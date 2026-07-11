@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
+import { FilterBarServerDispatchExample } from './examples/server-dispatch.example';
 import { FilterBarTanStackExample } from './examples/tanstack.example';
+import filterBarServerDispatchExampleCodeRaw from './examples/server-dispatch.example.ts?raw' with {
+  loader: 'text',
+};
 import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw' with {
   loader: 'text',
 };
@@ -10,7 +14,13 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
 @Component({
   selector: 'hd-filter-bar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock, ExampleTabs, PageHeader, FilterBarTanStackExample],
+  imports: [
+    CodeBlock,
+    ExampleTabs,
+    PageHeader,
+    FilterBarServerDispatchExample,
+    FilterBarTanStackExample,
+  ],
   template: `
     <article class="hd-prose">
       <hd-page-header
@@ -25,11 +35,12 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
       </hd-page-header>
 
       <p>
-        <code>hell-filter-bar</code> supports arbitrary <code>text</code> fields, fixed
-        <code>options</code> fields, and unstructured search through the reserved
-        <code>$text</code> key. It owns only the interaction — the app owns the token array and
-        round-trips <code>(valueChange)</code>. Every token has the stable shape
-        <code>{{ '{' }} key, operator: 'eq', value {{ '}' }}</code>, so persistence and query
+        <code>hell-filter-bar</code> supports arbitrary <code>text</code>, fixed
+        <code>options</code>, async <code>entity</code>, and structured <code>dateRange</code>
+        fields, plus unstructured search through the reserved <code>$text</code> key. It owns only
+        the interaction — the app owns the token array and round-trips
+        <code>(valueChange)</code>. Every token has the stable shape
+        <code>{{ '{' }} key, operator: 'eq', value {{ '}' }}</code>, so persistence and request
         dispatch need no UI-specific translation layer.
       </p>
 
@@ -46,6 +57,18 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         <app-filter-bar-tanstack-example />
       </hd-example-tabs>
 
+      <h2>Server-dispatch recipe</h2>
+      <p>
+        Entity lookup and result fetching are separate application concerns. This example gives
+        the Owner field an abortable <code>HellSearchSource</code>, then sends the complete
+        controlled token array — including the structured Created range — as one simulated API
+        request. Type <code>error</code> in the Owner editor to exercise
+        <code>(searchError)</code>.
+      </p>
+      <hd-example-tabs [code]="serverDispatchExampleCode">
+        <app-filter-bar-server-dispatch-example />
+      </hd-example-tabs>
+
       <h2>Field and value contracts</h2>
       <hd-code-block [code]="bindingCode" />
       <ul>
@@ -54,8 +77,23 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
           commits only a declared <code>{{ '{' }} value, label, disabled? {{ '}' }}</code> option.
         </li>
         <li>
+          <code>kind: 'entity'</code> accepts a <code>HellSearchSource</code> returning stable
+          <code>{{ '{' }} id, label, disabled? {{ '}' }}</code> options. Its committed value keeps
+          both the backend id and human-readable label so rehydrated tokens need no follow-up lookup.
+          Free-typed drafts never commit as entities. Set per-field <code>debounceMs</code> and
+          <code>limit</code> for the source; the editor owns loading, empty, and error status rows.
+        </li>
+        <li>
+          <code>kind: 'dateRange'</code> commits
+          <code>{{ '{' }} kind: 'dateRange', from, to {{ '}' }}</code> with nullable ISO dates.
+          Open-ended ranges are valid; optional field <code>min</code>/<code>max</code> bounds apply
+          to both date inputs. These are local calendar-date strings (<code>YYYY-MM-DD</code>), not
+          UTC timestamps; translate them only at your server boundary if that API requires it.
+        </li>
+        <li>
           Fields are single-use by default. Set <code>multiple: true</code> to keep the field
-          available and, for options, keep its create editor open for successive tokens.
+          available and, for options and entity fields, keep its create editor open for successive
+          tokens.
         </li>
         <li>
           The reserved <code>$text</code> token is always a singleton. Committing or live-updating
@@ -64,7 +102,8 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         </li>
         <li>
           <code>freeTextDebounceMs</code> opts into debounced live free text; each emission still
-          contains the whole controlled value. The bar never fetches or persists anything.
+          contains the whole controlled value. The bar owns no backend or persistence; entity
+          editors only invoke the consumer-owned <code>search</code> seam.
         </li>
       </ul>
 
@@ -94,7 +133,8 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
       <h2>Styling</h2>
       <p>
         Refine the flat Public Parts through <code>ui</code>; composed button, chip, combobox, and
-        popover defaults ship through <code>@hell-ui/angular/filter-bar/styles.css</code>.
+        popover, Date Input, and Date Picker defaults ship through
+        <code>@hell-ui/angular/filter-bar/styles.css</code>.
       </p>
       <table class="hd-doc-table">
         <thead><tr><th>Part</th><th>Purpose</th></tr></thead>
@@ -110,19 +150,29 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         <li><code>fields</code>: required <code>HellFilterField[]</code>.</li>
         <li><code>value</code>: controlled <code>HellFilterToken[]</code>; default <code>[]</code>.</li>
         <li><code>(valueChange)</code>: the complete next token array; never emitted on first render.</li>
+        <li>
+          <code>(searchError)</code>: the failed entity field, query, and original error. Aborted
+          superseded searches do not emit.
+        </li>
+        <li>
+          <code>entityDebounceMs</code>: default entity search delay; default <code>200</code>.
+          Override it per entity field with <code>debounceMs</code>.
+        </li>
         <li><code>disabled</code>, <code>placeholder</code>, <code>aria-label</code>, and <code>ui</code>.</li>
         <li>
           <code>provideHellFilterBarLabels(overrides)</code> localizes the input label; clear-all
-          and apply actions; free-text field, suggestion, and token copy; token edit labels; and
-          added, updated, removed, and cleared live announcements.
+          and apply actions; entity loading, empty, and error states; range input names and display;
+          free-text field, suggestion, and token copy; token edit labels; and added, updated, removed,
+          and cleared live announcements.
         </li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
         <li>
-          The field and options pickers delegate the WAI-ARIA combobox/listbox pattern, including
-          <code>aria-expanded</code>, <code>aria-controls</code>, and active-descendant focus.
+          The field, options, and entity pickers delegate the WAI-ARIA combobox/listbox pattern,
+          including <code>aria-expanded</code>, <code>aria-controls</code>, and active-descendant
+          focus. Loading, empty, and failed entity searches remain announced status states.
         </li>
         <li>
           Tokens form one Chip Set tab stop. Arrow Left/Right and Home/End move between tokens;
@@ -146,6 +196,7 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         <li>Use stable, unique field keys that also map cleanly to your table or request schema.</li>
         <li>Use <code>multiple: true</code> only when values within that field have a clear OR meaning.</li>
         <li>Keep URL, storage, TanStack, and server adapters outside the component.</li>
+        <li>Return stable entity ids and labels, and honor the source's abort signal.</li>
       </ul>
 
       <h2>Don't</h2>
@@ -153,6 +204,7 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         <li>Don't mutate the supplied token array in place; emit and store the complete next value.</li>
         <li>Don't declare a field with the reserved <code>$text</code> key.</li>
         <li>Don't use free text when the value must be one of a fixed set; declare an options field.</li>
+        <li>Don't serialize date ranges through <code>Date.toISOString()</code>; preserve local dates.</li>
         <li>Don't target portalled descendants with private selectors; refine the documented parts.</li>
       </ul>
     </article>
@@ -160,6 +212,7 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
 })
 export class FilterBarPage {
   protected readonly exampleCode = filterBarTanStackExampleCodeRaw;
+  protected readonly serverDispatchExampleCode = filterBarServerDispatchExampleCodeRaw;
   protected readonly bindingCode = `readonly fields: readonly HellFilterField[] = [
   { key: 'name', label: 'Name', kind: 'text' },
   {
@@ -191,6 +244,9 @@ export class FilterBarPage {
     { name: 'panel', purpose: 'Combobox suggestion or options surface.' },
     { name: 'option', purpose: 'One field, free-text, or value row.' },
     { name: 'editor', purpose: 'Shared per-kind editor mounted for create or edit.' },
+    { name: 'status', purpose: 'Entity loading, empty, or error status row.' },
+    { name: 'dateRange', purpose: 'From/to Date Input pair inside the range editor.' },
+    { name: 'dateRangeActions', purpose: 'Commit actions for the date-range editor.' },
     { name: 'clear', purpose: 'Clear-all action, shown when tokens exist.' },
     { name: 'live', purpose: 'Polite add/update/remove/clear announcement region.' },
   ] as const;

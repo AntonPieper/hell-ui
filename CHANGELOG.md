@@ -7,6 +7,18 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Extended Filter Bar with the remaining `entity` and `dateRange` field kinds.
+  Entity editors orchestrate a consumer-owned `HellSearchSource` with debounce,
+  cancellation, stale-result protection, loading/empty/error states, and a
+  structured `{ kind: 'entity', id, label }` token value that remains useful
+  offline. Date ranges compose two `HellDateInput` controls, support open-ended
+  local-calendar ranges, and serialize as
+  `{ kind: 'dateRange', from: string | null, to: string | null }`. Both kinds use
+  the same create/edit/Escape/focus-restoration lifecycle as core fields, including
+  nested portaled surfaces registered through the Filter Bar floating scope.
+  Docs add a simulated server-dispatch recipe; unit, browser, package-consumer,
+  API-report, and axe contracts cover the widened public seam. Closes #118
+  (spec #100).
 - Added the `@hell-ui/angular/filter-bar` Package Entry Point (Composite): a
   keyboard-first `hell-filter-bar` for declared `text` and fixed `options`
   fields plus first-class free text on the reserved `$text` key. The complete

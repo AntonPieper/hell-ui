@@ -3,6 +3,7 @@ import {
   commitHellFilterToken,
   filterHellFilterFields,
   identifyHellFilterToken,
+  sameHellFilterValue,
   type HellFilterField,
   type HellFilterToken,
 } from './filter-bar.state';
@@ -185,6 +186,131 @@ describe('Filter Bar state contract', () => {
       { key: HELL_FILTER_TEXT_KEY, operator: 'eq', value: 'old query' },
       { key: 'status', operator: 'eq', value: 'open' },
       { key: HELL_FILTER_TEXT_KEY, operator: 'eq', value: 'stale query' },
+    ]);
+  });
+
+  it('commits serializable entity and open date-range values without mutating input', () => {
+    const current: readonly HellFilterToken[] = [
+      {
+        key: 'assignee',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Lovelace' },
+      },
+    ];
+
+    const next = commitHellFilterToken(current, {
+      key: 'created',
+      value: { kind: 'dateRange', from: '2026-07-01', to: null },
+      multiple: false,
+    });
+
+    expect(next).toEqual([
+      ...current,
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-01', to: null },
+      },
+    ]);
+    expect(JSON.parse(JSON.stringify(next))).toEqual(next);
+    expect(current).toHaveLength(1);
+  });
+
+  it('deduplicates structured values by stable entity id and date endpoints', () => {
+    const entity = { kind: 'entity' as const, id: 'person-1', label: 'Ada Lovelace' };
+    const current: readonly HellFilterToken[] = [
+      { key: 'assignee', operator: 'eq', value: entity },
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: null, to: '2026-07-31' },
+      },
+    ];
+
+    expect(
+      commitHellFilterToken(current, {
+        key: 'assignee',
+        value: { ...entity },
+        multiple: true,
+      }),
+    ).toEqual(current);
+    expect(
+      commitHellFilterToken(current, {
+        key: 'created',
+        value: { kind: 'dateRange', from: null, to: '2026-07-31' },
+        multiple: true,
+      }),
+    ).toEqual(current);
+    expect(sameHellFilterValue(entity, { ...entity })).toBe(true);
+    expect(sameHellFilterValue(entity, { ...entity, label: 'Ada Byron' })).toBe(true);
+  });
+
+  it('keeps structured edit identities stable across controlled object recreation and reorder', () => {
+    const original: readonly HellFilterToken[] = [
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-01', to: '2026-07-10' },
+      },
+      {
+        key: 'assignee',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Lovelace' },
+      },
+    ];
+    const identity = identifyHellFilterToken(original, 1);
+    const current: readonly HellFilterToken[] = [
+      { ...original[1]!, value: { ...(original[1]!.value as object) } } as HellFilterToken,
+      { ...original[0]!, value: { ...(original[0]!.value as object) } } as HellFilterToken,
+    ];
+
+    expect(
+      commitHellFilterToken(current, {
+        key: 'assignee',
+        value: { kind: 'entity', id: 'person-2', label: 'Grace Hopper' },
+        multiple: true,
+        editIdentity: identity!,
+      }),
+    ).toEqual([
+      {
+        key: 'assignee',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-2', label: 'Grace Hopper' },
+      },
+      current[1],
+    ]);
+  });
+
+  it('retains an entity edit identity when controlled display metadata changes', () => {
+    const original: readonly HellFilterToken[] = [
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Lovelace' },
+      },
+    ];
+    const identity = identifyHellFilterToken(original, 0);
+    const relabelled: readonly HellFilterToken[] = [
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Byron' },
+      },
+    ];
+
+    expect(
+      commitHellFilterToken(relabelled, {
+        key: 'owner',
+        value: { kind: 'entity', id: 'person-2', label: 'Grace Hopper' },
+        multiple: false,
+        editIdentity: identity!,
+      }),
+    ).toEqual([
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-2', label: 'Grace Hopper' },
+      },
     ]);
   });
 });

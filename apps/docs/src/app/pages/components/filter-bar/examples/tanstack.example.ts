@@ -106,13 +106,16 @@ export class FilterBarTanStackExample {
   ];
 
   private readonly globalFilter = computed(
-    () => this.filters().find((token) => token.key === HELL_FILTER_TEXT_KEY)?.value ?? '',
+    () => {
+      const value = this.filters().find((token) => token.key === HELL_FILTER_TEXT_KEY)?.value;
+      return typeof value === 'string' ? value : '';
+    },
   );
   private readonly columnFilters = computed<ColumnFiltersState>(() => {
     const valuesByField = new Map<string, Set<string>>();
 
     for (const token of this.filters()) {
-      if (token.key === HELL_FILTER_TEXT_KEY) continue;
+      if (token.key === HELL_FILTER_TEXT_KEY || typeof token.value !== 'string') continue;
 
       const values = valuesByField.get(token.key) ?? new Set<string>();
       values.add(token.value);

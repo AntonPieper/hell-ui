@@ -16,15 +16,29 @@ import {
 import type { InjectionToken, Provider } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_DIRECTIVES, HellCombobox } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
 import {
   hellCreateLabels,
   hellPartStyler,
   hellRankLocalSearch,
+  HellSearchService,
   type HellRecipe,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
+import {
+  HELL_DATE_INPUT_ADAPTER,
+  HellDateInput,
+  hellCoerceDateInputValue,
+  hellFormatDateInputValue,
+  hellIsDateInputValueWithinBounds,
+  hellParseDateInputText,
+  type HellDateInputAdapter,
+} from '@hell-ui/angular/date-input';
+import {
+  HELL_FLOATING_SCOPE,
+  HellFloatingScopeRegistry,
+} from '@hell-ui/angular/internal/core';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 
 import {
@@ -34,23 +48,46 @@ import {
   identifyHellFilterToken,
   type HellFilterField,
   type HellFilterFieldBase,
+  type HellFilterDateRangeField,
+  type HellFilterDateRangeValue,
+  type HellFilterEntityField,
+  type HellFilterEntityOption,
+  type HellFilterEntityValue,
   type HellFilterOption,
   type HellFilterOptionsField,
   type HellFilterSuggestion,
   type HellFilterTextField,
   type HellFilterToken,
   type HellFilterTokenIdentity,
+  type HellFilterTokenValue,
+  sameHellFilterSerializedValue,
 } from './filter-bar.state';
 
 export {
   HELL_FILTER_TEXT_KEY,
   type HellFilterField,
   type HellFilterFieldBase,
+  type HellFilterDateRangeField,
+  type HellFilterDateRangeValue,
+  type HellFilterEntityField,
+  type HellFilterEntityOption,
+  type HellFilterEntityValue,
   type HellFilterOption,
   type HellFilterOptionsField,
   type HellFilterTextField,
   type HellFilterToken,
+  type HellFilterTokenValue,
 };
+
+/** Error emitted when an entity field's current search cannot resolve. */
+export interface HellFilterEntitySearchError {
+  /** Field whose search failed. */
+  readonly field: HellFilterEntityField;
+  /** Query dispatched to the consumer-owned search seam. */
+  readonly query: string;
+  /** Original non-abort rejection. */
+  readonly error: unknown;
+}
 
 /** Built-in copy owned by the Filter Bar Label Contract. */
 export interface HellFilterBarLabels {
@@ -58,8 +95,20 @@ export interface HellFilterBarLabels {
   readonly input: string;
   /** Clear-all button copy. */
   readonly clearAll: string;
-  /** Text-editor commit button copy. */
+  /** Commit-button copy shared by editors that expose an explicit action. */
   readonly apply: string;
+  /** Entity editor loading-state copy. */
+  readonly loading: (field: string) => string;
+  /** Entity editor empty-state copy. */
+  readonly empty: (field: string) => string;
+  /** Entity editor error-state copy. */
+  readonly error: (field: string) => string;
+  /** Accessible name for the start-date input. */
+  readonly from: (field: string) => string;
+  /** Accessible name for the end-date input. */
+  readonly to: (field: string) => string;
+  /** Visible token value for an open or closed date range. */
+  readonly dateRange: (from: string | null, to: string | null) => string;
   /** Synthetic field label used while editing free text. */
   readonly freeTextField: string;
   /** Free-text suggestion copy. */
@@ -84,6 +133,18 @@ const HELL_FILTER_BAR_LABELS_CONTRACT = hellCreateLabels<HellFilterBarLabels>(
     input: 'Filters',
     clearAll: 'Clear all filters',
     apply: 'Apply filter',
+    loading: (field) => `Loading ${field}`,
+    empty: (field) => `No ${field.toLocaleLowerCase()} found`,
+    error: (field) => `Could not load ${field.toLocaleLowerCase()}`,
+    from: (field) => `${field} from`,
+    to: (field) => `${field} to`,
+    dateRange: (from, to) => from && to
+      ? `${from} to ${to}`
+      : from
+        ? `From ${from}`
+        : to
+          ? `Through ${to}`
+          : 'Any date',
     freeTextField: 'Search',
     freeText: (query) => query ? `Search for “${query}”` : 'Add free-text search',
     freeTextToken: (value) => `Search: ${value}`,
@@ -116,6 +177,9 @@ export type HellFilterBarPart =
   | 'panel'
   | 'option'
   | 'editor'
+  | 'status'
+  | 'dateRange'
+  | 'dateRangeActions'
   | 'clear'
   | 'live';
 
@@ -135,7 +199,10 @@ const HELL_FILTER_BAR_RECIPE = {
   panel:
     'z-[var(--hell-z-popover,60)] max-h-[280px] shadow-hell-lg',
   option: 'data-[active]:bg-hell-surface-muted',
-  editor: 'relative flex min-w-[220px] items-center gap-hell-2',
+  editor: 'relative flex min-w-[220px] flex-wrap items-center gap-hell-2',
+  status: 'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*2)] text-[13px] text-hell-foreground-muted',
+  dateRange: 'relative flex min-w-[280px] flex-wrap items-center gap-hell-2',
+  dateRangeActions: 'flex items-center gap-hell-2',
   clear: '',
   live: 'sr-only',
 } satisfies HellRecipe<HellFilterBarPart>;
@@ -145,16 +212,55 @@ interface HellFilterEditorState {
   readonly field: HellFilterField;
   readonly tokenIdentity: HellFilterTokenIdentity | null;
   readonly query: string;
+  readonly entity: HellFilterEntityOption | null;
+  readonly dateRange: HellFilterDateRangeDraft | null;
+}
+
+interface HellFilterDateRangeDraft {
+  readonly from: Date | null;
+  readonly to: Date | null;
+  readonly fromText: string;
+  readonly toText: string;
 }
 
 let nextFilterBarId = 0;
 
+/** Component-local scope adapter; intentionally absent from the public Filter Bar class. */
+class HellFilterBarFloatingScope extends HellFloatingScopeRegistry {
+  private readonly registeredElements = new Set<HTMLElement>();
+
+  override registerFloatingElement(element: HTMLElement): void {
+    this.registeredElements.add(element);
+    super.registerFloatingElement(element);
+  }
+
+  override unregisterFloatingElement(element: HTMLElement): void {
+    this.registeredElements.delete(element);
+    super.unregisterFloatingElement(element);
+  }
+
+  hasOpenDatePicker(): boolean {
+    return Array.from(this.registeredElements).some(
+      (element) =>
+        element.matches('[data-slot="pickerPanel"]') &&
+        Boolean(element.querySelector('hell-date-picker')),
+    );
+  }
+}
+
+function createHellFilterBarFloatingScope(): HellFilterBarFloatingScope {
+  const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  return new HellFilterBarFloatingScope(() => host);
+}
+
 /**
- * Keyboard-first controlled token filter for declared text and options fields.
+ * Keyboard-first controlled token filter for declared text, options, entity,
+ * and date-range fields.
  *
  * The Filter Bar owns interaction state only. Consumers own the serializable
- * `value` array and round-trip `valueChange`; the component never fetches,
- * persists, or mutates the supplied array. Field suggestions always carry a
+ * `value` array and round-trip `valueChange`; the component orchestrates only
+ * consumer-supplied entity searches and owns no backend, persistence, or source
+ * data. It never mutates the supplied array. Field suggestions always carry a
  * highlighted visible outcome, including the free-text row, so Enter cannot
  * silently reinterpret a field name. A shared per-kind editor state is mounted
  * at the input for create and in a Popover anchored to a token for edit.
@@ -167,8 +273,13 @@ let nextFilterBarId = 0;
     HellButton,
     ...HELL_CHIP_DIRECTIVES,
     ...HELL_COMBOBOX_DIRECTIVES,
+    HellDateInput,
     HellPopover,
     HellPopoverTrigger,
+  ],
+  providers: [
+    { provide: HellFilterBarFloatingScope, useFactory: createHellFilterBarFloatingScope },
+    { provide: HELL_FLOATING_SCOPE, useExisting: HellFilterBarFloatingScope },
   ],
   // The composed Combobox and Popover host-directive bindings live in sibling
   // Package Entry Points. ng-packagr's partial template checker cannot see
@@ -309,7 +420,7 @@ let nextFilterBarId = 0;
     }
 
     <div data-slot="live" [class]="part('live')" aria-live="polite" aria-atomic="true">
-      {{ liveMessage() }}
+      {{ liveMessage() }} {{ entityLiveMessage() }}
     </div>
 
     <ng-template #valueEditor let-popoverTrigger>
@@ -350,9 +461,8 @@ let nextFilterBarId = 0;
               {{ labels.apply }}
             </button>
           </div>
-        } @else {
+        } @else if (state.field.kind === 'options') {
           <div
-            #editorCombobox="hellCombobox"
             hellCombobox
             data-slot="editor"
             [ui]="part('editor')"
@@ -365,7 +475,7 @@ let nextFilterBarId = 0;
             [attr.data-hell-filter-bar-owner]="instanceId"
             (valueChange)="onEditorSelection($any($event), popoverTrigger)"
             (openChange)="onEditorOpenChange($any($event), popoverTrigger)"
-            (focusout)="onEditorFocusOut($event, editorCombobox)"
+            (focusout)="onEditorFocusOut($event)"
           >
             <span data-slot="prefix" [class]="part('prefix')">{{ state.field.label }}:</span>
             <input
@@ -407,6 +517,148 @@ let nextFilterBarId = 0;
               }
             </div>
           </div>
+        } @else if (state.field.kind === 'entity') {
+          <div
+            hellCombobox
+            data-slot="editor"
+            [ui]="part('editor')"
+            [value]="null"
+            [options]="entityResults()"
+            [wrapNavigation]="false"
+            [disabled]="disabled()"
+            [attr.data-mode]="state.mode"
+            [attr.data-field]="state.field.key"
+            [attr.data-hell-filter-bar-owner]="instanceId"
+            (valueChange)="onEntitySelection($any($event), popoverTrigger)"
+            (openChange)="onEditorOpenChange($any($event), popoverTrigger)"
+            (focusout)="onEditorFocusOut($event)"
+          >
+            <span data-slot="prefix" [class]="part('prefix')">{{ state.field.label }}:</span>
+            <input
+              #entityInput
+              hellComboboxInput
+              data-slot="input"
+              data-hell-filter-editor-input
+              [ui]="part('input')"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              [attr.aria-label]="state.field.label"
+              [attr.aria-busy]="entityStatus() === 'loading' ? 'true' : null"
+              [value]="state.query"
+              [disabled]="disabled()"
+              (focus)="onEntityEditorFocus(entityInput)"
+              (input)="onEditorInput($event)"
+              (keydown)="onEditorKeydown($event, popoverTrigger)"
+              (keydown.escape)="onEditorEscape($event, popoverTrigger)"
+            />
+            <div
+              *hellComboboxPortal
+              hellComboboxDropdown
+              data-slot="panel"
+              data-hell-filter-editor-options
+              [ui]="part('panel')"
+              [attr.aria-label]="state.field.label"
+            >
+              @if (entityStatus() === 'loading') {
+                <div
+                  hellComboboxOption
+                  data-slot="status"
+                  data-state="loading"
+                  [value]="null"
+                  [disabled]="true"
+                  [ui]="part('status')"
+                >
+                  {{ labels.loading(state.field.label) }}
+                </div>
+              } @else if (entityStatus() === 'error') {
+                <div
+                  hellComboboxOption
+                  data-slot="status"
+                  data-state="error"
+                  [value]="null"
+                  [disabled]="true"
+                  [ui]="part('status')"
+                >
+                  {{ labels.error(state.field.label) }}
+                </div>
+              } @else if (!entityResults().length) {
+                <div
+                  hellComboboxOption
+                  data-slot="status"
+                  data-state="empty"
+                  [value]="null"
+                  [disabled]="true"
+                  [ui]="part('status')"
+                >
+                  {{ labels.empty(state.field.label) }}
+                </div>
+              } @else {
+                @for (option of entityResults(); track option.id) {
+                  <div
+                    hellComboboxOption
+                    data-slot="option"
+                    data-hell-filter-editor-option
+                    [value]="option"
+                    [disabled]="disabled() || option.disabled"
+                    [ui]="part('option')"
+                  >
+                    {{ option.label }}
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        } @else {
+          <div
+            data-slot="editor"
+            [class]="part('editor')"
+            [attr.data-mode]="state.mode"
+            [attr.data-field]="state.field.key"
+            [attr.data-hell-filter-bar-owner]="instanceId"
+            (focusout)="onEditorFocusOut($event)"
+          >
+            <span data-slot="prefix" [class]="part('prefix')">{{ state.field.label }}:</span>
+            <div data-slot="dateRange" [class]="part('dateRange')">
+              <hell-date-input
+                data-range-bound="from"
+                [date]="state.dateRange?.from ?? null"
+                [min]="dateRangeMin(state.field)"
+                [max]="dateRangeFromMax(state)"
+                [disabled]="disabled()"
+                [aria-label]="labels.from(state.field.label)"
+                (input)="onDateRangeDraftInput('from', $event)"
+                (dateChange)="onDateRangeChange('from', $event)"
+                (keydown.enter)="onDateRangeEnter($event, popoverTrigger)"
+                (keydown.escape)="onEditorEscape($event, popoverTrigger)"
+              />
+              <hell-date-input
+                data-range-bound="to"
+                [date]="state.dateRange?.to ?? null"
+                [min]="dateRangeToMin(state)"
+                [max]="dateRangeMax(state.field)"
+                [disabled]="disabled()"
+                [aria-label]="labels.to(state.field.label)"
+                (input)="onDateRangeDraftInput('to', $event)"
+                (dateChange)="onDateRangeChange('to', $event)"
+                (keydown.enter)="onDateRangeEnter($event, popoverTrigger)"
+                (keydown.escape)="onEditorEscape($event, popoverTrigger)"
+              />
+            </div>
+            <div data-slot="dateRangeActions" [class]="part('dateRangeActions')">
+              <button
+                hellButton
+                type="button"
+                variant="soft"
+                size="sm"
+                [disabled]="disabled() || !canCommitDateRange(state)"
+                (click)="commitEditor(undefined, popoverTrigger)"
+                (keydown.escape)="onEditorEscape($event, popoverTrigger)"
+              >
+                {{ labels.apply }}
+              </button>
+            </div>
+          </div>
         }
       }
     </ng-template>
@@ -422,7 +674,7 @@ export class HellFilterBar {
     recipe: () => HELL_FILTER_BAR_RECIPE,
   });
 
-  /** Declared text/options fields. Keys must be stable; `$text` is reserved. */
+  /** Declared Filter Bar fields. Keys must be stable; `$text` is reserved. */
   readonly fields = input.required<readonly HellFilterField[]>();
   /** Complete controlled, serializable token value. */
   readonly value = input<readonly HellFilterToken[]>([]);
@@ -439,9 +691,13 @@ export class HellFilterBar {
   readonly freeTextDebounceMs = input<number | null, unknown>(null, {
     transform: (value) => (value == null || value === '' ? null : numberAttribute(value)),
   });
+  /** Default debounce delay for entity searches without a field-level override. */
+  readonly entityDebounceMs = input(200, { transform: numberAttribute });
 
   /** Emits the whole next controlled value on commit/removal/clear. */
   readonly valueChange = output<readonly HellFilterToken[]>();
+  /** Emits current entity-search failures; aborts and stale failures are ignored. */
+  readonly searchError = output<HellFilterEntitySearchError>();
 
   protected readonly labels = inject(HELL_FILTER_BAR_LABELS);
   protected readonly query = signal('');
@@ -449,10 +705,19 @@ export class HellFilterBar {
   protected readonly editorOpen = signal(false);
   protected readonly editor = signal<HellFilterEditorState | null>(null);
   protected readonly liveMessage = signal('');
+  protected readonly entityLiveMessage = signal('');
+  protected readonly entityResults = signal<HellFilterEntityOption[]>([]);
+  protected readonly entityStatus = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
   private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly searchService = inject(HellSearchService);
+  private readonly dateAdapter = inject<HellDateInputAdapter>(HELL_DATE_INPUT_ADAPTER);
+  private readonly floatingScope = inject(HellFilterBarFloatingScope);
   private liveTimer: ReturnType<typeof setTimeout> | null = null;
+  private entitySearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private entitySearchAbort: AbortController | null = null;
+  private entitySearchGeneration = 0;
   private suppressEditorClose = false;
   protected readonly instanceId = ++nextFilterBarId;
 
@@ -472,7 +737,10 @@ export class HellFilterBar {
     }).map(({ item }) => item);
   });
   constructor() {
-    this.destroyRef.onDestroy(() => this.clearLiveTimer());
+    this.destroyRef.onDestroy(() => {
+      this.clearLiveTimer();
+      this.cancelEntitySearch();
+    });
   }
 
   protected onPickerInput(event: Event): void {
@@ -557,7 +825,9 @@ export class HellFilterBar {
     if (!field) return;
     this.pickerOpen.set(false);
     this.editorOpen.set(false);
-    this.editor.set({ mode: 'edit', field, tokenIdentity, query: token.value });
+    const state = this.buildEditorState('edit', field, tokenIdentity, token.value);
+    this.editor.set(state);
+    this.startEntitySearch(state);
   }
 
   protected onEditOpenChange(open: boolean, index: number): void {
@@ -573,6 +843,7 @@ export class HellFilterBar {
       closingIdentity &&
       this.sameIdentity(state.tokenIdentity, closingIdentity)
     ) {
+      this.cancelEntitySearch();
       this.editor.set(null);
     }
   }
@@ -617,10 +888,16 @@ export class HellFilterBar {
     const current = this.editor();
     if (!current) return;
     const input = event.target as HTMLInputElement;
-    this.editor.set({ ...current, query: input.value });
+    const next = {
+      ...current,
+      query: input.value,
+      entity: current.field.kind === 'entity' ? null : current.entity,
+    };
+    this.editor.set(next);
     if (current.field.kind === 'options' && input.value && !this.editorOpen()) {
       this.dispatchComboboxKey(input, 'ArrowDown');
     }
+    if (current.field.kind === 'entity') this.startEntitySearch(next);
   }
 
   protected onEditorKeydown(
@@ -664,40 +941,121 @@ export class HellFilterBar {
     this.dispatchComboboxKey(input, 'ArrowDown');
   }
 
+  protected onEntityEditorFocus(input: HTMLInputElement): void {
+    const state = this.editor();
+    if (this.disabled() || state?.field.kind !== 'entity') return;
+    this.dispatchComboboxKey(input, 'ArrowDown');
+    if (this.entityStatus() === 'idle') this.startEntitySearch(state);
+  }
+
+  protected onEntitySelection(
+    selection: HellFilterEntityOption | null,
+    trigger?: HellPopoverTrigger,
+  ): void {
+    if (!selection) return;
+    const current = this.entityResults().find(
+      (candidate) => candidate.id === selection.id && candidate.label === selection.label,
+    );
+    if (!current || current.disabled) return;
+    this.commitEditor(current, trigger);
+  }
+
+  protected onDateRangeChange(bound: 'from' | 'to', date: Date | null): void {
+    if (this.disabled()) return;
+    const state = this.editor();
+    if (state?.field.kind !== 'dateRange' || !state.dateRange) return;
+    const text = this.dateAdapter.format(date);
+    this.editor.set({
+      ...state,
+      dateRange: bound === 'from'
+        ? { ...state.dateRange, from: date, fromText: text }
+        : { ...state.dateRange, to: date, toText: text },
+    });
+  }
+
+  protected onDateRangeDraftInput(bound: 'from' | 'to', event: Event): void {
+    const state = this.editor();
+    if (state?.field.kind !== 'dateRange' || !state.dateRange) return;
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    this.editor.set({
+      ...state,
+      dateRange: bound === 'from'
+        ? { ...state.dateRange, fromText: input.value }
+        : { ...state.dateRange, toText: input.value },
+    });
+  }
+
+  protected onDateRangeEnter(event: Event, trigger?: HellPopoverTrigger): void {
+    if (!(event.target instanceof HTMLInputElement) || event.target.dataset['slot'] !== 'input') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.commitEditor(undefined, trigger);
+  }
+
+  protected dateRangeMin(field: HellFilterDateRangeField): Date | null {
+    return this.parseFilterDate(field.min);
+  }
+
+  protected dateRangeMax(field: HellFilterDateRangeField): Date | null {
+    return this.parseFilterDate(field.max);
+  }
+
+  protected dateRangeFromMax(state: HellFilterEditorState): Date | null {
+    if (state.field.kind !== 'dateRange' || !state.dateRange) return null;
+    const parsedTo = this.dateAdapter.parseText(state.dateRange.toText);
+    const to = parsedTo.valid ? parsedTo.value : state.dateRange.to;
+    return this.earlierDate(this.dateRangeMax(state.field), to);
+  }
+
+  protected dateRangeToMin(state: HellFilterEditorState): Date | null {
+    if (state.field.kind !== 'dateRange' || !state.dateRange) return null;
+    const parsedFrom = this.dateAdapter.parseText(state.dateRange.fromText);
+    const from = parsedFrom.valid ? parsedFrom.value : state.dateRange.from;
+    return this.laterDate(this.dateRangeMin(state.field), from);
+  }
+
+  protected canCommitDateRange(state: HellFilterEditorState): boolean {
+    return this.parseDateRangeDraft(state) !== null;
+  }
+
   protected onEditorEscape(event: Event, trigger?: HellPopoverTrigger): void {
+    if (this.editor()?.field.kind === 'dateRange' && this.dateRangeCalendarOpen()) return;
     event.preventDefault();
     event.stopPropagation();
     this.cancelEditor(trigger);
   }
 
-  protected onEditorFocusOut(event: FocusEvent, combobox?: HellCombobox): void {
+  protected onEditorFocusOut(_event: FocusEvent): void {
     const state = this.editor();
     if (state?.mode !== 'create') return;
-    const relatedTarget = event.relatedTarget;
-    const outside = combobox
-      ? combobox.isOutsideControl(relatedTarget)
-      : !(relatedTarget instanceof Node) ||
-        !(event.currentTarget as HTMLElement).contains(relatedTarget);
-    if (outside) this.cancelEditor(undefined, false);
+    setTimeout(() => {
+      if (this.editor() !== state) return;
+      if (!this.floatingScope.containsFloatingTarget(this.host.ownerDocument.activeElement)) {
+        this.cancelEditor(undefined, false);
+      }
+    }, 0);
   }
 
-  protected onEditorOpenChange(open: boolean, trigger?: HellPopoverTrigger): void {
+  protected onEditorOpenChange(open: boolean, _trigger?: HellPopoverTrigger): void {
     this.editorOpen.set(open);
     if (open) return;
     if (this.suppressEditorClose) {
       this.suppressEditorClose = false;
-      return;
     }
-    if (this.editor()?.field.kind === 'options') this.cancelEditor(trigger, false);
   }
 
-  protected commitEditor(option?: HellFilterOption, trigger?: HellPopoverTrigger): void {
+  protected commitEditor(
+    option?: HellFilterOption | HellFilterEntityOption,
+    trigger?: HellPopoverTrigger,
+  ): void {
     if (this.disabled()) return;
     const state = this.editor();
     if (!state) return;
-    if (state.field.kind === 'options' && (!option || option.disabled)) return;
-    const committed = state.field.kind === 'options' ? option!.value : state.query.trim();
-    if (state.field.kind === 'text' && !committed) return;
+    const committed = this.editorCommitValue(state, option);
+    if (committed === null) return;
 
     const current = this.value();
     const editIndex = state.tokenIdentity
@@ -730,13 +1088,20 @@ export class HellFilterBar {
       );
     }
 
-    if (state.mode === 'create' && state.field.kind === 'options' && state.field.multiple) {
+    if (
+      state.mode === 'create' &&
+      (state.field.kind === 'options' || state.field.kind === 'entity') &&
+      state.field.multiple
+    ) {
       this.suppressEditorClose = true;
-      this.editor.set({ ...state, query: '' });
+      const nextState = { ...state, query: '', entity: null };
+      this.editor.set(nextState);
+      this.startEntitySearch(nextState);
       queueMicrotask(() => this.focusEditor('create'));
       return;
     }
 
+    this.cancelEntitySearch();
     this.editorOpen.set(false);
     this.editor.set(null);
     if (trigger) {
@@ -746,7 +1111,7 @@ export class HellFilterBar {
         }, 0);
       });
     } else {
-      queueMicrotask(() => this.focusPicker());
+      setTimeout(() => this.focusPicker(), 0);
     }
   }
 
@@ -771,14 +1136,17 @@ export class HellFilterBar {
   }
 
   protected tokenLabel(token: HellFilterToken): string {
-    if (token.key === HELL_FILTER_TEXT_KEY) return this.labels.freeTextToken(token.value);
+    if (token.key === HELL_FILTER_TEXT_KEY && typeof token.value === 'string') {
+      return this.labels.freeTextToken(token.value);
+    }
     const field = this.fields().find((candidate) => candidate.key === token.key);
-    if (!field) return `${token.key}: ${token.value}`;
-    if (field.kind === 'options') {
+    const value = this.filterValueLabel(token.value);
+    if (!field) return `${token.key}: ${value}`;
+    if (field.kind === 'options' && typeof token.value === 'string') {
       const option = field.options.find((candidate) => candidate.value === token.value);
       return `${field.label}: ${option?.label ?? token.value}`;
     }
-    return `${field.label}: ${token.value}`;
+    return `${field.label}: ${value}`;
   }
 
   protected tokenTrack(token: HellFilterToken, index: number): string {
@@ -790,16 +1158,237 @@ export class HellFilterBar {
     return suggestion.kind === 'field' ? `field:${suggestion.field.key}` : `free:${index}`;
   }
 
+  private buildEditorState(
+    mode: 'create' | 'edit',
+    field: HellFilterField,
+    tokenIdentity: HellFilterTokenIdentity | null,
+    value: HellFilterTokenValue,
+  ): HellFilterEditorState {
+    const entity = field.kind === 'entity' && this.isEntityValue(value)
+      ? { id: value.id, label: value.label }
+      : null;
+    const dateRange = field.kind === 'dateRange'
+      ? this.isDateRangeValue(value)
+        ? this.createDateRangeDraft(
+            this.parseFilterDate(value.from),
+            this.parseFilterDate(value.to),
+          )
+        : this.createDateRangeDraft(null, null)
+      : null;
+    const query = typeof value === 'string'
+      ? field.kind === 'dateRange' ? '' : value
+      : entity?.label ?? '';
+
+    return { mode, field, tokenIdentity, query, entity, dateRange };
+  }
+
+  private editorCommitValue(
+    state: HellFilterEditorState,
+    option: HellFilterOption | HellFilterEntityOption | undefined,
+  ): HellFilterTokenValue | null {
+    if (state.field.kind === 'text') return state.query.trim() || null;
+    if (state.field.kind === 'options') {
+      return option && 'value' in option && !option.disabled ? option.value : null;
+    }
+    if (state.field.kind === 'entity') {
+      return option && 'id' in option && !option.disabled
+        ? { kind: 'entity', id: option.id, label: option.label }
+        : null;
+    }
+    const dateRange = this.parseDateRangeDraft(state);
+    if (!dateRange) return null;
+    return {
+      kind: 'dateRange',
+      from: dateRange.from ? hellFormatDateInputValue(dateRange.from) : null,
+      to: dateRange.to ? hellFormatDateInputValue(dateRange.to) : null,
+    };
+  }
+
+  private filterValueLabel(value: HellFilterTokenValue): string {
+    if (typeof value === 'string') return value;
+    if (value.kind === 'entity') return value.label;
+    return this.labels.dateRange(value.from, value.to);
+  }
+
+  private isEntityValue(value: HellFilterTokenValue): value is HellFilterEntityValue {
+    return typeof value !== 'string' && value.kind === 'entity';
+  }
+
+  private isDateRangeValue(value: HellFilterTokenValue): value is HellFilterDateRangeValue {
+    return typeof value !== 'string' && value.kind === 'dateRange';
+  }
+
+  private createDateRangeDraft(from: Date | null, to: Date | null): HellFilterDateRangeDraft {
+    const coercedFrom = this.coerceDateInputValue(from);
+    const coercedTo = this.coerceDateInputValue(to);
+    return {
+      from: coercedFrom,
+      to: coercedTo,
+      fromText: this.dateAdapter.format(coercedFrom),
+      toText: this.dateAdapter.format(coercedTo),
+    };
+  }
+
+  private coerceDateInputValue(value: Date | null): Date | null {
+    return this.dateAdapter.coerce
+      ? this.dateAdapter.coerce(value)
+      : hellCoerceDateInputValue(value);
+  }
+
+  private parseDateRangeDraft(
+    state: HellFilterEditorState,
+  ): { readonly from: Date | null; readonly to: Date | null } | null {
+    if (state.field.kind !== 'dateRange' || !state.dateRange) return null;
+
+    const parsedFrom = this.dateAdapter.parseText(state.dateRange.fromText);
+    const parsedTo = this.dateAdapter.parseText(state.dateRange.toText);
+    if (!parsedFrom.valid || !parsedTo.valid) return null;
+
+    const from = parsedFrom.value;
+    const to = parsedTo.value;
+    if (!from && !to) return null;
+    if (from && to && this.dateTime(from) > this.dateTime(to)) return null;
+
+    const min = this.dateRangeMin(state.field);
+    const max = this.dateRangeMax(state.field);
+    if (!this.isDateInputValueWithinBounds(from, min, this.earlierDate(max, to))) return null;
+    if (!this.isDateInputValueWithinBounds(to, this.laterDate(min, from), max)) return null;
+    return { from, to };
+  }
+
+  private isDateInputValueWithinBounds(
+    value: Date | null,
+    min: Date | null,
+    max: Date | null,
+  ): boolean {
+    return this.dateAdapter.isWithinBounds?.(value, min, max) ??
+      hellIsDateInputValueWithinBounds(value, min, max);
+  }
+
+  private parseFilterDate(value: string | null | undefined): Date | null {
+    if (!value) return null;
+    const parsed = hellParseDateInputText(value);
+    return parsed.valid ? parsed.value : null;
+  }
+
+  private dateTime(value: Date): number {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
+  }
+
+  private earlierDate(first: Date | null, second: Date | null): Date | null {
+    if (!first) return second;
+    if (!second) return first;
+    return this.dateTime(first) <= this.dateTime(second) ? first : second;
+  }
+
+  private laterDate(first: Date | null, second: Date | null): Date | null {
+    if (!first) return second;
+    if (!second) return first;
+    return this.dateTime(first) >= this.dateTime(second) ? first : second;
+  }
+
+  private startEntitySearch(state: HellFilterEditorState): void {
+    this.cancelEntitySearch();
+    if (state.field.kind !== 'entity') return;
+
+    const field = state.field;
+    const query = state.query;
+    const generation = this.entitySearchGeneration;
+    this.entityStatus.set('loading');
+    this.entityLiveMessage.set(this.labels.loading(field.label));
+    this.entityResults.set([]);
+    const delay = Math.max(0, field.debounceMs ?? this.entityDebounceMs());
+    this.entitySearchTimer = setTimeout(() => {
+      this.entitySearchTimer = null;
+      const controller = new AbortController();
+      this.entitySearchAbort = controller;
+      void this.searchService.search({
+        query,
+        source: field.search,
+        limit: field.limit,
+        signal: controller.signal,
+        fields: [
+          { weight: 2, get: (option) => option.label },
+          { weight: 1, get: (option) => option.id },
+        ],
+      }).then((results) => {
+        if (!this.isCurrentEntitySearch(generation, field, query, controller)) return;
+        this.entitySearchAbort = null;
+        const items = results.map(({ item }) => item);
+        this.entityResults.set(items);
+        this.entityStatus.set('ready');
+        this.entityLiveMessage.set(items.length ? '' : this.labels.empty(field.label));
+        queueMicrotask(() => this.activateFirstEntityResult());
+      }).catch((error: unknown) => {
+        if (!this.isCurrentEntitySearch(generation, field, query, controller)) return;
+        this.entitySearchAbort = null;
+        this.entityResults.set([]);
+        this.entityStatus.set('error');
+        this.entityLiveMessage.set(this.labels.error(field.label));
+        this.searchError.emit({ field, query, error });
+      });
+    }, delay);
+  }
+
+  private isCurrentEntitySearch(
+    generation: number,
+    field: HellFilterEntityField,
+    query: string,
+    controller: AbortController,
+  ): boolean {
+    const state = this.editor();
+    return (
+      !controller.signal.aborted &&
+      generation === this.entitySearchGeneration &&
+      state?.field === field &&
+      state.query === query
+    );
+  }
+
+  private activateFirstEntityResult(): void {
+    if (!this.entityResults().length) return;
+    const state = this.editor();
+    if (state?.field.kind !== 'entity') return;
+    const root = state.mode === 'create' ? this.host : this.host.ownerDocument.body;
+    const editor = root.querySelector<HTMLElement>(
+      `[data-slot="editor"][data-mode="${state.mode}"]` +
+        `[data-hell-filter-bar-owner="${this.instanceId}"]`,
+    );
+    const input = editor?.querySelector<HTMLInputElement>('[data-hell-filter-editor-input]');
+    if (input?.getAttribute('aria-expanded') === 'true' && !input.getAttribute('aria-activedescendant')) {
+      this.dispatchComboboxKey(input, 'ArrowDown');
+    }
+  }
+
+  private cancelEntitySearch(): void {
+    this.entitySearchGeneration += 1;
+    if (this.entitySearchTimer !== null) {
+      clearTimeout(this.entitySearchTimer);
+      this.entitySearchTimer = null;
+    }
+    this.entitySearchAbort?.abort();
+    this.entitySearchAbort = null;
+    this.entityResults.set([]);
+    this.entityStatus.set('idle');
+    this.entityLiveMessage.set('');
+  }
+
   private beginCreate(field: HellFilterField, query: string): void {
     this.clearLiveTimer();
     this.query.set('');
     this.pickerOpen.set(false);
     this.editorOpen.set(false);
-    this.editor.set({ mode: 'create', field, tokenIdentity: null, query });
+    const state = this.buildEditorState('create', field, null, query);
+    this.editor.set(state);
+    this.startEntitySearch(state);
     setTimeout(() => {
       const document = this.host.ownerDocument;
       const activeElement = document.activeElement;
-      if (activeElement && activeElement !== document.body && !this.host.contains(activeElement)) {
+      if (
+        activeElement &&
+        activeElement !== document.body &&
+        !this.floatingScope.containsFloatingTarget(activeElement)
+      ) {
         this.cancelEditor(undefined, false);
         return;
       }
@@ -810,6 +1399,7 @@ export class HellFilterBar {
   private cancelEditor(trigger?: HellPopoverTrigger, restoreFocus = true): void {
     const state = this.editor();
     if (!state) return;
+    this.cancelEntitySearch();
     this.editorOpen.set(false);
     this.editor.set(null);
     if (state.mode === 'edit' && trigger) {
@@ -822,7 +1412,7 @@ export class HellFilterBar {
         }
       });
     } else if (restoreFocus) {
-      queueMicrotask(() => this.focusPicker());
+      setTimeout(() => this.focusPicker(), 0);
     }
   }
 
@@ -878,7 +1468,12 @@ export class HellFilterBar {
   private sameValue(a: readonly HellFilterToken[], b: readonly HellFilterToken[]): boolean {
     return a.length === b.length && a.every((token, index) => {
       const other = b[index];
-      return token.key === other?.key && token.operator === other.operator && token.value === other.value;
+      return Boolean(
+        other &&
+        token.key === other.key &&
+        token.operator === other.operator &&
+        sameHellFilterSerializedValue(token.value, other.value),
+      );
     });
   }
 
@@ -900,9 +1495,18 @@ export class HellFilterBar {
 
   private focusEditor(mode: 'create' | 'edit'): void {
     const root = mode === 'create' ? this.host : this.host.ownerDocument.body;
-    root.querySelector<HTMLInputElement>(
-      `[data-slot="editor"][data-mode="${mode}"][data-hell-filter-bar-owner="${this.instanceId}"] [data-hell-filter-editor-input]`,
+    const editor = root.querySelector<HTMLElement>(
+      `[data-slot="editor"][data-mode="${mode}"][data-hell-filter-bar-owner="${this.instanceId}"]`,
+    );
+    editor?.querySelector<HTMLInputElement>(
+      '[data-hell-filter-editor-input], hell-date-input input[data-slot="input"]',
     )?.focus();
+  }
+
+  private dateRangeCalendarOpen(): boolean {
+    const state = this.editor();
+    if (state?.field.kind !== 'dateRange') return false;
+    return this.floatingScope.hasOpenDatePicker();
   }
 
   private focusLastToken(): void {

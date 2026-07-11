@@ -1093,6 +1093,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'filter bar filter-bar tanstack examples hell-filter-bar HellFilterField HellFilterToken controlled value valueChange text options free text $text columnFilters globalFilter Table Shell toolbar Filter Controls tokens chips combobox listbox popover',
   },
   {
+    title: 'Filter Bar: Server dispatch',
+    path: '/components/filter-bar',
+    detail: 'components/filter-bar/examples/server-dispatch.example.ts',
+    terms:
+      'filter bar filter-bar server dispatch entity date range dateRange async HellSearchSource abort signal HellFilterEntityOption debounceMs limit searchError loading empty error owner work orders controlled serializable JSON ISO open ended request',
+  },
+  {
     title: 'Multi-Select Menu Button: Basic',
     path: '/components/multi-select-menu-button',
     detail: 'components/multi-select-menu-button/examples/basic.example.ts',
@@ -2127,7 +2134,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     path: '/components/filter-bar',
     detail: 'HellFilterBar, HellFilterField, HellFilterToken, valueChange',
     terms:
-      'filter-bar HellFilterBar HellFilterField HellFilterTextField HellFilterOptionsField HellFilterOption HellFilterToken HELL_FILTER_TEXT_KEY controlled serializable operator eq multiple freeTextDebounceMs ui HellFilterBarPart HellFilterBarUi Label Contract',
+      'filter-bar HellFilterBar HellFilterField HellFilterTextField HellFilterOptionsField HellFilterEntityField HellFilterDateRangeField HellFilterOption HellFilterEntityOption HellFilterEntityValue HellFilterDateRangeValue HellFilterTokenValue HellFilterToken HellFilterEntitySearchError HELL_FILTER_TEXT_KEY controlled serializable operator eq multiple freeTextDebounceMs entityDebounceMs debounceMs limit searchError loading empty error ui HellFilterBarPart HellFilterBarUi Label Contract',
   },
   {
     title: 'Combobox slots',
