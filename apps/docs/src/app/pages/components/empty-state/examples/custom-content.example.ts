@@ -12,9 +12,13 @@ import { HellIcon } from '@hell-ui/angular/icon';
   providers: [provideIcons({ faSolidCloudArrowUp })],
   template: `
     <div class="h-80 rounded-hell-lg border border-hell-border bg-hell-surface">
-      <hell-empty-state [headingLevel]="2">
+      <hell-empty-state>
         <hell-icon hellEmptyStateMedia name="faSolidCloudArrowUp" class="text-hell-primary" />
-        <span hellEmptyStateTitle>Upload your first document</span>
+        <!-- A projected title owns its own semantics — use a real heading
+             element. headingLevel only promotes the built-in preset title. -->
+        <h2 hellEmptyStateTitle class="m-0 text-[length:inherit] font-[inherit]">
+          Upload your first document
+        </h2>
         <span hellEmptyStateDescription>
           Drag files here or browse to add contracts, invoices, and statements.
         </span>

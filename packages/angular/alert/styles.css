@@ -1,2 +1,18 @@
 /* Alert defaults are Tailwind utility recipes. */
 @source "./alert.ts";
+
+@layer components {
+  /* Built-in dismiss glyph. Rendered as a CSS mask on the empty button so a
+     bare `<button hellAlertDismiss></button>` ships a visible × with zero
+     consumer markup; projecting any child (icon or text) drops the `:empty`
+     match and replaces it. Mirrors the breadcrumb-separator glyph mechanism. */
+  button[hellAlertDismiss][data-slot='root']:empty::before {
+    content: '';
+    display: block;
+    height: 1rem;
+    width: 1rem;
+    background-color: currentcolor;
+    -webkit-mask: var(--hell-icon-close) center / contain no-repeat;
+    mask: var(--hell-icon-close) center / contain no-repeat;
+  }
+}

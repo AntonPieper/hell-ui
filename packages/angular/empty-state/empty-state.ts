@@ -168,8 +168,8 @@ export class HellEmptyStateActions {}
       <div
         data-slot="title"
         [class]="part('title')"
-        [attr.role]="headingLevel() ? 'heading' : null"
-        [attr.aria-level]="headingLevel()"
+        [attr.role]="!hasCustomTitle() && headingLevel() ? 'heading' : null"
+        [attr.aria-level]="hasCustomTitle() ? null : headingLevel()"
       >
         @if (hasCustomTitle()) {
           <ng-content select="[hellEmptyStateTitle]" />
@@ -214,9 +214,11 @@ export class HellEmptyState {
   readonly preset = input<HellEmptyStatePreset | null>(null);
 
   /**
-   * Heading level the title is promoted to. `null` (default) renders the title
-   * as a non-semantic emphasized element; a level of `2`–`6` exposes it as a
-   * heading with the matching `aria-level` for the page outline.
+   * Heading level the built-in preset title is promoted to. `null` (default)
+   * renders the title as a non-semantic emphasized element; a level of `2`–`6`
+   * exposes it as a heading with the matching `aria-level` for the page outline.
+   * Ignored when a `hellEmptyStateTitle` is projected — a real heading element
+   * owns its own semantics, so the wrapper never doubles up `role="heading"`.
    */
   readonly headingLevel = input<HellEmptyStateHeadingLevel | null>(null);
 

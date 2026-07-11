@@ -13,13 +13,13 @@ import {
   imports: [HellChipSet, HellChip, HellChipRemove],
   template: `
     <div hellChipSet ui="gap-hell-3" aria-label="Tags">
-      <span hellChip [ui]="chipUi" [label]="'Design'">
+      <span hellChip [ui]="chipUi">
         Design
-        <button hellChipRemove [ui]="removeUi">×</button>
+        <button hellChipRemove [ui]="removeUi"></button>
       </span>
-      <span hellChip [ui]="chipUi" [label]="'Research'">
+      <span hellChip [ui]="chipUi">
         Research
-        <button hellChipRemove [ui]="removeUi">×</button>
+        <button hellChipRemove [ui]="removeUi"></button>
       </span>
     </div>
   `,

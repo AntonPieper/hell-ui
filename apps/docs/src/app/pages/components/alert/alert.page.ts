@@ -11,6 +11,10 @@ import { AlertBannerExample } from './examples/banner.example';
 import alertBannerExampleCodeRaw from './examples/banner.example.ts?raw' with { loader: 'text' };
 import { AlertBasicExample } from './examples/basic.example';
 import alertBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
+import { AlertConditionalExample } from './examples/conditional.example';
+import alertConditionalExampleCodeRaw from './examples/conditional.example.ts?raw' with {
+  loader: 'text',
+};
 import { AlertDismissibleExample } from './examples/dismissible.example';
 import alertDismissibleExampleCodeRaw from './examples/dismissible.example.ts?raw' with {
   loader: 'text',
@@ -38,6 +42,7 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
     AlertBannerExample,
     AlertDismissibleExample,
     AlertActionsExample,
+    AlertConditionalExample,
     AlertAsyncRoleExample,
     AlertValidationSummaryExample,
     AlertStylingExample,
@@ -126,6 +131,21 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
       </p>
       <hd-example-tabs [code]="alertActionsExampleCode">
         <app-alert-actions-example />
+      </hd-example-tabs>
+
+      <h2>Conditional content</h2>
+      <p>
+        A single slotted element inside an <code>&#64;if</code> projects on its own — a lone
+        <code>&lt;button hellAlertDismiss&gt;</code> in an <code>&#64;if</code> still reaches the
+        dismiss slot. The catch is grouping: content projection matches each <code>&#64;if</code>
+        block's <em>single</em> root node by its slot selector, so an <code>&lt;ng-container&gt;</code>
+        wrapper or several elements in one block carry no selector and fall into the default content
+        region instead of the dismiss position. Wrap the conditional content in
+        <code>&lt;ng-container ngProjectAs="[hellAlertDismiss]"&gt;</code> (matching the slot you are
+        targeting) so it projects reliably however many nodes it holds.
+      </p>
+      <hd-example-tabs [code]="alertConditionalExampleCode">
+        <app-alert-conditional-example />
       </hd-example-tabs>
 
       <h2>Async alerts and roles</h2>
@@ -243,6 +263,7 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
 })
 export class AlertPage {
   protected readonly alertBasicExampleCode = alertBasicExampleCodeRaw;
+  protected readonly alertConditionalExampleCode = alertConditionalExampleCodeRaw;
   protected readonly alertVariantsExampleCode = alertVariantsExampleCodeRaw;
   protected readonly alertIconExampleCode = alertIconExampleCodeRaw;
   protected readonly alertBannerExampleCode = alertBannerExampleCodeRaw;

@@ -28,15 +28,24 @@ test.describe('empty state browser accessibility contract', () => {
     await expect(noResults).toContainText('No customers match ""');
   });
 
-  test('a projected title can be promoted to a heading level', async ({ page }) => {
+  test('a projected real heading owns the outline entry without doubled heading roles', async ({
+    page,
+  }) => {
     await gotoEmptyState(page);
 
     const custom = page.locator('app-empty-state-custom-content-example hell-empty-state');
     await expect(custom).toBeVisible();
 
+    // The projected <h2> is the one heading — native semantics, no promotion.
     const heading = custom.getByRole('heading', { name: 'Upload your first document', level: 2 });
     await expect(heading).toBeVisible();
-    await expect(heading).toHaveAttribute('data-slot', 'title');
+
+    // The title wrapper stays semantically inert so the heading is not nested
+    // inside a second role="heading" element.
+    const titleSlot = custom.locator('[data-slot="title"]');
+    await expect(titleSlot).not.toHaveAttribute('role', /.+/);
+    await expect(titleSlot).not.toHaveAttribute('aria-level', /.+/);
+    await expect(custom.getByRole('heading')).toHaveCount(1);
 
     // Both projected actions are reachable buttons.
     await expect(custom.getByRole('button', { name: 'Browse files' })).toBeVisible();

@@ -12,6 +12,9 @@ import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
 // @public
+export const HELL_CHIP_DIRECTIVES: readonly [typeof HellChipSet, typeof HellChip, typeof HellChipRemove];
+
+// @public
 export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels>;
 
 // @public

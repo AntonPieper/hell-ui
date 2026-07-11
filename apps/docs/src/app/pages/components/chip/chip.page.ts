@@ -67,8 +67,9 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       <p>
         A chip set of removable chips. Tab moves into the set once; arrow keys move between chips;
         <code>Delete</code> or <code>Backspace</code> removes the focused chip and keeps focus in
-        the set. Each remove button is a real <code>&lt;button&gt;</code> named
-        <code>Remove {{ '{' }}label{{ '}' }}</code> through the Label Contract.
+        the set. Each remove button is an empty <code>&lt;button hellChipRemove&gt;</code>: it ships
+        a built-in × glyph and is named <code>Remove {{ '{' }}label{{ '}' }}</code> — derived from
+        the chip's own text through the Label Contract — so you never write the label twice.
       </p>
       <hd-example-tabs [code]="chipBasicExampleCode">
         <app-chip-basic-example />
@@ -171,8 +172,9 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           <code>disabled</code>: <code>boolean</code> — disables the chip and its remove button.
         </li>
         <li>
-          <code>label</code>: <code>string</code> — the chip's human label, used to name its remove
-          button.
+          <code>label</code>: <code>string</code> — optional override for the chip's human label.
+          The remove button's name is derived from the chip's text content by default; set this
+          only when the visible text is not a good accessible name.
         </li>
         <li><code>(remove)</code>: <code>void</code> — emitted on remove-button click or on
           <code>Delete</code>/<code>Backspace</code> when focused.</li>
@@ -182,10 +184,15 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       <ul>
         <li>Renders a real, sibling <code>&lt;button type="button"&gt;</code> — never nest it as an
           interactive child of a <code>&lt;button&gt;</code> chip host.</li>
+        <li>Ships a built-in × glyph on the empty button; project any content to replace it.</li>
         <li>Named <code>Remove {{ '{' }}label{{ '}' }}</code> via <code>HELL_CHIP_LABELS</code> /
-          <code>provideHellChipLabels</code>.</li>
+          <code>provideHellChipLabels</code>, with the label taken from the chip's text content.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellChipRemovePart&gt;</code>.</li>
       </ul>
+      <p>
+        <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>, <code>HellChip</code>,
+        and <code>HellChipRemove</code>, for bulk <code>imports</code>.
+      </p>
 
       <h2>Accessibility</h2>
       <ul>
@@ -217,7 +224,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       <ul class="hd-do">
         <li>Give the chip set an accessible name (<code>aria-label</code> or
           <code>aria-labelledby</code>) describing the collection.</li>
-        <li>Set <code>label</code> on each removable chip so its remove button is clearly named.</li>
+        <li>Give a removable chip visible text so its remove button is named automatically; reach
+          for <code>label</code> only to override that name.</li>
         <li>Handle <code>(remove)</code> by updating your own collection.</li>
         <li>Use a <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> host when the whole chip is
           clickable.</li>

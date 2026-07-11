@@ -13,9 +13,9 @@ interface Assignee {
   template: `
     <div hellChipSet aria-label="Assigned people">
       @for (assignee of assignees(); track assignee.id) {
-        <span hellChip [label]="assignee.name" (remove)="remove(assignee.id)">
+        <span hellChip (remove)="remove(assignee.id)">
           {{ assignee.name }}
-          <button hellChipRemove>×</button>
+          <button hellChipRemove></button>
         </span>
       } @empty {
         <span class="text-hell-foreground-muted text-[13px]">No one assigned.</span>

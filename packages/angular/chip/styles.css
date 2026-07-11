@@ -1,2 +1,18 @@
 /* Chip, chip set, and remove-button defaults are Tailwind utility recipes. */
 @source "./chip.ts";
+
+@layer components {
+  /* Built-in remove glyph. Rendered as a CSS mask on the empty button so a
+     bare `<button hellChipRemove></button>` ships a visible × with zero
+     consumer markup; projecting any child (icon or text) drops the `:empty`
+     match and replaces it. Sized in `em` so it tracks the chip's size scale. */
+  button[hellChipRemove][data-slot='root']:empty::before {
+    content: '';
+    display: block;
+    height: 0.85em;
+    width: 0.85em;
+    background-color: currentcolor;
+    -webkit-mask: var(--hell-icon-close) center / contain no-repeat;
+    mask: var(--hell-icon-close) center / contain no-repeat;
+  }
+}

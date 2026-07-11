@@ -78,6 +78,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'alert basic components/alert/examples/basic.example components/alert hell-alert hellAlertTitle hellAlertDescription info inline message smallest usage',
   },
   {
+    title: 'Alert: Conditional content',
+    path: '/components/alert',
+    detail: 'components/alert/examples/conditional.example.ts',
+    terms:
+      'alert conditional components/alert/examples/conditional.example components/alert hell-alert hellAlertDismiss ngProjectAs ng-container if control flow conditional projection dismiss slot default content region',
+  },
+  {
     title: 'Alert: Dismissible',
     path: '/components/alert',
     detail: 'components/alert/examples/dismissible.example.ts',
@@ -818,6 +825,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/empty-state/examples/custom-content.example.ts',
     terms:
       'empty-state custom-content components/empty-state/examples/custom-content.example components/empty-state hell-empty-state hellEmptyStateMedia hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton hell-icon headingLevel projection override illustration provideHellEmptyStateLabels label contract',
+  },
+  {
+    title: 'Empty State: Conditional content',
+    path: '/components/empty-state',
+    detail: 'components/empty-state/examples/conditional.example.ts',
+    terms:
+      'empty-state conditional components/empty-state/examples/conditional.example components/empty-state hell-empty-state hellEmptyStateActions ngProjectAs ng-container if control flow conditional projection dropped default ng-content retry cta slot',
   },
   {
     title: 'Field: All Parts Styling',
