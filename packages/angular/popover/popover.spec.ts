@@ -48,7 +48,19 @@ class EnabledPopoverAnchorTriggerHost {
     <button id="disabled-button" type="button" [hellPopoverTrigger]="popover" disabled>
       Button
     </button>
-    <a id="disabled-anchor" href="#popover" [hellPopoverTrigger]="popover" disabled>Anchor</a>
+    <a
+      id="disabled-anchor"
+      href="#popover"
+      tabindex="0"
+      [hellPopoverTrigger]="popover"
+      disabled
+    >
+      Anchor
+    </a>
+    <button id="authored-tabindex" tabindex="-1" [hellPopoverTrigger]="popover">
+      Authored tabindex
+    </button>
+    <button id="native-tabindex" [hellPopoverTrigger]="popover">Native tabindex</button>
   `,
 })
 class DisabledPopoverTriggerHost {}
@@ -139,6 +151,17 @@ describe('HellPopoverTrigger', () => {
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
     expect(document.body.textContent).not.toContain('Popover');
+  });
+
+  it('preserves authored tabindex on enabled buttons without adding one to native triggers', () => {
+    const fixture = TestBed.createComponent(DisabledPopoverTriggerHost);
+    fixture.detectChanges();
+
+    const authored = query<HTMLButtonElement>(fixture.nativeElement, '#authored-tabindex');
+    const native = query<HTMLButtonElement>(fixture.nativeElement, '#native-tabindex');
+
+    expect(authored.getAttribute('tabindex')).toBe('-1');
+    expect(native.hasAttribute('tabindex')).toBe(false);
   });
 
   it('emits close when outside pointer interaction closes button popovers', async () => {

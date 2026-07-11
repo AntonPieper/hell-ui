@@ -215,6 +215,7 @@ class HellComboboxSelectionController {
  */
 @Directive({
   selector: '[hellCombobox]',
+  exportAs: 'hellCombobox',
   hostDirectives: [
     {
       directive: NgpCombobox,
@@ -249,6 +250,8 @@ class HellComboboxSelectionController {
 export class HellCombobox<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellComboboxPart>>(undefined, { alias: 'ui' });
+  /** Whether Arrow Up/Down wrap between the first and last enabled option. */
+  readonly wrapNavigation = input(true, { transform: booleanAttribute });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<HellComboboxPart>(this.ui, {
@@ -265,6 +268,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   private dropdownOpen = false;
 
   constructor() {
+    this.host.nativeElement.addEventListener('keydown', this.clampNavigation, { capture: true });
     const valueSub = this.combobox.valueChange.subscribe((value) => {
       this.valueAccessor.emitValue(this.normalizeValue(value));
     });
@@ -272,6 +276,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
       this.dropdownOpen = open;
     });
     this.destroyRef.onDestroy(() => {
+      this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, { capture: true });
       valueSub.unsubscribe();
       openSub.unsubscribe();
     });
@@ -309,6 +314,25 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
       this.valueAccessor.markTouched();
     }
   }
+
+  private readonly clampNavigation = (event: KeyboardEvent): void => {
+    if (this.wrapNavigation() || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
+    if (!(event.target instanceof HTMLInputElement)) return;
+    const activeId = event.target.getAttribute('aria-activedescendant');
+    const activeOption = activeId ? event.target.ownerDocument.getElementById(activeId) : null;
+    const listbox = activeOption?.closest('[role="listbox"]');
+    if (!activeOption || !listbox) return;
+    const enabled = Array.from(listbox.querySelectorAll<HTMLElement>('[role="option"]'))
+      .filter((option) => option.getAttribute('aria-disabled') !== 'true' && !option.hasAttribute('data-disabled'));
+    const first = enabled[0];
+    const last = enabled.at(-1);
+    const atBoundary =
+      (event.key === 'ArrowUp' && activeOption === first) ||
+      (event.key === 'ArrowDown' && activeOption === last);
+    if (!atBoundary) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   registerDropdown(dropdown: HTMLElement): void {
     this.floatingScope.registerFloatingElement(dropdown);

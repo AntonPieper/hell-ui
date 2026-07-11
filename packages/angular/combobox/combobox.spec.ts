@@ -16,7 +16,12 @@ import {
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
   template: `
-    <div hellCombobox [formControl]="control" (valueChange)="values.push($any($event))">
+    <div
+      hellCombobox
+      [wrapNavigation]="false"
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    >
       <input hellComboboxInput aria-label="Assignee" />
       <button hellComboboxButton type="button">Toggle</button>
       <div *hellComboboxPortal hellComboboxDropdown>
@@ -395,6 +400,31 @@ describe('HellCombobox', () => {
     expect(dropdown.getAttribute('role')).toBe('listbox');
     expect(options.map((option) => option.textContent?.trim())).toEqual(['Atlas', 'Nova']);
     expect(options.every((option) => option.tabIndex === -1)).toBe(true);
+  });
+
+  it('can clamp delegated Arrow navigation at the first and last enabled options', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const firstId = options[0]!.id;
+    const lastId = options[1]!.id;
+    expect(input.getAttribute('aria-activedescendant')).toBe(firstId);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(firstId);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
   });
 
   it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {

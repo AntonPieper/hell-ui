@@ -39,7 +39,7 @@ const packageConsumerCiGroups = [
   { name: 'button', scenarios: ['button'] },
   {
     name: 'composite-foundations',
-    scenarios: ['composite-css', 'app-shell', 'page-header', 'resizable', 'split-view'],
+    scenarios: ['composite-css', 'app-shell', 'filter-bar', 'page-header', 'resizable', 'split-view'],
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
@@ -309,6 +309,17 @@ const packageConsumerScenarioCatalog = [
       'border-radius:var(--radius-hell-md)',
       'transform:rotate(180deg)',
     ],
+  },
+  {
+    name: 'filter-bar',
+    description: 'narrow controlled Filter Bar composite with composed entrypoint styles',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    mainTs: filterBarConsumerMainTs,
+    stylesCss: filterBarConsumerStylesCss,
+    cssIncludes: ['min-width:180px', 'z-index:var(--hell-z-popover,60)'],
   },
   {
     name: 'page-header',
@@ -1951,6 +1962,48 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function filterBarConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HellFilterBar,
+  type HellFilterBarUi,
+  type HellFilterField,
+  type HellFilterToken,
+} from '${packageName}/filter-bar';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellFilterBar],
+  template: \`
+    <hell-filter-bar
+      aria-label="Package filters"
+      [fields]="fields"
+      [value]="value()"
+      [ui]="filterUi"
+      (valueChange)="value.set($event)"
+    />
+  \`,
+})
+class App {
+  protected readonly fields: readonly HellFilterField[] = [
+    { key: 'name', label: 'Name', kind: 'text' },
+    {
+      key: 'status',
+      label: 'Status',
+      kind: 'options',
+      options: [{ value: 'active', label: 'Active' }],
+    },
+  ];
+  protected readonly value = signal<readonly HellFilterToken[]>([]);
+  protected readonly filterUi = { root: 'max-w-[640px]' } satisfies HellFilterBarUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function appShellConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2497,6 +2550,13 @@ function pageHeaderConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/page-header/styles.css";
+`;
+}
+
+function filterBarConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/filter-bar/styles.css";
 `;
 }
 

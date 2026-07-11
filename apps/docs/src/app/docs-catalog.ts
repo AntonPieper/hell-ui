@@ -338,6 +338,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/menu/menu.page').then((m) => m.MenuPage),
       },
       {
+        routePath: 'components/filter-bar',
+        label: 'Filter Bar',
+        icon: 'faSolidFilter',
+        loadComponent: () =>
+          import('./pages/components/filter-bar/filter-bar.page').then((m) => m.FilterBarPage),
+      },
+      {
         routePath: 'components/multi-select-menu-button',
         label: 'Multi-select menu button',
         icon: 'faSolidListCheck',
