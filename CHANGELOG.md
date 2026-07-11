@@ -518,6 +518,60 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Package-consumer registry/store preflights and five diagnostic package-manager
   commands that duplicated the real strict install and production build.
 
+### Added
+
+- More granular Public Parts across six entrypoints, all styleable through the
+  existing `ui` Part Style Maps: `HellAvatar` gains `image` and `fallback`
+  parts, `HellCheckbox` gains `indicator` (the check/dash glyph),
+  `HellAudioPlayer` gains `captionsText` (the committed transcript leaf),
+  `HellPaginationStrip` gains `control` (its owned nav/page buttons), and
+  `HellSplitView` gains `backButton` (the compact-mode back control). The
+  TanStack table shell adopts the Part Style Map contract for the first time:
+  `HellTanStackTable` exposes `root`, `toolbar`, `footer`, and `scrollport`,
+  and `HellTanStackPagination` exposes `root` and `pageSize` with camelCase
+  `data-slot` values replacing the former kebab-case markers; the private
+  `.hell-tanstack-table` and `.hell-tanstack-pagination` host classes are
+  gone. Evidence: part assertions in each entrypoint's spec and
+  `pnpm run test:architecture`.
+
+### Changed
+
+- Release publishing now delegates its shared gates to `release:dry-run`, and
+  package validation runs Publint before the Hell-specific tarball audit.
+- The workspace lockfile is deduplicated and build/test transitive dependencies
+  are constrained to patched releases; both full and production audits are clean.
+- The docs initial-bundle warning now starts just above the accepted baseline
+  instead of warning on every successful production build; the 1.05 MB failure
+  threshold remains unchanged. Playwright now exercises that production output
+  through Vite preview instead of running optimized bundles through a dev
+  server; the unused stats-file output is gone as well.
+- Accessibility documentation now describes stable ownership boundaries and
+  consumer responsibilities instead of maintaining a per-demo test matrix
+  that had already drifted from the executable coverage.
+- Production TypeScript is linted with type information. Test fixtures stay on
+  the syntax-aware ruleset because Angular and third-party test doubles expose
+  deliberately loose values that would make type-aware lint mostly noise.
+
+### Fixed
+
+- TanStack column filters no longer render object-valued state as the literal
+  text `[object Object]`; only scalar filter values are shown in the input.
+- Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`
+  and `aria-checked`; they are native toggle buttons announcing selection via
+  `aria-pressed`, matching the WAI-ARIA toggle-button pattern. This works
+  around ng-primitives (<= 0.124) hardcoding radio semantics on toggle-group
+  items in both selection modes ([ng-primitives#813](https://github.com/ng-primitives/ng-primitives/issues/813));
+  single-select groups keep radio items. Evidence: mode-specific assertions in
+  `packages/angular/toggle/toggle.spec.ts` and
+  `e2e/toggle-a11y-contracts.spec.ts`.
+- Interactive `[hellBreadcrumbEllipsis]` buttons no longer carry the
+  `role="presentation"` and `aria-hidden="true"` that `NgpBreadcrumbEllipsis`
+  applies unconditionally, so a focusable ellipsis button is announced instead
+  of violating axe's `aria-hidden-focus` rule; span hosts stay decorative.
+  Evidence: host-specific assertions in
+  `packages/angular/breadcrumbs/breadcrumbs.spec.ts` and the new breadcrumbs
+  target in `e2e/docs-axe-smoke.spec.ts`.
+
 ## [0.2.0] - 2026-07-03
 
 ### Breaking changes

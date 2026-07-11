@@ -245,7 +245,9 @@ export class HellBreadcrumbSeparator {
 /**
  * Collapsed-middle indicator. Apply to a button when interactive (e.g. opens
  * a menu listing the hidden crumbs) or a span when purely decorative. Renders
- * three dots via CSS so no icon import is required.
+ * three dots via CSS so no icon import is required. Button hosts drop the
+ * primitive's decorative `role="presentation"`/`aria-hidden="true"` so the
+ * control stays visible to assistive technology; span hosts keep them.
  */
 @Directive({
   selector: '[hellBreadcrumbEllipsis]',
@@ -255,6 +257,8 @@ export class HellBreadcrumbSeparator {
     'data-slot': 'root',
     '[attr.type]': 'nativeButtonType()',
     '[attr.aria-label]': 'nativeButtonType() ? (ariaLabel() ?? labels.showHiddenNavigation) : null',
+    '[attr.role]': "nativeButtonType() ? null : 'presentation'",
+    '[attr.aria-hidden]': "nativeButtonType() ? null : 'true'",
   },
 })
 export class HellBreadcrumbEllipsis {
