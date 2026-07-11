@@ -206,6 +206,11 @@
       "output": "chip"
     },
     {
+      "glob": "chip-presentation.ts",
+      "input": "internal/chip",
+      "output": "internal/chip"
+    },
+    {
       "glob": "drop-zone.ts",
       "input": "drop-zone",
       "output": "drop-zone"

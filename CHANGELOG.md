@@ -266,6 +266,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Production TypeScript is linted with type information. Test fixtures stay on
   the syntax-aware ruleset because Angular and third-party test doubles expose
   deliberately loose values that would make type-aware lint mostly noise.
+- The omnibar's `[hellOmnibarChip]` / `button[hellOmnibarChipRemove]` scope
+  pills now use the same presentation implementation as the public
+  `@hell-ui/angular/chip` primitive instead of private recipes and CSS. The
+  composition stays behind the existing omnibar `ui` inputs, so the public
+  omnibar API is unchanged; chip-only `variant`, `size`, `disabled`, and
+  `label` inputs do not leak into the Composite. The remove button keeps the
+  omnibar tab rule: it leaves the tab order while the panel is open and rejoins
+  it when closed. `@hell-ui/angular/omnibar/styles.css` imports the chip styles
+  so omnibar-only consumers still get the shared visuals. Evidence:
+  `packages/angular/omnibar/omnibar.spec.ts` and
+  `e2e/omnibar-a11y-contracts.spec.ts`. Closes #115 (spec #95).
 
 ### Fixed
 

@@ -30,6 +30,7 @@ const apiReportExclusions = new Map([
   ['features/code-editor', 'feature surface, not yet under report'],
   ['features/pdf-viewer', 'feature surface, not yet under report'],
   ['internal/audio-transcript', 'internal seam, not part of the public surface'],
+  ['internal/chip', 'internal seam, not part of the public surface'],
   ['internal/core', 'internal seam, not part of the public surface'],
   ['internal/ng-primitives', 'internal seam, not part of the public surface'],
   ['table-tanstack', 'adapter surface, not yet under report'],
