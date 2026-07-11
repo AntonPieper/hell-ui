@@ -69,6 +69,7 @@
     "tag/tag.ts",
     "toggle/toggle.ts",
     "omnibar/omnibar.ts",
+    "page-header/page-header.ts",
     "toast/toast.ts",
     "features/code-editor/code-editor.ts",
     "assets/**"
@@ -229,6 +230,9 @@
     },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
+    },
+    "./page-header": {
+      "@heinrich/source": "./page-header/public-api.ts"
     },
     "./resizable": {
       "@heinrich/source": "./resizable/public-api.ts"
@@ -476,6 +480,11 @@
       "@heinrich/source": "./omnibar/styles.css",
       "style": "./omnibar/styles.css",
       "default": "./omnibar/styles.css"
+    },
+    "./page-header/styles.css": {
+      "@heinrich/source": "./page-header/styles.css",
+      "style": "./page-header/styles.css",
+      "default": "./page-header/styles.css"
     },
     "./resizable/styles.css": {
       "@heinrich/source": "./resizable/styles.css",

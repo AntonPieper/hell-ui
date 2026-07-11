@@ -412,6 +412,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/toolbar/toolbar.page').then((m) => m.ToolbarPage),
       },
+      {
+        routePath: 'components/page-header',
+        label: 'Page header',
+        icon: 'faSolidHeading',
+        loadComponent: () =>
+          import('./pages/components/page-header/page-header.page').then((m) => m.PageHeaderPage),
+      },
     ],
   },
   {

@@ -287,6 +287,19 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'page header',
+    path: '/components/page-header',
+    heading: 'Page header',
+    include: ['main'],
+    prepare: async (page) => {
+      await expect(
+        page
+          .locator('app-page-header-detail-example')
+          .getByRole('heading', { name: 'Ada Lovelace', level: 1 }),
+      ).toBeVisible();
+    },
+  },
+  {
     name: 'table primitives docs example',
     path: '/components/table',
     heading: 'Table',

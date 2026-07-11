@@ -36,7 +36,7 @@ const packageConsumerCiGroups = [
   { name: 'button', scenarios: ['button'] },
   {
     name: 'composite-foundations',
-    scenarios: ['composite-css', 'app-shell', 'resizable', 'split-view'],
+    scenarios: ['composite-css', 'app-shell', 'page-header', 'resizable', 'split-view'],
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
@@ -279,6 +279,21 @@ const packageConsumerScenarioCatalog = [
       'overflow:hidden',
       'border-radius:var(--radius-hell-md)',
       'transform:rotate(180deg)',
+    ],
+  },
+  {
+    name: 'page-header',
+    description: 'narrow page-header composite with built-in back-button styles',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    mainTs: pageHeaderConsumerMainTs,
+    stylesCss: pageHeaderConsumerStylesCss,
+    cssIncludes: [
+      'max-width:65ch',
+      'font-size:var(--text-xl)',
+      'transition-property:background-color,border-color,color,box-shadow',
     ],
   },
   {
@@ -1838,6 +1853,37 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function pageHeaderConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_PAGE_HEADER_DIRECTIVES, type HellPageHeaderUi } from '${packageName}/page-header';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_PAGE_HEADER_DIRECTIVES],
+  template: \`
+    <hell-page-header [level]="2" [ui]="pageHeaderUi">
+      <hell-page-header-back (back)="backCount += 1" />
+      <span hellPageHeaderTitle>Package consumer</span>
+      <span hellPageHeaderMeta>Beta</span>
+      <p hellPageHeaderDescription>Page-header recipes compile from the packed entrypoint.</p>
+      <div hellPageHeaderToolbar>Actions</div>
+    </hell-page-header>
+  \`,
+})
+class App {
+  protected backCount = 0;
+  protected readonly pageHeaderUi = {
+    root: 'border border-hell-border p-hell-4',
+    title: 'text-2xl',
+  } satisfies HellPageHeaderUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function appShellConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2369,6 +2415,13 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/omnibar/styles.css";
 @import "${packageName}/time-input/styles.css";
 @import "${packageName}/toast/styles.css";
+`;
+}
+
+function pageHeaderConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/page-header/styles.css";
 `;
 }
 

@@ -276,6 +276,11 @@
       "output": "omnibar"
     },
     {
+      "glob": "page-header.ts",
+      "input": "page-header",
+      "output": "page-header"
+    },
+    {
       "glob": "toast.ts",
       "input": "toast",
       "output": "toast"
