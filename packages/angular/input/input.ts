@@ -93,8 +93,9 @@ export class HellNativeSelect {
 
 /**
  * Styled resizable `<textarea>` built on `NgpTextarea`. Opt into content-based
- * height growth with `autoGrow`; cap it in CSS via `rows` (minimum) plus
- * `max-block-size` and `overflow-y: auto` (maximum).
+ * height growth with `autoGrow`; bound it in CSS via `min-block-size` (minimum —
+ * `rows` is not a floor under `field-sizing: content`) plus `max-block-size` and
+ * `overflow-y: auto` (maximum).
  */
 @Directive({
   selector: 'textarea[hellTextarea]',

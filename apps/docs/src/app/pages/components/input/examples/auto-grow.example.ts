@@ -13,13 +13,13 @@ import { HellTextarea } from '@hell-ui/angular/input';
         id="auto-grow-note"
         hellTextarea
         autoGrow
-        rows="2"
-        ui="[max-block-size:13rem] overflow-y-auto"
+        ui="[min-block-size:9rem] [max-block-size:13rem] overflow-y-auto"
         placeholder="Type a few lines — the field grows as you go…"
       ></textarea>
       <div hellFieldDescription>
-        <code>rows</code> sets the minimum; growth is capped with
-        <code>max-block-size</code>, then the content scrolls. No JavaScript measurement.
+        <code>min-block-size</code> holds the floor (it stays this tall even when emptied);
+        <code>max-block-size</code> plus <code>overflow-y: auto</code> caps growth, then the
+        content scrolls. No JavaScript measurement.
       </div>
     </div>
   `,

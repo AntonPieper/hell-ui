@@ -11,9 +11,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   Package Entry Point: the native `<textarea>` grows with its content via CSS
   `field-sizing: content` — no resize observers, no per-keystroke JavaScript
   measurement, no animated height. It reflects `data-auto-grow` and disables the
-  native resize handle while active (the two affordances conflict); cap the growth
-  in CSS with `rows` for the minimum plus `max-block-size` and `overflow-y: auto`
-  for the maximum so a long paste scrolls internally. Progressive enhancement:
+  native resize handle while active (the two affordances conflict); bound the growth
+  in CSS with `min-block-size` for the minimum (`rows` is not a floor under
+  `field-sizing: content`) plus `max-block-size` and `overflow-y: auto` for the
+  maximum so a long paste scrolls internally. Progressive enhancement:
   browsers without `field-sizing` degrade to a normal fixed-size textarea with no
   JavaScript polyfill. Evidence: `packages/angular/input/input.spec.ts`, the
   docs page at `/components/input` (Auto-grow example), and its axe WCAG A/AA
@@ -127,12 +128,19 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   outputs. The default `contextual` mode renders the bar only while dirty;
   `persistent` mode keeps a stable footer for settings pages. `busy` gates both
   actions and shows a progress glyph in Save; `disabled` gates Save only. The
+  built-in Save button defaults to `type=button` and emits only `saved`, so it
+  never submits an enclosing form (no double-fire); `saveType=submit` opts into
+  native form submission, and `size` forwards to both built-in buttons. The
   bar renders in normal flow, sticky to the bottom of its nearest scroll
   container (no fixed-position portal), never steals focus on appearance,
-  announces its message politely through the CDK LiveAnnouncer, and suppresses
-  its slide-in under `prefers-reduced-motion`. Extra consumer actions project
-  into the actions part before the built-in Discard/Save buttons; message and
-  button labels come from the Label Contract (`provideHellSaveBarLabels`).
+  announces its message politely through the CDK LiveAnnouncer — at most once
+  per dirty session, so a form that flaps dirty→pristine→dirty within a tick
+  raises no announcement storm — and suppresses its slide-in under
+  `prefers-reduced-motion`; persistent mode renders no empty message paragraph
+  while pristine. Extra consumer actions project into the actions part before
+  the built-in Discard/Save buttons. Message and button labels come from the
+  Label Contract (`provideHellSaveBarLabels`), and the unsaved-changes `message`
+  can be overridden per instance.
   Refine the `root`, `message`, `actions`, `save`, and `discard` parts through
   the Part Style Map, and import `@hell-ui/angular/save-bar/styles.css` (which
   carries the button primitive styles it composes) for the default visuals.

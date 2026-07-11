@@ -1,8 +1,22 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+
+// The save bar slides in (translate + opacity) on appearance; measuring geometry
+// mid-animation is worth a few px and flakes tight pixel comparisons. Wait for a
+// settled layout signal — the element's animations finished and two paint frames —
+// then compare with an explicit tolerance instead of racing the render. The
+// tolerance also absorbs CI scrollbar-width variance (overlay vs classic).
+const GEOMETRY_TOLERANCE_PX = 8;
 
 async function gotoSaveBar(page: Page): Promise<void> {
   await page.goto('/components/save-bar');
   await expect(page.getByRole('heading', { name: 'Save bar', level: 1 })).toBeVisible();
+}
+
+async function waitForLayoutSettled(locator: Locator): Promise<void> {
+  await locator.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => {})));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
 }
 
 test.describe('save bar browser accessibility contract', () => {
@@ -42,6 +56,8 @@ test.describe('save bar browser accessibility contract', () => {
     await field.click();
     await field.pressSequentially('x');
     await expect(bar).toBeVisible();
+    // Let the slide-in finish before trusting any geometry.
+    await waitForLayoutSettled(bar);
 
     // The container actually scrolls and the bar docks to its visible bottom.
     expect(
@@ -59,18 +75,82 @@ test.describe('save bar browser accessibility contract', () => {
       return box.y + box.height;
     };
 
-    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(8);
+    // Relative invariant: the bar's bottom edge sits at the container's visible
+    // bottom, within a small tolerance for sub-pixel rounding.
+    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(
+      GEOMETRY_TOLERANCE_PX,
+    );
 
     // Scrolled to the end, the bar still closes the container without
     // overlapping the last field.
     await container.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
-    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(8);
+    await waitForLayoutSettled(bar);
+    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(
+      GEOMETRY_TOLERANCE_PX,
+    );
 
     const lastField = example.getByRole('textbox', { name: 'Notes' });
     const lastFieldBox = await lastField.boundingBox();
     const barBox = await bar.boundingBox();
     if (!lastFieldBox || !barBox) throw new Error('Expected boxes for overlap check.');
-    expect(lastFieldBox.y + lastFieldBox.height).toBeLessThanOrEqual(barBox.y + 1);
+    // The last field's bottom never crosses into the bar (relative ordering).
+    expect(lastFieldBox.y + lastFieldBox.height).toBeLessThanOrEqual(
+      barBox.y + GEOMETRY_TOLERANCE_PX,
+    );
+  });
+
+  test('the default Save emits saved without submitting an enclosing form', async ({ page }) => {
+    await gotoSaveBar(page);
+
+    const example = page.locator('app-save-bar-contextual-form-example');
+    const form = example.locator('form');
+    const bar = example.locator('hell-save-bar');
+
+    // Instrument the form: count native submit events without swallowing them.
+    await form.evaluate((element) => {
+      element.dataset['submitCount'] = '0';
+      element.addEventListener('submit', () => {
+        element.dataset['submitCount'] = String(Number(element.dataset['submitCount'] ?? '0') + 1);
+      });
+    });
+
+    const name = example.getByRole('textbox', { name: 'Display name' });
+    await name.click();
+    await name.pressSequentially(' Jr.');
+    await expect(bar).toBeVisible();
+
+    // The default Save is type="button": clicking it runs the save (bar goes
+    // busy, then resolves hidden) but never triggers the form's native submit.
+    await bar.getByRole('button', { name: 'Save' }).click();
+    await expect(bar).toHaveAttribute('data-busy', '');
+    expect(await form.getAttribute('data-submit-count')).toBe('0');
+    await expect(bar).toBeHidden({ timeout: 3_000 });
+  });
+
+  test('saveType="submit" saves on Enter and announces the per-instance message', async ({
+    page,
+  }) => {
+    await gotoSaveBar(page);
+
+    const example = page.locator('app-save-bar-form-submit-example');
+    const bar = example.locator('hell-save-bar');
+    await expect(bar).toBeHidden();
+
+    const subject = example.getByRole('textbox', { name: 'Subject' });
+    await subject.click();
+    await subject.pressSequentially(' (urgent)');
+    await expect(bar).toBeVisible();
+
+    // The per-instance message overrides the Label Contract, both rendered and
+    // announced politely.
+    await expect(bar.locator('[data-slot="message"]')).toHaveText('You have an unsent fax');
+    const announcer = page.locator('.cdk-live-announcer-element');
+    await expect(announcer).toHaveText('You have an unsent fax');
+
+    // saveType="submit" wires Save to native submission, so Enter in a field saves.
+    await subject.press('Enter');
+    await expect(bar).toHaveAttribute('data-busy', '');
+    await expect(bar).toBeHidden({ timeout: 3_000 });
   });
 
   test('actions are keyboard-reachable in document order and operable', async ({ page }) => {

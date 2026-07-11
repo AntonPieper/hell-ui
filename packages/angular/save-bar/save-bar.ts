@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   booleanAttribute,
   computed,
   effect,
@@ -13,6 +14,7 @@ import {
   hellCreateLabels,
   hellPartStyler,
   type HellRecipe,
+  type HellSize,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
@@ -25,6 +27,13 @@ import type { InjectionToken, OutputEmitterRef, Provider } from '@angular/core';
  * always-editable surfaces such as settings pages.
  */
 export type HellSaveBarMode = 'contextual' | 'persistent';
+
+/**
+ * Native `type` of the built-in Save button. `'button'` (default) emits only
+ * `saved` and never submits an enclosing `<form>`; `'submit'` opts into native
+ * form submission.
+ */
+export type HellSaveBarSaveType = 'button' | 'submit';
 
 /** Built-in strings owned by the save-bar entry point's Label Contract. */
 export interface HellSaveBarLabels {
@@ -56,10 +65,17 @@ export type HellSaveBarPart = 'root' | 'message' | 'actions' | 'save' | 'discard
 /** Part Style Map accepted by the HellSaveBar `ui` input. */
 export type HellSaveBarUi = HellUi<HellSaveBarPart>;
 
+/**
+ * How long `dirty` must stay false before the bar re-arms its contextual
+ * announcement. Guards against announcement storms when a form flaps between
+ * dirty and pristine within a tick.
+ */
+const HELL_SAVE_BAR_ANNOUNCE_SETTLE_MS = 50;
+
 const HELL_SAVE_BAR_RECIPE = {
   root: 'sticky bottom-0 z-10 flex w-full flex-wrap items-center justify-between gap-hell-3 border-0 border-t border-solid border-hell-border bg-hell-surface-elevated px-hell-5 py-hell-3',
   message: 'm-0 flex min-w-0 items-center text-[13px] leading-normal text-hell-foreground-muted',
-  actions: 'flex flex-wrap items-center gap-hell-3',
+  actions: 'flex flex-wrap items-center gap-hell-3 ms-auto',
   // The built-in buttons render on the button primitive; these entries hold
   // only save-bar refinements, merged into each button's own root recipe.
   save: '',
@@ -82,10 +98,13 @@ const HELL_SAVE_BAR_RECIPE = {
  * `busy` gates both actions while a save is in flight; `disabled` gates Save
  * only (typically bound to form invalidity), leaving Discard operable. Extra
  * consumer actions project into the actions part before the built-in buttons.
- * The Save button is a plain submit-triggering button: inside a `<form>` it
- * also fires native submit, so handle either `(saved)` or `(ngSubmit)`, not
- * both. Message and button labels come from the Label Contract
- * (`provideHellSaveBarLabels`).
+ * The Save button defaults to `type="button"` and emits only `saved`, so it
+ * never submits an enclosing `<form>` — no double-fire. Set `saveType="submit"`
+ * to opt into native form submission and handle `(ngSubmit)` instead of
+ * `(saved)`, e.g. so pressing Enter in a field also saves. Button and message
+ * labels come from the Label Contract (`provideHellSaveBarLabels`); the
+ * unsaved-changes message can be overridden per instance with the `message`
+ * input, and `size` forwards to both built-in buttons.
  *
  * Usage:
  *   <hell-save-bar
@@ -109,17 +128,15 @@ const HELL_SAVE_BAR_RECIPE = {
     '[style.display]': "visible() ? null : 'none'",
   },
   template: `
-    <p data-slot="message" [class]="part('message')">
-      @if (dirty()) {
-        {{ labels.message }}
-      }
-    </p>
+    @if (dirty()) {
+      <p data-slot="message" [class]="part('message')">{{ effectiveMessage() }}</p>
+    }
     <div data-slot="actions" [class]="part('actions')">
       <ng-content />
       <button
         hellButton
         variant="ghost"
-        size="sm"
+        [size]="size()"
         type="button"
         data-slot="discard"
         [ui]="part('discard')"
@@ -131,8 +148,8 @@ const HELL_SAVE_BAR_RECIPE = {
       <button
         hellButton
         variant="primary"
-        size="sm"
-        type="submit"
+        [size]="size()"
+        [type]="saveType()"
         data-slot="save"
         [ui]="part('save')"
         [disabled]="busy() || disabled()"
@@ -193,6 +210,25 @@ export class HellSaveBar {
    */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /**
+   * Per-instance unsaved-changes message. Overrides the Label Contract default
+   * (`provideHellSaveBarLabels`) for this bar only, so a one-off surface can show
+   * e.g. "Unsent fax" without a scoped provider. The effective message is both
+   * rendered while dirty and announced on contextual appearance. Defaults to the
+   * Label Contract message.
+   */
+  readonly message = input<string>();
+
+  /**
+   * Native `type` of the built-in Save button. `'button'` (default) emits only
+   * `saved` and never submits an enclosing `<form>`; `'submit'` opts into native
+   * form submission (handle `(ngSubmit)` instead of `(saved)`).
+   */
+  readonly saveType = input<HellSaveBarSaveType>('button');
+
+  /** Size of the built-in Discard and Save buttons. Defaults to `'sm'`. */
+  readonly size = input<HellSize>('sm');
+
   /** Emitted when the Save action is activated. The consumer performs the mutation. */
   readonly saved: OutputEmitterRef<void> = output<void>();
 
@@ -204,22 +240,50 @@ export class HellSaveBar {
 
   private readonly announcer = inject(LiveAnnouncer);
 
+  /** Effective unsaved-changes message: the `message` input, or the Label Contract default. */
+  protected readonly effectiveMessage = computed(() => this.message() ?? this.labels.message);
+
   /** Whether the bar currently renders: always in `persistent` mode, while dirty in `contextual`. */
   protected readonly visible = computed(() => this.mode() === 'persistent' || this.dirty());
 
-  private wasContextuallyVisible = false;
+  /** Whether the current dirty session has already been announced. */
+  private announced = false;
+  /** Pending timer that re-arms announcements once `dirty` has settled false. */
+  private settleHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    // Own the settle timer the way the toaster owns its auto-dismiss timers:
+    // a single stored handle, cleared on re-arm and on destroy, never a raw
+    // setTimeout scattered through the component.
+    inject(DestroyRef).onDestroy(() => this.clearSettle());
+
     // Announce contextual appearance through the CDK LiveAnnouncer instead of
     // marking the bar itself as a live region: the message reads once, politely,
-    // and never interrupts the consumer's focus or typing.
+    // and never interrupts the consumer's focus or typing. A dirty session is
+    // announced at most once; after dirty clears, announcements only re-arm once
+    // it has stayed false for a settle interval, so a form that flaps
+    // dirty→pristine→dirty within a tick produces no announcement storm.
     effect(() => {
       const contextuallyVisible = this.mode() === 'contextual' && this.dirty();
-      if (contextuallyVisible && !this.wasContextuallyVisible) {
-        void this.announcer.announce(this.labels.message, 'polite');
+      if (contextuallyVisible) {
+        this.clearSettle();
+        if (!this.announced) {
+          this.announced = true;
+          void this.announcer.announce(this.effectiveMessage(), 'polite');
+        }
+      } else if (this.announced && this.settleHandle === null) {
+        this.settleHandle = setTimeout(() => {
+          this.settleHandle = null;
+          this.announced = false;
+        }, HELL_SAVE_BAR_ANNOUNCE_SETTLE_MS);
       }
-      this.wasContextuallyVisible = contextuallyVisible;
     });
+  }
+
+  private clearSettle(): void {
+    if (this.settleHandle === null) return;
+    clearTimeout(this.settleHandle);
+    this.settleHandle = null;
   }
 
   /** Emit `saved` unless gated. Invoked by the built-in Save button. */
