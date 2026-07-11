@@ -246,6 +246,26 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'filter-bar',
+    path: '/components/filter-bar',
+    heading: 'Filter Bar',
+    include: [
+      'main',
+      '[hellPopover][data-slot="root"]',
+      '[hellComboboxDropdown][data-slot="panel"]',
+    ],
+    prepare: async (page) => {
+      const example = page.locator('app-filter-bar-tanstack-example');
+      const picker = example.getByRole('combobox', { name: 'People filters' });
+      await picker.fill('status:inv');
+      const editor = example.locator('[data-slot="editor"][data-mode="create"]');
+      await editor.getByRole('combobox', { name: 'Status' }).press('Enter');
+      await example.getByRole('button', { name: 'Edit Status: Invited' }).click();
+      await expect(page.getByRole('dialog', { name: 'Edit Status: Invited' })).toBeVisible();
+      await expect(page.getByRole('option', { name: 'Invited' })).toBeVisible();
+    },
+  },
+  {
     name: 'multi-select-menu-button',
     path: '/components/multi-select-menu-button',
     heading: 'Multi-select menu button',

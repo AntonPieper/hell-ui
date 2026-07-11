@@ -1,4 +1,4 @@
-import { Directive, ElementRef, inject } from '@angular/core';
+import { Directive, ElementRef, HostAttributeToken, inject } from '@angular/core';
 
 /**
  * Shared disabled semantics for Hell directives hosted on native interactive
@@ -9,6 +9,7 @@ import { Directive, ElementRef, inject } from '@angular/core';
 @Directive()
 export abstract class HellNativeInteractiveDisabledGuard {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly authoredTabIndex = inject(new HostAttributeToken('tabindex'), { optional: true });
 
   protected nativeButtonType(): 'button' | null {
     return this.isButton() ? 'button' : null;
@@ -22,8 +23,13 @@ export abstract class HellNativeInteractiveDisabledGuard {
     return this.isAnchor() && disabled ? 'true' : null;
   }
 
-  protected disabledAnchorTabIndex(disabled: boolean): -1 | null {
-    return this.isAnchor() && disabled ? -1 : null;
+  /**
+   * Forces disabled anchors out of the tab order while preserving a static
+   * consumer-authored tabindex when the trigger is enabled. A dynamic host
+   * binding returning `null` would otherwise remove that static attribute.
+   */
+  protected disabledAnchorTabIndex(disabled: boolean): string | -1 | null {
+    return this.isAnchor() && disabled ? -1 : this.authoredTabIndex;
   }
 
   protected preventDisabledAnchor(event: Event, disabled: boolean): void {

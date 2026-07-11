@@ -1086,6 +1086,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'hellButton hell-icon hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItem hellMenuItemIcon hellMenuItemTrailing hellMenuItemCheckbox hellMenuItemIndicator hellMenuItemRadioGroup hellMenuItemRadio hellMenuSeparator hellSubmenuTrigger ui part style map data-hover data-focus-visible bg-hell-primary-soft rounded-hell-lg refine',
   },
   {
+    title: 'Filter Bar: TanStack Filter Controls',
+    path: '/components/filter-bar',
+    detail: 'components/filter-bar/examples/tanstack.example.ts',
+    terms:
+      'filter bar filter-bar tanstack examples hell-filter-bar HellFilterField HellFilterToken controlled value valueChange text options free text $text columnFilters globalFilter Table Shell toolbar Filter Controls tokens chips combobox listbox popover',
+  },
+  {
     title: 'Multi-Select Menu Button: Basic',
     path: '/components/multi-select-menu-button',
     detail: 'components/multi-select-menu-button/examples/basic.example.ts',
@@ -2114,6 +2121,13 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     path: '/getting-started',
     detail: 'provideHell<Module>Labels, HELL_<MODULE>_LABELS',
     terms: 'i18n labels localization aria-label accessibility provideHellPaginationLabels provideHellSpinnerLabels labels',
+  },
+  {
+    title: 'Filter Bar controlled tokens',
+    path: '/components/filter-bar',
+    detail: 'HellFilterBar, HellFilterField, HellFilterToken, valueChange',
+    terms:
+      'filter-bar HellFilterBar HellFilterField HellFilterTextField HellFilterOptionsField HellFilterOption HellFilterToken HELL_FILTER_TEXT_KEY controlled serializable operator eq multiple freeTextDebounceMs ui HellFilterBarPart HellFilterBarUi Label Contract',
   },
   {
     title: 'Combobox slots',

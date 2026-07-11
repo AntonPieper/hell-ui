@@ -240,6 +240,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>container</code>: <code>string | HTMLElement | null</code> — overlay mount target. Default <code>body</code>.</li>
         <li><code>flip</code>: <code>NgpFlipInput</code> — flip on overflow. Default <code>true</code>.</li>
         <li><code>options</code>: <code>readonly T[]</code> — full option registry for virtualized/manually ordered lists (aliases <code>ngpComboboxOptions</code>).</li>
+        <li><code>wrapNavigation</code>: <code>boolean</code> — lets Arrow Up/Down wrap between boundaries. Default <code>true</code>; set <code>false</code> for clamped composite flows.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — refines the <code>root</code> part.</li>
         <li>Outputs: <code>valueChange: HellComboboxValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
         <li>Implements <code>ControlValueAccessor</code>, so it works with <code>ngModel</code> and reactive forms.</li>

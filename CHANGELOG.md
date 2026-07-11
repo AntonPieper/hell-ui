@@ -7,6 +7,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the `@hell-ui/angular/filter-bar` Package Entry Point (Composite): a
+  keyboard-first `hell-filter-bar` for declared `text` and fixed `options`
+  fields plus first-class free text on the reserved `$text` key. The complete
+  `{ key, operator: 'eq', value }[]` is controlled and serializable; the bar
+  emits whole next arrays only on commit, removal, clear-all, or opt-in
+  debounced live free text, and owns no fetching, persistence, or engine state.
+  Its field combobox always highlights a visible outcome (including “Search
+  for …”), so Enter never silently reinterprets a field name; `field:` is an
+  accelerator into the same editor. One per-kind editor state serves create at
+  the input and edit in a token-anchored Popover. Escape consumes one layer,
+  Backspace-on-empty removes only the last token in the picker, and token
+  navigation/removal composes the Chip Set contract. The Label Contract covers
+  built-in copy and polite add/update/remove/clear announcements; the Part Style Map
+  covers the flat token, control, editor, panel, option, clear, and live-region
+  anatomy. The delegated Combobox wrapper now exposes a `wrapNavigation` input for
+  clamped Arrow-key flows while keeping active-descendant ownership in ng-primitives.
+  Docs ship a real TanStack Table Shell Filter Controls recipe.
+  Evidence: `packages/angular/filter-bar/filter-bar.spec.ts`,
+  `packages/angular/filter-bar/filter-bar.state.spec.ts`,
+  `e2e/filter-bar-contracts.spec.ts`, the docs page at
+  `/components/filter-bar`, and its axe WCAG A/AA smoke coverage. Closes #117
+  (spec #100).
 - Added the `@hell-ui/angular/page-header` Package Entry Point (Composite): a
   `hell-page-header` slot-based page chrome with `root`, `leading`, `titleGroup`,
   `title`, `meta`, `description`, and `toolbar` Public Parts. Everything is
