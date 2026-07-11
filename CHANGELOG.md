@@ -154,6 +154,34 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `/components/save-bar` (including app-shell placement and confirm-service
   discard recipes), and its axe WCAG A/AA smoke coverage. Closes #108
   (spec #97).
+- New `@hell-ui/angular/toolbar` Composite entry point: an APG-toolbar-pattern
+  action bar where actions are declared once as `hellToolbarAction` templates
+  (label, optional icon, `disabled`, `priority` of `primary`/`default`/
+  `overflowOnly`, an `iconOnly` inline rendering whose accessible name and
+  `title` tooltip come from `label`, and an `activated` output) and rendered
+  either as inline Hell buttons or as items in a trailing Hell overflow menu
+  (which always shows the label). `hellToolbarSeparator` declares group
+  dividers that render inline and as menu separators, and make collapse
+  group-aware: a trailing separated group overflows as a unit instead of
+  stranding a half-cluster. `hellToolbarWidget` projects arbitrary content
+  (search field, select) that joins the layout and roving focus but never
+  collapses or menu-ifies. Membership is recomputed from a container-driven
+  `ResizeObserver` against an off-screen sizing row — measured and committed
+  outside change detection, once per resize frame, with the overflow trigger's
+  width reserved and last-known widths cached so container growth never feeds
+  zero widths back into the policy — and first paint starts collapsed to the
+  pinned items until the first measurement commits, so no action is ever
+  unreachable, clipped, or oscillating at any width. A roving tabindex spans
+  the visible controls and the overflow trigger for a single tab stop; when
+  the focused action collapses out of the row, focus moves to the overflow
+  trigger. The overflow trigger's default name lives in the toolbar Label
+  Contract (`provideHellToolbarLabels`). Exposes the `root`, `action`,
+  `separator`, `widget`, `overflowTrigger`, `overflowMenu`, `overflowItem`,
+  and `overflowSeparator` Public Parts, plus the exported
+  `hellResolveToolbarOverflow` priority policy. Evidence:
+  `packages/angular/toolbar/toolbar.spec.ts`, `e2e/toolbar-contracts.spec.ts`,
+  the docs page at `/components/toolbar`, and its axe WCAG A/AA smoke
+  coverage. Closes #107, #133 (spec #96).
 
 ### Changed
 
@@ -219,20 +247,6 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   single-select groups keep radio items. Evidence: mode-specific assertions in
   `packages/angular/toggle/toggle.spec.ts` and
   `e2e/toggle-a11y-contracts.spec.ts`.
-
-- New `@hell-ui/angular/toolbar` Composite entry point: an APG-toolbar-pattern
-  action bar where actions are declared once as `hellToolbarAction` templates
-  (label, optional icon, `disabled`, `priority` of `primary`/`default`/
-  `overflowOnly`, and an `activated` output) and rendered either as inline Hell
-  buttons or as items in a trailing Hell overflow menu. Membership is recomputed
-  from a container-driven `ResizeObserver` — measured and committed outside
-  change detection, once per resize frame, with the overflow trigger's width
-  reserved — so the row is flicker-free and no action is unreachable at any
-  width. A roving tabindex spans the visible actions and the overflow trigger
-  for a single tab stop, and label/disabled state stays identical between the
-  two renderings. Exposes the `root`, `action`, `overflowTrigger`,
-  `overflowMenu`, and `overflowItem` Public Parts, plus the exported
-  `hellResolveToolbarOverflow` priority policy. Closes #107.
 
 ### Removed
 

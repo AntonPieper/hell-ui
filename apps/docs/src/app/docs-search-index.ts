@@ -1967,11 +1967,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'toolbar priorities components/toolbar/examples/priorities.example hell-toolbar hellToolbarAction priority primary default overflowOnly never overflows collapse narrow container variant overflow menu more actions',
   },
   {
-    title: 'Toolbar: Standalone above a table',
+    title: 'Toolbar: Icon-only actions and separators',
+    path: '/components/toolbar',
+    detail: 'components/toolbar/examples/icon-only.example.ts',
+    terms:
+      'toolbar icon-only components/toolbar/examples/icon-only.example hell-toolbar hellToolbarAction hellToolbarSeparator iconOnly aria-label title tooltip separator group divider formatting bold italic align compact square icon button overflow menu label',
+  },
+  {
+    title: 'Toolbar: Standalone above a table, with a widget',
     path: '/components/toolbar',
     detail: 'components/toolbar/examples/table-toolbar.example.ts',
     terms:
-      'toolbar table standalone components/toolbar/examples/table-toolbar.example hell-toolbar hellToolbarAction HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
+      'toolbar table standalone widget components/toolbar/examples/table-toolbar.example hell-toolbar hellToolbarAction hellToolbarSeparator hellToolbarWidget iconOnly search field never collapses HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
   },
   {
     title: 'Toolbar: Styling',

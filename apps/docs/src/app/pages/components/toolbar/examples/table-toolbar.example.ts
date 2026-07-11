@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidDownload,
   faSolidFilter,
+  faSolidMagnifyingGlass,
   faSolidPlus,
   faSolidTableColumns,
   faSolidXmark,
@@ -33,6 +34,7 @@ const MEMBERS: readonly Member[] = [
       faSolidFilter,
       faSolidDownload,
       faSolidTableColumns,
+      faSolidMagnifyingGlass,
       faSolidXmark,
     }),
   ],
@@ -52,15 +54,35 @@ const MEMBERS: readonly Member[] = [
         >
           <hell-icon name="faSolidPlus" size="13px" />
         </ng-template>
-        <ng-template hellToolbarAction label="Filter" (activated)="run('filter')">
+
+        <ng-template hellToolbarSeparator />
+
+        <ng-template hellToolbarAction label="Filter" iconOnly (activated)="run('filter')">
           <hell-icon name="faSolidFilter" size="13px" />
         </ng-template>
-        <ng-template hellToolbarAction label="Export" (activated)="run('export')">
+        <ng-template hellToolbarAction label="Export" iconOnly (activated)="run('export')">
           <hell-icon name="faSolidDownload" size="13px" />
         </ng-template>
-        <ng-template hellToolbarAction label="Columns" (activated)="run('columns')">
+        <ng-template hellToolbarAction label="Columns" iconOnly (activated)="run('columns')">
           <hell-icon name="faSolidTableColumns" size="13px" />
         </ng-template>
+
+        <ng-template hellToolbarWidget>
+          <label
+            class="flex items-center gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface px-hell-2 py-hell-1 text-hell-foreground-muted focus-within:border-hell-border-strong"
+          >
+            <hell-icon name="faSolidMagnifyingGlass" size="12px" aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Search members"
+              placeholder="Search members"
+              class="w-36 border-0 bg-transparent text-sm text-hell-foreground outline-none placeholder:text-hell-foreground-subtle"
+              [value]="query()"
+              (input)="query.set($any($event.target).value)"
+            />
+          </label>
+        </ng-template>
+
         <ng-template
           hellToolbarAction
           label="Remove selected"
@@ -81,7 +103,7 @@ const MEMBERS: readonly Member[] = [
             </tr>
           </thead>
           <tbody hellTableBody>
-            @for (member of members; track member.name) {
+            @for (member of visibleMembers(); track member.name) {
               <tr hellTableRow>
                 <td hellTableCell>{{ member.name }}</td>
                 <td hellTableCell>{{ member.role }}</td>
@@ -97,8 +119,14 @@ const MEMBERS: readonly Member[] = [
   `,
 })
 export class ToolbarTableExample {
-  protected readonly members = MEMBERS;
+  protected readonly query = signal('');
   protected readonly lastAction = signal('none yet');
+
+  protected readonly visibleMembers = computed(() => {
+    const needle = this.query().trim().toLowerCase();
+    if (!needle) return MEMBERS;
+    return MEMBERS.filter((member) => member.name.toLowerCase().includes(needle));
+  });
 
   protected run(action: string): void {
     this.lastAction.set(action);

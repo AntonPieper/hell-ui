@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 const TOOLBAR_HARNESS_PATH = '/components/toolbar?toolbarHarness=1';
 
 const ALL_ACTIONS = ['New', 'Edit', 'Duplicate', 'Share', 'Download', 'Locked', 'Settings'];
+const NON_OVERFLOW_ONLY = ['New', 'Edit', 'Duplicate', 'Share', 'Download', 'Locked'];
 
 async function gotoToolbarHarness(page: Page): Promise<void> {
   await page.goto(TOOLBAR_HARNESS_PATH);
@@ -11,10 +12,50 @@ async function gotoToolbarHarness(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
-async function setWidth(page: Page, width: 640 | 420 | 220): Promise<void> {
+async function setWidth(page: Page, width: 960 | 640 | 420 | 220): Promise<void> {
   await page.getByTestId(`toolbar-width-${width}`).click();
   // Let the ResizeObserver commit the new overflow membership.
   await expect.poll(() => inlineLabels(page)).not.toHaveLength(0);
+}
+
+/**
+ * Settles a wide layout: membership transitions in single commits (there are no
+ * incremental states), so once more than the collapsed-to-primary first paint is
+ * inline, the measured membership for the current width has committed. Needed
+ * before using the inline row as a baseline (counts, "last inline action") —
+ * on slow renderers the ResizeObserver commit can lag the width change.
+ */
+async function settleWide(page: Page): Promise<void> {
+  await expect
+    .poll(() => inlineLabels(page).then((labels) => labels.length))
+    .toBeGreaterThanOrEqual(2);
+}
+
+/**
+ * Settles a narrow layout: the stale wider membership overflows the clipped
+ * row, while a committed narrow membership fits by construction of the policy.
+ */
+async function settleNarrow(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const row = document.querySelector('[data-testid="toolbar"] [data-hell-toolbar-actions]');
+        return row ? row.scrollWidth <= row.clientWidth : false;
+      }),
+    )
+    .toBe(true);
+}
+
+/** Resizes without moving focus, so a focused action can be observed collapsing. */
+async function setWidthKeepingFocus(page: Page, width: 960 | 640 | 420 | 220): Promise<void> {
+  await page.evaluate((testId) => {
+    (document.querySelector(`[data-testid="${testId}"]`) as HTMLElement | null)?.click();
+  }, `toolbar-width-${width}`);
+}
+
+async function setCapWidth(page: Page, width: 720 | 420 | 240): Promise<void> {
+  await page.getByTestId(`toolbar-cap-width-${width}`).click();
+  await expect(page.getByTestId('toolbar-cap-search')).toBeVisible();
 }
 
 async function inlineLabels(page: Page): Promise<string[]> {
@@ -24,41 +65,75 @@ async function inlineLabels(page: Page): Promise<string[]> {
     .then((texts) => texts.map((text) => text.trim()).filter(Boolean));
 }
 
-async function openOverflowLabels(page: Page): Promise<string[]> {
-  const trigger = page.getByRole('button', { name: 'More actions' });
-  if ((await trigger.count()) === 0) return [];
+interface MembershipSnapshot {
+  readonly inline: string[];
+  readonly overflow: string[];
+}
+
+/**
+ * Opens the overflow menu and reads the inline row and the menu items in ONE
+ * page evaluation — an atomic, same-tick snapshot. Sequential sampling (read
+ * inline, then open the menu and read it) can straddle a membership commit on
+ * slow renderers: the inline read sees the stale membership and the menu read
+ * sees the fresh one, producing phantom duplicates in the union. A single-tick
+ * snapshot is consistent at every moment because each commit renders the row
+ * and the (reactive) open menu in the same change-detection pass.
+ */
+async function openOverflowSnapshot(page: Page): Promise<MembershipSnapshot> {
+  const trigger = page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]');
+  if ((await trigger.count()) === 0) return { inline: await inlineLabels(page), overflow: [] };
   await trigger.click();
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
-  const labels = (await menu.getByRole('menuitem').allInnerTexts()).map((text) => text.trim());
+  const snapshot = await page.evaluate<MembershipSnapshot>(() => ({
+    inline: Array.from(
+      document.querySelectorAll(
+        '[data-testid="toolbar"] [data-slot="action"] .hell-toolbar-action-label',
+      ),
+    ).map((el) => el.textContent?.trim() ?? ''),
+    overflow: Array.from(document.querySelectorAll('[role="menu"] [role="menuitem"]')).map(
+      (el) => el.textContent?.trim() ?? '',
+    ),
+  }));
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
-  return labels;
+  return snapshot;
 }
 
 test.describe('toolbar overflow + APG keyboard contracts', () => {
-  test('collapses lower-priority actions into the overflow menu as the container narrows, losing none', async ({
+  test('collapses lower-priority actions into the overflow menu as the container narrows, losing none, and recomputes on widen', async ({
     page,
   }) => {
     await gotoToolbarHarness(page);
 
     await setWidth(page, 640);
-    const wideInline = await inlineLabels(page);
-    const wideOverflow = await openOverflowLabels(page);
+    await settleWide(page);
+    const wide = await openOverflowSnapshot(page);
     // primary stays visible; overflowOnly never renders inline.
-    expect(wideInline).toContain('New');
-    expect(wideInline).not.toContain('Settings');
-    expect(wideOverflow).toContain('Settings');
+    expect(wide.inline).toContain('New');
+    expect(wide.inline).not.toContain('Settings');
+    expect(wide.overflow).toContain('Settings');
     // No action is unreachable: inline ∪ overflow covers every declared action.
-    expect([...wideInline, ...wideOverflow].sort()).toEqual([...ALL_ACTIONS].sort());
+    expect([...wide.inline, ...wide.overflow].sort()).toEqual([...ALL_ACTIONS].sort());
 
     await setWidth(page, 220);
-    const narrowInline = await inlineLabels(page);
-    const narrowOverflow = await openOverflowLabels(page);
-    expect(narrowInline).toContain('New');
-    expect(narrowInline.length).toBeLessThanOrEqual(wideInline.length);
-    await expect(page.getByRole('button', { name: 'More actions' })).toBeVisible();
-    expect([...narrowInline, ...narrowOverflow].sort()).toEqual([...ALL_ACTIONS].sort());
+    await settleNarrow(page);
+    const narrow = await openOverflowSnapshot(page);
+    expect(narrow.inline).toContain('New');
+    expect(narrow.inline.length).toBeLessThanOrEqual(wide.inline.length);
+    await expect(
+      page.getByTestId('toolbar').getByRole('button', { name: 'More actions' }),
+    ).toBeVisible();
+    expect([...narrow.inline, ...narrow.overflow].sort()).toEqual([...ALL_ACTIONS].sort());
+
+    // Widen-then-recompute: growing the container must bring every collapsed
+    // action back inline (cached widths, so no width-0 oscillation loses one).
+    await setWidth(page, 960);
+    await expect
+      .poll(() => inlineLabels(page).then((labels) => labels.slice().sort()))
+      .toEqual([...NON_OVERFLOW_ONLY].sort());
+    const rewide = await openOverflowSnapshot(page);
+    expect(rewide.overflow).toEqual(['Settings']);
   });
 
   test('keeps disabled parity for an action across the inline and menu renderings', async ({
@@ -66,6 +141,9 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
   }) => {
     await gotoToolbarHarness(page);
     await setWidth(page, 640);
+    // Settle before branching on inline membership, so the branch decision and
+    // the sampled rendering come from the same committed state.
+    await settleWide(page);
 
     const inlineLocked = page.locator(
       '[data-testid="toolbar"] [data-slot="action"]:has(.hell-toolbar-action-label:text-is("Locked"))',
@@ -73,7 +151,7 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
     if ((await inlineLocked.count()) > 0) {
       await expect(inlineLocked).toBeDisabled();
     } else {
-      await page.getByRole('button', { name: 'More actions' }).click();
+      await page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]').click();
       await expect(page.getByRole('menuitem', { name: 'Locked' })).toBeDisabled();
       await page.keyboard.press('Escape');
     }
@@ -84,6 +162,9 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
   }) => {
     await gotoToolbarHarness(page);
     await setWidth(page, 220);
+    // Settle before opening the menu: a commit landing between Enter and the
+    // focus assertion would insert items above the focused one.
+    await settleNarrow(page);
 
     const firstControl = page.locator('[data-testid="toolbar"] [data-hell-toolbar-control]').first();
     await firstControl.focus();
@@ -97,7 +178,7 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
     // End jumps to the trailing overflow trigger; Enter opens the menu and
     // focus crosses into the menu (button → menu boundary).
     await page.keyboard.press('End');
-    const trigger = page.getByRole('button', { name: 'More actions' });
+    const trigger = page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]');
     await expect(trigger).toBeFocused();
 
     await page.keyboard.press('Enter');
@@ -108,6 +189,75 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
     // Escape returns focus to the trigger (menu → button boundary).
     await page.keyboard.press('Escape');
     await expect(trigger).toBeFocused();
+  });
+
+  test('moves focus to the overflow trigger when the focused action collapses out of the row', async ({
+    page,
+  }) => {
+    await gotoToolbarHarness(page);
+    await setWidth(page, 640);
+    // Settle so "last inline action" is a collapsible default, not the
+    // collapsed-to-primary first paint (where only "New" would be focusable).
+    await settleWide(page);
+
+    // Focus the last enabled inline action (the first to collapse as we narrow).
+    const lastInline = page
+      .locator('[data-testid="toolbar"] [data-slot="action"]:not([disabled])')
+      .last();
+    await lastInline.focus();
+    await expect(lastInline).toBeFocused();
+
+    // Narrow without moving focus off the action; it collapses out of the DOM.
+    await setWidthKeepingFocus(page, 220);
+
+    const trigger = page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]');
+    await expect(trigger).toBeFocused();
+  });
+
+  test('keeps an open overflow menu in sync while the container resizes under it', async ({
+    page,
+  }) => {
+    await gotoToolbarHarness(page);
+    await setWidth(page, 220);
+    await settleNarrow(page);
+
+    // Open the menu on the settled narrow membership.
+    await page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]').click();
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    const menuItems = () =>
+      menu.getByRole('menuitem').allInnerTexts().then((texts) => texts.map((t) => t.trim()));
+    expect(await menuItems()).toContain('Duplicate');
+
+    // Grow the container underneath the OPEN menu (no click, so it stays open).
+    await page.evaluate(() => {
+      const container = document.querySelector<HTMLElement>('[data-testid="toolbar-container"]');
+      if (container) container.style.width = '960px';
+    });
+
+    // The open menu re-renders reactively: collapsed actions move back inline
+    // and drop out of the menu, leaving only the overflowOnly action — no
+    // action is ever rendered in both places at once.
+    await expect.poll(menuItems).toEqual(['Settings']);
+    await expect(menu).toBeVisible();
+    await expect
+      .poll(() => inlineLabels(page).then((labels) => labels.slice().sort()))
+      .toEqual([...NON_OVERFLOW_ONLY].sort());
+
+    const atomic = await page.evaluate(() => ({
+      inline: Array.from(
+        document.querySelectorAll(
+          '[data-testid="toolbar"] [data-slot="action"] .hell-toolbar-action-label',
+        ),
+      ).map((el) => el.textContent?.trim() ?? ''),
+      overflow: Array.from(document.querySelectorAll('[role="menu"] [role="menuitem"]')).map(
+        (el) => el.textContent?.trim() ?? '',
+      ),
+    }));
+    expect([...atomic.inline, ...atomic.overflow].sort()).toEqual([...ALL_ACTIONS].sort());
+
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
   });
 
   test('activates an action from both the inline button and the overflow menu', async ({
@@ -124,8 +274,69 @@ test.describe('toolbar overflow + APG keyboard contracts', () => {
       .click();
     await expect(lastAction).toHaveText('New');
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.locator('[data-testid="toolbar"] [data-slot="overflowTrigger"]').click();
     await page.getByRole('menuitem', { name: 'Settings' }).click();
     await expect(lastAction).toHaveText('Settings');
+  });
+});
+
+test.describe('toolbar capabilities: icon-only actions, separators, widgets', () => {
+  const capToolbar = '[data-testid="toolbar-cap"]';
+
+  test('renders icon-only actions with a label-derived accessible name and no visible text', async ({
+    page,
+  }) => {
+    await gotoToolbarHarness(page);
+    await setCapWidth(page, 720);
+
+    const bold = page.locator(`${capToolbar} [data-slot="action"][aria-label="Bold"]`);
+    await expect(bold).toBeVisible();
+    await expect(bold).toHaveAttribute('data-icon-only', '');
+    await expect(bold).toHaveAttribute('title', 'Bold');
+    // Reachable by its accessible name, with no visible label text node.
+    await expect(page.getByRole('button', { name: 'Bold' })).toBeVisible();
+    await expect(bold.locator('.hell-toolbar-action-label')).toHaveCount(0);
+  });
+
+  test('renders an inline separator between groups and a menu separator when collapsed', async ({
+    page,
+  }) => {
+    await gotoToolbarHarness(page);
+
+    await setCapWidth(page, 720);
+    await expect(
+      page.locator(`${capToolbar} [data-slot="separator"]`).first(),
+    ).toBeVisible();
+
+    await setCapWidth(page, 240);
+    await page.locator(`${capToolbar} [data-slot="overflowTrigger"]`).click();
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.locator('[role="separator"]').first()).toBeAttached();
+    await page.keyboard.press('Escape');
+  });
+
+  test('keeps the search-field widget visible at every width and in the roving order', async ({
+    page,
+  }) => {
+    await gotoToolbarHarness(page);
+
+    const search = page.getByTestId('toolbar-cap-search');
+
+    await setCapWidth(page, 720);
+    await expect(search).toBeVisible();
+
+    // Narrow enough to collapse the icon actions: the widget never menu-ifies.
+    await setCapWidth(page, 240);
+    await expect(search).toBeVisible();
+    await expect(page.locator(`${capToolbar} [data-slot="overflowTrigger"]`)).toBeVisible();
+
+    // The widget's input participates in the single roving tab order.
+    await search.focus();
+    await expect(search).toBeFocused();
+    await expect(search).toHaveAttribute('tabindex', '0');
+    await expect(
+      page.locator(`${capToolbar} [data-hell-toolbar-actions] [tabindex="0"]`),
+    ).toHaveCount(1);
   });
 });
