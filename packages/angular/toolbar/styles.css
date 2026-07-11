@@ -3,6 +3,7 @@
 
 @layer components {
   hell-toolbar[data-slot='root'] {
+    position: relative;
     display: flex;
     width: 100%;
     min-width: calc(var(--spacing) * 0);
@@ -52,5 +53,28 @@
     align-items: center;
     justify-content: center;
     width: calc(var(--spacing) * 4);
+  }
+
+  /* Off-screen sizing row: renders every collapsible item at its natural inline
+     width so the overflow policy always has fresh, non-zero widths regardless
+     of what is currently visible. Kept inert and out of the layout so it can be
+     measured without painting, taking focus, or forcing container scroll. */
+  hell-toolbar[data-slot='root'] .hell-toolbar-measure {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-hell-2);
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  hell-toolbar[data-slot='root'] .hell-toolbar-measure .hell-toolbar-measure-item {
+    flex: 0 0 auto;
   }
 }

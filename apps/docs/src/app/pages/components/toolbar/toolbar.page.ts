@@ -11,6 +11,10 @@ import { ToolbarPrioritiesExample } from './examples/priorities.example';
 import toolbarPrioritiesExampleCodeRaw from './examples/priorities.example.ts?raw' with {
   loader: 'text',
 };
+import { ToolbarIconOnlyExample } from './examples/icon-only.example';
+import toolbarIconOnlyExampleCodeRaw from './examples/icon-only.example.ts?raw' with {
+  loader: 'text',
+};
 import { ToolbarTableExample } from './examples/table-toolbar.example';
 import toolbarTableExampleCodeRaw from './examples/table-toolbar.example.ts?raw' with {
   loader: 'text',
@@ -29,6 +33,7 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
     ToolbarContractHarnessPage,
     ToolbarBasicExample,
     ToolbarPrioritiesExample,
+    ToolbarIconOnlyExample,
     ToolbarTableExample,
     ToolbarStylingExample,
   ],
@@ -92,12 +97,38 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </hd-example-tabs>
 
         <div class="hd-prose">
-          <h2>Standalone above a table</h2>
+          <h2>Icon-only actions and separators</h2>
+          <p>
+            Add <code>iconOnly</code> to an action to render a compact, square icon button inline:
+            the label becomes the button's accessible name (<code>aria-label</code>) and a native
+            <code>title</code> tooltip, and the visible text is hidden. The overflow menu still shows
+            the full label, so the action stays legible once collapsed. Because the toolbar owns the
+            inline button, richer tooltips are a native <code>title</code>; when you need a full
+            <code>@hell-ui/angular/tooltip</code> popover, keep the action a labelled button or reach
+            for a <code>hellToolbarWidget</code>.
+          </p>
+          <p>
+            A <code>hellToolbarSeparator</code> template declares a group divider: it renders as an
+            inline divider between two visible groups and as a menu separator between two overflowed
+            groups. Collapse is group-aware — a group between separators overflows as a unit rather
+            than stranding a half-cluster, and edge or doubled separators are dropped automatically.
+          </p>
+        </div>
+
+        <hd-example-tabs [code]="iconOnlyCode">
+          <app-toolbar-icon-only-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>Standalone above a table, with a widget</h2>
           <p>
             The toolbar is not tied to the page header — it works anywhere. Here it sits above a
             <code>@hell-ui/angular/table</code> as a table action bar: a primary “Invite member”, a
-            few table controls that overflow on narrow screens, and a destructive
-            <code>overflowOnly</code> action kept out of the way in the menu.
+            separator, icon-only table controls that overflow on narrow screens, a
+            <code>hellToolbarWidget</code> search field, and a destructive <code>overflowOnly</code>
+            action kept out of the way in the menu. A widget projects arbitrary content that stays
+            in the layout and the roving tab order but never collapses into the menu — the honest
+            boundary between things that can menu-ify (actions) and things that cannot (widgets).
           </p>
         </div>
 
@@ -131,6 +162,14 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
                 <td>Each inline action button (a <code>hellButton</code>).</td>
               </tr>
               <tr>
+                <td><code>separator</code></td>
+                <td>An inline group divider rendered from a <code>hellToolbarSeparator</code>.</td>
+              </tr>
+              <tr>
+                <td><code>widget</code></td>
+                <td>The wrapper around a <code>hellToolbarWidget</code>'s projected content.</td>
+              </tr>
+              <tr>
                 <td><code>overflowTrigger</code></td>
                 <td>The trailing “More actions” button that opens the overflow menu.</td>
               </tr>
@@ -141,6 +180,10 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               <tr>
                 <td><code>overflowItem</code></td>
                 <td>Each overflowed action rendered as a menu item.</td>
+              </tr>
+              <tr>
+                <td><code>overflowSeparator</code></td>
+                <td>A group divider between overflowed groups (a <code>hellMenuSeparator</code>).</td>
               </tr>
             </tbody>
           </table>
@@ -162,7 +205,12 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               <code>'horizontal'</code>.
             </li>
             <li><code>size</code>: <code>HellSize</code>. Applied to buttons and trigger. Default <code>'sm'</code>.</li>
-            <li><code>overflowLabel</code>: <code>string</code>. Accessible label for the overflow trigger. Default <code>'More actions'</code>.</li>
+            <li>
+              <code>overflowLabel</code>: <code>string</code>. Accessible label for the overflow
+              trigger. Defaults to <code>''</code>, which falls back to the toolbar Label Contract's
+              <code>overflowTrigger</code> string (<code>'More actions'</code>). Override the default
+              globally with <code>provideHellToolbarLabels</code> rather than hardcoding the input.
+            </li>
             <li>
               <code>ui</code>: <code>HellUiInput&lt;HellToolbarPart&gt;</code> — a shorthand class
               string for the <code>root</code> part or a <code>HellToolbarUi</code> map.
@@ -180,19 +228,44 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               <code>priority</code>: <code>'primary' | 'default' | 'overflowOnly'</code>. Default
               <code>'default'</code>.
             </li>
+            <li>
+              <code>iconOnly</code>: <code>boolean</code>. Renders the inline button icon-only, taking
+              its accessible name and <code>title</code> tooltip from <code>label</code>; the menu
+              item still shows the label. Default <code>false</code>.
+            </li>
             <li><code>variant</code>: <code>HellButtonVariant</code>. Inline button variant; ignored in the menu. Default <code>'default'</code>.</li>
             <li><code>activated</code>: <code>output&lt;void&gt;</code>. Emits from whichever rendering is activated.</li>
           </ul>
+          <p>
+            <strong><code>ng-template hellToolbarSeparator</code></strong>
+            (<code>HellToolbarSeparator</code>) — a group divider. Renders inline between two visible
+            groups and as a menu separator between two overflowed groups; makes collapse group-aware.
+          </p>
+          <p>
+            <strong><code>ng-template hellToolbarWidget</code></strong>
+            (<code>HellToolbarWidget</code>) — projected content (search field, select, toggle group)
+            that stays inline and in the roving tab order but never collapses or menu-ifies. Place
+            interactive widgets like a search field at the end: they capture their own arrow keys, so
+            <code>Tab</code> (not arrows) moves out of the toolbar.
+          </p>
           <p>Content projection and exports:</p>
           <ul>
-            <li><code>HELL_TOOLBAR_DIRECTIVES</code> — bulk-import tuple of <code>HellToolbar</code> and <code>HellToolbarAction</code>.</li>
+            <li>
+              <code>HELL_TOOLBAR_DIRECTIVES</code> — bulk-import tuple of <code>HellToolbar</code>,
+              <code>HellToolbarAction</code>, <code>HellToolbarSeparator</code>, and
+              <code>HellToolbarWidget</code>.
+            </li>
+            <li>
+              <code>provideHellToolbarLabels</code> / <code>HELL_TOOLBAR_LABELS</code> — the Label
+              Contract for the overflow-trigger name and its English default.
+            </li>
             <li>
               <code>hellResolveToolbarOverflow</code> — the pure priority/overflow policy used
               internally and exported for testing.
             </li>
             <li>
               <code>HellToolbarPart</code> —
-              <code>'root' | 'action' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem'</code>;
+              <code>'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator'</code>;
               <code>HellToolbarUi</code> is <code>HellUi&lt;HellToolbarPart&gt;</code>.
             </li>
           </ul>
@@ -202,14 +275,32 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             <li>The host is a <code>role="toolbar"</code> with <code>aria-orientation</code>; give it a name via <code>label</code> or <code>labelledBy</code>.</li>
             <li>
               A roving tabindex gives the toolbar a single tab stop: arrow keys move between the
-              visible action buttons and the overflow trigger, and <code>Home</code>/<code>End</code>
-              jump to the ends, per the WAI-ARIA toolbar pattern.
+              visible action buttons, widgets, and the overflow trigger, and
+              <code>Home</code>/<code>End</code> jump to the ends, per the WAI-ARIA toolbar pattern.
+            </li>
+            <li>
+              When the focused action collapses out of the row as the container narrows, focus moves
+              to the overflow trigger (where the action now lives) instead of dropping to the page.
+            </li>
+            <li>
+              Interactive widgets own their own keys: a focused text field or select consumes the
+              arrow keys for editing, so use <code>Tab</code> to leave the toolbar from a widget.
+            </li>
+            <li>
+              Icon-only actions keep an accessible name from <code>label</code> and expose it as a
+              native <code>title</code> tooltip, so the button is never a nameless glyph.
             </li>
             <li>
               Overflowed actions live in the standard Hell menu with the same labels and disabled
               states, so no action becomes unreachable at any width.
             </li>
-            <li>Overflow recalculation is measured and committed outside change detection, once per resize frame, so the row does not flicker.</li>
+            <li>
+              An open overflow menu stays in sync during resize: its items are driven by the same
+              reactive membership as the inline row, so an action moving back inline drops out of
+              the open menu in the same render — nothing is ever shown in both places at once, and
+              the menu stays open as long as overflowed actions remain.
+            </li>
+            <li>Overflow recalculation is measured and committed outside change detection, once per resize frame, so the row does not flicker or flash a clipped first paint.</li>
           </ul>
 
           <h2>Do</h2>
@@ -217,6 +308,8 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             <li>Give every action a clear <code>label</code>; it names both the button and the menu item.</li>
             <li>Reserve <code>primary</code> for the one or two actions that must always stay visible.</li>
             <li>Use <code>overflowOnly</code> for rare or destructive actions that should stay tucked away.</li>
+            <li>Group related actions with <code>hellToolbarSeparator</code> so clusters collapse together.</li>
+            <li>Put interactive widgets (search, select) at the end, and keep them to things that should never menu-ify.</li>
             <li>Name the toolbar with <code>label</code> or <code>labelledBy</code>.</li>
           </ul>
 
@@ -238,6 +331,7 @@ export class ToolbarPage {
 
   protected readonly basicCode = toolbarBasicExampleCodeRaw;
   protected readonly prioritiesCode = toolbarPrioritiesExampleCodeRaw;
+  protected readonly iconOnlyCode = toolbarIconOnlyExampleCodeRaw;
   protected readonly tableCode = toolbarTableExampleCodeRaw;
   protected readonly stylingCode = toolbarStylingExampleCodeRaw;
 }

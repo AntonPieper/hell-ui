@@ -13,7 +13,10 @@ import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
 // @public
-export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellToolbarAction];
+export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellToolbarAction, typeof HellToolbarSeparator, typeof HellToolbarWidget];
+
+// @public
+export const HELL_TOOLBAR_LABELS: InjectionToken<HellToolbarLabels>;
 
 // @public
 export function hellResolveToolbarOverflow(items: readonly HellToolbarOverflowItem[], metrics: HellToolbarOverflowMetrics): HellToolbarOverflowResult;
@@ -21,38 +24,48 @@ export function hellResolveToolbarOverflow(items: readonly HellToolbarOverflowIt
 // @public
 export class HellToolbar {
     constructor();
-    protected readonly actions: _angular_core.Signal<readonly HellToolbarAction[]>;
+    protected actionOf(view: HellToolbarItemModel): HellToolbarAction;
     protected activate(action: HellToolbarAction): void;
-    protected readonly inlineActions: _angular_core.Signal<HellToolbarAction[]>;
+    protected readonly effectiveOverflowLabel: _angular_core.Signal<string>;
+    protected readonly inlineViews: _angular_core.Signal<readonly HellToolbarItemModel[]>;
+    // Warning: (ae-forgotten-export) The symbol "HellToolbarItemModel" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
+    protected readonly itemModels: _angular_core.Signal<readonly HellToolbarItemModel[]>;
     readonly label: _angular_core.InputSignal<string>;
     readonly labelledBy: _angular_core.InputSignal<string>;
+    protected readonly measureViews: _angular_core.Signal<readonly HellToolbarItemModel[]>;
     protected onFocusIn(event: FocusEvent): void;
     protected onKeydown(event: KeyboardEvent): void;
     // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly overflowActions: _angular_core.Signal<HellToolbarAction[]>;
     readonly overflowLabel: _angular_core.InputSignal<string>;
+    protected readonly overflowViews: _angular_core.Signal<readonly HellToolbarItemModel[]>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellToolbarPart>;
+    protected readonly separatorOrientation: _angular_core.Signal<HellOrientation>;
     protected readonly showOverflow: _angular_core.Signal<boolean>;
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellToolbarPart>>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellToolbar, "hell-toolbar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "overflowLabel": { "alias": "overflowLabel"; "required": false; "isSignal": true; }; }, {}, ["actions"], never, true, never>;
+    protected widgetOf(view: HellToolbarItemModel): HellToolbarWidget;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellToolbar, "hell-toolbar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "overflowLabel": { "alias": "overflowLabel"; "required": false; "isSignal": true; }; }, {}, ["declaredItems"], never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbar, never>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HellToolbarItem" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
+//
 // @public
-export class HellToolbarAction {
+export class HellToolbarAction extends HellToolbarItem {
     readonly activated: _angular_core.OutputEmitterRef<void>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly icon: TemplateRef<unknown>;
+    readonly iconOnly: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly kind: "action";
     readonly label: _angular_core.InputSignal<string>;
     readonly priority: _angular_core.InputSignal<HellToolbarActionPriority>;
     // Warning: (ae-forgotten-export) The symbol "HellButtonVariant" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly variant: _angular_core.InputSignal<HellButtonVariant>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarAction, "ng-template[hellToolbarAction]", never, { "label": { "alias": "label"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "priority": { "alias": "priority"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; }, { "activated": "activated"; }, never, never, true, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarAction, "ng-template[hellToolbarAction]", never, { "label": { "alias": "label"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "priority": { "alias": "priority"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "iconOnly": { "alias": "iconOnly"; "required": false; "isSignal": true; }; }, { "activated": "activated"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarAction, never>;
 }
 
@@ -60,8 +73,18 @@ export class HellToolbarAction {
 export type HellToolbarActionPriority = 'primary' | 'default' | 'overflowOnly';
 
 // @public
+export type HellToolbarItemKind = 'action' | 'separator' | 'widget';
+
+// @public
+export interface HellToolbarLabels {
+    readonly overflowTrigger: string;
+}
+
+// @public
 export interface HellToolbarOverflowItem {
-    readonly priority: HellToolbarActionPriority;
+    readonly group?: number;
+    readonly kind?: HellToolbarItemKind;
+    readonly priority?: HellToolbarActionPriority;
     readonly width: number;
 }
 
@@ -79,12 +102,30 @@ export interface HellToolbarOverflowResult {
 }
 
 // @public
-export type HellToolbarPart = 'root' | 'action' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem';
+export type HellToolbarPart = 'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator';
+
+// @public
+export class HellToolbarSeparator extends HellToolbarItem {
+    readonly kind: "separator";
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarSeparator, "ng-template[hellToolbarSeparator]", never, {}, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarSeparator, never>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
 //
 // @public
 export type HellToolbarUi = HellUi<HellToolbarPart>;
+
+// @public
+export class HellToolbarWidget extends HellToolbarItem {
+    readonly content: TemplateRef<unknown>;
+    readonly kind: "widget";
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarWidget, "ng-template[hellToolbarWidget]", never, {}, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarWidget, never>;
+}
+
+// @public
+export function provideHellToolbarLabels(overrides: Partial<HellToolbarLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 
