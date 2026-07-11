@@ -259,6 +259,47 @@ describe('HellMenuItem', () => {
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
   });
 
+  it('moves focus by printable-key typeahead and cycles repeated initials', async () => {
+    const fixture = TestBed.createComponent(CheckableMenuHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    const checkbox = await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[role="menuitemcheckbox"]',
+    );
+    const comfortable = query<HTMLButtonElement>(
+      document.body,
+      '[role="menuitemradio"][value="comfortable"]',
+    );
+    const compact = query<HTMLButtonElement>(
+      document.body,
+      '[role="menuitemradio"][value="compact"]',
+    );
+
+    checkbox.focus();
+    const first = new KeyboardEvent('keydown', {
+      key: 'c',
+      bubbles: true,
+      cancelable: true,
+    });
+    checkbox.dispatchEvent(first);
+
+    expect(first.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(comfortable);
+
+    const repeated = new KeyboardEvent('keydown', {
+      key: 'c',
+      bubbles: true,
+      cancelable: true,
+    });
+    comfortable.dispatchEvent(repeated);
+
+    expect(repeated.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(compact);
+  });
+
   it('joins the browser top-most rendering context when the Popover API exists', async () => {
     // Overlay panes (e.g. the Omnibar panel through CDK) render via the
     // Popover API and paint above all z-indexed content; menus must join the

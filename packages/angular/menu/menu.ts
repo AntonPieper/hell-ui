@@ -1,4 +1,12 @@
-import { Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  Renderer2,
+  afterNextRender,
+  inject,
+  input,
+} from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -103,6 +111,10 @@ const HELL_MENU_ITEM_TRAILING_RECIPE = {
   root: 'ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-subtle tabular-nums',
 } satisfies HellRecipe<HellMenuItemTrailingPart>;
 
+const HELL_MENU_ITEM_SELECTOR =
+  '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
+const HELL_MENU_TYPEAHEAD_TIMEOUT_MS = 500;
+
 /** Trigger that opens a `[hellMenu]` when activated. Apply to a `<button>` or `<a>`. */
 @Directive({
   selector: 'button[hellMenuTrigger], a[hellMenuTrigger]',
@@ -187,6 +199,10 @@ export class HellSubmenuTrigger {
   },
 })
 export class HellMenu {
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  private typeaheadBuffer = '';
+  private lastTypeaheadAt = Number.NEGATIVE_INFINITY;
+
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellMenuPart>>(undefined, { alias: 'ui' });
 
@@ -203,21 +219,78 @@ export class HellMenu {
   constructor() {
     hellRegisterFloatingHost();
 
+    const stopTypeaheadListener = inject(Renderer2).listen(
+      this.host,
+      'keydown',
+      (event: KeyboardEvent) => this.handleTypeahead(event),
+    );
+    inject(DestroyRef).onDestroy(stopTypeaheadListener);
+
     // Overlay panes such as the Omnibar panel render through the browser
     // Popover API, which paints above every z-indexed element. Menus join the
     // same top-most rendering context so a menu opened from inside such a
     // pane still paints above it (later entries win); ng-primitives keeps
     // owning position and dismissal.
-    const element = inject(ElementRef<HTMLElement>).nativeElement;
     afterNextRender(() => {
-      if (typeof element.showPopover !== 'function' || !element.isConnected) return;
-      element.setAttribute('popover', 'manual');
+      if (typeof this.host.showPopover !== 'function' || !this.host.isConnected) return;
+      this.host.setAttribute('popover', 'manual');
       try {
-        element.showPopover();
+        this.host.showPopover();
       } catch {
-        element.removeAttribute('popover');
+        this.host.removeAttribute('popover');
       }
     });
+  }
+
+  private handleTypeahead(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.key.length !== 1 ||
+      event.key === ' ' ||
+      target?.matches('input, textarea, select, [contenteditable]:not([contenteditable="false"])')
+    ) {
+      return;
+    }
+
+    const items = Array.from(this.host.querySelectorAll<HTMLElement>(HELL_MENU_ITEM_SELECTOR)).filter(
+      (item) => !item.matches(':disabled, [aria-disabled="true"], [data-disabled]'),
+    );
+    if (items.length === 0) return;
+
+    const key = event.key.toLocaleLowerCase();
+    const withinTimeout = event.timeStamp - this.lastTypeaheadAt <= HELL_MENU_TYPEAHEAD_TIMEOUT_MS;
+    this.typeaheadBuffer = withinTimeout ? `${this.typeaheadBuffer}${key}` : key;
+    this.lastTypeaheadAt = event.timeStamp;
+
+    const repeatedKey = [...this.typeaheadBuffer].every((character) => character === key);
+    const query = repeatedKey ? key : this.typeaheadBuffer;
+    const currentIndex = target ? items.indexOf(target) : -1;
+    const firstIndex = query.length > 1 && currentIndex >= 0 ? currentIndex : currentIndex + 1;
+    const match = this.findTypeaheadMatch(items, firstIndex, query);
+
+    if (match) {
+      event.preventDefault();
+      match.focus();
+    }
+  }
+
+  private findTypeaheadMatch(
+    items: readonly HTMLElement[],
+    firstIndex: number,
+    query: string,
+  ): HTMLElement | undefined {
+    for (let offset = 0; offset < items.length; offset += 1) {
+      const item = items[(firstIndex + offset + items.length) % items.length];
+      const label = item.textContent?.trim().replace(/\s+/g, ' ').toLocaleLowerCase() ?? '';
+      if (label.startsWith(query)) return item;
+    }
+
+    return undefined;
   }
 }
 

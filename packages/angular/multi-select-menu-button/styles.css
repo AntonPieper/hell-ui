@@ -1,0 +1,38 @@
+/* The Multi-Select Menu Button Composite renders its trigger on the button
+   primitive and its panel/items on the menu primitive, so it carries the
+   styles it composes. */
+@import '../button/styles.css';
+@import '../menu/styles.css';
+
+/* Trigger and count-badge defaults are Tailwind utility recipes in the component. */
+@source "./multi-select-menu-button.ts";
+
+@layer components {
+  hell-multi-select-menu-button[data-slot='root'] {
+    display: inline-flex;
+  }
+
+  hell-multi-select-menu-button[data-slot='root'] .hell-msmb-label:empty {
+    display: none;
+  }
+
+  /* The chevron sits after the label/count and rotates while the menu is open. */
+  hell-multi-select-menu-button[data-slot='root'] .hell-msmb-chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-hell-foreground-subtle);
+    transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  hell-multi-select-menu-button[data-slot='root'] [data-slot='trigger'][data-open] .hell-msmb-chevron {
+    rotate: 180deg;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    hell-multi-select-menu-button[data-slot='root'] .hell-msmb-chevron {
+      transition: none;
+    }
+  }
+}

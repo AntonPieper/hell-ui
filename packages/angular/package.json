@@ -71,6 +71,7 @@
     "omnibar/omnibar.ts",
     "page-header/page-header.ts",
     "toast/toast.ts",
+    "multi-select-menu-button/multi-select-menu-button.ts",
     "features/code-editor/code-editor.ts",
     "assets/**"
   ],
@@ -227,6 +228,9 @@
     },
     "./dialpad": {
       "@heinrich/source": "./dialpad/public-api.ts"
+    },
+    "./multi-select-menu-button": {
+      "@heinrich/source": "./multi-select-menu-button/public-api.ts"
     },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
@@ -475,6 +479,11 @@
       "@heinrich/source": "./dialpad/styles.css",
       "style": "./dialpad/styles.css",
       "default": "./dialpad/styles.css"
+    },
+    "./multi-select-menu-button/styles.css": {
+      "@heinrich/source": "./multi-select-menu-button/styles.css",
+      "style": "./multi-select-menu-button/styles.css",
+      "default": "./multi-select-menu-button/styles.css"
     },
     "./omnibar/styles.css": {
       "@heinrich/source": "./omnibar/styles.css",

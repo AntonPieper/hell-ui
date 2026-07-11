@@ -25,6 +25,30 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/page-header-contracts.spec.ts`, the docs page at `/components/page-header`
   (list-screen and detail-screen anatomies), and its axe WCAG A/AA smoke
   coverage. Closes #116 (spec #96).
+- Added the `@hell-ui/angular/multi-select-menu-button` Package Entry Point
+  (Composite): `hell-multi-select-menu-button` is a button that opens a menu of
+  checkable options and reflects the selected count on its trigger. Selection is
+  controlled — the consumer binds `options` (`{ value, label, disabled? }[]`)
+  and `selected` (`value[]`) and owns the array; toggling an option keeps the
+  menu open (composed menu-item-checkbox semantics), emits the whole next
+  selection through `selectedChange`, never mutates the consumer's array, and
+  emits nothing on first render. `minSelected` is a deselection floor that
+  disables the still-selected options once the selection reaches it (so a table
+  can never reach zero visible columns); an opt-in `resettable` item emits a
+  distinct `reset` event with its label behind the Label Contract
+  (`provideHellMultiSelectMenuButtonLabels`). The trigger reflects state through
+  the `count` badge part and `data-selection-count` / `data-has-selection`
+  attributes; refine the `root`, `trigger`, and `count` parts through the Part
+  Style Map, and import `@hell-ui/angular/multi-select-menu-button/styles.css`
+  for the default visuals. Docs ship a TanStack Table Shell column-visibility
+  recipe (respecting `enableHiding`) with a localStorage persistence snippet.
+  The composed menu also restores its documented printable-key typeahead while
+  leaving roving focus, activation, dismissal, and nested menus delegated to
+  ng-primitives.
+  Evidence: `packages/angular/multi-select-menu-button/multi-select-menu-button.spec.ts`,
+  `e2e/multi-select-menu-button-contracts.spec.ts`, the docs page at
+  `/components/multi-select-menu-button`, and its axe WCAG A/AA smoke coverage.
+  Closes #109 (spec #98).
 - Added `HELL_CHIP_DIRECTIVES` to `@hell-ui/angular/chip` (array of
   `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and

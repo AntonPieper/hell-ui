@@ -240,6 +240,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'multi-select-menu-button',
+    path: '/components/multi-select-menu-button',
+    heading: 'Multi-select menu button',
+    include: ['main', '[hellMenu][data-slot="root"]'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Channels' }).first().click();
+      await expect(page.getByRole('menu').first()).toBeVisible();
+    },
+  },
+  {
     name: 'select',
     path: '/components/select',
     heading: 'Select',
