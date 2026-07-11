@@ -151,6 +151,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'file-upload',
+    path: '/components/file-upload',
+    heading: 'File upload',
+    include: ['main'],
+  },
+  {
     name: 'input, select & textarea',
     path: '/components/input',
     heading: 'Input, Select & Textarea',

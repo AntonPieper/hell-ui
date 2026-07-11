@@ -221,6 +221,11 @@
       "output": "empty-state"
     },
     {
+      "glob": "file-upload.ts",
+      "input": "file-upload",
+      "output": "file-upload"
+    },
+    {
       "glob": "icon.ts",
       "input": "icon",
       "output": "icon"
