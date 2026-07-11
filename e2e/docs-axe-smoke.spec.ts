@@ -266,6 +266,36 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'filter-bar entity status',
+    path: '/components/filter-bar',
+    heading: 'Filter Bar',
+    include: ['main', '[hellComboboxDropdown][data-slot="panel"]'],
+    prepare: async (page) => {
+      const example = page.locator('app-filter-bar-server-dispatch-example');
+      const picker = example.getByRole('combobox', { name: 'Work order filters' });
+      await picker.fill('owner');
+      await picker.press('Enter');
+      const editor = example.locator('[data-slot="editor"][data-field="owner"]');
+      await editor.getByRole('combobox', { name: 'Owner' }).fill('not in the directory');
+      await expect(page.locator('[data-slot="status"][data-state="empty"]')).toBeVisible();
+    },
+  },
+  {
+    name: 'filter-bar date range',
+    path: '/components/filter-bar',
+    heading: 'Filter Bar',
+    include: ['main', '[data-slot="pickerPanel"]'],
+    prepare: async (page) => {
+      const example = page.locator('app-filter-bar-server-dispatch-example');
+      const picker = example.getByRole('combobox', { name: 'Work order filters' });
+      await picker.fill('created');
+      await picker.press('Enter');
+      const editor = example.locator('[data-slot="editor"][data-field="created"]');
+      await editor.getByRole('button', { name: 'Choose date for Created from' }).click();
+      await expect(page.locator('[data-slot="pickerPanel"]').getByRole('grid')).toBeVisible();
+    },
+  },
+  {
     name: 'multi-select-menu-button',
     path: '/components/multi-select-menu-button',
     heading: 'Multi-select menu button',

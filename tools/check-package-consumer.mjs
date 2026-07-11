@@ -315,11 +315,16 @@ const packageConsumerScenarioCatalog = [
     description: 'narrow controlled Filter Bar composite with composed entrypoint styles',
     coverage: ['composites'],
     peerTier: 'composite',
-    peerGroup: 'composite',
-    dependencies: styledUiWithoutFontAwesomeDeps,
+    peerGroup: 'composite-icons',
+    dependencies: styledUiDeps,
     mainTs: filterBarConsumerMainTs,
     stylesCss: filterBarConsumerStylesCss,
-    cssIncludes: ['min-width:180px', 'z-index:var(--hell-z-popover,60)'],
+    cssIncludes: [
+      'min-width:180px',
+      'max-width:calc(var(--spacing) * 56)',
+      'pointer-events:none',
+      'z-index:var(--hell-z-popover,60)',
+    ],
   },
   {
     name: 'page-header',
@@ -1995,8 +2000,34 @@ class App {
       kind: 'options',
       options: [{ value: 'active', label: 'Active' }],
     },
+    {
+      key: 'owner',
+      label: 'Owner',
+      kind: 'entity',
+      search: async ({ query }) => [
+        { id: 'grace', label: query ? 'Grace Hopper' : 'Suggested owner' },
+      ],
+    },
+    {
+      key: 'created',
+      label: 'Created',
+      kind: 'dateRange',
+      min: '2026-01-01',
+      max: '2026-12-31',
+    },
   ];
-  protected readonly value = signal<readonly HellFilterToken[]>([]);
+  protected readonly value = signal<readonly HellFilterToken[]>([
+    {
+      key: 'owner',
+      operator: 'eq',
+      value: { kind: 'entity', id: 'grace', label: 'Grace Hopper' },
+    },
+    {
+      key: 'created',
+      operator: 'eq',
+      value: { kind: 'dateRange', from: '2026-01-01', to: null },
+    },
+  ]);
   protected readonly filterUi = { root: 'max-w-[640px]' } satisfies HellFilterBarUi;
 }
 

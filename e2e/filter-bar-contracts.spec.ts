@@ -9,6 +9,10 @@ function example(page: Page) {
   return page.locator('app-filter-bar-tanstack-example');
 }
 
+function serverExample(page: Page) {
+  return page.locator('app-filter-bar-server-dispatch-example');
+}
+
 test.describe('Filter Bar browser contract', () => {
   test('keyboard journey: highlighted options field wins, commits, and edits in the same editor', async ({
     page,
@@ -195,5 +199,176 @@ test.describe('Filter Bar browser contract', () => {
       'Team: Compiler',
       'Status: Active',
     ]);
+  });
+
+  test('async entity search exposes status, commits only results, and shares edit/remove behavior', async ({
+    page,
+  }) => {
+    await gotoFilterBar(page);
+    const root = serverExample(page);
+    const picker = root.getByRole('combobox', { name: 'Work order filters' });
+
+    await picker.fill('own');
+    await picker.press('Enter');
+    const createEditor = root.locator('[data-slot="editor"][data-field="owner"]');
+    const ownerInput = createEditor.getByRole('combobox', { name: 'Owner' });
+    await expect(ownerInput).toBeFocused();
+
+    await ownerInput.pressSequentially('not in the directory');
+    await expect(ownerInput).toHaveValue('not in the directory');
+    await expect(page.locator('[data-slot="status"][data-state="loading"]')).toBeVisible();
+    await expect(page.locator('[data-slot="status"][data-state="empty"]')).toBeVisible();
+    await ownerInput.press('Enter');
+    await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
+
+    // Escape leaves no half-open editor state, and the same field can be reopened immediately.
+    await ownerInput.press('Escape');
+    await expect(createEditor).toBeHidden();
+    await expect(picker).toBeFocused();
+    await picker.fill('owner');
+    await picker.press('Enter');
+
+    const reopenedEditor = root.locator('[data-slot="editor"][data-field="owner"]');
+    const reopenedInput = reopenedEditor.getByRole('combobox', { name: 'Owner' });
+    await reopenedInput.fill('mara');
+    await expect(page.locator('[data-slot="status"][data-state="loading"]')).toBeVisible();
+    const mara = page.getByRole('option', { name: 'Mara Voss', exact: true });
+    await expect(mara).toBeVisible();
+    await expect(reopenedInput).toHaveAttribute('aria-activedescendant', await mara.getAttribute('id'));
+    await reopenedInput.press('Enter');
+
+    await expect(root.locator('[data-slot="tokenLabel"]')).toHaveText('Owner: Mara Voss');
+    await expect(root.locator('[data-slot="live"]')).toHaveText('Owner: Mara Voss added');
+    await expect(root.getByTestId('filter-server-request')).toContainText('"id": "mara"');
+
+    await root.getByRole('button', { name: 'Edit Owner: Mara Voss' }).click();
+    const editEditor = page.locator(
+      '[hellPopover] [data-slot="editor"][data-mode="edit"][data-field="owner"]',
+    );
+    const editInput = editEditor.getByRole('combobox', { name: 'Owner' });
+    await editInput.fill('theo');
+    const theo = page.getByRole('option', { name: 'Theo Martin', exact: true });
+    await expect(theo).toBeVisible();
+    await editInput.press('Enter');
+    await expect(root.locator('[data-slot="tokenLabel"]')).toHaveText('Owner: Theo Martin');
+    await expect(root.locator('[data-slot="live"]')).toHaveText('Owner: Theo Martin updated');
+    await expect(root.getByTestId('filter-server-request')).toContainText('"id": "theo"');
+
+    const token = root.locator('[data-slot="token"]');
+    await token.focus();
+    await token.press('Delete');
+    await expect(token).toHaveCount(0);
+    await expect(root.locator('[data-slot="live"]')).toHaveText('Owner: Theo Martin removed');
+    await expect(root.getByTestId('filter-server-request')).toContainText('"filters": []');
+  });
+
+  test('date range keeps calendar Escape nested and round-trips closed and open ranges', async ({
+    page,
+  }) => {
+    test.setTimeout(60_000);
+    await gotoFilterBar(page);
+    const root = serverExample(page);
+    const picker = root.getByRole('combobox', { name: 'Work order filters' });
+
+    await picker.fill('cre');
+    await picker.press('Enter');
+    let editor = root.locator('[data-slot="editor"][data-field="created"]');
+    let from = editor.getByRole('textbox', { name: 'Created from' });
+    await expect(from).toBeFocused();
+
+    // A calendar is inside the Filter Bar's Floating Scope: interacting with
+    // its portal must not outside-dismiss the owning range editor.
+    const fromTrigger = editor.getByRole('button', { name: 'Choose date for Created from' });
+    await fromTrigger.focus();
+    await fromTrigger.press('Enter');
+    let calendar = page.locator('[data-slot="pickerPanel"]:visible');
+    await expect(calendar.getByRole('grid')).toBeVisible();
+    await calendar
+      .locator('button[ngpdatepickerdatebutton]:not([disabled]):not([data-outside-month])')
+      .nth(10)
+      .click();
+    await expect(editor).toBeVisible();
+
+    // Escape consumes the nested calendar first, then the shared Filter Bar
+    // editor, and finally restores the field picker.
+    await fromTrigger.click();
+    calendar = page.locator('[data-slot="pickerPanel"]:visible');
+    await expect(calendar).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(calendar).toBeHidden();
+    await expect(editor).toBeVisible();
+    await from.press('Escape');
+    await expect(editor).toBeHidden();
+    await expect(picker).toBeFocused();
+
+    await picker.fill('created');
+    await picker.press('Enter');
+    editor = root.locator('[data-slot="editor"][data-field="created"]');
+    from = editor.getByRole('textbox', { name: 'Created from' });
+    const to = editor.getByRole('textbox', { name: 'Created to' });
+    await from.fill('2026-01-01');
+    await to.fill('2026-04-30');
+    await to.press('Enter');
+
+    await expect(root.locator('[data-slot="tokenLabel"]')).toHaveText(
+      'Created: 2026-01-01 to 2026-04-30',
+    );
+    await expect(root.locator('[data-slot="live"]')).toHaveText(
+      'Created: 2026-01-01 to 2026-04-30 added',
+    );
+    const request = root.getByTestId('filter-server-request');
+    await expect(request).toContainText('"kind": "dateRange"');
+    await expect(request).toContainText('"from": "2026-01-01"');
+    await expect(request).toContainText('"to": "2026-04-30"');
+
+    // Editing uses the same seeded controls; Escape discards the draft and
+    // restores the token rather than leaking an intermediate controlled value.
+    const token = root.locator('[data-slot="token"]');
+    await root.getByRole('button', { name: /^Edit Created:/ }).click();
+    let editEditor = page.locator(
+      '[hellPopover] [data-slot="editor"][data-mode="edit"][data-field="created"]',
+    );
+    let editTo = editEditor.getByRole('textbox', { name: 'Created to' });
+    await expect(editEditor.getByRole('textbox', { name: 'Created from' })).toHaveValue(
+      '2026-01-01',
+    );
+    await expect(editTo).toHaveValue('2026-04-30');
+    const editApply = editEditor.getByRole('button', { name: 'Apply filter' });
+    await editTo.fill('not-a-date');
+    await expect(editApply).toBeDisabled();
+    await editTo.press('Enter');
+    await expect(editEditor).toBeVisible();
+    await expect(request).toContainText('"to": "2026-04-30"');
+    await editTo.fill('2026-06-30');
+    await editTo.press('Escape');
+    await expect(editEditor).toBeHidden();
+    await expect(token).toBeFocused();
+    await expect(request).toContainText('"to": "2026-04-30"');
+
+    // A nullable bound remains a clean JSON value, not an empty string or UTC timestamp.
+    await token.press('Enter');
+    editEditor = page.locator(
+      '[hellPopover] [data-slot="editor"][data-mode="edit"][data-field="created"]',
+    );
+    await expect(editEditor).toBeVisible();
+    const editFrom = editEditor.getByRole('textbox', { name: 'Created from' });
+    editTo = editEditor.getByRole('textbox', { name: 'Created to' });
+    await editFrom.fill('');
+    await editFrom.press('Tab');
+    await page.keyboard.press('Tab');
+    await editTo.press('Tab');
+    await page.keyboard.press('Tab');
+    const openEndedApply = editEditor.getByRole('button', { name: 'Apply filter' });
+    await expect(openEndedApply).toBeFocused();
+    await openEndedApply.press('Enter');
+
+    await expect(root.locator('[data-slot="tokenLabel"]')).toHaveText(
+      'Created: Through 2026-04-30',
+    );
+    await expect(root.locator('[data-slot="live"]')).toHaveText(
+      'Created: Through 2026-04-30 updated',
+    );
+    await expect(request).toContainText('"from": null');
+    await expect(request).toContainText('"to": "2026-04-30"');
   });
 });

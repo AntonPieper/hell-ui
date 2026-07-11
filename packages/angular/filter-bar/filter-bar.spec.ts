@@ -1,11 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import {
+  hellIsDateInputValueWithinBounds,
+  provideHellDateInputAdapter,
+} from '@hell-ui/angular/date-input';
 
 import {
   HELL_FILTER_TEXT_KEY,
   HellFilterBar,
+  type HellFilterEntityOption,
   type HellFilterField,
+  type HellFilterEntitySearchError,
   type HellFilterToken,
 } from './filter-bar';
 
@@ -78,6 +84,97 @@ class StaticInputHost {
   readonly fields = FIELDS;
 }
 
+interface EntitySearchCall {
+  readonly query: string;
+  readonly signal: AbortSignal | undefined;
+  readonly resolve: (items: readonly HellFilterEntityOption[]) => void;
+  readonly reject: (error: unknown) => void;
+}
+
+@Component({
+  imports: [HellFilterBar],
+  template: `
+    <hell-filter-bar
+      aria-label="Advanced filters"
+      [fields]="fields"
+      [value]="value()"
+      entityDebounceMs="0"
+      (valueChange)="value.set($event)"
+      (searchError)="errors.push($event)"
+    />
+  `,
+})
+class AdvancedHostComponent {
+  readonly value = signal<readonly HellFilterToken[]>([]);
+  readonly calls: EntitySearchCall[] = [];
+  readonly errors: HellFilterEntitySearchError[] = [];
+  readonly fields: readonly HellFilterField[] = [
+    {
+      key: 'owner',
+      label: 'Owner',
+      kind: 'entity',
+      debounceMs: 0,
+      search: ({ query, signal }) => new Promise<readonly HellFilterEntityOption[]>(
+        (resolve, reject) => this.calls.push({ query, signal, resolve, reject }),
+      ),
+    },
+    {
+      key: 'created',
+      label: 'Created',
+      kind: 'dateRange',
+      min: '2026-07-01',
+      max: '2026-07-31',
+    },
+  ];
+}
+
+@Component({
+  imports: [HellFilterBar],
+  providers: [
+    provideHellDateInputAdapter({
+      parseText: (text) => {
+        const trimmed = text.trim();
+        if (!trimmed) return { valid: true, value: null };
+        const match = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(trimmed);
+        if (!match) return { valid: false };
+        const date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+        return date.getFullYear() === Number(match[3]) &&
+          date.getMonth() === Number(match[2]) - 1 &&
+          date.getDate() === Number(match[1])
+          ? { valid: true, value: date }
+          : { valid: false };
+      },
+      format: (date) => date
+        ? `${date.getDate().toString().padStart(2, '0')}.` +
+          `${(date.getMonth() + 1).toString().padStart(2, '0')}.` +
+          date.getFullYear().toString()
+        : '',
+      coerce: (date) => date && date.getDate() >= 3 ? date : null,
+      isWithinBounds: hellIsDateInputValueWithinBounds,
+    }),
+  ],
+  template: `
+    <hell-filter-bar
+      aria-label="Localized filters"
+      [fields]="fields"
+      [value]="value()"
+      (valueChange)="value.set($event)"
+    />
+  `,
+})
+class LocalizedDateHostComponent {
+  readonly value = signal<readonly HellFilterToken[]>([]);
+  readonly fields: readonly HellFilterField[] = [
+    {
+      key: 'created',
+      label: 'Created',
+      kind: 'dateRange',
+      min: '2026-07-01',
+      max: '2026-07-31',
+    },
+  ];
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -95,7 +192,14 @@ afterAll(() => {
 
 describe('HellFilterBar', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [HostComponent, StaticInputHost] })
+    await TestBed.configureTestingModule({
+      imports: [
+        HostComponent,
+        StaticInputHost,
+        AdvancedHostComponent,
+        LocalizedDateHostComponent,
+      ],
+    })
       .compileComponents();
   });
 
@@ -435,6 +539,338 @@ describe('HellFilterBar', () => {
       .textContent?.trim()).toBe('Tag: Any tag');
   });
 
+  it('searches and commits a selected entity as a stable serializable value', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    inputValue(picker, 'owner:ad');
+    await nextTask();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.calls).toHaveLength(1);
+    expect(fixture.componentInstance.calls[0]?.query).toBe('ad');
+    const entityInput = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-field="owner"] [data-hell-filter-editor-input]',
+    );
+    expect(entityInput.getAttribute('aria-busy')).toBe('true');
+    const loading = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="status"][data-state="loading"]',
+    );
+    expect(loading.textContent?.trim()).toBe('Loading Owner');
+
+    fixture.componentInstance.calls[0]!.resolve([
+      { id: 'person-1', label: 'Ada Lovelace' },
+      { id: 'person-2', label: 'Grace Hopper', disabled: true },
+    ]);
+    const active = await waitForActiveOption(fixture, entityInput);
+    expect(active.textContent?.trim()).toBe('Ada Lovelace');
+    expect(entityInput.getAttribute('aria-busy')).toBeNull();
+
+    key(entityInput, 'Enter');
+    await nextTask();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Lovelace' },
+      },
+    ]);
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="tokenLabel"]')
+      .textContent?.trim()).toBe('Owner: Ada Lovelace');
+    expect(document.activeElement).toBe(query<HTMLInputElement>(fixture.nativeElement, 'input'));
+  });
+
+  it('emits a refreshed label when an entity keeps the same stable id', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    fixture.componentInstance.value.set([
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Lovelace' },
+      },
+    ]);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '[data-hell-filter-token-edit]').click();
+    const entityInput = await waitFor<HTMLInputElement>(
+      fixture,
+      document.body,
+      '[data-field="owner"] [data-hell-filter-editor-input]',
+    );
+    await nextTask();
+    await settle(fixture);
+    inputValue(entityInput, 'Ada');
+    await nextTask();
+    await settle(fixture);
+    fixture.componentInstance.calls.at(-1)!.resolve([
+      { id: 'person-1', label: 'Ada Byron' },
+    ]);
+    expect((await waitForActiveOption(fixture, entityInput)).textContent?.trim()).toBe('Ada Byron');
+    key(entityInput, 'Enter');
+    await waitForMissing(fixture, document.body, '[hellPopover] [data-slot="editor"]');
+
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'owner',
+        operator: 'eq',
+        value: { kind: 'entity', id: 'person-1', label: 'Ada Byron' },
+      },
+    ]);
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="tokenLabel"]')
+      .textContent?.trim()).toBe('Owner: Ada Byron');
+  });
+
+  it('aborts superseded entity searches and discards their stale rejection', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    inputValue(picker, 'owner:a');
+    await nextTask();
+    await settle(fixture);
+    const entityInput = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-field="owner"] [data-hell-filter-editor-input]',
+    );
+    inputValue(entityInput, 'ab');
+    inputValue(entityInput, 'abc');
+
+    // Both replacement drafts are debounced into one dispatch.
+    expect(fixture.componentInstance.calls).toHaveLength(1);
+    await nextTask();
+    await settle(fixture);
+    expect(fixture.componentInstance.calls).toHaveLength(2);
+    expect(fixture.componentInstance.calls[0]?.signal?.aborted).toBe(true);
+    expect(fixture.componentInstance.calls[1]?.query).toBe('abc');
+
+    fixture.componentInstance.calls[0]!.reject(new Error('stale failure'));
+    fixture.componentInstance.calls[1]!.resolve([]);
+    const empty = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="status"][data-state="empty"]',
+    );
+    expect(empty.textContent?.trim()).toBe('No owner found');
+    expect(fixture.componentInstance.errors).toEqual([]);
+
+    inputValue(entityInput, 'broken');
+    await nextTask();
+    await settle(fixture);
+    const failure = new Error('current failure');
+    fixture.componentInstance.calls.at(-1)!.reject(failure);
+    const error = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="status"][data-state="error"]',
+    );
+    expect(error.textContent?.trim()).toBe('Could not load owner');
+    expect(fixture.componentInstance.errors).toEqual([
+      expect.objectContaining({ field: fixture.componentInstance.fields[0], query: 'broken', error: failure }),
+    ]);
+
+  });
+
+  it('discards a stale successful entity response after newer results render', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    await settle(fixture);
+    inputValue(query<HTMLInputElement>(fixture.nativeElement, 'input'), 'owner:a');
+    await nextTask();
+    await settle(fixture);
+    const entityInput = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-field="owner"] [data-hell-filter-editor-input]',
+    );
+
+    inputValue(entityInput, 'new');
+    await nextTask();
+    await settle(fixture);
+    expect(fixture.componentInstance.calls).toHaveLength(2);
+    fixture.componentInstance.calls[1]!.resolve([{ id: 'new', label: 'New owner' }]);
+    expect((await waitForActiveOption(fixture, entityInput)).textContent?.trim()).toBe('New owner');
+
+    fixture.componentInstance.calls[0]!.resolve([{ id: 'old', label: 'Old owner' }]);
+    await nextTask();
+    await settle(fixture);
+    expect(document.body.textContent).not.toContain('Old owner');
+    expect((await waitForActiveOption(fixture, entityInput)).textContent?.trim()).toBe('New owner');
+  });
+
+  it('serializes open date ranges and reuses the same editor for controlled edits', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    inputValue(picker, 'created:');
+    const editor = await waitFor<HTMLElement>(
+      fixture,
+      fixture.nativeElement,
+      '[data-slot="editor"][data-field="created"]',
+    );
+    const from = query<HTMLInputElement>(editor, 'input[aria-label="Created from"]');
+    const to = query<HTMLInputElement>(editor, 'input[aria-label="Created to"]');
+    await nextTask();
+    await settle(fixture);
+    expect(document.activeElement).toBe(from);
+    expect(from.value).toBe('');
+    expect(to.value).toBe('');
+    expect(applyButton(editor).disabled).toBe(true);
+
+    inputValue(from, '2026-07-04');
+    key(from, 'Enter');
+    await settle(fixture);
+
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-04', to: null },
+      },
+    ]);
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="tokenLabel"]')
+      .textContent?.trim()).toBe('Created: From 2026-07-04');
+
+    query<HTMLButtonElement>(fixture.nativeElement, '[data-hell-filter-token-edit]').click();
+    const editEditor = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[hellPopover] [data-slot="editor"][data-field="created"]',
+    );
+    const editTo = query<HTMLInputElement>(editEditor, 'input[aria-label="Created to"]');
+    inputValue(editTo, '2026-07-20');
+    editTo.dispatchEvent(new Event('blur', { bubbles: true }));
+    await settle(fixture);
+    applyButton(editEditor).click();
+    await waitForMissing(fixture, document.body, '[hellPopover] [data-slot="editor"]');
+
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-04', to: '2026-07-20' },
+      },
+    ]);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '[data-hell-filter-token-edit]').click();
+    const draftEditor = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[hellPopover] [data-slot="editor"][data-field="created"]',
+    );
+    const draftFrom = query<HTMLInputElement>(draftEditor, 'input[aria-label="Created from"]');
+    const draftTo = query<HTMLInputElement>(draftEditor, 'input[aria-label="Created to"]');
+    inputValue(draftTo, 'not-a-date');
+    await settle(fixture);
+    expect(applyButton(draftEditor).disabled).toBe(true);
+    key(draftTo, 'Enter');
+    await settle(fixture);
+    expect(document.body.contains(draftEditor)).toBe(true);
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-04', to: '2026-07-20' },
+      },
+    ]);
+
+    // Both visible drafts are resolved together, so changing the second bound
+    // can make a first bound that was invalid against the old value committable.
+    inputValue(draftFrom, '2026-07-25');
+    inputValue(draftTo, '2026-07-30');
+    await settle(fixture);
+    expect(applyButton(draftEditor).disabled).toBe(false);
+    applyButton(draftEditor).click();
+    await waitForMissing(fixture, document.body, '[hellPopover] [data-slot="editor"]');
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-25', to: '2026-07-30' },
+      },
+    ]);
+  });
+
+  it('uses the composed Date Input adapter while keeping token dates ISO serialized', async () => {
+    const fixture = TestBed.createComponent(LocalizedDateHostComponent);
+    fixture.componentInstance.value.set([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-02', to: null },
+      },
+    ]);
+    await settle(fixture);
+    query<HTMLButtonElement>(fixture.nativeElement, '[data-hell-filter-token-edit]').click();
+    const editor = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[hellPopover] [data-slot="editor"][data-field="created"]',
+    );
+    const from = query<HTMLInputElement>(editor, 'input[aria-label="Created from"]');
+
+    // The same adapter coercion used by Date Input also owns Filter Bar's
+    // hidden draft, so a rejected controlled date cannot be stale-committed.
+    expect(from.value).toBe('');
+    expect(applyButton(editor).disabled).toBe(true);
+
+    inputValue(from, '30.06.2026');
+    await settle(fixture);
+    expect(applyButton(editor).disabled).toBe(true);
+    key(from, 'Enter');
+    await settle(fixture);
+    expect(document.body.contains(editor)).toBe(true);
+
+    inputValue(from, '04.07.2026');
+    key(from, 'Enter');
+    await settle(fixture);
+    expect(fixture.componentInstance.value()).toEqual([
+      {
+        key: 'created',
+        operator: 'eq',
+        value: { kind: 'dateRange', from: '2026-07-04', to: null },
+      },
+    ]);
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="tokenLabel"]')
+      .textContent?.trim()).toBe('Created: From 2026-07-04');
+  });
+
+  it('keeps a nested date calendar as the first Escape and focus-dismissal layer', async () => {
+    const fixture = TestBed.createComponent(AdvancedHostComponent);
+    await settle(fixture);
+    inputValue(query<HTMLInputElement>(fixture.nativeElement, 'input'), 'created:');
+    const editor = await waitFor<HTMLElement>(
+      fixture,
+      fixture.nativeElement,
+      '[data-slot="editor"][data-field="created"]',
+    );
+    const from = query<HTMLInputElement>(editor, 'input[aria-label="Created from"]');
+    query<HTMLButtonElement>(editor, 'hell-date-input [data-slot="trigger"]').click();
+    const calendar = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="pickerPanel"] hell-date-picker',
+    );
+    query<HTMLButtonElement>(calendar, 'button').focus();
+    await nextTask();
+    await settle(fixture);
+    expect(fixture.nativeElement.querySelector('[data-field="created"]')).not.toBeNull();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await waitForMissing(fixture, document.body, '[data-slot="pickerPanel"]');
+    expect(fixture.nativeElement.querySelector('[data-field="created"]')).not.toBeNull();
+
+    from.focus();
+    key(from, 'Escape');
+    await nextTask();
+    await waitForMissing(fixture, fixture.nativeElement, '[data-field="created"]');
+    expect(document.activeElement).toBe(query<HTMLInputElement>(fixture.nativeElement, 'input'));
+  });
+
   it('coerces static boolean and nullable numeric inputs', async () => {
     const fixture = TestBed.createComponent(StaticInputHost);
     await settle(fixture);
@@ -532,4 +968,11 @@ async function waitForActiveOption(
 
 function queryAll<T extends HTMLElement>(root: ParentNode, selector: string): T[] {
   return Array.from(root.querySelectorAll<T>(selector));
+}
+
+function applyButton(root: ParentNode): HTMLButtonElement {
+  const button = queryAll<HTMLButtonElement>(root, 'button')
+    .find((candidate) => candidate.textContent?.trim() === 'Apply filter');
+  if (!button) throw new Error('Expected Apply filter button.');
+  return button;
 }
