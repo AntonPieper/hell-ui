@@ -7,6 +7,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added `HELL_CHIP_DIRECTIVES` to `@hell-ui/angular/chip` (array of
+  `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
+  the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and
+  "Conditional content" docs sections on the alert and empty-state pages that
+  document the `@if` + `ngProjectAs` content-projection recipe. See #135.
 - Added an `autoGrow` opt-in to `HellTextarea` in the `@hell-ui/angular/input`
   Package Entry Point: the native `<textarea>` grows with its content via CSS
   `field-sizing: content` — no resize observers, no per-keystroke JavaScript
@@ -184,6 +189,26 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/number-input/number-input.spec.ts`,
   `e2e/number-input-a11y-contracts.spec.ts`, and the docs page at
   `/components/number-input`. Closes #134 (spec #94).
+- `hellAlertDismiss` and `hellChipRemove` now ship a built-in × glyph so the
+  dismiss/remove controls are visible with zero consumer markup — the previous
+  attribute directives rendered empty buttons. The glyph is a CSS mask on the
+  empty button (mirroring the breadcrumb-separator mechanism), keyed off a new
+  `--hell-icon-close` token; projecting any content into the button drops the
+  `:empty` match and replaces the default glyph. Import
+  `@hell-ui/angular/alert/styles.css` / `@hell-ui/angular/chip/styles.css` for
+  the glyph. Evidence: `packages/angular/alert/alert.spec.ts`,
+  `packages/angular/chip/chip.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
+  `e2e/chip-a11y-contracts.spec.ts`. Closes #135 (specs #91, #95).
+- `hellChipRemove` now derives its accessible name (`Remove {label}`) from the
+  chip's rendered text content by default, demoting the `hellChip` `label` input
+  to an optional override — one source of truth, so the label is no longer
+  written twice. Docs examples drop the redundant `[label]`. Evidence:
+  `packages/angular/chip/chip.spec.ts`.
+- `hell-empty-state` no longer applies `role="heading"`/`aria-level` to the
+  title wrapper when a `hellEmptyStateTitle` is projected, so a projected real
+  heading is not nested inside a second heading role; `headingLevel` still
+  promotes the built-in preset title. Evidence:
+  `packages/angular/empty-state/empty-state.spec.ts`.
 - TanStack column filters no longer render object-valued state as the literal
   text `[object Object]`; only scalar filter values are shown in the input.
 - Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`

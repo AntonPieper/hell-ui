@@ -22,7 +22,7 @@ import {
       (remove)="onRemove('span')"
     >
       Marketing
-      <button id="span-remove" hellChipRemove>×</button>
+      <button id="span-remove" hellChipRemove></button>
     </span>
 
     <button
@@ -33,7 +33,7 @@ import {
       (remove)="onRemove('button')"
     >
       Overdue
-      <button id="button-remove" hellChipRemove>×</button>
+      <button id="button-remove" hellChipRemove></button>
     </button>
 
     <a id="anchor-chip" hellChip href="#pinned">Pinned</a>
@@ -64,7 +64,7 @@ class HostSemanticsHost {
           (remove)="remove(chip.id)"
         >
           {{ chip.label }}
-          <button [id]="'remove-' + chip.id" hellChipRemove>×</button>
+          <button [id]="'remove-' + chip.id" hellChipRemove></button>
         </span>
       }
     </div>
@@ -92,15 +92,34 @@ class ChipSetHost {
   template: `
     <span hellChip [label]="'Widget'">
       Widget
-      <button id="labelled-remove" hellChipRemove>×</button>
+      <button id="labelled-remove" hellChipRemove></button>
     </span>
     <span hellChip>
-      Anonymous
-      <button id="fallback-remove" hellChipRemove>×</button>
+      <svg aria-hidden="true" width="8" height="8"></svg>
+      <button id="fallback-remove" hellChipRemove></button>
     </span>
   `,
 })
 class LabelOverrideHost {}
+
+@Component({
+  imports: [HellChip, HellChipRemove],
+  template: `
+    <span hellChip>
+      Marketing
+      <button id="derived-remove" hellChipRemove></button>
+    </span>
+    <span hellChip [label]="'Priority customer'">
+      Marketing
+      <button id="override-remove" hellChipRemove></button>
+    </span>
+    <span hellChip>
+      <svg aria-hidden="true" width="8" height="8"></svg>
+      <button id="empty-remove" hellChipRemove></button>
+    </span>
+  `,
+})
+class DerivedLabelHost {}
 
 describe('HellChip host semantics', () => {
   beforeEach(async () => {
@@ -196,12 +215,46 @@ describe('HellChip host semantics', () => {
 });
 
 describe('HellChip Label Contract', () => {
-  it('names the remove button "Remove {label}" and falls back without a label', async () => {
+  it('derives the remove button name from the chip text content', async () => {
+    await TestBed.configureTestingModule({ imports: [DerivedLabelHost] }).compileComponents();
+    const fixture = TestBed.createComponent(DerivedLabelHost);
+    fixture.detectChanges();
+    await settleContent(fixture);
+
+    // No [label] input: the accessible name comes from the rendered text, so
+    // the label lives in exactly one place.
+    expect(query(fixture, '#derived-remove').getAttribute('aria-label')).toBe('Remove Marketing');
+  });
+
+  it('lets the label input override the derived content name', async () => {
+    await TestBed.configureTestingModule({ imports: [DerivedLabelHost] }).compileComponents();
+    const fixture = TestBed.createComponent(DerivedLabelHost);
+    fixture.detectChanges();
+    await settleContent(fixture);
+
+    // Text content is "Marketing" but the explicit label wins.
+    expect(query(fixture, '#override-remove').getAttribute('aria-label')).toBe(
+      'Remove Priority customer',
+    );
+  });
+
+  it('falls back to the generic name when the chip has neither text nor a label', async () => {
+    await TestBed.configureTestingModule({ imports: [DerivedLabelHost] }).compileComponents();
+    const fixture = TestBed.createComponent(DerivedLabelHost);
+    fixture.detectChanges();
+    await settleContent(fixture);
+
+    expect(query(fixture, '#empty-remove').getAttribute('aria-label')).toBe('Remove');
+  });
+
+  it('applies a per-instance label override synchronously', async () => {
     await TestBed.configureTestingModule({ imports: [HostSemanticsHost] }).compileComponents();
     const fixture = TestBed.createComponent(HostSemanticsHost);
     fixture.detectChanges();
 
+    // The label input resolves without waiting on content observation.
     expect(query(fixture, '#span-remove').getAttribute('aria-label')).toBe('Remove Marketing');
+    // A chip with no remove button carries no remove aria-label.
     expect(query(fixture, '#anchor-chip').hasAttribute('aria-label')).toBe(false);
   });
 
@@ -209,6 +262,7 @@ describe('HellChip Label Contract', () => {
     await TestBed.configureTestingModule({ imports: [LabelOverrideHost] }).compileComponents();
     const fixture = TestBed.createComponent(LabelOverrideHost);
     fixture.detectChanges();
+    await settleContent(fixture);
 
     expect(query(fixture, '#labelled-remove').getAttribute('aria-label')).toBe('Dismiss Widget');
     expect(query(fixture, '#fallback-remove').getAttribute('aria-label')).toBe('Remove');
@@ -352,4 +406,11 @@ function press(element: HTMLElement, key: string): KeyboardEvent {
 
 function flushMicrotasks(): Promise<void> {
   return Promise.resolve();
+}
+
+async function settleContent(fixture: { detectChanges(): void }): Promise<void> {
+  // The chip derives its label through a MutationObserver, which delivers on a
+  // microtask; let it run, then reflect the derived name into the bindings.
+  await new Promise((resolve) => setTimeout(resolve));
+  fixture.detectChanges();
 }

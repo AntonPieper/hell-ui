@@ -7,13 +7,13 @@ import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
   imports: [HellChipSet, HellChip, HellChipRemove],
   template: `
     <div hellChipSet aria-label="Capabilities">
-      <span hellChip [label]="'Billing'">
+      <span hellChip>
         Billing
-        <button hellChipRemove>×</button>
+        <button hellChipRemove></button>
       </span>
-      <span hellChip disabled [label]="'Read only'">
+      <span hellChip disabled>
         Read only
-        <button hellChipRemove>×</button>
+        <button hellChipRemove></button>
       </span>
     </div>
   `,

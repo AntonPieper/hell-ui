@@ -3,6 +3,7 @@ import {
   Directive,
   ElementRef,
   Injectable,
+  afterNextRender,
   booleanAttribute,
   computed,
   effect,
@@ -382,8 +383,12 @@ export class HellChip {
   /** Whether the chip and its remove button are disabled. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
-   * Human-readable label for the chip, used to build its remove button's
-   * accessible name (`Remove {label}`). Optional; falls back to a generic name.
+   * Explicit override for the chip's human label. By default the remove
+   * button's accessible name is derived from the chip's rendered text content
+   * (`Remove {content}`), so a plain text chip needs no `label`. Set this only
+   * when the visible text is not a good accessible name (or the chip's content
+   * is non-textual); it falls back to a generic name when neither this input
+   * nor any text content is present.
    */
   readonly label = input<string>();
 
@@ -408,10 +413,37 @@ export class HellChip {
   /** Whether the host element carries native interactive semantics. */
   protected readonly interactive = computed(() => this.isInteractiveHost() && !this.disabled());
 
+  /**
+   * The chip's rendered text content, tracked so the remove button can derive
+   * its accessible name without the consumer restating the label. The built-in
+   * remove glyph is a CSS pseudo-element, so it never leaks into this text.
+   */
+  private readonly contentText = signal<string | undefined>(undefined);
+
   constructor() {
     this.controller.disabled = () => this.disabled();
-    this.controller.label = () => this.label();
+    // The explicit `label` input wins; otherwise fall back to the rendered text.
+    this.controller.label = () => this.label() ?? this.contentText();
     this.controller.requestRemove = () => this.requestRemove();
+
+    // Derive the label from the chip's text content and keep it current as the
+    // content changes. The initial read runs after the first render (browser
+    // only, so SSR stays safe and hydrated content is read even when no
+    // mutation ever fires); a MutationObserver (guarded like the slider's)
+    // keeps it fresh. Neither ever sees the ::before remove glyph — a CSS
+    // pseudo-element is not part of the DOM tree.
+    const hostElement = this.host.nativeElement;
+    const syncContentText = (): void => {
+      const text = hostElement.textContent?.replace(/\s+/g, ' ').trim();
+      this.contentText.set(text ? text : undefined);
+    };
+    afterNextRender(syncContentText);
+    const MutationObserverCtor = hostElement.ownerDocument.defaultView?.MutationObserver;
+    if (MutationObserverCtor) {
+      const observer = new MutationObserverCtor(syncContentText);
+      observer.observe(hostElement, { childList: true, characterData: true, subtree: true });
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    }
 
     this.set?.registerChip(this.registration);
     this.destroyRef.onDestroy(() => {
@@ -462,10 +494,12 @@ export class HellChip {
  * `<button>` inside a `[hellChip]` — never a nested interactive element inside
  * a `<button>` chip host.
  *
- * It is named through the Label Contract as `Remove {label}`, stays out of the
- * roving tab order (`Delete`/`Backspace` on the focused chip is the keyboard
- * path), inherits the chip's disabled state, and routes clicks to the chip's
- * `remove` output.
+ * A bare `<button hellChipRemove></button>` ships a built-in × glyph (a CSS
+ * mask on the empty button); project any content to replace it. It is named
+ * through the Label Contract as `Remove {chip label}` — derived from the chip's
+ * text content by default — stays out of the roving tab order
+ * (`Delete`/`Backspace` on the focused chip is the keyboard path), inherits the
+ * chip's disabled state, and routes clicks to the chip's `remove` output.
  */
 @Directive({
   selector: 'button[hellChipRemove]',
@@ -514,3 +548,6 @@ export class HellChipRemove {
     this.chip.requestRemove();
   }
 }
+
+/** All directives of the chip entry point, for bulk `imports`. */
+export const HELL_CHIP_DIRECTIVES = [HellChipSet, HellChip, HellChipRemove] as const;

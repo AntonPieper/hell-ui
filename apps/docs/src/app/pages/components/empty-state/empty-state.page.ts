@@ -19,6 +19,10 @@ import { EmptyStateCustomContentExample } from './examples/custom-content.exampl
 import emptyStateCustomContentExampleCodeRaw from './examples/custom-content.example.ts?raw' with {
   loader: 'text',
 };
+import { EmptyStateConditionalExample } from './examples/conditional.example';
+import emptyStateConditionalExampleCodeRaw from './examples/conditional.example.ts?raw' with {
+  loader: 'text',
+};
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 
@@ -33,6 +37,7 @@ import { PageHeader } from '../../../shared/page-header';
     EmptyStateErrorExample,
     EmptyStateForbiddenExample,
     EmptyStateCustomContentExample,
+    EmptyStateConditionalExample,
   ],
   template: `
     <article class="hd-prose">
@@ -112,11 +117,30 @@ import { PageHeader } from '../../../shared/page-header';
         Skip <code>preset</code> and project everything yourself for high-traffic screens: a branded
         glyph or illustration through <code>hellEmptyStateMedia</code>, your own copy through
         <code>hellEmptyStateTitle</code> and <code>hellEmptyStateDescription</code>, and one or more
-        buttons through <code>hellEmptyStateActions</code>. Set <code>headingLevel</code> to promote
-        the title into the page outline when the empty state stands in for a whole region.
+        buttons through <code>hellEmptyStateActions</code>. A projected title owns its own
+        semantics — project a real heading element (an <code>&lt;h2&gt;</code> here) when the empty
+        state stands in for a whole region; <code>headingLevel</code> promotes only the built-in
+        preset title, so heading roles are never doubled.
       </p>
       <hd-example-tabs [code]="emptyStateCustomContentExampleCode">
         <app-empty-state-custom-content-example />
+      </hd-example-tabs>
+
+      <h2>Conditional content</h2>
+      <p>
+        Empty state has <strong>no default <code>&lt;ng-content&gt;</code></strong>: every projected
+        node reaches a part only by matching that part's slot selector. Content projection matches
+        each <code>&#64;if</code> block's <em>single</em> root node by its selector, so a lone
+        <code>&lt;button hellEmptyStateActions&gt;</code> in an <code>&#64;if</code> projects fine —
+        but an <code>&lt;ng-container&gt;</code> wrapper, or more than one element in the same block,
+        carries no selector and is <strong>silently dropped</strong> (there is no default slot to
+        catch it). Wrap the conditional content in
+        <code>&lt;ng-container ngProjectAs="[hellEmptyStateActions]"&gt;</code> so it always reaches
+        the actions slot — the canonical case being a Retry action that only appears while a retry
+        is worth offering.
+      </p>
+      <hd-example-tabs [code]="emptyStateConditionalExampleCode">
+        <app-empty-state-conditional-example />
       </hd-example-tabs>
 
       <h2>In a TanStack Table shell</h2>
@@ -185,9 +209,11 @@ import { PageHeader } from '../../../shared/page-header';
               default glyph and default title/description strings. Default <code>null</code>.
             </li>
             <li>
-              <code>headingLevel</code>: <code>2 | 3 | 4 | 5 | 6 | null</code>. Promotes the title
-              to a heading (via <code>role="heading"</code> and <code>aria-level</code>). Default
-              <code>null</code> keeps the title as non-semantic emphasis.
+              <code>headingLevel</code>: <code>2 | 3 | 4 | 5 | 6 | null</code>. Promotes the
+              built-in preset title to a heading (via <code>role="heading"</code> and
+              <code>aria-level</code>). Default <code>null</code> keeps it as non-semantic emphasis.
+              Ignored when a <code>hellEmptyStateTitle</code> is projected — project a real heading
+              element instead.
             </li>
             <li>
               <code>ui</code>: <code>HellUiInput&lt;HellEmptyStatePart&gt;</code> where
@@ -224,9 +250,11 @@ import { PageHeader } from '../../../shared/page-header';
           carry the meaning.
         </li>
         <li>
-          The title is a non-semantic emphasized element by default. Set <code>headingLevel</code>
-          when the empty state stands in for a whole region so it joins the page's heading outline
-          without skipping levels.
+          The preset title is a non-semantic emphasized element by default. Set
+          <code>headingLevel</code> when the empty state stands in for a whole region so it joins
+          the page's heading outline without skipping levels. A projected title owns its own
+          semantics: use a real heading element, and the wrapper stays inert so heading roles are
+          never doubled.
         </li>
         <li>
           Actions are ordinary projected buttons that keep their own focus order and keyboard
@@ -257,4 +285,5 @@ export class EmptyStatePage {
   protected readonly emptyStateErrorExampleCode = emptyStateErrorExampleCodeRaw;
   protected readonly emptyStateForbiddenExampleCode = emptyStateForbiddenExampleCodeRaw;
   protected readonly emptyStateCustomContentExampleCode = emptyStateCustomContentExampleCodeRaw;
+  protected readonly emptyStateConditionalExampleCode = emptyStateConditionalExampleCodeRaw;
 }

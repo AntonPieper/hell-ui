@@ -19,9 +19,9 @@ import {
       [ui]="ui()"
     />
 
-    <hell-empty-state id="projected" preset="noResults">
+    <hell-empty-state id="projected" preset="noResults" [headingLevel]="3">
       <span hellEmptyStateMedia id="custom-media">glyph</span>
-      <span hellEmptyStateTitle id="custom-title">Custom title</span>
+      <h2 hellEmptyStateTitle id="custom-title">Custom title</h2>
       <p hellEmptyStateDescription id="custom-description">Custom description</p>
       <button hellEmptyStateActions id="custom-action" type="button">Clear filters</button>
     </hell-empty-state>
@@ -104,6 +104,18 @@ describe('HellEmptyState', () => {
 
     expect(title.getAttribute('role')).toBe('heading');
     expect(title.getAttribute('aria-level')).toBe('3');
+  });
+
+  it('does not add heading semantics to the wrapper when a title is projected', () => {
+    const fixture = setup();
+    const host = fixture.nativeElement as HTMLElement;
+    // The projected instance sets headingLevel AND projects a real <h2>. The
+    // wrapper must stay semantically inert so the outline gets one heading, not
+    // two nested heading roles.
+    const title = query(host, '#projected [data-slot="title"]');
+    expect(title.getAttribute('role')).toBeNull();
+    expect(title.getAttribute('aria-level')).toBeNull();
+    expect(title.querySelector('#custom-title')?.tagName).toBe('H2');
   });
 
   it('lets the Label Contract override preset copy for a scope', () => {
