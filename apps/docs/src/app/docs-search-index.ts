@@ -526,6 +526,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_DIRECTIVES single-select filter currency ui data-slot root',
   },
   {
+    title: 'Combobox: Chips presentation',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/chips.example.ts',
+    terms:
+      'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
+  },
+  {
     title: 'Combobox: Multiple',
     path: '/components/combobox',
     detail: 'components/combobox/examples/multiple.example.ts',

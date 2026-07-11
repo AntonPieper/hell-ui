@@ -9,6 +9,10 @@ import { ComboboxMultipleExample } from './examples/multiple.example';
 import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' with {
   loader: 'text',
 };
+import { ComboboxChipsExample } from './examples/chips.example';
+import comboboxChipsExampleCodeRaw from './examples/chips.example.ts?raw' with {
+  loader: 'text',
+};
 import { ComboboxWithFieldTagExample } from './examples/with-field-tag.example';
 import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.example.ts?raw' with {
   loader: 'text',
@@ -26,6 +30,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
     ComboboxBasicExample,
     ComboboxPresetExample,
     ComboboxMultipleExample,
+    ComboboxChipsExample,
     ComboboxWithFieldTagExample,
     ComboboxStylingExample,
     PageHeader,
@@ -93,6 +98,24 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       </p>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
         <app-combobox-multiple-example />
+      </hd-example-tabs>
+
+      <h2>Chips presentation</h2>
+      <p>
+        Drop a <code>hellComboboxChips</code> directive inside the control, before the
+        <code>hellComboboxInput</code>, and each selected value renders as a removable chip built on
+        the <code>@hell-ui/angular/chip</code> primitive — the multi-select assign-groups pattern.
+        Removal via a chip's remove button or Backspace in the empty field routes through the
+        combobox's selection state, so the emitted form value, the options'
+        <code>aria-selected</code> state, and the rendered chips never diverge; a disabled combobox
+        disables every chip's remove button. The presentation composes <code>HellChipSet</code>, so
+        its chips form one roving tab stop: use Arrow Left/Right or Home/End to move, then Delete or
+        Backspace to remove the focused chip. Pass <code>[displayWith]</code> to label chips when a
+        value's string form is not the label you want, and relax the control's fixed height (as
+        below via <code>[ui]</code>) so chips wrap.
+      </p>
+      <hd-example-tabs [code]="comboboxChipsExampleCode">
+        <app-combobox-chips-example />
       </hd-example-tabs>
 
       <h2>With field and tag</h2>
@@ -233,6 +256,12 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxOptionPart&gt;</code> (<code>'root'</code>).</li>
       </ul>
       <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code> (<code>HellComboboxEmptyPart</code> = <code>'root'</code>).</p>
+      <p><code>[hellComboboxChips]</code> — the multiple-mode chips presentation. Place it inside the control, before the input; it renders each selected value as a removable chip and routes removal (chip button or Backspace-on-empty) through the combobox selection state.</p>
+      <ul>
+        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>
+        <li><code>size</code>: <code>HellSize</code> — chip size. Default <code>'sm'</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxChipsPart&gt;</code> — map of <code>root | chip</code> (the remove button styles through the chip entry point).</li>
+      </ul>
       <p><code>[hellComboboxPortal]</code> — structural directive that renders the dropdown as a floating overlay while open. No inputs.</p>
       <p><code>&lt;hell-combobox-basic&gt;</code> — the convenience component composing the whole anatomy.</p>
       <ul>
@@ -254,9 +283,11 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <code>HellComboboxCompareWith&lt;T&gt;</code>, <code>HellComboboxDisplayWith&lt;T&gt;</code>;
         and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
         <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
-        <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>, and
-        <code>ComboboxBasic</code>. The bundles <code>HELL_COMBOBOX_DIRECTIVES</code> and
-        <code>HELL_COMBOBOX_BASIC_DIRECTIVES</code> ease <code>imports</code>.
+        <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>,
+        <code>ComboboxChips</code>, and <code>ComboboxBasic</code>. The bundles
+        <code>HELL_COMBOBOX_DIRECTIVES</code> (which now includes
+        <code>hellComboboxChips</code>) and <code>HELL_COMBOBOX_BASIC_DIRECTIVES</code> ease
+        <code>imports</code>.
       </p>
 
       <h2>Accessibility</h2>
@@ -264,6 +295,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li>The input carries <code>role="combobox"</code>, <code>aria-autocomplete="list"</code>, <code>aria-haspopup="listbox"</code>, and <code>autocomplete="off"</code>, with <code>aria-expanded</code>, <code>aria-controls</code>, and <code>aria-activedescendant</code> tracking the open state and highlighted option.</li>
         <li>The dropdown is a <code>role="listbox"</code>; each option is a <code>role="option"</code> that reflects <code>aria-selected</code> and <code>data-selected</code> / <code>data-active</code> / <code>data-disabled</code> state.</li>
         <li>Keyboard: Arrow Down/Up open and move the active option, Home/End jump to first/last, Enter selects the active option, and Escape closes the dropdown.</li>
+        <li>With <code>hellComboboxChips</code>, the selected chips form one roving tab stop. Arrow Left/Right and Home/End move chip focus; Delete/Backspace removes the focused chip and keeps focus in the collection. Backspace in the empty input removes the last selection.</li>
         <li>The toggle button is <code>tabindex="-1"</code> with <code>aria-haspopup="listbox"</code>, so the input stays the single keyboard entry point while the button remains a pointer affordance.</li>
         <li>Give the input an accessible name via a <code>&lt;label&gt;</code> (for example inside <code>hellField</code>), <code>aria-label</code>, or <code>aria-labelledby</code>. On <code>&lt;hell-combobox-basic&gt;</code> pass <code>aria-label</code>.</li>
       </ul>
@@ -271,7 +303,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <h2>Do</h2>
       <ul class="hd-do">
         <li>Use combobox when a list is large enough that typing to filter beats scanning.</li>
-        <li>Show selected values as <code>hellTag</code> chips in multiple mode so applied tokens stay scannable.</li>
+        <li>Use <code>hellComboboxChips</code> for editable multiple selections; keep <code>hellTag</code> for static or read-only summaries.</li>
         <li>Leave <code>hellComboboxButton</code> empty — its chevron is drawn by the stylesheet.</li>
         <li>Provide an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
         <li>Reach for <code>&lt;hell-combobox-basic&gt;</code> when composing the directives is just boilerplate.</li>
@@ -282,7 +314,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li>Don't use a combobox for fewer than ~5 options — a <code>radio</code> group or plain <code>select</code> is faster.</li>
         <li>Don't hide the toggle button; users need a visible affordance to open the list without typing.</li>
         <li>Don't render <code>hellComboboxDropdown</code> without <code>*hellComboboxPortal</code>, or it stays inline and always visible.</li>
-        <li>Don't target private descendants — each directive's only public part is <code>root</code>.</li>
+        <li>Don't target private descendants — refine each module through its documented Part Style Map (<code>root</code>, plus <code>chip</code> on <code>hellComboboxChips</code>).</li>
       </ul>
     </article>
   `,
@@ -291,6 +323,7 @@ export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
   protected readonly comboboxPresetExampleCode = comboboxPresetExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
+  protected readonly comboboxChipsExampleCode = comboboxChipsExampleCodeRaw;
   protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;
   protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
 }
