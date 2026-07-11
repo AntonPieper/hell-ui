@@ -347,6 +347,32 @@ describe('HellOmnibar interactions', () => {
     );
   });
 
+  it('renders omnibar chips through the shared chip presentation without changing their ui seam', () => {
+    const defaultFixture = TestBed.createComponent(OmnibarHost);
+    defaultFixture.detectChanges();
+
+    const chip = query<HTMLElement>(defaultFixture.nativeElement, '[hellOmnibarChip]');
+    const remove = query<HTMLButtonElement>(defaultFixture.nativeElement, '[hellOmnibarChipRemove]');
+
+    expect(chip.getAttribute('data-slot')).toBe('root');
+    expect(chip.className).toContain('rounded-hell-pill');
+    expect(chip.className).toContain('h-[22px]');
+    expect(remove.getAttribute('data-slot')).toBe('root');
+    expect(remove.className).toContain('rounded-hell-pill');
+
+    const styledFixture = TestBed.createComponent(OmnibarPartStyleHost);
+    styledFixture.detectChanges();
+
+    const styledChip = query<HTMLElement>(styledFixture.nativeElement, '[hellOmnibarChip]');
+    const styledRemove = query<HTMLButtonElement>(
+      styledFixture.nativeElement,
+      '[hellOmnibarChipRemove]',
+    );
+    expect(styledChip.className).toContain('rounded-none');
+    expect(styledChip.className).not.toContain('rounded-hell-pill');
+    expect(styledRemove.className).toContain('text-hell-danger');
+  });
+
   it('renders the actions strip only when action buttons register', () => {
     const withActions = TestBed.createComponent(OmnibarHost);
     withActions.detectChanges();

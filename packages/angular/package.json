@@ -55,6 +55,7 @@
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
     "chip/chip.ts",
+    "internal/chip/chip-presentation.ts",
     "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
     "icon/icon.ts",
@@ -84,6 +85,9 @@
     },
     "./internal/audio-transcript": {
       "@heinrich/source": "./internal/audio-transcript/public-api.ts"
+    },
+    "./internal/chip": {
+      "@heinrich/source": "./internal/chip/public-api.ts"
     },
     "./internal/core": {
       "@heinrich/source": "./internal/core/public-api.ts"

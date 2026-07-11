@@ -39,6 +39,10 @@ import {
 } from '@hell-ui/angular/core';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { NgpInput } from 'ng-primitives/input';
+import {
+  hellChipPresentationRecipe,
+  hellChipRemovePresentationRecipe,
+} from '@hell-ui/angular/internal/chip';
 import { HellSearch, HellSearchClear } from '@hell-ui/angular/search';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 import {
@@ -258,14 +262,6 @@ const HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE = {
 const HELL_OMNIBAR_ITEM_TRAILING_RECIPE = {
   root: 'ms-auto inline-flex items-center',
 } satisfies HellRecipe<HellOmnibarItemTrailingPart>;
-
-const HELL_OMNIBAR_CHIP_RECIPE = {
-  root: 'inline-flex items-center gap-1 rounded-hell-sm',
-} satisfies HellRecipe<HellOmnibarChipPart>;
-
-const HELL_OMNIBAR_CHIP_REMOVE_RECIPE = {
-  root: 'inline-flex h-[18px] w-[18px] items-center justify-center rounded-hell-sm',
-} satisfies HellRecipe<HellOmnibarChipRemovePart>;
 
 const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {
   root: '',
@@ -1250,10 +1246,10 @@ export class HellOmnibarChip {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellOmnibarChipPart>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Public chip presentation composed behind the omnibar's existing `ui` contract. */
   protected readonly part = hellPartStyler<HellOmnibarChipPart>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_CHIP_RECIPE,
+    recipe: () => hellChipPresentationRecipe('sm'),
   });
 }
 
@@ -1271,10 +1267,10 @@ export class HellOmnibarChipRemove {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellOmnibarChipRemovePart>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Public chip-remove presentation composed behind the omnibar's existing `ui` contract. */
   protected readonly part = hellPartStyler<HellOmnibarChipRemovePart>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_CHIP_REMOVE_RECIPE,
+    recipe: hellChipRemovePresentationRecipe,
   });
 
   private readonly omnibar = inject(HellOmnibar, { optional: true });
