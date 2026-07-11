@@ -155,6 +155,17 @@ const ACCESSIBILITY_OWNERSHIP: readonly AccessibilityOwnership[] = [
       </div>
 
       <div class="hd-prose">
+        <h2>Motion preferences</h2>
+        <p>
+          Importing <code>@hell-ui/angular/tokens.css</code> makes Hell's semantic duration tokens
+          collapse to 1 ms under <code>prefers-reduced-motion: reduce</code>, preserving lifecycle
+          events while making token-driven transitions and entrances effectively instant.
+          Entrypoints with hardcoded keyframes — currently Spinner, Skeleton, and Audio Player —
+          disable that motion in their own recipes or stylesheets. Those guards target Hell-owned
+          surfaces only; generic consumer or third-party <code>data-slot</code> elements are not
+          rewritten.
+        </p>
+
         <h2>Evidence policy</h2>
         <p>
           Browser contracts assert observable roles, names, state, keyboard movement, dismissal,

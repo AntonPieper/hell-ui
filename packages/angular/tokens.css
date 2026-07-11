@@ -703,3 +703,22 @@ body {
 [data-hell-skin="newspaper"] body {
   text-rendering: optimizeLegibility;
 }
+
+/* -------------------------------------------------------------------------
+ * Reduced motion — collapse the library's motion when the OS asks for it.
+ *
+ * The duration tokens drive every Hell transition and most entrance
+ * animations, so collapsing them makes those effectively instant while
+ * `transitionend` / `animationend` events still fire for code that waits on
+ * them. Entrypoints with hardcoded animation timings own their reduced-motion
+ * overrides locally; this shared substrate must not target generic consumer
+ * attributes such as `[data-slot]`.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-hell-theme] {
+    --hell-duration-fast: 1ms;
+    --hell-duration-base: 1ms;
+    --hell-duration-slow: 1ms;
+  }
+}
