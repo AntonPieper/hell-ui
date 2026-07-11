@@ -1,25 +1,24 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DOCUMENT,
   DestroyRef,
-  Directive,
   ElementRef,
   Injectable,
   InjectionToken,
+  Injector,
+  ViewContainerRef,
   afterNextRender,
   computed,
-  forwardRef,
   inject,
-  input,
-  output,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { NgTemplateOutlet } from '@angular/common';
 import { NgpDialogManager, injectDialogRef } from 'ng-primitives/dialog';
 import type { NgpDialogRef } from 'ng-primitives/dialog';
-import { NgpPopoverTrigger } from 'ng-primitives/popover';
+import { createOverlay } from 'ng-primitives/portal';
+import type { Placement } from '@floating-ui/dom';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import type { HellButtonVariant } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
@@ -30,74 +29,159 @@ import {
   HellDialogTitle,
 } from '@hell-ui/angular/dialog';
 import { HellPopover } from '@hell-ui/angular/popover';
-import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
-import type { OutputEmitterRef, Provider, TemplateRef, WritableSignal } from '@angular/core';
-
-/** Severity of a confirmation; `danger` styles the confirm button destructively and focuses cancel. */
-export type HellConfirmSeverity = 'default' | 'danger';
+import type { Provider, Signal } from '@angular/core';
 
 /**
- * Template context handed to a confirm dialog's projected `content` template.
- *
- * The `state` signal is seeded with `HellConfirmOptions.contentState` and rides
- * back to the caller in `HellConfirmResult.content` — read it with `state()` and
- * update it with `state.set(...)` from inside your template.
+ * What a confirmation asks: a plain title string, or a title with a supporting
+ * description. The title names the surface; the description is linked as its
+ * accessible description.
  */
-export interface HellConfirmContentContext<TContentState> {
-  /** The content state signal (same value as `state`). */
-  readonly $implicit: WritableSignal<TContentState>;
-  /** The content state signal; call it to read, `.set(...)` to update. */
-  readonly state: WritableSignal<TContentState>;
-}
+export type HellConfirmPrompt = string | Readonly<{ title: string; description?: string }>;
 
-/** Options passed to `HellConfirmService.confirm`. */
-export interface HellConfirmOptions<TContentState = void> {
-  /** Accessible dialog title and heading. */
-  readonly title: string;
-  /** Optional supporting description linked as the dialog's accessible description. */
-  readonly description?: string;
-  /** `default` (confirm focused) or `danger` (destructive confirm, cancel focused). Defaults to `default`. */
-  readonly severity?: HellConfirmSeverity;
-  /** Overrides the confirm button label. Falls back to the Label Contract's `confirm`. */
-  readonly confirmLabel?: string;
-  /** Overrides the cancel button label. Falls back to the Label Contract's `cancel`. */
-  readonly cancelLabel?: string;
-  /** Seconds the confirm button stays disabled with a visible countdown. Gating only — it never auto-confirms. */
-  readonly countdownSeconds?: number;
-  /** Optional template projected into the dialog body; its `state` rides back in the result. */
-  readonly content?: TemplateRef<HellConfirmContentContext<TContentState>>;
-  /** Initial value of the projected content template's `state` signal. */
-  readonly contentState?: TContentState;
+/**
+ * Opaque confirmation action: a button label composed with its appearance
+ * (`HellButtonVariant` vocabulary), initial-focus policy, and gating. The shape
+ * is not part of the public contract — build values with the combinators
+ * (`hellPrimaryAction`, `hellSecondaryAction`, `hellDestructiveAction`) and
+ * decorate them with `hellCountdownAction`.
+ */
+export interface HellConfirmAction {
+  /** @internal Structural brand only; the runtime shape is private. */
+  readonly ɵconfirmAction: true;
 }
 
 /**
- * Result of a confirmation. The promise always resolves: Escape, backdrop
- * dismissal, and cancel all resolve `confirmed: false`.
+ * Opaque keyed action for `injectHellChoice()`: a `HellConfirmAction` bound to
+ * the typed key the choice promise resolves with. Build values with
+ * `hellChoiceAction`; the shape is not part of the public contract.
  */
-export interface HellConfirmResult<TContentState = void> {
-  /** Whether the user confirmed. */
-  readonly confirmed: boolean;
-  /** Final projected-content state, when a `content` template was supplied. */
-  readonly content?: TContentState;
+export interface HellChoiceAction<K extends string> {
+  /** @internal Structural brand carrying the key type; the runtime shape is private. */
+  readonly ɵchoiceAction: K;
+}
+
+/** Resolved internal shape behind the opaque `HellConfirmAction`. */
+interface HellConfirmActionConfig {
+  readonly label: string;
+  readonly variant: HellButtonVariant;
+  readonly destructive: boolean;
+  readonly countdownSeconds: number;
+}
+
+/** The only runtime carrier of `HellConfirmAction`; combinators are its only constructors. */
+class HellConfirmActionValue implements HellConfirmAction {
+  declare readonly ɵconfirmAction: true;
+
+  constructor(readonly config: HellConfirmActionConfig) {}
+}
+
+/** The only runtime carrier of `HellChoiceAction`; `hellChoiceAction` is its only constructor. */
+class HellChoiceActionValue<K extends string> implements HellChoiceAction<K> {
+  declare readonly ɵchoiceAction: K;
+
+  constructor(
+    readonly key: K,
+    readonly config: HellConfirmActionConfig,
+    readonly dismissEquivalent: boolean,
+  ) {}
+}
+
+/** The primary action: the `primary` button variant, focused when the surface opens. */
+export function hellPrimaryAction(label: string): HellConfirmAction {
+  return new HellConfirmActionValue({
+    label,
+    variant: 'primary',
+    destructive: false,
+    countdownSeconds: 0,
+  });
+}
+
+/** A secondary action: the `default` button variant with no destructive focus policy. */
+export function hellSecondaryAction(label: string): HellConfirmAction {
+  return new HellConfirmActionValue({
+    label,
+    variant: 'default',
+    destructive: false,
+    countdownSeconds: 0,
+  });
+}
+
+/**
+ * A destructive action: the `danger` button variant. Initial focus moves to the
+ * safe alternative (the cancel button, or a safe choice action) so an
+ * Enter-by-habit cannot destroy data.
+ */
+export function hellDestructiveAction(label: string): HellConfirmAction {
+  return new HellConfirmActionValue({
+    label,
+    variant: 'danger',
+    destructive: true,
+    countdownSeconds: 0,
+  });
+}
+
+/**
+ * Decorates an action with a countdown gate: its button stays disabled for
+ * `seconds`, showing the remaining time through the Label Contract's
+ * `countdown` formatter. The countdown gates enabling only — it never confirms
+ * on its own, and initial focus moves off the gated button while it is disabled.
+ */
+export function hellCountdownAction(seconds: number, action: HellConfirmAction): HellConfirmAction {
+  return new HellConfirmActionValue({
+    ...hellConfirmActionConfig(action),
+    countdownSeconds: Math.max(0, Math.floor(seconds)),
+  });
+}
+
+/**
+ * Binds an action to the typed key an `injectHellChoice()` promise resolves
+ * with. Mark at most one action per choice `dismissEquivalent`: Escape and
+ * backdrop dismissal then resolve that action's key instead of `null`.
+ */
+export function hellChoiceAction<K extends string>(
+  key: K,
+  action: HellConfirmAction,
+  options?: { readonly dismissEquivalent?: boolean },
+): HellChoiceAction<K> {
+  return new HellChoiceActionValue(
+    key,
+    hellConfirmActionConfig(action),
+    options?.dismissEquivalent ?? false,
+  );
+}
+
+function hellConfirmActionConfig(action: HellConfirmAction): HellConfirmActionConfig {
+  if (!(action instanceof HellConfirmActionValue)) {
+    throw new Error(
+      'Hell UI confirm actions must be built with the hell*Action combinators (hellPrimaryAction, hellSecondaryAction, hellDestructiveAction, hellCountdownAction).',
+    );
+  }
+  return action.config;
+}
+
+function hellChoiceActionValue<K extends string>(
+  action: HellChoiceAction<K>,
+): HellChoiceActionValue<K> {
+  if (!(action instanceof HellChoiceActionValue)) {
+    throw new Error('Hell UI choice actions must be built with the hellChoiceAction combinator.');
+  }
+  return action;
 }
 
 /** Built-in strings owned by the confirm entry point's Label Contract. */
 export interface HellConfirmLabels {
-  /** Default confirm button label, shared by the service dialog and the popconfirm. */
+  /** Label of the default primary action used when `confirm()` is called without an action. */
   readonly confirm: string;
-  /** Default cancel button label, shared by the service dialog and the popconfirm. */
+  /** Label of the cancel button when no `cancelAction` overrides it. */
   readonly cancel: string;
-  /** Formats the remaining-seconds suffix appended to the confirm label while the countdown gates it. */
+  /** Formats the remaining-seconds suffix appended to a countdown-gated action label. */
   readonly countdown: (remainingSeconds: number) => string;
-  /** Default popconfirm message shown when a panel supplies no `message`. */
-  readonly popconfirmMessage: string;
 }
 
 const HELL_CONFIRM_LABELS_CONTRACT = hellCreateLabels<HellConfirmLabels>('HELL_CONFIRM_LABELS', {
   confirm: 'Confirm',
   cancel: 'Cancel',
   countdown: (remainingSeconds: number) => ` (${remainingSeconds})`,
-  popconfirmMessage: 'Are you sure?',
 });
 
 /** Injection token resolving to the effective confirm labels. */
@@ -109,61 +193,97 @@ export function provideHellConfirmLabels(overrides: Partial<HellConfirmLabels>):
   return HELL_CONFIRM_LABELS_CONTRACT.provide(overrides);
 }
 
-/** Data handed to the internal confirm dialog through the dialog manager. */
-interface HellConfirmDialogData {
-  readonly options: HellConfirmOptions<unknown>;
+/** Normalized prompt: title plus optional description. */
+interface HellConfirmPromptResolved {
+  readonly title: string;
+  readonly description: string | null;
+}
+
+function resolvePrompt(prompt: HellConfirmPrompt): HellConfirmPromptResolved {
+  if (typeof prompt === 'string') return { title: prompt, description: null };
+  return { title: prompt.title, description: prompt.description ?? null };
+}
+
+/** One rendered button of a confirm/choice surface, with its resolution value. */
+interface HellConfirmButton {
+  readonly label: string;
+  readonly variant: HellButtonVariant;
+  readonly countdownSeconds: number;
+  readonly value: unknown;
+}
+
+/** Reactive per-button state: countdown-gated disabling and the suffixed label. */
+interface HellConfirmButtonRuntime {
+  readonly text: Signal<string>;
+  readonly disabled: Signal<boolean>;
 }
 
 /**
- * Internal modal rendered by `HellConfirmService` on the dialog primitive. Not
- * part of the public surface — callers drive it entirely through the service.
+ * Creates the reactive state for one possibly countdown-gated button. Must run
+ * in an injection context; the ticking interval is cleaned up on destroy. The
+ * countdown gates enabling only — reaching zero merely enables the button.
+ */
+function hellConfirmButtonRuntime(
+  label: string,
+  countdownSeconds: number,
+  labels: HellConfirmLabels,
+): HellConfirmButtonRuntime {
+  const remaining = signal(countdownSeconds);
+  if (countdownSeconds > 0) {
+    const timer = setInterval(() => {
+      remaining.update((value) => (value > 0 ? value - 1 : 0));
+      if (remaining() <= 0) clearInterval(timer);
+    }, 1000);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+  return {
+    disabled: computed(() => remaining() > 0),
+    text: computed(() => (remaining() > 0 ? `${label}${labels.countdown(remaining())}` : label)),
+  };
+}
+
+/** Data handed to the internal confirm dialog through the dialog manager. */
+interface HellConfirmDialogData {
+  readonly prompt: HellConfirmPromptResolved;
+  readonly buttons: readonly HellConfirmButton[];
+  readonly initialFocusIndex: number;
+}
+
+/**
+ * Internal modal rendered on the dialog primitive for both `injectHellConfirm`
+ * and `injectHellChoice`. Not part of the public surface — callers drive it
+ * entirely through the inject functions; clicking a button closes the dialog
+ * with that button's resolution value.
  */
 @Component({
   selector: 'hell-confirm-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, HellButton, HellDialogOverlay, HellDialog, HellDialogTitle, HellDialogDescription],
+  imports: [HellButton, HellDialogOverlay, HellDialog, HellDialogTitle, HellDialogDescription],
   template: `
     <div hellDialogOverlay>
-      <div hellDialog size="sm" [attr.data-severity]="severity">
+      <div hellDialog size="sm">
         <div class="flex flex-col gap-hell-4 p-hell-5">
           <div class="flex flex-col gap-hell-1">
-            <h2 hellDialogTitle>{{ title }}</h2>
-            @if (description) {
-              <p hellDialogDescription>{{ description }}</p>
+            <h2 hellDialogTitle>{{ prompt.title }}</h2>
+            @if (prompt.description !== null) {
+              <p hellDialogDescription>{{ prompt.description }}</p>
             }
           </div>
 
-          @if (content) {
-            <div class="text-[13px] text-hell-foreground">
-              <ng-container
-                [ngTemplateOutlet]="content"
-                [ngTemplateOutletContext]="{ $implicit: state, state }"
-              />
-            </div>
-          }
-
           <div class="mt-hell-1 flex justify-end gap-hell-3">
-            <button
-              #cancelButtonEl
-              hellButton
-              variant="ghost"
-              size="sm"
-              type="button"
-              (click)="cancel()"
-            >
-              {{ cancelLabel }}
-            </button>
-            <button
-              #confirmButtonEl
-              hellButton
-              [variant]="confirmVariant"
-              size="sm"
-              type="button"
-              [disabled]="confirmDisabled()"
-              (click)="onConfirm()"
-            >
-              {{ confirmText() }}
-            </button>
+            @for (button of buttons; track $index) {
+              <button
+                #actionButton
+                hellButton
+                [variant]="button.variant"
+                size="sm"
+                type="button"
+                [disabled]="button.disabled()"
+                (click)="choose(button)"
+              >
+                {{ button.text() }}
+              </button>
+            }
           </div>
         </div>
       </div>
@@ -171,119 +291,71 @@ interface HellConfirmDialogData {
   `,
 })
 class HellConfirmDialog {
-  private readonly ref = injectDialogRef<HellConfirmDialogData, HellConfirmResult<unknown>>();
+  private readonly ref = injectDialogRef<HellConfirmDialogData, unknown>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  /** Effective confirm labels for this injector scope. */
-  protected readonly labels = inject(HELL_CONFIRM_LABELS);
+  private readonly labels = inject(HELL_CONFIRM_LABELS);
 
-  private readonly options = this.ref.data.options;
-  /** Dialog title text. */
-  protected readonly title = this.options.title;
-  /** Optional description text, or `null` when omitted. */
-  protected readonly description = this.options.description ?? null;
-  /** Resolved severity for this confirmation. */
-  protected readonly severity: HellConfirmSeverity = this.options.severity ?? 'default';
-  /** Resolved cancel button label. */
-  protected readonly cancelLabel = this.options.cancelLabel ?? this.labels.cancel;
-  /** Projected content template, or `null` when none was supplied. */
-  protected readonly content = this.options.content ?? null;
-  /** Button variant used for the confirm action. */
-  protected readonly confirmVariant: HellButtonVariant =
-    this.severity === 'danger' ? 'danger' : 'primary';
-  /** Projected content state signal, seeded from `contentState`. */
-  protected readonly state: WritableSignal<unknown> = signal(this.options.contentState);
+  private readonly data = this.ref.data;
+  /** Normalized prompt rendered as the dialog title and description. */
+  protected readonly prompt = this.data.prompt;
+  /** Rendered buttons with their reactive countdown state and resolution values. */
+  protected readonly buttons = this.data.buttons.map((button) => ({
+    variant: button.variant,
+    value: button.value,
+    ...hellConfirmButtonRuntime(button.label, button.countdownSeconds, this.labels),
+  }));
 
-  private readonly baseConfirmLabel = this.options.confirmLabel ?? this.labels.confirm;
-  private readonly totalCountdown = Math.max(0, Math.floor(this.options.countdownSeconds ?? 0));
-  /** Remaining countdown seconds; `0` once the confirm button is enabled. */
-  protected readonly remaining = signal(this.totalCountdown);
-  /** Whether the confirm button is currently gated by the countdown. */
-  protected readonly confirmDisabled = computed(() => this.remaining() > 0);
-  /** Confirm button label, with the countdown suffix appended while gated. */
-  protected readonly confirmText = computed(() =>
-    this.remaining() > 0
-      ? `${this.baseConfirmLabel}${this.labels.countdown(this.remaining())}`
-      : this.baseConfirmLabel,
-  );
-
-  private readonly confirmButtonRef = viewChild<ElementRef<HTMLButtonElement>>('confirmButtonEl');
-  private readonly cancelButtonRef = viewChild<ElementRef<HTMLButtonElement>>('cancelButtonEl');
-
-  private countdownTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly buttonRefs = viewChildren<ElementRef<HTMLButtonElement>>('actionButton');
 
   constructor() {
-    if (this.totalCountdown > 0) {
-      this.countdownTimer = setInterval(() => this.tickCountdown(), 1000);
-      inject(DestroyRef).onDestroy(() => this.stopCountdown());
-    }
     afterNextRender(() => this.focusInitialControl());
   }
 
-  /** Resolve the confirmation as confirmed, carrying the current content state. */
-  protected onConfirm(): void {
-    if (this.confirmDisabled()) return;
-    void this.ref.close({ confirmed: true, content: this.state() });
-  }
-
-  /** Resolve the confirmation as cancelled, carrying the current content state. */
-  protected cancel(): void {
-    void this.ref.close({ confirmed: false, content: this.state() });
-  }
-
-  private tickCountdown(): void {
-    this.remaining.update((value) => (value > 0 ? value - 1 : 0));
-    if (this.remaining() <= 0) this.stopCountdown();
-  }
-
-  private stopCountdown(): void {
-    if (this.countdownTimer === null) return;
-    clearInterval(this.countdownTimer);
-    this.countdownTimer = null;
+  /** Resolve the surface with the clicked button's value. */
+  protected choose(button: (typeof this.buttons)[number]): void {
+    if (button.disabled()) return;
+    void this.ref.close(button.value);
   }
 
   private focusInitialControl(): void {
-    const target =
-      this.severity === 'danger' || this.confirmDisabled()
-        ? this.cancelButtonRef()
-        : this.confirmButtonRef();
-    const element = target?.nativeElement;
-    if (!element) return;
-    // Run after the focus trap's mount autofocus so the confirm/cancel policy wins.
+    const target = this.buttonRefs()[this.data.initialFocusIndex]?.nativeElement;
+    if (!target) return;
+    // Run after the focus trap's mount autofocus so the action focus policy wins.
     const view = this.host.ownerDocument.defaultView;
-    if (view) view.requestAnimationFrame(() => element.focus({ preventScroll: true }));
-    else element.focus({ preventScroll: true });
+    if (view) view.requestAnimationFrame(() => target.focus({ preventScroll: true }));
+    else target.focus({ preventScroll: true });
   }
 }
 
+interface HellConfirmQueueEntry {
+  readonly data: HellConfirmDialogData;
+  readonly dismissValue: unknown;
+  readonly injector: Injector;
+  readonly resolve: (value: unknown) => void;
+  readonly opener: HTMLElement | null;
+}
+
 /**
- * Opens accessible confirmation dialogs on the dialog primitive and resolves a
- * promise with the outcome.
- *
- * `confirm` always resolves — Escape, backdrop dismissal, and cancel all resolve
- * `confirmed: false`, so destructive flows can `await` linearly. Calls queue:
- * the service never shows two confirm dialogs at once.
+ * Internal root queue behind `injectHellConfirm` and `injectHellChoice`. Opens
+ * one modal at a time on the dialog primitive; the promise always resolves —
+ * Escape and backdrop dismissal resolve the request's dismiss value.
  */
 @Injectable({ providedIn: 'root' })
-export class HellConfirmService {
+class HellConfirmModalQueue {
   private readonly dialogManager = inject(NgpDialogManager);
   private readonly document = inject(DOCUMENT);
 
   private readonly queue: HellConfirmQueueEntry[] = [];
-  private openRef: NgpDialogRef<HellConfirmDialogData, HellConfirmResult<unknown>> | null = null;
+  private openRef: NgpDialogRef<HellConfirmDialogData, unknown> | null = null;
 
-  /**
-   * Open a confirmation and resolve with `{ confirmed }` (plus the projected
-   * content state when a `content` template is used). Never rejects.
-   */
-  confirm<TContentState = void>(
-    options: HellConfirmOptions<TContentState>,
-  ): Promise<HellConfirmResult<TContentState>> {
-    return new Promise<HellConfirmResult<TContentState>>((resolve) => {
-      this.queue.push({
-        options,
-        resolve: resolve as (result: HellConfirmResult<unknown>) => void,
-        opener: this.activeElement(),
-      });
+  /** Enqueue one modal request and resolve with the chosen value. Never rejects. */
+  request(
+    data: HellConfirmDialogData,
+    dismissValue: unknown,
+    injector: Injector,
+  ): Promise<unknown> {
+    return new Promise<unknown>((resolve) => {
+      this.queue.push({ data, dismissValue, injector, resolve, opener: this.activeElement() });
       this.pump();
     });
   }
@@ -292,17 +364,16 @@ export class HellConfirmService {
     if (this.openRef || this.queue.length === 0) return;
 
     const entry = this.queue[0];
-    const data: HellConfirmDialogData = { options: entry.options };
-    const ref = this.dialogManager.open<HellConfirmDialogData, HellConfirmResult<unknown>>(
-      HellConfirmDialog,
-      { data },
-    );
+    const ref = this.dialogManager.open<HellConfirmDialogData, unknown>(HellConfirmDialog, {
+      data: entry.data,
+      injector: entry.injector,
+    });
     this.openRef = ref;
 
     ref.afterClosed.subscribe((result) => {
       this.openRef = null;
       this.queue.shift();
-      entry.resolve(result ?? { confirmed: false });
+      entry.resolve(result === undefined ? entry.dismissValue : result);
       this.restoreFocus(entry.opener);
       this.pump();
     });
@@ -321,148 +392,153 @@ export class HellConfirmService {
   }
 }
 
-interface HellConfirmQueueEntry {
-  readonly options: HellConfirmOptions<unknown>;
-  readonly resolve: (result: HellConfirmResult<unknown>) => void;
-  readonly opener: HTMLElement | null;
+function hellDefaultPrimaryConfig(labels: HellConfirmLabels): HellConfirmActionConfig {
+  return { label: labels.confirm, variant: 'primary', destructive: false, countdownSeconds: 0 };
 }
 
-/** Bridge a popconfirm panel invokes to resolve its owning trigger. */
-interface HellPopconfirmController {
-  /** Emit `confirmed` on the trigger and close the popconfirm. */
-  confirm(): void;
-  /** Close the popconfirm; the trigger emits `dismissed` as it closes. */
-  dismiss(): void;
+function hellDefaultCancelConfig(labels: HellConfirmLabels): HellConfirmActionConfig {
+  return { label: labels.cancel, variant: 'ghost', destructive: false, countdownSeconds: 0 };
 }
 
 /**
- * Injection token a `HellPopconfirmPanel` resolves to reach its owning trigger
- * through the popover overlay's parent injector. Internal to the entry point.
+ * The confirmation function returned by `injectHellConfirm`: opens one
+ * accessible modal for the prompt and resolves whether the user confirmed.
  */
-const HELL_POPCONFIRM = new InjectionToken<HellPopconfirmController>('HELL_POPCONFIRM');
+export type HellConfirmFn = (
+  prompt: HellConfirmPrompt,
+  action?: HellConfirmAction,
+  cancelAction?: HellConfirmAction,
+) => Promise<boolean>;
 
 /**
- * Root registry that enforces one open popconfirm at a time: opening one closes
- * any other. Internal — the trigger drives it from its open-state changes.
- */
-@Injectable({ providedIn: 'root' })
-class HellPopconfirmManager {
-  private current: HellPopconfirm | null = null;
-
-  /** Record `trigger` as the open popconfirm, closing any previously open one. */
-  open(trigger: HellPopconfirm): void {
-    if (this.current && this.current !== trigger) this.current.dismiss();
-    this.current = trigger;
-  }
-
-  /** Clear `trigger` if it is the currently tracked open popconfirm. */
-  release(trigger: HellPopconfirm): void {
-    if (this.current === trigger) this.current = null;
-  }
-}
-
-/**
- * Declarative confirmation popover anchored to its trigger. Attach it to any
- * destructive control and pair it with a `HellPopconfirmPanel` in a template:
+ * Injects a promise-based confirmation function backed by the dialog primitive.
  *
- * ```html
- * <button hellButton variant="danger" [hellPopconfirm]="confirmDelete" (confirmed)="deleteRow(row)">
- *   Delete
- * </button>
- * <ng-template #confirmDelete>
- *   <hell-popconfirm-panel message="Delete this row?" severity="danger" confirmLabel="Delete" />
- * </ng-template>
- * ```
- *
- * Built on the popover primitive, so focus moves into the panel on open and
- * returns to the trigger on dismiss, and Escape or an outside click dismiss it
- * through the shared Floating Dismissal rules. Opening one popconfirm closes any
- * other. There is no promise API on the declarative form: it emits `confirmed`
- * or `dismissed` and leaves the action itself to app code.
+ * `await confirm(prompt, action?, cancelAction?)` opens a focus-trapped,
+ * labelled modal and resolves `true` only when the user activates the confirm
+ * action. The promise always resolves — Escape, backdrop dismissal, and the
+ * cancel button resolve `false` — and calls queue: two confirm surfaces never
+ * show at once. Without an `action`, the confirm button is the Label
+ * Contract's default primary action; `cancelAction` replaces the default
+ * cancel button ("Keep project"). Destructive and countdown-gated actions move
+ * initial focus to cancel.
  */
-@Directive({
-  selector: 'button[hellPopconfirm], a[hellPopconfirm]',
-  exportAs: 'hellPopconfirm',
-  hostDirectives: [
-    {
-      directive: NgpPopoverTrigger,
-      inputs: [
-        'ngpPopoverTrigger:hellPopconfirm',
-        'ngpPopoverTriggerPlacement:placement',
-        'ngpPopoverTriggerOffset:offset',
-        'ngpPopoverTriggerFlip:flip',
-        'ngpPopoverTriggerShift:shift',
-        'ngpPopoverTriggerContainer:container',
-        'ngpPopoverTriggerDisabled:disabled',
+export function injectHellConfirm(): HellConfirmFn {
+  const queue = inject(HellConfirmModalQueue);
+  const injector = inject(Injector);
+
+  return (prompt, action, cancelAction) => {
+    const labels = injector.get(HELL_CONFIRM_LABELS);
+    const confirm = action ? hellConfirmActionConfig(action) : hellDefaultPrimaryConfig(labels);
+    const cancel = cancelAction
+      ? hellConfirmActionConfig(cancelAction)
+      : hellDefaultCancelConfig(labels);
+    const data: HellConfirmDialogData = {
+      prompt: resolvePrompt(prompt),
+      buttons: [
+        {
+          label: cancel.label,
+          variant: cancel.variant,
+          countdownSeconds: cancel.countdownSeconds,
+          value: false,
+        },
+        {
+          label: confirm.label,
+          variant: confirm.variant,
+          countdownSeconds: confirm.countdownSeconds,
+          value: true,
+        },
       ],
-    },
-  ],
-  providers: [{ provide: HELL_POPCONFIRM, useExisting: forwardRef(() => HellPopconfirm) }],
-  host: {
-    '[attr.type]': 'nativeButtonType()',
-    '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
-    '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
-    '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
-    '(click)': 'preventActionAnchorNavigation($event, trigger.disabled())',
-    '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
-  },
-})
-export class HellPopconfirm
-  extends HellNativeInteractiveDisabledGuard
-  implements HellPopconfirmController
-{
-  /** Underlying ng-primitives popover trigger state. */
-  protected readonly trigger = inject(NgpPopoverTrigger);
-  private readonly manager = inject(HellPopconfirmManager);
-
-  /** Emits when the user confirms; wire the destructive action here. */
-  readonly confirmed: OutputEmitterRef<void> = output<void>();
-  /** Emits when the popconfirm closes without confirming (cancel, Escape, outside click, or another opening). */
-  readonly dismissed: OutputEmitterRef<void> = output<void>();
-
-  private confirmedThisCycle = false;
-
-  constructor() {
-    super();
-    const subscription = this.trigger.openChange.subscribe((open: boolean) =>
-      this.onOpenChange(open),
-    );
-    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
-  }
-
-  /** Emit `confirmed` and close the popconfirm. */
-  confirm(): void {
-    this.confirmedThisCycle = true;
-    this.confirmed.emit();
-    void this.trigger.hide('program');
-  }
-
-  /** Close the popconfirm; `dismissed` fires as it closes. */
-  dismiss(): void {
-    void this.trigger.hide('program');
-  }
-
-  private onOpenChange(open: boolean): void {
-    if (open) {
-      this.confirmedThisCycle = false;
-      this.manager.open(this);
-      return;
-    }
-    this.manager.release(this);
-    if (!this.confirmedThisCycle) this.dismissed.emit();
-    this.confirmedThisCycle = false;
-  }
+      initialFocusIndex: confirm.destructive || confirm.countdownSeconds > 0 ? 0 : 1,
+    };
+    return queue.request(data, false, injector) as Promise<boolean>;
+  };
 }
 
 /**
- * Panel for a `HellPopconfirm` trigger: a small confirmation popover with a
- * message and confirm/cancel buttons. Place it inside the trigger's template.
+ * The decision function returned by `injectHellChoice`: opens one accessible
+ * modal offering the given actions and resolves the chosen action's key.
+ */
+export type HellChoiceFn = <K extends string>(
+  prompt: HellConfirmPrompt,
+  actions: ReadonlyArray<HellChoiceAction<K>>,
+) => Promise<K | null>;
+
+/**
+ * Injects a promise-based N-way decision function backed by the dialog
+ * primitive (modal only).
  *
- * It renders on the popover primitive (focus trap, `role="dialog"`, shared
- * Floating Dismissal) and wires its buttons back to the owning trigger, which
- * owns the `confirmed` / `dismissed` outputs. Danger severity mirrors the
- * confirm service: the confirm button takes the destructive variant and initial
- * focus starts on cancel.
+ * `await choice(prompt, actions)` renders one button per `hellChoiceAction`
+ * (in order) and resolves the activated action's key. The promise always
+ * resolves: Escape and backdrop dismissal resolve the key of the single action
+ * marked `dismissEquivalent`, else `null`. Calls share the confirm queue.
+ * When any action is destructive or countdown-gated, initial focus moves to
+ * the safe dismiss-equivalent action (or the first safe action).
+ */
+export function injectHellChoice(): HellChoiceFn {
+  const queue = inject(HellConfirmModalQueue);
+  const injector = inject(Injector);
+
+  return <K extends string>(
+    prompt: HellConfirmPrompt,
+    actions: ReadonlyArray<HellChoiceAction<K>>,
+  ) => {
+    const values = actions.map(hellChoiceActionValue);
+    if (values.length === 0) {
+      throw new Error('A Hell UI choice needs at least one hellChoiceAction.');
+    }
+    const dismissEquivalents = values.filter((value) => value.dismissEquivalent);
+    if (dismissEquivalents.length > 1) {
+      throw new Error('A Hell UI choice may mark at most one action dismissEquivalent.');
+    }
+    const data: HellConfirmDialogData = {
+      prompt: resolvePrompt(prompt),
+      buttons: values.map((value) => ({
+        label: value.config.label,
+        variant: value.config.variant,
+        countdownSeconds: value.config.countdownSeconds,
+        value: value.key,
+      })),
+      initialFocusIndex: choiceInitialFocusIndex(values),
+    };
+    return queue.request(data, dismissEquivalents[0]?.key ?? null, injector) as Promise<K | null>;
+  };
+}
+
+function choiceInitialFocusIndex(values: readonly HellChoiceActionValue<string>[]): number {
+  const isSafe = (value: HellChoiceActionValue<string>) =>
+    !value.config.destructive && value.config.countdownSeconds === 0;
+  if (values.every(isSafe)) return 0;
+
+  const dismissIndex = values.findIndex((value) => value.dismissEquivalent && isSafe(value));
+  if (dismissIndex >= 0) return dismissIndex;
+
+  const safeIndex = values.findIndex(isSafe);
+  return safeIndex >= 0 ? safeIndex : 0;
+}
+
+/** Everything the internal popconfirm panel needs from its opening call. */
+interface HellPopconfirmRequest {
+  readonly prompt: HellConfirmPromptResolved;
+  readonly action: HellConfirmActionConfig;
+  readonly cancelLabel: string;
+  confirm(): void;
+  cancel(): void;
+}
+
+/**
+ * Injection token carrying one popconfirm call's request into the panel
+ * rendered by the overlay. Internal to the entry point.
+ */
+const HELL_POPCONFIRM_REQUEST = new InjectionToken<HellPopconfirmRequest>(
+  'HELL_POPCONFIRM_REQUEST',
+);
+
+/**
+ * Internal anchored confirmation panel rendered on the popover primitive by
+ * `injectHellPopconfirm`. Not part of the public surface. It registers with
+ * any active Hell Floating Scope through `HellPopover`, is named by the prompt
+ * title, and mirrors the modal focus policy: destructive or countdown-gated
+ * actions start focus on cancel.
  */
 @Component({
   selector: 'hell-popconfirm-panel',
@@ -470,12 +546,19 @@ export class HellPopconfirm
   hostDirectives: [HellPopover],
   imports: [HellButton],
   host: {
-    '[attr.aria-labelledby]': 'messageId',
-    '[attr.data-severity]': 'severity()',
+    '[attr.aria-labelledby]': 'titleId',
+    '[attr.aria-describedby]': 'request.prompt.description !== null ? descriptionId : null',
   },
   template: `
     <div class="flex flex-col gap-hell-3">
-      <p [id]="messageId" class="text-[13px] text-hell-foreground">{{ resolvedMessage() }}</p>
+      <div class="flex flex-col gap-hell-1">
+        <p [id]="titleId" class="text-[13px] text-hell-foreground">{{ request.prompt.title }}</p>
+        @if (request.prompt.description !== null) {
+          <p [id]="descriptionId" class="text-[13px] text-hell-foreground-muted">
+            {{ request.prompt.description }}
+          </p>
+        }
+      </div>
       <div class="flex justify-end gap-hell-2">
         <button
           #cancelButtonEl
@@ -483,49 +566,40 @@ export class HellPopconfirm
           variant="ghost"
           size="sm"
           type="button"
-          (click)="onDismiss()"
+          (click)="request.cancel()"
         >
-          {{ cancelText() }}
+          {{ request.cancelLabel }}
         </button>
         <button
           #confirmButtonEl
           hellButton
-          [variant]="confirmVariant()"
+          [variant]="request.action.variant"
           size="sm"
           type="button"
+          [disabled]="confirm.disabled()"
           (click)="onConfirm()"
         >
-          {{ confirmText() }}
+          {{ confirm.text() }}
         </button>
       </div>
     </div>
   `,
 })
-export class HellPopconfirmPanel {
-  /** Confirmation message. Falls back to the Label Contract's `popconfirmMessage`. */
-  readonly message = input<string>();
-  /** `default` (confirm focused) or `danger` (destructive confirm, cancel focused). Defaults to `default`. */
-  readonly severity = input<HellConfirmSeverity>('default');
-  /** Overrides the confirm button label. Falls back to the Label Contract's `confirm`. */
-  readonly confirmLabel = input<string>();
-  /** Overrides the cancel button label. Falls back to the Label Contract's `cancel`. */
-  readonly cancelLabel = input<string>();
-
+class HellPopconfirmPanel {
+  /** The opening call's prompt, action, and resolution callbacks. */
+  protected readonly request = inject(HELL_POPCONFIRM_REQUEST);
   private readonly labels = inject(HELL_CONFIRM_LABELS);
-  private readonly controller = inject(HELL_POPCONFIRM);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  /** Stable id linking the message paragraph as the dialog's accessible name. */
-  protected readonly messageId = `hell-popconfirm-${nextPopconfirmId()}`;
-  /** Resolved confirmation message. */
-  protected readonly resolvedMessage = computed(() => this.message() ?? this.labels.popconfirmMessage);
-  /** Resolved confirm button label. */
-  protected readonly confirmText = computed(() => this.confirmLabel() ?? this.labels.confirm);
-  /** Resolved cancel button label. */
-  protected readonly cancelText = computed(() => this.cancelLabel() ?? this.labels.cancel);
-  /** Button variant used for the confirm action. */
-  protected readonly confirmVariant = computed<HellButtonVariant>(() =>
-    this.severity() === 'danger' ? 'danger' : 'primary',
+  /** Stable id linking the prompt title as the panel's accessible name. */
+  protected readonly titleId = `hell-popconfirm-${nextPopconfirmId()}`;
+  /** Stable id linking the prompt description as the panel's accessible description. */
+  protected readonly descriptionId = `${this.titleId}-description`;
+  /** Reactive confirm-button state, including any countdown gate. */
+  protected readonly confirm = hellConfirmButtonRuntime(
+    this.request.action.label,
+    this.request.action.countdownSeconds,
+    this.labels,
   );
 
   private readonly confirmButtonRef = viewChild<ElementRef<HTMLButtonElement>>('confirmButtonEl');
@@ -535,21 +609,20 @@ export class HellPopconfirmPanel {
     afterNextRender(() => this.focusInitialControl());
   }
 
-  /** Confirm the action through the owning trigger. */
+  /** Resolve the popconfirm as confirmed unless the countdown still gates it. */
   protected onConfirm(): void {
-    this.controller.confirm();
-  }
-
-  /** Dismiss the popconfirm through the owning trigger. */
-  protected onDismiss(): void {
-    this.controller.dismiss();
+    if (this.confirm.disabled()) return;
+    this.request.confirm();
   }
 
   private focusInitialControl(): void {
-    const target = this.severity() === 'danger' ? this.cancelButtonRef() : this.confirmButtonRef();
+    const target =
+      this.request.action.destructive || this.confirm.disabled()
+        ? this.cancelButtonRef()
+        : this.confirmButtonRef();
     const element = target?.nativeElement;
     if (!element) return;
-    // Run after the popover focus trap's mount autofocus so the danger/default policy wins.
+    // Run after the popover focus trap's mount autofocus so the action focus policy wins.
     const view = this.host.ownerDocument.defaultView;
     if (view) view.requestAnimationFrame(() => element.focus({ preventScroll: true }));
     else element.focus({ preventScroll: true });
@@ -559,4 +632,111 @@ export class HellPopconfirmPanel {
 let popconfirmIdCounter = 0;
 function nextPopconfirmId(): number {
   return ++popconfirmIdCounter;
+}
+
+/** Handle the single-open registry uses to displace an open popconfirm. */
+interface HellPopconfirmHandle {
+  dismiss(): void;
+}
+
+/**
+ * Root registry enforcing one open popconfirm at a time: opening one displaces
+ * any other, which resolves `false`. Internal to the entry point.
+ */
+@Injectable({ providedIn: 'root' })
+class HellPopconfirmManager {
+  private current: HellPopconfirmHandle | null = null;
+
+  /** Track `handle` as the open popconfirm, dismissing any previously open one. */
+  open(handle: HellPopconfirmHandle): void {
+    const previous = this.current;
+    this.current = handle;
+    if (previous) previous.dismiss();
+  }
+
+  /** Clear `handle` if it is the currently tracked open popconfirm. */
+  release(handle: HellPopconfirmHandle): void {
+    if (this.current === handle) this.current = null;
+  }
+}
+
+/**
+ * The popconfirm function returned by `injectHellPopconfirm`: opens one
+ * anchored confirmation panel and resolves whether the user confirmed.
+ */
+export type HellPopconfirmFn = (
+  anchor: HTMLElement,
+  prompt: HellConfirmPrompt,
+  action?: HellConfirmAction,
+) => Promise<boolean>;
+
+/**
+ * Injects a promise-based anchored confirmation function backed by the popover
+ * primitive — the in-context alternative to `injectHellConfirm` for lightweight
+ * decisions such as a row delete.
+ *
+ * `await popconfirm(anchor, prompt, action?)` opens a small panel positioned
+ * against `anchor`, moves focus into it, and resolves `true` only when the
+ * user activates the confirm action. The promise always resolves — cancel,
+ * Escape, an outside click, and another popconfirm opening all resolve `false`.
+ * Focus returns to the anchor when the panel closes, one popconfirm is open at
+ * a time, and the panel joins the surrounding Hell Floating Scope so nested
+ * dismissal keeps working. Must be injected in a component or directive: the
+ * panel renders from the caller's view.
+ */
+export function injectHellPopconfirm(): HellPopconfirmFn {
+  const injector = inject(Injector);
+  const viewContainerRef = inject(ViewContainerRef);
+  const manager = inject(HellPopconfirmManager);
+
+  return (anchor, prompt, action) =>
+    new Promise<boolean>((resolve) => {
+      const labels = injector.get(HELL_CONFIRM_LABELS);
+      const config = action ? hellConfirmActionConfig(action) : hellDefaultPrimaryConfig(labels);
+
+      let result = false;
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        manager.release(handle);
+        resolve(result);
+      };
+
+      const request: HellPopconfirmRequest = {
+        prompt: resolvePrompt(prompt),
+        action: config,
+        cancelLabel: labels.cancel,
+        confirm: () => {
+          result = true;
+          overlay.hide();
+        },
+        cancel: () => overlay.hide(),
+      };
+
+      const overlay = createOverlay<unknown>({
+        content: HellPopconfirmPanel,
+        triggerElement: anchor,
+        injector,
+        viewContainerRef,
+        placement: signal<Placement>('bottom'),
+        offset: 4,
+        closeOnOutsideClick: true,
+        closeOnEscape: true,
+        restoreFocus: true,
+        providers: [{ provide: HELL_POPCONFIRM_REQUEST, useValue: request }],
+        onClose: settle,
+      });
+
+      const handle: HellPopconfirmHandle = {
+        // Displacement skips the user-driven close's focus restore and must
+        // also settle a panel dismissed before its open tick, so destroy + settle.
+        dismiss: () => {
+          overlay.destroy();
+          settle();
+        },
+      };
+      manager.open(handle);
+      void overlay.show();
+    });
 }

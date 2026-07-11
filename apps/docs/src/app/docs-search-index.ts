@@ -551,35 +551,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/confirm',
     detail: 'components/confirm/examples/basic.example.ts',
     terms:
-      'confirm HellConfirmService confirm promise await dialog modal confirmed publish smallest usage title description accessible focus trap composite',
+      'confirm injectHellConfirm hellPrimaryAction prompt action promise await dialog modal boolean publish smallest usage title description accessible focus trap composite',
   },
   {
-    title: 'Confirm: Danger',
+    title: 'Confirm: Destructive',
     path: '/components/confirm',
     detail: 'components/confirm/examples/danger.example.ts',
     terms:
-      'confirm HellConfirmService severity danger destructive delete confirmLabel cancelLabel initial focus cancel button variant danger irreversible',
+      'confirm injectHellConfirm hellDestructiveAction hellSecondaryAction cancelAction destructive delete keep project initial focus cancel button variant danger irreversible',
   },
   {
     title: 'Confirm: Countdown',
     path: '/components/confirm',
     detail: 'components/confirm/examples/countdown.example.ts',
     terms:
-      'confirm HellConfirmService countdownSeconds countdown gate disabled remaining seconds reset database never auto-confirm irreversible Label Contract',
-  },
-  {
-    title: 'Confirm: Projected content',
-    path: '/components/confirm',
-    detail: 'components/confirm/examples/content-template.example.ts',
-    terms:
-      'confirm HellConfirmService content template contentState HellConfirmContentContext state signal writable checkbox hellNativeCheckbox delete imported groups result rides back projected',
+      'confirm injectHellConfirm hellCountdownAction decorator countdown gate disabled remaining seconds reset database never auto-confirm irreversible Label Contract',
   },
   {
     title: 'Confirm: Popconfirm row delete',
     path: '/components/confirm',
     detail: 'components/confirm/examples/popconfirm-row-delete.example.ts',
     terms:
-      'popconfirm hellPopconfirm HellPopconfirmPanel hell-popconfirm-panel row delete destructive danger anchored popover confirmed dismissed single open one at a time floating dismissal escape outside click confirmLabel severity in-context inline trigger directive panel declarative',
+      'popconfirm injectHellPopconfirm hellDestructiveAction anchor row delete destructive danger anchored popover imperative promise boolean single open one at a time floating dismissal escape outside click focus restore in-context inline',
+  },
+  {
+    title: 'Confirm: Choice for unsaved changes',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/choice-unsaved-changes.example.ts',
+    terms:
+      'choice injectHellChoice hellChoiceAction dismissEquivalent typed key n-way decision save discard keep editing unsaved changes close editor escape resolves stay null modal',
   },
   {
     title: 'Date Input: Basic',
@@ -1345,11 +1345,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'save-bar sticky-scroll components/save-bar/examples/sticky-scroll.example components/save-bar hell-save-bar sticky bottom scroll container normal flow no portal no fixed overflow dock last field visible',
   },
   {
-    title: 'Save Bar: Discard through the confirm service',
+    title: 'Save Bar: Discard through the confirm function',
     path: '/components/save-bar',
     detail: 'components/save-bar/examples/confirm-discard.example.ts',
     terms:
-      'save-bar confirm-discard components/save-bar/examples/confirm-discard.example components/save-bar hell-save-bar HellConfirmService discarded confirm dialog danger discard changes keep editing route guard unsaved changes recoverable',
+      'save-bar confirm-discard components/save-bar/examples/confirm-discard.example components/save-bar hell-save-bar injectHellConfirm hellDestructiveAction hellSecondaryAction discarded confirm dialog danger discard changes keep editing route guard unsaved changes recoverable',
   },
   {
     title: 'Search: Basic',

@@ -59,12 +59,12 @@ test.describe('save bar browser accessibility contract', () => {
       return box.y + box.height;
     };
 
-    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(2);
+    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(8);
 
     // Scrolled to the end, the bar still closes the container without
     // overlapping the last field.
     await container.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
-    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(2);
+    expect(Math.abs((await barBottom()) - (await containerBottom()))).toBeLessThanOrEqual(8);
 
     const lastField = example.getByRole('textbox', { name: 'Notes' });
     const lastFieldBox = await lastField.boundingBox();

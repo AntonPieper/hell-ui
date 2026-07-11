@@ -2,7 +2,12 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HellButton } from '@hell-ui/angular/button';
 
-import { HELL_CONFIRM_LABELS, HellPopconfirm, HellPopconfirmPanel, provideHellConfirmLabels } from './confirm';
+import {
+  hellCountdownAction,
+  hellDestructiveAction,
+  injectHellPopconfirm,
+  provideHellConfirmLabels,
+} from './confirm';
 
 const POPCONFIRM_TEST_TIMEOUT_MS = 15000;
 const POPCONFIRM_TEST_CASE_TIMEOUT_MS = 30000;
@@ -18,55 +23,18 @@ beforeAll(() => {
 
 @Component({
   selector: 'hell-popconfirm-host',
-  imports: [HellButton, HellPopconfirm, HellPopconfirmPanel],
+  imports: [HellButton],
   template: `
-    <button
-      id="trigger-a"
-      hellButton
-      variant="danger"
-      [hellPopconfirm]="panelA"
-      [container]="container"
-      (confirmed)="events.push('confirmed-a')"
-      (dismissed)="events.push('dismissed-a')"
-    >
-      Delete A
-    </button>
-    <ng-template #panelA>
-      <hell-popconfirm-panel
-        [message]="message"
-        [severity]="severity"
-        [confirmLabel]="confirmLabel"
-        [cancelLabel]="cancelLabel"
-      />
-    </ng-template>
-
-    <button
-      id="trigger-b"
-      hellButton
-      [hellPopconfirm]="panelB"
-      [container]="container"
-      (confirmed)="events.push('confirmed-b')"
-      (dismissed)="events.push('dismissed-b')"
-    >
-      Delete B
-    </button>
-    <ng-template #panelB>
-      <hell-popconfirm-panel message="Second row?" />
-    </ng-template>
-
+    <button id="anchor-a" hellButton variant="danger" type="button">Delete A</button>
+    <button id="anchor-b" hellButton type="button">Delete B</button>
     <button id="outside" type="button">Outside</button>
-    <div id="popconfirm-container" #container></div>
   `,
 })
 class PopconfirmHost {
-  readonly events: string[] = [];
-  message: string | undefined = 'Delete this row?';
-  severity: 'default' | 'danger' = 'danger';
-  confirmLabel: string | undefined;
-  cancelLabel: string | undefined;
+  readonly popconfirm = injectHellPopconfirm();
 }
 
-describe('HellPopconfirm', () => {
+describe('injectHellPopconfirm', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [PopconfirmHost] }).compileComponents();
   });
@@ -77,78 +45,166 @@ describe('HellPopconfirm', () => {
     }
   });
 
-  it('emits confirmed and closes when the confirm button is clicked', async () => {
-    const fixture = TestBed.createComponent(PopconfirmHost);
-    fixture.detectChanges();
+  it(
+    'resolves true and closes when the confirm button is clicked',
+    async () => {
+      const { fixture, host } = setup();
+      const promise = host.popconfirm(
+        anchor(fixture, '#anchor-a'),
+        'Delete this row?',
+        hellDestructiveAction('Delete'),
+      );
+      const panel = await waitForPanel(fixture);
+      expect(panel.textContent).toContain('Delete this row?');
 
-    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#trigger-a');
-    trigger.click();
-    const panel = await waitForPanel(fixture);
-    expect(panel.textContent).toContain('Delete this row?');
+      confirmButton(panel).click();
+      await waitForNoPanel(fixture);
 
-    confirmButton(panel).click();
-    await waitForNoPanel(fixture);
+      await expect(promise).resolves.toBe(true);
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 
-    expect(fixture.componentInstance.events).toEqual(['confirmed-a']);
-  }, POPCONFIRM_TEST_CASE_TIMEOUT_MS);
+  it(
+    'resolves false and closes when the cancel button is clicked',
+    async () => {
+      const { fixture, host } = setup();
+      const promise = host.popconfirm(
+        anchor(fixture, '#anchor-a'),
+        'Delete this row?',
+        hellDestructiveAction('Delete'),
+      );
+      const panel = await waitForPanel(fixture);
 
-  it('emits dismissed and closes when the cancel button is clicked', async () => {
-    const fixture = TestBed.createComponent(PopconfirmHost);
-    fixture.detectChanges();
+      cancelButton(panel).click();
+      await waitForNoPanel(fixture);
 
-    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#trigger-a');
-    trigger.click();
-    const panel = await waitForPanel(fixture);
+      await expect(promise).resolves.toBe(false);
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 
-    cancelButton(panel).click();
-    await waitForNoPanel(fixture);
+  it(
+    'names the panel from the prompt and links the description',
+    async () => {
+      const { fixture, host } = setup();
+      void host.popconfirm(anchor(fixture, '#anchor-a'), {
+        title: 'Delete this row?',
+        description: 'This cannot be undone.',
+      });
+      const panel = await waitForPanel(fixture);
 
-    expect(fixture.componentInstance.events).toEqual(['dismissed-a']);
-  }, POPCONFIRM_TEST_CASE_TIMEOUT_MS);
+      const labelledBy = panel.getAttribute('aria-labelledby') ?? '';
+      const describedBy = panel.getAttribute('aria-describedby') ?? '';
+      expect(panel.getAttribute('role')).toBe('dialog');
+      expect(document.getElementById(labelledBy)?.textContent?.trim()).toBe('Delete this row?');
+      expect(document.getElementById(describedBy)?.textContent?.trim()).toBe(
+        'This cannot be undone.',
+      );
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 
-  it('uses the destructive variant for danger severity', async () => {
-    const fixture = TestBed.createComponent(PopconfirmHost);
-    fixture.detectChanges();
+  it(
+    'uses the destructive variant for destructive actions',
+    async () => {
+      const { fixture, host } = setup();
+      void host.popconfirm(
+        anchor(fixture, '#anchor-a'),
+        'Delete this row?',
+        hellDestructiveAction('Delete'),
+      );
+      const panel = await waitForPanel(fixture);
 
-    query<HTMLButtonElement>(fixture.nativeElement, '#trigger-a').click();
-    const panel = await waitForPanel(fixture);
+      expect(confirmButton(panel).getAttribute('data-variant')).toBe('danger');
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 
-    expect(confirmButton(panel).getAttribute('data-variant')).toBe('danger');
-  }, POPCONFIRM_TEST_CASE_TIMEOUT_MS);
+  it(
+    'gates a countdown action without auto-confirming',
+    async () => {
+      const { fixture, host } = setup();
+      let resolved = false;
+      const promise = host.popconfirm(
+        anchor(fixture, '#anchor-a'),
+        'Reset this device?',
+        hellCountdownAction(1, hellDestructiveAction('Reset')),
+      );
+      void promise.then(() => (resolved = true));
+      const panel = await waitForPanel(fixture);
 
-  it('enforces a single open popconfirm — opening one dismisses another', async () => {
-    const fixture = TestBed.createComponent(PopconfirmHost);
-    fixture.detectChanges();
+      const confirm = confirmButton(panel);
+      expect(confirm.disabled).toBe(true);
+      expect(confirm.textContent).toContain('(1)');
 
-    query<HTMLButtonElement>(fixture.nativeElement, '#trigger-a').click();
-    await waitForPanel(fixture);
+      await delay(1150);
+      await settle(fixture);
 
-    query<HTMLButtonElement>(fixture.nativeElement, '#trigger-b').click();
-    await waitForPanelText(fixture, 'Second row?');
+      expect(confirm.disabled).toBe(false);
+      expect(resolved).toBe(false); // countdown enables only — it never auto-confirms
 
-    expect(document.body.querySelectorAll('hell-popconfirm-panel')).toHaveLength(1);
-    expect(fixture.componentInstance.events).toContain('dismissed-a');
-    expect(fixture.componentInstance.events).not.toContain('confirmed-a');
-  }, POPCONFIRM_TEST_CASE_TIMEOUT_MS);
+      confirm.click();
+      await waitForNoPanel(fixture);
+      await expect(promise).resolves.toBe(true);
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 
-  it('applies per-panel label overrides and Label Contract defaults', async () => {
-    TestBed.configureTestingModule({
-      providers: [provideHellConfirmLabels({ confirm: 'Ja', cancel: 'Nein' })],
-    });
-    const fixture = TestBed.createComponent(PopconfirmHost);
-    fixture.componentInstance.severity = 'default';
-    fixture.componentInstance.message = undefined; // exercise the default message label
-    fixture.detectChanges();
+  it(
+    'enforces a single open popconfirm — opening one resolves the other false',
+    async () => {
+      const { fixture, host } = setup();
+      const first = host.popconfirm(anchor(fixture, '#anchor-a'), 'First row?');
+      await waitForPanel(fixture);
 
-    query<HTMLButtonElement>(fixture.nativeElement, '#trigger-a').click();
-    const panel = await waitForPanel(fixture);
+      const second = host.popconfirm(anchor(fixture, '#anchor-b'), 'Second row?');
+      await waitForPanelText(fixture, 'Second row?');
 
-    expect(panel.textContent).toContain('Are you sure?');
-    expect(confirmButton(panel).textContent?.trim()).toBe('Ja');
-    expect(cancelButton(panel).textContent?.trim()).toBe('Nein');
-    expect(TestBed.inject(HELL_CONFIRM_LABELS).popconfirmMessage).toBe('Are you sure?');
-  }, POPCONFIRM_TEST_CASE_TIMEOUT_MS);
+      expect(document.body.querySelectorAll('hell-popconfirm-panel')).toHaveLength(1);
+      await expect(first).resolves.toBe(false);
+
+      confirmButton(query(document.body, 'hell-popconfirm-panel')).click();
+      await waitForNoPanel(fixture);
+      await expect(second).resolves.toBe(true);
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
+
+  it(
+    'applies Label Contract defaults to the action and cancel labels',
+    async () => {
+      TestBed.configureTestingModule({
+        providers: [provideHellConfirmLabels({ confirm: 'Ja', cancel: 'Nein' })],
+      });
+      const { fixture, host } = setup();
+
+      void host.popconfirm(anchor(fixture, '#anchor-a'), 'Are you sure?');
+      const panel = await waitForPanel(fixture);
+
+      expect(confirmButton(panel).textContent?.trim()).toBe('Ja');
+      expect(confirmButton(panel).getAttribute('data-variant')).toBe('primary');
+      expect(cancelButton(panel).textContent?.trim()).toBe('Nein');
+    },
+    POPCONFIRM_TEST_CASE_TIMEOUT_MS,
+  );
 });
+
+function setup(): {
+  fixture: ReturnType<typeof TestBed.createComponent<PopconfirmHost>>;
+  host: PopconfirmHost;
+} {
+  const fixture = TestBed.createComponent(PopconfirmHost);
+  fixture.detectChanges();
+  return { fixture, host: fixture.componentInstance };
+}
+
+function anchor(
+  fixture: { nativeElement: HTMLElement },
+  selector: string,
+): HTMLButtonElement {
+  return query<HTMLButtonElement>(fixture.nativeElement, selector);
+}
 
 function confirmButton(panel: HTMLElement): HTMLButtonElement {
   return panelButton(panel, 'primary', 'danger');
@@ -168,7 +224,6 @@ function panelButton(panel: HTMLElement, ...variants: string[]): HTMLButtonEleme
 
 async function waitForPanel(fixture: {
   detectChanges(): void;
-  whenStable(): Promise<unknown>;
 }): Promise<HTMLElement> {
   const timeout = Date.now() + POPCONFIRM_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
@@ -181,7 +236,7 @@ async function waitForPanel(fixture: {
 }
 
 async function waitForPanelText(
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  fixture: { detectChanges(): void },
   text: string,
 ): Promise<void> {
   const timeout = Date.now() + POPCONFIRM_TEST_TIMEOUT_MS;
@@ -194,10 +249,7 @@ async function waitForPanelText(
   throw new Error(`Expected exactly one popconfirm panel containing ${text}.`);
 }
 
-async function waitForNoPanel(fixture: {
-  detectChanges(): void;
-  whenStable(): Promise<unknown>;
-}): Promise<void> {
+async function waitForNoPanel(fixture: { detectChanges(): void }): Promise<void> {
   const timeout = Date.now() + POPCONFIRM_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
     await settle(fixture);
@@ -220,6 +272,10 @@ async function nextFrame(): Promise<void> {
     return;
   }
   await Promise.resolve();
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
