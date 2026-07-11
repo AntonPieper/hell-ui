@@ -292,12 +292,19 @@ describe('HellNumberInput', () => {
     expect(input.getAttribute('aria-valuemax')).toBe('65535');
   });
 
-  it('drops the spinbutton role while the value is null', () => {
+  it('keeps a static spinbutton role while the value is null and omits only aria-valuenow', () => {
     const fixture = TestBed.createComponent(NumberInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(1);
+    host.max.set(65535);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    expect(input.getAttribute('role')).toBeNull();
+    // Role and bounds are static: present regardless of whether a value exists.
+    expect(input.getAttribute('role')).toBe('spinbutton');
+    expect(input.getAttribute('aria-valuemin')).toBe('1');
+    expect(input.getAttribute('aria-valuemax')).toBe('65535');
+    // aria-valuenow is the only spinbutton attribute omitted while the value is null.
     expect(input.getAttribute('aria-valuenow')).toBeNull();
   });
 
@@ -347,6 +354,48 @@ describe('HellNumberInput', () => {
     );
     fixture.detectChanges();
     expect(host.value()).toBe(110);
+  });
+
+  it('commits a pending typed draft before stepping with the keyboard', () => {
+    const fixture = TestBed.createComponent(NumberInputHost);
+    const host = fixture.componentInstance;
+    host.value.set(8081);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    // Type a new value without committing it (no blur / Enter).
+    input.value = '500';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    fixture.detectChanges();
+
+    // Steps from the just-typed 500, not the stale committed 8081.
+    expect(host.value()).toBe(501);
+    expect(input.value).toBe('501');
+    expect(host.values).toEqual([500, 501]);
+  });
+
+  it('commits a pending typed draft before a Home/End jump', () => {
+    const fixture = TestBed.createComponent(NumberInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(1);
+    host.max.set(65535);
+    host.value.set(8081);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '500';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    fixture.detectChanges();
+
+    // The typed draft commits first, then End jumps to max.
+    expect(host.value()).toBe(65535);
+    expect(host.values).toEqual([500, 65535]);
   });
 
   it('jumps to min and max with Home and End when bounds exist', () => {
@@ -429,6 +478,69 @@ describe('HellNumberInput', () => {
     decrement.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     fixture.detectChanges();
     expect(host.value()).toBe(5);
+  });
+
+  it('commits a pending typed draft before a stepper click', () => {
+    const fixture = TestBed.createComponent(NumberInputHost);
+    const host = fixture.componentInstance;
+    host.steppers.set(true);
+    host.value.set(8081);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    // Type 500 without committing, then click the increment stepper.
+    input.value = '500';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    const increment = stepperButton(fixture.nativeElement, 'increment');
+    increment.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+    increment.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    fixture.detectChanges();
+
+    // 8081 committed, typed 500, clicked + → 501, never 8082 from the stale value.
+    expect(host.value()).toBe(501);
+    expect(input.value).toBe('501');
+    expect(host.values).toEqual([500, 501]);
+  });
+
+  it('keeps the stepper buttons out of the tab order', () => {
+    const fixture = TestBed.createComponent(NumberInputHost);
+    fixture.componentInstance.steppers.set(true);
+    fixture.detectChanges();
+
+    expect(stepperButton(fixture.nativeElement, 'increment').getAttribute('tabindex')).toBe('-1');
+    expect(stepperButton(fixture.nativeElement, 'decrement').getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('keeps the Shift multiplier across hold-to-repeat steps', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(NumberInputHost);
+      const host = fixture.componentInstance;
+      host.steppers.set(true);
+      host.value.set(100);
+      fixture.detectChanges();
+
+      const increment = stepperButton(fixture.nativeElement, 'increment');
+      increment.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, button: 0, shiftKey: true }),
+      );
+      fixture.detectChanges();
+      // The first step lands immediately with the ×10 Shift multiplier.
+      expect(host.value()).toBe(110);
+
+      // Cross the hold delay, then fire one repeat tick.
+      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(60);
+      fixture.detectChanges();
+      // The repeat keeps the multiplier: another +10, not +1.
+      expect(host.value()).toBe(120);
+
+      increment.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('disables the steppers at the bounds', () => {

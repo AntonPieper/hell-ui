@@ -162,6 +162,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Fixed
 
+- `HellNumberInput` now commits a pending typed draft before stepping, so typing
+  a value and then clicking a stepper or pressing Arrow / Page / Home / End steps
+  from what was typed instead of the stale committed value it shadowed (commit
+  8081, type `500`, click `+` now yields `501`, not `8082`). Its spinbutton
+  semantics are also static: `role="spinbutton"` and `aria-valuemin` /
+  `aria-valuemax` are reflected whenever the corresponding bound exists regardless
+  of the current value, and only `aria-valuenow` drops while the value is null
+  (empty fields stay axe-clean). The Shift multiplier now persists across
+  hold-to-repeat steps, and the increment / decrement stepper buttons are out of
+  the tab order (`tabindex="-1"`, APG spinbutton prior art) so keyboard stepping on
+  the field is the single, accessible tab stop. Evidence:
+  `packages/angular/number-input/number-input.spec.ts`,
+  `e2e/number-input-a11y-contracts.spec.ts`, and the docs page at
+  `/components/number-input`. Closes #134 (spec #94).
 - TanStack column filters no longer render object-valued state as the literal
   text `[object Object]`; only scalar filter values are shown in the input.
 - Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`
