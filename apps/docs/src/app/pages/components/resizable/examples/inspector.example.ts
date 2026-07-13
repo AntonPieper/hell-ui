@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 interface Ticket {
   readonly id: string;
@@ -24,7 +24,7 @@ const tickets: readonly Ticket[] = [
     ...HELL_RESIZABLE_DIRECTIVES,
     ...HELL_CARD_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
-    HellTag,
+    HellChip,
   ],
   template: `
     <!-- List / inspector split: a table of tickets on the left, a detail card -->
@@ -51,7 +51,7 @@ const tickets: readonly Ticket[] = [
                   <td hellTableCell class="font-medium">{{ ticket.id }}</td>
                   <td hellTableCell>{{ ticket.title }}</td>
                   <td hellTableCell>
-                    <span hellTag [variant]="statusVariant(ticket.status)">{{ ticket.status }}</span>
+                    <span hellChip [variant]="statusVariant(ticket.status)">{{ ticket.status }}</span>
                   </td>
                 </tr>
               }
@@ -70,7 +70,7 @@ const tickets: readonly Ticket[] = [
         <div hellCard [elevation]="0" ui="h-full rounded-none border-0">
           <div hellCardHeader>
             <strong>{{ selected().id }}</strong>
-            <span hellTag [variant]="statusVariant(selected().status)">{{ selected().status }}</span>
+            <span hellChip [variant]="statusVariant(selected().status)">{{ selected().status }}</span>
           </div>
           <div hellCardBody class="flex flex-col gap-hell-2 text-sm">
             <p class="m-0 font-medium">{{ selected().title }}</p>

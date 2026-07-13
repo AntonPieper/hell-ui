@@ -100,7 +100,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         Add <code>multiple</code> to let the list accumulate selections. The value becomes an
         array, the dropdown stays open as you toggle rows, and selected options carry
         <code>aria-selected="true"</code>. Summarize the selection in the trigger (a count works
-        well) and reflect the choices elsewhere — here as <code>hellTag</code> chips.
+        well) and reflect the choices elsewhere — here as <code>hellChip</code> chips.
       </p>
       <hd-example-tabs [code]="selectMultipleExampleCode" previewClass="min-h-[220px]">
         <app-select-multiple-example />
@@ -122,7 +122,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p>
         A realistic review-decision row: a <code>hellField</code> supplies the label, description,
         and a submit-time <code>hellFieldError</code>, the <code>&lt;hell-select-basic&gt;</code>
-        preset owns the choice, and a <code>hellTag</code> next to the label mirrors the decision
+        preset owns the choice, and a <code>hellChip</code> next to the label mirrors the decision
         with a matching semantic variant. No manual <code>aria</code> wiring — the field state
         connects label and description to the trigger.
       </p>

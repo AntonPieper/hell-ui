@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 interface Voicemail {
   readonly caller: string;
@@ -16,12 +16,12 @@ interface Voicemail {
 @Component({
   selector: 'app-audio-player-voicemail-inbox-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAudioPlayer, HellTag, ...HELL_CARD_DIRECTIVES],
+  imports: [HellAudioPlayer, HellChip, ...HELL_CARD_DIRECTIVES],
   template: `
     <div hellCard class="max-w-xl">
       <div hellCardHeader>
         <span>Voicemail</span>
-        <span hellTag variant="info">{{ unreadCount }} new</span>
+        <span hellChip variant="info">{{ unreadCount }} new</span>
       </div>
       <ul hellCardBody class="m-0 flex list-none flex-col gap-hell-4 p-0">
         @for (mail of voicemails; track mail.src) {
@@ -29,10 +29,10 @@ interface Voicemail {
             <div class="flex items-center gap-hell-2">
               <span class="text-sm font-semibold text-hell-foreground">{{ mail.caller }}</span>
               @if (mail.unread) {
-                <span hellTag variant="primary">Unread</span>
+                <span hellChip variant="primary">Unread</span>
               }
               @if (mail.urgent) {
-                <span hellTag variant="danger">Urgent</span>
+                <span hellChip variant="danger">Urgent</span>
               }
               <span class="ms-auto text-xs tabular-nums text-hell-foreground-muted">
                 {{ mail.durationLabel }}

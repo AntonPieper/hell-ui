@@ -123,13 +123,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/toggle/toggle.page').then((m) => m.TogglePage),
       },
       {
-        routePath: 'components/tag',
-        label: 'Tag',
-        icon: 'faSolidTag',
-        loadComponent: () =>
-          import('./pages/components/tag/tag.page').then((m) => m.TagPage),
-      },
-      {
         routePath: 'components/chip',
         label: 'Chip',
         icon: 'faSolidTags',

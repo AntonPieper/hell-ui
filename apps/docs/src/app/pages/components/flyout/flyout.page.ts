@@ -108,8 +108,8 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
       <h2>With a filters panel</h2>
       <p>
         A toolbar button that opens a checklist of status filters and reflects the active count
-        back onto the trigger with <code>hellTag</code> (narrow entry point
-        <code>@hell-ui/angular/tag</code>). Each option is a <code>hellCheckbox</code> wrapped in
+        back onto the trigger with <code>hellChip</code> (narrow entry point
+        <code>@hell-ui/angular/chip</code>). Each option is a <code>hellCheckbox</code> wrapped in
         <code>hellField</code> (narrow entry point <code>@hell-ui/angular/field</code>) for label
         association. Because the flyout doesn't trap focus, the rest of the toolbar stays usable
         while the panel is open.

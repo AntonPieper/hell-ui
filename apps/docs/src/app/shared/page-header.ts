@@ -3,7 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { hdCopyTextToClipboard } from './code-tools';
 
 const PAGE_HEADER_ICONS = { faSolidCheck, faSolidCopy };
@@ -19,7 +19,7 @@ type HdPageStatus = 'Experimental' | 'Beta';
   selector: 'hd-page-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons(PAGE_HEADER_ICONS)],
-  imports: [HellButton, HellIcon, HellTag],
+  imports: [HellButton, HellIcon, HellChip],
   template: `
     <header class="hd-page-header">
       <div class="hd-page-header-row">
@@ -30,10 +30,10 @@ type HdPageStatus = 'Experimental' | 'Beta';
         }
         <h1 class="hd-page-header-title">{{ title() }}</h1>
         @if (category()) {
-          <span hellTag class="hd-page-header-tag" variant="primary">{{ category() }}</span>
+          <span hellChip class="hd-page-header-tag" variant="primary">{{ category() }}</span>
         }
         @if (status(); as s) {
-          <span hellTag class="hd-page-header-tag" [variant]="s === 'Beta' ? 'info' : 'warning'">
+          <span hellChip class="hd-page-header-tag" [variant]="s === 'Beta' ? 'info' : 'warning'">
             {{ s }}
           </span>
         }

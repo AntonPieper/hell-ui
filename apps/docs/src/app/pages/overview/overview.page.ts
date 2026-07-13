@@ -12,7 +12,7 @@ import {
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const HD_OVERVIEW_ICONS = {
   faSolidBolt,
@@ -67,7 +67,7 @@ const HD_OVERVIEW_SECTIONS: readonly OverviewSectionLink[] = [
     links: [
       { label: 'Button', path: '/components/button' },
       { label: 'Toggle', path: '/components/toggle' },
-      { label: 'Tag', path: '/components/tag' },
+      { label: 'Tag', path: '/components/chip' },
       { label: 'Progress', path: '/components/progress' },
     ],
   },
@@ -125,12 +125,12 @@ const HD_OVERVIEW_SECTIONS: readonly OverviewSectionLink[] = [
   selector: 'hd-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons(HD_OVERVIEW_ICONS)],
-  imports: [RouterLink, HellButton, HellIcon, HellTag, ...HELL_CARD_DIRECTIVES],
+  imports: [RouterLink, HellButton, HellIcon, HellChip, ...HELL_CARD_DIRECTIVES],
   template: `
     <div class="hd-landing">
       <section class="hd-hero">
         <span class="hd-hero-logo" aria-hidden="true"></span>
-        <span hellTag variant="info">Heinrich Element Library</span>
+        <span hellChip variant="info">Heinrich Element Library</span>
         <h1>Angular components for dense business software</h1>
         <p class="hd-hero-tagline">
           hell pairs ng-primitives behavior with a restrained Tailwind v4 token layer. You keep

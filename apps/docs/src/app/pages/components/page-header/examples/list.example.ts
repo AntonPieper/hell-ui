@@ -8,18 +8,18 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_PAGE_HEADER_DIRECTIVES } from '@hell-ui/angular/page-header';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-page-header-list-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidPlus, faSolidFilter, faSolidDownload, faSolidGear })],
-  imports: [HellIcon, HellTag, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
   template: `
     <hell-page-header>
       <span hellPageHeaderTitle>Team members</span>
-      <span hellTag hellPageHeaderMeta variant="info">24 seats</span>
+      <span hellChip hellPageHeaderMeta variant="info">24 seats</span>
       <p hellPageHeaderDescription>Everyone with access to the Acme workspace.</p>
 
       <hell-toolbar hellPageHeaderToolbar label="Member actions">

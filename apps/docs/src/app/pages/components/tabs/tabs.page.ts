@@ -92,7 +92,7 @@ import tabsWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' wit
       <h2>With card and tag</h2>
       <p>
         Tabs commonly organize the detail sections of a record shown in a <code>hellCard</code>.
-        Pairing it with a status <code>hellTag</code> in the header keeps the record's state
+        Pairing it with a status <code>hellChip</code> in the header keeps the record's state
         visible no matter which tab is active.
       </p>
       <hd-example-tabs [code]="tabsWithCardExampleCode">

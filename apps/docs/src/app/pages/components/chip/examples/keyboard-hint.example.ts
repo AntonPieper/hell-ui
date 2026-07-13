@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellKbd } from '@hell-ui/angular/tag';
+import { HellKbd } from '@hell-ui/angular/chip';
 
 @Component({
-  selector: 'app-tag-keyboard-hint-example',
+  selector: 'app-chip-keyboard-hint-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellKbd],
   template: ` Press <kbd hellKbd>⌘</kbd> + <kbd hellKbd>K</kbd> to open the command palette. `,
 })
-export class TagKeyboardHintExample {}
+export class ChipKeyboardHintExample {}
