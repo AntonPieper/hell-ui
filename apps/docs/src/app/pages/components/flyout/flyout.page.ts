@@ -70,6 +70,10 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
         <a routerLink="/components/dialog">Dialog</a> instead when the interaction needs a focus
         trap.
       </p>
+      <p>
+        Weighing flyout against the other floating surfaces? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
+      </p>
 
       <h2>Basic</h2>
       <p>

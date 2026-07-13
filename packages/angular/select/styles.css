@@ -3,6 +3,7 @@
 /* Select defaults are Tailwind utility recipes in the directives. */
 @source "./select.ts";
 @source "../internal/option/option-presentation.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @layer components {
   [hellSelectTrigger][data-slot='root']::after,

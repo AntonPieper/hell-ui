@@ -325,6 +325,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Extracted the elevated floating-panel surface, pop-in animation, and default
+  popover z-index into a shared internal presentation module so the popover,
+  flyout, menu, select, and combobox panels can no longer drift (class sets
+  verified unchanged; tooltip and dialog stay deliberately local as an inverse
+  mini-surface and a modal card). A new "When to use which overlay" guide page
+  documents the tooltip/popover/flyout/dialog/picker taxonomy with cross-links
+  from the four overlay pages. Closes #155.
 - Omnibar items now render through the shared option-surface presentation, so
   they carry the same metrics and active/selected treatment as select,
   combobox, and listbox options (item padding unifies on the shared metric;

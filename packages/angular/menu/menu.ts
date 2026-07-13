@@ -31,10 +31,13 @@ import {
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
+import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from '@hell-ui/angular/internal/floating';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 
+// Shares the elevated surface and pop-in but keeps its own `--hell-z-menu`
+// stacking variable local so menus can promote above popover-based overlays.
 const HELL_MENU_RECIPE = {
-  root: 'fixed z-[var(--hell-z-menu,var(--hell-z-popover,60))] flex min-w-[200px] flex-col gap-px rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: `fixed z-[var(--hell-z-menu,var(--hell-z-popover,60))] flex min-w-[200px] flex-col gap-px ${HELL_FLOATING_SURFACE} p-hell-2 ${HELL_FLOATING_POP_IN}`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_MENU_ITEM_RECIPE =

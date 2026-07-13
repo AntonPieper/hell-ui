@@ -5,6 +5,7 @@
 /* Combobox defaults are Tailwind utility recipes in the directives. */
 @source "./combobox.ts";
 @source "../internal/option/option-presentation.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @layer components {
   [hellComboboxButton][data-slot='root']::after,

@@ -7,7 +7,20 @@ import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellO
 import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
+<<<<<<< HEAD
 import { writeComboboxStateDisabled, writeComboboxStateValue } from '@hell-ui/angular/internal/ng-primitives';
+||||||| 7b91fa1b
+import {
+  writeComboboxStateDisabled,
+  writeComboboxStateValue,
+} from '@hell-ui/angular/internal/ng-primitives';
+=======
+import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from '@hell-ui/angular/internal/floating';
+import {
+  writeComboboxStateDisabled,
+  writeComboboxStateValue,
+} from '@hell-ui/angular/internal/ng-primitives';
+>>>>>>> worktree-agent-afc3a8edeb97def97
 
 export type HellComboboxSingleValue<T = unknown> = T | null;
 export type HellComboboxMultipleValue<T = unknown> = readonly T[];
@@ -45,7 +58,7 @@ const HELL_COMBOBOX_BUTTON_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_COMBOBOX_DROPDOWN_RECIPE = {
-  root: 'fixed flex max-h-[min(320px,var(--ngp-combobox-available-height,320px))] w-[var(--ngp-combobox-width,var(--ngp-combobox-input-width,220px))] flex-col gap-px overflow-y-auto rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none origin-[var(--ngp-combobox-transform-origin,top)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: `fixed flex max-h-[min(320px,var(--ngp-combobox-available-height,320px))] w-[var(--ngp-combobox-width,var(--ngp-combobox-input-width,220px))] flex-col gap-px overflow-y-auto ${HELL_FLOATING_SURFACE} p-hell-2 ${HELL_FLOATING_POP_IN} origin-[var(--ngp-combobox-transform-origin,top)]`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_COMBOBOX_OPTION_RECIPE = hellOptionSurfaceRecipe();

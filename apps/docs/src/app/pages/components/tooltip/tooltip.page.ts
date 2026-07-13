@@ -72,6 +72,10 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         <a routerLink="/components/popover">Popover</a> or a
         <a routerLink="/components/flyout">Flyout</a> instead.
       </p>
+      <p>
+        Not sure which floating surface fits? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
+      </p>
 
       <h2>Basic</h2>
       <p>

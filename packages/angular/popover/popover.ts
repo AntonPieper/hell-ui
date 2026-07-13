@@ -4,9 +4,14 @@ import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import {
+  HELL_FLOATING_POP_IN,
+  HELL_FLOATING_SURFACE,
+  HELL_FLOATING_Z_POPOVER,
+} from '@hell-ui/angular/internal/floating';
 
 const HELL_POPOVER_RECIPE = {
-  root: 'absolute z-[var(--hell-z-popover,60)] max-w-[320px] rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] text-hell-foreground shadow-hell-lg outline-none animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: `absolute ${HELL_FLOATING_Z_POPOVER} max-w-[320px] ${HELL_FLOATING_SURFACE} p-hell-4 text-[13px] text-hell-foreground ${HELL_FLOATING_POP_IN}`,
 } satisfies HellRecipe<'root'>;
 
 /**

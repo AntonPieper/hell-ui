@@ -66,6 +66,10 @@ import popoverWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' 
         <a routerLink="/components/flyout">Flyout</a> when nearby controls must stay reachable
         without a focus trap.
       </p>
+      <p>
+        Weighing popover against the other floating surfaces? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
+      </p>
 
       <h2>Basic</h2>
       <p>
