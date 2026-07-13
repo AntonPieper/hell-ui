@@ -1,2 +1,3 @@
 /* Listbox defaults are Tailwind utility recipes in the directives. */
 @source "./listbox.ts";
+@source "../internal/option/option-presentation.ts";

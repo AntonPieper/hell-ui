@@ -98,6 +98,9 @@
     "./internal/ng-primitives": {
       "@heinrich/source": "./internal/ng-primitives/public-api.ts"
     },
+    "./internal/option": {
+      "@heinrich/source": "./internal/option/public-api.ts"
+    },
     "./testing": {
       "@heinrich/source": "./testing/public-api.ts"
     },

@@ -1,6 +1,10 @@
 import { Directive, inject, input } from '@angular/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
+  HELL_OPTION_SURFACE_METRICS,
+  HELL_OPTION_SURFACE_SELECTED_STATES,
+} from '@hell-ui/angular/internal/option';
+import {
   NgpListbox,
   NgpListboxHeader,
   NgpListboxOption,
@@ -13,7 +17,7 @@ const HELL_LISTBOX_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_LISTBOX_OPTION_RECIPE = {
-  root: 'grid cursor-pointer gap-0.5 rounded-hell-sm border-0 bg-transparent px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-start font-[inherit] text-[13px] text-hell-foreground outline-none hover:bg-hell-surface-muted data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground aria-selected:bg-hell-primary-soft aria-selected:font-medium aria-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]',
+  root: `grid gap-0.5 border-0 text-start font-[inherit] ${HELL_OPTION_SURFACE_METRICS} hover:bg-hell-surface-muted ${HELL_OPTION_SURFACE_SELECTED_STATES} aria-selected:bg-hell-primary-soft aria-selected:font-medium aria-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-50`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_LISTBOX_SECTION_RECIPE = {

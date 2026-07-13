@@ -28,6 +28,7 @@ import {
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
+import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -84,9 +85,7 @@ const HELL_SELECT_DROPDOWN_RECIPE = {
   root: 'fixed z-[var(--hell-z-popover,60)] flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none origin-[var(--ngp-select-transform-origin,top)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
 } satisfies HellRecipe<'root'>;
 
-const HELL_SELECT_OPTION_RECIPE = {
-  root: 'flex cursor-pointer items-center gap-hell-3 rounded-hell-sm bg-transparent px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-[13px] text-hell-foreground outline-none data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]',
-} satisfies HellRecipe<'root'>;
+const HELL_SELECT_OPTION_RECIPE = hellOptionSurfaceRecipe();
 
 const HELL_SELECT_BASIC_RECIPE = {
   root: '',

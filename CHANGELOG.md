@@ -325,6 +325,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- The select, combobox, and listbox option rows now draw their surface from
+  one internal option-surface presentation (metrics, active/selected states,
+  and form-disabled treatment), so hover/active/selected/disabled styling
+  cannot drift between the list modules. Rendered class sets are unchanged
+  (verified by set-equality during the refactor). Menu items deliberately keep
+  local styling (full-bleed rows with indicator gutters, no selection
+  surface); the omnibar's item states stay in its stylesheet until #160
+  rebases its list machinery. No public API change. Closes #154.
+
 - Hell's duration-token-driven transitions and entrance animations now collapse
   under `prefers-reduced-motion: reduce`; Spinner, Skeleton, and Audio Player
   also disable their hardcoded keyframe motion locally. The shared token
