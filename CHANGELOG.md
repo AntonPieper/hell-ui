@@ -531,6 +531,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Dialpad moved behind a feature entry point. Import `HellDialpad`, its
+  Part Style Map types, `HellDialpadLabels`, and `HELL_DIALPAD_LABELS` from
+  `@hell-ui/angular/features/dialpad` (styles from
+  `@hell-ui/angular/features/dialpad/styles.css`) instead of
+  `@hell-ui/angular/dialpad`. The component itself is unchanged; the core
+  component set stays domain-agnostic, matching the code editor and PDF
+  viewer feature entry points. No re-export from the old path. Closes #161.
 - Moved two directive homes so entry points match their semantics.
   `HellNativeSelect` now exports from `@hell-ui/angular/select` (the entry
   point whose docs already pointed at it) instead of `@hell-ui/angular/input`.
