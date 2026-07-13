@@ -1,4 +1,5 @@
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { HELL_FLOATING_SURFACE_SHELL } from '@hell-ui/angular/internal/floating';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from '@hell-ui/angular/internal/core';
 import {
   HellFloatingInteractionController,
@@ -36,8 +37,11 @@ import {
 
 let nextFlyoutId = 0;
 
+// Shares the elevated surface shell but keeps its own hairline border (no
+// `border-solid`), higher z fallback, and `hell-flyout-in` animation local —
+// see the per-atom notes in internal/floating/floating-presentation.ts.
 const HELL_FLYOUT_RECIPE = {
-  root: 'fixed z-[var(--hell-z-popover,1000)] max-w-[min(320px,calc(100vw_-_(var(--spacing-hell-4)*2)))] rounded-hell-md border border-hell-border bg-hell-surface-elevated text-hell-foreground shadow-hell-lg outline-none animate-[hell-flyout-in_var(--hell-duration-fast,150ms)_var(--ease-hell-out,ease)]',
+  root: `fixed z-[var(--hell-z-popover,1000)] max-w-[min(320px,calc(100vw_-_(var(--spacing-hell-4)*2)))] ${HELL_FLOATING_SURFACE_SHELL} border border-hell-border text-hell-foreground animate-[hell-flyout-in_var(--hell-duration-fast,150ms)_var(--ease-hell-out,ease)]`,
 } satisfies HellRecipe<'root'>;
 
 /**

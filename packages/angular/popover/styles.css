@@ -2,6 +2,7 @@
 
 /* Popover defaults are Tailwind utility recipes in the directive. */
 @source "./popover.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @keyframes hell-pop-in {
   from {

@@ -2,6 +2,7 @@
 
 /* Menu defaults are Tailwind utility recipes in the directives. */
 @source "./menu.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @layer components {
   /* Menus promote themselves into the browser top-most rendering context

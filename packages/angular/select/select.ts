@@ -30,6 +30,11 @@ import {
 } from '@hell-ui/angular/core';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
 import {
+  HELL_FLOATING_POP_IN,
+  HELL_FLOATING_SURFACE,
+  HELL_FLOATING_Z_POPOVER,
+} from '@hell-ui/angular/internal/floating';
+import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
   HellFloatingScopeRegistry,
@@ -82,7 +87,7 @@ const HELL_SELECT_PLACEHOLDER_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_DROPDOWN_RECIPE = {
-  root: 'fixed z-[var(--hell-z-popover,60)] flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none origin-[var(--ngp-select-transform-origin,top)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: `fixed ${HELL_FLOATING_Z_POPOVER} flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto ${HELL_FLOATING_SURFACE} p-hell-2 ${HELL_FLOATING_POP_IN} origin-[var(--ngp-select-transform-origin,top)]`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_OPTION_RECIPE = hellOptionSurfaceRecipe();

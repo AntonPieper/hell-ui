@@ -92,6 +92,9 @@
     "./internal/core": {
       "@heinrich/source": "./internal/core/public-api.ts"
     },
+    "./internal/floating": {
+      "@heinrich/source": "./internal/floating/public-api.ts"
+    },
     "./internal/hotkeys": {
       "@heinrich/source": "./internal/hotkeys/public-api.ts"
     },

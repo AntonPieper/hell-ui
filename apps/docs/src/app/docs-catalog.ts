@@ -90,6 +90,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/guide/guide.page').then((m) => m.GuidePage),
       },
       {
+        routePath: 'guide/overlays',
+        label: 'Overlays',
+        icon: 'faSolidLayerGroup',
+        loadComponent: () =>
+          import('./pages/guide/overlays/overlays.page').then((m) => m.OverlaysPage),
+      },
+      {
         routePath: 'theming',
         label: 'Theming',
         icon: 'faSolidPalette',
