@@ -27,7 +27,7 @@
     "field/field.ts",
     "input/input.ts",
     "tabs/tabs.ts",
-    "dialpad/dialpad.ts",
+    "features/dialpad/dialpad.ts",
     "menu/menu.ts",
     "listbox/listbox.ts",
     "popover/popover.ts",
@@ -232,9 +232,6 @@
     "./date-picker": {
       "@heinrich/source": "./date-picker/public-api.ts"
     },
-    "./dialpad": {
-      "@heinrich/source": "./dialpad/public-api.ts"
-    },
     "./file-upload": {
       "@heinrich/source": "./file-upload/public-api.ts"
     },
@@ -273,6 +270,9 @@
     },
     "./features/code-editor": {
       "@heinrich/source": "./features/code-editor/public-api.ts"
+    },
+    "./features/dialpad": {
+      "@heinrich/source": "./features/dialpad/public-api.ts"
     },
     "./features/pdf-viewer": {
       "@heinrich/source": "./features/pdf-viewer/public-api.ts"
@@ -487,11 +487,6 @@
       "style": "./date-picker/styles.css",
       "default": "./date-picker/styles.css"
     },
-    "./dialpad/styles.css": {
-      "@heinrich/source": "./dialpad/styles.css",
-      "style": "./dialpad/styles.css",
-      "default": "./dialpad/styles.css"
-    },
     "./file-upload/styles.css": {
       "@heinrich/source": "./file-upload/styles.css",
       "style": "./file-upload/styles.css",
@@ -551,6 +546,11 @@
       "@heinrich/source": "./features/code-editor/styles.css",
       "style": "./features/code-editor/styles.css",
       "default": "./features/code-editor/styles.css"
+    },
+    "./features/dialpad/styles.css": {
+      "@heinrich/source": "./features/dialpad/styles.css",
+      "style": "./features/dialpad/styles.css",
+      "default": "./features/dialpad/styles.css"
     },
     "./features/pdf-viewer/styles.css": {
       "@heinrich/source": "./features/pdf-viewer/styles.css",

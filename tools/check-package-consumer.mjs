@@ -1772,7 +1772,7 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
 import { HELL_DIALOG_DIRECTIVES } from '${packageName}/dialog';
-import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
+import { HellDialpad, type HellDialpadUi } from '${packageName}/features/dialpad';
 import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '${packageName}/file-upload';
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';

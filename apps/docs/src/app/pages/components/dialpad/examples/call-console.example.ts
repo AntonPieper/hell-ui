@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellDialpad } from '@hell-ui/angular/dialpad';
+import { HellDialpad } from '@hell-ui/angular/features/dialpad';
 import { HellTag } from '@hell-ui/angular/tag';
 
 type CallState = 'idle' | 'dialing' | 'connected';
