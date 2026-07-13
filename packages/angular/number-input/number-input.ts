@@ -41,16 +41,14 @@ import {
 import type { HellSize } from '@hell-ui/angular/core';
 import {
   hellPartStyler,
+  hellInvalidTypedValue,
+  hellTypedValue,
   type HellRecipe,
+  type HellTypedValueParseResult,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
-import {
-  HellTypedValueInputState,
-  type HellTypedValueParseResult,
-  hellInvalidTypedValue,
-  hellTypedValue,
-} from '@hell-ui/angular/internal/core';
+import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
 
 /** Built-in accessibility labels owned by the number input entry point. */
 export interface HellNumberInputLabels {
@@ -101,16 +99,13 @@ export interface HellNumberInputAdapterContext {
   readonly integer: boolean;
 }
 
-/** Result of parsing number input text into a value or an invalid draft. */
-export type HellNumberInputParseResult = HellTypedValueParseResult<number>;
-
 /** Strategy for parsing, formatting, normalizing, and comparing numeric values. */
 export interface HellNumberInputAdapter {
   /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
   readonly parseText: (
     text: string,
     context: HellNumberInputAdapterContext,
-  ) => HellNumberInputParseResult;
+  ) => HellTypedValueParseResult<number>;
   /** Format a committed value for the text field. */
   readonly format: (value: number | null, context: HellNumberInputAdapterContext) => string;
   /** Coerce external form/input values before display; non-finite values should return null. */
@@ -132,10 +127,10 @@ const DECIMAL_PATTERN = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
  * deterministic. Empty text commits a nullable clear; anything else that does
  * not match stays as an invalid draft.
  */
-export function hellParseNumberInputText(
+function hellParseNumberInputText(
   text: string,
   context: HellNumberInputAdapterContext,
-): HellNumberInputParseResult {
+): HellTypedValueParseResult<number> {
   const trimmed = text.trim();
   if (!trimmed) return hellTypedValue<number>(null);
 
@@ -148,7 +143,7 @@ export function hellParseNumberInputText(
 }
 
 /** Format a numeric value as its plain decimal string, or empty string when null. */
-export function hellFormatNumberInputValue(
+function hellFormatNumberInputValue(
   value: number | null,
   _context: HellNumberInputAdapterContext,
 ): string {
@@ -156,7 +151,7 @@ export function hellFormatNumberInputValue(
 }
 
 /** Coerce an external value to a finite number, or null when it is not usable. */
-export function hellNormalizeNumberInputValue(
+function hellNormalizeNumberInputValue(
   value: number | null | undefined,
   _context: HellNumberInputAdapterContext,
 ): number | null {
@@ -164,7 +159,7 @@ export function hellNormalizeNumberInputValue(
 }
 
 /** Compare two numeric values by identity, treating null as its own value. */
-export function hellSameNumberInputValue(a: number | null, b: number | null): boolean {
+function hellSameNumberInputValue(a: number | null, b: number | null): boolean {
   return a === b;
 }
 

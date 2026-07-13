@@ -28,11 +28,8 @@ import {
 } from '@hell-ui/angular/core';
 import {
   HELL_DATE_INPUT_ADAPTER,
+  HELL_DEFAULT_DATE_INPUT_ADAPTER,
   HellDateInput,
-  hellCoerceDateInputValue,
-  hellFormatDateInputValue,
-  hellIsDateInputValueWithinBounds,
-  hellParseDateInputText,
   type HellDateInputAdapter,
 } from '@hell-ui/angular/date-input';
 import {
@@ -1191,8 +1188,8 @@ export class HellFilterBar {
     if (!dateRange) return null;
     return {
       kind: 'dateRange',
-      from: dateRange.from ? hellFormatDateInputValue(dateRange.from) : null,
-      to: dateRange.to ? hellFormatDateInputValue(dateRange.to) : null,
+      from: dateRange.from ? HELL_DEFAULT_DATE_INPUT_ADAPTER.format(dateRange.from) : null,
+      to: dateRange.to ? HELL_DEFAULT_DATE_INPUT_ADAPTER.format(dateRange.to) : null,
     };
   }
 
@@ -1224,7 +1221,7 @@ export class HellFilterBar {
   private coerceDateInputValue(value: Date | null): Date | null {
     return this.dateAdapter.coerce
       ? this.dateAdapter.coerce(value)
-      : hellCoerceDateInputValue(value);
+      : HELL_DEFAULT_DATE_INPUT_ADAPTER.coerce!(value);
   }
 
   private parseDateRangeDraft(
@@ -1254,12 +1251,12 @@ export class HellFilterBar {
     max: Date | null,
   ): boolean {
     return this.dateAdapter.isWithinBounds?.(value, min, max) ??
-      hellIsDateInputValueWithinBounds(value, min, max);
+      HELL_DEFAULT_DATE_INPUT_ADAPTER.isWithinBounds!(value, min, max);
   }
 
   private parseFilterDate(value: string | null | undefined): Date | null {
     if (!value) return null;
-    const parsed = hellParseDateInputText(value);
+    const parsed = HELL_DEFAULT_DATE_INPUT_ADAPTER.parseText(value);
     return parsed.valid ? parsed.value : null;
   }
 
