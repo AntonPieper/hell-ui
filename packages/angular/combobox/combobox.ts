@@ -7,20 +7,11 @@ import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellO
 import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
-<<<<<<< HEAD
-import { writeComboboxStateDisabled, writeComboboxStateValue } from '@hell-ui/angular/internal/ng-primitives';
-||||||| 7b91fa1b
-import {
-  writeComboboxStateDisabled,
-  writeComboboxStateValue,
-} from '@hell-ui/angular/internal/ng-primitives';
-=======
 import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from '@hell-ui/angular/internal/floating';
 import {
   writeComboboxStateDisabled,
   writeComboboxStateValue,
 } from '@hell-ui/angular/internal/ng-primitives';
->>>>>>> worktree-agent-afc3a8edeb97def97
 
 export type HellComboboxSingleValue<T = unknown> = T | null;
 export type HellComboboxMultipleValue<T = unknown> = readonly T[];

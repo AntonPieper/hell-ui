@@ -4,28 +4,6 @@ import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
-<<<<<<< HEAD
-import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
-import { hellSyncFormFieldDescriptions, hellSyncFormFieldLabels } from '@hell-ui/angular/internal/core';
-import { NgpSelect, NgpSelectDropdown, NgpSelectOption, NgpSelectPortal, injectSelectState } from 'ng-primitives/select';
-||||||| 7b91fa1b
-import {
-  hellContainsFloatingTarget,
-  hellRegisterFloatingHost,
-  HellFloatingScopeRegistry,
-} from '@hell-ui/angular/internal/core';
-import {
-  hellSyncFormFieldDescriptions,
-  hellSyncFormFieldLabels,
-} from '@hell-ui/angular/internal/core';
-import {
-  NgpSelect,
-  NgpSelectDropdown,
-  NgpSelectOption,
-  NgpSelectPortal,
-  injectSelectState,
-} from 'ng-primitives/select';
-=======
 import {
   HELL_FLOATING_POP_IN,
   HELL_FLOATING_SURFACE,
@@ -47,7 +25,6 @@ import {
   NgpSelectPortal,
   injectSelectState,
 } from 'ng-primitives/select';
->>>>>>> worktree-agent-afc3a8edeb97def97
 import { NgpInput } from 'ng-primitives/input';
 import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 
