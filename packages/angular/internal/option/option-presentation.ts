@@ -6,9 +6,9 @@ import type { HellRecipe } from '@hell-ui/angular/core';
  * The select and combobox option rows consume `hellOptionSurfaceRecipe()`
  * whole; the listbox recomposes the same atoms with its own layout and
  * native-semantics mirrors. Menu items deliberately stay local (full-bleed
- * rows with indicator gutters and no selection surface), and the omnibar's
- * item states currently live in its stylesheet until its list machinery is
- * rebased onto the shared primitives.
+ * rows with indicator gutters and no selection surface); omnibar items
+ * compose the metrics and selected-state atoms with their own button-host
+ * specifics.
  */
 
 /** Box metrics and typography shared by every option row. */

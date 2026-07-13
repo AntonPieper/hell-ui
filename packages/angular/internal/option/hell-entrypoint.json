@@ -1,6 +1,7 @@
 {
   "category": "internal",
   "exports": [
+    "./option-label",
     "./option-presentation"
   ],
   "header": [

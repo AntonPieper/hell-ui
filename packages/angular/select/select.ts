@@ -3,7 +3,11 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/for
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
+import {
+  hellOptionRowLabel,
+  hellOptionSurfaceRecipe,
+  hellPickedValueLabel,
+} from '@hell-ui/angular/internal/option';
 import {
   HELL_FLOATING_POP_IN,
   HELL_FLOATING_SURFACE,
@@ -456,15 +460,12 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
 
   /** Display text for one option row. */
   protected optionLabel(option: HellOption<T>): string {
-    return this.displayWith()?.(option.value) ?? option.label;
+    return hellOptionRowLabel(option, this.displayWith());
   }
 
   /** Display text for a picked value: `displayWith`, else its option's label. */
   private labelFor(value: T): string {
-    const override = this.displayWith();
-    if (override) return override(value);
-    const compare = this.compareWith();
-    return this.options().find((option) => compare(option.value, value))?.label ?? String(value);
+    return hellPickedValueLabel(value, this.options(), this.displayWith(), this.compareWith());
   }
 
   constructor() {

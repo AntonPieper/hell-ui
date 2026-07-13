@@ -17,7 +17,7 @@ A Package Entry Point whose public surface contains both primitive behavior and 
 A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
 
 **Multi-Select Menu Button**
-A general Composite that opens a menu of checkable options from a button and reflects the selected count through button text, an icon, or a badge. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
+A documented recipe (formerly a Composite entry point) that opens a menu of checkable options from a button and reflects the selected count through consumer-owned markup: `hellButton` + `[hellMenu]` + `hell-menu-options`. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
 _Avoid_: Column visibility selector, table column picker.
 
 **Feature**

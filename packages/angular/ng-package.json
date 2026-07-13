@@ -271,11 +271,6 @@
       "output": "switch"
     },
     {
-      "glob": "tag.ts",
-      "input": "tag",
-      "output": "tag"
-    },
-    {
       "glob": "toggle.ts",
       "input": "toggle",
       "output": "toggle"
