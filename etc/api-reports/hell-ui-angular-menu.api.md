@@ -16,8 +16,8 @@ import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public
-export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];
+// @public (undocumented)
+export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuOptions, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];
 
 // @public
 export class HellMenu {
@@ -99,6 +99,32 @@ export class HellMenuLabel {
 }
 
 // @public
+export class HellMenuOptions<T = string> {
+    // Warning: (ae-forgotten-export) The symbol "HellOptionCompareWith" needs to be exported by the entry point hell-ui-angular-menu.d.ts
+    readonly compareWith: i0.InputSignal<HellOptionCompareWith<T>>;
+    // (undocumented)
+    protected isSelected(option: HellOption<T>): boolean;
+    // Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-menu.d.ts
+    readonly options: i0.InputSignal<readonly HellOption<T>[]>;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellMenuOptionsPart>;
+    readonly selected: i0.InputSignal<readonly T[]>;
+    readonly selectedChange: i0.OutputEmitterRef<readonly T[]>;
+    // (undocumented)
+    protected toggle(option: HellOption<T>, checked: boolean): void;
+    readonly ui: i0.InputSignal<HellUiInput<HellMenuOptionsPart>>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellMenuOptions<any>, "hell-menu-options", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "selected": { "alias": "selected"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; }, { "selectedChange": "selectedChange"; }, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuOptions<any>, never>;
+}
+
+// @public
+export type HellMenuOptionsPart = 'root' | 'item' | 'indicator';
+
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-menu.d.ts
+//
+// @public
+export type HellMenuOptionsUi = HellUi<HellMenuOptionsPart>;
+
+// @public
 export class HellMenuSection {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -130,6 +156,12 @@ export class HellSubmenuTrigger {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSubmenuTrigger, "[hellSubmenuTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSubmenuTrigger; inputs: { "ngpSubmenuTrigger": "hellSubmenuTrigger"; "ngpSubmenuTriggerPlacement": "placement"; "ngpSubmenuTriggerOffset": "offset"; "ngpSubmenuTriggerDisabled": "disabled"; "ngpSubmenuTriggerFlip": "flip"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSubmenuTrigger, never>;
 }
+
+// Warnings were encountered during analysis:
+//
+// types/hell-ui-angular-menu.d.ts:196:5 - (ae-undocumented) Missing documentation for "isSelected".
+// types/hell-ui-angular-menu.d.ts:197:5 - (ae-undocumented) Missing documentation for "toggle".
+// types/hell-ui-angular-menu.d.ts:203:15 - (ae-undocumented) Missing documentation for "HELL_MENU_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

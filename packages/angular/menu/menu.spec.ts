@@ -1,4 +1,5 @@
 import { Component, signal, viewChild } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
@@ -111,6 +112,31 @@ class CheckableMenuHost {
 @Component({
   imports: [...HELL_MENU_DIRECTIVES],
   template: `
+    <ng-template #menu>
+      <div hellMenu>
+        <hell-menu-options
+          [options]="options"
+          [selected]="selected()"
+          (selectedChange)="selected.set([...$event])"
+        />
+      </div>
+    </ng-template>
+    <button type="button" [hellMenuTrigger]="menu">Columns</button>
+  `,
+})
+class MenuOptionsHost {
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'name', label: 'Name' },
+    { value: 'status', label: 'Status' },
+    { value: 'owner', label: 'Owner', disabled: true },
+  ];
+  readonly selected = signal<readonly string[]>(['status']);
+  readonly trigger = viewChild.required(NgpMenuTrigger);
+}
+
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
     <ng-template #rootMenu>
       <div hellMenu>
         <button
@@ -157,6 +183,7 @@ describe('HellMenuItem', () => {
         EnabledMenuAnchorTriggerHost,
         DisabledMenuTriggerHost,
         CheckableMenuHost,
+        MenuOptionsHost,
         SubmenuHost,
       ],
     }).compileComponents();
@@ -257,6 +284,43 @@ describe('HellMenuItem', () => {
     expect(fixture.componentInstance.density()).toBe('compact');
     expect(compact.getAttribute('aria-checked')).toBe('true');
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
+  });
+
+  it('renders data-driven options as controlled checkbox items', async () => {
+    const fixture = TestBed.createComponent(MenuOptionsHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[role="menuitemcheckbox"]',
+    );
+
+    const items = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>('[role="menuitemcheckbox"]'),
+    );
+
+    expect(items.map((item) => item.textContent?.trim())).toEqual(['Name', 'Status', 'Owner']);
+    expect(items.map((item) => item.getAttribute('aria-checked'))).toEqual([
+      'false',
+      'true',
+      'false',
+    ]);
+    expect(items[2]?.hasAttribute('disabled')).toBe(true);
+
+    items[0]?.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.selected()).toEqual(['status', 'name']);
+    expect(items[0]?.getAttribute('aria-checked')).toBe('true');
+    expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
+
+    items[1]?.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.selected()).toEqual(['name']);
+    expect(items[1]?.getAttribute('aria-checked')).toBe('false');
   });
 
   it('moves focus by printable-key typeahead and cycles repeated initials', async () => {

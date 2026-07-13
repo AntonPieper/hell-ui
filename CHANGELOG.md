@@ -7,6 +7,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added `hell-menu-options` to the menu entry point: a data-driven checkable
+  option list rendering one checkbox menu item per core `HellOption`
+  (`{ value, label, disabled? }`) with a controlled `selected` model and
+  `selectedChange` output. Disabled options render but cannot be toggled, so a
+  consumer enforces a selection floor by disabling still-selected options. It
+  composes freely inside a `[hellMenu]` panel next to hand-written items,
+  sections, and separators, and joins `HELL_MENU_DIRECTIVES`. Closes #150
+  (spec #147). Evidence: menu unit suite, docs data-driven options example.
 - Brought the select, combobox, date-input, audio-player, and TanStack table
   shell (including its virtual-rows strategy) entry points under API reports:
   59 entry points are now guarded. The api-extractor "Unable to follow symbol"

@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  Component,
   DestroyRef,
   Directive,
   ElementRef,
@@ -6,6 +8,7 @@ import {
   afterNextRender,
   inject,
   input,
+  output,
 } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
@@ -20,7 +23,14 @@ import {
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import {
+  hellPartStyler,
+  type HellOption,
+  type HellOptionCompareWith,
+  type HellRecipe,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 
 const HELL_MENU_RECIPE = {
@@ -490,11 +500,89 @@ export class HellMenuItemTrailing {
 }
 
 /** All directives that make up the menu entry point, for bulk `imports`. */
+/** Public parts of the HellMenuOptions module, styleable through its Part Style Map. */
+export type HellMenuOptionsPart = 'root' | 'item' | 'indicator';
+/** Part Style Map accepted by the HellMenuOptions `ui` input. */
+export type HellMenuOptionsUi = HellUi<HellMenuOptionsPart>;
+
+const HELL_MENU_OPTIONS_RECIPE = {
+  root: 'contents',
+  item: '',
+  indicator: '',
+} satisfies HellRecipe<HellMenuOptionsPart>;
+
+/**
+ * Data-driven checkable options for a `[hellMenu]` panel. Renders one
+ * checkbox menu item per `HellOption`; the controlled `selected` input is the
+ * single source of truth and `selectedChange` emits the next selection after a
+ * toggle. Disabled options render but cannot be toggled — a consumer enforces
+ * a selection floor by marking still-selected options disabled. Compose it
+ * inside a menu alongside hand-written items, sections, and separators; the
+ * host renders as `display: contents`, so items participate in the menu's own
+ * layout and roving focus.
+ */
+@Component({
+  selector: 'hell-menu-options',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellMenuItemCheckbox, HellMenuItemIndicator],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
+  template: `
+    @for (option of options(); track option.value) {
+      <button
+        hellMenuItemCheckbox
+        type="button"
+        data-slot="item"
+        [ui]="part('item')"
+        [checked]="isSelected(option)"
+        [disabled]="option.disabled ?? false"
+        (checkedChange)="toggle(option, $event)"
+      >
+        <span hellMenuItemIndicator data-slot="indicator" [ui]="part('indicator')"></span>
+        <span>{{ option.label }}</span>
+      </button>
+    }
+  `,
+})
+export class HellMenuOptions<T = string> {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuOptionsPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuOptionsPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_OPTIONS_RECIPE,
+  });
+
+  /** Options rendered as checkable menu items. */
+  readonly options = input<readonly HellOption<T>[]>([]);
+  /** Selected values (controlled); the component never keeps its own copy. */
+  readonly selected = input<readonly T[]>([]);
+  /** Compares option values against `selected` entries. */
+  readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
+  /** Emits the next selection after the user toggles an option. */
+  readonly selectedChange = output<readonly T[]>();
+
+  protected isSelected(option: HellOption<T>): boolean {
+    const compare = this.compareWith();
+    return this.selected().some((value) => compare(value, option.value));
+  }
+
+  protected toggle(option: HellOption<T>, checked: boolean): void {
+    const compare = this.compareWith();
+    const without = this.selected().filter((value) => !compare(value, option.value));
+    this.selectedChange.emit(checked ? [...without, option.value] : without);
+  }
+}
+
 export const HELL_MENU_DIRECTIVES = [
   HellMenuTrigger,
   HellSubmenuTrigger,
   HellMenu,
   HellMenuItem,
+  HellMenuOptions,
   HellMenuItemCheckbox,
   HellMenuItemRadio,
   HellMenuItemRadioGroup,
