@@ -211,6 +211,16 @@
       "output": "internal/chip"
     },
     {
+      "glob": "option-presentation.ts",
+      "input": "internal/option",
+      "output": "internal/option"
+    },
+    {
+      "glob": "floating-presentation.ts",
+      "input": "internal/floating",
+      "output": "internal/floating"
+    },
+    {
       "glob": "drop-zone.ts",
       "input": "drop-zone",
       "output": "drop-zone"
