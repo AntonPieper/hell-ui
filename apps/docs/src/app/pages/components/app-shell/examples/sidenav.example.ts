@@ -9,7 +9,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const HD_APP_SHELL_SIDENAV_ICONS = {
   faSolidGauge,
@@ -22,7 +22,7 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
 @Component({
   selector: 'app-app-shell-sidenav-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_APP_SHELL_DIRECTIVES, HellIcon, HellTag],
+  imports: [...HELL_APP_SHELL_DIRECTIVES, HellIcon, HellChip],
   providers: [provideIcons(HD_APP_SHELL_SIDENAV_ICONS)],
   template: `
     <div hellAppShell class="h-[28rem] overflow-hidden rounded-hell-lg border border-hell-border">
@@ -39,7 +39,7 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
         <a hellNavItem href="#" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidInbox" size="14px" />
           <span hellNavItemLabel>Inbox</span>
-          <span hellNavItemTrailing hellTag variant="primary">12</span>
+          <span hellNavItemTrailing hellChip variant="primary">12</span>
         </a>
         <a hellNavItem href="#" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidUsers" size="14px" />

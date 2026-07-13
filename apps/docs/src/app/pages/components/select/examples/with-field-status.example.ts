@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { type HellTagVariant } from '@hell-ui/angular/core';
+import { type HellChipVariant } from '@hell-ui/angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/select';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 type Decision = 'Approved' | 'Changes requested' | 'Rejected';
 
 const DECISIONS: readonly Decision[] = ['Approved', 'Changes requested', 'Rejected'];
 
-const DECISION_VARIANT: Record<Decision, HellTagVariant> = {
+const DECISION_VARIANT: Record<Decision, HellChipVariant> = {
   Approved: 'success',
   'Changes requested': 'warning',
   Rejected: 'danger',
@@ -18,14 +18,14 @@ const DECISION_VARIANT: Record<Decision, HellTagVariant> = {
 @Component({
   selector: 'app-select-with-field-status-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_BASIC_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, HellButton, HellTag],
+  imports: [...HELL_SELECT_BASIC_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, HellButton, HellChip],
   template: `
     <form class="grid max-w-96 gap-hell-4" (submit)="submit($event)">
       <div hellField>
         <label hellFieldLabel for="review-decision">
           Review decision
           @if (decision(); as current) {
-            <span hellTag [variant]="variantFor(current)">{{ current }}</span>
+            <span hellChip [variant]="variantFor(current)">{{ current }}</span>
           }
         </label>
         <hell-select-basic
@@ -57,7 +57,7 @@ export class SelectWithFieldStatusExample {
     this.decision.set(next);
   }
 
-  protected variantFor(decision: Decision): HellTagVariant {
+  protected variantFor(decision: Decision): HellChipVariant {
     return DECISION_VARIANT[decision];
   }
 

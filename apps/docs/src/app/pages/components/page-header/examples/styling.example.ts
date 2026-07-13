@@ -3,18 +3,18 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidPlus } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_PAGE_HEADER_DIRECTIVES, type HellPageHeaderUi } from '@hell-ui/angular/page-header';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-page-header-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidPlus })],
-  imports: [HellIcon, HellTag, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
   template: `
     <hell-page-header [ui]="headerUi">
       <span hellPageHeaderTitle>Billing</span>
-      <span hellTag hellPageHeaderMeta variant="warning">Past due</span>
+      <span hellChip hellPageHeaderMeta variant="warning">Past due</span>
       <p hellPageHeaderDescription>Invoices and payment methods for your organization.</p>
 
       <hell-toolbar hellPageHeaderToolbar label="Billing actions">

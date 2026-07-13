@@ -6,7 +6,7 @@ import { HellCheckbox } from '@hell-ui/angular/checkbox';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 interface StatusFilter {
   readonly id: string;
@@ -18,7 +18,7 @@ interface StatusFilter {
   selector: 'app-flyout-with-filters-panel-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidFilter })],
-  imports: [HellButton, HellCheckbox, ...HELL_FIELD_DIRECTIVES, HellFlyout, HellFlyoutTrigger, HellIcon, HellTag],
+  imports: [HellButton, HellCheckbox, ...HELL_FIELD_DIRECTIVES, HellFlyout, HellFlyoutTrigger, HellIcon, HellChip],
   template: `
     <div class="min-h-[220px]">
       <button
@@ -31,7 +31,7 @@ interface StatusFilter {
         <hell-icon name="faSolidFilter" />
         Status
         @if (activeCount() > 0) {
-          <span hellTag variant="primary">{{ activeCount() }}</span>
+          <span hellChip variant="primary">{{ activeCount() }}</span>
         }
       </button>
 

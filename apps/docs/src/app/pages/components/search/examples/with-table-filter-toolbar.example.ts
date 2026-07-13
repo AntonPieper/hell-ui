@@ -3,7 +3,7 @@ import { HellInput } from '@hell-ui/angular/input';
 import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
 import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 type InvoiceStatus = 'Paid' | 'Open' | 'Overdue';
 
@@ -36,7 +36,7 @@ const STATUS_VARIANT: Record<InvoiceStatus, 'success' | 'info' | 'danger'> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HellInput,
-    HellTag,
+    HellChip,
     ...HELL_LISTBOX_DIRECTIVES,
     ...HELL_SEARCH_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
@@ -86,7 +86,7 @@ const STATUS_VARIANT: Record<InvoiceStatus, 'success' | 'info' | 'danger'> = {
                 <td hellTableCell>{{ invoice.customer }}</td>
                 <td hellTableCell>{{ invoice.amount }}</td>
                 <td hellTableCell>
-                  <span hellTag [variant]="statusVariant[invoice.status]">
+                  <span hellChip [variant]="statusVariant[invoice.status]">
                     {{ invoice.status }}
                   </span>
                 </td>

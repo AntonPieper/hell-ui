@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
 
 @Component({
   selector: 'app-select-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES, HellTag],
+  imports: [...HELL_SELECT_DIRECTIVES, HellChip],
   template: `
     <div class="flex max-w-72 flex-col gap-hell-2">
       <button
@@ -34,7 +34,7 @@ const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
 
       <div class="flex flex-wrap gap-hell-1">
         @for (permission of selected(); track permission) {
-          <span hellTag variant="primary">{{ permission }}</span>
+          <span hellChip variant="primary">{{ permission }}</span>
         } @empty {
           <span class="text-xs text-hell-foreground-subtle">No permissions granted</span>
         }

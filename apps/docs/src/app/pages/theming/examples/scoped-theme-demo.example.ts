@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-themed-panel-demo',
-  imports: [HellButton, HellTag, ...HELL_CARD_DIRECTIVES],
+  imports: [HellButton, HellChip, ...HELL_CARD_DIRECTIVES],
   template: `
     <section
       hellCard
@@ -22,7 +22,7 @@ import { HellTag } from '@hell-ui/angular/tag';
       <div hellCardHeader>
         <div class="flex items-center justify-between gap-3">
           <strong>Billing panel</strong>
-          <span hellTag variant="info">Scoped theme</span>
+          <span hellChip variant="info">Scoped theme</span>
         </div>
       </div>
       <div hellCardBody class="grid gap-3">

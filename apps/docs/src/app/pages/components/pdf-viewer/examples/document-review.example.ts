@@ -6,7 +6,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
 interface ReviewDoc {
@@ -25,7 +25,7 @@ const DOCS: readonly ReviewDoc[] = [
 @Component({
   selector: 'app-pdf-viewer-document-review-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellPdfViewer, HellButton, HellIcon, HellTag, ...HELL_CARD_DIRECTIVES, ...HELL_SPLIT_VIEW_DIRECTIVES],
+  imports: [HellPdfViewer, HellButton, HellIcon, HellChip, ...HELL_CARD_DIRECTIVES, ...HELL_SPLIT_VIEW_DIRECTIVES],
   providers: [provideIcons({ faSolidCircleCheck, faSolidFilePdf })],
   template: `
     <hell-split-view framed [height]="520" [detailOpen]="detailOpen()" (detailOpenChange)="detailOpen.set($event)">
@@ -69,7 +69,7 @@ const DOCS: readonly ReviewDoc[] = [
                   {{ doc.id }} · submitted by {{ doc.submitter }}
                 </span>
               </div>
-              <span hellTag [variant]="doc.status === 'Approved' ? 'success' : 'warning'">
+              <span hellChip [variant]="doc.status === 'Approved' ? 'success' : 'warning'">
                 {{ doc.status }}
               </span>
             </div>

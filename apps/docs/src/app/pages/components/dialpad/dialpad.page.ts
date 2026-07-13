@@ -76,7 +76,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
       <h2>With button and card</h2>
       <p>
         A small call console: the dialpad supplies the number, a <code>hellCard</code> gives it a
-        titled surface with a status <code>hellTag</code>, and <code>hellButton</code> drives the
+        titled surface with a status <code>hellChip</code>, and <code>hellButton</code> drives the
         dial/hang-up action. The dialpad switches to <code>readOnly</code> once a call starts so
         the number stays visible without accepting edits mid-call.
       </p>

@@ -68,7 +68,6 @@
     "slider/slider.ts",
     "spinner/spinner.ts",
     "switch/switch.ts",
-    "tag/tag.ts",
     "toggle/toggle.ts",
     "omnibar/omnibar.ts",
     "page-header/page-header.ts",
@@ -189,9 +188,6 @@
     },
     "./tabs": {
       "@heinrich/source": "./tabs/public-api.ts"
-    },
-    "./tag": {
-      "@heinrich/source": "./tag/public-api.ts"
     },
     "./toggle": {
       "@heinrich/source": "./toggle/public-api.ts"
@@ -416,11 +412,6 @@
       "@heinrich/source": "./tabs/styles.css",
       "style": "./tabs/styles.css",
       "default": "./tabs/styles.css"
-    },
-    "./tag/styles.css": {
-      "@heinrich/source": "./tag/styles.css",
-      "style": "./tag/styles.css",
-      "default": "./tag/styles.css"
     },
     "./toggle/styles.css": {
       "@heinrich/source": "./toggle/styles.css",

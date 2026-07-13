@@ -15,9 +15,9 @@ import {
 import {
   hellCreateLabels,
   hellPartStyler,
+  HellChipVariant,
   HellOrientation,
   HellSize,
-  HellTagVariant,
   type HellRecipe,
   type HellUiInput,
 } from '@hell-ui/angular/core';
@@ -43,6 +43,14 @@ export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels> = hellCreateLabels
 
 const HELL_CHIP_SET_RECIPE = {
   root: 'inline-flex flex-wrap items-center gap-hell-2 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch outline-none',
+} satisfies HellRecipe<'root'>;
+
+const HELL_BADGE_RECIPE = {
+  root: 'inline-flex h-hell-4 min-w-hell-4 items-center justify-center rounded-full bg-hell-danger px-hell-1 py-0 text-[10px] font-bold text-white',
+} satisfies HellRecipe<'root'>;
+
+const HELL_KBD_RECIPE = {
+  root: 'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-hell-surface-subtle px-[5px] py-0 font-mono text-[11px] text-hell-foreground-muted border border-b-2 border-solid border-hell-border',
 } satisfies HellRecipe<'root'>;
 
 /**
@@ -341,7 +349,7 @@ export class HellChip {
   });
 
   /** Color scheme conveying the chip's semantic meaning. Defaults to `default`. */
-  readonly variant = input<HellTagVariant>('default');
+  readonly variant = input<HellChipVariant>('default');
   /** Size of the chip. Defaults to `md`. */
   readonly size = input<HellSize>('md');
   /** Whether the chip and its remove button are disabled. Defaults to `false`. */
@@ -513,5 +521,43 @@ export class HellChipRemove {
   }
 }
 
-/** All directives of the chip entry point, for bulk `imports`. */
+/** Small numeric or status indicator, typically overlaid on another element. */
+@Directive({
+  selector: '[hellBadge]',
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
+})
+export class HellBadge {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BADGE_RECIPE,
+  });
+}
+
+/** Styled representation of a keyboard key or shortcut. */
+@Directive({
+  selector: 'kbd[hellKbd], [hellKbd]',
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
+})
+export class HellKbd {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_KBD_RECIPE,
+  });
+}
+
+/** All chip-set directives of the chip entry point, for bulk `imports`. */
 export const HELL_CHIP_DIRECTIVES = [HellChipSet, HellChip, HellChipRemove] as const;

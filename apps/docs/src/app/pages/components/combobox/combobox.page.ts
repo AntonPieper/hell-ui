@@ -63,7 +63,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         assignee and label selectors, warehouse or account lookups — where a plain
         <code>&lt;select&gt;</code> or a <code>radio</code> group would be slower. In multiple mode
         the value follows the primitive's array contract, which pairs naturally with
-        <code>hellTag</code> chips for a token filter. When wiring the full directive set is more
+        <code>hellChip</code> chips for a token filter. When wiring the full directive set is more
         boilerplate than the screen deserves, the <code>&lt;hell-combobox-basic&gt;</code>
         convenience component composes the whole anatomy and handles display filtering for you.
       </p>
@@ -93,7 +93,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p>
         Add <code>multiple</code> to <code>hellCombobox</code> and the value becomes a read-only
         array; selecting an option toggles its membership and the dropdown stays open for the next
-        pick. Render the current selection as <code>hellTag</code> chips below the control so the
+        pick. Render the current selection as <code>hellChip</code> chips below the control so the
         applied tokens stay scannable.
       </p>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
@@ -122,7 +122,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p>
         A realistic reviewer picker: <code>hellField</code> wires a <code>hellFieldLabel</code> and
         <code>hellFieldDescription</code> to the combobox for accessible naming, while each selected
-        teammate renders as a dismissible <code>hellTag</code> chip with a
+        teammate renders as a dismissible <code>hellChip</code> chip with a
         <code>hellButton iconOnly</code> remove control. Every piece imports from its own narrow
         entry point.
       </p>
@@ -304,7 +304,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <h2>Do</h2>
       <ul class="hd-do">
         <li>Use combobox when a list is large enough that typing to filter beats scanning.</li>
-        <li>Use <code>hellComboboxChips</code> for editable multiple selections; keep <code>hellTag</code> for static or read-only summaries.</li>
+        <li>Use <code>hellComboboxChips</code> for editable multiple selections; keep <code>hellChip</code> for static or read-only summaries.</li>
         <li>Leave <code>hellComboboxButton</code> empty — its chevron is drawn by the stylesheet.</li>
         <li>Provide an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
         <li>Reach for <code>&lt;hell-combobox-basic&gt;</code> when composing the directives is just boilerplate.</li>

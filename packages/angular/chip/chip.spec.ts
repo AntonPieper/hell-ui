@@ -2,7 +2,7 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellChip, HellChipRemove, HellChipSet, HELL_CHIP_LABELS } from './chip';
+import { HellBadge, HellChip, HellChipRemove, HellChipSet, HellKbd, HELL_CHIP_LABELS } from './chip';
 
 @Component({
   imports: [HellChip, HellChipRemove],
@@ -384,6 +384,82 @@ describe('HellChipSet roving focus and removal', () => {
 
     const set = query(fixture, '[hellChipSet]');
     expect(doc.activeElement).toBe(set);
+  });
+});
+
+@Component({
+  imports: [HellChip, HellBadge, HellKbd],
+  template: `
+    <span id="static-chip" hellChip variant="success">Ready</span>
+    <span
+      id="chip-string"
+      hellChip
+      variant="warning"
+      ui="bg-hell-danger px-hell-4 text-hell-foreground-inverse"
+    >
+      Escalated
+    </span>
+    <span id="badge-string" hellBadge ui="min-w-hell-8 bg-hell-info">3</span>
+    <kbd id="kbd-map" hellKbd [ui]="kbdUi">K</kbd>
+  `,
+})
+class PillPartStyleHost {
+  readonly kbdUi = {
+    root: 'h-hell-6 border-hell-primary text-hell-primary',
+  };
+}
+
+describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [PillPartStyleHost] }).compileComponents();
+  });
+
+  it('renders a standalone span chip as a non-interactive static pill with its variant', () => {
+    const fixture = TestBed.createComponent(PillPartStyleHost);
+    fixture.detectChanges();
+
+    const chip = query(fixture, '#static-chip');
+    expect(chip.getAttribute('data-slot')).toBe('root');
+    expect(chip.getAttribute('data-variant')).toBe('success');
+    expect(chip.getAttribute('data-interactive')).toBeNull();
+    expect(chip.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('merges chip string shorthand over the recipe while preserving state attributes', () => {
+    const fixture = TestBed.createComponent(PillPartStyleHost);
+    fixture.detectChanges();
+
+    const chip = query(fixture, '#chip-string');
+    const classes = chip.className.split(/\s+/);
+    expect(chip.getAttribute('data-variant')).toBe('warning');
+    expect(classes).toContain('bg-hell-danger');
+    expect(classes).toContain('px-hell-4');
+    expect(classes).toContain('text-hell-foreground-inverse');
+    expect(classes).not.toContain('px-hell-3');
+  });
+
+  it('merges conflicting Badge root classes through hellTwMerge', () => {
+    const fixture = TestBed.createComponent(PillPartStyleHost);
+    fixture.detectChanges();
+
+    const badge = query(fixture, '#badge-string');
+    const classes = badge.className.split(/\s+/);
+    expect(badge.getAttribute('data-slot')).toBe('root');
+    expect(classes).toContain('min-w-hell-8');
+    expect(classes).toContain('bg-hell-info');
+    expect(classes).not.toContain('min-w-hell-4');
+    expect(classes).not.toContain('bg-hell-danger');
+  });
+
+  it('applies Kbd object maps to the root part', () => {
+    const fixture = TestBed.createComponent(PillPartStyleHost);
+    fixture.detectChanges();
+
+    const kbd = query(fixture, '#kbd-map');
+    expect(kbd.getAttribute('data-slot')).toBe('root');
+    expect(kbd.className).toContain('h-hell-6');
+    expect(kbd.className).toContain('border-hell-primary');
+    expect(kbd.className).toContain('text-hell-primary');
   });
 });
 

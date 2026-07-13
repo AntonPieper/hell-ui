@@ -87,7 +87,7 @@ import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.e
 
       <h2>With button and tag</h2>
       <p>
-        A status row combining <code>hellTag</code> for the connection state, <code>hell-icon</code>
+        A status row combining <code>hellChip</code> for the connection state, <code>hell-icon</code>
         for the status glyph and the leading call icon, and <code>hellButton</code> for the
         action. The disabled button communicates why the action is unavailable without any extra
         state plumbing — the <code>hellButton</code> directive handles the disabled semantics.

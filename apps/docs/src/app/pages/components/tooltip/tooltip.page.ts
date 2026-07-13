@@ -121,7 +121,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         A common toolbar shape: icon-only <code>hellButton</code>s (narrow entry point
         <code>@hell-ui/angular/button</code>) with <code>hell-icon</code>s
         (<code>@hell-ui/angular/icon</code>) for glyphs, and <code>hellKbd</code>
-        (<code>@hell-ui/angular/tag</code>) inside each tooltip to spell out the shortcut next to
+        (<code>@hell-ui/angular/chip</code>) inside each tooltip to spell out the shortcut next to
         the action name. Icon-only buttons still need their own <code>aria-label</code> — the
         tooltip is a supplementary hint on top, not the button's accessible name.
       </p>

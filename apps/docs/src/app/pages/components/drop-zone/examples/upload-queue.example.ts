@@ -5,7 +5,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HellDropZone } from '@hell-ui/angular/drop-zone';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 interface UploadItem {
   readonly id: number;
@@ -19,7 +19,7 @@ let nextId = 0;
 @Component({
   selector: 'app-drop-zone-upload-queue-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellDropZone, HellProgress, HellProgressBar, HellTag, HellButton, HellIcon],
+  imports: [HellDropZone, HellProgress, HellProgressBar, HellChip, HellButton, HellIcon],
   providers: [provideIcons({ faSolidXmark })],
   template: `
     <div hellDropzone accept=".pdf,.png,.jpg,.jpeg" (files)="onFiles($event)">
@@ -36,13 +36,13 @@ let nextId = 0;
               <div class="flex items-center gap-hell-2">
                 @switch (upload.status) {
                   @case ('uploading') {
-                    <span hellTag variant="info">{{ upload.progress }}%</span>
+                    <span hellChip variant="info">{{ upload.progress }}%</span>
                   }
                   @case ('done') {
-                    <span hellTag variant="success">Done</span>
+                    <span hellChip variant="success">Done</span>
                   }
                   @case ('error') {
-                    <span hellTag variant="danger">Failed</span>
+                    <span hellChip variant="danger">Failed</span>
                   }
                 }
                 <button

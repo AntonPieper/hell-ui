@@ -7,7 +7,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellKbd } from '@hell-ui/angular/tag';
+import { HellKbd } from '@hell-ui/angular/chip';
 import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };

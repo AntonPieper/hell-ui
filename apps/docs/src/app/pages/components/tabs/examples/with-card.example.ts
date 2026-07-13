@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 
 @Component({
   selector: 'app-tabs-with-card-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES, HellTag, ...HELL_TABS_DIRECTIVES],
+  imports: [...HELL_CARD_DIRECTIVES, HellChip, ...HELL_TABS_DIRECTIVES],
   template: `
     <div hellCard>
       <div hellCardHeader>
         Server-04
-        <span hellTag variant="success">Running</span>
+        <span hellChip variant="success">Running</span>
       </div>
       <div hellCardBody>
         <div hellTabset value="metrics">

@@ -107,7 +107,7 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
       <p>
         A plan chooser combines <code>hellCard</code> for the container,
         <code>hellField</code> in horizontal orientation to pair each radio with its label and
-        description, and a <code>hellTag</code> to call out the recommended tier. The
+        description, and a <code>hellChip</code> to call out the recommended tier. The
         <code>required</code> input keeps the group invalid until a plan is picked.
       </p>
       <hd-example-tabs [code]="radioPlanPickerExampleCode">
