@@ -62,9 +62,6 @@ export type HellSaveBarSaveType = 'button' | 'submit';
 // @public
 export type HellSaveBarUi = HellUi<HellSaveBarPart>;
 
-// @public
-export function provideHellSaveBarLabels(overrides: Partial<HellSaveBarLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

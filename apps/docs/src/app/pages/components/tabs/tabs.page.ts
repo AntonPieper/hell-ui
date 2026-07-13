@@ -162,26 +162,20 @@ import tabsWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' wit
           <code>orientation: HellOrientation</code> (<code>horizontal | vertical</code>, default
           <code>horizontal</code>), <code>activateOnFocus: boolean</code> (default
           <code>true</code> — selects a tab as soon as it receives focus, rather than waiting for
-          activation), <code>ui: HellUiInput&lt;HellTabsetPart&gt;</code>.
+          activation), <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
-          <code>hellTabList</code>: <code>ui: HellUiInput&lt;HellTabListPart&gt;</code>. No other
+          <code>hellTabList</code>: <code>ui: HellUiInput&lt;'root'&gt;</code>. No other
           inputs — orientation and ARIA wiring come from the parent tabset.
         </li>
         <li>
           <code>hellTab</code> (applied to <code>button[hellTab]</code>):
           <code>value: string</code> (required), <code>disabled: boolean</code> (default
-          <code>false</code>), <code>ui: HellUiInput&lt;HellTabPart&gt;</code>.
+          <code>false</code>), <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>hellTabPanel</code>: <code>value: string</code> (required),
-          <code>ui: HellUiInput&lt;HellTabPanelPart&gt;</code>.
-        </li>
-        <li>
-          Exported types: <code>HellTabsetPart</code>, <code>HellTabListPart</code>,
-          <code>HellTabPart</code>, <code>HellTabPanelPart</code> (each <code>'root'</code>), and
-          their matching <code>HellTabsetUi</code>, <code>HellTabListUi</code>,
-          <code>HellTabUi</code>, <code>HellTabPanelUi</code> Part Style Maps.
+          <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>HELL_TABS_DIRECTIVES</code>: array of all four directives, for bulk

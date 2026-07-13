@@ -1,12 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellProgress,
-  HellProgressBar,
-  type HellProgressBarUi,
-  type HellProgressUi,
-} from './progress';
+import { HellProgress, HellProgressBar } from './progress';
 
 @Component({
   imports: [HellProgress, HellProgressBar],
@@ -23,11 +18,11 @@ import {
 class ProgressPartStyleHost {
   readonly progressUi = {
     root: 'h-hell-3 rounded-hell-md bg-hell-info-soft',
-  } satisfies HellProgressUi;
+  };
 
   readonly barUi = {
     root: 'bg-hell-info transition-none',
-  } satisfies HellProgressBarUi;
+  };
 }
 
 describe('HellProgress Part Style Maps', () => {

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import type { InjectionToken, OutputEmitterRef, Provider } from '@angular/core';
+import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
 /** Built-in accessibility labels owned by the alert entry point. */
 export interface HellAlertLabels {
@@ -19,17 +19,10 @@ export interface HellAlertLabels {
   readonly dismiss: string;
 }
 
-const HELL_ALERT_LABELS_CONTRACT = hellCreateLabels<HellAlertLabels>('HELL_ALERT_LABELS', {
+/** Injection token resolving to the effective alert labels. */
+export const HELL_ALERT_LABELS: InjectionToken<HellAlertLabels> = hellCreateLabels<HellAlertLabels>('HELL_ALERT_LABELS', {
   dismiss: 'Dismiss',
 });
-
-/** Injection token resolving to the effective alert labels. */
-export const HELL_ALERT_LABELS: InjectionToken<HellAlertLabels> = HELL_ALERT_LABELS_CONTRACT.token;
-
-/** Override any subset of the alert labels for an injector scope. */
-export function provideHellAlertLabels(overrides: Partial<HellAlertLabels>): Provider {
-  return HELL_ALERT_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Severity of an alert; drives its Semantic Theme Token color scheme and default glyph. */
 export type HellAlertVariant = 'info' | 'success' | 'warning' | 'danger';
@@ -40,26 +33,6 @@ export type HellAlertLayout = 'inline' | 'banner';
 export type HellAlertPart = 'root' | 'icon' | 'content';
 /** Part Style Map accepted by the HellAlert `ui` input. */
 export type HellAlertUi = HellUi<HellAlertPart>;
-
-/** Public parts of the HellAlertTitle module, styleable through its Part Style Map. */
-export type HellAlertTitlePart = 'root';
-/** Part Style Map accepted by the HellAlertTitle `ui` input. */
-export type HellAlertTitleUi = HellUi<HellAlertTitlePart>;
-
-/** Public parts of the HellAlertDescription module, styleable through its Part Style Map. */
-export type HellAlertDescriptionPart = 'root';
-/** Part Style Map accepted by the HellAlertDescription `ui` input. */
-export type HellAlertDescriptionUi = HellUi<HellAlertDescriptionPart>;
-
-/** Public parts of the HellAlertActions module, styleable through its Part Style Map. */
-export type HellAlertActionsPart = 'root';
-/** Part Style Map accepted by the HellAlertActions `ui` input. */
-export type HellAlertActionsUi = HellUi<HellAlertActionsPart>;
-
-/** Public parts of the HellAlertDismiss module, styleable through its Part Style Map. */
-export type HellAlertDismissPart = 'root';
-/** Part Style Map accepted by the HellAlertDismiss `ui` input. */
-export type HellAlertDismissUi = HellUi<HellAlertDismissPart>;
 
 const HELL_ALERT_RECIPE = {
   root:
@@ -75,19 +48,19 @@ const HELL_ALERT_RECIPE = {
 
 const HELL_ALERT_TITLE_RECIPE = {
   root: 'm-0 text-sm font-semibold text-hell-foreground',
-} satisfies HellRecipe<HellAlertTitlePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_DESCRIPTION_RECIPE = {
   root: 'm-0 text-sm text-hell-foreground-muted',
-} satisfies HellRecipe<HellAlertDescriptionPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_ACTIONS_RECIPE = {
   root: 'mt-hell-2 flex flex-wrap items-center gap-hell-2',
-} satisfies HellRecipe<HellAlertActionsPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_DISMISS_RECIPE = {
   root: '-me-hell-1 -mt-hell-1 ms-auto inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 text-hell-foreground-subtle transition-[color,background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1',
-} satisfies HellRecipe<HellAlertDismissPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Marker for a custom alert glyph. Place it on any element projected into a
@@ -208,10 +181,10 @@ export class HellAlert {
 })
 export class HellAlertTitle {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAlertTitlePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAlertTitlePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ALERT_TITLE_RECIPE,
   });
@@ -227,10 +200,10 @@ export class HellAlertTitle {
 })
 export class HellAlertDescription {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAlertDescriptionPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAlertDescriptionPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ALERT_DESCRIPTION_RECIPE,
   });
@@ -246,10 +219,10 @@ export class HellAlertDescription {
 })
 export class HellAlertActions {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAlertActionsPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAlertActionsPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ALERT_ACTIONS_RECIPE,
   });
@@ -272,10 +245,10 @@ export class HellAlertActions {
 })
 export class HellAlertDismiss {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAlertDismissPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAlertDismissPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ALERT_DISMISS_RECIPE,
   });

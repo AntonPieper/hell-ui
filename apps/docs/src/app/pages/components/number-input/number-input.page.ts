@@ -190,7 +190,7 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           see below.
         </li>
         <li>
-          <code>provideHellNumberInputLabels</code>: override the <code>increment</code> /
+          <code>HELL_NUMBER_INPUT_LABELS</code>: override the <code>increment</code> /
           <code>decrement</code> Label Contract strings for the stepper buttons' accessible names.
         </li>
       </ul>

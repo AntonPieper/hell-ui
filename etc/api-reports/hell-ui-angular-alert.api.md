@@ -43,26 +43,12 @@ export class HellAlertActions {
 }
 
 // @public
-export type HellAlertActionsPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-alert.d.ts
-//
-// @public
-export type HellAlertActionsUi = HellUi<HellAlertActionsPart>;
-
-// @public
 export class HellAlertDescription {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertDescription, "[hellAlertDescription]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertDescription, never>;
 }
-
-// @public
-export type HellAlertDescriptionPart = 'root';
-
-// @public
-export type HellAlertDescriptionUi = HellUi<HellAlertDescriptionPart>;
 
 // @public
 export class HellAlertDismiss {
@@ -74,12 +60,6 @@ export class HellAlertDismiss {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertDismiss, "button[hellAlertDismiss]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertDismiss, never>;
 }
-
-// @public
-export type HellAlertDismissPart = 'root';
-
-// @public
-export type HellAlertDismissUi = HellUi<HellAlertDismissPart>;
 
 // @public
 export class HellAlertIcon {
@@ -106,20 +86,13 @@ export class HellAlertTitle {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertTitle, never>;
 }
 
-// @public
-export type HellAlertTitlePart = 'root';
-
-// @public
-export type HellAlertTitleUi = HellUi<HellAlertTitlePart>;
-
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-alert.d.ts
+//
 // @public
 export type HellAlertUi = HellUi<HellAlertPart>;
 
 // @public
 export type HellAlertVariant = 'info' | 'success' | 'warning' | 'danger';
-
-// @public
-export function provideHellAlertLabels(overrides: Partial<HellAlertLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

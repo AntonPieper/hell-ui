@@ -1,39 +1,9 @@
 import { NgTemplateOutlet } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  Directive,
-  ElementRef,
-  NO_ERRORS_SCHEMA,
-  NgZone,
-  TemplateRef,
-  afterNextRender,
-  afterRenderEffect,
-  booleanAttribute,
-  computed,
-  contentChildren,
-  effect,
-  forwardRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, NO_ERRORS_SCHEMA, NgZone, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import {
-  hellCreateLabels,
-  hellPartStyler,
-  type HellButtonVariant,
-  type HellOrientation,
-  type HellRecipe,
-  type HellSize,
-  type HellUi,
-  type HellUiInput,
-} from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import { hellCreateLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /**
  * How a toolbar action participates in responsive overflow:
@@ -60,18 +30,10 @@ export interface HellToolbarLabels {
   readonly overflowTrigger: string;
 }
 
-const HELL_TOOLBAR_LABELS_CONTRACT = hellCreateLabels<HellToolbarLabels>('HELL_TOOLBAR_LABELS', {
+/** Injection token resolving to the effective toolbar labels. */
+export const HELL_TOOLBAR_LABELS: InjectionToken<HellToolbarLabels> = hellCreateLabels<HellToolbarLabels>('HELL_TOOLBAR_LABELS', {
   overflowTrigger: 'More actions',
 });
-
-/** Injection token resolving to the effective toolbar labels. */
-export const HELL_TOOLBAR_LABELS: InjectionToken<HellToolbarLabels> =
-  HELL_TOOLBAR_LABELS_CONTRACT.token;
-
-/** Override any subset of the toolbar labels for an injector scope. */
-export function provideHellToolbarLabels(overrides: Partial<HellToolbarLabels>): Provider {
-  return HELL_TOOLBAR_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of the HellToolbar module, styleable through its Part Style Map. */
 export type HellToolbarPart =
@@ -567,7 +529,7 @@ export class HellToolbar {
   /**
    * Accessible label for the overflow trigger button. When left empty (the
    * default) it falls back to the toolbar Label Contract's `overflowTrigger`
-   * string (`provideHellToolbarLabels`), so the English default lives in the
+   * string (`HELL_TOOLBAR_LABELS`), so the English default lives in the
    * contract rather than a hardcoded input value.
    */
   readonly overflowLabel = input('');

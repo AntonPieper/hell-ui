@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_DIALOG_DIRECTIVES, type HellDialogUi } from '@hell-ui/angular/dialog';
+import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
 
 @Component({
   selector: 'app-dialog-styling-example',
@@ -34,7 +34,7 @@ import { HELL_DIALOG_DIRECTIVES, type HellDialogUi } from '@hell-ui/angular/dial
   `,
 })
 export class DialogStylingExample {
-  protected readonly dialogUi: HellDialogUi = {
+  protected readonly dialogUi = {
     root: 'rounded-hell-xl border-2 border-hell-danger',
   };
 }

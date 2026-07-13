@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleInfo } from '@ng-icons/font-awesome/solid';
 
-import { HellIcon, type HellIconUi } from './icon';
+import { HellIcon } from './icon';
 
 @Component({
   imports: [HellIcon],
@@ -38,7 +38,7 @@ class LabelledIconHost {}
 class PartStyleIconHost {
   readonly iconUi = {
     root: 'text-hell-info',
-  } satisfies HellIconUi;
+  };
 }
 
 describe('HellIcon', () => {

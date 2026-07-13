@@ -1,13 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellChip,
-  HellChipRemove,
-  HellChipSet,
-  provideHellChipLabels,
-  type HellChipUi,
-} from './chip';
+import { HellChip, HellChipRemove, HellChipSet, HELL_CHIP_LABELS } from './chip';
 
 @Component({
   imports: [HellChip, HellChipRemove],
@@ -44,7 +39,7 @@ import {
 class HostSemanticsHost {
   readonly buttonDisabled = signal(false);
   readonly removed: string[] = [];
-  readonly chipUi = { root: 'bg-hell-primary text-white' } satisfies HellChipUi;
+  readonly chipUi = { root: 'bg-hell-primary text-white' };
 
   onRemove(id: string): void {
     this.removed.push(id);
@@ -88,7 +83,7 @@ class ChipSetHost {
 
 @Component({
   imports: [HellChip, HellChipRemove],
-  providers: [provideHellChipLabels({ remove: (label) => `Dismiss ${label}` })],
+  providers: [provideHellLabels(HELL_CHIP_LABELS, { remove: (label) => `Dismiss ${label}` })],
   template: `
     <span hellChip [label]="'Widget'">
       Widget
@@ -258,7 +253,7 @@ describe('HellChip Label Contract', () => {
     expect(query(fixture, '#anchor-chip').hasAttribute('aria-label')).toBe(false);
   });
 
-  it('honours provideHellChipLabels overrides and the generic fallback', async () => {
+  it('honours HELL_CHIP_LABELS overrides and the generic fallback', async () => {
     await TestBed.configureTestingModule({ imports: [LabelOverrideHost] }).compileComponents();
     const fixture = TestBed.createComponent(LabelOverrideHost);
     fixture.detectChanges();

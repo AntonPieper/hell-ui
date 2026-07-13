@@ -64,7 +64,8 @@ export interface HellNumberInputLabels {
   readonly decrementFor: (label: string) => string;
 }
 
-const HELL_NUMBER_INPUT_LABELS_CONTRACT = hellCreateLabels<HellNumberInputLabels>(
+/** Injection token resolving to the effective number input labels. */
+export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels> = hellCreateLabels<HellNumberInputLabels>(
   'HELL_NUMBER_INPUT_LABELS',
   {
     increment: 'Increase value',
@@ -73,17 +74,6 @@ const HELL_NUMBER_INPUT_LABELS_CONTRACT = hellCreateLabels<HellNumberInputLabels
     decrementFor: (label) => `Decrease ${label}`,
   },
 );
-
-/** Injection token resolving to the effective number input labels. */
-export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels> =
-  HELL_NUMBER_INPUT_LABELS_CONTRACT.token;
-
-/** Override any subset of the number input labels for an injector scope. */
-export function provideHellNumberInputLabels(
-  overrides: Partial<HellNumberInputLabels>,
-): Provider {
-  return HELL_NUMBER_INPUT_LABELS_CONTRACT.provide(overrides);
-}
 
 let nextNumberInputId = 0;
 

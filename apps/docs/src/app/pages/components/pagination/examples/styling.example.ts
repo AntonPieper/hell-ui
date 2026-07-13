@@ -1,19 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  HellPagination,
-  HellPaginationButton,
-  HellPaginationFirst,
-  HellPaginationLast,
-  HellPaginationNext,
-  HellPaginationPrev,
-  HellPaginationStrip,
-  type HellPaginationButtonUi,
-  type HellPaginationFirstUi,
-  type HellPaginationLastUi,
-  type HellPaginationNextUi,
-  type HellPaginationPrevUi,
-  type HellPaginationStripUi,
-} from '@hell-ui/angular/pagination';
+import { HellPagination, HellPaginationButton, HellPaginationFirst, HellPaginationLast, HellPaginationNext, HellPaginationPrev, HellPaginationStrip, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
 
 @Component({
   selector: 'app-pagination-styling-example',
@@ -87,19 +73,19 @@ export class PaginationStylingExample {
 
   protected readonly firstUi = {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
-  } satisfies HellPaginationFirstUi;
+  };
   protected readonly prevUi = {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
-  } satisfies HellPaginationPrevUi;
+  };
   protected readonly buttonUi = {
     root: 'rounded-hell-pill bg-hell-primary text-hell-primary-foreground',
-  } satisfies HellPaginationButtonUi;
+  };
   protected readonly nextUi = {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
-  } satisfies HellPaginationNextUi;
+  };
   protected readonly lastUi = {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
-  } satisfies HellPaginationLastUi;
+  };
 
   protected readonly jumpStripUi = {
     root: 'rounded-hell-lg bg-hell-surface-muted p-hell-2',

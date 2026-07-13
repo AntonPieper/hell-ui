@@ -1,14 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellBadge,
-  type HellBadgeUi,
-  HellKbd,
-  type HellKbdUi,
-  HellTag,
-  type HellTagUi,
-} from './tag';
+import { HellBadge, HellKbd, HellTag } from './tag';
 
 @Component({
   imports: [HellTag, HellBadge, HellKbd],
@@ -29,15 +22,15 @@ import {
 class TagPartStyleHost {
   readonly tagUi = {
     root: 'rounded-hell-md bg-hell-warning-soft text-hell-warning-strong',
-  } satisfies HellTagUi;
+  };
 
   readonly kbdUi = {
     root: 'h-hell-6 border-hell-primary text-hell-primary',
-  } satisfies HellKbdUi;
+  };
 
   readonly badgeUi = {
     root: 'bg-hell-info',
-  } satisfies HellBadgeUi;
+  };
 }
 
 describe('Tag, Badge, and Kbd Part Style Maps', () => {

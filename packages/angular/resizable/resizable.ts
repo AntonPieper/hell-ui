@@ -24,7 +24,7 @@ import {
 } from '@hell-ui/angular/internal/core';
 import { isDocumentPositionFollowing } from '@hell-ui/angular/internal/core';
 import { HellOrientation } from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the resizable entry point. */
 export interface HellResizableLabels {
@@ -32,27 +32,10 @@ export interface HellResizableLabels {
   readonly resizePanels: string;
 }
 
-const HELL_RESIZABLE_LABELS_CONTRACT = hellCreateLabels<HellResizableLabels>('HELL_RESIZABLE_LABELS', {
+/** Injection token resolving to the effective resizable labels. */
+export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels> = hellCreateLabels<HellResizableLabels>('HELL_RESIZABLE_LABELS', {
   resizePanels: 'Resize panels',
 });
-
-/** Injection token resolving to the effective resizable labels. */
-export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels> = HELL_RESIZABLE_LABELS_CONTRACT.token;
-
-/** Override any subset of the resizable labels for an injector scope. */
-export function provideHellResizableLabels(overrides: Partial<HellResizableLabels>): Provider {
-  return HELL_RESIZABLE_LABELS_CONTRACT.provide(overrides);
-}
-
-/** Public parts of the HellResizable module, styleable through its Part Style Map. */
-export type HellResizablePart = 'root';
-/** Part Style Map accepted by the HellResizable `ui` input. */
-export type HellResizableUi = HellUi<HellResizablePart>;
-
-/** Public parts of the HellResizablePane module, styleable through its Part Style Map. */
-export type HellResizablePanePart = 'root';
-/** Part Style Map accepted by the HellResizablePane `ui` input. */
-export type HellResizablePaneUi = HellUi<HellResizablePanePart>;
 
 /** Public parts of the HellResizableHandle module, styleable through its Part Style Map. */
 export type HellResizableHandlePart = 'root' | 'grip';
@@ -61,11 +44,11 @@ export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;
 
 const HELL_RESIZABLE_RECIPE = {
   root: 'flex h-full w-full',
-} satisfies HellRecipe<HellResizablePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_RESIZABLE_PANE_RECIPE = {
   root: 'min-h-0 min-w-0 overflow-auto',
-} satisfies HellRecipe<HellResizablePanePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_RESIZABLE_HANDLE_RECIPE = {
   root: 'flex bg-transparent',
@@ -109,10 +92,10 @@ function hellAriaControlsValue(
 })
 export class HellResizable implements AfterContentInit {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellResizablePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellResizablePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_RESIZABLE_RECIPE,
   });
@@ -283,10 +266,10 @@ export class HellResizable implements AfterContentInit {
 })
 export class HellResizablePane implements OnDestroy {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellResizablePanePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellResizablePanePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_RESIZABLE_PANE_RECIPE,
   });

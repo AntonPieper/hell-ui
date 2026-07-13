@@ -9,7 +9,7 @@ import {
   numberAttribute,
   output,
 } from '@angular/core';
-import type { InjectionToken, OutputEmitterRef, Provider } from '@angular/core';
+import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 import type { Placement } from '@floating-ui/dom';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
@@ -44,21 +44,11 @@ export interface HellMultiSelectMenuButtonLabels {
   readonly reset: string;
 }
 
-const HELL_MULTI_SELECT_MENU_BUTTON_LABELS_CONTRACT =
+/** Injection token resolving to the effective multi-select-menu-button labels. */
+export const HELL_MULTI_SELECT_MENU_BUTTON_LABELS: InjectionToken<HellMultiSelectMenuButtonLabels> =
   hellCreateLabels<HellMultiSelectMenuButtonLabels>('HELL_MULTI_SELECT_MENU_BUTTON_LABELS', {
     reset: 'Reset to default',
   });
-
-/** Injection token resolving to the effective multi-select-menu-button labels. */
-export const HELL_MULTI_SELECT_MENU_BUTTON_LABELS: InjectionToken<HellMultiSelectMenuButtonLabels> =
-  HELL_MULTI_SELECT_MENU_BUTTON_LABELS_CONTRACT.token;
-
-/** Override any subset of the multi-select-menu-button labels for an injector scope. */
-export function provideHellMultiSelectMenuButtonLabels(
-  overrides: Partial<HellMultiSelectMenuButtonLabels>,
-): Provider {
-  return HELL_MULTI_SELECT_MENU_BUTTON_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of the HellMultiSelectMenuButton module, styleable through its Part Style Map. */
 export type HellMultiSelectMenuButtonPart = 'root' | 'trigger' | 'count';
@@ -90,7 +80,7 @@ const HELL_MULTI_SELECT_MENU_BUTTON_RECIPE = {
  * drop below it (a table can never reach zero visible columns). An opt-in
  * `resettable` reset item emits the distinct `reset` event so the consumer can
  * restore its own defaults; its label comes from the Label Contract
- * (`provideHellMultiSelectMenuButtonLabels`).
+ * (`provideHellLabels(HELL_MULTI_SELECT_MENU_BUTTON_LABELS, …)`).
  *
  * The trigger reflects selection through the `count` badge part and the
  * `data-selection-count` / `data-has-selection` attributes. Refine the `root`,

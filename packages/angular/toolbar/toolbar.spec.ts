@@ -1,13 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_TOOLBAR_DIRECTIVES,
-  hellResolveToolbarOverflow,
-  provideHellToolbarLabels,
-  type HellToolbarOverflowItem,
-  type HellToolbarUi,
-} from './toolbar';
+import { HELL_TOOLBAR_DIRECTIVES, hellResolveToolbarOverflow, HELL_TOOLBAR_LABELS, type HellToolbarOverflowItem, type HellToolbarUi } from './toolbar';
 
 describe('hellResolveToolbarOverflow', () => {
   const item = (
@@ -269,7 +264,7 @@ class CapabilitiesHost {
 
 @Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
-  providers: [provideHellToolbarLabels({ overflowTrigger: 'Weitere Aktionen' })],
+  providers: [provideHellLabels(HELL_TOOLBAR_LABELS, { overflowTrigger: 'Weitere Aktionen' })],
   template: `
     <hell-toolbar label="Localized">
       <ng-template hellToolbarAction label="One" priority="primary"></ng-template>

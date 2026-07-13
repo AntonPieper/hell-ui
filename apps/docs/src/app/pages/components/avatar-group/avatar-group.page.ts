@@ -114,16 +114,16 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
       </p>
       <ul>
         <li>
-          <code>HellAvatarGroupUi</code> (<code>hell-avatar-group</code>) — <code>root</code>: the
+          <code>hell-avatar-group</code> — <code>root</code>: the
           stacking container. Owns the shared size and overlap CSS variables.
         </li>
         <li>
-          <code>HellAvatarGroupItemUi</code> (<code>[hellAvatarGroupItem]</code>) —
+          <code>[hellAvatarGroupItem]</code> —
           <code>root</code>: the projected item itself (an avatar, button, or anchor). Carries the
           selection ring.
         </li>
         <li>
-          <code>HellAvatarGroupOverflowUi</code> (<code>[hellAvatarGroupOverflow]</code>) —
+          <code>[hellAvatarGroupOverflow]</code> —
           <code>root</code>: the trailing "+N" indicator.
         </li>
       </ul>
@@ -142,7 +142,7 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
               default <code>md</code>
             </li>
             <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellAvatarGroupPart&gt;</code>, part union
+              <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>, part union
               <code>'root'</code>
             </li>
           </ul>
@@ -155,7 +155,7 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
               <code>false</code>
             </li>
             <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellAvatarGroupItemPart&gt;</code>, part union
+              <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>, part union
               <code>'root'</code>
             </li>
           </ul>
@@ -164,7 +164,7 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           <code>[hellAvatarGroupOverflow]</code> (<code>HellAvatarGroupOverflow</code>):
           <ul>
             <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellAvatarGroupOverflowPart&gt;</code>, part
+              <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>, part
               union <code>'root'</code>
             </li>
           </ul>

@@ -506,6 +506,24 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Removed the 278 information-free single-part Part Style Map aliases
+  (`Hell<Module>Part = 'root'` and their `Hell<Module>Ui = HellUi<...>`
+  counterparts) from every entry point. Single-part modules now type their
+  `ui` input as `HellUiInput<'root'>` from `@hell-ui/angular/core` directly;
+  multi-part unions such as `HellToasterPart` or `HellNumberInputPart` and
+  their `Ui` maps remain exported. Migrate `HellXUi` annotations on single-part
+  modules to `HellUi<'root'>` (or drop the annotation). Evidence: API reports
+  shrink accordingly; behavior, recipes, and `data-slot` contracts are
+  unchanged per the untouched unit and e2e suites.
+- Consolidated the 26 per-entry-point `provideHell<Module>Labels` functions
+  into one generic `provideHellLabels(token, overrides)` exported from
+  `@hell-ui/angular/core`. `hellCreateLabels` now returns the `InjectionToken`
+  itself and registers its defaults for the generic provider; the
+  `HellLabelContract` type is gone. Migrate
+  `provideHellAlertLabels({ dismiss: '…' })` to
+  `provideHellLabels(HELL_ALERT_LABELS, { dismiss: '…' })`; the label
+  interfaces and `HELL_*_LABELS` tokens are unchanged. Evidence: migrated
+  spec coverage across all label-owning entry points.
 - `@hell-ui/angular/table-tanstack` no longer re-exports
   `FlexRenderDirective`/`FlexRender` or the other TanStack FlexRender helpers;
   import them from `@tanstack/angular-table`. TanStack shell behavior is

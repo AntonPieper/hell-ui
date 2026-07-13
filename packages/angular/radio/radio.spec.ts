@@ -2,15 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import {
-  HellNativeRadio,
-  HellNativeRadioGroup,
-  type HellNativeRadioGroupUi,
-  HellRadio,
-  HellRadioGroup,
-  type HellRadioGroupUi,
-  type HellRadioUi,
-} from './radio';
+import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from './radio';
 
 @Component({
   selector: 'hell-radio-host',
@@ -194,13 +186,13 @@ class RadioPartStyleHost {
   readonly value = signal('a');
   protected readonly radioUi = {
     root: 'gap-hell-5 text-hell-danger',
-  } satisfies HellRadioUi;
+  };
   protected readonly groupUi = {
     root: 'gap-hell-6',
-  } satisfies HellRadioGroupUi;
+  };
   protected readonly nativeGroupUi = {
     root: 'gap-hell-5',
-  } satisfies HellNativeRadioGroupUi;
+  };
 }
 
 describe('HellRadio', () => {

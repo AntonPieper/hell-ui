@@ -7,7 +7,6 @@ import {
   inject,
   input,
   type InjectionToken,
-  type Provider,
 } from '@angular/core';
 import {
   NgpPagination,
@@ -28,7 +27,7 @@ import {
   providePaginationNextState,
   providePaginationPreviousState,
 } from 'ng-primitives/pagination';
-import { HellNativeSelect, type HellNativeSelectUi } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/input';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
@@ -54,9 +53,9 @@ export interface HellPaginationLabels {
   readonly pageTotal?: (pageCount: number) => string;
 }
 
-const HELL_PAGINATION_LABEL_CONTRACT = hellCreateLabels<HellPaginationLabels>(
-  'HELL_PAGINATION_LABELS',
-  {
+/** Injection token resolving to the effective pagination labels. */
+export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels> =
+  hellCreateLabels<HellPaginationLabels>('HELL_PAGINATION_LABELS', {
     navigation: 'Pagination',
     firstPage: 'First page',
     previousPage: 'Previous page',
@@ -66,52 +65,10 @@ const HELL_PAGINATION_LABEL_CONTRACT = hellCreateLabels<HellPaginationLabels>(
     pageStatus: (page, pageCount) => `Page ${page} of ${pageCount}`,
     jumpToPage: 'Page',
     pageTotal: (pageCount) => `of ${pageCount}`,
-  },
-);
-
-/** Injection token resolving to the effective pagination labels. */
-export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels> =
-  HELL_PAGINATION_LABEL_CONTRACT.token;
-
-/** Override any subset of the pagination labels for an injector scope. */
-export function provideHellPaginationLabels(
-  overrides: Partial<HellPaginationLabels>,
-): Provider {
-  return HELL_PAGINATION_LABEL_CONTRACT.provide(overrides);
-}
+  });
 
 /** Layout variant of the `HellPaginationStrip`: full page buttons, a compact previous/next control, or a page-jump select. */
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
-
-/** Public parts of the HellPagination module, styleable through its Part Style Map. */
-export type HellPaginationPart = 'root';
-/** Part Style Map accepted by the HellPagination `ui` input. */
-export type HellPaginationUi = HellUi<HellPaginationPart>;
-
-/** Public parts of the HellPaginationFirst module, styleable through its Part Style Map. */
-export type HellPaginationFirstPart = 'root';
-/** Part Style Map accepted by the HellPaginationFirst `ui` input. */
-export type HellPaginationFirstUi = HellUi<HellPaginationFirstPart>;
-
-/** Public parts of the HellPaginationPrev module, styleable through its Part Style Map. */
-export type HellPaginationPrevPart = 'root';
-/** Part Style Map accepted by the HellPaginationPrev `ui` input. */
-export type HellPaginationPrevUi = HellUi<HellPaginationPrevPart>;
-
-/** Public parts of the HellPaginationNext module, styleable through its Part Style Map. */
-export type HellPaginationNextPart = 'root';
-/** Part Style Map accepted by the HellPaginationNext `ui` input. */
-export type HellPaginationNextUi = HellUi<HellPaginationNextPart>;
-
-/** Public parts of the HellPaginationLast module, styleable through its Part Style Map. */
-export type HellPaginationLastPart = 'root';
-/** Part Style Map accepted by the HellPaginationLast `ui` input. */
-export type HellPaginationLastUi = HellUi<HellPaginationLastPart>;
-
-/** Public parts of the HellPaginationButton module, styleable through its Part Style Map. */
-export type HellPaginationButtonPart = 'root';
-/** Part Style Map accepted by the HellPaginationButton `ui` input. */
-export type HellPaginationButtonUi = HellUi<HellPaginationButtonPart>;
 
 /** Public parts of the HellPaginationStrip module, styleable through its Part Style Map. */
 export type HellPaginationStripPart =
@@ -128,30 +85,30 @@ export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;
 
 const HELL_PAGINATION_RECIPE = {
   root: 'inline-flex flex-wrap items-center gap-hell-1 data-[mode=jump]:gap-hell-2 data-[mode=previous-next]:gap-hell-2',
-} satisfies HellRecipe<HellPaginationPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_CONTROL_ROOT_RECIPE =
   'inline-flex h-hell-control-sm min-w-[var(--spacing-hell-control-sm)] cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-transparent bg-transparent px-hell-3 font-[inherit] text-xs font-medium leading-none text-hell-foreground transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-[0.45] data-selected:border-hell-primary data-selected:bg-hell-primary data-selected:text-hell-primary-foreground data-selected:font-semibold';
 
 const HELL_PAGINATION_FIRST_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<HellPaginationFirstPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_PREV_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<HellPaginationPrevPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_NEXT_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<HellPaginationNextPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_LAST_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<HellPaginationLastPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_BUTTON_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<HellPaginationButtonPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_STRIP_RECIPE = {
   root: HELL_PAGINATION_RECIPE.root,
@@ -244,10 +201,10 @@ function paginationKeyboardActivation(
 })
 export class HellPagination {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_RECIPE,
   });
@@ -276,10 +233,10 @@ export class HellPagination {
 })
 export class HellPaginationFirst {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationFirstPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationFirstPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_FIRST_RECIPE,
   });
@@ -317,10 +274,10 @@ export class HellPaginationFirst {
 })
 export class HellPaginationPrev {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationPrevPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationPrevPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_PREV_RECIPE,
   });
@@ -358,10 +315,10 @@ export class HellPaginationPrev {
 })
 export class HellPaginationNext {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationNextPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationNextPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_NEXT_RECIPE,
   });
@@ -399,10 +356,10 @@ export class HellPaginationNext {
 })
 export class HellPaginationLast {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationLastPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationLastPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_LAST_RECIPE,
   });
@@ -443,10 +400,10 @@ export class HellPaginationLast {
 })
 export class HellPaginationButton {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPaginationButtonPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPaginationButtonPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_BUTTON_RECIPE,
   });
@@ -666,7 +623,7 @@ export class HellPaginationStrip {
   }
 
   /** Part Style Map forwarded to the embedded `hellNativeSelect` jump control. */
-  protected jumpSelectUi(): HellNativeSelectUi {
+  protected jumpSelectUi(): { root: string } {
     return { root: this.part('jumpSelect') };
   }
 

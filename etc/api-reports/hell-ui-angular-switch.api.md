@@ -27,14 +27,6 @@ export class HellNativeSwitch {
 }
 
 // @public
-export type HellNativeSwitchPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-switch.d.ts
-//
-// @public
-export type HellNativeSwitchUi = HellUi<HellNativeSwitchPart>;
-
-// @public
 export class HellSwitch implements ControlValueAccessor {
     readonly checked: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
@@ -54,6 +46,8 @@ export class HellSwitch implements ControlValueAccessor {
 // @public
 export type HellSwitchPart = 'root' | 'thumb';
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-switch.d.ts
+//
 // @public
 export type HellSwitchUi = HellUi<HellSwitchPart>;
 

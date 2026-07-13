@@ -28,11 +28,6 @@ export type HellCheckboxPart = 'root' | 'indicator';
 /** Part Style Map accepted by the HellCheckbox `ui` input. */
 export type HellCheckboxUi = HellUi<HellCheckboxPart>;
 
-/** Public parts of the HellNativeCheckbox module, styleable through its Part Style Map. */
-export type HellNativeCheckboxPart = 'root';
-/** Part Style Map accepted by the HellNativeCheckbox `ui` input. */
-export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
-
 const HELL_CHECKBOX_RECIPE = {
   root: 'inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-primary-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-checked:border-hell-primary data-checked:bg-hell-primary data-indeterminate:border-hell-primary data-indeterminate:bg-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-50',
   indicator: 'block size-hell-4 translate-y-[-0.5px]',
@@ -40,7 +35,7 @@ const HELL_CHECKBOX_RECIPE = {
 
 const HELL_NATIVE_CHECKBOX_RECIPE = {
   root: 'relative inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary checked:bg-hell-primary checked:text-hell-primary-foreground indeterminate:border-hell-primary indeterminate:bg-hell-primary indeterminate:text-hell-primary-foreground data-[indeterminate]:border-hell-primary data-[indeterminate]:bg-hell-primary data-[indeterminate]:text-hell-primary-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-} satisfies HellRecipe<HellNativeCheckboxPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Styled checkbox built on `ngpCheckbox`. Forwards `checked`, `indeterminate`,
@@ -220,10 +215,10 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
 })
 export class HellNativeCheckbox {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNativeCheckboxPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNativeCheckboxPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NATIVE_CHECKBOX_RECIPE,
   });

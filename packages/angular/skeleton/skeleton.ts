@@ -1,14 +1,9 @@
 import { Directive, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-
-/** Public parts of the HellSkeleton module, styleable through its Part Style Map. */
-export type HellSkeletonPart = 'root';
-/** Part Style Map accepted by the HellSkeleton `ui` input. */
-export type HellSkeletonUi = HellUi<HellSkeletonPart>;
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
 const HELL_SKELETON_RECIPE = {
   root: 'block animate-[hell-shimmer_1.6s_linear_infinite] rounded-sm bg-hell-surface-muted bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--color-hell-surface)_70%,transparent)_50%,transparent_100%)] bg-[length:200%_100%] bg-no-repeat motion-reduce:animate-none motion-reduce:bg-none data-[shape=circle]:rounded-full data-[shape=rect]:rounded-hell-md',
-} satisfies HellRecipe<HellSkeletonPart>;
+} satisfies HellRecipe<'root'>;
 
 /** Loading shape placeholder. Pure visual — no semantics. */
 @Directive({
@@ -24,10 +19,10 @@ const HELL_SKELETON_RECIPE = {
 })
 export class HellSkeleton {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSkeletonPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSkeletonPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SKELETON_RECIPE,
   });

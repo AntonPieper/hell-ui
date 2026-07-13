@@ -1,3 +1,4 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
@@ -5,24 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { type HellSearchSource, type HellUiInput } from '@hell-ui/angular/core';
 import { HellGlobalKeydownService } from '@hell-ui/angular/internal/hotkeys';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import {
-  HELL_OMNIBAR_DIRECTIVES,
-  type HellOmnibarActionUi,
-  type HellOmnibarActionsStripUi,
-  type HellOmnibarChipRemoveUi,
-  type HellOmnibarChipUi,
-  type HellOmnibarGroupLabelUi,
-  type HellOmnibarGroupUi,
-  type HellOmnibarItemIconUi,
-  type HellOmnibarItemSubtextUi,
-  type HellOmnibarItemTextUi,
-  type HellOmnibarItemTrailingUi,
-  type HellOmnibarItemUi,
-  type HellOmnibarPart,
-  type HellOmnibarSubmitEvent,
-  type HellOmnibarUi,
-  provideHellOmnibarLabels,
-} from './omnibar';
+import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarPart, type HellOmnibarSubmitEvent, type HellOmnibarUi, HELL_OMNIBAR_LABELS } from './omnibar';
 
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES, ...HELL_MENU_DIRECTIVES],
@@ -109,7 +93,7 @@ class OmnibarDisabledItemHost {
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES],
   providers: [
-    provideHellOmnibarLabels({
+    provideHellLabels(HELL_OMNIBAR_LABELS, {
       clearSearch: 'Suche löschen',
     }),
   ],
@@ -191,17 +175,17 @@ class OmnibarPartStyleHost {
     results: 'gap-hell-2',
   } satisfies HellOmnibarUi;
   readonly ui = signal<HellUiInput<HellOmnibarPart>>('max-w-[420px]');
-  readonly chipUi = { root: 'rounded-none border-hell-danger' } satisfies HellOmnibarChipUi;
-  readonly chipRemoveUi = { root: 'text-hell-danger' } satisfies HellOmnibarChipRemoveUi;
-  readonly actionsStripUi = { root: 'gap-hell-3' } satisfies HellOmnibarActionsStripUi;
-  readonly actionUi = { root: 'text-hell-danger' } satisfies HellOmnibarActionUi;
-  readonly groupUi = { root: 'gap-hell-2' } satisfies HellOmnibarGroupUi;
-  readonly groupLabelUi = { root: 'text-hell-danger' } satisfies HellOmnibarGroupLabelUi;
-  readonly itemUi = { root: 'rounded-none' } satisfies HellOmnibarItemUi;
-  readonly itemIconUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemIconUi;
-  readonly itemTextUi = { root: 'gap-hell-2' } satisfies HellOmnibarItemTextUi;
-  readonly itemSubtextUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemSubtextUi;
-  readonly itemTrailingUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemTrailingUi;
+  readonly chipUi = { root: 'rounded-none border-hell-danger' };
+  readonly chipRemoveUi = { root: 'text-hell-danger' };
+  readonly actionsStripUi = { root: 'gap-hell-3' };
+  readonly actionUi = { root: 'text-hell-danger' };
+  readonly groupUi = { root: 'gap-hell-2' };
+  readonly groupLabelUi = { root: 'text-hell-danger' };
+  readonly itemUi = { root: 'rounded-none' };
+  readonly itemIconUi = { root: 'text-hell-danger' };
+  readonly itemTextUi = { root: 'gap-hell-2' };
+  readonly itemSubtextUi = { root: 'text-hell-danger' };
+  readonly itemTrailingUi = { root: 'text-hell-danger' };
 }
 
 describe('HellOmnibar interactions', () => {

@@ -104,7 +104,7 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
         <code>HellSkeleton</code> owns exactly one Public Part, <code>root</code> — the host
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellSkeletonUi</code> map. Refinements merge on top of the default recipe through
+        <code>&#123; root?: string &#125;</code> map. Refinements merge on top of the default recipe through
         Hell's Tailwind merge, so a conflicting utility such as
         <code>bg-hell-primary-soft</code> or <code>rounded-hell-lg</code> wins deterministically.
       </p>
@@ -154,14 +154,12 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
           <code>shape</code>: <code>'text' | 'circle' | 'rect'</code>. Default <code>'text'</code>.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellSkeletonPart&gt;</code> — a shorthand class
-          string or a <code>HellSkeletonUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellSkeletonPart</code> (<code>'root'</code>),
-          <code>HellSkeletonUi</code> (<code>HellUi&lt;HellSkeletonPart&gt;</code>).
-        </li>
+          </li>
       </ul>
       <h2>Accessibility</h2>
       <ul>

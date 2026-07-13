@@ -37,12 +37,12 @@ export type HellUiInput<Part extends string> = string | HellUi<Part> | null | un
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 ```
 
-Every public component that exposes `[ui]` should export its part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Migrated components declare their own typed `[ui]` signal input and compose the shared `hellPartStyler<Part>` factory from core, which owns the single part-class merge pipeline and the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`:
+Multi-part components export their part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Single-part modules do not export `Part`/`Ui` aliases; their `ui` input is typed `HellUiInput<'root'>` directly, since the aliases carried no information beyond the shared core types. Migrated components declare their own typed `[ui]` signal input and compose the shared `hellPartStyler<Part>` factory from core, which owns the single part-class merge pipeline and the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`:
 
 ```ts
-readonly ui = input<HellUiInput<HellButtonPart>>(undefined, { alias: 'ui' });
+readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-protected readonly part = hellPartStyler<HellButtonPart>(this.ui, {
+protected readonly part = hellPartStyler<'root'>(this.ui, {
   defaultPart: 'root',
   recipe: () => ({ root: this.rootRecipe() }),
 });
@@ -63,8 +63,7 @@ components such as Dialpad may expose multiple Public Parts from the root
 because those parts are rendered by the root component itself.
 
 Single-host public directives use `root` as their sole Public Part. Semantic
-identity belongs to the directive name and exported UI type, such as
-`HellMenuItemUi` or `HellCardHeaderUi`, while the local part remains `root`.
+identity belongs to the directive name, while the local part remains `root`.
 Semantic part names such as `item`, `option`, or `header` belong inside
 multi-part owned-anatomy component maps where one root exposes several Public
 Parts.

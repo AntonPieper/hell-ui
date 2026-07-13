@@ -48,31 +48,6 @@ export type HellSelectFormValue<T = unknown> =
 export type HellSelectDisplayWith<T = unknown> = (value: T) => string;
 export type HellSelectCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
-/** Public parts of the HellSelect module, styleable through its Part Style Map. */
-export type HellSelectPart = 'root';
-/** Part Style Map accepted by the HellSelect `ui` input. */
-export type HellSelectUi = HellUi<HellSelectPart>;
-
-/** Public parts of the HellSelectValue module, styleable through its Part Style Map. */
-export type HellSelectValuePart = 'root';
-/** Part Style Map accepted by the HellSelectValue `ui` input. */
-export type HellSelectValueUi = HellUi<HellSelectValuePart>;
-
-/** Public parts of the HellSelectPlaceholder module, styleable through its Part Style Map. */
-export type HellSelectPlaceholderPart = 'root';
-/** Part Style Map accepted by the HellSelectPlaceholder `ui` input. */
-export type HellSelectPlaceholderUi = HellUi<HellSelectPlaceholderPart>;
-
-/** Public parts of the HellSelectDropdown module, styleable through its Part Style Map. */
-export type HellSelectDropdownPart = 'root';
-/** Part Style Map accepted by the HellSelectDropdown `ui` input. */
-export type HellSelectDropdownUi = HellUi<HellSelectDropdownPart>;
-
-/** Public parts of the HellSelectOption module, styleable through its Part Style Map. */
-export type HellSelectOptionPart = 'root';
-/** Part Style Map accepted by the HellSelectOption `ui` input. */
-export type HellSelectOptionUi = HellUi<HellSelectOptionPart>;
-
 /** Public parts of the HellSelectBasic module, styleable through its Part Style Map. */
 export type HellSelectBasicPart =
   | 'root'
@@ -86,23 +61,23 @@ export type HellSelectBasicUi = HellUi<HellSelectBasicPart>;
 
 const HELL_SELECT_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-pointer items-center gap-hell-3 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-hell-3 text-start font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
-} satisfies HellRecipe<HellSelectPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_VALUE_RECIPE = {
   root: 'min-w-0 flex-auto overflow-hidden text-ellipsis whitespace-nowrap',
-} satisfies HellRecipe<HellSelectValuePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_PLACEHOLDER_RECIPE = {
   root: 'min-w-0 flex-auto overflow-hidden text-ellipsis whitespace-nowrap text-hell-foreground-muted',
-} satisfies HellRecipe<HellSelectPlaceholderPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_DROPDOWN_RECIPE = {
   root: 'fixed z-[var(--hell-z-popover,60)] flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none origin-[var(--ngp-select-transform-origin,top)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
-} satisfies HellRecipe<HellSelectDropdownPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_OPTION_RECIPE = {
   root: 'flex cursor-pointer items-center gap-hell-3 rounded-hell-sm bg-transparent px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-[13px] text-hell-foreground outline-none data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]',
-} satisfies HellRecipe<HellSelectOptionPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_BASIC_RECIPE = {
   root: '',
@@ -151,10 +126,10 @@ const HELL_SELECT_BASIC_RECIPE = {
 })
 export class HellSelect<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SELECT_RECIPE,
   });
@@ -254,10 +229,10 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
 })
 export class HellSelectValue {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectValuePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectValuePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SELECT_VALUE_RECIPE,
   });
@@ -272,10 +247,10 @@ export class HellSelectValue {
 })
 export class HellSelectPlaceholder {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectPlaceholderPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectPlaceholderPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SELECT_PLACEHOLDER_RECIPE,
   });
@@ -292,10 +267,10 @@ export class HellSelectPlaceholder {
 })
 export class HellSelectDropdown implements OnDestroy {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectDropdownPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectDropdownPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SELECT_DROPDOWN_RECIPE,
   });
@@ -350,10 +325,10 @@ export class HellSelectPortal {}
 })
 export class HellSelectOption {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectOptionPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectOptionPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_SELECT_OPTION_RECIPE,
   });

@@ -180,25 +180,21 @@ import { PageHeader } from '../../../shared/page-header';
               <code>data-elevation</code>. Default <code>1</code>.
             </li>
             <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellCardPart&gt;</code> where
-              <code>HellCardPart = 'root'</code>. Exports <code>HellCardUi</code>.
+              <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
         <li>
           <code>[hellCardHeader]</code> — the header region.
-          <code>ui</code>: <code>HellUiInput&lt;HellCardHeaderPart&gt;</code> where
-          <code>HellCardHeaderPart = 'root'</code>. Exports <code>HellCardHeaderUi</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>[hellCardBody]</code> — the body region.
-          <code>ui</code>: <code>HellUiInput&lt;HellCardBodyPart&gt;</code> where
-          <code>HellCardBodyPart = 'root'</code>. Exports <code>HellCardBodyUi</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>[hellCardFooter]</code> — the footer region.
-          <code>ui</code>: <code>HellUiInput&lt;HellCardFooterPart&gt;</code> where
-          <code>HellCardFooterPart = 'root'</code>. Exports <code>HellCardFooterUi</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>HELL_CARD_DIRECTIVES</code>: array of all four directives, for bulk

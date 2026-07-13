@@ -157,7 +157,7 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
             <li><code>collapsible</code>: <code>boolean</code>, default <code>false</code>. In <code>type="single"</code>, allows closing the currently open item so nothing stays open.</li>
             <li><code>disabled</code>: <code>boolean</code>, default <code>false</code>. Disables every item in the group.</li>
             <li><code>orientation</code>: <code>'vertical' | 'horizontal'</code>, default <code>'vertical'</code>. Informational for assistive tech and CSS hooks only — layout stays consumer-owned.</li>
-            <li><code>ui: HellUiInput&lt;HellAccordionPart&gt;</code> where <code>HellAccordionPart = 'root'</code>. Exports <code>HellAccordionUi</code>.</li>
+            <li><code>ui: HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
         </li>
         <li>
@@ -165,19 +165,19 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
           <ul>
             <li><code>value</code>: <code>T</code>, required in practice — identifies the item within the group's <code>value</code>.</li>
             <li><code>disabled</code>: <code>boolean</code>, default <code>false</code>. Locks this item closed independent of the group.</li>
-            <li><code>ui: HellUiInput&lt;HellAccordionItemPart&gt;</code> where <code>HellAccordionItemPart = 'root'</code>. Exports <code>HellAccordionItemUi</code>.</li>
+            <li><code>ui: HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
         </li>
         <li>
           <code>button[hellAccordionTrigger]</code> — the section header button (host directive <code>NgpAccordionTrigger</code>). Sets <code>type="button"</code> automatically.
           <ul>
-            <li><code>ui: HellUiInput&lt;HellAccordionTriggerPart&gt;</code> where <code>HellAccordionTriggerPart = 'root'</code>. Exports <code>HellAccordionTriggerUi</code>.</li>
+            <li><code>ui: HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
         </li>
         <li>
           <code>[hellAccordionContent]</code> — the collapsible panel (host directive <code>NgpAccordionContent</code>). Mirrors the item's closed state to <code>aria-hidden</code> and <code>inert</code> so hidden content and its focusable descendants are unreachable while collapsed.
           <ul>
-            <li><code>ui: HellUiInput&lt;HellAccordionContentPart&gt;</code> where <code>HellAccordionContentPart = 'root'</code>. Exports <code>HellAccordionContentUi</code>.</li>
+            <li><code>ui: HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
         </li>
         <li>Import every directive at once via <code>HELL_ACCORDION_DIRECTIVES</code>.</li>

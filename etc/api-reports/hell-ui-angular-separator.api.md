@@ -26,14 +26,6 @@ export class HellSeparator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSeparator, never>;
 }
 
-// @public
-export type HellSeparatorPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-separator.d.ts
-//
-// @public
-export type HellSeparatorUi = HellUi<HellSeparatorPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

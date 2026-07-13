@@ -277,7 +277,7 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
       <ul>
         <li><code>HellToastTemplate</code> — marker directive (<code>hellToastTemplate</code>) for custom toast templates.</li>
         <li><code>HELL_TOAST_DIRECTIVES</code> — <code>[HellToaster, HellToastTemplate]</code> for bulk import.</li>
-        <li><code>HellToastLabels</code>, <code>HELL_TOAST_LABELS</code>, <code>provideHellToastLabels()</code> — the Label Contract for the region, stack, dismiss, and dismiss-all strings.</li>
+        <li><code>HellToastLabels</code>, <code>HELL_TOAST_LABELS</code>, <code>provideHellLabels(HELL_TOAST_LABELS, …)</code> — the Label Contract for the region, stack, dismiss, and dismiss-all strings.</li>
       </ul>
 
       <h2>Accessibility</h2>
@@ -307,7 +307,7 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
         <li>
           The close button carries the <code>dismiss</code> label and the dismiss-all button the
           <code>dismissAll</code> label; the status glyph is <code>aria-hidden</code>. Override any
-          string with <code>provideHellToastLabels()</code>.
+          string with <code>provideHellLabels(HELL_TOAST_LABELS, …)</code>.
         </li>
       </ul>
 

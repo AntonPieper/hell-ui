@@ -1,12 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_TABS_DIRECTIVES,
-  type HellTabPanelUi,
-  type HellTabUi,
-  type HellTabsetUi,
-} from './tabs';
+import { HELL_TABS_DIRECTIVES } from './tabs';
 
 @Component({
   imports: [...HELL_TABS_DIRECTIVES],
@@ -32,13 +27,13 @@ class TabsHost {
   readonly events: string[] = [];
   protected readonly tabsetUi = {
     root: 'gap-hell-8',
-  } satisfies HellTabsetUi;
+  };
   protected readonly tabUi = {
     root: 'px-hell-6 text-hell-danger',
-  } satisfies HellTabUi;
+  };
   protected readonly panelUi = {
     root: 'py-hell-2',
-  } satisfies HellTabPanelUi;
+  };
 }
 
 describe('HellTabs', () => {

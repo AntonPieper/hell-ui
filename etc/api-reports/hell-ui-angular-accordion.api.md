@@ -35,14 +35,6 @@ export class HellAccordionContent {
 }
 
 // @public
-export type HellAccordionContentPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-accordion.d.ts
-//
-// @public
-export type HellAccordionContentUi = HellUi<HellAccordionContentPart>;
-
-// @public
 export class HellAccordionItem {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -51,30 +43,12 @@ export class HellAccordionItem {
 }
 
 // @public
-export type HellAccordionItemPart = 'root';
-
-// @public
-export type HellAccordionItemUi = HellUi<HellAccordionItemPart>;
-
-// @public
-export type HellAccordionPart = 'root';
-
-// @public
 export class HellAccordionTrigger {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionTrigger, "button[hellAccordionTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionTrigger; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionTrigger, never>;
 }
-
-// @public
-export type HellAccordionTriggerPart = 'root';
-
-// @public
-export type HellAccordionTriggerUi = HellUi<HellAccordionTriggerPart>;
-
-// @public
-export type HellAccordionUi = HellUi<HellAccordionPart>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -85,9 +85,6 @@ export type HellDateRangePickerPart = 'root' | 'header' | 'nav' | 'navButton' | 
 // @public
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
 
-// @public
-export function provideHellDatePickerLabels(overrides: Partial<HellDatePickerLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

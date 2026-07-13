@@ -25,12 +25,6 @@ export class HellInput {
 }
 
 // @public
-export type HellInputPart = 'root';
-
-// @public
-export type HellInputUi = HellUi<HellInputPart>;
-
-// @public
 export class HellNativeSelect {
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -39,12 +33,6 @@ export class HellNativeSelect {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
 }
-
-// @public
-export type HellNativeSelectPart = 'root';
-
-// @public
-export type HellNativeSelectUi = HellUi<HellNativeSelectPart>;
 
 // @public
 export type HellPartStyler<Part extends string> = (part: Part) => string;
@@ -71,12 +59,6 @@ export class HellTextarea {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "autoGrow": { "alias": "autoGrow"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;
 }
-
-// @public
-export type HellTextareaPart = 'root';
-
-// @public
-export type HellTextareaUi = HellUi<HellTextareaPart>;
 
 // @public
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;

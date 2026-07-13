@@ -1,5 +1,5 @@
 import { computed, Directive, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpAccordion,
   NgpAccordionItem,
@@ -8,41 +8,21 @@ import {
   injectAccordionItemState,
 } from 'ng-primitives/accordion';
 
-/** Public parts of the HellAccordion module, styleable through its Part Style Map. */
-export type HellAccordionPart = 'root';
-/** Part Style Map accepted by the HellAccordion `ui` input. */
-export type HellAccordionUi = HellUi<HellAccordionPart>;
-
-/** Public parts of the HellAccordionItem module, styleable through its Part Style Map. */
-export type HellAccordionItemPart = 'root';
-/** Part Style Map accepted by the HellAccordionItem `ui` input. */
-export type HellAccordionItemUi = HellUi<HellAccordionItemPart>;
-
-/** Public parts of the HellAccordionTrigger module, styleable through its Part Style Map. */
-export type HellAccordionTriggerPart = 'root';
-/** Part Style Map accepted by the HellAccordionTrigger `ui` input. */
-export type HellAccordionTriggerUi = HellUi<HellAccordionTriggerPart>;
-
-/** Public parts of the HellAccordionContent module, styleable through its Part Style Map. */
-export type HellAccordionContentPart = 'root';
-/** Part Style Map accepted by the HellAccordionContent `ui` input. */
-export type HellAccordionContentUi = HellUi<HellAccordionContentPart>;
-
 const HELL_ACCORDION_RECIPE = {
   root: 'flex flex-col overflow-clip rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated',
-} satisfies HellRecipe<HellAccordionPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ACCORDION_ITEM_RECIPE = {
   root: 'border-b border-hell-border last:border-0',
-} satisfies HellRecipe<HellAccordionItemPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ACCORDION_TRIGGER_RECIPE = {
   root: 'flex w-full cursor-pointer items-center justify-between gap-hell-4 border-0 border-solid bg-transparent px-hell-5 py-hell-4 text-start font-[inherit] text-[13px] font-semibold text-hell-foreground transition-[background-color] duration-[var(--hell-duration-fast)] ease-hell-out data-hover:bg-hell-surface-subtle data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-[-2px]',
-} satisfies HellRecipe<HellAccordionTriggerPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_ACCORDION_CONTENT_RECIPE = {
   root: 'block overflow-hidden text-[13px] leading-[1.55] text-hell-foreground-muted transition-[height] duration-[var(--hell-duration-base)] ease-hell-out [interpolate-size:allow-keywords]',
-} satisfies HellRecipe<HellAccordionContentPart>;
+} satisfies HellRecipe<'root'>;
 
 /** Container coordinating a group of collapsible `HellAccordionItem` sections. */
 @Directive({
@@ -67,10 +47,10 @@ const HELL_ACCORDION_CONTENT_RECIPE = {
 })
 export class HellAccordion {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAccordionPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAccordionPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ACCORDION_RECIPE,
   });
@@ -92,10 +72,10 @@ export class HellAccordion {
 })
 export class HellAccordionItem {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAccordionItemPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAccordionItemPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ACCORDION_ITEM_RECIPE,
   });
@@ -113,10 +93,10 @@ export class HellAccordionItem {
 })
 export class HellAccordionTrigger {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAccordionTriggerPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAccordionTriggerPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ACCORDION_TRIGGER_RECIPE,
   });
@@ -135,10 +115,10 @@ export class HellAccordionTrigger {
 })
 export class HellAccordionContent {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAccordionContentPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAccordionContentPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ACCORDION_CONTENT_RECIPE,
   });

@@ -282,7 +282,7 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h3>Labels</h3>
       <ul>
         <li>
-          <code>provideHellDatePickerLabels(overrides)</code> overrides the navigation button
+          <code>provideHellLabels(HELL_DATE_PICKER_LABELS, overrides)</code> overrides the navigation button
           labels (<code>previousYear</code>, <code>nextYear</code>, <code>previousMonth</code>,
           <code>nextMonth</code>) for an injector scope. English defaults ship built in.
         </li>
@@ -306,7 +306,7 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           The month and year navigation buttons carry Label Contract accessible names
           (<code>Previous month</code>, <code>Next month</code>, <code>Previous year</code>,
           <code>Next year</code> by default), overridable via
-          <code>provideHellDatePickerLabels</code>.
+          <code>HELL_DATE_PICKER_LABELS</code>.
         </li>
         <li>
           Disabled days (out of <code>min</code>/<code>max</code>, or when the whole picker is

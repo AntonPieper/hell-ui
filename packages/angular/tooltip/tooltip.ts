@@ -1,17 +1,12 @@
 import { Directive, inject, input } from '@angular/core';
 import { NgpTooltip, NgpTooltipTrigger, injectTooltipTriggerState } from 'ng-primitives/tooltip';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 
-/** Public parts of the HellTooltip module, styleable through its Part Style Map. */
-export type HellTooltipPart = 'root';
-/** Part Style Map accepted by the HellTooltip `ui` input. */
-export type HellTooltipUi = HellUi<HellTooltipPart>;
-
 const HELL_TOOLTIP_RECIPE = {
   root: 'pointer-events-none absolute max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))] rounded-hell-sm bg-[#1c222a] px-2 py-1 text-xs font-medium leading-[var(--text-xs--line-height)] text-white shadow-hell-md [overflow-wrap:anywhere] data-hoverable:pointer-events-auto animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
-} satisfies HellRecipe<HellTooltipPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Trigger for an `ng-template` tooltip. Bind `[hellTooltipTrigger]` to the
@@ -66,10 +61,10 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
 })
 export class HellTooltip {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTooltipPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTooltipPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TOOLTIP_RECIPE,
   });

@@ -29,7 +29,7 @@ import {
   HellDialogTitle,
 } from '@hell-ui/angular/dialog';
 import { HellPopover } from '@hell-ui/angular/popover';
-import type { Provider, Signal } from '@angular/core';
+import type { Signal } from '@angular/core';
 
 /**
  * What a confirmation asks: a plain title string, or a title with a supporting
@@ -178,20 +178,12 @@ export interface HellConfirmLabels {
   readonly countdown: (remainingSeconds: number) => string;
 }
 
-const HELL_CONFIRM_LABELS_CONTRACT = hellCreateLabels<HellConfirmLabels>('HELL_CONFIRM_LABELS', {
+/** Injection token resolving to the effective confirm labels. */
+export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels> = hellCreateLabels<HellConfirmLabels>('HELL_CONFIRM_LABELS', {
   confirm: 'Confirm',
   cancel: 'Cancel',
   countdown: (remainingSeconds: number) => ` (${remainingSeconds})`,
 });
-
-/** Injection token resolving to the effective confirm labels. */
-export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels> =
-  HELL_CONFIRM_LABELS_CONTRACT.token;
-
-/** Override any subset of the confirm labels for an injector scope. */
-export function provideHellConfirmLabels(overrides: Partial<HellConfirmLabels>): Provider {
-  return HELL_CONFIRM_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Normalized prompt: title plus optional description. */
 interface HellConfirmPromptResolved {

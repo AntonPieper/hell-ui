@@ -2,13 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellInput } from '@hell-ui/angular/input';
-import {
-  HELL_FIELD_DIRECTIVES,
-  type HellFieldDescriptionUi,
-  type HellFieldErrorUi,
-  type HellFieldLabelUi,
-  type HellFieldUi,
-} from './field';
+import { HELL_FIELD_DIRECTIVES } from './field';
 
 @Component({
   imports: [HellInput, ...HELL_FIELD_DIRECTIVES],
@@ -35,19 +29,19 @@ import {
 class FieldHost {
   protected readonly fieldUi = {
     root: 'gap-hell-6 flex-row',
-  } satisfies HellFieldUi;
+  };
 
   protected readonly labelUi = {
     root: 'text-sm text-hell-danger',
-  } satisfies HellFieldLabelUi;
+  };
 
   protected readonly descriptionUi = {
     root: 'text-hell-danger',
-  } satisfies HellFieldDescriptionUi;
+  };
 
   protected readonly errorUi = {
     root: 'text-hell-foreground',
-  } satisfies HellFieldErrorUi;
+  };
 }
 
 describe('HellField', () => {

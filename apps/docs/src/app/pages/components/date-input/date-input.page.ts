@@ -201,7 +201,7 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           parse/format/coerce/compare/bounds policy — see below.
         </li>
         <li>
-          <code>provideHellDateInputLabels</code>: override the <code>chooseDate</code> /
+          <code>HELL_DATE_INPUT_LABELS</code>: override the <code>chooseDate</code> /
           <code>chooseDateFor</code> Label Contract strings for the calendar trigger's accessible
           name.
         </li>

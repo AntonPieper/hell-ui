@@ -65,9 +65,6 @@ export interface HellMultiSelectOption<T = string> {
     readonly value: T;
 }
 
-// @public
-export function provideHellMultiSelectMenuButtonLabels(overrides: Partial<HellMultiSelectMenuButtonLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

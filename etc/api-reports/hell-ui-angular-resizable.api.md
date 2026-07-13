@@ -100,21 +100,6 @@ export class HellResizablePane implements OnDestroy {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizablePane, never>;
 }
 
-// @public
-export type HellResizablePanePart = 'root';
-
-// @public
-export type HellResizablePaneUi = HellUi<HellResizablePanePart>;
-
-// @public
-export type HellResizablePart = 'root';
-
-// @public
-export type HellResizableUi = HellUi<HellResizablePart>;
-
-// @public
-export function provideHellResizableLabels(overrides: Partial<HellResizableLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

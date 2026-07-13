@@ -1,12 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  HellBadge,
-  type HellBadgeUi,
-  HellKbd,
-  type HellKbdUi,
-  HellTag,
-  type HellTagUi,
-} from '@hell-ui/angular/tag';
+import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
 
 @Component({
   selector: 'app-tag-styling-example',
@@ -32,15 +25,15 @@ import {
   `,
 })
 export class TagStylingExample {
-  protected readonly tagUi: HellTagUi = {
+  protected readonly tagUi = {
     root: 'rounded-hell-md bg-hell-success-strong text-hell-foreground-inverse',
   };
 
-  protected readonly badgeUi: HellBadgeUi = {
+  protected readonly badgeUi = {
     root: 'rounded-hell-sm bg-hell-danger-strong',
   };
 
-  protected readonly kbdUi: HellKbdUi = {
+  protected readonly kbdUi = {
     root: 'h-hell-6 min-w-hell-6 rounded-hell-md bg-hell-surface-elevated text-hell-foreground',
   };
 }

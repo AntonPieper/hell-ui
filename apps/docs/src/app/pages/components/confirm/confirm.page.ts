@@ -204,7 +204,7 @@ import confirmChoiceUnsavedChangesExampleCodeRaw from './examples/choice-unsaved
         </li>
         <li>
           <code>HellConfirmLabels</code>, <code>HELL_CONFIRM_LABELS</code>,
-          <code>provideHellConfirmLabels()</code> — the Label Contract for the default
+          <code>provideHellLabels(HELL_CONFIRM_LABELS, …)</code> — the Label Contract for the default
           <code>confirm</code> action label, the default <code>cancel</code> label, and the
           <code>countdown</code> suffix formatter.
         </li>
@@ -216,7 +216,7 @@ import confirmChoiceUnsavedChangesExampleCodeRaw from './examples/choice-unsaved
         <li>Popconfirm panels are anchored dialogs on the popover primitive: focus moves into the panel on open and returns to the anchor on close, and Escape or an outside click dismisses through the shared Floating Dismissal rules.</li>
         <li>Every surface is named by its prompt title (<code>aria-labelledby</code>) and, when present, described by its description (<code>aria-describedby</code>).</li>
         <li>Destructive and countdown-gated actions start focus on the safe alternative: the cancel button, or a choice's safe dismiss-equivalent action.</li>
-        <li>Every built-in string — the default action labels and the countdown suffix — sits behind the Label Contract. Override them with <code>provideHellConfirmLabels()</code>.</li>
+        <li>Every built-in string — the default action labels and the countdown suffix — sits behind the Label Contract. Override them with <code>provideHellLabels(HELL_CONFIRM_LABELS, …)</code>.</li>
       </ul>
 
       <h2>Do</h2>
@@ -225,7 +225,7 @@ import confirmChoiceUnsavedChangesExampleCodeRaw from './examples/choice-unsaved
         <li>Name actions with specific verbs ("Delete project"), not "OK".</li>
         <li>Use <code>hellDestructiveAction</code> for anything that destroys data, and add a <code>hellCountdownAction</code> gate when the blast radius is high.</li>
         <li>Reach for <code>choice()</code> when a decision has a third honest answer — never nest confirms.</li>
-        <li>Override built-in labels through <code>provideHellConfirmLabels()</code> for localization.</li>
+        <li>Override built-in labels through <code>provideHellLabels(HELL_CONFIRM_LABELS, …)</code> for localization.</li>
       </ul>
 
       <h2>Don't</h2>
@@ -248,13 +248,7 @@ export class ConfirmPage {
     confirmChoiceUnsavedChangesExampleCodeRaw;
 
   protected readonly routeGuardRecipe = `import { CanDeactivateFn } from '@angular/router';
-import {
-  hellChoiceAction,
-  hellDestructiveAction,
-  hellPrimaryAction,
-  hellSecondaryAction,
-  injectHellChoice,
-} from '@hell-ui/angular/confirm';
+import { hellChoiceAction, hellDestructiveAction, hellPrimaryAction, hellSecondaryAction, injectHellChoice } from '@hell-ui/angular/confirm';
 
 export interface HasUnsavedChanges {
   hasUnsavedChanges(): boolean;

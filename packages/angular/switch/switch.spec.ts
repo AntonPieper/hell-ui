@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellNativeSwitch, type HellNativeSwitchUi, HellSwitch, type HellSwitchUi } from './switch';
+import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from './switch';
 
 @Component({
   imports: [HellSwitch],
@@ -114,7 +114,7 @@ class SwitchPartStyleHost {
 
   protected readonly nativeSwitchUi = {
     root: 'w-[44px] bg-hell-danger',
-  } satisfies HellNativeSwitchUi;
+  };
 }
 
 describe('HellSwitch', () => {

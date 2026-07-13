@@ -47,14 +47,6 @@ export class HellTableBody {
 }
 
 // @public
-export type HellTableBodyPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-table.d.ts
-//
-// @public
-export type HellTableBodyUi = HellUi<HellTableBodyPart>;
-
-// @public
 export class HellTableCell {
     constructor();
     readonly align: _angular_core.WritableSignal<"start" | "center" | "end">;
@@ -72,12 +64,6 @@ export class HellTableCell {
 }
 
 // @public
-export type HellTableCellPart = 'root';
-
-// @public
-export type HellTableCellUi = HellUi<HellTableCellPart>;
-
-// @public
 export class HellTableContainer {
     constructor();
     readonly busy: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -86,12 +72,6 @@ export class HellTableContainer {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableContainer, "[hellTableContainer]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "busy": { "alias": "busy"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableContainer, never>;
 }
-
-// @public
-export type HellTableContainerPart = 'root';
-
-// @public
-export type HellTableContainerUi = HellUi<HellTableContainerPart>;
 
 // @public
 class HellTableHead {
@@ -139,18 +119,6 @@ export class HellTableHeaderCell implements OnDestroy {
 }
 
 // @public
-export type HellTableHeaderCellPart = 'root';
-
-// @public
-export type HellTableHeaderCellUi = HellUi<HellTableHeaderCellPart>;
-
-// @public
-export type HellTableHeadPart = 'root';
-
-// @public
-export type HellTableHeadUi = HellUi<HellTableHeadPart>;
-
-// @public
 export interface HellTableMeasurableItem {
     readonly key?: string | number | null;
 }
@@ -174,9 +142,6 @@ export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDe
 export type HellTableMeasureRowCallback<TItem = unknown> = {
     bivarianceHack(measurement: HellTableRowMeasurement<TItem>): void;
 }['bivarianceHack'];
-
-// @public
-export type HellTablePart = 'root';
 
 // @public
 export interface HellTableResizeAdapter {
@@ -219,6 +184,8 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
 // @public
 export type HellTableResizeHandlePart = 'root' | 'grip';
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-table.d.ts
+//
 // @public
 export type HellTableResizeHandleUi = HellUi<HellTableResizeHandlePart>;
 
@@ -268,12 +235,6 @@ export class HellTableRowAction {
 }
 
 // @public
-export type HellTableRowActionPart = 'root';
-
-// @public
-export type HellTableRowActionUi = HellUi<HellTableRowActionPart>;
-
-// @public
 export class HellTableRowCheckbox {
     constructor();
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
@@ -286,12 +247,6 @@ export class HellTableRowCheckbox {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableRowCheckbox, "input[type=\"checkbox\"][hellTableRowCheckbox]", ["hellTableRowCheckbox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableRowCheckbox, never>;
 }
-
-// @public
-export type HellTableRowCheckboxPart = 'root';
-
-// @public
-export type HellTableRowCheckboxUi = HellUi<HellTableRowCheckboxPart>;
 
 // @public
 export class HellTableRowIgnore {
@@ -314,9 +269,6 @@ export interface HellTableRowMeasurement<TItem = unknown> {
 export type HellTableRowMeasurementReason = 'init' | 'input' | 'manual' | 'resize';
 
 // @public
-export type HellTableRowPart = 'root';
-
-// @public
 export class HellTableRowRadio {
     constructor();
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
@@ -329,15 +281,6 @@ export class HellTableRowRadio {
 }
 
 // @public
-export type HellTableRowRadioPart = 'root';
-
-// @public
-export type HellTableRowRadioUi = HellUi<HellTableRowRadioPart>;
-
-// @public
-export type HellTableRowUi = HellUi<HellTableRowPart>;
-
-// @public
 export class HellTableSelectionCell {
     constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -345,12 +288,6 @@ export class HellTableSelectionCell {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableSelectionCell, "[hellTableSelectionCell]", ["hellTableSelectionCell"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableSelectionCell, never>;
 }
-
-// @public
-export type HellTableSelectionCellPart = 'root';
-
-// @public
-export type HellTableSelectionCellUi = HellUi<HellTableSelectionCellPart>;
 
 // @public
 export class HellTableSortTrigger {
@@ -366,21 +303,9 @@ export class HellTableSortTrigger {
 }
 
 // @public
-export type HellTableSortTriggerPart = 'root';
-
-// @public
-export type HellTableSortTriggerUi = HellUi<HellTableSortTriggerPart>;
-
-// @public
-export type HellTableUi = HellUi<HellTablePart>;
-
-// @public
 export interface HellTableUtilitiesLabels {
     readonly resizeColumn: string;
 }
-
-// @public
-export function provideHellTableUtilitiesLabels(overrides: Partial<HellTableUtilitiesLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

@@ -221,8 +221,7 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li><code>pageCount</code>: <code>number</code>. Total number of pages.</li>
         <li><code>disabled</code>: <code>boolean</code>. Disables every composed control's activation.</li>
         <li><code>pageChange</code>: <code>EventEmitter&lt;number&gt;</code>. Emits the new 1-based page.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellPaginationPart&gt;</code> — refines the single <code>root</code> part.</li>
-        <li>Exported types: <code>HellPaginationPart</code> (<code>'root'</code>), <code>HellPaginationUi</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the single <code>root</code> part.</li>
       </ul>
       <h3>
         <code>HellPaginationFirst</code> / <code>HellPaginationPrev</code> /
@@ -232,15 +231,13 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>Selectors: <code>button[hellPaginationFirst]</code>, <code>a[hellPaginationFirst]</code> (and the equivalent <code>Prev</code>/<code>Next</code>/<code>Last</code> selectors).</li>
         <li><code>disabled</code>: <code>boolean</code>. Explicit disable in addition to the boundary state derived from <code>page</code>/<code>pageCount</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;Part&gt;</code> — refines the module's single <code>root</code> part.</li>
-        <li>Exported types per module: <code>HellPaginationFirstPart</code>/<code>Ui</code>, <code>HellPaginationPrevPart</code>/<code>Ui</code>, <code>HellPaginationNextPart</code>/<code>Ui</code>, <code>HellPaginationLastPart</code>/<code>Ui</code> — each <code>Part</code> is <code>'root'</code>.</li>
       </ul>
       <h3><code>HellPaginationButton</code></h3>
       <ul>
         <li>Selectors: <code>button[hellPaginationButton]</code>, <code>a[hellPaginationButton]</code>.</li>
         <li><code>page</code>: <code>number</code>. The page this button navigates to.</li>
         <li><code>disabled</code>: <code>boolean</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellPaginationButtonPart&gt;</code> — refines the single <code>root</code> part.</li>
-        <li>Exported types: <code>HellPaginationButtonPart</code> (<code>'root'</code>), <code>HellPaginationButtonUi</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the single <code>root</code> part.</li>
       </ul>
       <h3><code>HellPaginationStrip</code> (<code>&lt;hell-pagination&gt;</code>)</h3>
       <ul>
@@ -261,7 +258,7 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h3>Labels</h3>
       <ul>
         <li>
-          <code>provideHellPaginationLabels(overrides: Partial&lt;HellPaginationLabels&gt;)</code>:
+          <code>provideHellLabels(HELL_PAGINATION_LABELS, overrides)</code>:
           overrides any subset of <code>navigation</code>, <code>firstPage</code>,
           <code>previousPage</code>, <code>nextPage</code>, <code>lastPage</code>,
           <code>page(page)</code>, <code>pageStatus(page, pageCount)</code>,

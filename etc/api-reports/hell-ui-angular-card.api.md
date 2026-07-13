@@ -34,14 +34,6 @@ export class HellCardBody {
 }
 
 // @public
-export type HellCardBodyPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-card.d.ts
-//
-// @public
-export type HellCardBodyUi = HellUi<HellCardBodyPart>;
-
-// @public
 export class HellCardFooter {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -50,30 +42,12 @@ export class HellCardFooter {
 }
 
 // @public
-export type HellCardFooterPart = 'root';
-
-// @public
-export type HellCardFooterUi = HellUi<HellCardFooterPart>;
-
-// @public
 export class HellCardHeader {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardHeader, "[hellCardHeader]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardHeader, never>;
 }
-
-// @public
-export type HellCardHeaderPart = 'root';
-
-// @public
-export type HellCardHeaderUi = HellUi<HellCardHeaderPart>;
-
-// @public
-export type HellCardPart = 'root';
-
-// @public
-export type HellCardUi = HellUi<HellCardPart>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -14,7 +14,7 @@ import {
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /**
  * Preset situations an empty state can represent. Each preset supplies a
@@ -49,7 +49,8 @@ export interface HellEmptyStateLabels {
   readonly forbiddenDescription: string;
 }
 
-const HELL_EMPTY_STATE_LABELS_CONTRACT = hellCreateLabels<HellEmptyStateLabels>(
+/** Injection token resolving to the effective empty-state labels. */
+export const HELL_EMPTY_STATE_LABELS: InjectionToken<HellEmptyStateLabels> = hellCreateLabels<HellEmptyStateLabels>(
   'HELL_EMPTY_STATE_LABELS',
   {
     noDataTitle: 'Nothing here yet',
@@ -62,15 +63,6 @@ const HELL_EMPTY_STATE_LABELS_CONTRACT = hellCreateLabels<HellEmptyStateLabels>(
     forbiddenDescription: 'You do not have permission to view this.',
   },
 );
-
-/** Injection token resolving to the effective empty-state labels. */
-export const HELL_EMPTY_STATE_LABELS: InjectionToken<HellEmptyStateLabels> =
-  HELL_EMPTY_STATE_LABELS_CONTRACT.token;
-
-/** Override any subset of the empty-state preset copy for an injector scope. */
-export function provideHellEmptyStateLabels(overrides: Partial<HellEmptyStateLabels>): Provider {
-  return HELL_EMPTY_STATE_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of the HellEmptyState module, styleable through its Part Style Map. */
 export type HellEmptyStatePart = 'root' | 'media' | 'title' | 'description' | 'actions';

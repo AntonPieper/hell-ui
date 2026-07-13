@@ -1342,7 +1342,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function buttonConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton, type HellButtonUi } from '${packageName}/button';
+import { HellButton } from '${packageName}/button';
 
 @Component({
   selector: 'app-root',
@@ -1355,7 +1355,7 @@ import { HellButton, type HellButtonUi } from '${packageName}/button';
 })
 class App {
   protected readonly disabled = true;
-  protected readonly linkUi = { root: 'text-hell-primary underline-offset-[3px]' } satisfies HellButtonUi;
+  protected readonly linkUi = { root: 'text-hell-primary underline-offset-[3px]' };
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1365,7 +1365,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function buttonUiConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton, type HellButtonUi } from '${packageName}/button';
+import { HellButton } from '${packageName}/button';
 
 @Component({
   selector: 'app-root',
@@ -1378,7 +1378,7 @@ import { HellButton, type HellButtonUi } from '${packageName}/button';
 })
 class App {
   protected readonly disabled = true;
-  protected readonly linkUi = { root: 'underline-offset-[5px]' } satisfies HellButtonUi;
+  protected readonly linkUi = { root: 'underline-offset-[5px]' };
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1388,7 +1388,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function paginationConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_PAGINATION_DIRECTIVES, type HellPaginationButtonUi, type HellPaginationStripUi } from '${packageName}/pagination';
+import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '${packageName}/pagination';
 
 const stripUi = {
   root: 'gap-hell-4',
@@ -1397,7 +1397,7 @@ const stripUi = {
 
 const pageButtonUi = {
   root: 'rounded-hell-pill bg-hell-primary',
-} satisfies HellPaginationButtonUi;
+};
 
 @Component({
   selector: 'app-root',
@@ -1449,70 +1449,36 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_ACCORDION_DIRECTIVES, type HellAccordionTriggerUi } from '${packageName}/accordion';
+import { HELL_ACCORDION_DIRECTIVES } from '${packageName}/accordion';
 import { HellAvatar, type HellAvatarPart, type HellAvatarUi } from '${packageName}/avatar';
-import {
-  HELL_BREADCRUMBS_DIRECTIVES,
-  type HellBreadcrumbEllipsisUi,
-  type HellBreadcrumbItemUi,
-  type HellBreadcrumbLinkUi,
-  type HellBreadcrumbListUi,
-  type HellBreadcrumbPageUi,
-  type HellBreadcrumbSeparatorUi,
-  type HellBreadcrumbsUi,
-} from '${packageName}/breadcrumbs';
-import { HellButton, type HellButtonUi } from '${packageName}/button';
-import { HELL_CARD_DIRECTIVES, type HellCardHeaderUi } from '${packageName}/card';
-import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi, type HellNativeCheckboxUi } from '${packageName}/checkbox';
-import { HellDropZone, type HellDropZonePart, type HellDropZoneUi } from '${packageName}/drop-zone';
+import { HELL_BREADCRUMBS_DIRECTIVES } from '${packageName}/breadcrumbs';
+import { HellButton } from '${packageName}/button';
+import { HELL_CARD_DIRECTIVES } from '${packageName}/card';
+import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '${packageName}/checkbox';
+import { HellDropZone } from '${packageName}/drop-zone';
 import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
-import { HellFlyout, HellFlyoutTrigger, type HellFlyoutUi } from '${packageName}/flyout';
-import { HellIcon, type HellIconPart, type HellIconUi } from '${packageName}/icon';
-import { HellInput, type HellInputUi } from '${packageName}/input';
-import { HELL_LISTBOX_DIRECTIVES, type HellListboxOptionUi, type HellListboxUi } from '${packageName}/listbox';
-import { HELL_MENU_DIRECTIVES, type HellMenuItemUi, type HellMenuUi } from '${packageName}/menu';
-import { HellPopover, HellPopoverTrigger, type HellPopoverUi } from '${packageName}/popover';
-import { HellProgress, HellProgressBar, type HellProgressBarUi, type HellProgressUi } from '${packageName}/progress';
-import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup, type HellNativeRadioGroupUi, type HellNativeRadioUi, type HellRadioGroupUi, type HellRadioUi } from '${packageName}/radio';
-import { HellSearch, HellSearchClear, type HellSearchClearUi, type HellSearchUi } from '${packageName}/search';
-import {
-  HELL_SELECT_DIRECTIVES,
-  HellSelectBasic,
-  type HellSelectBasicUi,
-  type HellSelectOptionUi,
-  type HellSelectUi,
-} from '${packageName}/select';
-import { HellSeparator, type HellSeparatorUi } from '${packageName}/separator';
+import { HellFlyout, HellFlyoutTrigger } from '${packageName}/flyout';
+import { HellIcon } from '${packageName}/icon';
+import { HellInput } from '${packageName}/input';
+import { HELL_LISTBOX_DIRECTIVES } from '${packageName}/listbox';
+import { HELL_MENU_DIRECTIVES } from '${packageName}/menu';
+import { HellPopover, HellPopoverTrigger } from '${packageName}/popover';
+import { HellProgress, HellProgressBar } from '${packageName}/progress';
+import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from '${packageName}/radio';
+import { HellSearch, HellSearchClear } from '${packageName}/search';
+import { HELL_SELECT_DIRECTIVES, HellSelectBasic, type HellSelectBasicUi } from '${packageName}/select';
+import { HellSeparator } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
-import { HellSkeleton, type HellSkeletonUi } from '${packageName}/skeleton';
-import { HellSpinner, type HellSpinnerUi } from '${packageName}/spinner';
-import { HellSwitch, HellNativeSwitch, type HellNativeSwitchUi, type HellSwitchUi } from '${packageName}/switch';
-import {
-  HellBadge,
-  type HellBadgeUi,
-  HellKbd,
-  type HellKbdUi,
-  HellTag,
-  type HellTagUi,
-} from '${packageName}/tag';
-import { HELL_TABS_DIRECTIVES, type HellTabUi } from '${packageName}/tabs';
-import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupItemUi, type HellToggleGroupUi, type HellToggleUi } from '${packageName}/toggle';
-import { HellTooltip, HellTooltipTrigger, type HellTooltipUi } from '${packageName}/tooltip';
-import {
-  HELL_COMBOBOX_DIRECTIVES,
-  HellComboboxBasic,
-  type HellComboboxBasicUi,
-  type HellComboboxButtonUi,
-  type HellComboboxDropdownUi,
-  type HellComboboxEmptyUi,
-  type HellComboboxInputUi,
-  type HellComboboxOptionUi,
-  type HellComboboxUi,
-} from '${packageName}/combobox';
+import { HellSkeleton } from '${packageName}/skeleton';
+import { HellSpinner } from '${packageName}/spinner';
+import { HellSwitch, HellNativeSwitch, type HellSwitchUi } from '${packageName}/switch';
+import { HellBadge, HellKbd, HellTag } from '${packageName}/tag';
+import { HELL_TABS_DIRECTIVES } from '${packageName}/tabs';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '${packageName}/toggle';
+import { HellTooltip, HellTooltipTrigger } from '${packageName}/tooltip';
+import { HELL_COMBOBOX_DIRECTIVES, HellComboboxBasic, type HellComboboxBasicUi } from '${packageName}/combobox';
 
-type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
-
-const primitiveRootPart: PrimitiveRootPart = 'root';
+const primitiveRootPart: HellAvatarPart = 'root';
 
 @Component({
   selector: 'app-root',
@@ -1720,73 +1686,73 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
 class App {
   protected readonly accordionTriggerUi = {
     root: 'bg-hell-surface-subtle',
-  } satisfies HellAccordionTriggerUi;
-  protected readonly activeTabUi = { root: 'text-hell-primary' } satisfies HellTabUi;
+  };
+  protected readonly activeTabUi = { root: 'text-hell-primary' };
   protected readonly primitiveRootPart = primitiveRootPart;
   protected readonly avatarUi = { root: 'bg-hell-info-soft' } satisfies HellAvatarUi;
-  protected readonly badgeUi = { root: 'bg-hell-info' } satisfies HellBadgeUi;
-  protected readonly breadcrumbEllipsisUi = { root: 'text-hell-info' } satisfies HellBreadcrumbEllipsisUi;
-  protected readonly breadcrumbItemUi = { root: 'gap-hell-2' } satisfies HellBreadcrumbItemUi;
-  protected readonly breadcrumbLinkUi = { root: 'text-hell-info' } satisfies HellBreadcrumbLinkUi;
-  protected readonly breadcrumbListUi = { root: 'gap-hell-2' } satisfies HellBreadcrumbListUi;
-  protected readonly breadcrumbPageUi = { root: 'text-hell-info-strong' } satisfies HellBreadcrumbPageUi;
-  protected readonly breadcrumbSeparatorUi = { root: 'text-hell-info' } satisfies HellBreadcrumbSeparatorUi;
-  protected readonly breadcrumbsUi = { root: 'text-hell-info' } satisfies HellBreadcrumbsUi;
-  protected readonly buttonUi = { root: 'bg-hell-info' } satisfies HellButtonUi;
-  protected readonly cardHeaderUi = { root: 'items-start' } satisfies HellCardHeaderUi;
+  protected readonly badgeUi = { root: 'bg-hell-info' };
+  protected readonly breadcrumbEllipsisUi = { root: 'text-hell-info' };
+  protected readonly breadcrumbItemUi = { root: 'gap-hell-2' };
+  protected readonly breadcrumbLinkUi = { root: 'text-hell-info' };
+  protected readonly breadcrumbListUi = { root: 'gap-hell-2' };
+  protected readonly breadcrumbPageUi = { root: 'text-hell-info-strong' };
+  protected readonly breadcrumbSeparatorUi = { root: 'text-hell-info' };
+  protected readonly breadcrumbsUi = { root: 'text-hell-info' };
+  protected readonly buttonUi = { root: 'bg-hell-info' };
+  protected readonly cardHeaderUi = { root: 'items-start' };
   protected readonly checkboxUi = { root: 'border-hell-info' } satisfies HellCheckboxUi;
-  protected readonly dropZoneUi = { root: 'border-hell-info' } satisfies HellDropZoneUi;
-  protected readonly flyoutUi = { root: 'rounded-hell-pill' } satisfies HellFlyoutUi;
-  protected readonly iconUi = { root: 'text-hell-info' } satisfies HellIconUi;
-  protected readonly inputUi = { root: 'border-hell-info' } satisfies HellInputUi;
-  protected readonly kbdUi = { root: 'border-hell-info' } satisfies HellKbdUi;
-  protected readonly nativeCheckboxUi = { root: 'border-hell-info' } satisfies HellNativeCheckboxUi;
-  protected readonly nativeRadioGroupUi = { root: 'gap-hell-2' } satisfies HellNativeRadioGroupUi;
-  protected readonly nativeRadioUi = { root: 'border-hell-info' } satisfies HellNativeRadioUi;
-  protected readonly nativeSwitchUi = { root: 'bg-hell-info-soft' } satisfies HellNativeSwitchUi;
+  protected readonly dropZoneUi = { root: 'border-hell-info' };
+  protected readonly flyoutUi = { root: 'rounded-hell-pill' };
+  protected readonly iconUi = { root: 'text-hell-info' };
+  protected readonly inputUi = { root: 'border-hell-info' };
+  protected readonly kbdUi = { root: 'border-hell-info' };
+  protected readonly nativeCheckboxUi = { root: 'border-hell-info' };
+  protected readonly nativeRadioGroupUi = { root: 'gap-hell-2' };
+  protected readonly nativeRadioUi = { root: 'border-hell-info' };
+  protected readonly nativeSwitchUi = { root: 'bg-hell-info-soft' };
   protected readonly listboxValue = ['ada'];
-  protected readonly listboxOptionUi = { root: 'bg-hell-primary-soft' } satisfies HellListboxOptionUi;
-  protected readonly listboxUi = { root: 'gap-hell-4' } satisfies HellListboxUi;
-  protected readonly menuItemUi = { root: 'bg-hell-primary-soft' } satisfies HellMenuItemUi;
-  protected readonly menuUi = { root: 'rounded-hell-pill' } satisfies HellMenuUi;
-  protected readonly popoverUi = { root: 'rounded-hell-pill' } satisfies HellPopoverUi;
-  protected readonly progressBarUi = { root: 'bg-hell-info' } satisfies HellProgressBarUi;
-  protected readonly progressUi = { root: 'bg-hell-info-soft' } satisfies HellProgressUi;
-  protected readonly radioGroupUi = { root: 'gap-hell-2' } satisfies HellRadioGroupUi;
-  protected readonly radioUi = { root: 'text-hell-info' } satisfies HellRadioUi;
-  protected readonly searchClearUi = { root: 'text-hell-info' } satisfies HellSearchClearUi;
-  protected readonly searchUi = { root: 'grid gap-hell-2' } satisfies HellSearchUi;
+  protected readonly listboxOptionUi = { root: 'bg-hell-primary-soft' };
+  protected readonly listboxUi = { root: 'gap-hell-4' };
+  protected readonly menuItemUi = { root: 'bg-hell-primary-soft' };
+  protected readonly menuUi = { root: 'rounded-hell-pill' };
+  protected readonly popoverUi = { root: 'rounded-hell-pill' };
+  protected readonly progressBarUi = { root: 'bg-hell-info' };
+  protected readonly progressUi = { root: 'bg-hell-info-soft' };
+  protected readonly radioGroupUi = { root: 'gap-hell-2' };
+  protected readonly radioUi = { root: 'text-hell-info' };
+  protected readonly searchClearUi = { root: 'text-hell-info' };
+  protected readonly searchUi = { root: 'grid gap-hell-2' };
   protected readonly selectBasicUi = {
     trigger: 'rounded-hell-pill',
     dropdown: 'rounded-hell-pill',
     option: 'bg-hell-primary-soft',
   } satisfies HellSelectBasicUi;
-  protected readonly selectOptionUi = { root: 'bg-hell-primary-soft' } satisfies HellSelectOptionUi;
+  protected readonly selectOptionUi = { root: 'bg-hell-primary-soft' };
   protected readonly selectOptions = ['low', 'high'];
-  protected readonly selectUi = { root: 'rounded-hell-pill' } satisfies HellSelectUi;
-  protected readonly separatorUi = { root: 'bg-hell-info' } satisfies HellSeparatorUi;
+  protected readonly selectUi = { root: 'rounded-hell-pill' };
+  protected readonly separatorUi = { root: 'bg-hell-info' };
   protected readonly sliderUi = { range: 'bg-hell-info', thumb: 'border-hell-info' } satisfies HellSliderUi;
-  protected readonly skeletonUi = { root: 'bg-hell-info-soft' } satisfies HellSkeletonUi;
-  protected readonly spinnerUi = { root: 'text-hell-info' } satisfies HellSpinnerUi;
+  protected readonly skeletonUi = { root: 'bg-hell-info-soft' };
+  protected readonly spinnerUi = { root: 'text-hell-info' };
   protected readonly switchUi = { root: 'bg-hell-info-soft', thumb: 'shadow-none' } satisfies HellSwitchUi;
-  protected readonly tagUi = { root: 'bg-hell-info-soft' } satisfies HellTagUi;
-  protected readonly toggleGroupItemUi = { root: 'text-hell-info' } satisfies HellToggleGroupItemUi;
-  protected readonly toggleGroupUi = { root: 'gap-hell-2' } satisfies HellToggleGroupUi;
-  protected readonly toggleUi = { root: 'text-hell-info' } satisfies HellToggleUi;
-  protected readonly tooltipUi = { root: 'rounded-hell-pill' } satisfies HellTooltipUi;
+  protected readonly tagUi = { root: 'bg-hell-info-soft' };
+  protected readonly toggleGroupItemUi = { root: 'text-hell-info' };
+  protected readonly toggleGroupUi = { root: 'gap-hell-2' };
+  protected readonly toggleUi = { root: 'text-hell-info' };
+  protected readonly tooltipUi = { root: 'rounded-hell-pill' };
   protected comboboxValue: string | null = null;
   protected readonly comboboxOptions = ['apple', 'apricot', 'blackberry'];
   protected readonly disabledComboboxOption = 'blackberry';
-  protected readonly comboboxUi = { root: 'rounded-hell-pill' } satisfies HellComboboxUi;
-  protected readonly comboboxButtonUi = { root: 'text-hell-info' } satisfies HellComboboxButtonUi;
+  protected readonly comboboxUi = { root: 'rounded-hell-pill' };
+  protected readonly comboboxButtonUi = { root: 'text-hell-info' };
   protected readonly comboboxDropdownUi = {
     root: 'rounded-hell-pill',
-  } satisfies HellComboboxDropdownUi;
-  protected readonly comboboxEmptyUi = { root: 'text-hell-info' } satisfies HellComboboxEmptyUi;
-  protected readonly comboboxInputUi = { root: 'text-hell-info' } satisfies HellComboboxInputUi;
+  };
+  protected readonly comboboxEmptyUi = { root: 'text-hell-info' };
+  protected readonly comboboxInputUi = { root: 'text-hell-info' };
   protected readonly comboboxOptionUi = {
     root: 'bg-hell-primary-soft',
-  } satisfies HellComboboxOptionUi;
+  };
   protected readonly comboboxBasicUi = {
     control: 'rounded-hell-pill',
     button: 'text-hell-info',
@@ -1805,7 +1771,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
-import { HELL_DIALOG_DIRECTIVES, type HellDialogOverlayUi, type HellDialogUi } from '${packageName}/dialog';
+import { HELL_DIALOG_DIRECTIVES } from '${packageName}/dialog';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
 import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '${packageName}/file-upload';
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
@@ -1909,8 +1875,8 @@ class App {
       progress: 0.5,
     },
   ];
-  protected readonly dialogOverlayUi = { root: 'p-hell-4' } satisfies HellDialogOverlayUi;
-  protected readonly dialogUi = { root: 'max-w-[520px]' } satisfies HellDialogUi;
+  protected readonly dialogOverlayUi = { root: 'p-hell-4' };
+  protected readonly dialogUi = { root: 'max-w-[520px]' };
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
   protected readonly toasterUi = { toast: 'ring-1 ring-hell-border' } satisfies HellToasterUi;
   protected readonly searchItems: readonly SearchItem[] = [
@@ -2067,11 +2033,11 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function resizableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, type HellResizablePaneUi } from '${packageName}/resizable';
+import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi } from '${packageName}/resizable';
 
 const paneUi = {
   root: 'hd-surface-elevated p-4 overflow-hidden',
-} satisfies HellResizablePaneUi;
+};
 
 const handleUi = {
   root: 'bg-hell-surface-muted',

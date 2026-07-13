@@ -47,9 +47,6 @@ export interface HellChipLabels {
 }
 
 // @public
-export type HellChipPart = 'root';
-
-// @public
 export class HellChipRemove {
     constructor();
     protected readonly ariaLabel: _angular_core.Signal<string>;
@@ -62,14 +59,6 @@ export class HellChipRemove {
 }
 
 // @public
-export type HellChipRemovePart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-chip.d.ts
-//
-// @public
-export type HellChipRemoveUi = HellUi<HellChipRemovePart>;
-
-// @public
 export class HellChipSet {
     constructor();
     protected onKeydown(event: KeyboardEvent): void;
@@ -80,18 +69,6 @@ export class HellChipSet {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChipSet, "[hellChipSet]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChipSet, never>;
 }
-
-// @public
-export type HellChipSetPart = 'root';
-
-// @public
-export type HellChipSetUi = HellUi<HellChipSetPart>;
-
-// @public
-export type HellChipUi = HellUi<HellChipPart>;
-
-// @public
-export function provideHellChipLabels(overrides: Partial<HellChipLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

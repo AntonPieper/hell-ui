@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellSeparator, type HellSeparatorUi } from './separator';
+import { HellSeparator } from './separator';
 
 @Component({
   imports: [HellSeparator],
@@ -25,7 +25,7 @@ import { HellSeparator, type HellSeparatorUi } from './separator';
 class SeparatorPartStyleHost {
   readonly separatorUi = {
     root: 'bg-hell-info w-hell-2',
-  } satisfies HellSeparatorUi;
+  };
 }
 
 describe('HellSeparator Part Style Map', () => {

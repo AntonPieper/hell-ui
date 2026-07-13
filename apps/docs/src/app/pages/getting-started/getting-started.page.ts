@@ -88,6 +88,6 @@ export class GettingStartedPage {
   protected readonly installCode = installCodeRaw;
   protected readonly postcssCode = postcssCodeRaw;
   protected readonly stylesCode = stylesCodeRaw;
-  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { provideHellSpinnerLabels } from '@hell-ui/angular/spinner';\nimport { provideHellPaginationLabels } from '@hell-ui/angular/pagination';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellSpinnerLabels({ loading: 'Wird geladen' }),\n    provideHellPaginationLabels({\n      navigation: 'Seitennavigation',\n      nextPage: 'Nächste Seite',\n      page: (page) => 'Seite ' + page,\n    }),\n  ],\n};\n`;
+  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { HELL_SPINNER_LABELS } from '@hell-ui/angular/spinner';\nimport { provideHellPaginationLabels } from '@hell-ui/angular/pagination';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' }),\n    provideHellPaginationLabels({\n      navigation: 'Seitennavigation',\n      nextPage: 'Nächste Seite',\n      page: (page) => 'Seite ' + page,\n    }),\n  ],\n};\n`;
   protected readonly buttonDemoCode = buttonDemoCodeRaw;
 }

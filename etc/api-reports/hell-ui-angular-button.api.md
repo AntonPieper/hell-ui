@@ -32,14 +32,6 @@ export class HellButton {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellButton, never>;
 }
 
-// @public
-export type HellButtonPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-button.d.ts
-//
-// @public
-export type HellButtonUi = HellUi<HellButtonPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

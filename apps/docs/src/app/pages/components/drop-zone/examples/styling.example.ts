@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellDropZone, type HellDropZoneUi } from '@hell-ui/angular/drop-zone';
+import { HellDropZone } from '@hell-ui/angular/drop-zone';
 
 @Component({
   selector: 'app-drop-zone-styling-example',
@@ -16,7 +16,7 @@ import { HellDropZone, type HellDropZoneUi } from '@hell-ui/angular/drop-zone';
       <span class="hd-muted">PDF or CSV</span>
     </div>
 
-    <!-- Equivalent explicit HellDropZoneUi map form. -->
+    <!-- Equivalent explicit map form. -->
     <div hellDropzone [ui]="dangerZone" (files)="onFiles($event)">
       <strong>Drop signed contracts here</strong>
       <span class="hd-muted">PDF only &mdash; legal review required</span>
@@ -30,7 +30,7 @@ import { HellDropZone, type HellDropZoneUi } from '@hell-ui/angular/drop-zone';
 export class DropZoneStylingExample {
   protected readonly files = signal<File[]>([]);
 
-  protected readonly dangerZone: HellDropZoneUi = {
+  protected readonly dangerZone = {
     root: 'rounded-hell-sm border-hell-danger bg-hell-danger-soft p-hell-6 text-hell-danger-strong',
   };
 

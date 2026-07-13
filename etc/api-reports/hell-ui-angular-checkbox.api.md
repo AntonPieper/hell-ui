@@ -63,12 +63,6 @@ export class HellNativeCheckbox {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeCheckbox, never>;
 }
 
-// @public
-export type HellNativeCheckboxPart = 'root';
-
-// @public
-export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

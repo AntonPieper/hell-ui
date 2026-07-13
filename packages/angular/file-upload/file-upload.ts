@@ -31,7 +31,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HellDropZone } from '@hell-ui/angular/drop-zone';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
-import type { InjectionToken, OutputEmitterRef, Provider } from '@angular/core';
+import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
 /**
  * Lifecycle state of one file in the managed list. The consumer owns every
@@ -108,7 +108,8 @@ export interface HellFileUploadLabels {
   readonly errorAnnouncement: (name: string) => string;
 }
 
-const HELL_FILE_UPLOAD_LABELS_CONTRACT = hellCreateLabels<HellFileUploadLabels>(
+/** Injection token resolving to the effective file-upload labels. */
+export const HELL_FILE_UPLOAD_LABELS: InjectionToken<HellFileUploadLabels> = hellCreateLabels<HellFileUploadLabels>(
   'HELL_FILE_UPLOAD_LABELS',
   {
     browse: 'Browse files',
@@ -130,15 +131,6 @@ const HELL_FILE_UPLOAD_LABELS_CONTRACT = hellCreateLabels<HellFileUploadLabels>(
     errorAnnouncement: (name) => `${name} failed to upload`,
   },
 );
-
-/** Injection token resolving to the effective file-upload labels. */
-export const HELL_FILE_UPLOAD_LABELS: InjectionToken<HellFileUploadLabels> =
-  HELL_FILE_UPLOAD_LABELS_CONTRACT.token;
-
-/** Override any subset of the file-upload labels for an injector scope. */
-export function provideHellFileUploadLabels(overrides: Partial<HellFileUploadLabels>): Provider {
-  return HELL_FILE_UPLOAD_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of the HellFileUpload module, styleable through its Part Style Map. */
 export type HellFileUploadPart =

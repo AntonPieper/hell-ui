@@ -1,12 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_RESIZABLE_DIRECTIVES,
-  type HellResizableHandleUi,
-  type HellResizablePaneUi,
-  provideHellResizableLabels,
-} from './resizable';
+import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, HELL_RESIZABLE_LABELS } from './resizable';
 
 @Component({
   imports: [...HELL_RESIZABLE_DIRECTIVES],
@@ -24,7 +20,7 @@ class ResizableHost {}
 
 @Component({
   imports: [...HELL_RESIZABLE_DIRECTIVES],
-  providers: [provideHellResizableLabels({ resizePanels: 'Contract resize handle' })],
+  providers: [provideHellLabels(HELL_RESIZABLE_LABELS, { resizePanels: 'Contract resize handle' })],
   template: `
     <div id="contract-group" hellResizable>
       <section hellResizablePane [minSize]="40">A</section>
@@ -46,7 +42,7 @@ class ResizableLabelContractHost {}
   `,
 })
 class ResizableUiHost {
-  readonly paneUi = { root: 'overflow-hidden bg-hell-danger' } satisfies HellResizablePaneUi;
+  readonly paneUi = { root: 'overflow-hidden bg-hell-danger' };
   readonly handleUi = {
     root: 'bg-hell-danger flex-none',
     grip: 'bg-hell-primary',

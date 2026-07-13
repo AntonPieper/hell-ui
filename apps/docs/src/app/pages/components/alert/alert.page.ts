@@ -240,7 +240,7 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
       <p><code>hellAlertDismiss</code> (selector <code>button[hellAlertDismiss]</code>)</p>
       <ul>
         <li><code>aria-label</code>: overrides the accessible name; defaults to the <code>HELL_ALERT_LABELS</code> <code>dismiss</code> string.</li>
-        <li>Override the label per injector with <code>provideHellAlertLabels(&#123; dismiss: '…' &#125;)</code>.</li>
+        <li>Override the label per injector with <code>provideHellLabels(HELL_ALERT_LABELS, &#123; dismiss: '…' &#125;)</code>.</li>
       </ul>
 
       <h2>Accessibility</h2>

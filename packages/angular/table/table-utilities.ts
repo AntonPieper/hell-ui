@@ -42,7 +42,7 @@ export type {
   HellTableResizeItem,
   HellTableResizeSide,
 } from './table-resize-adapter';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the table utilities entry point. */
 export interface HellTableUtilitiesLabels {
@@ -50,17 +50,10 @@ export interface HellTableUtilitiesLabels {
   readonly resizeColumn: string;
 }
 
-const HELL_TABLE_UTILITIES_LABELS_CONTRACT = hellCreateLabels<HellTableUtilitiesLabels>('HELL_TABLE_UTILITIES_LABELS', {
+/** Injection token resolving to the effective table utilities labels. */
+export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellTableUtilitiesLabels> = hellCreateLabels<HellTableUtilitiesLabels>('HELL_TABLE_UTILITIES_LABELS', {
   resizeColumn: 'Resize column',
 });
-
-/** Injection token resolving to the effective table utilities labels. */
-export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellTableUtilitiesLabels> = HELL_TABLE_UTILITIES_LABELS_CONTRACT.token;
-
-/** Override any subset of the table utilities labels for an injector scope. */
-export function provideHellTableUtilitiesLabels(overrides: Partial<HellTableUtilitiesLabels>): Provider {
-  return HELL_TABLE_UTILITIES_LABELS_CONTRACT.provide(overrides);
-}
 
 function hellElementDirection(element: HTMLElement): HellResizeDirection {
   return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
@@ -87,66 +80,6 @@ const HELL_TABLE_ROW_NATIVE_ELEMENTS = ['TR'] as const;
 const HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS = ['TH'] as const;
 const HELL_TABLE_CELL_NATIVE_ELEMENTS = ['TD'] as const;
 
-/** Public parts of the HellTableContainer module, styleable through its Part Style Map. */
-export type HellTableContainerPart = 'root';
-/** Part Style Map accepted by the HellTableContainer `ui` input. */
-export type HellTableContainerUi = HellUi<HellTableContainerPart>;
-
-/** Public parts of the HellTable module, styleable through its Part Style Map. */
-export type HellTablePart = 'root';
-/** Part Style Map accepted by the HellTable `ui` input. */
-export type HellTableUi = HellUi<HellTablePart>;
-
-/** Public parts of the HellTableHead module, styleable through its Part Style Map. */
-export type HellTableHeadPart = 'root';
-/** Part Style Map accepted by the HellTableHead `ui` input. */
-export type HellTableHeadUi = HellUi<HellTableHeadPart>;
-
-/** Public parts of the HellTableBody module, styleable through its Part Style Map. */
-export type HellTableBodyPart = 'root';
-/** Part Style Map accepted by the HellTableBody `ui` input. */
-export type HellTableBodyUi = HellUi<HellTableBodyPart>;
-
-/** Public parts of the HellTableRow module, styleable through its Part Style Map. */
-export type HellTableRowPart = 'root';
-/** Part Style Map accepted by the HellTableRow `ui` input. */
-export type HellTableRowUi = HellUi<HellTableRowPart>;
-
-/** Public parts of the HellTableRowAction module, styleable through its Part Style Map. */
-export type HellTableRowActionPart = 'root';
-/** Part Style Map accepted by the HellTableRowAction `ui` input. */
-export type HellTableRowActionUi = HellUi<HellTableRowActionPart>;
-
-/** Public parts of the HellTableSelectionCell module, styleable through its Part Style Map. */
-export type HellTableSelectionCellPart = 'root';
-/** Part Style Map accepted by the HellTableSelectionCell `ui` input. */
-export type HellTableSelectionCellUi = HellUi<HellTableSelectionCellPart>;
-
-/** Public parts of the HellTableRowCheckbox module, styleable through its Part Style Map. */
-export type HellTableRowCheckboxPart = 'root';
-/** Part Style Map accepted by the HellTableRowCheckbox `ui` input. */
-export type HellTableRowCheckboxUi = HellUi<HellTableRowCheckboxPart>;
-
-/** Public parts of the HellTableRowRadio module, styleable through its Part Style Map. */
-export type HellTableRowRadioPart = 'root';
-/** Part Style Map accepted by the HellTableRowRadio `ui` input. */
-export type HellTableRowRadioUi = HellUi<HellTableRowRadioPart>;
-
-/** Public parts of the HellTableHeaderCell module, styleable through its Part Style Map. */
-export type HellTableHeaderCellPart = 'root';
-/** Part Style Map accepted by the HellTableHeaderCell `ui` input. */
-export type HellTableHeaderCellUi = HellUi<HellTableHeaderCellPart>;
-
-/** Public parts of the HellTableSortTrigger module, styleable through its Part Style Map. */
-export type HellTableSortTriggerPart = 'root';
-/** Part Style Map accepted by the HellTableSortTrigger `ui` input. */
-export type HellTableSortTriggerUi = HellUi<HellTableSortTriggerPart>;
-
-/** Public parts of the HellTableCell module, styleable through its Part Style Map. */
-export type HellTableCellPart = 'root';
-/** Part Style Map accepted by the HellTableCell `ui` input. */
-export type HellTableCellUi = HellUi<HellTableCellPart>;
-
 /** Public parts of the HellTableResizeHandle module, styleable through its Part Style Map. */
 export type HellTableResizeHandlePart = 'root' | 'grip';
 /** Part Style Map accepted by the HellTableResizeHandle `ui` input. */
@@ -154,51 +87,51 @@ export type HellTableResizeHandleUi = HellUi<HellTableResizeHandlePart>;
 
 const HELL_TABLE_CONTAINER_RECIPE = {
   root: 'flex min-w-0 flex-col overflow-clip rounded-hell-md border border-hell-border bg-hell-surface-elevated',
-} satisfies HellRecipe<HellTableContainerPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_RECIPE = {
   root: 'table w-full table-fixed border-separate border-spacing-0 text-[13px] text-hell-foreground data-[content-width=true]:w-max data-[content-width=true]:min-w-full',
-} satisfies HellRecipe<HellTablePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_HEAD_RECIPE = {
   root: 'table-header-group bg-hell-surface-subtle',
-} satisfies HellRecipe<HellTableHeadPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_BODY_RECIPE = {
   root: '',
-} satisfies HellRecipe<HellTableBodyPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_ROW_RECIPE = {
   root: 'transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-[active=true]:bg-hell-surface-subtle data-[selected=true]:bg-hell-primary-soft',
-} satisfies HellRecipe<HellTableRowPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_ROW_ACTION_RECIPE = {
   root: 'inline-flex h-hell-control-xs cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-transparent bg-transparent px-hell-2 font-[inherit] text-xs font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
-} satisfies HellRecipe<HellTableRowActionPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_SELECTION_CELL_RECIPE = {
   root: 'box-border w-[44px] min-w-[44px] whitespace-nowrap px-hell-3 text-center',
-} satisfies HellRecipe<HellTableSelectionCellPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_ROW_CHECKBOX_RECIPE = {
   root: 'relative inline-flex h-[calc(var(--spacing)*4)] w-[calc(var(--spacing)*4)] cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-hell-border-strong bg-hell-surface-elevated p-0 text-hell-foreground transition-[background-color,border-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary checked:bg-hell-primary checked:text-hell-primary-foreground indeterminate:border-hell-primary indeterminate:bg-hell-primary indeterminate:text-hell-primary-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
-} satisfies HellRecipe<HellTableRowCheckboxPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_ROW_RADIO_RECIPE = {
   root: 'relative inline-flex h-[calc(var(--spacing)*4)] w-[calc(var(--spacing)*4)] cursor-pointer appearance-none items-center justify-center rounded-hell-pill border border-hell-border-strong bg-hell-surface-elevated p-0 transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
-} satisfies HellRecipe<HellTableRowRadioPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_HEADER_CELL_RECIPE = {
   root: 'sticky top-0 z-[1] table-cell select-none whitespace-nowrap border-b border-hell-border bg-hell-surface-subtle px-hell-3 py-hell-2 text-start align-middle text-[11px] font-semibold uppercase text-hell-foreground-muted data-[sortable=true]:pe-hell-8',
-} satisfies HellRecipe<HellTableHeaderCellPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_SORT_TRIGGER_RECIPE = {
   root: 'inline-flex items-center gap-[calc(var(--spacing)*1.5)] rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-inherit shadow-none disabled:cursor-default enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
-} satisfies HellRecipe<HellTableSortTriggerPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_CELL_RECIPE = {
   root: 'overflow-hidden text-ellipsis whitespace-nowrap border-b border-hell-border px-hell-3 py-hell-2 text-start align-middle data-[align=center]:text-center data-[align=end]:text-end data-[space=empty]:py-hell-8',
-} satisfies HellRecipe<HellTableCellPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_RESIZE_HANDLE_RECIPE = {
   root: 'absolute inset-y-0 end-0 z-[2] inline-flex w-hell-2 cursor-col-resize touch-none select-none items-stretch justify-end focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px]',
@@ -321,10 +254,10 @@ function injectHellTableRoleSupport(
 })
 export class HellTableContainer {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableContainerPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableContainerPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_CONTAINER_RECIPE,
   });
@@ -355,10 +288,10 @@ export class HellTableContainer {
 })
 export class HellTable {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTablePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTablePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_RECIPE,
   });
@@ -404,10 +337,10 @@ export class HellTable {
 })
 export class HellTableHead {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableHeadPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableHeadPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_HEAD_RECIPE,
   });
@@ -457,10 +390,10 @@ export class HellTableHead {
 })
 export class HellTableBody {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableBodyPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableBodyPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_BODY_RECIPE,
   });
@@ -518,10 +451,10 @@ export class HellTableRowIgnore {}
 })
 export class HellTableRow {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableRowPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableRowPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_ROW_RECIPE,
   });
@@ -571,10 +504,10 @@ export class HellTableRow {
 })
 export class HellTableRowAction {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableRowActionPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableRowActionPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_ROW_ACTION_RECIPE,
   });
@@ -606,10 +539,10 @@ export class HellTableRowAction {
 })
 export class HellTableSelectionCell {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableSelectionCellPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableSelectionCellPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_SELECTION_CELL_RECIPE,
   });
@@ -638,10 +571,10 @@ export class HellTableSelectionCell {
 })
 export class HellTableRowCheckbox {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableRowCheckboxPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableRowCheckboxPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_ROW_CHECKBOX_RECIPE,
   });
@@ -689,10 +622,10 @@ export class HellTableRowCheckbox {
 })
 export class HellTableRowRadio {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableRowRadioPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableRowRadioPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_ROW_RADIO_RECIPE,
   });
@@ -741,10 +674,10 @@ export class HellTableRowRadio {
 })
 export class HellTableHeaderCell implements OnDestroy {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableHeaderCellPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableHeaderCellPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_HEADER_CELL_RECIPE,
   });
@@ -867,10 +800,10 @@ export class HellTableHeaderCell implements OnDestroy {
 })
 export class HellTableSortTrigger {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableSortTriggerPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableSortTriggerPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_SORT_TRIGGER_RECIPE,
   });
@@ -921,10 +854,10 @@ export class HellTableSortTrigger {
 })
 export class HellTableCell {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTableCellPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTableCellPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_CELL_RECIPE,
   });

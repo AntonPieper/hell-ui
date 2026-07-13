@@ -31,12 +31,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellEmptyState } from '@hell-ui/angular/empty-state';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import {
-  HellInput,
-  HellNativeSelect,
-  type HellInputUi,
-  type HellNativeSelectUi,
-} from '@hell-ui/angular/input';
+import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
@@ -45,7 +40,7 @@ type ɵHellStrategyCleanup = VoidFunction | void;
 
 const HELL_TANSTACK_FILTER_INPUT_UI = {
   root: 'min-w-[calc(var(--spacing)*44)] max-w-full rounded-hell-sm px-hell-2',
-} satisfies HellInputUi;
+} satisfies HellUi<'root'>;
 
 /** Public parts of the HellTanStackTable shell, styleable through its Part Style Map. */
 export type HellTanStackTablePart = 'root' | 'toolbar' | 'footer' | 'scrollport';
@@ -80,7 +75,7 @@ const HELL_TANSTACK_PAGINATION_RECIPE = {
 /** Refines the rows-per-page `<select>` through the nested `hellNativeSelect` root part. */
 const HELL_TANSTACK_PAGINATION_SELECT_UI = {
   root: 'min-w-[calc(var(--spacing)*18)] max-[640px]:min-w-[calc(var(--spacing)*20)]',
-} satisfies HellNativeSelectUi;
+} satisfies HellUi<'root'>;
 
 type HellClassValue =
   | string

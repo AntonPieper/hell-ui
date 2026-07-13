@@ -1,17 +1,10 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 
-import {
-  HellNumberInput,
-  hellFormatNumberInputValue,
-  hellParseNumberInputText,
-  provideHellNumberInputAdapter,
-  provideHellNumberInputLabels,
-  type HellNumberInputPart,
-  type HellNumberInputUi,
-} from './number-input';
+import { HellNumberInput, hellFormatNumberInputValue, hellParseNumberInputText, provideHellNumberInputAdapter, HELL_NUMBER_INPUT_LABELS, type HellNumberInputPart, type HellNumberInputUi } from './number-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
@@ -697,7 +690,7 @@ describe('HellNumberInput', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [NumberInputHost],
-      providers: [provideHellNumberInputLabels({ increment: 'Bump up' })],
+      providers: [provideHellLabels(HELL_NUMBER_INPUT_LABELS, { increment: 'Bump up' })],
     });
     const fixture = TestBed.createComponent(NumberInputHost);
     fixture.componentInstance.steppers.set(true);

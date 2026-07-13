@@ -363,13 +363,13 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             </li>
             <li>
               <code>ui</code>: <code>HellUiInput&lt;Part&gt;</code> on every directive — shorthand
-              string for <code>root</code>, or a map. Exported part/UI types include
-              <code>HellTablePart</code>/<code>HellTableUi</code>,
+              string for <code>root</code>, or a map. Multi-part modules export part/UI types, e.g.
               <code>HellTableResizeHandlePart</code> (<code>'root' | 'grip'</code>) /
-              <code>HellTableResizeHandleUi</code>, and matching pairs for every other module.
+              <code>HellTableResizeHandleUi</code>; single-part modules take
+              <code>HellUiInput&lt;'root'&gt;</code>.
             </li>
             <li>
-              <code>provideHellTableUtilitiesLabels</code>: overrides the Label Contract (currently
+              <code>HELL_TABLE_UTILITIES_LABELS</code>: overrides the Label Contract (currently
               <code>resizeColumn</code>).
             </li>
           </ul>

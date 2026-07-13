@@ -2,12 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 
-import {
-  HELL_AVATAR_GROUP_DIRECTIVES,
-  type HellAvatarGroupItemUi,
-  type HellAvatarGroupOverflowUi,
-  type HellAvatarGroupUi,
-} from './avatar-group';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from './avatar-group';
 
 @Component({
   imports: [...HELL_AVATAR_GROUP_DIRECTIVES, HellAvatar],
@@ -78,15 +73,15 @@ class SizedGroupHost {
 class PartStyleHost {
   protected readonly groupUi = {
     root: 'inline-grid items-end',
-  } satisfies HellAvatarGroupUi;
+  };
 
   protected readonly itemUi = {
     root: 'justify-start rounded-hell-md',
-  } satisfies HellAvatarGroupItemUi;
+  };
 
   protected readonly overflowUi = {
     root: 'rounded-hell-md border-hell-info bg-hell-info text-hell-foreground-inverse',
-  } satisfies HellAvatarGroupOverflowUi;
+  };
 }
 
 describe('HellAvatarGroup Part Style Map', () => {

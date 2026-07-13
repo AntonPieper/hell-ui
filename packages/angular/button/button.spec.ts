@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellButton, type HellButtonUi } from './button';
+import { HellButton } from './button';
 
 @Component({
   imports: [HellButton],
@@ -30,8 +30,8 @@ class ButtonHost {
   readonly disabled = signal(false);
   readonly customUi = {
     root: 'bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover',
-  } satisfies HellButtonUi;
-  readonly dynamicUi = signal<HellButtonUi>({
+  };
+  readonly dynamicUi = signal<{ root?: string }>({
     root: 'bg-hell-danger px-hell-7',
   });
 }

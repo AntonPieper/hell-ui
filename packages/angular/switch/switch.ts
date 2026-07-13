@@ -24,11 +24,6 @@ export type HellSwitchPart = 'root' | 'thumb';
 /** Part Style Map accepted by the HellSwitch `ui` input. */
 export type HellSwitchUi = HellUi<HellSwitchPart>;
 
-/** Public parts of the HellNativeSwitch module, styleable through its Part Style Map. */
-export type HellNativeSwitchPart = 'root';
-/** Part Style Map accepted by the HellNativeSwitch `ui` input. */
-export type HellNativeSwitchUi = HellUi<HellNativeSwitchPart>;
-
 const HELL_SWITCH_RECIPE = {
   root: 'relative inline-block h-hell-6 w-[36px] cursor-pointer appearance-none rounded-hell-pill border-0 bg-hell-border-strong p-0 m-0 align-middle font-[inherit] text-[inherit] transition-[background-color] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] data-checked:bg-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-disabled:cursor-not-allowed data-disabled:opacity-50',
   thumb:
@@ -37,7 +32,7 @@ const HELL_SWITCH_RECIPE = {
 
 const HELL_NATIVE_SWITCH_RECIPE = {
   root: 'relative inline-block h-hell-6 w-[36px] cursor-pointer appearance-none rounded-hell-pill border-0 bg-hell-border-strong p-0 m-0 align-middle font-[inherit] text-[inherit] transition-[background-color] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] checked:bg-hell-primary focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-} satisfies HellRecipe<HellNativeSwitchPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Styled switch built on `ngpSwitch`. Use for binary on/off settings where the
@@ -181,10 +176,10 @@ export class HellSwitch implements ControlValueAccessor {
 })
 export class HellNativeSwitch {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNativeSwitchPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNativeSwitchPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NATIVE_SWITCH_RECIPE,
   });

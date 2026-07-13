@@ -143,9 +143,9 @@ such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
 `root` `ui` contract. App Shell/nav directives follow the same local-root rule:
 style each directive through its own `ui`. Resizable directives follow that
 local-root rule as well. Split View exposes a flat owned-anatomy map for parts
-such as `pane`, `compactHeader`, and `itemNavigation`. Dialog, Toast,
+such as `pane`, `compactHeader`, and `itemNavigation`. Toast,
 AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
-`HellDialogUi`, `HellToasterUi`, `HellAudioPlayerUi`, `HellOmnibarUi`, and
+`HellToasterUi`, `HellAudioPlayerUi`, `HellOmnibarUi`, and
 `HellCodeEditorUi`. Primitives that have not migrated yet still document
 `unstyled` locally.
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
+import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-button-styling-example',
@@ -27,7 +27,7 @@ import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
   `,
 })
 export class ButtonStylingExample {
-  protected readonly rootPartMap: HellButtonUi = {
+  protected readonly rootPartMap = {
     root: 'rounded-hell-lg bg-hell-danger px-hell-7 text-hell-foreground-inverse shadow-hell-lg data-hover:bg-hell-danger-hover data-press:bg-hell-danger-active',
   };
 }

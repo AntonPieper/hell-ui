@@ -3,12 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import {
-  HellCheckbox,
-  type HellCheckboxUi,
-  HellNativeCheckbox,
-  type HellNativeCheckboxUi,
-} from './checkbox';
+import { HellCheckbox, type HellCheckboxUi, HellNativeCheckbox } from './checkbox';
 
 @Component({
   selector: 'hell-checkbox-host',
@@ -153,7 +148,7 @@ class CheckboxPartStyleHost {
   readonly indeterminate = signal(false);
   protected readonly nativeUi = {
     root: 'border-hell-danger size-hell-6',
-  } satisfies HellNativeCheckboxUi;
+  };
   protected readonly customUi = {
     root: 'bg-hell-danger size-hell-6 rounded-hell-pill',
     indicator: 'text-hell-danger size-hell-3',

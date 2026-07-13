@@ -1,19 +1,9 @@
 import { ApplicationRef, Component } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
-import {
-  HELL_CONFIRM_LABELS,
-  hellChoiceAction,
-  hellCountdownAction,
-  hellDestructiveAction,
-  hellPrimaryAction,
-  hellSecondaryAction,
-  injectHellChoice,
-  injectHellConfirm,
-  provideHellConfirmLabels,
-  type HellConfirmAction,
-} from './confirm';
+import { HELL_CONFIRM_LABELS, hellChoiceAction, hellCountdownAction, hellDestructiveAction, hellPrimaryAction, hellSecondaryAction, injectHellChoice, injectHellConfirm, type HellConfirmAction } from './confirm';
 
 @Component({
   template: `<button id="opener" type="button">Opener</button>`,
@@ -195,7 +185,7 @@ describe('injectHellConfirm', () => {
 
   it('falls back to the Label Contract default primary action without an action', async () => {
     TestBed.configureTestingModule({
-      providers: [provideHellConfirmLabels({ confirm: 'Ja', cancel: 'Nein' })],
+      providers: [provideHellLabels(HELL_CONFIRM_LABELS, { confirm: 'Ja', cancel: 'Nein' })],
     });
     const { fixture, host } = setup();
 

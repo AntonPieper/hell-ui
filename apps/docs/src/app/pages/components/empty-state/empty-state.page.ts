@@ -229,7 +229,7 @@ import { PageHeader } from '../../../shared/page-header';
           part.
         </li>
         <li>
-          <code>provideHellEmptyStateLabels(overrides)</code> — override any subset of the preset
+          <code>provideHellLabels(HELL_EMPTY_STATE_LABELS, overrides)</code> — override any subset of the preset
           title/description strings (<code>HellEmptyStateLabels</code>) for an injector scope.
           Exposed token: <code>HELL_EMPTY_STATE_LABELS</code>.
         </li>

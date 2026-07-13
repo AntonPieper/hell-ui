@@ -41,14 +41,6 @@ export class HellPaginationButton {
 }
 
 // @public
-export type HellPaginationButtonPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-//
-// @public
-export type HellPaginationButtonUi = HellUi<HellPaginationButtonPart>;
-
-// @public
 export class HellPaginationFirst {
     protected readonly activate: (event: Event) => void;
     protected readonly disabled: _angular_core.Signal<boolean>;
@@ -58,12 +50,6 @@ export class HellPaginationFirst {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationFirst, "button[hellPaginationFirst], a[hellPaginationFirst]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationFirst; inputs: { "ngpPaginationFirstDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationFirst, never>;
 }
-
-// @public
-export type HellPaginationFirstPart = 'root';
-
-// @public
-export type HellPaginationFirstUi = HellUi<HellPaginationFirstPart>;
 
 // @public
 export interface HellPaginationLabels {
@@ -90,12 +76,6 @@ export class HellPaginationLast {
 }
 
 // @public
-export type HellPaginationLastPart = 'root';
-
-// @public
-export type HellPaginationLastUi = HellUi<HellPaginationLastPart>;
-
-// @public
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
 // @public
@@ -110,15 +90,6 @@ export class HellPaginationNext {
 }
 
 // @public
-export type HellPaginationNextPart = 'root';
-
-// @public
-export type HellPaginationNextUi = HellUi<HellPaginationNextPart>;
-
-// @public
-export type HellPaginationPart = 'root';
-
-// @public
 export class HellPaginationPrev {
     protected readonly activate: (event: Event) => void;
     protected readonly disabled: _angular_core.Signal<boolean>;
@@ -130,20 +101,15 @@ export class HellPaginationPrev {
 }
 
 // @public
-export type HellPaginationPrevPart = 'root';
-
-// @public
-export type HellPaginationPrevUi = HellUi<HellPaginationPrevPart>;
-
-// @public
 export class HellPaginationStrip {
     protected controlUi(): {
         root: string;
     };
     protected currentPage(): number;
     protected goToSelectedPage(event: Event): void;
-    // Warning: (ae-forgotten-export) The symbol "HellNativeSelectUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-    protected jumpSelectUi(): HellNativeSelectUi;
+    protected jumpSelectUi(): {
+        root: string;
+    };
     protected readonly labels: HellPaginationLabels;
     readonly mode: _angular_core.InputSignal<HellPaginationMode>;
     protected pageCount(): number;
@@ -164,14 +130,10 @@ export class HellPaginationStrip {
 // @public
 export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph' | 'status' | 'jump' | 'jumpLabel' | 'jumpSelect' | 'jumpTotal';
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
+//
 // @public
 export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;
-
-// @public
-export type HellPaginationUi = HellUi<HellPaginationPart>;
-
-// @public
-export function provideHellPaginationLabels(overrides: Partial<HellPaginationLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

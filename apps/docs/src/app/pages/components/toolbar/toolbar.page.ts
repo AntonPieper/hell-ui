@@ -209,7 +209,7 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               <code>overflowLabel</code>: <code>string</code>. Accessible label for the overflow
               trigger. Defaults to <code>''</code>, which falls back to the toolbar Label Contract's
               <code>overflowTrigger</code> string (<code>'More actions'</code>). Override the default
-              globally with <code>provideHellToolbarLabels</code> rather than hardcoding the input.
+              globally with <code>HELL_TOOLBAR_LABELS</code> rather than hardcoding the input.
             </li>
             <li>
               <code>ui</code>: <code>HellUiInput&lt;HellToolbarPart&gt;</code> — a shorthand class
@@ -256,7 +256,7 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               <code>HellToolbarWidget</code>.
             </li>
             <li>
-              <code>provideHellToolbarLabels</code> / <code>HELL_TOOLBAR_LABELS</code> — the Label
+              <code>HELL_TOOLBAR_LABELS</code> / <code>HELL_TOOLBAR_LABELS</code> — the Label
               Contract for the overflow-trigger name and its English default.
             </li>
             <li>

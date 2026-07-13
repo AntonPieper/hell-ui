@@ -13,7 +13,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the dialpad entry point. */
 export interface HellDialpadLabels {
@@ -31,19 +31,12 @@ export interface HellDialpadLabels {
   readonly key?: (digit: string, letters?: string) => string;
 }
 
-const HELL_DIALPAD_LABELS_CONTRACT = hellCreateLabels<HellDialpadLabels>('HELL_DIALPAD_LABELS', {
+/** Injection token resolving to the effective dialpad labels. */
+export const HELL_DIALPAD_LABELS: InjectionToken<HellDialpadLabels> = hellCreateLabels<HellDialpadLabels>('HELL_DIALPAD_LABELS', {
   dialpad: 'Dial pad',
   backspace: 'Backspace',
   call: 'Call',
 });
-
-/** Injection token resolving to the effective dialpad labels. */
-export const HELL_DIALPAD_LABELS: InjectionToken<HellDialpadLabels> = HELL_DIALPAD_LABELS_CONTRACT.token;
-
-/** Override any subset of the dialpad labels for an injector scope. */
-export function provideHellDialpadLabels(overrides: Partial<HellDialpadLabels>): Provider {
-  return HELL_DIALPAD_LABELS_CONTRACT.provide(overrides);
-}
 
 interface HellDialpadKey {
   digit: string;

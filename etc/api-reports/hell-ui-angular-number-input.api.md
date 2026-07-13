@@ -132,9 +132,6 @@ export function hellSameNumberInputValue(a: number | null, b: number | null): bo
 // @public
 export function provideHellNumberInputAdapter(adapter: HellNumberInputAdapter): Provider;
 
-// @public
-export function provideHellNumberInputLabels(overrides: Partial<HellNumberInputLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

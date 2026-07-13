@@ -249,7 +249,7 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           parse/format/normalize/compare policy — see below.
         </li>
         <li>
-          <code>provideHellTimeInputLabels</code>: override the Label Contract strings for the
+          <code>HELL_TIME_INPUT_LABELS</code>: override the Label Contract strings for the
           clock trigger, unit spinbuttons, step buttons, and minute presets
           (<code>HellTimeInputLabels</code>).
         </li>

@@ -165,8 +165,8 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
         </li>
         <li><code>checkedChange</code>: <code>OutputEmitterRef&lt;boolean&gt;</code>, emitted on native <code>change</code>.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellNativeSwitchPart&gt;</code> — shorthand string
-          or <code>HellNativeSwitchUi</code> map (<code>&#123; root?: string &#125;</code>).
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string
+          or <code>&#123; root?: string &#125;</code> map.
         </li>
         <li>
           Native <code>checked</code>/<code>disabled</code> and Angular Forms come from the
@@ -176,8 +176,7 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
       <ul>
         <li>
           Exported types: <code>HellSwitchPart</code> (<code>'root' | 'thumb'</code>),
-          <code>HellSwitchUi</code>, <code>HellNativeSwitchPart</code> (<code>'root'</code>),
-          <code>HellNativeSwitchUi</code>.
+          <code>HellSwitchUi</code>.
         </li>
       </ul>
 

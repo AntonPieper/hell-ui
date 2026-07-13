@@ -24,14 +24,6 @@ export class HellSkeleton {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSkeleton, never>;
 }
 
-// @public
-export type HellSkeletonPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
-//
-// @public
-export type HellSkeletonUi = HellUi<HellSkeletonPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

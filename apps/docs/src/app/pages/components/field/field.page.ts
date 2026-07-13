@@ -164,8 +164,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
               <code>hellFieldError</code> for orientation-aware layout.
             </li>
             <li>
-              <code>ui: HellUiInput&lt;HellFieldPart&gt;</code> where
-              <code>HellFieldPart = 'root'</code>. Exports <code>HellFieldUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -175,8 +174,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
           it focuses the control, or toggles it immediately for checkbox/switch/radio roles.
           <ul>
             <li>
-              <code>ui: HellUiInput&lt;HellFieldLabelPart&gt;</code> where
-              <code>HellFieldLabelPart = 'root'</code>. Exports <code>HellFieldLabelUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -186,9 +184,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
           <code>aria-describedby</code>.
           <ul>
             <li>
-              <code>ui: HellUiInput&lt;HellFieldDescriptionPart&gt;</code> where
-              <code>HellFieldDescriptionPart = 'root'</code>. Exports
-              <code>HellFieldDescriptionUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -199,8 +195,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
           <code>aria-describedby</code>.
           <ul>
             <li>
-              <code>ui: HellUiInput&lt;HellFieldErrorPart&gt;</code> where
-              <code>HellFieldErrorPart = 'root'</code>. Exports <code>HellFieldErrorUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>

@@ -26,14 +26,6 @@ export class HellIcon {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellIcon, never>;
 }
 
-// @public
-export type HellIconPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-icon.d.ts
-//
-// @public
-export type HellIconUi = HellUi<HellIconPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

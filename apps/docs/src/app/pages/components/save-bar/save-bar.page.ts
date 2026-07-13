@@ -237,7 +237,7 @@ import { PageHeader } from '../../../shared/page-header';
           </ul>
         </li>
         <li>
-          <code>provideHellSaveBarLabels(overrides)</code> — override any subset of the message and
+          <code>provideHellLabels(HELL_SAVE_BAR_LABELS, overrides)</code> — override any subset of the message and
           button labels (<code>HellSaveBarLabels</code>) for an injector scope. Exposed token:
           <code>HELL_SAVE_BAR_LABELS</code>.
         </li>

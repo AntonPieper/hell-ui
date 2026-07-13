@@ -5,7 +5,6 @@
 ```ts
 
 import { InjectionToken } from '@angular/core';
-import { Provider } from '@angular/core';
 
 // @public
 export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels>;
@@ -69,9 +68,6 @@ export function injectHellConfirm(): HellConfirmFn;
 
 // @public
 export function injectHellPopconfirm(): HellPopconfirmFn;
-
-// @public
-export function provideHellConfirmLabels(overrides: Partial<HellConfirmLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

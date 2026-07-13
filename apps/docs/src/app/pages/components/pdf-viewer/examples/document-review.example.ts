@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidFilePdf } from '@ng-icons/font-awesome/solid';
 import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
-import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
+import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
@@ -111,7 +111,7 @@ export class PdfViewerDocumentReviewExample {
 
   protected readonly rowUi = {
     root: 'justify-start gap-2 data-[current=true]:border-hell-border data-[current=true]:bg-hell-primary-soft data-[current=true]:text-hell-primary-soft-foreground',
-  } satisfies HellButtonUi;
+  };
 
   protected readonly selected = computed(
     () => this.docs().find((doc) => doc.id === this.selectedId()) ?? null,

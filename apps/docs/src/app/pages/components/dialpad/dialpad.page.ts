@@ -183,7 +183,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
           Exported types: <code>HellDialpadPart</code> (the twelve parts above),
           <code>HellDialpadUi</code> (<code>HellUi&lt;HellDialpadPart&gt;</code>),
           <code>HellDialpadLabels</code>, <code>HELL_DIALPAD_LABELS</code> injection token, and
-          <code>provideHellDialpadLabels()</code> for overriding the group, number, backspace,
+          <code>provideHellLabels(HELL_DIALPAD_LABELS, …)</code> for overriding the group, number, backspace,
           clear, call, and per-key accessible labels.
         </li>
       </ul>
@@ -203,7 +203,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
         <li>Use for phone-style numeric entry and DTMF/dial flows, not general numeric forms.</li>
         <li>Listen to <code>(digit)</code> for per-key tones or logging, and <code>(valueChange)</code> for the running number in form state.</li>
         <li>Set <code>readOnly</code> instead of <code>disabled</code> once a call connects, so the number stays visible and callable.</li>
-        <li>Override labels with <code>provideHellDialpadLabels()</code> for localized apps instead of restyling text nodes.</li>
+        <li>Override labels with <code>provideHellLabels(HELL_DIALPAD_LABELS, …)</code> for localized apps instead of restyling text nodes.</li>
       </ul>
 
       <h2>Don't</h2>

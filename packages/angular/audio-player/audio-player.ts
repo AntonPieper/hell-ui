@@ -33,7 +33,7 @@ import {
   HellAudioTranscriptUnavailableRuntime,
   type HellAudioTranscriptRuntimeFactory,
 } from '@hell-ui/angular/internal/audio-transcript';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the audio player entry point. */
 export interface HellAudioPlayerLabels {
@@ -60,7 +60,8 @@ export interface HellAudioPlayerLabels {
   readonly pressPlayForCaptions: string;
 }
 
-const HELL_AUDIO_PLAYER_LABELS_CONTRACT = hellCreateLabels<HellAudioPlayerLabels>('HELL_AUDIO_PLAYER_LABELS', {
+/** Injection token resolving to the effective audio player labels. */
+export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels> = hellCreateLabels<HellAudioPlayerLabels>('HELL_AUDIO_PLAYER_LABELS', {
   play: 'Play',
   pause: 'Pause',
   seek: 'Seek',
@@ -84,13 +85,6 @@ const HELL_AUDIO_PLAYER_LABELS_CONTRACT = hellCreateLabels<HellAudioPlayerLabels
   pressPlayForCaptions: 'Press play to capture a speech transcript.',
 });
 
-/** Injection token resolving to the effective audio player labels. */
-export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels> = HELL_AUDIO_PLAYER_LABELS_CONTRACT.token;
-
-/** Override any subset of the audio player labels for an injector scope. */
-export function provideHellAudioPlayerLabels(overrides: Partial<HellAudioPlayerLabels>): Provider {
-  return HELL_AUDIO_PLAYER_LABELS_CONTRACT.provide(overrides);
-}
 /** Public parts of the HellAudioPlayer module, styleable through its Part Style Map. */
 export type HellAudioPlayerPart =
   | 'root'

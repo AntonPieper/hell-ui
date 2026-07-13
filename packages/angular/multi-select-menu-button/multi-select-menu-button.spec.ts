@@ -1,11 +1,8 @@
 import { Component, signal } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellMultiSelectMenuButton,
-  provideHellMultiSelectMenuButtonLabels,
-  type HellMultiSelectOption,
-} from './multi-select-menu-button';
+import { HellMultiSelectMenuButton, HELL_MULTI_SELECT_MENU_BUTTON_LABELS, type HellMultiSelectOption } from './multi-select-menu-button';
 
 const COLUMN_OPTIONS: readonly HellMultiSelectOption[] = [
   { value: 'name', label: 'Name' },
@@ -200,7 +197,7 @@ describe('HellMultiSelectMenuButton', () => {
     await TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideHellMultiSelectMenuButtonLabels({ reset: 'Standardansicht' })],
+      providers: [provideHellLabels(HELL_MULTI_SELECT_MENU_BUTTON_LABELS, { reset: 'Standardansicht' })],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(HostComponent);

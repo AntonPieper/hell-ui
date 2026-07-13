@@ -150,20 +150,20 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         </p>
         <ul>
           <li><code>aria-label</code>: <code>string | null</code>. Accessible name override. Defaults to the <code>back</code> Label Contract string.</li>
-          <li><code>ui</code>: <code>HellUiInput&lt;HellPageHeaderBackPart&gt;</code> — refines its <code>root</code> part.</li>
+          <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines its <code>root</code> part.</li>
           <li><code>back</code>: <code>output&lt;void&gt;</code>. Emits when activated. No navigation.</li>
         </ul>
         <p>Exports and labels:</p>
         <ul>
           <li><code>HELL_PAGE_HEADER_DIRECTIVES</code> — bulk-import tuple of the header, the back affordance, and every slot marker.</li>
-          <li><code>provideHellPageHeaderLabels</code> — overrides the built-in labels (<code>back</code>).</li>
+          <li><code>HELL_PAGE_HEADER_LABELS</code> — overrides the built-in labels (<code>back</code>).</li>
           <li><code>HellPageHeaderPart</code> — <code>'root' | 'leading' | 'titleGroup' | 'title' | 'meta' | 'description' | 'toolbar'</code>.</li>
         </ul>
 
         <h2>Accessibility</h2>
         <ul>
           <li>The title is exposed as a heading at <code>level</code> (default 1) so screen-reader users reach per-page orientation in one keystroke; keep exactly one page header per screen at level 1.</li>
-          <li>The back affordance is a real button with an accessible name from the Label Contract; localize it with <code>provideHellPageHeaderLabels</code> or override per instance with <code>aria-label</code>.</li>
+          <li>The back affordance is a real button with an accessible name from the Label Contract; localize it with <code>HELL_PAGE_HEADER_LABELS</code> or override per instance with <code>aria-label</code>.</li>
           <li>Breadcrumbs projected into the leading region keep their own <code>nav</code> landmark and <code>aria-current</code> semantics.</li>
         </ul>
 

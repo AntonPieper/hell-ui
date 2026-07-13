@@ -192,8 +192,8 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
             sizes across container resizes. Default <code>true</code>.
           </li>
           <li>
-            <code>ui</code>: <code>HellUiInput&lt;HellResizablePart&gt;</code> — shorthand string or
-            <code>HellResizableUi</code> map (<code>&#123; root: string &#125;</code>) refining the
+            <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or
+            <code>&#123; root?: string &#125;</code> map refining the
             <code>root</code> part.
           </li>
           <li>
@@ -212,8 +212,8 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
             <code>80</code>.
           </li>
           <li>
-            <code>ui</code>: <code>HellUiInput&lt;HellResizablePanePart&gt;</code> — shorthand string
-            or <code>HellResizablePaneUi</code> map (<code>&#123; root: string &#125;</code>).
+            <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string
+            or <code>&#123; root?: string &#125;</code> map.
           </li>
         </ul>
         <h3><code>hellResizableHandle</code></h3>
@@ -241,20 +241,17 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <h3>Exported types &amp; helpers</h3>
         <ul>
           <li>
-            Part unions: <code>HellResizablePart</code> / <code>HellResizablePanePart</code>
-            (<code>'root'</code>) and <code>HellResizableHandlePart</code>
-            (<code>'root' | 'grip'</code>).
+            Part union: <code>HellResizableHandlePart</code> (<code>'root' | 'grip'</code>).
           </li>
           <li>
-            Part Style Map types: <code>HellResizableUi</code>, <code>HellResizablePaneUi</code>,
-            <code>HellResizableHandleUi</code>.
+            Part Style Map type: <code>HellResizableHandleUi</code>.
           </li>
           <li>
             <code>HELL_RESIZABLE_DIRECTIVES</code> — the group, pane, and handle bundled for
             <code>imports</code>.
           </li>
           <li>
-            <code>provideHellResizableLabels(&#123; resizePanels &#125;)</code> and
+            <code>provideHellLabels(HELL_RESIZABLE_LABELS, &#123; resizePanels &#125;)</code> and
             <code>HELL_RESIZABLE_LABELS</code> — override the handle's default accessible label.
           </li>
         </ul>
@@ -279,7 +276,7 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
             The handle carries an <code>aria-label</code> from the Label Contract
             (<code>"Resize panels"</code> by default). Set <code>aria-label</code> per handle for a
             more specific name, or override globally with
-            <code>provideHellResizableLabels</code>.
+            <code>HELL_RESIZABLE_LABELS</code>.
           </li>
           <li>
             When the container is too small for the combined pane minimums, handles set

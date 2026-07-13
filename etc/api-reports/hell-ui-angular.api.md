@@ -18,20 +18,13 @@ export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
 export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link' | 'danger' | 'success';
 
 // @public
-export function hellCreateLabels<T extends object>(description: string, defaults: T): HellLabelContract<T>;
+export function hellCreateLabels<T extends object>(description: string, defaults: T): InjectionToken<T>;
 
 // @public
 export class HellFloatingElement implements AfterViewInit {
     ngAfterViewInit(): void;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFloatingElement, "[hellFloatingElement]", never, {}, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFloatingElement, never>;
-}
-
-// @public
-export interface HellLabelContract<T extends object> {
-    readonly defaults: T;
-    readonly provide: (overrides: Partial<T>) => Provider;
-    readonly token: InjectionToken<T>;
 }
 
 // @public
@@ -137,6 +130,9 @@ export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 
 // @public
 export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
+
+// @public
+export function provideHellLabels<T extends object>(token: InjectionToken<T>, overrides: Partial<T>): Provider;
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;

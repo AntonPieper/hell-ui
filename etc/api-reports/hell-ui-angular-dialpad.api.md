@@ -90,9 +90,6 @@ export type HellDialpadPart = 'root' | 'display' | 'displayLabel' | 'numberInput
 // @public
 export type HellDialpadUi = HellUi<HellDialpadPart>;
 
-// @public
-export function provideHellDialpadLabels(overrides: Partial<HellDialpadLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

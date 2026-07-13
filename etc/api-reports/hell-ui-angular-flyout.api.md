@@ -36,9 +36,6 @@ export class HellFlyout {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellFlyout, never>;
 }
 
-// @public
-export type HellFlyoutPart = 'root';
-
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-flyout.d.ts
 //
 // @public
@@ -56,11 +53,6 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellFlyoutTrigger, "button[hellFlyoutTrigger], a[hellFlyoutTrigger]", ["hellFlyoutTrigger"], { "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "openChange": "openChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellFlyoutTrigger, never>;
 }
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-flyout.d.ts
-//
-// @public
-export type HellFlyoutUi = HellUi<HellFlyoutPart>;
 
 // (No @packageDocumentation comment for this package)
 

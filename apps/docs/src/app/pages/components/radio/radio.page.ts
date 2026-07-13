@@ -180,8 +180,8 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
           directive's <code>Validator</code> implementation (a <code>{{ '{ required: true }' }}</code> error when unset).
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellRadioGroupPart&gt;</code> — shorthand string or
-          <code>HellRadioGroupUi</code> map (<code>{{ '{ root?: string }' }}</code>).
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or
+          <code>&#123; root?: string &#125;</code> map (<code>{{ '{ root?: string }' }}</code>).
         </li>
         <li>Implements Angular's <code>ControlValueAccessor</code> and <code>Validator</code> for forms integration.</li>
       </ul>
@@ -190,16 +190,16 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
         <li><code>value</code>: the item's value, compared against the group's <code>value</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Disables this item only. Default <code>false</code>.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellRadioPart&gt;</code> — shorthand string or
-          <code>HellRadioUi</code> map (<code>{{ '{ root?: string }' }}</code>).
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or
+          <code>&#123; root?: string &#125;</code> map (<code>{{ '{ root?: string }' }}</code>).
         </li>
       </ul>
       <p><code>[hellNativeRadioGroup]</code> (<code>HellNativeRadioGroup</code>):</p>
       <ul>
         <li><code>orientation</code>: <code>HellOrientation</code>. Default <code>'vertical'</code>. Layout only — carries no value or keyboard behavior.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellNativeRadioGroupPart&gt;</code> — shorthand
-          string or <code>HellNativeRadioGroupUi</code> map (<code>{{ '{ root?: string }' }}</code>).
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand
+          string or <code>&#123; root?: string &#125;</code> map (<code>{{ '{ root?: string }' }}</code>).
         </li>
       </ul>
       <p><code>input[type="radio"][hellNativeRadio]</code> (<code>HellNativeRadio</code>):</p>
@@ -210,19 +210,12 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
         </li>
         <li><code>checkedChange</code>: <code>OutputEmitterRef&lt;boolean&gt;</code>, emitted on native <code>change</code>.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellNativeRadioPart&gt;</code> — shorthand string or
-          <code>HellNativeRadioUi</code> map (<code>{{ '{ root?: string }' }}</code>).
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or
+          <code>&#123; root?: string &#125;</code> map (<code>{{ '{ root?: string }' }}</code>).
         </li>
         <li>Native <code>checked</code>/<code>disabled</code> and Angular Forms come from the underlying <code>&lt;input&gt;</code> directly.</li>
       </ul>
       <ul>
-        <li>
-          Exported types: <code>HellRadioGroupPart</code>/<code>HellRadioPart</code>/
-          <code>HellNativeRadioGroupPart</code>/<code>HellNativeRadioPart</code> (all
-          <code>'root'</code>), and their matching <code>HellRadioGroupUi</code>,
-          <code>HellRadioUi</code>, <code>HellNativeRadioGroupUi</code>,
-          <code>HellNativeRadioUi</code> Part Style Maps.
-        </li>
         <li><code>HellRadioIndicator</code>: re-export of <code>NgpRadioIndicator</code>, the selected-dot marker for custom items.</li>
       </ul>
 

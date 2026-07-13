@@ -180,39 +180,30 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
       <ul>
         <li>
           <code>nav[hellBreadcrumbs]</code> — landmark wrapper (host directive
-          <code>NgpBreadcrumbs</code>). <code>ui: HellUiInput&lt;HellBreadcrumbsPart&gt;</code> where
-          <code>HellBreadcrumbsPart = 'root'</code>. Exports <code>HellBreadcrumbsUi</code>.
+          <code>NgpBreadcrumbs</code>). <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>ol|ul[hellBreadcrumbList]</code> — list wrapper (host directive
-          <code>NgpBreadcrumbList</code>). <code>ui: HellUiInput&lt;HellBreadcrumbListPart&gt;</code>
-          where <code>HellBreadcrumbListPart = 'root'</code>. Exports
-          <code>HellBreadcrumbListUi</code>.
+          <code>NgpBreadcrumbList</code>). <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>li[hellBreadcrumbItem]</code> — apply once per crumb (host directive
-          <code>NgpBreadcrumbItem</code>). <code>ui: HellUiInput&lt;HellBreadcrumbItemPart&gt;</code>
-          where <code>HellBreadcrumbItemPart = 'root'</code>. Exports
-          <code>HellBreadcrumbItemUi</code>.
+          <code>NgpBreadcrumbItem</code>). <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>a|button[hellBreadcrumbLink]</code> — navigable crumb (host directive
           <code>NgpBreadcrumbLink</code>). Sets <code>type="button"</code> automatically on a
-          <code>button</code> host. <code>ui: HellUiInput&lt;HellBreadcrumbLinkPart&gt;</code> where
-          <code>HellBreadcrumbLinkPart = 'root'</code>. Exports <code>HellBreadcrumbLinkUi</code>.
+          <code>button</code> host. <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>[hellBreadcrumbPage]</code> — current page; sets <code>aria-current="page"</code>
           automatically (host directive <code>NgpBreadcrumbPage</code>).
-          <code>ui: HellUiInput&lt;HellBreadcrumbPagePart&gt;</code> where
-          <code>HellBreadcrumbPagePart = 'root'</code>. Exports <code>HellBreadcrumbPageUi</code>.
+          <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>li[hellBreadcrumbSeparator]</code> — divider; renders a chevron via CSS while empty,
           sets <code>role="presentation"</code> and <code>aria-hidden="true"</code> (host directive
-          <code>NgpBreadcrumbSeparator</code>). <code>ui: HellUiInput&lt;HellBreadcrumbSeparatorPart&gt;</code>
-          where <code>HellBreadcrumbSeparatorPart = 'root'</code>. Exports
-          <code>HellBreadcrumbSeparatorUi</code>.
+          <code>NgpBreadcrumbSeparator</code>). <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>[hellBreadcrumbEllipsis]</code> — collapsed-middle indicator (host directive
@@ -220,15 +211,13 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
           <code>button</code> host, sets <code>type="button"</code> and
           <code>aria-label</code> — defaulting to the <code>showHiddenNavigation</code> label —
           unless overridden by the <code>aria-label</code> input.
-          <code>ui: HellUiInput&lt;HellBreadcrumbEllipsisPart&gt;</code> where
-          <code>HellBreadcrumbEllipsisPart = 'root'</code>. Exports
-          <code>HellBreadcrumbEllipsisUi</code>.
+          <code>ui: HellUiInput&lt;'root'&gt;</code>.
           <ul>
             <li><code>ariaLabel</code> (alias <code>aria-label</code>): <code>string | null</code>, default <code>null</code>.</li>
           </ul>
         </li>
         <li>
-          <code>HELL_BREADCRUMBS_LABELS</code> / <code>provideHellBreadcrumbsLabels(overrides)</code>
+          <code>HELL_BREADCRUMBS_LABELS</code> / <code>provideHellLabels(HELL_BREADCRUMBS_LABELS, overrides)</code>
           — Label Contract for built-in accessibility strings. Default
           <code>showHiddenNavigation: 'Show hidden navigation'</code>.
         </li>

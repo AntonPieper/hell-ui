@@ -159,35 +159,29 @@ import tagWithTableExampleCodeRaw from './examples/with-table.example.ts?raw' wi
           <code>default</code>.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellTagPart&gt;</code> — string shorthand or a
-          <code>HellTagUi</code> map that refines the <code>root</code> part.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — string shorthand or a
+          <code>&#123; root?: string &#125;</code> map that refines the <code>root</code> part.
         </li>
         <li>
-          Exported types: <code>HellTagPart</code> (<code>'root'</code>), <code>HellTagUi</code>
-          (<code>HellUi&lt;HellTagPart&gt;</code>).
-        </li>
+          </li>
       </ul>
       <p><code>hellBadge</code></p>
       <ul>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellBadgePart&gt;</code> — string shorthand or a
-          <code>HellBadgeUi</code> map that refines the <code>root</code> part. No other inputs.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — string shorthand or a
+          <code>&#123; root?: string &#125;</code> map that refines the <code>root</code> part. No other inputs.
         </li>
         <li>
-          Exported types: <code>HellBadgePart</code> (<code>'root'</code>),
-          <code>HellBadgeUi</code> (<code>HellUi&lt;HellBadgePart&gt;</code>).
-        </li>
+          </li>
       </ul>
       <p><code>hellKbd</code> (selector <code>kbd[hellKbd], [hellKbd]</code>)</p>
       <ul>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellKbdPart&gt;</code> — string shorthand or a
-          <code>HellKbdUi</code> map that refines the <code>root</code> part. No other inputs.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — string shorthand or a
+          <code>&#123; root?: string &#125;</code> map that refines the <code>root</code> part. No other inputs.
         </li>
         <li>
-          Exported types: <code>HellKbdPart</code> (<code>'root'</code>), <code>HellKbdUi</code>
-          (<code>HellUi&lt;HellKbdPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

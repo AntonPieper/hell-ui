@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES, type HellFieldUi } from '@hell-ui/angular/field';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellCheckbox } from '@hell-ui/angular/checkbox';
 import { HellInput } from '@hell-ui/angular/input';
 
@@ -30,5 +30,5 @@ export class FieldOrientationExample {
   protected readonly agree = signal(false);
   protected readonly compactFieldUi = {
     root: 'gap-hell-3',
-  } satisfies HellFieldUi;
+  };
 }

@@ -207,8 +207,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
               otherwise omits the attribute.
             </li>
             <li>
-              <code>ui: HellUiInput&lt;HellInputPart&gt;</code> where
-              <code>HellInputPart = 'root'</code>. Exports <code>HellInputUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -219,9 +218,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
             <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
             <li><code>invalid</code>: <code>boolean</code>. Default <code>false</code>.</li>
             <li>
-              <code>ui: HellUiInput&lt;HellNativeSelectPart&gt;</code> where
-              <code>HellNativeSelectPart = 'root'</code>. Exports
-              <code>HellNativeSelectUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -238,8 +235,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
               cap height in CSS with <code>max-block-size</code> + <code>overflow-y: auto</code>.
             </li>
             <li>
-              <code>ui: HellUiInput&lt;HellTextareaPart&gt;</code> where
-              <code>HellTextareaPart = 'root'</code>. Exports <code>HellTextareaUi</code>.
+              <code>ui: HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
