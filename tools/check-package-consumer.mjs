@@ -1465,18 +1465,19 @@ import { HELL_MENU_DIRECTIVES } from '${packageName}/menu';
 import { HellPopover, HellPopoverTrigger } from '${packageName}/popover';
 import { HellProgress, HellProgressBar } from '${packageName}/progress';
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from '${packageName}/radio';
-import { HellSearch, HellSearchClear } from '${packageName}/search';
-import { HELL_SELECT_DIRECTIVES, HellSelectBasic, type HellSelectBasicUi } from '${packageName}/select';
+import type { HellOption } from '${packageName}';
+import { HellSearch, HellSearchClear } from '${packageName}/input';
+import { HELL_SELECT_DIRECTIVES, HellSelect, type HellSelectUi } from '${packageName}/select';
 import { HellSeparator } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
 import { HellSkeleton } from '${packageName}/skeleton';
 import { HellSpinner } from '${packageName}/spinner';
 import { HellSwitch, HellNativeSwitch, type HellSwitchUi } from '${packageName}/switch';
-import { HellBadge, HellKbd, HellTag } from '${packageName}/tag';
+import { HellBadge, HellChip, HellKbd } from '${packageName}/chip';
 import { HELL_TABS_DIRECTIVES } from '${packageName}/tabs';
 import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '${packageName}/toggle';
 import { HellTooltip, HellTooltipTrigger } from '${packageName}/tooltip';
-import { HELL_COMBOBOX_DIRECTIVES, HellComboboxBasic, type HellComboboxBasicUi } from '${packageName}/combobox';
+import { HELL_COMBOBOX_DIRECTIVES, HellCombobox, type HellComboboxUi } from '${packageName}/combobox';
 
 const primitiveRootPart: HellAvatarPart = 'root';
 
@@ -1510,7 +1511,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
     HellSearch,
     HellSearchClear,
     ...HELL_SELECT_DIRECTIVES,
-    HellSelectBasic,
+    HellSelect,
     HellSeparator,
     HellSlider,
     HellSkeleton,
@@ -1519,7 +1520,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
     HellNativeSwitch,
     HellBadge,
     HellKbd,
-    HellTag,
+    HellChip,
     ...HELL_TABS_DIRECTIVES,
     HellToggle,
     HellToggleGroup,
@@ -1527,7 +1528,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
     HellTooltip,
     HellTooltipTrigger,
     ...HELL_COMBOBOX_DIRECTIVES,
-    HellComboboxBasic,
+    HellCombobox,
   ],
   template: \`
     <button hellButton type="button" [ui]="buttonUi">Save</button>
@@ -1552,7 +1553,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
       <button hellToggleGroupItem value="right" type="button">Right</button>
     </div>
 
-    <span hellTag [ui]="tagUi">Ready</span>
+    <span hellChip [ui]="tagUi">Ready</span>
     <span hellBadge [ui]="badgeUi">3</span>
     <kbd hellKbd [ui]="kbdUi">K</kbd>
 
@@ -1615,7 +1616,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
       </div>
     }
 
-    <button hellSelect type="button" [options]="selectOptions" [ui]="selectUi">
+    <button hellSelectTrigger type="button" [options]="selectOptions" [ui]="selectUi">
       <span hellSelectPlaceholder>Pick priority</span>
       <ng-template hellSelectPortal>
         <div hellSelectDropdown>
@@ -1624,7 +1625,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
       </ng-template>
     </button>
 
-    <hell-select-basic [options]="selectOptions" [ui]="selectBasicUi" />
+    <hell-select [options]="presetOptions" [ui]="selectBasicUi" />
     <div
       hellCombobox
       [value]="comboboxValue"
@@ -1654,7 +1655,7 @@ const primitiveRootPart: HellAvatarPart = 'root';
         }
       </div>
     </div>
-    <hell-combobox-basic [options]="selectOptions" [ui]="comboboxBasicUi" />
+    <hell-combobox [options]="presetOptions" [ui]="comboboxBasicUi" />
 
     <section hellCard ui="shadow-none">
       <header hellCardHeader [ui]="cardHeaderUi">Account</header>
@@ -1726,9 +1727,13 @@ class App {
     trigger: 'rounded-hell-pill',
     dropdown: 'rounded-hell-pill',
     option: 'bg-hell-primary-soft',
-  } satisfies HellSelectBasicUi;
+  } satisfies HellSelectUi;
   protected readonly selectOptionUi = { root: 'bg-hell-primary-soft' };
   protected readonly selectOptions = ['low', 'high'];
+  protected readonly presetOptions: readonly HellOption<string>[] = [
+    { value: 'low', label: 'Low' },
+    { value: 'high', label: 'High' },
+  ];
   protected readonly selectUi = { root: 'rounded-hell-pill' };
   protected readonly separatorUi = { root: 'bg-hell-info' };
   protected readonly sliderUi = { range: 'bg-hell-info', thumb: 'border-hell-info' } satisfies HellSliderUi;
@@ -1758,7 +1763,7 @@ class App {
     button: 'text-hell-info',
     dropdown: 'rounded-hell-pill',
     option: 'bg-hell-primary-soft',
-  } satisfies HellComboboxBasicUi;
+  } satisfies HellComboboxUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -2488,7 +2493,7 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/skeleton/styles.css";
 @import "${packageName}/spinner/styles.css";
 @import "${packageName}/switch/styles.css";
-@import "${packageName}/tag/styles.css";
+@import "${packageName}/chip/styles.css";
 @import "${packageName}/tabs/styles.css";
 @import "${packageName}/toggle/styles.css";
 @import "${packageName}/tooltip/styles.css";
