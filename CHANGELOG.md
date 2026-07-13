@@ -325,6 +325,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Omnibar items now render through the shared option-surface presentation, so
+  they carry the same metrics and active/selected treatment as select,
+  combobox, and listbox options (item padding unifies on the shared metric;
+  the active-state background is unchanged). The item base/active CSS rules
+  moved out of the omnibar stylesheet into the recipe. The active-descendant
+  keyboard model deliberately stays local with the reason documented in code:
+  the omnibar drives its list from a text input over an async item set, which
+  ng-primitives' focus-owning listbox model does not serve. Closes #160.
 - The select, combobox, and listbox option rows now draw their surface from
   one internal option-surface presentation (metrics, active/selected states,
   and form-disabled treatment), so hover/active/selected/disabled styling
