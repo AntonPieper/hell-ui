@@ -531,6 +531,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- The typed-value adapter parse-result contract is now one public core seam:
+  `hellTypedValue`, `hellInvalidTypedValue`, `HellTypedValueParseResult`,
+  `HellTypedValueValidParse`, and `HellTypedValueInvalidParse` export from
+  `@hell-ui/angular/core`. The number-input, time-input, and date-input entry
+  points no longer export their standalone parse/format/normalize/compare
+  helper functions or per-entry-point `Hell*InputParseResult` aliases — build
+  custom adapters with the core constructors and register them with the kept
+  `provideHell<X>InputAdapter` functions; reuse built-in behavior through the
+  exported `HELL_DEFAULT_<X>_INPUT_ADAPTER` objects. Closes #156 (spec-free;
+  see the three docs pages for the one shared authoring convention). Evidence:
+  rewritten input suites, migrated filter-bar serialization paths.
 - Dialpad moved behind a feature entry point. Import `HellDialpad`, its
   Part Style Map types, `HellDialpadLabels`, and `HELL_DIALPAD_LABELS` from
   `@hell-ui/angular/features/dialpad` (styles from

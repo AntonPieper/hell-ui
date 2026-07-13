@@ -31,6 +31,9 @@ export class HellFloatingElement implements AfterViewInit {
 }
 
 // @public
+export function hellInvalidTypedValue(): HellTypedValueInvalidParse;
+
+// @public
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
 
 // @public
@@ -139,6 +142,26 @@ export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public
+export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
+
+// @public
+export interface HellTypedValueInvalidParse {
+    // (undocumented)
+    readonly valid: false;
+}
+
+// @public
+export type HellTypedValueParseResult<TValue> = HellTypedValueValidParse<TValue> | HellTypedValueInvalidParse;
+
+// @public
+export interface HellTypedValueValidParse<TValue> {
+    // (undocumented)
+    readonly valid: true;
+    // (undocumented)
+    readonly value: TValue | null;
+}
+
+// @public
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 
 // @public
@@ -149,6 +172,12 @@ export function provideHellLabels<T extends object>(token: InjectionToken<T>, ov
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
+
+// Warnings were encountered during analysis:
+//
+// types/hell-ui-angular-internal-core.d.ts:472:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:473:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:477:5 - (ae-undocumented) Missing documentation for "valid".
 
 // (No @packageDocumentation comment for this package)
 

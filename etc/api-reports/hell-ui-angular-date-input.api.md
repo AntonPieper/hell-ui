@@ -25,9 +25,6 @@ export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels>;
 // @public (undocumented)
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter;
 
-// @public (undocumented)
-export function hellCoerceDateInputValue(value: Date | null | undefined): Date | null;
-
 // @public
 export class HellDateInput implements ControlValueAccessor, Validator {
     constructor();
@@ -109,7 +106,8 @@ export interface HellDateInputAdapter {
     readonly format: (value: Date | null) => string;
     readonly isSameValue?: (a: Date | null, b: Date | null) => boolean;
     readonly isWithinBounds?: (value: Date | null, min: Date | null, max: Date | null) => boolean;
-    readonly parseText: (text: string) => HellDateInputParseResult;
+    // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
+    readonly parseText: (text: string) => HellTypedValueParseResult<Date>;
 }
 
 // @public
@@ -120,11 +118,6 @@ export interface HellDateInputLabels {
     readonly chooseDateFor: (label: string) => string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
-//
-// @public (undocumented)
-export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
-
 // @public
 export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
 
@@ -134,65 +127,48 @@ export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | '
 export type HellDateInputUi = HellUi<HellDateInputPart>;
 
 // @public (undocumented)
-export function hellFormatDateInputValue(d: Date | null): string;
-
-// @public (undocumented)
-export function hellIsDateInputValueWithinBounds(d: Date | null, min: Date | null, max: Date | null): boolean;
-
-// @public
-export function hellParseDateInputText(text: string): HellDateInputParseResult;
-
-// @public (undocumented)
-export function hellSameDateInputValue(a: Date | null, b: Date | null): boolean;
-
-// @public (undocumented)
 export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-date-input.d.ts:10:5 - (ae-undocumented) Missing documentation for "chooseDate".
-// types/hell-ui-angular-date-input.d.ts:11:5 - (ae-undocumented) Missing documentation for "chooseDateFor".
-// types/hell-ui-angular-date-input.d.ts:19:1 - (ae-undocumented) Missing documentation for "HellDateInputParseResult".
-// types/hell-ui-angular-date-input.d.ts:20:1 - (ae-undocumented) Missing documentation for "HellDateInputAdapter".
-// types/hell-ui-angular-date-input.d.ts:32:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_DATE_INPUT_ADAPTER".
-// types/hell-ui-angular-date-input.d.ts:33:15 - (ae-undocumented) Missing documentation for "HELL_DATE_INPUT_ADAPTER".
-// types/hell-ui-angular-date-input.d.ts:34:1 - (ae-undocumented) Missing documentation for "provideHellDateInputAdapter".
-// types/hell-ui-angular-date-input.d.ts:41:1 - (ae-undocumented) Missing documentation for "hellFormatDateInputValue".
-// types/hell-ui-angular-date-input.d.ts:42:1 - (ae-undocumented) Missing documentation for "hellIsDateInputValueWithinBounds".
-// types/hell-ui-angular-date-input.d.ts:43:1 - (ae-undocumented) Missing documentation for "hellSameDateInputValue".
-// types/hell-ui-angular-date-input.d.ts:44:1 - (ae-undocumented) Missing documentation for "hellCoerceDateInputValue".
-// types/hell-ui-angular-date-input.d.ts:58:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-date-input.d.ts:59:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-date-input.d.ts:60:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-date-input.d.ts:61:5 - (ae-undocumented) Missing documentation for "date".
-// types/hell-ui-angular-date-input.d.ts:62:5 - (ae-undocumented) Missing documentation for "min".
-// types/hell-ui-angular-date-input.d.ts:63:5 - (ae-undocumented) Missing documentation for "max".
-// types/hell-ui-angular-date-input.d.ts:64:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-date-input.d.ts:65:5 - (ae-undocumented) Missing documentation for "inputId".
-// types/hell-ui-angular-date-input.d.ts:66:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular-date-input.d.ts:67:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-date-input.d.ts:68:5 - (ae-undocumented) Missing documentation for "ariaDescribedby".
-// types/hell-ui-angular-date-input.d.ts:69:5 - (ae-undocumented) Missing documentation for "ariaLabelledby".
-// types/hell-ui-angular-date-input.d.ts:70:5 - (ae-undocumented) Missing documentation for "dateChange".
-// types/hell-ui-angular-date-input.d.ts:79:5 - (ae-undocumented) Missing documentation for "current".
-// types/hell-ui-angular-date-input.d.ts:80:5 - (ae-undocumented) Missing documentation for "display".
-// types/hell-ui-angular-date-input.d.ts:81:5 - (ae-undocumented) Missing documentation for "invalidDraft".
-// types/hell-ui-angular-date-input.d.ts:82:5 - (ae-undocumented) Missing documentation for "isInvalid".
-// types/hell-ui-angular-date-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-date-input.d.ts:84:5 - (ae-undocumented) Missing documentation for "fieldAriaDescribedby".
-// types/hell-ui-angular-date-input.d.ts:85:5 - (ae-undocumented) Missing documentation for "fieldAriaLabelledby".
-// types/hell-ui-angular-date-input.d.ts:86:5 - (ae-undocumented) Missing documentation for "pickerFocusedDate".
-// types/hell-ui-angular-date-input.d.ts:87:5 - (ae-undocumented) Missing documentation for "triggerAriaLabel".
-// types/hell-ui-angular-date-input.d.ts:94:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-date-input.d.ts:95:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-date-input.d.ts:96:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-date-input.d.ts:97:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
-// types/hell-ui-angular-date-input.d.ts:98:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-date-input.d.ts:101:5 - (ae-undocumented) Missing documentation for "onInput".
-// types/hell-ui-angular-date-input.d.ts:102:5 - (ae-undocumented) Missing documentation for "onBlur".
-// types/hell-ui-angular-date-input.d.ts:103:5 - (ae-undocumented) Missing documentation for "commit".
-// types/hell-ui-angular-date-input.d.ts:104:5 - (ae-undocumented) Missing documentation for "onPick".
-// types/hell-ui-angular-date-input.d.ts:109:5 - (ae-undocumented) Missing documentation for "validate".
+// types/hell-ui-angular-date-input.d.ts:9:5 - (ae-undocumented) Missing documentation for "chooseDate".
+// types/hell-ui-angular-date-input.d.ts:10:5 - (ae-undocumented) Missing documentation for "chooseDateFor".
+// types/hell-ui-angular-date-input.d.ts:18:1 - (ae-undocumented) Missing documentation for "HellDateInputAdapter".
+// types/hell-ui-angular-date-input.d.ts:30:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_DATE_INPUT_ADAPTER".
+// types/hell-ui-angular-date-input.d.ts:31:15 - (ae-undocumented) Missing documentation for "HELL_DATE_INPUT_ADAPTER".
+// types/hell-ui-angular-date-input.d.ts:32:1 - (ae-undocumented) Missing documentation for "provideHellDateInputAdapter".
+// types/hell-ui-angular-date-input.d.ts:46:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-date-input.d.ts:47:5 - (ae-undocumented) Missing documentation for "invalid".
+// types/hell-ui-angular-date-input.d.ts:48:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-date-input.d.ts:49:5 - (ae-undocumented) Missing documentation for "date".
+// types/hell-ui-angular-date-input.d.ts:50:5 - (ae-undocumented) Missing documentation for "min".
+// types/hell-ui-angular-date-input.d.ts:51:5 - (ae-undocumented) Missing documentation for "max".
+// types/hell-ui-angular-date-input.d.ts:52:5 - (ae-undocumented) Missing documentation for "placeholder".
+// types/hell-ui-angular-date-input.d.ts:53:5 - (ae-undocumented) Missing documentation for "inputId".
+// types/hell-ui-angular-date-input.d.ts:54:5 - (ae-undocumented) Missing documentation for "name".
+// types/hell-ui-angular-date-input.d.ts:55:5 - (ae-undocumented) Missing documentation for "ariaLabel".
+// types/hell-ui-angular-date-input.d.ts:56:5 - (ae-undocumented) Missing documentation for "ariaDescribedby".
+// types/hell-ui-angular-date-input.d.ts:57:5 - (ae-undocumented) Missing documentation for "ariaLabelledby".
+// types/hell-ui-angular-date-input.d.ts:58:5 - (ae-undocumented) Missing documentation for "dateChange".
+// types/hell-ui-angular-date-input.d.ts:67:5 - (ae-undocumented) Missing documentation for "current".
+// types/hell-ui-angular-date-input.d.ts:68:5 - (ae-undocumented) Missing documentation for "display".
+// types/hell-ui-angular-date-input.d.ts:69:5 - (ae-undocumented) Missing documentation for "invalidDraft".
+// types/hell-ui-angular-date-input.d.ts:70:5 - (ae-undocumented) Missing documentation for "isInvalid".
+// types/hell-ui-angular-date-input.d.ts:71:5 - (ae-undocumented) Missing documentation for "isDisabled".
+// types/hell-ui-angular-date-input.d.ts:72:5 - (ae-undocumented) Missing documentation for "fieldAriaDescribedby".
+// types/hell-ui-angular-date-input.d.ts:73:5 - (ae-undocumented) Missing documentation for "fieldAriaLabelledby".
+// types/hell-ui-angular-date-input.d.ts:74:5 - (ae-undocumented) Missing documentation for "pickerFocusedDate".
+// types/hell-ui-angular-date-input.d.ts:75:5 - (ae-undocumented) Missing documentation for "triggerAriaLabel".
+// types/hell-ui-angular-date-input.d.ts:82:5 - (ae-undocumented) Missing documentation for "writeValue".
+// types/hell-ui-angular-date-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "registerOnChange".
+// types/hell-ui-angular-date-input.d.ts:84:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
+// types/hell-ui-angular-date-input.d.ts:85:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
+// types/hell-ui-angular-date-input.d.ts:86:5 - (ae-undocumented) Missing documentation for "setDisabledState".
+// types/hell-ui-angular-date-input.d.ts:89:5 - (ae-undocumented) Missing documentation for "onInput".
+// types/hell-ui-angular-date-input.d.ts:90:5 - (ae-undocumented) Missing documentation for "onBlur".
+// types/hell-ui-angular-date-input.d.ts:91:5 - (ae-undocumented) Missing documentation for "commit".
+// types/hell-ui-angular-date-input.d.ts:92:5 - (ae-undocumented) Missing documentation for "onPick".
+// types/hell-ui-angular-date-input.d.ts:97:5 - (ae-undocumented) Missing documentation for "validate".
 
 // (No @packageDocumentation comment for this package)
 

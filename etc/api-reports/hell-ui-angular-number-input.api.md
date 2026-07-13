@@ -26,12 +26,6 @@ export const HELL_NUMBER_INPUT_ADAPTER: InjectionToken<HellNumberInputAdapter>;
 export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels>;
 
 // @public
-export function hellFormatNumberInputValue(value: number | null, _context: HellNumberInputAdapterContext): string;
-
-// @public
-export function hellNormalizeNumberInputValue(value: number | null | undefined, _context: HellNumberInputAdapterContext): number | null;
-
-// @public
 export class HellNumberInput implements ControlValueAccessor, Validator {
     constructor();
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
@@ -94,7 +88,8 @@ export interface HellNumberInputAdapter {
     readonly format: (value: number | null, context: HellNumberInputAdapterContext) => string;
     readonly isSameValue?: (a: number | null, b: number | null) => boolean;
     readonly normalize?: (value: number | null | undefined, context: HellNumberInputAdapterContext) => number | null;
-    readonly parseText: (text: string, context: HellNumberInputAdapterContext) => HellNumberInputParseResult;
+    // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
+    readonly parseText: (text: string, context: HellNumberInputAdapterContext) => HellTypedValueParseResult<number>;
 }
 
 // @public
@@ -110,11 +105,6 @@ export interface HellNumberInputLabels {
     readonly incrementFor: (label: string) => string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
-//
-// @public
-export type HellNumberInputParseResult = HellTypedValueParseResult<number>;
-
 // @public
 export type HellNumberInputPart = 'root' | 'input' | 'increment' | 'decrement' | 'suffix';
 
@@ -122,12 +112,6 @@ export type HellNumberInputPart = 'root' | 'input' | 'increment' | 'decrement' |
 //
 // @public
 export type HellNumberInputUi = HellUi<HellNumberInputPart>;
-
-// @public
-export function hellParseNumberInputText(text: string, context: HellNumberInputAdapterContext): HellNumberInputParseResult;
-
-// @public
-export function hellSameNumberInputValue(a: number | null, b: number | null): boolean;
 
 // @public
 export function provideHellNumberInputAdapter(adapter: HellNumberInputAdapter): Provider;

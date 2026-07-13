@@ -25,18 +25,6 @@ export const HELL_TIME_INPUT_ADAPTER: InjectionToken<HellTimeInputAdapter>;
 export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels>;
 
 // @public
-export function hellFormatTimeInputValue(t: HellTimeValue, context: HellTimeInputAdapterContext): string;
-
-// @public
-export function hellNormalizeTimeInputValue(value: HellTimeValue | null | undefined, context: HellTimeInputAdapterContext): HellTimeValue | null;
-
-// @public
-export function hellParseTimeInputText(text: string, context: HellTimeInputAdapterContext): HellTimeInputParseResult;
-
-// @public
-export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean;
-
-// @public
 export class HellTimeInput implements ControlValueAccessor, Validator {
     constructor();
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
@@ -106,7 +94,8 @@ export interface HellTimeInputAdapter {
     readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
     readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
     readonly normalize?: (value: HellTimeValue | null | undefined, context: HellTimeInputAdapterContext) => HellTimeValue | null;
-    readonly parseText: (text: string, context: HellTimeInputAdapterContext) => HellTimeInputParseResult;
+    // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
+    readonly parseText: (text: string, context: HellTimeInputAdapterContext) => HellTypedValueParseResult<HellTimeValue>;
 }
 
 // @public
@@ -129,11 +118,6 @@ export interface HellTimeInputLabels {
     readonly selectedTime?: (time: string) => string;
     readonly subtractFiveMinutes: string;
 }
-
-// Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-//
-// @public
-export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
 
 // @public
 export type HellTimeInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel' | 'pickerHeader' | 'pickerReadout' | 'pickerUnits' | 'pickerUnit' | 'pickerUnitLabel' | 'pickerUnitControl' | 'pickerUnitValue' | 'pickerUnitStep' | 'minutePresets' | 'minutePreset';
