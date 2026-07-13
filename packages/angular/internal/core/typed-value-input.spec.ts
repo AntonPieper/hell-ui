@@ -1,6 +1,10 @@
 import { signal } from '@angular/core';
 
-import { HellTypedValueInputState, hellInvalidTypedValue, hellTypedValue } from './typed-value-input';
+import {
+  HellTypedValueInputState,
+  hellInvalidTypedValue,
+  hellTypedValue,
+} from './typed-value-input';
 
 describe('Typed Value Input', () => {
   it('keeps draft text until the external value changes', () => {

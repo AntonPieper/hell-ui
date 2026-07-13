@@ -242,7 +242,7 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           Exported types: <code>HellTimeInputPart</code> (the fifteen parts listed under Styling),
           <code>HellTimeInputUi</code> (<code>HellUi&lt;HellTimeInputPart&gt;</code>),
           <code>HellTimeValue</code>, <code>HellTimeInputAdapter</code>,
-          <code>HellTimeInputAdapterContext</code>, <code>HellTimeInputParseResult</code>.
+          <code>HellTimeInputAdapterContext</code>.
         </li>
         <li>
           <code>provideHellTimeInputAdapter</code>: replace the default native-compatible
@@ -263,11 +263,14 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         the browser itself blocks illegal typed values. Its parser also accepts common 12-hour
         text (<code>9:00 am</code>, <code>1:30pm</code>) and bare digit runs (<code>930</code>) for
         adapter reuse, plus programmatic paths that go around the native control. Empty text
-        commits a clear to <code>null</code>. Provide a custom <code>HellTimeInputAdapter</code>
-        via <code>provideHellTimeInputAdapter</code>, which binds it to the
-        <code>HELL_TIME_INPUT_ADAPTER</code> injection token, for localized formats or named
-        shortcuts; custom adapters switch the field to plain text mode, since the native time
-        control cannot display non-standard text.
+        commits a clear to <code>null</code>. For localized formats or named shortcuts, implement the
+        <code>HellTimeInputAdapter</code> interface and register it with
+        <code>provideHellTimeInputAdapter</code>, which binds it to the
+        <code>HELL_TIME_INPUT_ADAPTER</code> injection token. In <code>parseText</code>, return
+        <code>hellTypedValue(value)</code> for a committable value (<code>null</code> clears the
+        field) or <code>hellInvalidTypedValue()</code> to keep the typed text as a visible invalid
+        draft — both imported from <code>&#64;hell-ui/angular/core</code>. Custom adapters switch the
+        field to plain text mode, since the native time control cannot display non-standard text.
       </p>
 
       <h2>Accessibility</h2>

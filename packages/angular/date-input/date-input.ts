@@ -42,13 +42,16 @@ import {
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
-  HellTypedValueInputState,
-  type HellTypedValueParseResult,
+  hellPartStyler,
   hellInvalidTypedValue,
   hellTypedValue,
-} from '@hell-ui/angular/internal/core';
+  type HellRecipe,
+  type HellTypedValueParseResult,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
+import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
 
 /** Built-in accessibility labels owned by the date input entry point. */
 export interface HellDateInputLabels {
@@ -84,11 +87,9 @@ const HELL_DATE_INPUT_RECIPE = {
   pickerPanel: 'block rounded-hell-md border-0 bg-transparent p-0 shadow-none',
 } satisfies HellRecipe<HellDateInputPart>;
 
-export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
-
 export interface HellDateInputAdapter {
   /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
-  readonly parseText: (text: string) => HellDateInputParseResult;
+  readonly parseText: (text: string) => HellTypedValueParseResult<Date>;
   /** Format the committed value for the text field. */
   readonly format: (value: Date | null) => string;
   /** Coerce external form/input values before display; invalid dates should return null. */
@@ -121,7 +122,7 @@ export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Prov
  * and the stable business format we render back into the input. Empty text
  * commits a nullable clear; unparseable text stays as an invalid draft.
  */
-export function hellParseDateInputText(text: string): HellDateInputParseResult {
+function hellParseDateInputText(text: string): HellTypedValueParseResult<Date> {
   const t = text.trim();
   if (!t) return hellTypedValue<Date>(null);
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
@@ -138,7 +139,7 @@ export function hellParseDateInputText(text: string): HellDateInputParseResult {
   return hellInvalidTypedValue();
 }
 
-export function hellFormatDateInputValue(d: Date | null): string {
+function hellFormatDateInputValue(d: Date | null): string {
   if (!d) return '';
   const year = d.getFullYear().toString().padStart(4, '0');
   const month = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -156,7 +157,7 @@ function dateDayValue(value: Date | null | undefined): Date | null {
     : null;
 }
 
-export function hellIsDateInputValueWithinBounds(
+function hellIsDateInputValueWithinBounds(
   d: Date | null,
   min: Date | null,
   max: Date | null,
@@ -166,12 +167,12 @@ export function hellIsDateInputValueWithinBounds(
   return (!min || day >= dateDayTime(min)) && (!max || day <= dateDayTime(max));
 }
 
-export function hellSameDateInputValue(a: Date | null, b: Date | null): boolean {
+function hellSameDateInputValue(a: Date | null, b: Date | null): boolean {
   if (!a || !b) return a === b;
   return dateDayTime(a) === dateDayTime(b);
 }
 
-export function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
+function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
   return dateDayValue(value);
 }
 

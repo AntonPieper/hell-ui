@@ -38,13 +38,16 @@ import {
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
-  HellTypedValueInputState,
-  type HellTypedValueParseResult,
+  hellPartStyler,
   hellInvalidTypedValue,
   hellTypedValue,
-} from '@hell-ui/angular/internal/core';
+  type HellRecipe,
+  type HellTypedValueParseResult,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
+import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
 import {
   hellTimeInputNextPickerValue,
   hellTimeInputPickerMaxValue,
@@ -165,16 +168,13 @@ export interface HellTimeInputAdapterContext {
 
 type HellTimeUnit = HellTimeInputPickerUnit;
 
-/** Result of parsing time input text into a value or an invalid draft. */
-export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
-
 /** Strategy for parsing, formatting, normalizing, and comparing time values. */
 export interface HellTimeInputAdapter {
   /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
   readonly parseText: (
     text: string,
     context: HellTimeInputAdapterContext,
-  ) => HellTimeInputParseResult;
+  ) => HellTypedValueParseResult<HellTimeValue>;
   /** Format a committed time value for the text field and picker readout. */
   readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
   /** Coerce external form/input values before display; invalid values should return null. */
@@ -210,7 +210,7 @@ function pad(n: number) {
 }
 
 /** Format a time value as `HH:mm`, or `HH:mm:ss` when seconds are enabled. */
-export function hellFormatTimeInputValue(
+function hellFormatTimeInputValue(
   t: HellTimeValue,
   context: HellTimeInputAdapterContext,
 ): string {
@@ -226,7 +226,7 @@ export function hellFormatTimeInputValue(
  * Empty text commits a nullable clear; unparseable text stays as an invalid
  * draft.
  */
-export function hellNormalizeTimeInputValue(
+function hellNormalizeTimeInputValue(
   value: HellTimeValue | null | undefined,
   context: HellTimeInputAdapterContext,
 ): HellTimeValue | null {
@@ -235,10 +235,10 @@ export function hellNormalizeTimeInputValue(
 }
 
 /** Parse time input text into a value or an invalid draft, per the default formats. */
-export function hellParseTimeInputText(
+function hellParseTimeInputText(
   text: string,
   context: HellTimeInputAdapterContext,
-): HellTimeInputParseResult {
+): HellTypedValueParseResult<HellTimeValue> {
   const t = text.trim().toLowerCase();
   if (!t) return hellTypedValue<HellTimeValue>(null);
 
@@ -292,7 +292,7 @@ function isValidTime(value: HellTimeValue | null | undefined): value is HellTime
 }
 
 /** Compare two time values by their hour, minute, and second fields. */
-export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
+function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
   return a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second;
 }
 

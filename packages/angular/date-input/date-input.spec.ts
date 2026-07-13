@@ -5,8 +5,7 @@ import { By } from '@angular/platform-browser';
 
 import {
   HellDateInput,
-  hellCoerceDateInputValue,
-  hellSameDateInputValue,
+  HELL_DEFAULT_DATE_INPUT_ADAPTER,
   provideHellDateInputAdapter,
   type HellDateInputPart,
   type HellDateInputUi,
@@ -503,14 +502,19 @@ describe('HellDateInput', () => {
   });
 
   it('compares default dates by local day instead of exact timestamp', () => {
-    expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 22, 23, 59, 59))).toBe(
-      true,
-    );
-    expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 23))).toBe(false);
+    expect(
+      HELL_DEFAULT_DATE_INPUT_ADAPTER.isSameValue!(
+        new Date(2026, 3, 22),
+        new Date(2026, 3, 22, 23, 59, 59),
+      ),
+    ).toBe(true);
+    expect(
+      HELL_DEFAULT_DATE_INPUT_ADAPTER.isSameValue!(new Date(2026, 3, 22), new Date(2026, 3, 23)),
+    ).toBe(false);
   });
 
   it('coerces external Date values to local midnight', () => {
-    const coerced = hellCoerceDateInputValue(new Date(2026, 3, 22, 16, 45, 30, 12));
+    const coerced = HELL_DEFAULT_DATE_INPUT_ADAPTER.coerce!(new Date(2026, 3, 22, 16, 45, 30, 12));
 
     expect(formatDate(coerced)).toBe('2026-04-22');
     expect(coerced?.getHours()).toBe(0);

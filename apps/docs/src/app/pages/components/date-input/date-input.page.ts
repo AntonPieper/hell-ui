@@ -214,9 +214,13 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         treats it as a local-midnight date without locale parsing. Empty text commits a clear to
         <code>null</code>; anything else that doesn't match commits nothing and marks the draft
         invalid. If your product needs locale-aware parsing, a masked input, or a Temporal-backed
-        model, provide a <code>HellDateInputAdapter</code> with explicit <code>parseText</code>,
-        <code>format</code>, and optional <code>coerce</code> / <code>isSameValue</code> /
-        <code>isWithinBounds</code> functions via <code>provideHellDateInputAdapter</code>.
+        model, implement the <code>HellDateInputAdapter</code> interface with explicit
+        <code>parseText</code>, <code>format</code>, and optional <code>coerce</code> /
+        <code>isSameValue</code> / <code>isWithinBounds</code> functions and register it with
+        <code>provideHellDateInputAdapter</code>. In <code>parseText</code>, return
+        <code>hellTypedValue(value)</code> for a committable value (<code>null</code> clears the
+        field) or <code>hellInvalidTypedValue()</code> to keep the typed text as a visible invalid
+        draft — both imported from <code>&#64;hell-ui/angular/core</code>.
       </p>
 
       <h2>Accessibility</h2>
