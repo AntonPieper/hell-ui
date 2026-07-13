@@ -106,6 +106,9 @@
     "./internal/option": {
       "@heinrich/source": "./internal/option/public-api.ts"
     },
+    "./internal/search": {
+      "@heinrich/source": "./internal/search/public-api.ts"
+    },
     "./testing": {
       "@heinrich/source": "./testing/public-api.ts"
     },

@@ -25,6 +25,10 @@ import { ComboboxRankedFilteringExample } from './examples/ranked-filtering.exam
 import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.example.ts?raw' with {
   loader: 'text',
 };
+import { ComboboxAsyncSourceExample } from './examples/async-source.example';
+import comboboxAsyncSourceExampleCodeRaw from './examples/async-source.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-combobox',
@@ -38,6 +42,7 @@ import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.e
     ComboboxWithFieldTagExample,
     ComboboxStylingExample,
     ComboboxRankedFilteringExample,
+    ComboboxAsyncSourceExample,
     PageHeader,
   ],
   template: `
@@ -107,6 +112,22 @@ import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.e
       </p>
       <hd-example-tabs [code]="comboboxRankedFilteringExampleCode">
         <app-combobox-ranked-filtering-example />
+      </hd-example-tabs>
+
+      <h2>Async source</h2>
+      <p>
+        Pass a <code>HellSearchSource</code> through <code>[source]</code> (mutually exclusive with
+        <code>[options]</code>) and <code>&lt;hell-combobox&gt;</code> becomes an entity picker:
+        each keystroke dispatches a debounced query (<code>sourceDebounce</code>, default 120ms),
+        newer searches abort older ones via the request's <code>AbortSignal</code>, and stale
+        responses never overwrite fresh results — the same lifecycle the omnibar uses. While a
+        request is in flight the dropdown shows the <code>loading</code> part; a rejected source
+        shows the <code>error</code> part; both render copy from the combobox Label Contract.
+        Supply <code>displayWith</code> so picked values stay labelled when their option is no
+        longer in the loaded results.
+      </p>
+      <hd-example-tabs [code]="comboboxAsyncSourceExampleCode">
+        <app-combobox-async-source-example />
       </hd-example-tabs>
 
       <h2>Multiple</h2>
@@ -237,6 +258,16 @@ import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.e
             <td><code>empty</code></td>
             <td>The <code>hellComboboxEmpty</code> placeholder.</td>
           </tr>
+          <tr>
+            <td></td>
+            <td><code>loading</code></td>
+            <td>The in-flight message while an async <code>source</code> loads.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>error</code></td>
+            <td>The failure message when an async <code>source</code> rejects.</td>
+          </tr>
         </tbody>
       </table>
       <p>
@@ -290,13 +321,14 @@ import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.e
         <li><code>value</code>: <code>HellPickValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
-        <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
-        <li><code>emptyLabel</code>: <code>string</code>. Default <code>'No matches'</code>.</li>
+        <li><code>source</code>: <code>HellSearchSource&lt;HellOption&lt;T&gt;&gt; | null</code> — async option source, mutually exclusive with <code>options</code>. Default <code>null</code>.</li>
+        <li><code>sourceDebounce</code>: <code>number</code> — milliseconds between typing and dispatching to <code>source</code>. Default <code>120</code>.</li>
         <li><code>aria-label</code>: <code>string | null</code> — accessible name for the input. Default <code>null</code>.</li>
         <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
         <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt; | null</code> — overrides option labels (and labels selected values missing from <code>options</code>). Default <code>null</code>: the matching option's <code>label</code> renders. Filtering also matches against the rendered label.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty | loading | error</code>.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
+        <li>Labels (toggle button aria-label, empty, loading, and error copy) come from the combobox Label Contract: override with <code>provideHellLabels(HELL_COMBOBOX_LABELS, &#123; … &#125;)</code>.</li>
       </ul>
       <p>
         Value and option types come from <code>&#64;hell-ui/angular/core</code>:
@@ -349,4 +381,5 @@ export class ComboboxPage {
   protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;
   protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
   protected readonly comboboxRankedFilteringExampleCode = comboboxRankedFilteringExampleCodeRaw;
+  protected readonly comboboxAsyncSourceExampleCode = comboboxAsyncSourceExampleCodeRaw;
 }

@@ -1,0 +1,12 @@
+{
+  "category": "internal",
+  "exports": [
+    "./search-orchestrator"
+  ],
+  "header": [
+    "/**",
+    " * @internal Shared async search lifecycle for Hell-owned entry points only.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

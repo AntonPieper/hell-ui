@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, Injectable, booleanAttribute, OnDestroy, computed, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, Injectable, booleanAttribute, OnDestroy, computed, effect, forwardRef, inject, input, isDevMode, output, signal, viewChild, type InjectionToken, type Signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import { HELL_SEARCH_RANKER, hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSearchRanker, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HELL_SEARCH_RANKER, HellSearchService, hellCreateLabels, hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSearchRanker, type HellSearchResult, type HellSearchSource, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { hellContainsFloatingTarget, hellNormalizePickValue, hellRegisterFloatingHost, HellPickerControl } from '@hell-ui/angular/internal/core';
+import { HellSearchOrchestrator } from '@hell-ui/angular/internal/search';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import {
   hellOptionRowLabel,
@@ -30,9 +31,32 @@ export type HellComboboxPart =
   | 'button'
   | 'dropdown'
   | 'option'
-  | 'empty';
+  | 'empty'
+  | 'loading'
+  | 'error';
 /** Part Style Map accepted by the HellCombobox `ui` input. */
 export type HellComboboxUi = HellUi<HellComboboxPart>;
+
+/** Built-in copy owned by the combobox entry point. */
+export interface HellComboboxLabels {
+  /** Accessible label for the dropdown toggle button. */
+  readonly toggle: string;
+  /** Message shown when no option matches the current query. */
+  readonly empty: string;
+  /** Message shown while an async source is loading options. */
+  readonly loading: string;
+  /** Message shown when an async source fails to load options. */
+  readonly error: string;
+}
+
+/** Injection token resolving to the effective combobox labels. */
+export const HELL_COMBOBOX_LABELS: InjectionToken<HellComboboxLabels> =
+  hellCreateLabels<HellComboboxLabels>('HELL_COMBOBOX_LABELS', {
+    toggle: 'Toggle options',
+    empty: 'No matches',
+    loading: 'Loading options…',
+    error: "Couldn't load options",
+  });
 
 const HELL_COMBOBOX_ROOT_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
@@ -64,6 +88,9 @@ const HELL_COMBOBOX_CHIPS_RECIPE = {
   chip: 'max-w-full',
 } satisfies HellRecipe<HellComboboxChipsPart>;
 
+const HELL_COMBOBOX_STATUS_RECIPE =
+  'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*2)] text-xs text-hell-foreground-subtle';
+
 const HELL_COMBOBOX_RECIPE = {
   root: '',
   control: '',
@@ -72,6 +99,8 @@ const HELL_COMBOBOX_RECIPE = {
   dropdown: '',
   option: '',
   empty: '',
+  loading: HELL_COMBOBOX_STATUS_RECIPE,
+  error: `${HELL_COMBOBOX_STATUS_RECIPE} text-hell-danger`,
 } satisfies HellRecipe<HellComboboxPart>;
 
 /**
@@ -588,7 +617,7 @@ export class HellComboboxChips<T = unknown> {
         type="button"
         data-slot="button"
         [ui]="part('button')"
-        [attr.aria-label]="toggleLabel()"
+        [attr.aria-label]="labels.toggle"
       ></button>
       <div
         *hellComboboxPortal
@@ -596,20 +625,30 @@ export class HellComboboxChips<T = unknown> {
         data-slot="dropdown"
         [ui]="part('dropdown')"
       >
-        @for (option of filteredOptions(); track option.value) {
-          <div
-            hellComboboxOption
-            data-slot="option"
-            [ui]="part('option')"
-            [value]="option.value"
-            [disabled]="option.disabled ?? false"
-          >
-            {{ optionLabel(option) }}
+        @if (sourceLoading()) {
+          <div data-slot="loading" [class]="part('loading')" role="status">
+            {{ labels.loading }}
           </div>
-        } @empty {
-          <div hellComboboxEmpty data-slot="empty" [ui]="part('empty')">
-            {{ emptyLabel() }}
+        } @else if (sourceFailed()) {
+          <div data-slot="error" [class]="part('error')" role="status">
+            {{ labels.error }}
           </div>
+        } @else {
+          @for (option of filteredOptions(); track option.value) {
+            <div
+              hellComboboxOption
+              data-slot="option"
+              [ui]="part('option')"
+              [value]="option.value"
+              [disabled]="option.disabled ?? false"
+            >
+              {{ optionLabel(option) }}
+            </div>
+          } @empty {
+            <div hellComboboxEmpty data-slot="empty" [ui]="part('empty')">
+              {{ labels.empty }}
+            </div>
+          }
         }
       </div>
     </div>
@@ -627,12 +666,19 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
 
   /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
   readonly options = input<readonly HellOption<T>[]>([]);
+  /**
+   * Async option source, mutually exclusive with `options`. Queries are
+   * debounced, newer searches abort older ones, and loading/empty/error
+   * chrome renders inside the dropdown. Supply `displayWith` so picked
+   * values stay labelled while their option is not in the loaded results.
+   */
+  readonly source = input<HellSearchSource<HellOption<T>> | null>(null);
+  /** Debounce in milliseconds between typing and dispatching to `source`. */
+  readonly sourceDebounce = input<number>(120);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly allowDeselect = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly placeholder = input('Search');
-  readonly toggleLabel = input('Toggle options');
-  readonly emptyLabel = input('No matches');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
   /** Overrides option labels; also labels selected values missing from `options`. */
@@ -643,10 +689,15 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly labels = inject(HELL_COMBOBOX_LABELS);
   // Annotated: when ng-packagr compiles this entry point against core's
   // flattened d.ts, inference for the injected ranker collapses to `unknown`
   // and the lib build fails without the explicit type.
   private readonly ranker: HellSearchRanker = inject(HELL_SEARCH_RANKER);
+  private readonly orchestrator = new HellSearchOrchestrator<HellOption<T>>(
+    inject(HellSearchService),
+  );
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
   private readonly controlledValue = new HellControlledValueState<HellPickValue<T>>({
     externalValue: this.value,
@@ -675,7 +726,26 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
 
   protected readonly filterValue = computed(() => this.filterOverride() ?? this.selectedLabel());
 
-  protected readonly filteredOptions = computed(() => {
+  // Annotated: when ng-packagr compiles this entry point against the internal
+  // search module's flattened d.ts, the result generic collapses to `unknown`.
+  private readonly sourceOptions = computed(() =>
+    this.orchestrator.results().map((result: HellSearchResult<HellOption<T>>) => result.item),
+  );
+  /** Options behind the dropdown: loaded results in source mode, else `options`. */
+  private readonly effectiveOptions = computed(() =>
+    this.source() ? this.sourceOptions() : this.options(),
+  );
+  /** Whether source-mode loading chrome should render. */
+  protected readonly sourceLoading: Signal<boolean> = computed(
+    () => !!this.source() && this.orchestrator.loading(),
+  );
+  /** Whether source-mode error chrome should render. */
+  protected readonly sourceFailed: Signal<boolean> = computed(
+    () => !!this.source() && this.orchestrator.error() !== null,
+  );
+
+  protected readonly filteredOptions: Signal<readonly HellOption<T>[]> = computed(() => {
+    if (this.source()) return this.sourceOptions();
     const query = this.filterValue().trim();
     if (!query) return this.options();
     return this.ranker<HellOption<T>>(this.options(), {
@@ -684,6 +754,35 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     }).map(({ item }) => item);
   });
 
+  constructor() {
+    this.orchestrator.connect(this.destroyRef);
+    effect(() => {
+      const source = this.source();
+      if (!source) {
+        this.orchestrator.cancel();
+        this.orchestrator.clearResults();
+        return;
+      }
+      if (isDevMode() && this.options().length) {
+        throw new Error(
+          'hell-combobox: `options` and `source` are mutually exclusive — supply local options or an async source, not both.',
+        );
+      }
+      // Queries use only what the user typed (`filterOverride`), never the
+      // picked value's display label that `filterValue` falls back to —
+      // otherwise every selection would immediately re-query the source
+      // narrowed to its own label.
+      this.orchestrator.scheduleSearch(
+        this.filterOverride()?.trim() ?? '',
+        {
+          source,
+          fields: [{ name: 'label', get: (option: HellOption<T>) => this.optionLabel(option) }],
+        },
+        this.sourceDebounce(),
+      );
+    });
+  }
+
   /** Display text for one option row. */
   protected optionLabel(option: HellOption<T>): string {
     return hellOptionRowLabel(option, this.displayWith());
@@ -691,7 +790,12 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
 
   /** Display text for a picked value: `displayWith`, else its option's label. */
   private labelFor(value: T): string {
-    return hellPickedValueLabel(value, this.options(), this.displayWith(), this.compareWith());
+    return hellPickedValueLabel(
+      value,
+      this.effectiveOptions(),
+      this.displayWith(),
+      this.compareWith(),
+    );
   }
 
   protected onValueChange(next: HellPickValue<T>): void {

@@ -19,7 +19,11 @@ import * as tailwind_merge from 'tailwind-merge';
 export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellComboboxRoot, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty, typeof HellComboboxChips];
 
 // @public
+export const HELL_COMBOBOX_LABELS: InjectionToken<HellComboboxLabels>;
+
+// @public
 export class HellCombobox<T = unknown> implements ControlValueAccessor {
+    constructor();
     // (undocumented)
     readonly allowDeselect: _angular_core.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
@@ -37,13 +41,13 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     // (undocumented)
     protected readonly effectiveValue: Signal<HellPickValue<T>>;
     // (undocumented)
-    readonly emptyLabel: _angular_core.InputSignal<string>;
-    // (undocumented)
     protected filter(): string;
     // (undocumented)
     protected readonly filteredOptions: Signal<readonly HellOption<T>[]>;
     // (undocumented)
     protected readonly filterValue: Signal<string>;
+    // (undocumented)
+    protected readonly labels: HellComboboxLabels;
     // (undocumented)
     markControlTouched(event: FocusEvent): void;
     // (undocumented)
@@ -71,8 +75,11 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     protected readonly selectedLabel: Signal<string>;
     // (undocumented)
     setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
-    readonly toggleLabel: _angular_core.InputSignal<string>;
+    // Warning: (ae-forgotten-export) The symbol "HellSearchSource" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
+    readonly source: _angular_core.InputSignal<HellSearchSource<HellOption<T>> | null>;
+    readonly sourceDebounce: _angular_core.InputSignal<number>;
+    protected readonly sourceFailed: Signal<boolean>;
+    protected readonly sourceLoading: Signal<boolean>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellComboboxPart>>;
     // Warning: (ae-forgotten-export) The symbol "HellPickValue" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
@@ -83,7 +90,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     readonly valueChange: _angular_core.OutputEmitterRef<HellPickValue<T>>;
     // (undocumented)
     writeValue(value: HellPickValue<T>): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCombobox<any>, "hell-combobox", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "multiple": { "alias": "multiple"; "required": false; "isSignal": true; }; "allowDeselect": { "alias": "allowDeselect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "toggleLabel": { "alias": "toggleLabel"; "required": false; "isSignal": true; }; "emptyLabel": { "alias": "emptyLabel"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; "openChange": "openChange"; }, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCombobox<any>, "hell-combobox", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; "sourceDebounce": { "alias": "sourceDebounce"; "required": false; "isSignal": true; }; "multiple": { "alias": "multiple"; "required": false; "isSignal": true; }; "allowDeselect": { "alias": "allowDeselect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; "openChange": "openChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellCombobox<any>, never>;
 }
 
@@ -152,6 +159,14 @@ export class HellComboboxInput {
 }
 
 // @public
+export interface HellComboboxLabels {
+    readonly empty: string;
+    readonly error: string;
+    readonly loading: string;
+    readonly toggle: string;
+}
+
+// @public
 export class HellComboboxOption {
     // (undocumented)
     protected readonly disabled: Signal<boolean>;
@@ -162,7 +177,7 @@ export class HellComboboxOption {
 }
 
 // @public
-export type HellComboboxPart = 'root' | 'control' | 'input' | 'button' | 'dropdown' | 'option' | 'empty';
+export type HellComboboxPart = 'root' | 'control' | 'input' | 'button' | 'dropdown' | 'option' | 'empty' | 'loading' | 'error';
 
 // @public
 export class HellComboboxPortal {
@@ -201,45 +216,44 @@ export type HellComboboxUi = HellUi<HellComboboxPart>;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-combobox.d.ts:38:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-combobox.d.ts:39:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-combobox.d.ts:40:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-combobox.d.ts:41:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-combobox.d.ts:42:5 - (ae-undocumented) Missing documentation for "isOutsideControl".
-// types/hell-ui-angular-combobox.d.ts:43:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-combobox.d.ts:45:5 - (ae-undocumented) Missing documentation for "registerDropdown".
-// types/hell-ui-angular-combobox.d.ts:46:5 - (ae-undocumented) Missing documentation for "unregisterDropdown".
-// types/hell-ui-angular-combobox.d.ts:96:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-angular-combobox.d.ts:97:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-combobox.d.ts:130:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-combobox.d.ts:136:1 - (ae-undocumented) Missing documentation for "HellComboboxEmpty".
-// types/hell-ui-angular-combobox.d.ts:199:352 - (ae-forgotten-export) The symbol "i2" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-// types/hell-ui-angular-combobox.d.ts:213:5 - (ae-undocumented) Missing documentation for "multiple".
-// types/hell-ui-angular-combobox.d.ts:214:5 - (ae-undocumented) Missing documentation for "allowDeselect".
-// types/hell-ui-angular-combobox.d.ts:215:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-combobox.d.ts:216:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-combobox.d.ts:217:5 - (ae-undocumented) Missing documentation for "toggleLabel".
-// types/hell-ui-angular-combobox.d.ts:218:5 - (ae-undocumented) Missing documentation for "emptyLabel".
-// types/hell-ui-angular-combobox.d.ts:219:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-combobox.d.ts:220:5 - (ae-undocumented) Missing documentation for "compareWith".
-// types/hell-ui-angular-combobox.d.ts:223:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-combobox.d.ts:224:5 - (ae-undocumented) Missing documentation for "valueChange".
-// types/hell-ui-angular-combobox.d.ts:225:5 - (ae-undocumented) Missing documentation for "openChange".
-// types/hell-ui-angular-combobox.d.ts:232:5 - (ae-undocumented) Missing documentation for "effectiveValue".
-// types/hell-ui-angular-combobox.d.ts:233:5 - (ae-undocumented) Missing documentation for "effectiveDisabled".
-// types/hell-ui-angular-combobox.d.ts:234:5 - (ae-undocumented) Missing documentation for "selectedLabel".
-// types/hell-ui-angular-combobox.d.ts:235:5 - (ae-undocumented) Missing documentation for "filterValue".
-// types/hell-ui-angular-combobox.d.ts:236:5 - (ae-undocumented) Missing documentation for "filteredOptions".
-// types/hell-ui-angular-combobox.d.ts:241:5 - (ae-undocumented) Missing documentation for "onValueChange".
-// types/hell-ui-angular-combobox.d.ts:242:5 - (ae-undocumented) Missing documentation for "onFilterInput".
-// types/hell-ui-angular-combobox.d.ts:243:5 - (ae-undocumented) Missing documentation for "onOpenChange".
-// types/hell-ui-angular-combobox.d.ts:244:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-combobox.d.ts:245:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-combobox.d.ts:246:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-combobox.d.ts:247:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-combobox.d.ts:248:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-combobox.d.ts:249:5 - (ae-undocumented) Missing documentation for "filter".
-// types/hell-ui-angular-combobox.d.ts:255:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_DIRECTIVES".
+// types/hell-ui-angular-combobox.d.ts:51:5 - (ae-undocumented) Missing documentation for "writeValue".
+// types/hell-ui-angular-combobox.d.ts:52:5 - (ae-undocumented) Missing documentation for "registerOnChange".
+// types/hell-ui-angular-combobox.d.ts:53:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
+// types/hell-ui-angular-combobox.d.ts:54:5 - (ae-undocumented) Missing documentation for "setDisabledState".
+// types/hell-ui-angular-combobox.d.ts:55:5 - (ae-undocumented) Missing documentation for "isOutsideControl".
+// types/hell-ui-angular-combobox.d.ts:56:5 - (ae-undocumented) Missing documentation for "markControlTouched".
+// types/hell-ui-angular-combobox.d.ts:58:5 - (ae-undocumented) Missing documentation for "registerDropdown".
+// types/hell-ui-angular-combobox.d.ts:59:5 - (ae-undocumented) Missing documentation for "unregisterDropdown".
+// types/hell-ui-angular-combobox.d.ts:109:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
+// types/hell-ui-angular-combobox.d.ts:110:5 - (ae-undocumented) Missing documentation for "markControlTouched".
+// types/hell-ui-angular-combobox.d.ts:143:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-combobox.d.ts:149:1 - (ae-undocumented) Missing documentation for "HellComboboxEmpty".
+// types/hell-ui-angular-combobox.d.ts:212:352 - (ae-forgotten-export) The symbol "i2" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
+// types/hell-ui-angular-combobox.d.ts:235:5 - (ae-undocumented) Missing documentation for "multiple".
+// types/hell-ui-angular-combobox.d.ts:236:5 - (ae-undocumented) Missing documentation for "allowDeselect".
+// types/hell-ui-angular-combobox.d.ts:237:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-combobox.d.ts:238:5 - (ae-undocumented) Missing documentation for "placeholder".
+// types/hell-ui-angular-combobox.d.ts:239:5 - (ae-undocumented) Missing documentation for "ariaLabel".
+// types/hell-ui-angular-combobox.d.ts:240:5 - (ae-undocumented) Missing documentation for "compareWith".
+// types/hell-ui-angular-combobox.d.ts:243:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-combobox.d.ts:244:5 - (ae-undocumented) Missing documentation for "valueChange".
+// types/hell-ui-angular-combobox.d.ts:245:5 - (ae-undocumented) Missing documentation for "openChange".
+// types/hell-ui-angular-combobox.d.ts:248:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-combobox.d.ts:255:5 - (ae-undocumented) Missing documentation for "effectiveValue".
+// types/hell-ui-angular-combobox.d.ts:256:5 - (ae-undocumented) Missing documentation for "effectiveDisabled".
+// types/hell-ui-angular-combobox.d.ts:257:5 - (ae-undocumented) Missing documentation for "selectedLabel".
+// types/hell-ui-angular-combobox.d.ts:258:5 - (ae-undocumented) Missing documentation for "filterValue".
+// types/hell-ui-angular-combobox.d.ts:266:5 - (ae-undocumented) Missing documentation for "filteredOptions".
+// types/hell-ui-angular-combobox.d.ts:272:5 - (ae-undocumented) Missing documentation for "onValueChange".
+// types/hell-ui-angular-combobox.d.ts:273:5 - (ae-undocumented) Missing documentation for "onFilterInput".
+// types/hell-ui-angular-combobox.d.ts:274:5 - (ae-undocumented) Missing documentation for "onOpenChange".
+// types/hell-ui-angular-combobox.d.ts:275:5 - (ae-undocumented) Missing documentation for "markControlTouched".
+// types/hell-ui-angular-combobox.d.ts:276:5 - (ae-undocumented) Missing documentation for "writeValue".
+// types/hell-ui-angular-combobox.d.ts:277:5 - (ae-undocumented) Missing documentation for "registerOnChange".
+// types/hell-ui-angular-combobox.d.ts:278:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
+// types/hell-ui-angular-combobox.d.ts:279:5 - (ae-undocumented) Missing documentation for "setDisabledState".
+// types/hell-ui-angular-combobox.d.ts:280:5 - (ae-undocumented) Missing documentation for "filter".
+// types/hell-ui-angular-combobox.d.ts:286:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

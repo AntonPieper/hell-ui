@@ -7,6 +7,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The owned-anatomy `hell-combobox` is now an async entity picker: a
+  `source` input accepts the core `HellSearchSource` shape (mutually
+  exclusive with `options`; supplying both throws). Queries dispatch through
+  the shared search lifecycle — `sourceDebounce` (default 120ms) between
+  keystrokes, newer searches abort older ones via the request `AbortSignal`,
+  and stale responses never overwrite fresh results — the same orchestration
+  the omnibar uses, now extracted into one internal module both consume.
+  While a request is in flight the dropdown renders a `loading` Public Part;
+  a rejected source renders an `error` Public Part; copy for both comes from
+  the new combobox Label Contract. Supply `displayWith` so picked values
+  stay labelled while their option is not in the loaded results. Closes #166.
+  Evidence: combobox async-source unit suite, search-orchestrator contract
+  suite, docs "Async source" example.
+
 - Added `hell-menu-options` to the menu entry point: a data-driven checkable
   option list rendering one checkbox menu item per core `HellOption`
   (`{ value, label, disabled? }`) with a controlled `selected` model and
@@ -571,6 +585,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- The combobox joins the Label Contract: the `toggleLabel` and `emptyLabel`
+  string inputs on `hell-combobox` are gone. Built-in copy (toggle button
+  aria-label, empty, loading, and error messages) now comes from
+  `HELL_COMBOBOX_LABELS`; override per injector scope with
+  `provideHellLabels(HELL_COMBOBOX_LABELS, { toggle: …, empty: …, loading: …,
+  error: … })` like every other Hell module. Closes #166. Evidence: combobox
+  labels unit test, migrated docs examples.
 - The pick-value model is one core family: `HellPickSingleValue<T>`
   (`T | null`), `HellPickMultipleValue<T>` (`readonly T[]`), and their union
   `HellPickValue<T>` export from `@hell-ui/angular/core`, and the select and

@@ -72,8 +72,8 @@ _Avoid_: Part Style Map, class override API.
 The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
 
 **Label Contract**
-The injectable text Interface for built-in accessibility labels and status strings. Each Package Entry Point owns its label interface, English defaults, injection token, and `provideHell<Module>Labels` function (built on core's `hellCreateLabels` factory), so consumers replace labels per imported module instead of forking components or accepting hardcoded ARIA text. Core owns no aggregate label bag; a consumer bundle carries only the label strings of the entry points it imports.
-_Avoid_: Central `HellLabels` bag, `provideHellLabels`, cross-entry-point label registries.
+The injectable text Interface for built-in accessibility labels and status strings. Each Package Entry Point owns its label interface, English defaults, and injection token (built on core's `hellCreateLabels` factory); consumers override any subset per injector scope with core's token-scoped `provideHellLabels(token, overrides)` instead of forking components or accepting hardcoded ARIA text. Core owns no aggregate label bag; a consumer bundle carries only the label strings of the entry points it imports.
+_Avoid_: Central `HellLabels` bag, per-module label string inputs, `provideHell<Module>Labels` wrapper functions, cross-entry-point label registries.
 
 **Floating Interaction**
 Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, flyouts, selects, comboboxes, and omnibar child overlays.
@@ -187,7 +187,11 @@ _Avoid_: Experimental table adapter, compatibility table route, grid mode.
 The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts table primitive header cells to Resize Behavior. Initial column sizing, persisted sizing state, and table-engine sizing policy belong to the app or TanStack. The runtime may measure rendered columns and emit primitive resize events, but it must not become a table sizing model. Resize Behavior remains layout-agnostic.
 
 **Omnibar Runtime**
-The query state, open state, search orchestration, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+The query state, open state, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Async searching delegates to the shared Search Orchestration module. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+
+**Search Orchestration**
+The shared async search lifecycle behind search-driven composites (omnibar, combobox): debounced dispatch to core's search service, newer-aborts-older cancellation, stale-result protection, and loading/error state. It lives in one internal module; composites own their chrome and item rendering, not the lifecycle.
+_Avoid_: Per-composite debounce/abort re-implementations.
 
 **Typed Value Input**
 The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.

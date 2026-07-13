@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   hellRankLocalSearch,
+  provideHellLabels,
   provideHellSearchRanker,
   type HellOption,
   type HellSearchRanker,
 } from '@hell-ui/angular/core';
-import { HellCombobox } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_LABELS, HellCombobox } from '@hell-ui/angular/combobox';
 
 const STATIONS: readonly HellOption<string>[] = [
   { value: 'nord-1', label: 'Nordhafen Terminal' },
@@ -37,14 +38,16 @@ const recencyRanker: HellSearchRanker = (items, request) => {
 @Component({
   selector: 'app-combobox-ranked-filtering-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideHellSearchRanker(recencyRanker)],
+  providers: [
+    provideHellSearchRanker(recencyRanker),
+    provideHellLabels(HELL_COMBOBOX_LABELS, { empty: 'No matching station' }),
+  ],
   imports: [HellCombobox],
   template: `
     <hell-combobox
       class="block max-w-72"
       aria-label="Dispatch station"
       placeholder="Type “no”…"
-      emptyLabel="No matching station"
       [options]="stations"
       [value]="value()"
       (valueChange)="value.set($any($event))"

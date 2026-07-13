@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { provideHellSearchRanker, type HellOption, type HellSearchRanker } from '@hell-ui/angular/core';
+import { provideHellLabels, provideHellSearchRanker, type HellOption, type HellSearchRanker, type HellSearchSource } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellComboboxRoot, HellCombobox, HELL_COMBOBOX_DIRECTIVES, type HellComboboxUi } from './combobox';
+import { HellComboboxRoot, HellCombobox, HELL_COMBOBOX_DIRECTIVES, HELL_COMBOBOX_LABELS, type HellComboboxUi } from './combobox';
 import type { HellPickValue } from '@hell-ui/angular/core';
 
 @Component({
@@ -121,16 +121,59 @@ class ComboboxBasicValueHost {
 
 @Component({
   imports: [HellCombobox],
+  providers: [
+    provideHellLabels(HELL_COMBOBOX_LABELS, {
+      toggle: 'Open planet list',
+      empty: 'No planets found',
+    }),
+  ],
+  template: `<hell-combobox aria-label="Choose a planet" [options]="[]" />`,
+})
+class ComboboxBasicLabelsHost {}
+
+@Component({
+  imports: [HellCombobox],
   template: `
     <hell-combobox
-      aria-label="Choose a planet"
-      [options]="[]"
-      [toggleLabel]="'Open planet list'"
-      [emptyLabel]="'No planets found'"
+      aria-label="Search stations"
+      [source]="source"
+      [sourceDebounce]="0"
+      [displayWith]="displayWith"
+      [value]="value()"
+      (valueChange)="value.set($any($event))"
     />
   `,
 })
-class ComboboxBasicLabelsHost {}
+class ComboboxSourceHost {
+  readonly requests: string[] = [];
+  readonly gates: Array<{
+    resolve(options: readonly HellOption<string>[]): void;
+    reject(reason?: unknown): void;
+  }> = [];
+  readonly value = signal<string | null>(null);
+  readonly displayWith = (value: string): string => `#${value}`;
+
+  readonly source: HellSearchSource<HellOption<string>> = (request) => {
+    this.requests.push(request.query);
+    return new Promise<readonly HellOption<string>[]>((resolve, reject) => {
+      this.gates.push({ resolve, reject });
+    });
+  };
+}
+
+@Component({
+  imports: [HellCombobox],
+  template: `
+    <hell-combobox
+      aria-label="Broken"
+      [options]="[{ value: 'a', label: 'A' }]"
+      [source]="source"
+    />
+  `,
+})
+class ComboboxSourceConflictHost {
+  readonly source: HellSearchSource<HellOption<string>> = () => Promise.resolve([]);
+}
 
 @Component({
   imports: [HellCombobox],
@@ -709,6 +752,118 @@ describe('HellCombobox filtering', () => {
     const dropdown = await openAndFilter(fixture, 'no');
 
     expect(optionLabels(dropdown)).toEqual(['Nova Synth', 'Banjo', 'Piano']);
+  });
+});
+
+describe('HellCombobox async source', () => {
+  afterEach(() => {
+    cleanupPortaledTestElements('[hellComboboxDropdown]');
+  });
+
+  async function settle(fixture: {
+    detectChanges: () => void;
+    whenStable: () => Promise<unknown>;
+  }): Promise<void> {
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  it('renders loading, then results, and re-queries as the user types', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxSourceHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    await settle(fixture);
+
+    expect(host.requests).toEqual(['']);
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox input[hellComboboxInput]',
+    );
+    const button = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-combobox button[hellComboboxButton]',
+    );
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+
+    expect(query<HTMLElement>(dropdown, '[data-slot="loading"]').textContent?.trim()).toBe(
+      'Loading options…',
+    );
+
+    host.gates[0]?.resolve([
+      { value: 'nord', label: 'Nordhafen' },
+      { value: 'hann', label: 'Hannover' },
+    ]);
+    await settle(fixture);
+
+    const labels = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]')).map(
+      (option) => option.textContent?.trim(),
+    );
+    expect(labels).toEqual(['#nord', '#hann']);
+    expect(dropdown.querySelector('[data-slot="loading"]')).toBeNull();
+
+    input.value = 'han';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle(fixture);
+
+    expect(host.requests).toEqual(['', 'han']);
+  });
+
+  it('renders the error label when the source rejects', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxSourceHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    await settle(fixture);
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox input[hellComboboxInput]',
+    );
+    const button = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-combobox button[hellComboboxButton]',
+    );
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+
+    host.gates[0]?.reject(new Error('backend down'));
+    await settle(fixture);
+
+    expect(query<HTMLElement>(dropdown, '[data-slot="error"]').textContent?.trim()).toBe(
+      "Couldn't load options",
+    );
+    expect(dropdown.querySelector('[hellComboboxOption]')).toBeNull();
+  });
+
+  it('labels picked values through displayWith while their option is absent', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxSourceHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    await settle(fixture);
+    host.gates[0]?.resolve([]);
+
+    host.value.set('nord');
+    await settle(fixture);
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox input[hellComboboxInput]',
+    );
+    expect(input.value).toBe('#nord');
+  });
+
+  it('rejects options and source together with a clear error', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ComboboxSourceConflictHost],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxSourceConflictHost);
+
+    expect(() => fixture.detectChanges()).toThrowError(/mutually exclusive/);
   });
 });
 

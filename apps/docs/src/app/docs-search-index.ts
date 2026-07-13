@@ -514,6 +514,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'code-editor all-parts part style map hell-code-editor ui HellCodeEditorUi root rounded-hell-xl border-hell-primary bg-hell-surface-elevated shadow-hell-lg min-h-40',
  },
  {
+ title:'Combobox: Async source',
+ path:'/components/combobox',
+ detail:'components/combobox/examples/async-source.example.ts',
+ terms:
+'components/combobox/examples/async-source.example components/combobox hell-combobox HellCombobox HellSearchSource source sourceDebounce async entity picker remote server loading empty error status chrome AbortSignal debounce displayWith HELL_COMBOBOX_LABELS provideHellLabels customers',
+ },
+ {
  title:'Combobox: Basic',
  path:'/components/combobox',
  detail:'components/combobox/examples/basic.example.ts',
@@ -546,7 +553,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/preset.example.ts',
  terms:
-'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
+'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect placeholder aria-label HELL_COMBOBOX_LABELS provideHellLabels convenience warehouse ui data-slot root control input button dropdown option empty',
  },
  {
  title:'Combobox: Styling',
