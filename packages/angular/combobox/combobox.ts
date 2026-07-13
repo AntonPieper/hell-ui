@@ -1,54 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  Directive,
-  ElementRef,
-  Injectable,
-  booleanAttribute,
-  OnDestroy,
-  computed,
-  forwardRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-  type Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, Injectable, booleanAttribute, OnDestroy, computed, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import {
-  hellPartStyler,
-  type HellOption,
-  type HellOptionCompareWith,
-  type HellOptionDisplayWith,
-  type HellRecipe,
-  type HellSize,
-  type HellUi,
-  type HellUiInput,
-} from '@hell-ui/angular/core';
-import {
-  hellContainsFloatingTarget,
-  hellRegisterFloatingHost,
-  HellFloatingScopeRegistry,
-} from '@hell-ui/angular/internal/core';
-import {
-  NgpCombobox,
-  NgpComboboxButton,
-  NgpComboboxDropdown,
-  NgpComboboxInput,
-  NgpComboboxOption,
-  NgpComboboxPortal,
-  injectComboboxState,
-} from 'ng-primitives/combobox';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
+import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
-import {
-  writeComboboxStateDisabled,
-  writeComboboxStateValue,
-} from '@hell-ui/angular/internal/ng-primitives';
+import { writeComboboxStateDisabled, writeComboboxStateValue } from '@hell-ui/angular/internal/ng-primitives';
 
 export type HellComboboxSingleValue<T = unknown> = T | null;
 export type HellComboboxMultipleValue<T = unknown> = readonly T[];
@@ -61,8 +20,8 @@ export type HellComboboxChipsPart = 'root' | 'chip';
 /** Part Style Map accepted by the HellComboboxChips `ui` input. */
 export type HellComboboxChipsUi = HellUi<HellComboboxChipsPart>;
 
-/** Public parts of the HellComboboxBasic module, styleable through its Part Style Map. */
-export type HellComboboxBasicPart =
+/** Public parts of the HellCombobox module, styleable through its Part Style Map. */
+export type HellComboboxPart =
   | 'root'
   | 'control'
   | 'input'
@@ -70,10 +29,10 @@ export type HellComboboxBasicPart =
   | 'dropdown'
   | 'option'
   | 'empty';
-/** Part Style Map accepted by the HellComboboxBasic `ui` input. */
-export type HellComboboxBasicUi = HellUi<HellComboboxBasicPart>;
+/** Part Style Map accepted by the HellCombobox `ui` input. */
+export type HellComboboxUi = HellUi<HellComboboxPart>;
 
-const HELL_COMBOBOX_RECIPE = {
+const HELL_COMBOBOX_ROOT_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
@@ -103,7 +62,7 @@ const HELL_COMBOBOX_CHIPS_RECIPE = {
   chip: 'max-w-full',
 } satisfies HellRecipe<HellComboboxChipsPart>;
 
-const HELL_COMBOBOX_BASIC_RECIPE = {
+const HELL_COMBOBOX_RECIPE = {
   root: '',
   control: '',
   input: '',
@@ -111,10 +70,10 @@ const HELL_COMBOBOX_BASIC_RECIPE = {
   dropdown: '',
   option: '',
   empty: '',
-} satisfies HellRecipe<HellComboboxBasicPart>;
+} satisfies HellRecipe<HellComboboxPart>;
 
 /**
- * Combobox-owned coordination seam between `HellCombobox` and its chips
+ * Combobox-owned coordination seam between `HellComboboxRoot` and its chips
  * presentation. Provided by the combobox host so the chips directive and the
  * input can read the live selection, register a chips presentation, and route
  * removals without those members appearing on the combobox's public API (the
@@ -208,7 +167,7 @@ class HellComboboxSelectionController {
     HellComboboxSelectionController,
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellCombobox),
+      useExisting: forwardRef(() => HellComboboxRoot),
       multi: true,
     },
   ],
@@ -218,7 +177,7 @@ class HellComboboxSelectionController {
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellCombobox<T = unknown> implements ControlValueAccessor {
+export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
   /** Whether Arrow Up/Down wrap between the first and last enabled option. */
@@ -227,7 +186,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_COMBOBOX_RECIPE,
+    recipe: () => HELL_COMBOBOX_ROOT_RECIPE,
   });
 
   private readonly combobox = inject(NgpCombobox);
@@ -418,8 +377,8 @@ export class HellComboboxDropdown implements OnDestroy {
   });
 
   private readonly dropdown = inject(NgpComboboxDropdown);
-  private readonly combobox = inject(HellCombobox, { optional: true });
-  private readonly basicCombobox = inject(HellComboboxBasic, { optional: true });
+  private readonly combobox = inject(HellComboboxRoot, { optional: true });
+  private readonly basicCombobox = inject(HellCombobox, { optional: true });
 
   constructor() {
     hellRegisterFloatingHost();
@@ -611,12 +570,12 @@ export class HellComboboxChips<T = unknown> {
  * component.
  */
 @Component({
-  selector: 'hell-combobox-basic',
+  selector: 'hell-combobox',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellComboboxBasic),
+      useExisting: forwardRef(() => HellCombobox),
       multi: true,
     },
   ],
@@ -625,7 +584,7 @@ export class HellComboboxChips<T = unknown> {
     'data-slot': 'root',
   },
   imports: [
-    HellCombobox,
+    HellComboboxRoot,
     HellComboboxButton,
     HellComboboxDropdown,
     HellComboboxEmpty,
@@ -688,14 +647,14 @@ export class HellComboboxChips<T = unknown> {
     </div>
   `,
 })
-export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
+export class HellCombobox<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellComboboxBasicPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<HellComboboxPart>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellComboboxBasicPart>(this.ui, {
+  protected readonly part = hellPartStyler<HellComboboxPart>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_COMBOBOX_BASIC_RECIPE,
+    recipe: () => HELL_COMBOBOX_RECIPE,
   });
 
   /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
@@ -723,7 +682,7 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     initialValue: null,
   });
   private readonly filterOverride = signal<string | null>(null);
-  private readonly combobox = viewChild(HellCombobox);
+  private readonly combobox = viewChild(HellComboboxRoot);
 
   // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
   // types inferred through internal entry points, shipping unbound `Signal`.
@@ -834,7 +793,7 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
 }
 
 export const HELL_COMBOBOX_DIRECTIVES = [
-  HellCombobox,
+  HellComboboxRoot,
   HellComboboxInput,
   HellComboboxButton,
   HellComboboxDropdown,
@@ -844,4 +803,3 @@ export const HELL_COMBOBOX_DIRECTIVES = [
   HellComboboxChips,
 ] as const;
 
-export const HELL_COMBOBOX_BASIC_DIRECTIVES = [HellComboboxBasic] as const;

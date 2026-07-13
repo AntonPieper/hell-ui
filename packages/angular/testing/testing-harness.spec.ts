@@ -18,32 +18,7 @@ import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HellTimeInput } from '@hell-ui/angular/time-input';
 import { HellToaster, HellToastService } from '@hell-ui/angular/toast';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import {
-  HellButtonHarness,
-  HellDialogDescriptionHarness,
-  HellDialogHarness,
-  HellDialogOverlayHarness,
-  HellDialogTitleHarness,
-  HellDialogTriggerHarness,
-  HellAccordionHarness,
-  HellComboboxHarness,
-  HellDateInputHarness,
-  HellDatePickerHarness,
-  HellDropZoneHarness,
-  HellMenuHarness,
-  HellMenuTriggerHarness,
-  HellOmnibarHarness,
-  HellOmnibarPanelHarness,
-  HellSelectHarness,
-  HellSliderHarness,
-  HellTabsetHarness,
-  HellTableContainerHarness,
-  HellTableRowActionHarness,
-  HellTableRowCheckboxHarness,
-  HellTableRowRadioHarness,
-  HellTimeInputHarness,
-  HellToasterHarness,
-} from './public-api';
+import { HellButtonHarness, HellDialogDescriptionHarness, HellDialogHarness, HellDialogOverlayHarness, HellDialogTitleHarness, HellDialogTriggerHarness, HellAccordionHarness, HellComboboxHarness, HellDateInputHarness, HellDatePickerHarness, HellDropZoneHarness, HellMenuHarness, HellMenuTriggerHarness, HellOmnibarHarness, HellOmnibarPanelHarness, HellSelectHarness, HellSliderHarness, HellTabsetHarness, HellTableContainerHarness, HellTableRowActionHarness, HellTableRowCheckboxHarness, HellTableRowRadioHarness, HellTimeInputHarness, HellToasterHarness } from './public-api';
 
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
@@ -178,7 +153,7 @@ class TableHarnessHost {
 @Component({
   imports: [...HELL_SELECT_DIRECTIVES],
   template: `
-    <button hellSelect type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
+    <button hellSelectTrigger type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
       <span hellSelectValue>Priority</span>
       <div *hellSelectPortal hellSelectDropdown>
         <div hellSelectOption value="low">Low</div>

@@ -11,7 +11,7 @@ const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
   template: `
     <div class="flex max-w-72 flex-col gap-hell-2">
       <button
-        hellSelect
+        hellSelectTrigger
         multiple
         type="button"
         aria-label="Permissions"

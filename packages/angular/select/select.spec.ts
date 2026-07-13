@@ -6,19 +6,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import {
-  HellSelect,
-  HellSelectBasic,
-  HellSelectFormValue,
-  HELL_SELECT_DIRECTIVES,
-  type HellSelectBasicUi,
-} from './select';
+import { HellSelectTrigger, HellSelect, HellSelectFormValue, HELL_SELECT_DIRECTIVES, type HellSelectUi } from './select';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
   template: `
     <button
-      hellSelect
+      hellSelectTrigger
       type="button"
       [formControl]="control"
       (valueChange)="values.push($any($event))"
@@ -41,7 +35,7 @@ class SelectFormHost {
   template: `
     <button
       id="multi-select"
-      hellSelect
+      hellSelectTrigger
       multiple
       type="button"
       [formControl]="control"
@@ -61,10 +55,10 @@ class SelectMultipleFormHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, HellSelectBasic],
+  imports: [ReactiveFormsModule, HellSelect],
   template: `
     <p id="priority-help">Used to route incoming work.</p>
-    <hell-select-basic
+    <hell-select
       aria-label="Priority"
       [aria-describedby]="'priority-help'"
       [options]="options"
@@ -83,11 +77,11 @@ class SelectBasicFormHost {
 }
 
 @Component({
-  imports: [HellSelectBasic],
+  imports: [HellSelect],
   template: `
     <span id="priority-label">Priority</span>
     <p id="priority-description">Used to route incoming work.</p>
-    <hell-select-basic
+    <hell-select
       [aria-labelledby]="'priority-label'"
       [aria-describedby]="'priority-description'"
       [options]="options"
@@ -104,8 +98,8 @@ class SelectBasicLabelledHost {
 }
 
 @Component({
-  imports: [HellSelectBasic],
-  template: `<hell-select-basic [ui]="selectUi" [options]="[{ value: 'low', label: 'Low' }]" />`,
+  imports: [HellSelect],
+  template: `<hell-select [ui]="selectUi" [options]="[{ value: 'low', label: 'Low' }]" />`,
 })
 class SelectBasicUiHost {
   protected readonly selectUi = {
@@ -114,13 +108,13 @@ class SelectBasicUiHost {
     placeholder: 'text-hell-danger',
     dropdown: 'rounded-hell-pill',
     option: 'px-hell-8 bg-hell-primary-soft',
-  } satisfies HellSelectBasicUi;
+  } satisfies HellSelectUi;
 }
 
 @Component({
-  imports: [HellSelectBasic],
+  imports: [HellSelect],
   template: `
-    <hell-select-basic
+    <hell-select
       aria-label="Priority"
       [options]="options"
       [displayWith]="displayWith()"
@@ -139,7 +133,7 @@ class SelectBasicOptionHost {
 @Component({
   imports: [...HELL_SELECT_DIRECTIVES],
   template: `
-    <button hellSelect type="button" ui="rounded-hell-pill bg-hell-primary">
+    <button hellSelectTrigger type="button" ui="rounded-hell-pill bg-hell-primary">
       <span hellSelectValue ui="text-hell-danger">Selection</span>
       <div *hellSelectPortal hellSelectDropdown ui="rounded-hell-pill">
         <div hellSelectOption value="low" [ui]="{ root: 'px-hell-8 bg-hell-primary-soft' }">
@@ -167,7 +161,7 @@ afterAll(() => {
   if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
 });
 
-describe('HellSelect', () => {
+describe('HellSelectTrigger', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -190,7 +184,7 @@ describe('HellSelect', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
 
     host.control.setValue('high');
     await fixture.whenStable();
@@ -228,7 +222,7 @@ describe('HellSelect', () => {
     const fixture = TestBed.createComponent(SelectUiHost);
     fixture.detectChanges();
 
-    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
     const value = query<HTMLElement>(fixture.nativeElement, '[hellSelectValue]');
     const dropdown = await openSelectDropdown(fixture, select);
     const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
@@ -258,7 +252,7 @@ describe('HellSelect', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
     const outside = document.createElement('button');
     outside.dataset['hellSelectTestOutside'] = '';
     document.body.append(outside);
@@ -295,7 +289,7 @@ describe('HellSelect', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
 
     select.focus();
     const dropdown = await openSelectDropdown(fixture, select);
@@ -335,7 +329,7 @@ describe('HellSelect', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
 
     host.control.setValue(['high']);
     await fixture.whenStable();
@@ -355,8 +349,8 @@ describe('HellSelect', () => {
     const fixture = TestBed.createComponent(SelectFormHost);
     fixture.detectChanges();
 
-    const debug = fixture.debugElement.query(By.directive(HellSelect));
-    const select = debug.injector.get(HellSelect<readonly string[]>);
+    const debug = fixture.debugElement.query(By.directive(HellSelectTrigger));
+    const select = debug.injector.get(HellSelectTrigger<readonly string[]>);
     const ngpSelect = debug.injector.get(NgpSelect);
     const arrayValue = ['north', 'south'] as const;
     let emitted: HellSelectFormValue<readonly string[]> | undefined;
@@ -372,10 +366,10 @@ describe('HellSelect', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select');
     const trigger = query<HTMLButtonElement>(
       fixture.nativeElement,
-      'hell-select-basic button[hellSelect]',
+      'hell-select button[hellSelectTrigger]',
     );
 
     expect(preset.getAttribute('data-slot')).toBe('root');
@@ -412,9 +406,9 @@ describe('HellSelect', () => {
     const host = fixture.componentInstance;
     const trigger = query<HTMLButtonElement>(
       fixture.nativeElement,
-      'hell-select-basic button[hellSelect]',
+      'hell-select button[hellSelectTrigger]',
     );
-    const debug = fixture.debugElement.query(By.directive(HellSelect));
+    const debug = fixture.debugElement.query(By.directive(HellSelectTrigger));
     const ngpSelect = debug.injector.get(NgpSelect);
 
     host.control.setValue('low');
@@ -443,7 +437,7 @@ describe('HellSelect', () => {
 
     const host = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
-    const trigger = query<HTMLButtonElement>(root, 'hell-select-basic button[hellSelect]');
+    const trigger = query<HTMLButtonElement>(root, 'hell-select button[hellSelectTrigger]');
 
     expect(trigger.textContent?.trim()).toContain('Select');
     expect(trigger.getAttribute('aria-labelledby')).toBe('priority-label');
@@ -462,8 +456,8 @@ describe('HellSelect', () => {
     const fixture = TestBed.createComponent(SelectBasicUiHost);
     fixture.detectChanges();
 
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
-    const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select');
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelectTrigger]');
     const placeholder = query<HTMLElement>(fixture.nativeElement, '[hellSelectPlaceholder]');
 
     expect(preset.getAttribute('data-slot')).toBe('root');
@@ -492,7 +486,7 @@ describe('HellSelect', () => {
     const host = fixture.componentInstance;
     const trigger = query<HTMLButtonElement>(
       fixture.nativeElement,
-      'hell-select-basic button[hellSelect]',
+      'hell-select button[hellSelectTrigger]',
     );
 
     expect(trigger.textContent?.trim()).toContain('High');

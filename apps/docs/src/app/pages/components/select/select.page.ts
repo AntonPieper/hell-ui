@@ -48,7 +48,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         known list.
       </hd-page-header>
       <p>
-        <code>[hellSelect]</code> is a directive suite built on the <code>NgpSelect</code> primitive
+        <code>[hellSelectTrigger]</code> is a directive suite built on the <code>NgpSelect</code> primitive
         from <code>ng-primitives</code>. You attach it to a native <code>&lt;button&gt;</code>
         trigger, render the selected value or a placeholder inside it, and float a listbox of
         <code>[hellSelectOption]</code> rows in a portal. Because options are plain projected
@@ -61,12 +61,12 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         medium-to-large lists where users know part of the value, use the
         <code>combobox</code> (typeahead filtering). Where OS-native pickers and mobile ergonomics
         matter most, use <code>hellNativeSelect</code> instead. For the common single-field form
-        case, the <code>&lt;hell-select-basic&gt;</code> preset composes the whole suite around a
+        case, the <code>&lt;hell-select&gt;</code> preset composes the whole suite around a
         string option list so you bind one <code>[options]</code> array and go.
       </p>
       <p>
-        The select is Angular-forms compatible: both <code>[hellSelect]</code> and
-        <code>&lt;hell-select-basic&gt;</code> are <code>ControlValueAccessor</code>s, so
+        The select is Angular-forms compatible: both <code>[hellSelectTrigger]</code> and
+        <code>&lt;hell-select&gt;</code> are <code>ControlValueAccessor</code>s, so
         <code>ngModel</code> and reactive form controls bind directly, and dropped inside a
         <code>hellField</code> the trigger inherits the field's label and description for
         accessibility.
@@ -74,7 +74,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Basic</h2>
       <p>
-        The smallest realistic usage: a <code>&lt;button hellSelect&gt;</code> trigger holding a
+        The smallest realistic usage: a <code>&lt;button hellSelectTrigger&gt;</code> trigger holding a
         <code>[hellSelectValue]</code> / <code>[hellSelectPlaceholder]</code> pair, plus a
         <code>*hellSelectPortal</code> wrapping the <code>[hellSelectDropdown]</code> of options.
         Read the selection from <code>valueChange</code>; individual options can be
@@ -108,7 +108,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Preset</h2>
       <p>
-        <code>&lt;hell-select-basic&gt;</code> composes the whole suite for the common single-field
+        <code>&lt;hell-select&gt;</code> composes the whole suite for the common single-field
         case. Bind an <code>[options]</code> array, a <code>[value]</code>, and a
         <code>placeholder</code>; supply a <code>displayWith</code> when options are objects.
         Placed inside a <code>hellField</code> it automatically inherits the field label and
@@ -121,7 +121,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <h2>With field and tag</h2>
       <p>
         A realistic review-decision row: a <code>hellField</code> supplies the label, description,
-        and a submit-time <code>hellFieldError</code>, the <code>&lt;hell-select-basic&gt;</code>
+        and a submit-time <code>hellFieldError</code>, the <code>&lt;hell-select&gt;</code>
         preset owns the choice, and a <code>hellChip</code> next to the label mirrors the decision
         with a matching semantic variant. No manual <code>aria</code> wiring — the field state
         connects label and description to the trigger.
@@ -134,13 +134,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p>
         Every module in this entry point follows the Part Style Map contract. A shorthand
         <code>ui="..."</code> string refines a module's default part; a <code>[ui]</code> map
-        refines parts by name. The single directives — <code>[hellSelect]</code>,
+        refines parts by name. The single directives — <code>[hellSelectTrigger]</code>,
         <code>[hellSelectValue]</code>, <code>[hellSelectPlaceholder]</code>,
         <code>[hellSelectDropdown]</code>, <code>[hellSelectOption]</code> — each expose one
         <code>root</code> part (rendered as <code>data-slot="root"</code>), so their shorthand and
         <code>&#123; root: '...' &#125;</code> map are equivalent. The
-        <code>&lt;hell-select-basic&gt;</code> preset is owned anatomy, so
-        <code>HellSelectBasicUi</code> is a flat multi-part map covering the pieces it renders. All
+        <code>&lt;hell-select&gt;</code> preset is owned anatomy, so
+        <code>HellSelectUi</code> is a flat multi-part map covering the pieces it renders. All
         refinements merge over the recipe through Hell's Tailwind merge, so they win
         deterministically over the defaults they conflict with.
       </p>
@@ -154,7 +154,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         </thead>
         <tbody>
           <tr>
-            <td><code>[hellSelect]</code></td>
+            <td><code>[hellSelectTrigger]</code></td>
             <td><code>root</code></td>
             <td>The button trigger — border, background, height, focus ring, and the chevron affordance.</td>
           </tr>
@@ -179,13 +179,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
             <td>A single option row — padding, radius, and the active / selected / disabled states.</td>
           </tr>
           <tr>
-            <td rowspan="6"><code>&lt;hell-select-basic&gt;</code></td>
+            <td rowspan="6"><code>&lt;hell-select&gt;</code></td>
             <td><code>root</code></td>
             <td>The preset host element wrapping the composed control.</td>
           </tr>
           <tr>
             <td><code>trigger</code></td>
-            <td>The composed <code>[hellSelect]</code> button inside the preset.</td>
+            <td>The composed <code>[hellSelectTrigger]</code> button inside the preset.</td>
           </tr>
           <tr>
             <td><code>value</code></td>
@@ -206,7 +206,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         </tbody>
       </table>
       <p>
-        The example below refines every part of the <code>&lt;hell-select-basic&gt;</code> map —
+        The example below refines every part of the <code>&lt;hell-select&gt;</code> map —
         <code>root</code>, <code>trigger</code>, <code>value</code>, <code>placeholder</code>,
         <code>dropdown</code>, and <code>option</code> — using Hell design tokens. Open it to see
         the styled panel and options.
@@ -216,7 +216,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </hd-example-tabs>
 
       <h2>API</h2>
-      <p><code>[hellSelect]</code> — trigger host and state container. Attach to a <code>&lt;button&gt;</code>.</p>
+      <p><code>[hellSelectTrigger]</code> — trigger host and state container. Attach to a <code>&lt;button&gt;</code>.</p>
       <ul>
         <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode. Default <code>null</code>.</li>
         <li><code>multiple</code>: <code>boolean</code>. Accumulates selections into an array and keeps the list open. Default <code>false</code>.</li>
@@ -244,7 +244,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <code>invalid</code>, and <code>ui: HellUiInput&lt;'root'&gt;</code>. Reach for it when OS
         pickers and mobile ergonomics matter more than custom rendering.
       </p>
-      <p><code>&lt;hell-select-basic&gt;</code> — the preset composing all of the above.</p>
+      <p><code>&lt;hell-select&gt;</code> — the preset composing all of the above.</p>
       <ul>
         <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
         <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
@@ -255,14 +255,14 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
         <li><code>aria-label</code> / <code>aria-labelledby</code> / <code>aria-describedby</code>: forwarded to the trigger; inside a <code>hellField</code> these are inherited automatically.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellSelectBasicPart&gt;</code> — a <code>HellSelectBasicUi</code> map over <code>root | trigger | value | placeholder | dropdown | option</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellSelectPart&gt;</code> — a <code>HellSelectUi</code> map over <code>root | trigger | value | placeholder | dropdown | option</code>.</li>
       </ul>
       <p>Exported types (from source):</p>
       <ul>
         <li>Values: <code>HellSelectSingleValue&lt;T&gt;</code> (<code>T | null</code>), <code>HellSelectMultipleValue&lt;T&gt;</code> (<code>readonly T[]</code>), <code>HellSelectFormValue&lt;T&gt;</code> (their union).</li>
         <li>Option contract (from <code>@hell-ui/angular/core</code>): <code>HellOption&lt;T&gt;</code>, <code>HellOptionDisplayWith&lt;T&gt;</code>, <code>HellOptionCompareWith&lt;T&gt;</code>.</li>
-        <li>Parts / maps: <code>HellSelectBasicPart</code> &amp; <code>HellSelectBasicUi</code>; each composable directive exposes a single <code>root</code> part (<code>ui: HellUiInput&lt;'root'&gt;</code>).</li>
-        <li>Directive bundles: <code>HELL_SELECT_DIRECTIVES</code> (the composable suite), <code>HELL_SELECT_BASIC_DIRECTIVES</code> (the preset).</li>
+        <li>Parts / maps: <code>HellSelectPart</code> &amp; <code>HellSelectUi</code>; each composable directive exposes a single <code>root</code> part (<code>ui: HellUiInput&lt;'root'&gt;</code>).</li>
+        <li>Directive bundles: <code>HELL_SELECT_DIRECTIVES</code> (the composable suite), <code>HellSelect</code> (the preset).</li>
       </ul>
 
       <h2>Accessibility</h2>

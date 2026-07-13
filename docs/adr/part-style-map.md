@@ -62,6 +62,12 @@ public child directive exposes its own narrow `[ui]` contract. Owned-anatomy
 components such as Dialpad may expose multiple Public Parts from the root
 because those parts are rendered by the root component itself.
 
+The selector convention makes DOM ownership legible: attribute selectors are
+headless behavior suites on consumer-owned elements, element selectors are
+owned-anatomy components with named Public Parts (e.g. `hell-select` owns its
+trigger/value/dropdown anatomy while `[hellSelectTrigger]` styles a consumer's
+button).
+
 Single-host public directives use `root` as their sole Public Part. Semantic
 identity belongs to the directive name, while the local part remains `root`.
 Semantic part names such as `item`, `option`, or `header` belong inside

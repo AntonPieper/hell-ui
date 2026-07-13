@@ -29,6 +29,10 @@ Entrypoint-owned metadata describing a Package Entry Point's architectural role,
 **Component Contract**
 The shared Interface expected from public Hell modules: behavior directives, stable public parts for owned structure, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual values, and a Part Style Map for visual customization.
 
+**Selector Convention**
+Attribute selectors mark headless behavior suites: the consumer owns the element and its DOM (`[hellSelectTrigger]`, `[hellCombobox]`, `[hellMenu]`). Element selectors mark owned-anatomy components: the library owns the DOM and exposes named Public Parts (`hell-select`, `hell-combobox`, `hell-toolbar`). The selector itself documents who owns the markup.
+_Avoid_: "Basic" suffixes, wrapper component, preset (as a public name).
+
 **Style Opt-Out**
 The legacy all-or-nothing contract that lets consumers keep a Hell module's behavior and accessibility while removing its default host styling.
 _Avoid_: Future customization surface, part style map.

@@ -9,7 +9,7 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
   imports: [...HELL_SELECT_DIRECTIVES],
   template: `
     <button
-      hellSelect
+      hellSelectTrigger
       type="button"
       aria-label="Priority"
       class="max-w-60"

@@ -1,9 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import type { HellOption } from '@hell-ui/angular/core';
-import {
-  HELL_SELECT_BASIC_DIRECTIVES,
-  type HellSelectBasicUi,
-} from '@hell-ui/angular/select';
+import { HellSelect, type HellSelectUi } from '@hell-ui/angular/select';
 
 const ENVIRONMENTS: readonly HellOption<string>[] = [
   { value: 'production', label: 'Production' },
@@ -15,10 +12,10 @@ const ENVIRONMENTS: readonly HellOption<string>[] = [
 @Component({
   selector: 'app-select-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_BASIC_DIRECTIVES],
+  imports: [HellSelect],
   template: `
-    <!-- HellSelectBasicPart: root | trigger | value | placeholder | dropdown | option -->
-    <hell-select-basic
+    <!-- HellSelectPart: root | trigger | value | placeholder | dropdown | option -->
+    <hell-select
       class="max-w-72"
       aria-label="Target environment"
       placeholder="Choose environment"
@@ -33,7 +30,7 @@ export class SelectStylingExample {
   protected readonly environments = ENVIRONMENTS;
   protected readonly value = signal<string | null>(null);
 
-  protected readonly ui: HellSelectBasicUi = {
+  protected readonly ui: HellSelectUi = {
     root: 'rounded-hell-lg bg-hell-surface-subtle p-hell-1',
     trigger: 'rounded-hell-md border-hell-primary bg-hell-surface-elevated font-mono',
     value: 'font-semibold text-hell-primary',

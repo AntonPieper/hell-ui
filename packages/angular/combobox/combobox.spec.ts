@@ -6,13 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import {
-  HellCombobox,
-  HellComboboxBasic,
-  HellComboboxValue,
-  HELL_COMBOBOX_DIRECTIVES,
-  type HellComboboxBasicUi,
-} from './combobox';
+import { HellComboboxRoot, HellCombobox, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES, type HellComboboxUi } from './combobox';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -89,9 +83,9 @@ class ComboboxChipsHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, HellComboboxBasic],
+  imports: [ReactiveFormsModule, HellCombobox],
   template: `
-    <hell-combobox-basic
+    <hell-combobox
       aria-label="Choose a planet"
       [options]="options"
       [formControl]="control"
@@ -109,8 +103,8 @@ class ComboboxBasicFormHost {
 }
 
 @Component({
-  imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic
+  imports: [HellCombobox],
+  template: `<hell-combobox
     aria-label="Choose a planet"
     [options]="options"
     [value]="value()"
@@ -125,9 +119,9 @@ class ComboboxBasicValueHost {
 }
 
 @Component({
-  imports: [HellComboboxBasic],
+  imports: [HellCombobox],
   template: `
-    <hell-combobox-basic
+    <hell-combobox
       aria-label="Choose a planet"
       [options]="[]"
       [toggleLabel]="'Open planet list'"
@@ -138,8 +132,8 @@ class ComboboxBasicValueHost {
 class ComboboxBasicLabelsHost {}
 
 @Component({
-  imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic [ui]="comboboxUi" [options]="[{ value: 'atlas', label: 'Atlas' }]" />`,
+  imports: [HellCombobox],
+  template: `<hell-combobox [ui]="comboboxUi" [options]="[{ value: 'atlas', label: 'Atlas' }]" />`,
 })
 class ComboboxBasicUiHost {
   protected readonly comboboxUi = {
@@ -149,7 +143,7 @@ class ComboboxBasicUiHost {
     button: 'text-hell-success-strong',
     dropdown: 'rounded-hell-pill',
     option: 'px-hell-8 bg-hell-primary-soft',
-  } satisfies HellComboboxBasicUi;
+  } satisfies HellComboboxUi;
 }
 
 @Component({
@@ -184,7 +178,7 @@ afterAll(() => {
   if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
 });
 
-describe('HellCombobox', () => {
+describe('HellComboboxRoot', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -360,7 +354,7 @@ describe('HellCombobox', () => {
 
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
 
     expect(input.getAttribute('role')).toBe('combobox');
@@ -388,11 +382,11 @@ describe('HellCombobox', () => {
 
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
     const button = query<HTMLButtonElement>(
       fixture.nativeElement,
-      'hell-combobox-basic button[hellComboboxButton]',
+      'hell-combobox button[hellComboboxButton]',
     );
 
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
@@ -459,8 +453,8 @@ describe('HellCombobox', () => {
     const fixture = TestBed.createComponent(ComboboxFormHost);
     fixture.detectChanges();
 
-    const debug = fixture.debugElement.query(By.directive(HellCombobox));
-    const combobox = debug.injector.get(HellCombobox<readonly string[]>);
+    const debug = fixture.debugElement.query(By.directive(HellComboboxRoot));
+    const combobox = debug.injector.get(HellComboboxRoot<readonly string[]>);
     const ngpCombobox = debug.injector.get(NgpCombobox);
     const arrayValue = ['north', 'south'] as const;
     let emitted: HellComboboxValue<readonly string[]> | undefined;
@@ -476,11 +470,11 @@ describe('HellCombobox', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic [hellCombobox]');
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox');
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox [hellCombobox]');
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
 
     expect(preset.getAttribute('data-slot')).toBe('root');
@@ -512,10 +506,10 @@ describe('HellCombobox', () => {
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic [hellCombobox]');
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox [hellCombobox]');
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
 
     host.control.setValue(null);
@@ -546,7 +540,7 @@ describe('HellCombobox', () => {
 
     const defaultButton = query<HTMLButtonElement>(
       defaultFixture.nativeElement,
-      'hell-combobox-basic button[hellComboboxButton]',
+      'hell-combobox button[hellComboboxButton]',
     );
     expect(defaultButton.textContent?.trim()).toBe('');
     expect(defaultButton.getAttribute('aria-label')).toBe('Toggle options');
@@ -556,11 +550,11 @@ describe('HellCombobox', () => {
 
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
     const button = query<HTMLButtonElement>(
       fixture.nativeElement,
-      'hell-combobox-basic button[hellComboboxButton]',
+      'hell-combobox button[hellComboboxButton]',
     );
 
     expect(button.textContent?.trim()).toBe('');
@@ -581,7 +575,7 @@ describe('HellCombobox', () => {
     const host = fixture.componentInstance;
     const input = query<HTMLInputElement>(
       fixture.nativeElement,
-      'hell-combobox-basic input[hellComboboxInput]',
+      'hell-combobox input[hellComboboxInput]',
     );
 
     expect(input.value).toBe('Atlas');
@@ -597,7 +591,7 @@ describe('HellCombobox', () => {
     const fixture = TestBed.createComponent(ComboboxBasicUiHost);
     fixture.detectChanges();
 
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox');
     const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
     const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');

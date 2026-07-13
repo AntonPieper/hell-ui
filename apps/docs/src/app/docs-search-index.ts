@@ -490,7 +490,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/code-editor',
  detail:'components/code-editor/examples/config-editor.example.ts',
  terms:
-'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select-basic HELL_CARD_DIRECTIVES HELL_SELECT_BASIC_DIRECTIVES hellButton language picker dirty reset apply ui root',
+'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select HELL_CARD_DIRECTIVES HellSelect hellButton language picker dirty reset apply ui root',
  },
  {
  title:'Code Editor: Supplying a language',
@@ -539,14 +539,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/preset.example.ts',
  terms:
-'components/combobox/examples/preset.example components/combobox hell-combobox-basic HellComboboxBasic HELL_COMBOBOX_BASIC_DIRECTIVES options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
+'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
  },
  {
  title:'Combobox: Styling',
  path:'/components/combobox',
  detail:'components/combobox/examples/styling.example.ts',
  terms:
-'components/combobox/examples/styling.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi HELL_COMBOBOX_BASIC_DIRECTIVES ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
+'components/combobox/examples/styling.example components/combobox hell-combobox HellCombobox HellComboboxUi HellCombobox ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
  },
  {
  title:'Combobox: With field and tag',
@@ -1463,42 +1463,42 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/select',
  detail:'components/select/examples/basic.example.ts',
  terms:
-'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
+'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
  },
  {
  title:'Select: Multiple',
  path:'/components/select',
  detail:'components/select/examples/multiple.example.ts',
  terms:
-'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
+'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
  },
  {
  title:'Select: Preset',
  path:'/components/select',
  detail:'components/select/examples/preset.example.ts',
  terms:
-'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
+'hell-select HellSelect hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
  },
  {
  title:'Select: Rich options',
  path:'/components/select',
  detail:'components/select/examples/rich-options.example.ts',
  terms:
-'rich-options hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
+'rich-options hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
  },
  {
  title:'Select: Styling',
  path:'/components/select',
  detail:'components/select/examples/styling.example.ts',
  terms:
-'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES HellSelectBasicUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
+'hell-select HellSelect HellSelectUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
  },
  {
  title:'Select: With field and tag',
  path:'/components/select',
  detail:'components/select/examples/with-field-status.example.ts',
  terms:
-'with-field-status hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton composite form review decision status submit error',
+'with-field-status hell-select HellSelect hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton composite form review decision status submit error',
  },
  {
  title:'Separator: All Parts Styling',
@@ -2154,9 +2154,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Select portal pattern',
  path:'/components/select',
- detail:'hellSelect with hellSelectPortal and hellSelectDropdown',
+ detail:'hellSelectTrigger with hellSelectPortal and hellSelectDropdown',
  terms:
-'HELL_SELECT_DIRECTIVES hellSelect hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption valueChange',
+'HELL_SELECT_DIRECTIVES hellSelectTrigger hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption valueChange',
  },
  {
  title:'Tabs anatomy',

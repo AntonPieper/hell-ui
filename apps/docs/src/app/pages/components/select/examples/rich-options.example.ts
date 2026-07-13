@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidCircleCheck,
-  faSolidCircleHalfStroke,
-  faSolidCircleXmark,
-} from '@ng-icons/font-awesome/solid';
+import { faSolidCircleCheck, faSolidCircleHalfStroke, faSolidCircleXmark } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 
@@ -53,7 +49,7 @@ const RICH_OPTION_ICONS = {
   providers: [provideIcons(RICH_OPTION_ICONS)],
   template: `
     <button
-      hellSelect
+      hellSelectTrigger
       type="button"
       aria-label="Service status"
       class="max-w-72"

@@ -16,41 +16,10 @@ import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
 // @public (undocumented)
-export const HELL_COMBOBOX_BASIC_DIRECTIVES: readonly [typeof HellComboboxBasic];
-
-// @public (undocumented)
-export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellCombobox, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty, typeof HellComboboxChips];
+export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellComboboxRoot, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty, typeof HellComboboxChips];
 
 // @public
 export class HellCombobox<T = unknown> implements ControlValueAccessor {
-    constructor();
-    // (undocumented)
-    isOutsideControl(next: EventTarget | Node | null): boolean;
-    // (undocumented)
-    markControlTouched(event: FocusEvent): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
-    registerDropdown(dropdown: HTMLElement): void;
-    // (undocumented)
-    registerOnChange(fn: (value: HellComboboxValue<T>) => void): void;
-    // (undocumented)
-    registerOnTouched(fn: () => void): void;
-    // (undocumented)
-    setDisabledState(isDisabled: boolean): void;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
-    unregisterDropdown(dropdown: HTMLElement): void;
-    readonly wrapNavigation: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    writeValue(value: HellComboboxValue<T>): void;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellCombobox<any>, "[hellCombobox]", ["hellCombobox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "wrapNavigation": { "alias": "wrapNavigation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpCombobox; inputs: { "ngpComboboxValue": "value"; "ngpComboboxMultiple": "multiple"; "ngpComboboxDisabled": "disabled"; "ngpComboboxAllowDeselect": "allowDeselect"; "ngpComboboxCompareWith": "compareWith"; "ngpComboboxDropdownPlacement": "placement"; "ngpComboboxDropdownContainer": "container"; "ngpComboboxDropdownFlip": "flip"; "ngpComboboxOptions": "options"; }; outputs: { "ngpComboboxValueChange": "valueChange"; "ngpComboboxOpenChange": "openChange"; }; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellCombobox<any>, never>;
-}
-
-// @public
-export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     // (undocumented)
     readonly allowDeselect: _angular_core.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
@@ -90,7 +59,8 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     protected optionLabel(option: HellOption<T>): string;
     // Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly options: _angular_core.InputSignal<readonly HellOption<T>[]>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellComboboxBasicPart>;
+    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellComboboxPart>;
     // (undocumented)
     readonly placeholder: _angular_core.InputSignal<string>;
     // (undocumented)
@@ -103,24 +73,17 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     setDisabledState(isDisabled: boolean): void;
     // (undocumented)
     readonly toggleLabel: _angular_core.InputSignal<string>;
-    readonly ui: _angular_core.InputSignal<HellUiInput<HellComboboxBasicPart>>;
+    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellComboboxPart>>;
     // (undocumented)
     readonly value: _angular_core.InputSignal<HellComboboxValue<T>>;
     // (undocumented)
     readonly valueChange: _angular_core.OutputEmitterRef<HellComboboxValue<T>>;
     // (undocumented)
     writeValue(value: HellComboboxValue<T>): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellComboboxBasic<any>, "hell-combobox-basic", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "multiple": { "alias": "multiple"; "required": false; "isSignal": true; }; "allowDeselect": { "alias": "allowDeselect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "toggleLabel": { "alias": "toggleLabel"; "required": false; "isSignal": true; }; "emptyLabel": { "alias": "emptyLabel"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; "openChange": "openChange"; }, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellComboboxBasic<any>, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCombobox<any>, "hell-combobox", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "multiple": { "alias": "multiple"; "required": false; "isSignal": true; }; "allowDeselect": { "alias": "allowDeselect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "toggleLabel": { "alias": "toggleLabel"; "required": false; "isSignal": true; }; "emptyLabel": { "alias": "emptyLabel"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; "openChange": "openChange"; }, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellCombobox<any>, never>;
 }
-
-// @public
-export type HellComboboxBasicPart = 'root' | 'control' | 'input' | 'button' | 'dropdown' | 'option' | 'empty';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-//
-// @public
-export type HellComboboxBasicUi = HellUi<HellComboboxBasicPart>;
 
 // @public
 export class HellComboboxButton {
@@ -151,6 +114,8 @@ export class HellComboboxChips<T = unknown> {
 // @public
 export type HellComboboxChipsPart = 'root' | 'chip';
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
+//
 // @public
 export type HellComboboxChipsUi = HellUi<HellComboboxChipsPart>;
 
@@ -198,13 +163,45 @@ export class HellComboboxOption {
 }
 
 // @public
+export type HellComboboxPart = 'root' | 'control' | 'input' | 'button' | 'dropdown' | 'option' | 'empty';
+
+// @public
 export class HellComboboxPortal {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellComboboxPortal, "[hellComboboxPortal]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpComboboxPortal; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellComboboxPortal, never>;
 }
 
+// @public
+export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
+    constructor();
+    // (undocumented)
+    isOutsideControl(next: EventTarget | Node | null): boolean;
+    // (undocumented)
+    markControlTouched(event: FocusEvent): void;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    // (undocumented)
+    registerDropdown(dropdown: HTMLElement): void;
+    // (undocumented)
+    registerOnChange(fn: (value: HellComboboxValue<T>) => void): void;
+    // (undocumented)
+    registerOnTouched(fn: () => void): void;
+    // (undocumented)
+    setDisabledState(isDisabled: boolean): void;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    // (undocumented)
+    unregisterDropdown(dropdown: HTMLElement): void;
+    readonly wrapNavigation: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    // (undocumented)
+    writeValue(value: HellComboboxValue<T>): void;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellComboboxRoot<any>, "[hellCombobox]", ["hellCombobox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "wrapNavigation": { "alias": "wrapNavigation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpCombobox; inputs: { "ngpComboboxValue": "value"; "ngpComboboxMultiple": "multiple"; "ngpComboboxDisabled": "disabled"; "ngpComboboxAllowDeselect": "allowDeselect"; "ngpComboboxCompareWith": "compareWith"; "ngpComboboxDropdownPlacement": "placement"; "ngpComboboxDropdownContainer": "container"; "ngpComboboxDropdownFlip": "flip"; "ngpComboboxOptions": "options"; }; outputs: { "ngpComboboxValueChange": "valueChange"; "ngpComboboxOpenChange": "openChange"; }; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellComboboxRoot<any>, never>;
+}
+
 // @public (undocumented)
 export type HellComboboxSingleValue<T = unknown> = T | null;
+
+// @public
+export type HellComboboxUi = HellUi<HellComboboxPart>;
 
 // @public (undocumented)
 export type HellComboboxValue<T = unknown> = HellComboboxSingleValue<T> | HellComboboxMultipleValue<T>;
@@ -253,7 +250,6 @@ export type HellComboboxValue<T = unknown> = HellComboboxSingleValue<T> | HellCo
 // types/hell-ui-angular-combobox.d.ts:256:5 - (ae-undocumented) Missing documentation for "setDisabledState".
 // types/hell-ui-angular-combobox.d.ts:257:5 - (ae-undocumented) Missing documentation for "filter".
 // types/hell-ui-angular-combobox.d.ts:266:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_DIRECTIVES".
-// types/hell-ui-angular-combobox.d.ts:267:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_BASIC_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

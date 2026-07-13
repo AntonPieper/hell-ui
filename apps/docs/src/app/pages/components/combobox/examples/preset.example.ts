@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import type { HellOption } from '@hell-ui/angular/core';
-import { HELL_COMBOBOX_BASIC_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HellCombobox } from '@hell-ui/angular/combobox';
 
 
 const WAREHOUSES: readonly HellOption<string>[] = [
@@ -15,9 +15,9 @@ const WAREHOUSES: readonly HellOption<string>[] = [
 @Component({
   selector: 'app-combobox-preset-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_BASIC_DIRECTIVES],
+  imports: [HellCombobox],
   template: `
-    <hell-combobox-basic
+    <hell-combobox
       class="block max-w-72"
       aria-label="Origin warehouse"
       placeholder="Select warehouse…"

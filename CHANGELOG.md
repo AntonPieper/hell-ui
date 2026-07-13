@@ -531,6 +531,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Adopted the selector convention (attribute selector = headless behavior
+  suite on a consumer-owned element; element selector = owned-anatomy
+  component) and removed the "Basic" names. `hell-select-basic` is now
+  `hell-select` (class `HellSelect`) and `hell-combobox-basic` is
+  `hell-combobox` (class `HellCombobox`). To free those names, the headless
+  select trigger renamed from `[hellSelect]`/`HellSelect` to
+  `[hellSelectTrigger]`/`HellSelectTrigger` (matching the menu/popover/listbox
+  trigger family), and the headless combobox container class renamed from
+  `HellCombobox` to `HellComboboxRoot` (its `[hellCombobox]` attribute selector
+  is unchanged). Part types renamed `HellSelectBasicPart/Ui` →
+  `HellSelectPart/Ui` and `HellComboboxBasicPart/Ui` → `HellComboboxPart/Ui`;
+  the `HELL_SELECT_BASIC_DIRECTIVES`/`HELL_COMBOBOX_BASIC_DIRECTIVES` arrays
+  are gone — import the components directly. The convention is recorded in
+  CONTEXT.md and the Part Style Map ADR. Closes #158 (spec #147). Evidence:
+  select/combobox unit suites, migrated docs, themes, and harnesses.
 - The typed-value adapter parse-result contract is now one public core seam:
   `hellTypedValue`, `hellInvalidTypedValue`, `HellTypedValueParseResult`,
   `HellTypedValueValidParse`, and `HellTypedValueInvalidParse` export from

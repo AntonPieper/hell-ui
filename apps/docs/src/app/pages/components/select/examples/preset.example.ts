@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import type { HellOption } from '@hell-ui/angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/select';
+import { HellSelect } from '@hell-ui/angular/select';
 
 const REGIONS: readonly HellOption<string>[] = [
   { value: 'eu-central-1', label: 'EU (Frankfurt)' },
@@ -13,11 +13,11 @@ const REGIONS: readonly HellOption<string>[] = [
 @Component({
   selector: 'app-select-preset-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_BASIC_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellSelect, ...HELL_FIELD_DIRECTIVES],
   template: `
     <div hellField class="max-w-72">
       <label hellFieldLabel for="deploy-region">Deployment region</label>
-      <hell-select-basic
+      <hell-select
         id="deploy-region"
         placeholder="Pick a region"
         [options]="regions"

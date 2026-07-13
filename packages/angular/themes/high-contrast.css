@@ -16,7 +16,7 @@
       [hellSelectDropdown],
       [data-hell-flyout],
       button[hellButton],
-      [hellSelect],
+      [hellSelectTrigger],
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],
@@ -37,7 +37,7 @@
   [data-hell-skin="high-contrast"]
     :is(
       button[hellButton],
-      [hellSelect],
+      [hellSelectTrigger],
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],

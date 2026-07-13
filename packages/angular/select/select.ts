@@ -1,56 +1,14 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  Directive,
-  ElementRef,
-  booleanAttribute,
-  OnDestroy,
-  computed,
-  forwardRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-  type Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, booleanAttribute, OnDestroy, computed, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import {
-  hellPartStyler,
-  type HellOption,
-  type HellOptionCompareWith,
-  type HellOptionDisplayWith,
-  type HellRecipe,
-  type HellSize,
-  type HellUi,
-  type HellUiInput,
-} from '@hell-ui/angular/core';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
-import {
-  hellContainsFloatingTarget,
-  hellRegisterFloatingHost,
-  HellFloatingScopeRegistry,
-} from '@hell-ui/angular/internal/core';
-import {
-  hellSyncFormFieldDescriptions,
-  hellSyncFormFieldLabels,
-} from '@hell-ui/angular/internal/core';
-import {
-  NgpSelect,
-  NgpSelectDropdown,
-  NgpSelectOption,
-  NgpSelectPortal,
-  injectSelectState,
-} from 'ng-primitives/select';
+import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
+import { hellSyncFormFieldDescriptions, hellSyncFormFieldLabels } from '@hell-ui/angular/internal/core';
+import { NgpSelect, NgpSelectDropdown, NgpSelectOption, NgpSelectPortal, injectSelectState } from 'ng-primitives/select';
 import { NgpInput } from 'ng-primitives/input';
-import {
-  injectFormFieldState,
-  ngpFormField,
-  provideFormFieldState,
-} from 'ng-primitives/form-field';
+import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
 export type HellSelectMultipleValue<T = unknown> = readonly T[];
@@ -58,18 +16,18 @@ export type HellSelectFormValue<T = unknown> =
   | HellSelectSingleValue<T>
   | HellSelectMultipleValue<T>;
 
-/** Public parts of the HellSelectBasic module, styleable through its Part Style Map. */
-export type HellSelectBasicPart =
+/** Public parts of the HellSelect module, styleable through its Part Style Map. */
+export type HellSelectPart =
   | 'root'
   | 'trigger'
   | 'value'
   | 'placeholder'
   | 'dropdown'
   | 'option';
-/** Part Style Map accepted by the HellSelectBasic `ui` input. */
-export type HellSelectBasicUi = HellUi<HellSelectBasicPart>;
+/** Part Style Map accepted by the HellSelect `ui` input. */
+export type HellSelectUi = HellUi<HellSelectPart>;
 
-const HELL_SELECT_RECIPE = {
+const HELL_SELECT_TRIGGER_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-pointer items-center gap-hell-3 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-hell-3 text-start font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
@@ -87,22 +45,22 @@ const HELL_SELECT_DROPDOWN_RECIPE = {
 
 const HELL_SELECT_OPTION_RECIPE = hellOptionSurfaceRecipe();
 
-const HELL_SELECT_BASIC_RECIPE = {
+const HELL_SELECT_RECIPE = {
   root: '',
   trigger: '',
   value: '',
   placeholder: '',
   dropdown: '',
   option: '',
-} satisfies HellRecipe<HellSelectBasicPart>;
+} satisfies HellRecipe<HellSelectPart>;
 
-/** Rich, headless select. Trigger element is the host of `[hellSelect]`;
+/** Rich, headless select. Trigger element is the host of `[hellSelectTrigger]`;
  *  use ng-content to render the selected value (or a placeholder), pair
  *  with `[hellSelectDropdown]` inside a `*hellSelectPortal`, and emit
  *  `valueChange` to react to selection. For native `<select>` controls,
  *  use `[hellNativeSelect]` instead. */
 @Directive({
-  selector: '[hellSelect]',
+  selector: '[hellSelectTrigger]',
   hostDirectives: [
     {
       directive: NgpSelect,
@@ -122,7 +80,7 @@ const HELL_SELECT_BASIC_RECIPE = {
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSelect),
+      useExisting: forwardRef(() => HellSelectTrigger),
       multi: true,
     },
   ],
@@ -132,14 +90,14 @@ const HELL_SELECT_BASIC_RECIPE = {
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellSelect<T = unknown> implements ControlValueAccessor {
+export class HellSelectTrigger<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_SELECT_RECIPE,
+    recipe: () => HELL_SELECT_TRIGGER_RECIPE,
   });
 
   private readonly select = inject(NgpSelect);
@@ -284,8 +242,8 @@ export class HellSelectDropdown implements OnDestroy {
   });
 
   private readonly dropdownElement = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly select = inject(HellSelect, { optional: true });
-  private readonly basicSelect = inject(HellSelectBasic, { optional: true });
+  private readonly select = inject(HellSelectTrigger, { optional: true });
+  private readonly basicSelect = inject(HellSelect, { optional: true });
 
   constructor() {
     hellRegisterFloatingHost();
@@ -346,13 +304,13 @@ export class HellSelectOption {
 }
 
 @Component({
-  selector: 'hell-select-basic',
+  selector: 'hell-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [provideFormFieldState()],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSelectBasic),
+      useExisting: forwardRef(() => HellSelect),
       multi: true,
     },
   ],
@@ -361,7 +319,7 @@ export class HellSelectOption {
     'data-slot': 'root',
   },
   imports: [
-    HellSelect,
+    HellSelectTrigger,
     HellSelectDropdown,
     HellSelectOption,
     HellSelectPortal,
@@ -370,7 +328,7 @@ export class HellSelectOption {
   ],
   template: `
     <button
-      hellSelect
+      hellSelectTrigger
       type="button"
       [value]="effectiveValue()"
       [multiple]="multiple()"
@@ -414,14 +372,14 @@ export class HellSelectOption {
     </button>
   `,
 })
-export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
+export class HellSelect<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectBasicPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<HellSelectPart>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectBasicPart>(this.ui, {
+  protected readonly part = hellPartStyler<HellSelectPart>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_SELECT_BASIC_RECIPE,
+    recipe: () => HELL_SELECT_RECIPE,
   });
 
   /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
@@ -441,7 +399,7 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly innerSelect = viewChild(HellSelect);
+  private readonly innerSelect = viewChild(HellSelectTrigger);
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
@@ -581,7 +539,7 @@ export class HellNativeSelect {
 }
 
 export const HELL_SELECT_DIRECTIVES = [
-  HellSelect,
+  HellSelectTrigger,
   HellSelectValue,
   HellSelectPlaceholder,
   HellSelectDropdown,
@@ -589,4 +547,3 @@ export const HELL_SELECT_DIRECTIVES = [
   HellSelectOption,
 ] as const;
 
-export const HELL_SELECT_BASIC_DIRECTIVES = [HellSelectBasic] as const;
