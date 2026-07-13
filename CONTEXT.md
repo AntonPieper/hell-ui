@@ -191,3 +191,7 @@ The query state, open state, search orchestration, projected item registry, keyb
 
 **Typed Value Input**
 The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.
+
+**Pick Value**
+The value shape shared by Hell's option-driven pickers: `T | null` in single mode, `readonly T[]` in multiple mode, and their union, exported once from core as `HellPickSingleValue`, `HellPickMultipleValue`, and `HellPickValue`. Pickers such as select and combobox retype onto this family instead of exporting per-module value types.
+_Avoid_: Per-module value twins, `HellSelectFormValue`, `HellComboboxValue`.

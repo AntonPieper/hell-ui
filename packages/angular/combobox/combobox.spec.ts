@@ -6,7 +6,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellComboboxRoot, HellCombobox, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES, type HellComboboxUi } from './combobox';
+import { HellComboboxRoot, HellCombobox, HELL_COMBOBOX_DIRECTIVES, type HellComboboxUi } from './combobox';
+import type { HellPickValue } from '@hell-ui/angular/core';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -52,7 +53,7 @@ class ComboboxFormHost {
 })
 class ComboboxMultipleFormHost {
   readonly control = new FormControl<string[]>(['atlas'], { nonNullable: true });
-  readonly values: Array<HellComboboxValue<string>> = [];
+  readonly values: Array<HellPickValue<string>> = [];
 }
 
 @Component({
@@ -78,7 +79,7 @@ class ComboboxMultipleFormHost {
 })
 class ComboboxChipsHost {
   readonly control = new FormControl<string[]>(['atlas', 'nova'], { nonNullable: true });
-  readonly values: Array<HellComboboxValue<string>> = [];
+  readonly values: Array<HellPickValue<string>> = [];
   readonly displayWith = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 }
 
@@ -457,7 +458,7 @@ describe('HellComboboxRoot', () => {
     const combobox = debug.injector.get(HellComboboxRoot<readonly string[]>);
     const ngpCombobox = debug.injector.get(NgpCombobox);
     const arrayValue = ['north', 'south'] as const;
-    let emitted: HellComboboxValue<readonly string[]> | undefined;
+    let emitted: HellPickValue<readonly string[]> | undefined;
 
     combobox.registerOnChange((value) => (emitted = value));
     ngpCombobox.valueChange.emit(arrayValue);

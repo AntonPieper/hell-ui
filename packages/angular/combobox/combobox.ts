@@ -3,7 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickMultipleValue, type HellPickSingleValue, type HellPickValue, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import {
@@ -16,12 +16,6 @@ import {
   writeComboboxStateDisabled,
   writeComboboxStateValue,
 } from '@hell-ui/angular/internal/ng-primitives';
-
-export type HellComboboxSingleValue<T = unknown> = T | null;
-export type HellComboboxMultipleValue<T = unknown> = readonly T[];
-export type HellComboboxValue<T = unknown> =
-  | HellComboboxSingleValue<T>
-  | HellComboboxMultipleValue<T>;
 
 /** Public parts of the HellComboboxChips module, styleable through its Part Style Map. */
 export type HellComboboxChipsPart = 'root' | 'chip';
@@ -201,7 +195,7 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellComboboxValue<T>>();
+  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
   private readonly floatingScope = new HellFloatingScopeRegistry();
   private dropdownOpen = false;
 
@@ -220,11 +214,11 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
     });
   }
 
-  writeValue(value: HellComboboxValue<T>): void {
+  writeValue(value: HellPickValue<T>): void {
     writeComboboxStateValue(this.comboboxState(), this.normalizeWriteValue(value));
   }
 
-  registerOnChange(fn: (value: HellComboboxValue<T>) => void): void {
+  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
@@ -280,25 +274,25 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
     this.floatingScope.unregisterFloatingElement(dropdown);
   }
 
-  private normalizeValue(value: unknown): HellComboboxValue<T> {
+  private normalizeValue(value: unknown): HellPickValue<T> {
     if (this.combobox.multiple()) {
       return this.normalizeMultipleValue(value);
     }
     return this.normalizeSingleValue(value);
   }
 
-  private normalizeSingleValue(value: unknown): HellComboboxSingleValue<T> {
+  private normalizeSingleValue(value: unknown): HellPickSingleValue<T> {
     if (value == null) return null;
     return value as T;
   }
 
-  private normalizeMultipleValue(value: unknown): HellComboboxMultipleValue<T> {
+  private normalizeMultipleValue(value: unknown): HellPickMultipleValue<T> {
     if (value == null) return [];
     if (Array.isArray(value)) return [...value];
     return [value as T];
   }
 
-  private normalizeWriteValue(value: HellComboboxValue<T>): HellComboboxValue<T> {
+  private normalizeWriteValue(value: HellPickValue<T>): HellPickValue<T> {
     if (this.combobox.multiple()) return this.normalizeMultipleValue(value);
     return this.normalizeSingleValue(value);
   }
@@ -677,14 +671,14 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
   /** Overrides option labels; also labels selected values missing from `options`. */
   readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
-  readonly value = input<HellComboboxValue<T> | null>(null);
+  readonly value = input<HellPickValue<T> | null>(null);
 
-  readonly valueChange = output<HellComboboxValue<T>>();
+  readonly valueChange = output<HellPickValue<T>>();
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellComboboxValue<T>>();
-  private readonly controlledValue = new HellControlledValueState<HellComboboxValue<T>>({
+  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
+  private readonly controlledValue = new HellControlledValueState<HellPickValue<T>>({
     externalValue: this.value,
     externalDisabled: this.disabled,
     initialValue: null,
@@ -694,7 +688,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
 
   // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
   // types inferred through internal entry points, shipping unbound `Signal`.
-  protected readonly effectiveValue: Signal<HellComboboxValue<T>> = this.controlledValue.value;
+  protected readonly effectiveValue: Signal<HellPickValue<T>> = this.controlledValue.value;
   protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
 
   protected readonly selectedLabel = computed(() => {
@@ -729,7 +723,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     return hellPickedValueLabel(value, this.options(), this.displayWith(), this.compareWith());
   }
 
-  protected onValueChange(next: HellComboboxValue<T>): void {
+  protected onValueChange(next: HellPickValue<T>): void {
     this.controlledValue.acceptUserValue(next);
     this.valueChange.emit(next);
     this.valueAccessor.emitValue(next);
@@ -757,12 +751,12 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     if (outside) this.valueAccessor.markTouched();
   }
 
-  writeValue(value: HellComboboxValue<T>): void {
+  writeValue(value: HellPickValue<T>): void {
     this.controlledValue.writeValue(this.normalizeWriteValue(value));
     this.filterOverride.set(null);
   }
 
-  registerOnChange(fn: (value: HellComboboxValue<T>) => void): void {
+  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
@@ -778,18 +772,18 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     return this.filterValue();
   }
 
-  private normalizeSingleValue(value: unknown): HellComboboxSingleValue<T> {
+  private normalizeSingleValue(value: unknown): HellPickSingleValue<T> {
     if (value == null) return null;
     return value as T;
   }
 
-  private normalizeMultipleValue(value: unknown): HellComboboxMultipleValue<T> {
+  private normalizeMultipleValue(value: unknown): HellPickMultipleValue<T> {
     if (value == null) return [];
     if (Array.isArray(value)) return [...value];
     return [value as T];
   }
 
-  private normalizeWriteValue(value: HellComboboxValue<T>): HellComboboxValue<T> {
+  private normalizeWriteValue(value: HellPickValue<T>): HellPickValue<T> {
     if (this.multiple()) {
       return this.normalizeMultipleValue(value);
     }

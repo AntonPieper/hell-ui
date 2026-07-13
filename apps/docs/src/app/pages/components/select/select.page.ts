@@ -218,13 +218,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <h2>API</h2>
       <p><code>[hellSelectTrigger]</code> — trigger host and state container. Attach to a <code>&lt;button&gt;</code>.</p>
       <ul>
-        <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode. Default <code>null</code>.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode. Default <code>null</code>.</li>
         <li><code>multiple</code>: <code>boolean</code>. Accumulates selections into an array and keeps the list open. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Disables the trigger. Default <code>false</code>.</li>
         <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code> (from core) — <code>(a, b) =&gt; boolean</code> for matching values by identity. Default reference equality.</li>
         <li><code>placement</code>, <code>container</code>, <code>flip</code>: floating-panel positioning, forwarded to the primitive.</li>
         <li><code>options</code>: optional value list forwarded to the primitive (used for virtualization scenarios).</li>
-        <li>Outputs: <code>valueChange: EventEmitter&lt;HellSelectFormValue&lt;T&gt;&gt;</code>, <code>openChange: EventEmitter&lt;boolean&gt;</code>.</li>
+        <li>Outputs: <code>valueChange: EventEmitter&lt;HellPickValue&lt;T&gt;&gt;</code>, <code>openChange: EventEmitter&lt;boolean&gt;</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or <code>&#123; root?: string &#125;</code> map refining <code>root</code>.</li>
       </ul>
       <p><code>[hellSelectValue]</code> / <code>[hellSelectPlaceholder]</code> — the selection and empty-state slots inside the trigger. Each takes <code>ui</code> (<code>HellUiInput&lt;'root'&gt;</code> / <code>HellUiInput&lt;'root'&gt;</code>).</p>
@@ -247,7 +247,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p><code>&lt;hell-select&gt;</code> — the preset composing all of the above.</p>
       <ul>
         <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
-        <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Select'</code>.</li>
@@ -257,10 +257,10 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellSelectPart&gt;</code> — a <code>HellSelectUi</code> map over <code>root | trigger | value | placeholder | dropdown | option</code>.</li>
       </ul>
-      <p>Exported types (from source):</p>
+      <p>Related types:</p>
       <ul>
-        <li>Values: <code>HellSelectSingleValue&lt;T&gt;</code> (<code>T | null</code>), <code>HellSelectMultipleValue&lt;T&gt;</code> (<code>readonly T[]</code>), <code>HellSelectFormValue&lt;T&gt;</code> (their union).</li>
-        <li>Option contract (from <code>@hell-ui/angular/core</code>): <code>HellOption&lt;T&gt;</code>, <code>HellOptionDisplayWith&lt;T&gt;</code>, <code>HellOptionCompareWith&lt;T&gt;</code>.</li>
+        <li>Values (from <code>&#64;hell-ui/angular/core</code>): <code>HellPickSingleValue&lt;T&gt;</code> (<code>T | null</code>), <code>HellPickMultipleValue&lt;T&gt;</code> (<code>readonly T[]</code>), <code>HellPickValue&lt;T&gt;</code> (their union).</li>
+        <li>Option contract (from <code>&#64;hell-ui/angular/core</code>): <code>HellOption&lt;T&gt;</code>, <code>HellOptionDisplayWith&lt;T&gt;</code>, <code>HellOptionCompareWith&lt;T&gt;</code>.</li>
         <li>Parts / maps: <code>HellSelectPart</code> &amp; <code>HellSelectUi</code>; each composable directive exposes a single <code>root</code> part (<code>ui: HellUiInput&lt;'root'&gt;</code>).</li>
         <li>Directive bundles: <code>HELL_SELECT_DIRECTIVES</code> (the composable suite), <code>HellSelect</code> (the preset).</li>
       </ul>

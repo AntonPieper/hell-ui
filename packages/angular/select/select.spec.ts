@@ -6,7 +6,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import { HellSelectTrigger, HellSelect, HellSelectFormValue, HELL_SELECT_DIRECTIVES, type HellSelectUi } from './select';
+import { HellSelectTrigger, HellSelect, HELL_SELECT_DIRECTIVES, type HellSelectUi } from './select';
+import type { HellPickValue } from '@hell-ui/angular/core';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
@@ -51,7 +52,7 @@ class SelectFormHost {
 })
 class SelectMultipleFormHost {
   readonly control = new FormControl<string[]>(['low'], { nonNullable: true });
-  readonly values: Array<HellSelectFormValue<string>> = [];
+  readonly values: Array<HellPickValue<string>> = [];
 }
 
 @Component({
@@ -353,7 +354,7 @@ describe('HellSelectTrigger', () => {
     const select = debug.injector.get(HellSelectTrigger<readonly string[]>);
     const ngpSelect = debug.injector.get(NgpSelect);
     const arrayValue = ['north', 'south'] as const;
-    let emitted: HellSelectFormValue<readonly string[]> | undefined;
+    let emitted: HellPickValue<readonly string[]> | undefined;
 
     select.registerOnChange((value) => (emitted = value));
     ngpSelect.valueChange.emit(arrayValue);

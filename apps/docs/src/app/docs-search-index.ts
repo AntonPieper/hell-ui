@@ -525,14 +525,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/chips.example.ts',
  terms:
-'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
+'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
  },
  {
  title:'Combobox: Multiple',
  path:'/components/combobox',
  detail:'components/combobox/examples/multiple.example.ts',
  terms:
-'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
  },
  {
  title:'Combobox: Preset',
@@ -553,7 +553,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/with-field-tag.example.ts',
  terms:
-'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
+'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
  },
  {
  title:'Confirm: Basic',

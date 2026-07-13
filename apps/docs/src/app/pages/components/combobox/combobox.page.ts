@@ -231,7 +231,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <h2>API</h2>
       <p><code>[hellCombobox]</code> — the control container (host of <code>NgpCombobox</code>).</p>
       <ul>
-        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
         <li><code>multiple</code>: <code>boolean</code>. Switches to array-valued multi-select. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>allowDeselect</code>: <code>boolean</code>. Lets a single selection be cleared by re-picking it. Default <code>false</code>.</li>
@@ -242,7 +242,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>options</code>: <code>readonly T[]</code> — full option registry for virtualized/manually ordered lists (aliases <code>ngpComboboxOptions</code>).</li>
         <li><code>wrapNavigation</code>: <code>boolean</code> — lets Arrow Up/Down wrap between boundaries. Default <code>true</code>; set <code>false</code> for clamped composite flows.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the <code>root</code> part.</li>
-        <li>Outputs: <code>valueChange: HellComboboxValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
+        <li>Outputs: <code>valueChange: HellPickValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
         <li>Implements <code>ControlValueAccessor</code>, so it works with <code>ngModel</code> and reactive forms.</li>
       </ul>
       <p><code>input[hellComboboxInput]</code> — the editable filter input; drives typing and keyboard focus. Exposes <code>ui</code>.</p>
@@ -267,7 +267,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p><code>&lt;hell-combobox&gt;</code> — the convenience component composing the whole anatomy.</p>
       <ul>
         <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
-        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
         <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
@@ -279,10 +279,11 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
       </ul>
       <p>
-        Exported types: <code>HellComboboxValue&lt;T&gt;</code>,
-        <code>HellComboboxSingleValue&lt;T&gt;</code>, <code>HellComboboxMultipleValue&lt;T&gt;</code>,
-        the core option contract <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>;
-        and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
+        Value and option types come from <code>&#64;hell-ui/angular/core</code>:
+        <code>HellPickValue&lt;T&gt;</code>, <code>HellPickSingleValue&lt;T&gt;</code>,
+        <code>HellPickMultipleValue&lt;T&gt;</code>, and the option contract
+        <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>.
+        This entry point exports per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
         <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
         <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>,
         <code>ComboboxChips</code>, and the owned-anatomy <code>hell-combobox</code>. The

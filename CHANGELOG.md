@@ -551,6 +551,18 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- The pick-value model is one core family: `HellPickSingleValue<T>`
+  (`T | null`), `HellPickMultipleValue<T>` (`readonly T[]`), and their union
+  `HellPickValue<T>` export from `@hell-ui/angular/core`, and the select and
+  combobox entry points no longer export per-module twins. Migration is a
+  rename: `HellSelectSingleValue` → `HellPickSingleValue`,
+  `HellSelectMultipleValue` → `HellPickMultipleValue`, `HellSelectFormValue` →
+  `HellPickValue`, `HellComboboxSingleValue` → `HellPickSingleValue`,
+  `HellComboboxMultipleValue` → `HellPickMultipleValue`, and
+  `HellComboboxValue` → `HellPickValue`, importing from
+  `@hell-ui/angular/core`. Behavior, inputs, and outputs are unchanged.
+  Closes #163. Evidence: select/combobox unit suites, refreshed API reports,
+  migrated docs examples.
 - Adopted the selector convention (attribute selector = headless behavior
   suite on a consumer-owned element; element selector = owned-anatomy
   component) and removed the "Basic" names. `hell-select-basic` is now

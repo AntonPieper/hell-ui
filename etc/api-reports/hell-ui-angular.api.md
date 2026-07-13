@@ -65,6 +65,15 @@ export interface HellPartStylerOptions<Part extends string> {
 }
 
 // @public
+export type HellPickMultipleValue<T = unknown> = readonly T[];
+
+// @public
+export type HellPickSingleValue<T = unknown> = T | null;
+
+// @public
+export type HellPickValue<T = unknown> = HellPickSingleValue<T> | HellPickMultipleValue<T>;
+
+// @public
 export function hellRankLocalSearch<T>(items: readonly T[], request: HellSearchRankRequest<T>): readonly HellSearchResult<T>[];
 
 // @public
