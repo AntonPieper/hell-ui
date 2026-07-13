@@ -9,6 +9,8 @@
     "./form-field-idrefs",
     "./idrefs",
     "./native-interactive-disabled",
+    "./pick-value",
+    "./picker-control",
     "./resize-behavior",
     "./typed-value-input"
   ],

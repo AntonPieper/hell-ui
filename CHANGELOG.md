@@ -325,6 +325,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Extracted the shared picker control plumbing (ControlValueAccessor bridge,
+  dropdown floating-scope registration, outside-control focus checks, and
+  mode-aware pick-value normalization) from the select trigger and combobox
+  root into one internal seam consumed by both directive suites and both
+  owned-anatomy components. Zero public API change (report declarations
+  verified identical); a contract test covers the seam, including
+  dropdown-counts-as-inside while open. Closes #164.
 - Extracted the elevated floating-panel surface, pop-in animation, and default
   popover z-index into a shared internal presentation module so the popover,
   flyout, menu, select, and combobox panels can no longer drift (class sets

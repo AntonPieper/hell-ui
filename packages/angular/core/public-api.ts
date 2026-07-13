@@ -1,4 +1,5 @@
 export * from './types';
+export * from './pick-value';
 export * from './styleable';
 export * from './part-style-merge';
 export * from './search';

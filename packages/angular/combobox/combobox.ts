@@ -3,8 +3,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickMultipleValue, type HellPickSingleValue, type HellPickValue, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import { hellContainsFloatingTarget, hellRegisterFloatingHost, HellFloatingScopeRegistry } from '@hell-ui/angular/internal/core';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellContainsFloatingTarget, hellNormalizePickValue, hellRegisterFloatingHost, HellPickerControl } from '@hell-ui/angular/internal/core';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import {
   hellOptionRowLabel,
@@ -195,56 +195,45 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
-  private readonly floatingScope = new HellFloatingScopeRegistry();
-  private dropdownOpen = false;
+  private readonly control = new HellPickerControl<T>({
+    host: () => this.host.nativeElement,
+    multiple: () => this.combobox.multiple(),
+    valueChanges: this.combobox.valueChange,
+    openChanges: this.combobox.openChange,
+    writeValue: (value) => writeComboboxStateValue(this.comboboxState(), value),
+    setDisabled: (disabled) => writeComboboxStateDisabled(this.comboboxState(), disabled),
+  });
 
   constructor() {
     this.host.nativeElement.addEventListener('keydown', this.clampNavigation, { capture: true });
-    const valueSub = this.combobox.valueChange.subscribe((value) => {
-      this.valueAccessor.emitValue(this.normalizeValue(value));
-    });
-    const openSub = this.combobox.openChange.subscribe((open) => {
-      this.dropdownOpen = open;
-    });
     this.destroyRef.onDestroy(() => {
       this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, { capture: true });
-      valueSub.unsubscribe();
-      openSub.unsubscribe();
     });
+    this.control.connect(this.destroyRef);
   }
 
   writeValue(value: HellPickValue<T>): void {
-    writeComboboxStateValue(this.comboboxState(), this.normalizeWriteValue(value));
+    this.control.writeValue(value);
   }
 
   registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.valueAccessor.registerOnChange(fn);
+    this.control.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
+    this.control.registerOnTouched(fn);
   }
 
   setDisabledState(isDisabled: boolean): void {
-    writeComboboxStateDisabled(this.comboboxState(), isDisabled);
+    this.control.setDisabledState(isDisabled);
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {
-    return !hellContainsFloatingTarget(
-      {
-        root: () => this.host.nativeElement,
-        scope: this.floatingScope,
-        floatingActive: () => this.dropdownOpen,
-      },
-      next,
-    );
+    return this.control.isOutsideControl(next);
   }
 
   markControlTouched(event: FocusEvent): void {
-    if (this.isOutsideControl(event.relatedTarget)) {
-      this.valueAccessor.markTouched();
-    }
+    this.control.markControlTouched(event);
   }
 
   private readonly clampNavigation = (event: KeyboardEvent): void => {
@@ -267,34 +256,11 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
   };
 
   registerDropdown(dropdown: HTMLElement): void {
-    this.floatingScope.registerFloatingElement(dropdown);
+    this.control.registerDropdown(dropdown);
   }
 
   unregisterDropdown(dropdown: HTMLElement): void {
-    this.floatingScope.unregisterFloatingElement(dropdown);
-  }
-
-  private normalizeValue(value: unknown): HellPickValue<T> {
-    if (this.combobox.multiple()) {
-      return this.normalizeMultipleValue(value);
-    }
-    return this.normalizeSingleValue(value);
-  }
-
-  private normalizeSingleValue(value: unknown): HellPickSingleValue<T> {
-    if (value == null) return null;
-    return value as T;
-  }
-
-  private normalizeMultipleValue(value: unknown): HellPickMultipleValue<T> {
-    if (value == null) return [];
-    if (Array.isArray(value)) return [...value];
-    return [value as T];
-  }
-
-  private normalizeWriteValue(value: HellPickValue<T>): HellPickValue<T> {
-    if (this.combobox.multiple()) return this.normalizeMultipleValue(value);
-    return this.normalizeSingleValue(value);
+    this.control.unregisterDropdown(dropdown);
   }
 }
 
@@ -752,7 +718,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   }
 
   writeValue(value: HellPickValue<T>): void {
-    this.controlledValue.writeValue(this.normalizeWriteValue(value));
+    this.controlledValue.writeValue(hellNormalizePickValue<T>(value, this.multiple()));
     this.filterOverride.set(null);
   }
 
@@ -770,24 +736,6 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
 
   protected filter(): string {
     return this.filterValue();
-  }
-
-  private normalizeSingleValue(value: unknown): HellPickSingleValue<T> {
-    if (value == null) return null;
-    return value as T;
-  }
-
-  private normalizeMultipleValue(value: unknown): HellPickMultipleValue<T> {
-    if (value == null) return [];
-    if (Array.isArray(value)) return [...value];
-    return [value as T];
-  }
-
-  private normalizeWriteValue(value: HellPickValue<T>): HellPickValue<T> {
-    if (this.multiple()) {
-      return this.normalizeMultipleValue(value);
-    }
-    return this.normalizeSingleValue(value);
   }
 }
 
