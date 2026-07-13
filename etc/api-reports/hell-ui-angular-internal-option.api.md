@@ -13,10 +13,21 @@ export const HELL_OPTION_SURFACE_METRICS = "cursor-pointer rounded-hell-sm bg-tr
 // @public
 export const HELL_OPTION_SURFACE_SELECTED_STATES = "data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]";
 
+// Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-internal-option.d.ts
+// Warning: (ae-forgotten-export) The symbol "HellOptionDisplayWith" needs to be exported by the entry point hell-ui-angular-internal-option.d.ts
+//
+// @public
+export function hellOptionRowLabel<T>(option: HellOption<T>, displayWith: HellOptionDisplayWith<T> | null): string;
+
 // Warning: (ae-forgotten-export) The symbol "HellRecipe" needs to be exported by the entry point hell-ui-angular-internal-option.d.ts
 //
 // @internal
 export function hellOptionSurfaceRecipe(): HellRecipe<'root'>;
+
+// Warning: (ae-forgotten-export) The symbol "HellOptionCompareWith" needs to be exported by the entry point hell-ui-angular-internal-option.d.ts
+//
+// @public
+export function hellPickedValueLabel<T>(value: T, options: readonly HellOption<T>[], displayWith: HellOptionDisplayWith<T> | null, compareWith: HellOptionCompareWith<T>): string;
 
 // (No @packageDocumentation comment for this package)
 
