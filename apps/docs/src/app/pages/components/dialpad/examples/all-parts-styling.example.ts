@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellDialpad, type HellDialpadUi } from '@hell-ui/angular/dialpad';
+import { HellDialpad, type HellDialpadUi } from '@hell-ui/angular/features/dialpad';
 
 @Component({
   selector: 'app-dialpad-all-parts-styling-example',

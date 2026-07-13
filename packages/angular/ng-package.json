@@ -67,8 +67,8 @@
     },
     {
       "glob": "dialpad.ts",
-      "input": "dialpad",
-      "output": "dialpad"
+      "input": "features/dialpad",
+      "output": "features/dialpad"
     },
     {
       "glob": "menu.ts",

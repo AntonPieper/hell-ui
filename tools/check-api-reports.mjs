@@ -25,6 +25,7 @@ const seenConsoleMessages = new Set();
 const apiReportExclusions = new Map([
   ['features/audio-transcript', 'experimental feature surface, not yet under report'],
   ['features/code-editor', 'feature surface, not yet under report'],
+  ['features/dialpad', 'feature surface, not yet under report'],
   ['features/pdf-viewer', 'feature surface, not yet under report'],
   ['internal/audio-transcript', 'internal seam, not part of the public surface'],
   ['internal/chip', 'internal seam, not part of the public surface'],

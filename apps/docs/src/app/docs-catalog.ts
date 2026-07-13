@@ -270,13 +270,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/file-upload/file-upload.page').then((m) => m.FileUploadPage),
       },
       {
-        routePath: 'components/dialpad',
-        label: 'Dialpad',
-        icon: 'faSolidPhone',
-        loadComponent: () =>
-          import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
-      },
-      {
         routePath: 'components/save-bar',
         label: 'Save bar',
         icon: 'faSolidFloppyDisk',
@@ -512,6 +505,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidCode',
         loadComponent: () =>
           import('./pages/components/code-editor/code-editor.page').then((m) => m.CodeEditorPage),
+      },
+      {
+        routePath: 'components/dialpad',
+        label: 'Dialpad',
+        icon: 'faSolidPhone',
+        loadComponent: () =>
+          import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
       {
         routePath: 'components/pdf-viewer',
