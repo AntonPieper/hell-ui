@@ -1,17 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidChartLine,
-  faSolidFileInvoice,
-  faSolidFolderOpen,
-  faSolidGauge,
-  faSolidGear,
-  faSolidInbox,
-  faSolidKey,
-  faSolidRightFromBracket,
-  faSolidUser,
-  faSolidUsers,
-} from '@ng-icons/font-awesome/solid';
+import { faSolidChartLine, faSolidFileInvoice, faSolidFolderOpen, faSolidGauge, faSolidGear, faSolidInbox, faSolidKey, faSolidRightFromBracket, faSolidUser, faSolidUsers } from '@ng-icons/font-awesome/solid';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { AppShellBasicExample } from './examples/basic.example';
@@ -262,7 +251,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
           by the module's <code>Hell*Part</code> — here always <code>root</code>.
         </li>
         <li>
-          Localize built-in toggle labels with <code>provideHellAppShellLabels(&#123; … &#125;)</code>
+          Localize built-in toggle labels with <code>provideHellLabels(HELL_APP_SHELL_LABELS, &#123; … &#125;)</code>
           from <code>@hell-ui/angular/app-shell</code>. Import the whole suite via
           <code>HELL_APP_SHELL_DIRECTIVES</code>.
         </li>
@@ -328,7 +317,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
         <li>
           Don't hardcode the toggle labels in markup — localize them through
-          <code>provideHellAppShellLabels</code>.
+          <code>HELL_APP_SHELL_LABELS</code>.
         </li>
       </ul>
     </article>

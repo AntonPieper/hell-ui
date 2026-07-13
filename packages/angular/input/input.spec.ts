@@ -2,14 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import {
-  HellInput,
-  type HellInputUi,
-  HellNativeSelect,
-  type HellNativeSelectUi,
-  HellTextarea,
-  type HellTextareaUi,
-} from './input';
+import { HellInput, HellNativeSelect, HellTextarea } from './input';
 
 @Component({
   imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_DIRECTIVES],
@@ -89,15 +82,15 @@ class FieldControlHost {}
 class PartStyleHost {
   protected readonly inputUi = {
     root: 'rounded-hell-pill data-[size=sm]:px-hell-6 data-[size=sm]:text-sm',
-  } satisfies HellInputUi;
+  };
 
   protected readonly selectUi = {
     root: 'rounded-hell-pill border-hell-info bg-hell-info-soft',
-  } satisfies HellNativeSelectUi;
+  };
 
   protected readonly textareaUi = {
     root: 'rounded-hell-lg min-h-32 resize-none',
-  } satisfies HellTextareaUi;
+  };
 }
 
 describe('Hell input primitives', () => {

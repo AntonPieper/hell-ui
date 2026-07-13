@@ -225,17 +225,17 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li><code>placement</code>, <code>container</code>, <code>flip</code>: floating-panel positioning, forwarded to the primitive.</li>
         <li><code>options</code>: optional value list forwarded to the primitive (used for virtualization scenarios).</li>
         <li>Outputs: <code>valueChange: EventEmitter&lt;HellSelectFormValue&lt;T&gt;&gt;</code>, <code>openChange: EventEmitter&lt;boolean&gt;</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellSelectPart&gt;</code> — shorthand string or <code>HellSelectUi</code> map refining <code>root</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or <code>&#123; root?: string &#125;</code> map refining <code>root</code>.</li>
       </ul>
-      <p><code>[hellSelectValue]</code> / <code>[hellSelectPlaceholder]</code> — the selection and empty-state slots inside the trigger. Each takes <code>ui</code> (<code>HellUiInput&lt;HellSelectValuePart&gt;</code> / <code>HellUiInput&lt;HellSelectPlaceholderPart&gt;</code>).</p>
-      <p><code>[hellSelectDropdown]</code> — the floating listbox panel; pair with <code>*hellSelectPortal</code> so it renders only while open and floats over surrounding content. Takes <code>ui</code> (<code>HellUiInput&lt;HellSelectDropdownPart&gt;</code>).</p>
+      <p><code>[hellSelectValue]</code> / <code>[hellSelectPlaceholder]</code> — the selection and empty-state slots inside the trigger. Each takes <code>ui</code> (<code>HellUiInput&lt;'root'&gt;</code> / <code>HellUiInput&lt;'root'&gt;</code>).</p>
+      <p><code>[hellSelectDropdown]</code> — the floating listbox panel; pair with <code>*hellSelectPortal</code> so it renders only while open and floats over surrounding content. Takes <code>ui</code> (<code>HellUiInput&lt;'root'&gt;</code>).</p>
       <p><code>[hellSelectOption]</code> — one option row.</p>
       <ul>
         <li><code>value</code>: the option's value. Required.</li>
         <li><code>disabled</code>: <code>boolean</code>. Skips the row for selection and keyboard activation.</li>
         <li><code>index</code>: optional explicit index (virtualization).</li>
         <li>Output: <code>activated</code> — emitted when the row is activated.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellSelectOptionPart&gt;</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p><code>&lt;hell-select-basic&gt;</code> — the preset composing all of the above.</p>
       <ul>
@@ -254,7 +254,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <ul>
         <li>Values: <code>HellSelectSingleValue&lt;T&gt;</code> (<code>T | null</code>), <code>HellSelectMultipleValue&lt;T&gt;</code> (<code>readonly T[]</code>), <code>HellSelectFormValue&lt;T&gt;</code> (their union).</li>
         <li>Callbacks: <code>HellSelectDisplayWith&lt;T&gt;</code>, <code>HellSelectCompareWith&lt;T&gt;</code>.</li>
-        <li>Parts / maps: <code>HellSelectPart</code> &amp; <code>HellSelectUi</code>, <code>HellSelectValuePart</code> &amp; <code>HellSelectValueUi</code>, <code>HellSelectPlaceholderPart</code> &amp; <code>HellSelectPlaceholderUi</code>, <code>HellSelectDropdownPart</code> &amp; <code>HellSelectDropdownUi</code>, <code>HellSelectOptionPart</code> &amp; <code>HellSelectOptionUi</code>, <code>HellSelectBasicPart</code> &amp; <code>HellSelectBasicUi</code>.</li>
+        <li>Parts / maps: <code>HellSelectBasicPart</code> &amp; <code>HellSelectBasicUi</code>; each composable directive exposes a single <code>root</code> part (<code>ui: HellUiInput&lt;'root'&gt;</code>).</li>
         <li>Directive bundles: <code>HELL_SELECT_DIRECTIVES</code> (the composable suite), <code>HELL_SELECT_BASIC_DIRECTIVES</code> (the preset).</li>
       </ul>
 

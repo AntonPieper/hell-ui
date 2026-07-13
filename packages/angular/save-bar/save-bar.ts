@@ -1,25 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  booleanAttribute,
-  computed,
-  effect,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, booleanAttribute, computed, effect, inject, input, output } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import {
-  hellCreateLabels,
-  hellPartStyler,
-  type HellRecipe,
-  type HellSize,
-  type HellUi,
-  type HellUiInput,
-} from '@hell-ui/angular/core';
+import { hellCreateLabels, hellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import type { InjectionToken, OutputEmitterRef, Provider } from '@angular/core';
+import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
 /**
  * Visibility mode of the save bar. `contextual` (default) renders the bar only
@@ -45,20 +28,12 @@ export interface HellSaveBarLabels {
   readonly discard: string;
 }
 
-const HELL_SAVE_BAR_LABELS_CONTRACT = hellCreateLabels<HellSaveBarLabels>('HELL_SAVE_BAR_LABELS', {
+/** Injection token resolving to the effective save-bar labels. */
+export const HELL_SAVE_BAR_LABELS: InjectionToken<HellSaveBarLabels> = hellCreateLabels<HellSaveBarLabels>('HELL_SAVE_BAR_LABELS', {
   message: 'You have unsaved changes',
   save: 'Save',
   discard: 'Discard',
 });
-
-/** Injection token resolving to the effective save-bar labels. */
-export const HELL_SAVE_BAR_LABELS: InjectionToken<HellSaveBarLabels> =
-  HELL_SAVE_BAR_LABELS_CONTRACT.token;
-
-/** Override any subset of the save-bar labels for an injector scope. */
-export function provideHellSaveBarLabels(overrides: Partial<HellSaveBarLabels>): Provider {
-  return HELL_SAVE_BAR_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of the HellSaveBar module, styleable through its Part Style Map. */
 export type HellSaveBarPart = 'root' | 'message' | 'actions' | 'save' | 'discard';
@@ -102,7 +77,7 @@ const HELL_SAVE_BAR_RECIPE = {
  * never submits an enclosing `<form>` — no double-fire. Set `saveType="submit"`
  * to opt into native form submission and handle `(ngSubmit)` instead of
  * `(saved)`, e.g. so pressing Enter in a field also saves. Button and message
- * labels come from the Label Contract (`provideHellSaveBarLabels`); the
+ * labels come from the Label Contract (`HELL_SAVE_BAR_LABELS`); the
  * unsaved-changes message can be overridden per instance with the `message`
  * input, and `size` forwards to both built-in buttons.
  *
@@ -212,7 +187,7 @@ export class HellSaveBar {
 
   /**
    * Per-instance unsaved-changes message. Overrides the Label Contract default
-   * (`provideHellSaveBarLabels`) for this bar only, so a one-off surface can show
+   * (`HELL_SAVE_BAR_LABELS`) for this bar only, so a one-off surface can show
    * e.g. "Unsent fax" without a scoped provider. The effective message is both
    * rendered while dirty and announced on contextual appearance. Defaults to the
    * Label Contract message.

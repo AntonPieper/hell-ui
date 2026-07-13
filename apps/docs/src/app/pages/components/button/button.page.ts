@@ -132,7 +132,7 @@ import buttonVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wi
         <code>HellButton</code> exposes exactly one Public Part, <code>root</code> — the host
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellButtonUi</code> map. Both forms merge on top of the variant/size recipe through
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the variant/size recipe through
         Hell's Tailwind merge, so refinements win deterministically over the defaults they
         conflict with.
       </p>
@@ -179,14 +179,12 @@ import buttonVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wi
           <code>tabindex="-1"</code>, and blocks click/Enter activation.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellButtonPart&gt;</code> — a shorthand class
-          string or a <code>HellButtonUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellButtonPart</code> (<code>'root'</code>),
-          <code>HellButtonUi</code> (<code>HellUi&lt;HellButtonPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

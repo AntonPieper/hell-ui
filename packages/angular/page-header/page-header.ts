@@ -1,23 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Directive,
-  computed,
-  contentChild,
-  contentChildren,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, computed, contentChild, contentChildren, inject, input, output } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import {
-  hellCreateLabels,
-  hellPartStyler,
-  type HellRecipe,
-  type HellUi,
-  type HellUiInput,
-} from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import { hellCreateLabels, hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the page-header entry point. */
 export interface HellPageHeaderLabels {
@@ -25,21 +9,13 @@ export interface HellPageHeaderLabels {
   readonly back: string;
 }
 
-const HELL_PAGE_HEADER_LABELS_CONTRACT = hellCreateLabels<HellPageHeaderLabels>(
+/** Injection token resolving to the effective page-header labels. */
+export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellPageHeaderLabels> = hellCreateLabels<HellPageHeaderLabels>(
   'HELL_PAGE_HEADER_LABELS',
   {
     back: 'Go back',
   },
 );
-
-/** Injection token resolving to the effective page-header labels. */
-export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellPageHeaderLabels> =
-  HELL_PAGE_HEADER_LABELS_CONTRACT.token;
-
-/** Override any subset of the page-header labels for an injector scope. */
-export function provideHellPageHeaderLabels(overrides: Partial<HellPageHeaderLabels>): Provider {
-  return HELL_PAGE_HEADER_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Heading level the title element is rendered at. Defaults to `1`. */
 export type HellPageHeaderLevel = 1 | 2 | 3 | 4 | 5 | 6;
@@ -55,11 +31,6 @@ export type HellPageHeaderPart =
   | 'toolbar';
 /** Part Style Map accepted by the HellPageHeader `ui` input. */
 export type HellPageHeaderUi = HellUi<HellPageHeaderPart>;
-
-/** Public parts of the HellPageHeaderBack module, styleable through its Part Style Map. */
-export type HellPageHeaderBackPart = 'root';
-/** Part Style Map accepted by the HellPageHeaderBack `ui` input. */
-export type HellPageHeaderBackUi = HellUi<HellPageHeaderBackPart>;
 
 /** Marks projected leading content (breadcrumbs, etc.) for the page header's `leading` region. */
 @Directive({ selector: '[hellPageHeaderLeading]' })
@@ -83,14 +54,14 @@ export class HellPageHeaderToolbar {}
 
 const HELL_PAGE_HEADER_BACK_RECIPE = {
   root: 'inline-flex flex-none items-center',
-} satisfies HellRecipe<HellPageHeaderBackPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * The optional back affordance for a page header. Renders a ghost icon button
  * with an inline chevron (no icon-package dependency) and emits `back` when
  * activated — it performs no navigation itself, so routing stays with the app.
  * Its accessible name comes from the page-header Label Contract
- * (`provideHellPageHeaderLabels`) and can be overridden per instance with
+ * (`HELL_PAGE_HEADER_LABELS`) and can be overridden per instance with
  * `aria-label`. Place it in the header's leading region; the header projects it
  * automatically without a `hellPageHeaderLeading` marker.
  */
@@ -131,10 +102,10 @@ const HELL_PAGE_HEADER_BACK_RECIPE = {
 })
 export class HellPageHeaderBack {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPageHeaderBackPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPageHeaderBackPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PAGE_HEADER_BACK_RECIPE,
   });

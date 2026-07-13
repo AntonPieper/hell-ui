@@ -164,8 +164,7 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
             </li>
             <li><code>max</code>: <code>number</code>. The value that represents completion. Default <code>100</code>.</li>
             <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellProgressPart&gt;</code> where
-              <code>HellProgressPart = 'root'</code>. Exports <code>HellProgressUi</code>.
+              <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
             </li>
           </ul>
         </li>
@@ -173,8 +172,7 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
           <code>[hellProgressBar]</code> — the fill. Hosts <code>NgpProgressIndicator</code>, which
           reads the track's state through DI and sets its own inline <code>width</code> style; apply
           it to a child element of <code>hellProgress</code>.
-          <code>ui</code>: <code>HellUiInput&lt;HellProgressBarPart&gt;</code> where
-          <code>HellProgressBarPart = 'root'</code>. Exports <code>HellProgressBarUi</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
       </ul>
 

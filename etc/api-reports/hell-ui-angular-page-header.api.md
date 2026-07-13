@@ -44,14 +44,6 @@ export class HellPageHeaderBack {
 }
 
 // @public
-export type HellPageHeaderBackPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-page-header.d.ts
-//
-// @public
-export type HellPageHeaderBackUi = HellUi<HellPageHeaderBackPart>;
-
-// @public
 export class HellPageHeaderDescription {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellPageHeaderDescription, "[hellPageHeaderDescription]", never, {}, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPageHeaderDescription, never>;
@@ -92,11 +84,10 @@ export class HellPageHeaderToolbar {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPageHeaderToolbar, never>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-page-header.d.ts
+//
 // @public
 export type HellPageHeaderUi = HellUi<HellPageHeaderPart>;
-
-// @public
-export function provideHellPageHeaderLabels(overrides: Partial<HellPageHeaderLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

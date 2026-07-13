@@ -206,23 +206,20 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p><code>hellDialogOverlay</code>:</p>
       <ul>
         <li><code>scoped</code>: <code>boolean</code>. Default <code>false</code>. Reads bounds from the nearest scope root instead of the viewport.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellDialogOverlayPart&gt;</code> — shorthand string or <code>HellDialogOverlayUi</code> map refining <code>root</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or <code>&#123; root?: string &#125;</code> map refining <code>root</code>.</li>
       </ul>
       <p><code>hellDialog</code>:</p>
       <ul>
         <li><code>size</code>: <code>'sm' | 'md' | 'lg' | 'xl'</code>. Default <code>md</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellDialogPart&gt;</code> — shorthand string or <code>HellDialogUi</code> map refining <code>root</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or <code>&#123; root?: string &#125;</code> map refining <code>root</code>.</li>
       </ul>
       <p><code>hellDialogTitle</code> / <code>hellDialogDescription</code>:</p>
       <ul>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellDialogTitlePart&gt;</code> / <code>HellUiInput&lt;HellDialogDescriptionPart&gt;</code> — shorthand string or map refining <code>root</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or map refining <code>root</code>.</li>
       </ul>
       <p><code>hellDialogScope</code>: behavior-only marker; <code>exportAs: 'hellDialogScope'</code>; no inputs.</p>
       <p>
-        Exported types: <code>HellDialogPart</code>, <code>HellDialogOverlayPart</code>,
-        <code>HellDialogTitlePart</code>, <code>HellDialogDescriptionPart</code> (all
-        <code>'root'</code>); their <code>Hell*Ui</code> map counterparts; and
-        <code>HellDialogTemplateContext&lt;TData, TResult&gt;</code>.
+        Exported types: <code>HellDialogTemplateContext&lt;TData, TResult&gt;</code>.
         <code>HELL_DIALOG_DIRECTIVES</code> bundles all six directives for bulk import.
       </p>
 

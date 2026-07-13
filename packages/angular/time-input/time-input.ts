@@ -79,7 +79,8 @@ export interface HellTimeInputLabels {
   readonly minutePreset?: (minute: number) => string;
 }
 
-const HELL_TIME_INPUT_LABELS_CONTRACT = hellCreateLabels<HellTimeInputLabels>('HELL_TIME_INPUT_LABELS', {
+/** Injection token resolving to the effective time input labels. */
+export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels> = hellCreateLabels<HellTimeInputLabels>('HELL_TIME_INPUT_LABELS', {
   chooseTime: 'Choose time',
   chooseTimeFor: (label) => `Choose time for ${label}`,
   subtractFiveMinutes: 'Subtract 5 minutes',
@@ -93,14 +94,6 @@ const HELL_TIME_INPUT_LABELS_CONTRACT = hellCreateLabels<HellTimeInputLabels>('H
   minutePresets: 'Minute presets',
   minutePreset: (minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`,
 });
-
-/** Injection token resolving to the effective time input labels. */
-export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels> = HELL_TIME_INPUT_LABELS_CONTRACT.token;
-
-/** Override any subset of the time input labels for an injector scope. */
-export function provideHellTimeInputLabels(overrides: Partial<HellTimeInputLabels>): Provider {
-  return HELL_TIME_INPUT_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Structured time value exchanged by the time input. */
 export interface HellTimeValue {

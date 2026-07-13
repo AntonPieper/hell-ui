@@ -330,23 +330,11 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       <p><strong>Exported types</strong>:</p>
       <ul>
         <li>
-          Part unions: <code>HellOmnibarPart</code> (the 12-part anatomy above) plus single-part
-          <code>HellOmnibarPanelPart</code>, <code>HellOmnibarGroupPart</code>,
-          <code>HellOmnibarGroupLabelPart</code>, <code>HellOmnibarItemPart</code>,
-          <code>HellOmnibarItemIconPart</code>, <code>HellOmnibarItemTextPart</code>,
-          <code>HellOmnibarItemSubtextPart</code>, <code>HellOmnibarItemTrailingPart</code>,
-          <code>HellOmnibarChipPart</code>, <code>HellOmnibarChipRemovePart</code>,
-          <code>HellOmnibarActionsStripPart</code>, and <code>HellOmnibarActionPart</code> (all <code>'root'</code>).
+          Part unions: <code>HellOmnibarPart</code> (the 12-part anatomy above).
         </li>
         <li>
-          Matching <code>ui</code> map types: <code>HellOmnibarUi</code>,
-          <code>HellOmnibarPanelUi</code>, <code>HellOmnibarGroupUi</code>,
-          <code>HellOmnibarGroupLabelUi</code>, <code>HellOmnibarItemUi</code>,
-          <code>HellOmnibarItemIconUi</code>, <code>HellOmnibarItemTextUi</code>,
-          <code>HellOmnibarItemSubtextUi</code>, <code>HellOmnibarItemTrailingUi</code>,
-          <code>HellOmnibarChipUi</code>, <code>HellOmnibarChipRemoveUi</code>,
-          <code>HellOmnibarActionsStripUi</code>, and <code>HellOmnibarActionUi</code>
-          (each <code>HellUi&lt;…Part&gt;</code>).
+          Matching <code>ui</code> map type: <code>HellOmnibarUi</code>
+          (<code>HellUi&lt;HellOmnibarPart&gt;</code>).
         </li>
         <li>
           Event/context types: <code>HellOmnibarSubmitEvent</code>,
@@ -355,7 +343,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </li>
         <li>
           Labels: <code>HellOmnibarLabels</code> (<code>&#123; clearSearch &#125;</code>),
-          <code>provideHellOmnibarLabels(overrides)</code>, and <code>HELL_OMNIBAR_LABELS</code> to
+          <code>provideHellLabels(HELL_OMNIBAR_LABELS, overrides)</code>, and <code>HELL_OMNIBAR_LABELS</code> to
           localize the clear-button label.
         </li>
         <li><code>HELL_OMNIBAR_DIRECTIVES</code> — the full standalone import array for the composition.</li>
@@ -400,7 +388,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           with <code>loadingMessage</code>, so busy/empty states are announced as content, not just
           spinners.
         </li>
-        <li>The clear button is labeled through the <code>clearSearch</code> label (localizable via <code>provideHellOmnibarLabels</code>).</li>
+        <li>The clear button is labeled through the <code>clearSearch</code> label (localizable via <code>HELL_OMNIBAR_LABELS</code>).</li>
         <li>The global <code>hotkey</code> respects other editable surfaces and already-prevented keydowns before firing.</li>
       </ul>
 

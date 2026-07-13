@@ -1,14 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
-import {
-  HellFileUpload,
-  provideHellFileUploadLabels,
-  type HellFileUploadItem,
-  type HellFileUploadRejection,
-  type HellFileUploadUi,
-} from './file-upload';
+import { HellFileUpload, HELL_FILE_UPLOAD_LABELS, type HellFileUploadItem, type HellFileUploadRejection, type HellFileUploadUi } from './file-upload';
 
 const liveAnnounce = vi.fn(() => Promise.resolve());
 const announcementService = { announce: liveAnnounce };
@@ -310,7 +305,7 @@ describe('HellFileUpload', () => {
   describe('label contract', () => {
     it('overrides built-in strings and rejection reasons for a scope', () => {
       const fixture = setup([
-        provideHellFileUploadLabels({
+        provideHellLabels(HELL_FILE_UPLOAD_LABELS, {
           browse: 'Choose files',
           rejectedType: (name) => `${name}: wrong type`,
           statusPending: 'Queued',

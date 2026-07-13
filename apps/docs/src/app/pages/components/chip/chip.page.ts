@@ -160,7 +160,7 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           attribute. Defaults to <code>horizontal</code>.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellChipSetPart&gt;</code> — refines the
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the
           <code>root</code> part.
         </li>
       </ul>
@@ -178,7 +178,7 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         </li>
         <li><code>(remove)</code>: <code>void</code> — emitted on remove-button click or on
           <code>Delete</code>/<code>Backspace</code> when focused.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellChipPart&gt;</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p><code>hellChipRemove</code> (selector <code>button[hellChipRemove]</code>)</p>
       <ul>
@@ -186,8 +186,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           interactive child of a <code>&lt;button&gt;</code> chip host.</li>
         <li>Ships a built-in × glyph on the empty button; project any content to replace it.</li>
         <li>Named <code>Remove {{ '{' }}label{{ '}' }}</code> via <code>HELL_CHIP_LABELS</code> /
-          <code>provideHellChipLabels</code>, with the label taken from the chip's text content.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellChipRemovePart&gt;</code>.</li>
+          <code>HELL_CHIP_LABELS</code>, with the label taken from the chip's text content.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p>
         <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>, <code>HellChip</code>,

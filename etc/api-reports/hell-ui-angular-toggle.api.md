@@ -51,27 +51,7 @@ export class HellToggleGroupItem {
 }
 
 // @public
-export type HellToggleGroupItemPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-toggle.d.ts
-//
-// @public
-export type HellToggleGroupItemUi = HellUi<HellToggleGroupItemPart>;
-
-// @public
-export type HellToggleGroupPart = 'root';
-
-// @public
-export type HellToggleGroupUi = HellUi<HellToggleGroupPart>;
-
-// @public
 export type HellToggleGroupValue = string | null | readonly string[];
-
-// @public
-export type HellTogglePart = 'root';
-
-// @public
-export type HellToggleUi = HellUi<HellTogglePart>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -124,9 +124,6 @@ export class HellToolbarWidget extends HellToolbarItem {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarWidget, never>;
 }
 
-// @public
-export function provideHellToolbarLabels(overrides: Partial<HellToolbarLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

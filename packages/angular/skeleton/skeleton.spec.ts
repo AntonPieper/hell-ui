@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellSkeleton, type HellSkeletonUi } from './skeleton';
+import { HellSkeleton } from './skeleton';
 
 @Component({
   imports: [HellSkeleton],
@@ -26,7 +26,7 @@ class SkeletonClassHookHost {}
 class SkeletonPartStyleHost {
   readonly skeletonUi = {
     root: 'min-h-hell-8 bg-hell-info-soft',
-  } satisfies HellSkeletonUi;
+  };
 }
 
 describe('HellSkeleton', () => {

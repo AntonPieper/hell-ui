@@ -1,18 +1,13 @@
 import { Directive, inject, input } from '@angular/core';
 import type { FocusOrigin } from '@angular/cdk/a11y';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 
-/** Public parts of the HellPopover module, styleable through its Part Style Map. */
-export type HellPopoverPart = 'root';
-/** Part Style Map accepted by the HellPopover `ui` input. */
-export type HellPopoverUi = HellUi<HellPopoverPart>;
-
 const HELL_POPOVER_RECIPE = {
   root: 'absolute z-[var(--hell-z-popover,60)] max-w-[320px] rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] text-hell-foreground shadow-hell-lg outline-none animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
-} satisfies HellRecipe<HellPopoverPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
@@ -78,10 +73,10 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
 })
 export class HellPopover {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellPopoverPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellPopoverPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_POPOVER_RECIPE,
   });

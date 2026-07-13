@@ -207,7 +207,7 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         The entry point also exports the <code>HellAudioPlayerPart</code> and
         <code>HellAudioPlayerUi</code> styling types, the <code>HellAudioPlayerLabels</code> interface
         with its <code>HELL_AUDIO_PLAYER_LABELS</code> token and
-        <code>provideHellAudioPlayerLabels()</code> for the Label Contract, and the
+        <code>provideHellLabels(HELL_AUDIO_PLAYER_LABELS, …)</code> for the Label Contract, and the
         <code>HellAudioRuntime</code> / <code>hellHtmlAudioElementAdapter</code> runtime primitives.
         This module has no outputs; playback state stays internal to its Audio Runtime.
       </p>

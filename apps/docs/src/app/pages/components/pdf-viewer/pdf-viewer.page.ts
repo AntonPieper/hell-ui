@@ -202,12 +202,12 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
       <ul>
         <li>Exported types: <code>HellPdfViewerPart</code>, <code>HellPdfViewerUi</code> (<code>HellUi&lt;HellPdfViewerPart&gt;</code>), <code>HellPdfWorkerSource</code>, <code>HellPdfRuntimeFactory</code>.</li>
         <li>Runtime seam: <code>HELL_PDF_RUNTIME_FACTORY</code> injection token swaps the pdf.js/browser runtime (used by tests or app-specific hosts).</li>
-        <li>Labels: <code>provideHellPdfViewerLabels(overrides)</code> and the <code>HellPdfViewerLabels</code> interface override the built-in accessibility strings for an injector scope.</li>
+        <li>Labels: <code>provideHellLabels(HELL_PDF_VIEWER_LABELS, overrides)</code> and the <code>HellPdfViewerLabels</code> interface override the built-in accessibility strings for an injector scope.</li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Every toolbar and find-bar control is a labeled icon button or input; labels come from the <code>HellPdfViewerLabels</code> Label Contract, so you translate or reword them via <code>provideHellPdfViewerLabels</code> rather than forking the component.</li>
+        <li>Every toolbar and find-bar control is a labeled icon button or input; labels come from the <code>HellPdfViewerLabels</code> Label Contract, so you translate or reword them via <code>HELL_PDF_VIEWER_LABELS</code> rather than forking the component.</li>
         <li>The page-overview and find toggles reflect their open state with <code>aria-pressed</code>; the find match-count region is a <code>role="status"</code> live region (<code>aria-live="polite"</code>) that announces the current/total match count.</li>
         <li>In the thumbnail rail, each thumbnail is a button labeled "Go to page N"; the current page carries <code>aria-current="page"</code>.</li>
         <li>The host is focusable (<code>tabindex="0"</code>). Focused, it handles Ctrl/Cmd+F (find), Ctrl/Cmd+P (print), +/=/-/_/0 (zoom in/out/reset), PageUp/PageDown (previous/next page), and Home/End (first/last page). Shortcuts are skipped while focus is inside an editable field.</li>

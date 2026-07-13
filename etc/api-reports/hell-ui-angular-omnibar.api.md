@@ -121,26 +121,12 @@ export class HellOmnibarAction implements HellOmnibarRegisteredAction {
 }
 
 // @public
-export type HellOmnibarActionPart = 'root';
-
-// @public
 export class HellOmnibarActionsStrip {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarActionsStrip, "[hellOmnibarActions]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarActionsStrip, never>;
 }
-
-// @public
-export type HellOmnibarActionsStripPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
-//
-// @public
-export type HellOmnibarActionsStripUi = HellUi<HellOmnibarActionsStripPart>;
-
-// @public
-export type HellOmnibarActionUi = HellUi<HellOmnibarActionPart>;
 
 // @public
 export type HellOmnibarActivationSource = 'mouse' | 'keyboard' | 'api';
@@ -154,9 +140,6 @@ export class HellOmnibarChip {
 }
 
 // @public
-export type HellOmnibarChipPart = 'root';
-
-// @public
 export class HellOmnibarChipRemove {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected tabIndex(): -1 | null;
@@ -164,15 +147,6 @@ export class HellOmnibarChipRemove {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarChipRemove, "button[hellOmnibarChipRemove]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarChipRemove, never>;
 }
-
-// @public
-export type HellOmnibarChipRemovePart = 'root';
-
-// @public
-export type HellOmnibarChipRemoveUi = HellUi<HellOmnibarChipRemovePart>;
-
-// @public
-export type HellOmnibarChipUi = HellUi<HellOmnibarChipPart>;
 
 // @public
 export class HellOmnibarGroup {
@@ -190,18 +164,6 @@ export class HellOmnibarGroupLabel {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroupLabel, "[hellOmnibarGroupLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarGroupLabel, never>;
 }
-
-// @public
-export type HellOmnibarGroupLabelPart = 'root';
-
-// @public
-export type HellOmnibarGroupLabelUi = HellUi<HellOmnibarGroupLabelPart>;
-
-// @public
-export type HellOmnibarGroupPart = 'root';
-
-// @public
-export type HellOmnibarGroupUi = HellUi<HellOmnibarGroupPart>;
 
 // @public
 export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
@@ -232,27 +194,12 @@ export class HellOmnibarItemIcon {
 }
 
 // @public
-export type HellOmnibarItemIconPart = 'root';
-
-// @public
-export type HellOmnibarItemIconUi = HellUi<HellOmnibarItemIconPart>;
-
-// @public
-export type HellOmnibarItemPart = 'root';
-
-// @public
 export class HellOmnibarItemSubtext {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemSubtext, "[hellOmnibarItemSubtext]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemSubtext, never>;
 }
-
-// @public
-export type HellOmnibarItemSubtextPart = 'root';
-
-// @public
-export type HellOmnibarItemSubtextUi = HellUi<HellOmnibarItemSubtextPart>;
 
 // @public
 export class HellOmnibarItemText {
@@ -263,27 +210,12 @@ export class HellOmnibarItemText {
 }
 
 // @public
-export type HellOmnibarItemTextPart = 'root';
-
-// @public
-export type HellOmnibarItemTextUi = HellUi<HellOmnibarItemTextPart>;
-
-// @public
 export class HellOmnibarItemTrailing {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemTrailing, "[hellOmnibarItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemTrailing, never>;
 }
-
-// @public
-export type HellOmnibarItemTrailingPart = 'root';
-
-// @public
-export type HellOmnibarItemTrailingUi = HellUi<HellOmnibarItemTrailingPart>;
-
-// @public
-export type HellOmnibarItemUi = HellUi<HellOmnibarItemPart>;
 
 // @public
 export interface HellOmnibarLabels {
@@ -304,12 +236,6 @@ export class HellOmnibarPanel {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarPanel, "[hellOmnibarPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarPanel, never>;
 }
-
-// @public
-export type HellOmnibarPanelPart = 'root';
-
-// @public
-export type HellOmnibarPanelUi = HellUi<HellOmnibarPanelPart>;
 
 // @public
 export type HellOmnibarPart = 'root' | 'control' | 'inputWrap' | 'input' | 'clear' | 'panel' | 'actions' | 'results' | 'loading' | 'skeletonRow' | 'skeletonText' | 'empty';
@@ -336,16 +262,15 @@ export interface HellOmnibarSubmitEvent<T = unknown> {
     readonly value: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
+//
 // @public
 export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 
-// @public
-export function provideHellOmnibarLabels(overrides: Partial<HellOmnibarLabels>): Provider;
-
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-omnibar.d.ts:220:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:221:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:170:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:171:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
 
 // (No @packageDocumentation comment for this package)
 

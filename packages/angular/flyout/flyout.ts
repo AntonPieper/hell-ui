@@ -1,4 +1,4 @@
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from '@hell-ui/angular/internal/core';
 import {
   HellFloatingInteractionController,
@@ -36,14 +36,9 @@ import {
 
 let nextFlyoutId = 0;
 
-/** Public parts of the HellFlyout module, styleable through its Part Style Map. */
-export type HellFlyoutPart = 'root';
-/** Part Style Map accepted by the HellFlyout `ui` input. */
-export type HellFlyoutUi = HellUi<HellFlyoutPart>;
-
 const HELL_FLYOUT_RECIPE = {
   root: 'fixed z-[var(--hell-z-popover,1000)] max-w-[min(320px,calc(100vw_-_(var(--spacing-hell-4)*2)))] rounded-hell-md border border-hell-border bg-hell-surface-elevated text-hell-foreground shadow-hell-lg outline-none animate-[hell-flyout-in_var(--hell-duration-fast,150ms)_var(--ease-hell-out,ease)]',
-} satisfies HellRecipe<HellFlyoutPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Trigger half of the flyout pattern. Owns the open state. Render the panel
@@ -154,10 +149,10 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
 })
 export class HellFlyout {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellFlyoutPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellFlyoutPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_FLYOUT_RECIPE,
   });

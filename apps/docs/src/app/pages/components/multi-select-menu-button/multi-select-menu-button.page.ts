@@ -165,7 +165,7 @@ import { PageHeader } from '../../../shared/page-header';
           </ul>
         </li>
         <li>
-          <code>provideHellMultiSelectMenuButtonLabels(overrides)</code> — override the reset item
+          <code>provideHellLabels(HELL_MULTI_SELECT_MENU_BUTTON_LABELS, overrides)</code> — override the reset item
           label (<code>HellMultiSelectMenuButtonLabels</code>) for an injector scope. Exposed token:
           <code>HELL_MULTI_SELECT_MENU_BUTTON_LABELS</code>.
         </li>

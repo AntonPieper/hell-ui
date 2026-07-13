@@ -99,9 +99,6 @@ export type HellFileUploadStatus = 'pending' | 'uploading' | 'done' | 'error';
 // @public
 export type HellFileUploadUi = HellUi<HellFileUploadPart>;
 
-// @public
-export function provideHellFileUploadLabels(overrides: Partial<HellFileUploadLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

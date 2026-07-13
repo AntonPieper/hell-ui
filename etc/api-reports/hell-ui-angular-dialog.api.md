@@ -40,14 +40,6 @@ export class HellDialogDescription {
 }
 
 // @public
-export type HellDialogDescriptionPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
-//
-// @public
-export type HellDialogDescriptionUi = HellUi<HellDialogDescriptionPart>;
-
-// @public
 export class HellDialogOverlay {
     constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -56,15 +48,6 @@ export class HellDialogOverlay {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialogOverlay, "[hellDialogOverlay]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "scoped": { "alias": "scoped"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialogOverlay; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogOverlay, never>;
 }
-
-// @public
-export type HellDialogOverlayPart = 'root';
-
-// @public
-export type HellDialogOverlayUi = HellUi<HellDialogOverlayPart>;
-
-// @public
-export type HellDialogPart = 'root';
 
 // @public
 export class HellDialogScope {
@@ -86,12 +69,6 @@ export class HellDialogTitle {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogTitle, never>;
 }
 
-// @public
-export type HellDialogTitlePart = 'root';
-
-// @public
-export type HellDialogTitleUi = HellUi<HellDialogTitlePart>;
-
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
 //
 // @public
@@ -107,9 +84,6 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialogTrigger<any, any>, "button[hellDialogTrigger], a[hellDialogTrigger]", never, { "template": { "alias": "hellDialogTrigger"; "required": true; "isSignal": true; }; "closeOnEscape": { "alias": "closeOnEscape"; "required": false; "isSignal": true; }; "closeOnOutsideClick": { "alias": "closeOnOutsideClick"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "dialogData": { "alias": "dialogData"; "required": false; "isSignal": true; }; "hellDialogData": { "alias": "hellDialogData"; "required": false; "isSignal": true; }; }, { "closed": "closed"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogTrigger<any, any>, never>;
 }
-
-// @public
-export type HellDialogUi = HellUi<HellDialogPart>;
 
 // (No @packageDocumentation comment for this package)
 

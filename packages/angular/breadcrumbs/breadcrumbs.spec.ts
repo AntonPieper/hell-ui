@@ -1,17 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_BREADCRUMBS_DIRECTIVES,
-  type HellBreadcrumbEllipsisUi,
-  type HellBreadcrumbItemUi,
-  type HellBreadcrumbLinkUi,
-  type HellBreadcrumbListUi,
-  type HellBreadcrumbPageUi,
-  type HellBreadcrumbSeparatorUi,
-  type HellBreadcrumbsUi,
-  provideHellBreadcrumbsLabels,
-} from './breadcrumbs';
+import { HELL_BREADCRUMBS_DIRECTIVES, HELL_BREADCRUMBS_LABELS } from './breadcrumbs';
 
 @Component({
   imports: [...HELL_BREADCRUMBS_DIRECTIVES],
@@ -31,7 +22,7 @@ class BreadcrumbEllipsisHost {}
 
 @Component({
   imports: [...HELL_BREADCRUMBS_DIRECTIVES],
-  providers: [provideHellBreadcrumbsLabels({ showHiddenNavigation: 'Contract breadcrumbs' })],
+  providers: [provideHellLabels(HELL_BREADCRUMBS_LABELS, { showHiddenNavigation: 'Contract breadcrumbs' })],
   template: `
     <nav hellBreadcrumbs>
       <ol hellBreadcrumbList>
@@ -71,7 +62,7 @@ class BreadcrumbPartStyleStringHost {}
 
 @Component({
   imports: [...HELL_BREADCRUMBS_DIRECTIVES],
-  providers: [provideHellBreadcrumbsLabels({ showHiddenNavigation: 'Map breadcrumbs' })],
+  providers: [provideHellLabels(HELL_BREADCRUMBS_LABELS, { showHiddenNavigation: 'Map breadcrumbs' })],
   template: `
     <nav id="breadcrumbs-map" hellBreadcrumbs [ui]="breadcrumbsUi">
       <ol id="list-map" hellBreadcrumbList [ui]="listUi">
@@ -92,31 +83,31 @@ class BreadcrumbPartStyleStringHost {}
 class BreadcrumbPartStyleMapHost {
   readonly breadcrumbsUi = {
     root: 'flex text-hell-info',
-  } satisfies HellBreadcrumbsUi;
+  };
 
   readonly listUi = {
     root: 'grid gap-hell-3',
-  } satisfies HellBreadcrumbListUi;
+  };
 
   readonly itemUi = {
     root: 'grid gap-hell-2',
-  } satisfies HellBreadcrumbItemUi;
+  };
 
   readonly linkUi = {
     root: 'flex text-hell-info',
-  } satisfies HellBreadcrumbLinkUi;
+  };
 
   readonly pageUi = {
     root: 'block text-hell-info-strong',
-  } satisfies HellBreadcrumbPageUi;
+  };
 
   readonly separatorUi = {
     root: 'grid text-hell-info',
-  } satisfies HellBreadcrumbSeparatorUi;
+  };
 
   readonly ellipsisUi = {
     root: 'grid bg-hell-info-soft text-hell-info-strong',
-  } satisfies HellBreadcrumbEllipsisUi;
+  };
 }
 
 describe('HellBreadcrumbEllipsis', () => {

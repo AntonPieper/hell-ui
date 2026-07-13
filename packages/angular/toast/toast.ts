@@ -30,7 +30,7 @@ import {
   hellToastStackSnapshotsEqual,
   type HellToastStackSnapshot,
 } from './toast-stack.runtime';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the toast entry point. */
 export interface HellToastLabels {
@@ -46,21 +46,14 @@ export interface HellToastLabels {
   readonly dismissAll: string;
 }
 
-const HELL_TOAST_LABELS_CONTRACT = hellCreateLabels<HellToastLabels>('HELL_TOAST_LABELS', {
+/** Injection token resolving to the effective toast labels. */
+export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels> = hellCreateLabels<HellToastLabels>('HELL_TOAST_LABELS', {
   notifications: 'Notifications',
   notification: 'Notification',
   stack: 'Notification stack',
   dismiss: 'Dismiss',
   dismissAll: 'Dismiss all',
 });
-
-/** Injection token resolving to the effective toast labels. */
-export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels> = HELL_TOAST_LABELS_CONTRACT.token;
-
-/** Override any subset of the toast labels for an injector scope. */
-export function provideHellToastLabels(overrides: Partial<HellToastLabels>): Provider {
-  return HELL_TOAST_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Visual and semantic style of a toast. */
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';

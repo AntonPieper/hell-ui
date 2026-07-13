@@ -1,12 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_ACCORDION_DIRECTIVES,
-  type HellAccordionContentUi,
-  type HellAccordionItemUi,
-  type HellAccordionTriggerUi,
-} from './accordion';
+import { HELL_ACCORDION_DIRECTIVES } from './accordion';
 
 @Component({
   imports: [...HELL_ACCORDION_DIRECTIVES],
@@ -43,15 +38,15 @@ class AccordionHost {
 
   protected readonly itemUi = {
     root: 'border-b-0',
-  } satisfies HellAccordionItemUi;
+  };
 
   protected readonly triggerUi = {
     root: 'px-hell-7 text-hell-danger',
-  } satisfies HellAccordionTriggerUi;
+  };
 
   protected readonly contentUi = {
     root: 'text-hell-foreground',
-  } satisfies HellAccordionContentUi;
+  };
 }
 
 describe('HellAccordion', () => {

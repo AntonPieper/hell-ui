@@ -34,29 +34,12 @@ export class HellTabList {
 }
 
 // @public
-export type HellTabListPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
-//
-// @public
-export type HellTabListUi = HellUi<HellTabListPart>;
-
-// @public
 export class HellTabPanel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabPanel, "[hellTabPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabPanel; inputs: { "ngpTabPanelValue": "value"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabPanel, never>;
 }
-
-// @public
-export type HellTabPanelPart = 'root';
-
-// @public
-export type HellTabPanelUi = HellUi<HellTabPanelPart>;
-
-// @public
-export type HellTabPart = 'root';
 
 // @public
 export class HellTabset {
@@ -67,15 +50,6 @@ export class HellTabset {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabset, "[hellTabset]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabset; inputs: { "ngpTabsetValue": "value"; "ngpTabsetOrientation": "orientation"; "ngpTabsetActivateOnFocus": "activateOnFocus"; }; outputs: { "ngpTabsetValueChange": "valueChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabset, never>;
 }
-
-// @public
-export type HellTabsetPart = 'root';
-
-// @public
-export type HellTabsetUi = HellUi<HellTabsetPart>;
-
-// @public
-export type HellTabUi = HellUi<HellTabPart>;
 
 // (No @packageDocumentation comment for this package)
 

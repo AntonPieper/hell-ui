@@ -1,12 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  HellToggle,
-  HellToggleGroup,
-  HellToggleGroupItem,
-  type HellToggleGroupItemUi,
-  type HellToggleGroupUi,
-  type HellToggleUi,
-} from '@hell-ui/angular/toggle';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
 
 @Component({
   selector: 'app-toggle-styling-example',
@@ -24,7 +17,7 @@ import {
       Pill toggle
     </button>
 
-    <!-- Equivalent explicit HellToggleUi map form. -->
+    <!-- Equivalent explicit map form. -->
     <button hellToggle type="button" [ui]="toggleUi" [selected]="mapped()" (selectedChange)="mapped.set($event)">
       Map form
     </button>
@@ -42,13 +35,13 @@ export class ToggleStylingExample {
   protected readonly mapped = signal(false);
   protected readonly align = signal<string[]>(['left']);
 
-  protected readonly toggleUi: HellToggleUi = {
+  protected readonly toggleUi = {
     root: 'rounded-hell-xs border-hell-border-strong px-hell-6',
   };
-  protected readonly groupUi: HellToggleGroupUi = {
+  protected readonly groupUi = {
     root: 'gap-hell-2 rounded-hell-lg border-hell-primary bg-hell-primary-soft p-hell-2',
   };
-  protected readonly itemUi: HellToggleGroupItemUi = {
+  protected readonly itemUi = {
     root: 'rounded-hell-md text-hell-primary-soft-foreground data-selected:bg-hell-primary data-selected:text-hell-primary-foreground',
   };
 }

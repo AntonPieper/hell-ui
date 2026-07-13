@@ -175,7 +175,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           <code>disabled</code>: <code>boolean</code>, default <code>false</code>.
           <code>size</code>: <code>HellSize</code> (<code>xs | sm | md | lg | xl</code>), default
           <code>md</code>.
-          <code>ui</code>: <code>HellUiInput&lt;HellTogglePart&gt;</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>hellToggleGroup</code> (any host, typically a <code>div</code>):
@@ -187,7 +187,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           array; the Hell wrapper's own <code>ControlValueAccessor</code> is what maps to/from a
           scalar for <code>single</code> forms — see below).
           <code>disabled</code>: <code>boolean</code>, default <code>false</code>.
-          <code>ui</code>: <code>HellUiInput&lt;HellToggleGroupPart&gt;</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
           Implements Angular's <code>ControlValueAccessor</code>: bind
           <code>[(ngModel)]</code> or <code>formControlName</code> with a plain string
           (<code>single</code>) or string array (<code>multiple</code>) as the control's value
@@ -199,15 +199,11 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           <code>value</code>: <code>string</code>, required.
           <code>disabled</code>: <code>boolean</code>, default <code>false</code>.
           <code>size</code>: <code>HellSize</code>, default <code>sm</code>.
-          <code>ui</code>: <code>HellUiInput&lt;HellToggleGroupItemPart&gt;</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           Exported types: <code>HellToggleGroupValue</code>
-          (<code>string | null | readonly string[]</code>);
-          <code>HellTogglePart</code>, <code>HellToggleGroupPart</code>,
-          <code>HellToggleGroupItemPart</code> (each <code>'root'</code>);
-          <code>HellToggleUi</code>, <code>HellToggleGroupUi</code>,
-          <code>HellToggleGroupItemUi</code> (each <code>HellUi&lt;Part&gt;</code>).
+          (<code>string | null | readonly string[]</code>).
         </li>
       </ul>
 

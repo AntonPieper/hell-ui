@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import {
-  HELL_AVATAR_GROUP_DIRECTIVES,
-  type HellAvatarGroupItemUi,
-  type HellAvatarGroupOverflowUi,
-  type HellAvatarGroupUi,
-} from '@hell-ui/angular/avatar-group';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar-group';
 
 interface TeamMember {
   name: string;
@@ -33,15 +28,15 @@ interface TeamMember {
   `,
 })
 export class AvatarGroupStylingExample {
-  protected readonly groupUi: HellAvatarGroupUi = {
+  protected readonly groupUi = {
     root: 'rounded-hell-md bg-hell-surface-subtle p-hell-2',
   };
 
-  protected readonly itemUi: HellAvatarGroupItemUi = {
+  protected readonly itemUi = {
     root: 'rounded-hell-md',
   };
 
-  protected readonly overflowUi: HellAvatarGroupOverflowUi = {
+  protected readonly overflowUi = {
     root: 'rounded-hell-md border-hell-primary bg-hell-primary text-hell-foreground-inverse',
   };
 

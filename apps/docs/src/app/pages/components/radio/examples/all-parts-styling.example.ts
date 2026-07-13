@@ -1,13 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  HellNativeRadio,
-  HellNativeRadioGroup,
-  HellRadio,
-  HellRadioGroup,
-  HellRadioIndicator,
-  type HellNativeRadioGroupUi,
-  type HellRadioGroupUi,
-} from '@hell-ui/angular/radio';
+import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/radio';
 
 @Component({
   selector: 'app-radio-all-parts-styling-example',
@@ -75,10 +67,10 @@ import {
 })
 export class RadioAllPartsStylingExample {
   protected readonly value = signal('a');
-  protected readonly groupUi: HellRadioGroupUi = {
+  protected readonly groupUi = {
     root: 'gap-hell-2 rounded-hell-lg border border-hell-border bg-hell-surface-subtle p-hell-2',
   };
-  protected readonly nativeGroupUi: HellNativeRadioGroupUi = {
+  protected readonly nativeGroupUi = {
     root: 'gap-hell-4',
   };
 }

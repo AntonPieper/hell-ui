@@ -1,7 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellDialpad, provideHellDialpadLabels, type HellDialpadUi } from './dialpad';
+import { HellDialpad, HELL_DIALPAD_LABELS, type HellDialpadUi } from './dialpad';
 
 @Component({
   selector: 'app-dialpad-host',
@@ -42,7 +43,7 @@ class StatedDialpadHost {
   selector: 'app-localized-dialpad-host',
   imports: [HellDialpad],
   providers: [
-    provideHellDialpadLabels({
+    provideHellLabels(HELL_DIALPAD_LABELS, {
       dialpad: 'Telefonwählschieber',
       backspace: 'Rücktaste',
       call: 'Anrufen',
@@ -158,7 +159,7 @@ describe('HellDialpad labels', () => {
     expect(call.classList.contains('shadow-sm')).toBe(false);
   });
 
-  it('supports label overrides via provideHellDialpadLabels', () => {
+  it('supports label overrides via HELL_DIALPAD_LABELS', () => {
     const fixture = TestBed.createComponent(LocalizedDialpadHost);
     fixture.detectChanges();
 

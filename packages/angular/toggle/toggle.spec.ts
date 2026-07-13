@@ -2,14 +2,7 @@ import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellToggle,
-  type HellToggleGroupItemUi,
-  HellToggleGroup,
-  type HellToggleGroupUi,
-  HellToggleGroupItem,
-  type HellToggleUi,
-} from './toggle';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem } from './toggle';
 
 @Component({
   imports: [ReactiveFormsModule, HellToggleGroup, HellToggleGroupItem],
@@ -61,13 +54,13 @@ class ToggleGroupSingleFormsHost {
 class TogglePartStyleHost {
   protected readonly toggleUi = {
     root: 'bg-hell-danger px-hell-7',
-  } satisfies HellToggleUi;
+  };
   protected readonly groupUi = {
     root: 'gap-hell-4 bg-hell-danger-soft',
-  } satisfies HellToggleGroupUi;
+  };
   protected readonly itemUi = {
     root: 'px-hell-6 text-hell-danger',
-  } satisfies HellToggleGroupItemUi;
+  };
 }
 
 describe('HellToggleGroup', () => {

@@ -13,7 +13,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
 import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
@@ -127,7 +127,8 @@ export interface HellFilterBarLabels {
   readonly cleared: string;
 }
 
-const HELL_FILTER_BAR_LABELS_CONTRACT = hellCreateLabels<HellFilterBarLabels>(
+/** Injection token resolving to the effective Filter Bar labels. */
+export const HELL_FILTER_BAR_LABELS: InjectionToken<HellFilterBarLabels> = hellCreateLabels<HellFilterBarLabels>(
   'HELL_FILTER_BAR_LABELS',
   {
     input: 'Filters',
@@ -155,15 +156,6 @@ const HELL_FILTER_BAR_LABELS_CONTRACT = hellCreateLabels<HellFilterBarLabels>(
     cleared: 'All filters cleared',
   },
 );
-
-/** Injection token resolving to the effective Filter Bar labels. */
-export const HELL_FILTER_BAR_LABELS: InjectionToken<HellFilterBarLabels> =
-  HELL_FILTER_BAR_LABELS_CONTRACT.token;
-
-/** Override any subset of Filter Bar labels for an injector scope. */
-export function provideHellFilterBarLabels(overrides: Partial<HellFilterBarLabels>): Provider {
-  return HELL_FILTER_BAR_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Public parts of `hell-filter-bar`, styleable through its Part Style Map. */
 export type HellFilterBarPart =

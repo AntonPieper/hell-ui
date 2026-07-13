@@ -1,7 +1,7 @@
 import {
   Directive, ElementRef, inject, input } from '@angular/core';
 import { hellCreateLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpBreadcrumbs,
   NgpBreadcrumbList,
@@ -11,7 +11,7 @@ import {
   NgpBreadcrumbSeparator,
   NgpBreadcrumbEllipsis,
 } from 'ng-primitives/breadcrumbs';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the breadcrumbs entry point. */
 export interface HellBreadcrumbLabels {
@@ -19,80 +19,38 @@ export interface HellBreadcrumbLabels {
   readonly showHiddenNavigation: string;
 }
 
-const HELL_BREADCRUMBS_LABELS_CONTRACT = hellCreateLabels<HellBreadcrumbLabels>('HELL_BREADCRUMBS_LABELS', {
+/** Injection token resolving to the effective breadcrumbs labels. */
+export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels> = hellCreateLabels<HellBreadcrumbLabels>('HELL_BREADCRUMBS_LABELS', {
   showHiddenNavigation: 'Show hidden navigation',
 });
 
-/** Injection token resolving to the effective breadcrumbs labels. */
-export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels> = HELL_BREADCRUMBS_LABELS_CONTRACT.token;
-
-/** Override any subset of the breadcrumbs labels for an injector scope. */
-export function provideHellBreadcrumbsLabels(overrides: Partial<HellBreadcrumbLabels>): Provider {
-  return HELL_BREADCRUMBS_LABELS_CONTRACT.provide(overrides);
-}
-
-/** Public parts of the HellBreadcrumbs module, styleable through its Part Style Map. */
-export type HellBreadcrumbsPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbs `ui` input. */
-export type HellBreadcrumbsUi = HellUi<HellBreadcrumbsPart>;
-
-/** Public parts of the HellBreadcrumbList module, styleable through its Part Style Map. */
-export type HellBreadcrumbListPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbList `ui` input. */
-export type HellBreadcrumbListUi = HellUi<HellBreadcrumbListPart>;
-
-/** Public parts of the HellBreadcrumbItem module, styleable through its Part Style Map. */
-export type HellBreadcrumbItemPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbItem `ui` input. */
-export type HellBreadcrumbItemUi = HellUi<HellBreadcrumbItemPart>;
-
-/** Public parts of the HellBreadcrumbLink module, styleable through its Part Style Map. */
-export type HellBreadcrumbLinkPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbLink `ui` input. */
-export type HellBreadcrumbLinkUi = HellUi<HellBreadcrumbLinkPart>;
-
-/** Public parts of the HellBreadcrumbPage module, styleable through its Part Style Map. */
-export type HellBreadcrumbPagePart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbPage `ui` input. */
-export type HellBreadcrumbPageUi = HellUi<HellBreadcrumbPagePart>;
-
-/** Public parts of the HellBreadcrumbSeparator module, styleable through its Part Style Map. */
-export type HellBreadcrumbSeparatorPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbSeparator `ui` input. */
-export type HellBreadcrumbSeparatorUi = HellUi<HellBreadcrumbSeparatorPart>;
-
-/** Public parts of the HellBreadcrumbEllipsis module, styleable through its Part Style Map. */
-export type HellBreadcrumbEllipsisPart = 'root';
-/** Part Style Map accepted by the HellBreadcrumbEllipsis `ui` input. */
-export type HellBreadcrumbEllipsisUi = HellUi<HellBreadcrumbEllipsisPart>;
-
 const HELL_BREADCRUMBS_RECIPE = {
   root: 'inline-flex max-w-full items-center text-sm text-hell-foreground-muted',
-} satisfies HellRecipe<HellBreadcrumbsPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_LIST_RECIPE = {
   root: 'm-0 inline-flex min-w-0 list-none flex-wrap items-center gap-1.5 p-0',
-} satisfies HellRecipe<HellBreadcrumbListPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_ITEM_RECIPE = {
   root: 'inline-flex min-w-0 items-center gap-hell-1',
-} satisfies HellRecipe<HellBreadcrumbItemPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_LINK_RECIPE = {
   root: 'inline-flex max-w-[24ch] cursor-pointer items-center gap-hell-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-inherit no-underline transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:text-hell-foreground hover:underline hover:underline-offset-[3px] data-hover:text-hell-foreground data-hover:underline data-hover:underline-offset-[3px] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
-} satisfies HellRecipe<HellBreadcrumbLinkPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_PAGE_RECIPE = {
   root: 'inline-flex max-w-[32ch] items-center gap-hell-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-hell-foreground',
-} satisfies HellRecipe<HellBreadcrumbPagePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_SEPARATOR_RECIPE = {
   root: 'inline-flex flex-none items-center justify-center text-hell-foreground-subtle',
-} satisfies HellRecipe<HellBreadcrumbSeparatorPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_ELLIPSIS_RECIPE = {
   root: 'inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-hell-foreground-subtle transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-subtle hover:text-hell-foreground data-hover:bg-hell-surface-subtle data-hover:text-hell-foreground data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1',
-} satisfies HellRecipe<HellBreadcrumbEllipsisPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Breadcrumbs — composed from `ng-primitives/breadcrumbs`.
@@ -117,10 +75,10 @@ const HELL_BREADCRUMB_ELLIPSIS_RECIPE = {
 })
 export class HellBreadcrumbs {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbsPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbsPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMBS_RECIPE,
   });
@@ -137,10 +95,10 @@ export class HellBreadcrumbs {
 })
 export class HellBreadcrumbList {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbListPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbListPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_LIST_RECIPE,
   });
@@ -157,10 +115,10 @@ export class HellBreadcrumbList {
 })
 export class HellBreadcrumbItem {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbItemPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbItemPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_ITEM_RECIPE,
   });
@@ -178,10 +136,10 @@ export class HellBreadcrumbItem {
 })
 export class HellBreadcrumbLink {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbLinkPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbLinkPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_LINK_RECIPE,
   });
@@ -206,10 +164,10 @@ export class HellBreadcrumbLink {
 })
 export class HellBreadcrumbPage {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbPagePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbPagePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_PAGE_RECIPE,
   });
@@ -233,10 +191,10 @@ export class HellBreadcrumbPage {
 })
 export class HellBreadcrumbSeparator {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbSeparatorPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbSeparatorPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_SEPARATOR_RECIPE,
   });
@@ -263,10 +221,10 @@ export class HellBreadcrumbSeparator {
 })
 export class HellBreadcrumbEllipsis {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellBreadcrumbEllipsisPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellBreadcrumbEllipsisPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_BREADCRUMB_ELLIPSIS_RECIPE,
   });

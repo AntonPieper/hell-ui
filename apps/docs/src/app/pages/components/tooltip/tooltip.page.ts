@@ -134,7 +134,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         <code>HellTooltip</code> exposes exactly one Public Part, <code>root</code> — the surface
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellTooltipUi</code> map. Both forms merge on top of the default recipe through
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through
         Hell's Tailwind merge, so refinements win deterministically over the defaults they
         conflict with. <code>HellTooltipTrigger</code> renders no owned structure of its own — it
         attaches directly to your <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and has no
@@ -198,14 +198,12 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
       <p>Selector: <code>[hellTooltip]</code>.</p>
       <ul>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellTooltipPart&gt;</code> — a shorthand class
-          string or a <code>HellTooltipUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellTooltipPart</code> (<code>'root'</code>),
-          <code>HellTooltipUi</code> (<code>HellUi&lt;HellTooltipPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

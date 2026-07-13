@@ -1,4 +1,4 @@
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
   Directive,
   ElementRef,
@@ -11,14 +11,9 @@ import {
   signal,
 } from '@angular/core';
 
-/** Public parts of the HellDropZone module, styleable through its Part Style Map. */
-export type HellDropZonePart = 'root';
-/** Part Style Map accepted by the HellDropZone `ui` input. */
-export type HellDropZoneUi = HellUi<HellDropZonePart>;
-
 const HELL_DROP_ZONE_RECIPE = {
   root: 'flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-hell-3 rounded-lg border-[1.5px] border-dashed border-hell-border-strong bg-hell-surface-subtle p-hell-7 text-center text-hell-foreground-muted transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-active:border-hell-primary data-active:bg-hell-primary-soft data-active:text-hell-primary data-[dragover]:border-hell-primary data-[dragover]:bg-hell-primary-soft data-[dragover]:text-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-60',
-} satisfies HellRecipe<HellDropZonePart>;
+} satisfies HellRecipe<'root'>;
 
 function hellFileMatchesAccept(file: File, accept: string | null): boolean {
   const tokens = accept
@@ -70,10 +65,10 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
 })
 export class HellDropZone implements OnDestroy {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellDropZonePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellDropZonePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_DROP_ZONE_RECIPE,
   });

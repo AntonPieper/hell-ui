@@ -1,15 +1,10 @@
 import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-
-/** Public parts of the HellIcon module, styleable through its Part Style Map. */
-export type HellIconPart = 'root';
-/** Part Style Map accepted by the HellIcon `ui` input. */
-export type HellIconUi = HellUi<HellIconPart>;
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
 const HELL_ICON_RECIPE = {
   root: 'inline-flex text-[var(--_hell-icon-color,currentColor)] leading-none',
-} satisfies HellRecipe<HellIconPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Thin styled wrapper around `<ng-icon>` from `@ng-icons/core`.
@@ -39,10 +34,10 @@ const HELL_ICON_RECIPE = {
 })
 export class HellIcon {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellIconPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellIconPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_ICON_RECIPE,
   });

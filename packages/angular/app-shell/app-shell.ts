@@ -1,6 +1,6 @@
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { isElementLike } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
 import {
@@ -20,7 +20,7 @@ import {
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the app shell entry point. */
 export interface HellAppShellLabels {
@@ -34,20 +34,13 @@ export interface HellAppShellLabels {
   readonly hideSecondaryPanel: string;
 }
 
-const HELL_APP_SHELL_LABELS_CONTRACT = hellCreateLabels<HellAppShellLabels>('HELL_APP_SHELL_LABELS', {
+/** Injection token resolving to the effective app shell labels. */
+export const HELL_APP_SHELL_LABELS: InjectionToken<HellAppShellLabels> = hellCreateLabels<HellAppShellLabels>('HELL_APP_SHELL_LABELS', {
   expandSidebar: 'Expand sidebar',
   collapseSidebar: 'Collapse sidebar',
   showSecondaryPanel: 'Show secondary panel',
   hideSecondaryPanel: 'Hide secondary panel',
 });
-
-/** Injection token resolving to the effective app shell labels. */
-export const HELL_APP_SHELL_LABELS: InjectionToken<HellAppShellLabels> = HELL_APP_SHELL_LABELS_CONTRACT.token;
-
-/** Override any subset of the app shell labels for an injector scope. */
-export function provideHellAppShellLabels(overrides: Partial<HellAppShellLabels>): Provider {
-  return HELL_APP_SHELL_LABELS_CONTRACT.provide(overrides);
-}
 
 /** Minimum viewport width in pixels at which the shell uses the desktop layout. */
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
@@ -59,144 +52,69 @@ let nextAppShellId = 0;
 
 type HellAppShellMobilePanel = 'sidenav' | 'secondary';
 
-/** Public parts of the HellAppShell module, styleable through its Part Style Map. */
-export type HellAppShellPart = 'root';
-/** Part Style Map accepted by the HellAppShell `ui` input. */
-export type HellAppShellUi = HellUi<HellAppShellPart>;
-
-/** Public parts of the HellAppTopbar module, styleable through its Part Style Map. */
-export type HellAppTopbarPart = 'root';
-/** Part Style Map accepted by the HellAppTopbar `ui` input. */
-export type HellAppTopbarUi = HellUi<HellAppTopbarPart>;
-
-/** Public parts of the HellAppSidenav module, styleable through its Part Style Map. */
-export type HellAppSidenavPart = 'root';
-/** Part Style Map accepted by the HellAppSidenav `ui` input. */
-export type HellAppSidenavUi = HellUi<HellAppSidenavPart>;
-
-/** Public parts of the HellNavItem module, styleable through its Part Style Map. */
-export type HellNavItemPart = 'root';
-/** Part Style Map accepted by the HellNavItem `ui` input. */
-export type HellNavItemUi = HellUi<HellNavItemPart>;
-
-/** Public parts of the HellNavItemIcon module, styleable through its Part Style Map. */
-export type HellNavItemIconPart = 'root';
-/** Part Style Map accepted by the HellNavItemIcon `ui` input. */
-export type HellNavItemIconUi = HellUi<HellNavItemIconPart>;
-
-/** Public parts of the HellNavItemLabel module, styleable through its Part Style Map. */
-export type HellNavItemLabelPart = 'root';
-/** Part Style Map accepted by the HellNavItemLabel `ui` input. */
-export type HellNavItemLabelUi = HellUi<HellNavItemLabelPart>;
-
-/** Public parts of the HellNavItemTrailing module, styleable through its Part Style Map. */
-export type HellNavItemTrailingPart = 'root';
-/** Part Style Map accepted by the HellNavItemTrailing `ui` input. */
-export type HellNavItemTrailingUi = HellUi<HellNavItemTrailingPart>;
-
-/** Public parts of the HellNavSection module, styleable through its Part Style Map. */
-export type HellNavSectionPart = 'root';
-/** Part Style Map accepted by the HellNavSection `ui` input. */
-export type HellNavSectionUi = HellUi<HellNavSectionPart>;
-
-/** Public parts of the HellNavSectionToggle module, styleable through its Part Style Map. */
-export type HellNavSectionTogglePart = 'root';
-/** Part Style Map accepted by the HellNavSectionToggle `ui` input. */
-export type HellNavSectionToggleUi = HellUi<HellNavSectionTogglePart>;
-
-/** Public parts of the HellNavSectionItems module, styleable through its Part Style Map. */
-export type HellNavSectionItemsPart = 'root';
-/** Part Style Map accepted by the HellNavSectionItems `ui` input. */
-export type HellNavSectionItemsUi = HellUi<HellNavSectionItemsPart>;
-
-/** Public parts of the HellAppContent module, styleable through its Part Style Map. */
-export type HellAppContentPart = 'root';
-/** Part Style Map accepted by the HellAppContent `ui` input. */
-export type HellAppContentUi = HellUi<HellAppContentPart>;
-
-/** Public parts of the HellSidenavToggle module, styleable through its Part Style Map. */
-export type HellSidenavTogglePart = 'root';
-/** Part Style Map accepted by the HellSidenavToggle `ui` input. */
-export type HellSidenavToggleUi = HellUi<HellSidenavTogglePart>;
-
-/** Public parts of the HellSecondaryToggle module, styleable through its Part Style Map. */
-export type HellSecondaryTogglePart = 'root';
-/** Part Style Map accepted by the HellSecondaryToggle `ui` input. */
-export type HellSecondaryToggleUi = HellUi<HellSecondaryTogglePart>;
-
-/** Public parts of the HellAppSecondary module, styleable through its Part Style Map. */
-export type HellAppSecondaryPart = 'root';
-/** Part Style Map accepted by the HellAppSecondary `ui` input. */
-export type HellAppSecondaryUi = HellUi<HellAppSecondaryPart>;
-
-/** Public parts of the HellAppSecondaryBody module, styleable through its Part Style Map. */
-export type HellAppSecondaryBodyPart = 'root';
-/** Part Style Map accepted by the HellAppSecondaryBody `ui` input. */
-export type HellAppSecondaryBodyUi = HellUi<HellAppSecondaryBodyPart>;
-
 const HELL_APP_SHELL_RECIPE = {
   root: 'bg-hell-surface text-hell-foreground',
-} satisfies HellRecipe<HellAppShellPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_APP_TOPBAR_RECIPE = {
   root: 'gap-hell-3 border-hell-border bg-hell-surface-elevated pe-hell-4',
-} satisfies HellRecipe<HellAppTopbarPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_APP_SIDENAV_RECIPE = {
   root: 'gap-0.5 border-hell-border bg-hell-surface-elevated p-hell-3',
-} satisfies HellRecipe<HellAppSidenavPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_ITEM_RECIPE = {
   root: 'gap-hell-3 rounded-md px-3 py-2 text-hell-foreground-muted hover:bg-hell-surface-subtle hover:text-hell-foreground data-[active=true]:bg-hell-primary-soft data-[active=true]:text-hell-primary aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary',
-} satisfies HellRecipe<HellNavItemPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_ITEM_ICON_RECIPE = {
   root: 'w-4 text-hell-foreground-subtle',
-} satisfies HellRecipe<HellNavItemIconPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_ITEM_LABEL_RECIPE = {
   root: 'text-ellipsis',
-} satisfies HellRecipe<HellNavItemLabelPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_ITEM_TRAILING_RECIPE = {
   root: 'text-hell-foreground-subtle',
-} satisfies HellRecipe<HellNavItemTrailingPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_SECTION_RECIPE = {
   root: 'flex flex-col',
-} satisfies HellRecipe<HellNavSectionPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_SECTION_TOGGLE_RECIPE = {
   root: 'gap-hell-2 rounded-hell-sm px-3 py-1.5 text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:outline-hell-focus-ring',
-} satisfies HellRecipe<HellNavSectionTogglePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_NAV_SECTION_ITEMS_RECIPE = {
   root: 'gap-0.5',
-} satisfies HellRecipe<HellNavSectionItemsPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_APP_CONTENT_RECIPE = {
   root: 'bg-hell-surface-subtle p-hell-6',
-} satisfies HellRecipe<HellAppContentPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SIDENAV_TOGGLE_SHELL_RECIPE = {
   root: 'text-hell-foreground-muted hover:text-hell-foreground',
-} satisfies HellRecipe<HellSidenavTogglePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SECONDARY_TOGGLE_HEADER_RECIPE = {
   root: 'gap-hell-2 border-hell-border px-hell-4 py-hell-3 text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:outline-hell-focus-ring',
-} satisfies HellRecipe<HellSecondaryTogglePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_SECONDARY_TOGGLE_RAIL_RECIPE = {
   root: 'text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-primary',
-} satisfies HellRecipe<HellSecondaryTogglePart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_APP_SECONDARY_RECIPE = {
   root: 'border-hell-border bg-hell-surface-elevated',
-} satisfies HellRecipe<HellAppSecondaryPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_APP_SECONDARY_BODY_RECIPE = {
   root: 'opacity-100',
-} satisfies HellRecipe<HellAppSecondaryBodyPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Application shell — top bar + collapsible sidenav + main content + optional
@@ -241,10 +159,10 @@ const HELL_APP_SECONDARY_BODY_RECIPE = {
 })
 export class HellAppShell implements OnDestroy {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppShellPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppShellPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_SHELL_RECIPE,
   });
@@ -609,10 +527,10 @@ export class HellAppShell implements OnDestroy {
 })
 export class HellAppTopbar {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppTopbarPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppTopbarPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_TOPBAR_RECIPE,
   });
@@ -634,10 +552,10 @@ export class HellAppTopbar {
 })
 export class HellAppSidenav {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppSidenavPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppSidenavPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_SIDENAV_RECIPE,
   });
@@ -677,10 +595,10 @@ export class HellAppSidenav {
 })
 export class HellNavItem {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavItemPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavItemPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_ITEM_RECIPE,
   });
@@ -699,10 +617,10 @@ export class HellNavItem {
 })
 export class HellNavItemIcon {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavItemIconPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavItemIconPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_ITEM_ICON_RECIPE,
   });
@@ -718,10 +636,10 @@ export class HellNavItemIcon {
 })
 export class HellNavItemLabel {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavItemLabelPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavItemLabelPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_ITEM_LABEL_RECIPE,
   });
@@ -737,10 +655,10 @@ export class HellNavItemLabel {
 })
 export class HellNavItemTrailing {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavItemTrailingPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavItemTrailingPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_ITEM_TRAILING_RECIPE,
   });
@@ -757,10 +675,10 @@ export class HellNavItemTrailing {
 })
 export class HellNavSection {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavSectionPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavSectionPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_SECTION_RECIPE,
   });
@@ -798,10 +716,10 @@ export class HellNavSection {
 })
 export class HellNavSectionToggle {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavSectionTogglePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavSectionTogglePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_SECTION_TOGGLE_RECIPE,
   });
@@ -826,10 +744,10 @@ export class HellNavSectionToggle {
 })
 export class HellNavSectionItems {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNavSectionItemsPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNavSectionItemsPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_NAV_SECTION_ITEMS_RECIPE,
   });
@@ -855,10 +773,10 @@ export class HellNavSectionItems {
 })
 export class HellAppContent {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppContentPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppContentPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_CONTENT_RECIPE,
   });
@@ -897,10 +815,10 @@ export class HellSidenavToggle {
   /** Visual variant of the toggle. Defaults to `plain`. */
   readonly appearance = input<'plain' | 'shell'>('plain');
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSidenavTogglePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSidenavTogglePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => this.appearance() === 'shell' ? HELL_SIDENAV_TOGGLE_SHELL_RECIPE : { root: '' },
   });
@@ -936,10 +854,10 @@ export class HellSecondaryToggle {
   /** Visual variant of the toggle. Defaults to `plain`. */
   readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSecondaryTogglePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSecondaryTogglePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => {
     if (this.appearance() === 'header') return HELL_SECONDARY_TOGGLE_HEADER_RECIPE;
@@ -973,10 +891,10 @@ export class HellSecondaryToggle {
 })
 export class HellAppSecondary {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppSecondaryPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppSecondaryPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_SECONDARY_RECIPE,
   });
@@ -1017,10 +935,10 @@ export class HellAppSecondary {
 })
 export class HellAppSecondaryBody {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellAppSecondaryBodyPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellAppSecondaryBodyPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_APP_SECONDARY_BODY_RECIPE,
   });

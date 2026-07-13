@@ -128,7 +128,7 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
         <code>HellSpinner</code> owns exactly one Public Part, <code>root</code> — the host
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellSpinnerUi</code> map. Refinements merge on top of the variant/size recipe through
+        <code>&#123; root?: string &#125;</code> map. Refinements merge on top of the variant/size recipe through
         Hell's Tailwind merge, so a conflicting utility such as a custom <code>text-[36px]</code>
         font-size wins deterministically over the size preset it replaces.
       </p>
@@ -174,18 +174,16 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
           injected <code>HELL_SPINNER_LABELS</code> loading label.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellSpinnerPart&gt;</code> — a shorthand class
-          string or a <code>HellSpinnerUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellSpinnerPart</code> (<code>'root'</code>),
-          <code>HellSpinnerUi</code> (<code>HellUi&lt;HellSpinnerPart&gt;</code>),
-          <code>HellSpinnerVariant</code>.
+          Exported types: <code>HellSpinnerVariant</code>.
         </li>
         <li>
           Also exported from this entry point: <code>HELL_SPINNER_LABELS</code> injection token
-          and <code>provideHellSpinnerLabels()</code>, which override the built-in
+          and <code>provideHellLabels(HELL_SPINNER_LABELS, …)</code>, which override the built-in
           <code>loading</code> label for <code>hellSpinner</code> in an injector's scope.
         </li>
       </ul>

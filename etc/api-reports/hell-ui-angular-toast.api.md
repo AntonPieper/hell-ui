@@ -130,9 +130,6 @@ export class HellToastTemplate {
 // @public
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
 
-// @public
-export function provideHellToastLabels(overrides: Partial<HellToastLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

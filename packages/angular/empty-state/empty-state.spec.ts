@@ -1,13 +1,8 @@
 import { Component, signal } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_EMPTY_STATE_DIRECTIVES,
-  provideHellEmptyStateLabels,
-  type HellEmptyStateHeadingLevel,
-  type HellEmptyStatePreset,
-  type HellEmptyStateUi,
-} from './empty-state';
+import { HELL_EMPTY_STATE_DIRECTIVES, HELL_EMPTY_STATE_LABELS, type HellEmptyStateHeadingLevel, type HellEmptyStatePreset, type HellEmptyStateUi } from './empty-state';
 
 @Component({
   imports: [...HELL_EMPTY_STATE_DIRECTIVES],
@@ -120,7 +115,7 @@ describe('HellEmptyState', () => {
 
   it('lets the Label Contract override preset copy for a scope', () => {
     const fixture = setup([
-      provideHellEmptyStateLabels({
+      provideHellLabels(HELL_EMPTY_STATE_LABELS, {
         noDataTitle: 'No invoices yet',
         noDataDescription: 'Create your first invoice to get started.',
       }),

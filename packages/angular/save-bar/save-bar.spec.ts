@@ -1,14 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
-import {
-  HellSaveBar,
-  provideHellSaveBarLabels,
-  type HellSaveBarMode,
-  type HellSaveBarSaveType,
-  type HellSaveBarUi,
-} from './save-bar';
+import { HellSaveBar, HELL_SAVE_BAR_LABELS, type HellSaveBarMode, type HellSaveBarSaveType, type HellSaveBarUi } from './save-bar';
 import type { HellSize } from '@hell-ui/angular/core';
 
 const liveAnnounce = vi.fn(() => Promise.resolve());
@@ -212,7 +207,7 @@ describe('HellSaveBar', () => {
   describe('label contract', () => {
     it('lets the Label Contract override the message and action labels for a scope', () => {
       const fixture = setup([
-        provideHellSaveBarLabels({
+        provideHellLabels(HELL_SAVE_BAR_LABELS, {
           message: 'Draft not published',
           save: 'Publish',
           discard: 'Revert',
@@ -285,7 +280,7 @@ describe('HellSaveBar', () => {
     });
 
     it('renders and announces the per-instance message, overriding the Label Contract', () => {
-      const fixture = setup([provideHellSaveBarLabels({ message: 'You have unsaved changes' })]);
+      const fixture = setup([provideHellLabels(HELL_SAVE_BAR_LABELS, { message: 'You have unsaved changes' })]);
       fixture.componentInstance.message.set('Unsent fax');
       fixture.componentInstance.dirty.set(true);
       fixture.detectChanges();

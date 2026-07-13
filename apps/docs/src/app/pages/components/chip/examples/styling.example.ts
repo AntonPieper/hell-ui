@@ -1,11 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  HellChip,
-  HellChipRemove,
-  HellChipSet,
-  type HellChipRemoveUi,
-  type HellChipUi,
-} from '@hell-ui/angular/chip';
+import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-chip-styling-example',
@@ -27,9 +21,9 @@ import {
 export class ChipStylingExample {
   protected readonly chipUi = {
     root: 'rounded-hell-md bg-hell-primary text-hell-primary-foreground',
-  } satisfies HellChipUi;
+  };
 
   protected readonly removeUi = {
     root: 'hover:bg-white/25',
-  } satisfies HellChipRemoveUi;
+  };
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABS_DIRECTIVES, type HellTabsetUi } from '@hell-ui/angular/tabs';
+import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 
 @Component({
   selector: 'app-tabs-styling-example',
@@ -37,7 +37,7 @@ import { HELL_TABS_DIRECTIVES, type HellTabsetUi } from '@hell-ui/angular/tabs';
   `,
 })
 export class TabsStylingExample {
-  protected readonly tabsetUi: HellTabsetUi = {
+  protected readonly tabsetUi = {
     root: 'gap-hell-3',
   };
 }

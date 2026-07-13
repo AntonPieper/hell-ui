@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSkeleton, type HellSkeletonUi } from '@hell-ui/angular/skeleton';
+import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 @Component({
   selector: 'app-skeleton-all-parts-styling-example',
@@ -13,7 +13,7 @@ import { HellSkeleton, type HellSkeletonUi } from '@hell-ui/angular/skeleton';
   `,
 })
 export class SkeletonAllPartsStylingExample {
-  protected readonly skeletonUi: HellSkeletonUi = {
+  protected readonly skeletonUi = {
     root: 'bg-hell-info-soft',
   };
 }

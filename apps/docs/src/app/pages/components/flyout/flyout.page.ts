@@ -123,7 +123,7 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
         <code>HellFlyout</code> exposes exactly one Public Part, <code>root</code> — the panel
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellFlyoutUi</code> map. Both forms merge on top of the default recipe through Hell's
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through Hell's
         Tailwind merge, so refinements win deterministically over the defaults they conflict with.
         <code>HellFlyoutTrigger</code> renders no owned structure of its own — it attaches directly
         to your <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and has no Part Style Map.
@@ -195,14 +195,12 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
         <li><code>closeOnEscape</code>: <code>boolean</code>, default <code>true</code>.</li>
         <li><code>closeOnOutsideInteraction</code>: <code>boolean</code>, default <code>true</code>.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellFlyoutPart&gt;</code> — a shorthand class
-          string or a <code>HellFlyoutUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellFlyoutPart</code> (<code>'root'</code>),
-          <code>HellFlyoutUi</code> (<code>HellUi&lt;HellFlyoutPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

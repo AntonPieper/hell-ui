@@ -36,32 +36,12 @@ export class HellAvatarGroupItem {
 }
 
 // @public
-export type HellAvatarGroupItemPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
-//
-// @public
-export type HellAvatarGroupItemUi = HellUi<HellAvatarGroupItemPart>;
-
-// @public
 export class HellAvatarGroupOverflow {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupOverflow, "[hellAvatarGroupOverflow]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroupOverflow, never>;
 }
-
-// @public
-export type HellAvatarGroupOverflowPart = 'root';
-
-// @public
-export type HellAvatarGroupOverflowUi = HellUi<HellAvatarGroupOverflowPart>;
-
-// @public
-export type HellAvatarGroupPart = 'root';
-
-// @public
-export type HellAvatarGroupUi = HellUi<HellAvatarGroupPart>;
 
 // (No @packageDocumentation comment for this package)
 

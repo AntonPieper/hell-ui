@@ -35,14 +35,6 @@ export class HellListboxHeader {
 }
 
 // @public
-export type HellListboxHeaderPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-listbox.d.ts
-//
-// @public
-export type HellListboxHeaderUi = HellUi<HellListboxHeaderPart>;
-
-// @public
 export class HellListboxOption {
     protected readonly option: NgpListboxOption<any>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -50,15 +42,6 @@ export class HellListboxOption {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxOption, "[hellListboxOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxOption; inputs: { "id": "id"; "ngpListboxOptionValue": "value"; "ngpListboxOptionDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxOption, never>;
 }
-
-// @public
-export type HellListboxOptionPart = 'root';
-
-// @public
-export type HellListboxOptionUi = HellUi<HellListboxOptionPart>;
-
-// @public
-export type HellListboxPart = 'root';
 
 // @public
 export class HellListboxSection {
@@ -69,19 +52,10 @@ export class HellListboxSection {
 }
 
 // @public
-export type HellListboxSectionPart = 'root';
-
-// @public
-export type HellListboxSectionUi = HellUi<HellListboxSectionPart>;
-
-// @public
 export class HellListboxTrigger {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxTrigger, "[hellListboxTrigger]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpListboxTrigger; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxTrigger, never>;
 }
-
-// @public
-export type HellListboxUi = HellUi<HellListboxPart>;
 
 // (No @packageDocumentation comment for this package)
 

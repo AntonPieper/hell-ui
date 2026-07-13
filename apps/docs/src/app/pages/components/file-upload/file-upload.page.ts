@@ -171,7 +171,7 @@ import { PageHeader } from '../../../shared/page-header';
           </ul>
         </li>
         <li>
-          <code>provideHellFileUploadLabels(overrides)</code> — override any subset of the built-in
+          <code>provideHellLabels(HELL_FILE_UPLOAD_LABELS, overrides)</code> — override any subset of the built-in
           strings, rejection reasons, and announcements (<code>HellFileUploadLabels</code>) for an
           injector scope. Exposed token: <code>HELL_FILE_UPLOAD_LABELS</code>.
         </li>

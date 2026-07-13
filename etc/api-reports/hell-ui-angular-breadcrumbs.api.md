@@ -32,26 +32,12 @@ export class HellBreadcrumbEllipsis {
 }
 
 // @public
-export type HellBreadcrumbEllipsisPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-breadcrumbs.d.ts
-//
-// @public
-export type HellBreadcrumbEllipsisUi = HellUi<HellBreadcrumbEllipsisPart>;
-
-// @public
 export class HellBreadcrumbItem {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbItem, "li[hellBreadcrumbItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbItem; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbItem, never>;
 }
-
-// @public
-export type HellBreadcrumbItemPart = 'root';
-
-// @public
-export type HellBreadcrumbItemUi = HellUi<HellBreadcrumbItemPart>;
 
 // @public
 export interface HellBreadcrumbLabels {
@@ -68,12 +54,6 @@ export class HellBreadcrumbLink {
 }
 
 // @public
-export type HellBreadcrumbLinkPart = 'root';
-
-// @public
-export type HellBreadcrumbLinkUi = HellUi<HellBreadcrumbLinkPart>;
-
-// @public
 export class HellBreadcrumbList {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -82,24 +62,12 @@ export class HellBreadcrumbList {
 }
 
 // @public
-export type HellBreadcrumbListPart = 'root';
-
-// @public
-export type HellBreadcrumbListUi = HellUi<HellBreadcrumbListPart>;
-
-// @public
 export class HellBreadcrumbPage {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbPage, "[hellBreadcrumbPage]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbPage; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbPage, never>;
 }
-
-// @public
-export type HellBreadcrumbPagePart = 'root';
-
-// @public
-export type HellBreadcrumbPageUi = HellUi<HellBreadcrumbPagePart>;
 
 // @public
 export class HellBreadcrumbs {
@@ -116,21 +84,6 @@ export class HellBreadcrumbSeparator {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbSeparator, "li[hellBreadcrumbSeparator], [hellBreadcrumbSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbSeparator; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbSeparator, never>;
 }
-
-// @public
-export type HellBreadcrumbSeparatorPart = 'root';
-
-// @public
-export type HellBreadcrumbSeparatorUi = HellUi<HellBreadcrumbSeparatorPart>;
-
-// @public
-export type HellBreadcrumbsPart = 'root';
-
-// @public
-export type HellBreadcrumbsUi = HellUi<HellBreadcrumbsPart>;
-
-// @public
-export function provideHellBreadcrumbsLabels(overrides: Partial<HellBreadcrumbLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

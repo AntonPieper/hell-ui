@@ -1,13 +1,9 @@
 import { Component } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HellButton } from '@hell-ui/angular/button';
 
-import {
-  hellCountdownAction,
-  hellDestructiveAction,
-  injectHellPopconfirm,
-  provideHellConfirmLabels,
-} from './confirm';
+import { hellCountdownAction, hellDestructiveAction, injectHellPopconfirm, HELL_CONFIRM_LABELS } from './confirm';
 
 const POPCONFIRM_TEST_TIMEOUT_MS = 15000;
 const POPCONFIRM_TEST_CASE_TIMEOUT_MS = 30000;
@@ -175,7 +171,7 @@ describe('injectHellPopconfirm', () => {
     'applies Label Contract defaults to the action and cancel labels',
     async () => {
       TestBed.configureTestingModule({
-        providers: [provideHellConfirmLabels({ confirm: 'Ja', cancel: 'Nein' })],
+        providers: [provideHellLabels(HELL_CONFIRM_LABELS, { confirm: 'Ja', cancel: 'Nein' })],
       });
       const { fixture, host } = setup();
 

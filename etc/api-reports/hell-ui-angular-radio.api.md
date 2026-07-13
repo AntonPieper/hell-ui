@@ -41,20 +41,6 @@ export class HellNativeRadioGroup {
 }
 
 // @public
-export type HellNativeRadioGroupPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-radio.d.ts
-//
-// @public
-export type HellNativeRadioGroupUi = HellUi<HellNativeRadioGroupPart>;
-
-// @public
-export type HellNativeRadioPart = 'root';
-
-// @public
-export type HellNativeRadioUi = HellUi<HellNativeRadioPart>;
-
-// @public
 export class HellRadio {
     constructor();
     protected readonly groupDisabled: _angular_core.Signal<boolean>;
@@ -84,19 +70,7 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellRadioGroup<any>, never>;
 }
 
-// @public
-export type HellRadioGroupPart = 'root';
-
-// @public
-export type HellRadioGroupUi = HellUi<HellRadioGroupPart>;
-
 export { HellRadioIndicator }
-
-// @public
-export type HellRadioPart = 'root';
-
-// @public
-export type HellRadioUi = HellUi<HellRadioPart>;
 
 // (No @packageDocumentation comment for this package)
 

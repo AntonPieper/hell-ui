@@ -25,9 +25,6 @@ export class HellPopover {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPopover, never>;
 }
 
-// @public
-export type HellPopoverPart = 'root';
-
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-popover.d.ts
 //
 // @public
@@ -38,11 +35,6 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellPopoverTrigger, "button[hellPopoverTrigger], a[hellPopoverTrigger]", ["hellPopoverTrigger"], {}, {}, never, never, true, [{ directive: typeof i1.NgpPopoverTrigger; inputs: { "ngpPopoverTrigger": "hellPopoverTrigger"; "ngpPopoverTriggerPlacement": "placement"; "ngpPopoverTriggerOffset": "offset"; "ngpPopoverTriggerFlip": "flip"; "ngpPopoverTriggerShift": "shift"; "ngpPopoverTriggerContainer": "container"; "ngpPopoverTriggerDisabled": "disabled"; "ngpPopoverTriggerCloseOnEscape": "closeOnEscape"; "ngpPopoverTriggerCloseOnOutsideClick": "closeOnOutsideClick"; }; outputs: { "ngpPopoverTriggerOpenChange": "openChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPopoverTrigger, never>;
 }
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-popover.d.ts
-//
-// @public
-export type HellPopoverUi = HellUi<HellPopoverPart>;
 
 // (No @packageDocumentation comment for this package)
 

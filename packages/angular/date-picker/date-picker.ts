@@ -32,7 +32,7 @@ import { injectButtonState } from 'ng-primitives/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the date picker entry point. */
 export interface HellDatePickerLabels {
@@ -46,20 +46,13 @@ export interface HellDatePickerLabels {
   readonly nextMonth: string;
 }
 
-const HELL_DATE_PICKER_LABELS_CONTRACT = hellCreateLabels<HellDatePickerLabels>('HELL_DATE_PICKER_LABELS', {
+/** Injection token resolving to the effective date picker labels. */
+export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels> = hellCreateLabels<HellDatePickerLabels>('HELL_DATE_PICKER_LABELS', {
   previousYear: 'Previous year',
   nextYear: 'Next year',
   previousMonth: 'Previous month',
   nextMonth: 'Next month',
 });
-
-/** Injection token resolving to the effective date picker labels. */
-export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels> = HELL_DATE_PICKER_LABELS_CONTRACT.token;
-
-/** Override any subset of the date picker labels for an injector scope. */
-export function provideHellDatePickerLabels(overrides: Partial<HellDatePickerLabels>): Provider {
-  return HELL_DATE_PICKER_LABELS_CONTRACT.provide(overrides);
-}
 
 const HELL_DATE_PICKER_ICONS = {
   faSolidAnglesLeft,

@@ -3,23 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { BreakpointObserver, type BreakpointState } from '@angular/cdk/layout';
 import { ReplaySubject } from 'rxjs';
 
-import {
-  HELL_APP_SHELL_DIRECTIVES,
-  HELL_APP_SHELL_MOBILE_MEDIA,
-  type HellAppContentUi,
-  type HellAppSecondaryUi,
-  type HellAppSidenavUi,
-  type HellAppTopbarUi,
-  type HellNavItemIconUi,
-  type HellNavItemLabelUi,
-  type HellNavItemTrailingUi,
-  type HellNavItemUi,
-  type HellNavSectionItemsUi,
-  type HellNavSectionToggleUi,
-  type HellNavSectionUi,
-  type HellSecondaryToggleUi,
-  type HellSidenavToggleUi,
-} from './app-shell';
+import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
 
 @Component({
   imports: [...HELL_APP_SHELL_DIRECTIVES],
@@ -190,21 +174,21 @@ class FallbackShellHost {}
   `,
 })
 class UiShellHost {
-  readonly topbarUi = { root: 'bg-hell-danger border-hell-danger' } satisfies HellAppTopbarUi;
-  readonly sidenavUi = { root: 'bg-hell-surface-muted border-hell-danger' } satisfies HellAppSidenavUi;
-  readonly sidenavToggleUi = { root: 'text-hell-danger' } satisfies HellSidenavToggleUi;
-  readonly navSectionUi = { root: 'gap-hell-2' } satisfies HellNavSectionUi;
-  readonly navSectionToggleUi = { root: 'text-hell-danger' } satisfies HellNavSectionToggleUi;
-  readonly navSectionItemsUi = { root: 'gap-hell-2' } satisfies HellNavSectionItemsUi;
+  readonly topbarUi = { root: 'bg-hell-danger border-hell-danger' };
+  readonly sidenavUi = { root: 'bg-hell-surface-muted border-hell-danger' };
+  readonly sidenavToggleUi = { root: 'text-hell-danger' };
+  readonly navSectionUi = { root: 'gap-hell-2' };
+  readonly navSectionToggleUi = { root: 'text-hell-danger' };
+  readonly navSectionItemsUi = { root: 'gap-hell-2' };
   readonly navItemUi = {
     root: 'bg-hell-danger text-hell-foreground-inverse px-hell-7',
-  } satisfies HellNavItemUi;
-  readonly navIconUi = { root: 'text-hell-danger w-6' } satisfies HellNavItemIconUi;
-  readonly navLabelUi = { root: 'text-clip' } satisfies HellNavItemLabelUi;
-  readonly navTrailingUi = { root: 'text-hell-danger' } satisfies HellNavItemTrailingUi;
-  readonly contentUi = { root: 'bg-hell-surface-muted p-hell-2' } satisfies HellAppContentUi;
-  readonly secondaryUi = { root: 'bg-hell-surface-muted border-hell-danger' } satisfies HellAppSecondaryUi;
-  readonly secondaryToggleUi = { root: 'text-hell-danger' } satisfies HellSecondaryToggleUi;
+  };
+  readonly navIconUi = { root: 'text-hell-danger w-6' };
+  readonly navLabelUi = { root: 'text-clip' };
+  readonly navTrailingUi = { root: 'text-hell-danger' };
+  readonly contentUi = { root: 'bg-hell-surface-muted p-hell-2' };
+  readonly secondaryUi = { root: 'bg-hell-surface-muted border-hell-danger' };
+  readonly secondaryToggleUi = { root: 'text-hell-danger' };
 }
 
 let mediaController: ReturnType<typeof createMobileLayoutController>;

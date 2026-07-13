@@ -118,7 +118,7 @@ import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.e
       <p>
         Pass <code>ui="..."</code> as shorthand to refine <code>root</code>, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellIconUi</code> map. Both forms merge on top of the default recipe through Hell's
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through Hell's
         Tailwind merge, so a conflicting utility like <code>text-hell-primary</code> wins
         deterministically over the inherited-color default.
       </p>
@@ -134,14 +134,12 @@ import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.e
         <li><code>decorative</code>: <code>boolean</code>. Hides the icon from assistive technology when <code>true</code>. Default <code>true</code>.</li>
         <li><code>aria-label</code>: <code>string | null</code> (input alias for <code>ariaLabel</code>). Accessible name used when <code>decorative</code> is <code>false</code>. Default <code>null</code>.</li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellIconPart&gt;</code> — a shorthand class string
-          or a <code>HellIconUi</code> map (<code>&#123; root: string &#125;</code>) that refines
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class string
+          or a <code>&#123; root?: string &#125;</code> map that refines
           the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellIconPart</code> (<code>'root'</code>), <code>HellIconUi</code>
-          (<code>HellUi&lt;HellIconPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

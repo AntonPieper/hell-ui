@@ -160,7 +160,7 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         </li>
         <li><code>disabled</code>, <code>placeholder</code>, <code>aria-label</code>, and <code>ui</code>.</li>
         <li>
-          <code>provideHellFilterBarLabels(overrides)</code> localizes the input label; clear-all
+          <code>provideHellLabels(HELL_FILTER_BAR_LABELS, overrides)</code> localizes the input label; clear-all
           and apply actions; entity loading, empty, and error states; range input names and display;
           free-text field, suggestion, and token copy; token edit labels; and added, updated, removed,
           and cleared live announcements.
@@ -181,7 +181,7 @@ import filterBarTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw'
         </li>
         <li>
           Add, update, remove, and clear operations are announced through a polite live region.
-          Localize those messages with <code>provideHellFilterBarLabels</code> together with the
+          Localize those messages with <code>HELL_FILTER_BAR_LABELS</code> together with the
           visible built-in copy.
         </li>
         <li>

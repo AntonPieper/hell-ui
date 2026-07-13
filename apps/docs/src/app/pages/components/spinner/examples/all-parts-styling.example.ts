@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSpinner, type HellSpinnerUi } from '@hell-ui/angular/spinner';
+import { HellSpinner } from '@hell-ui/angular/spinner';
 
 @Component({
   selector: 'app-spinner-all-parts-styling-example',
@@ -16,7 +16,7 @@ import { HellSpinner, type HellSpinnerUi } from '@hell-ui/angular/spinner';
   `,
 })
 export class SpinnerAllPartsStylingExample {
-  protected readonly spinnerUi: HellSpinnerUi = {
+  protected readonly spinnerUi = {
     root: 'text-hell-success',
   };
 }

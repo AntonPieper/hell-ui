@@ -1,23 +1,8 @@
 import { Component, signal } from '@angular/core';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HellPagination,
-  HellPaginationButton,
-  HellPaginationFirst,
-  HellPaginationLast,
-  HellPaginationNext,
-  HellPaginationPrev,
-  HellPaginationStrip,
-  type HellPaginationButtonUi,
-  type HellPaginationFirstUi,
-  type HellPaginationLastUi,
-  type HellPaginationMode,
-  type HellPaginationNextUi,
-  type HellPaginationPrevUi,
-  type HellPaginationStripUi,
-  provideHellPaginationLabels,
-} from './pagination';
+import { HellPagination, HellPaginationButton, HellPaginationFirst, HellPaginationLast, HellPaginationNext, HellPaginationPrev, HellPaginationStrip, type HellPaginationMode, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -84,7 +69,7 @@ class PaginationExplicitDisabledHost {}
 @Component({
   imports: [HellPaginationStrip],
   providers: [
-    provideHellPaginationLabels({
+    provideHellLabels(HELL_PAGINATION_LABELS, {
       navigation: 'Seiten',
       nextPage: 'Nächste Seite',
       page: (page) => `Seite ${page}`,
@@ -135,19 +120,19 @@ class PaginationUiHost {
   readonly page = signal(2);
   readonly pageCount = signal(4);
   readonly pageEvents: number[] = [];
-  protected readonly firstUi = 'bg-hell-danger px-hell-7' satisfies HellPaginationFirstUi['root'];
+  protected readonly firstUi = 'bg-hell-danger px-hell-7';
   protected readonly prevUi = {
     root: 'bg-hell-surface-muted px-hell-6',
-  } satisfies HellPaginationPrevUi;
+  };
   protected readonly buttonUi = {
     root: 'rounded-hell-pill bg-hell-primary px-hell-8',
-  } satisfies HellPaginationButtonUi;
+  };
   protected readonly nextUi = {
     root: 'border-hell-danger px-hell-5',
-  } satisfies HellPaginationNextUi;
+  };
   protected readonly lastUi = {
     root: 'bg-hell-danger px-hell-7',
-  } satisfies HellPaginationLastUi;
+  };
   protected readonly stripUi = {
     root: 'gap-hell-4 bg-hell-surface-muted',
     control: 'rounded-hell-pill px-hell-9',

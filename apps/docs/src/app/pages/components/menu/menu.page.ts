@@ -241,14 +241,14 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <li><code>offset</code>: <code>number</code> or axis object. Default <code>0</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>flip</code>: <code>boolean</code> or options object. Default <code>true</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellSubmenuTriggerPart&gt;</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p><strong>Items and content</strong>:</p>
       <ul>
         <li>
           <code>hellMenuItem</code> (button/anchor/div): <code>disabled</code>: <code>boolean</code>;
           <code>closeOnSelect</code>: <code>boolean</code> (default <code>true</code>);
-          <code>ui</code>: <code>HellUiInput&lt;HellMenuItemPart&gt;</code>.
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
           <code>hellMenuItemCheckbox</code> (button): <code>checked</code>: <code>boolean</code>;

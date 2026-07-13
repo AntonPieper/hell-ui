@@ -36,14 +36,6 @@ export class HellFieldDescription {
 }
 
 // @public
-export type HellFieldDescriptionPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-field.d.ts
-//
-// @public
-export type HellFieldDescriptionUi = HellUi<HellFieldDescriptionPart>;
-
-// @public
 export class HellFieldError {
     protected readonly field: HellField | null;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -53,30 +45,12 @@ export class HellFieldError {
 }
 
 // @public
-export type HellFieldErrorPart = 'root';
-
-// @public
-export type HellFieldErrorUi = HellUi<HellFieldErrorPart>;
-
-// @public
 export class HellFieldLabel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldLabel, "label[hellFieldLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpLabel; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldLabel, never>;
 }
-
-// @public
-export type HellFieldLabelPart = 'root';
-
-// @public
-export type HellFieldLabelUi = HellUi<HellFieldLabelPart>;
-
-// @public
-export type HellFieldPart = 'root';
-
-// @public
-export type HellFieldUi = HellUi<HellFieldPart>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,11 +1,12 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellSpinner, type HellSpinnerUi, provideHellSpinnerLabels } from './spinner';
+import { HellSpinner, HELL_SPINNER_LABELS } from './spinner';
 
 @Component({
   imports: [HellSpinner],
-  providers: [provideHellSpinnerLabels({ loading: 'Wird geladen' })],
+  providers: [provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' })],
   template: `
     <span id="localized" hellSpinner></span>
     <span id="explicit" hellSpinner aria-label="Please wait"></span>
@@ -15,7 +16,7 @@ class SpinnerHost {}
 
 @Component({
   imports: [HellSpinner],
-  providers: [provideHellSpinnerLabels({ loading: 'Loading from contract' })],
+  providers: [provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Loading from contract' })],
   template: `
     <span id="spinner-string" hellSpinner variant="dots" size="lg" ui="block text-hell-danger"></span>
     <span id="spinner-map" hellSpinner variant="bars" size="sm" [ui]="spinnerUi"></span>
@@ -24,7 +25,7 @@ class SpinnerHost {}
 class SpinnerPartStyleHost {
   readonly spinnerUi = {
     root: 'text-hell-info',
-  } satisfies HellSpinnerUi;
+  };
 }
 
 describe('HellSpinner', () => {

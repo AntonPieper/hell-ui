@@ -149,16 +149,10 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
           <code>data-empty</code> state.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellSearchPart&gt;</code> on
-          <code>hellSearch</code>, <code>HellUiInput&lt;HellSearchClearPart&gt;</code> on
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> on
+          <code>hellSearch</code>, <code>HellUiInput&lt;'root'&gt;</code> on
           <code>hellSearchClear</code> — a shorthand class string or a
           <code>&#123; root: string &#125;</code> map for each directive's own root.
-        </li>
-        <li>
-          Exported types: <code>HellSearchPart</code> / <code>HellSearchClearPart</code> (both
-          <code>'root'</code>), <code>HellSearchUi</code> / <code>HellSearchClearUi</code>
-          (<code>HellUi&lt;HellSearchPart&gt;</code> / <code>HellUi&lt;HellSearchClearPart&gt;</code>),
-          and <code>HELL_SEARCH_DIRECTIVES</code> for bulk <code>imports</code>.
         </li>
       </ul>
 

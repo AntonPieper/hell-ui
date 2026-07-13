@@ -22,26 +22,12 @@ export class HellBadge {
 }
 
 // @public
-export type HellBadgePart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-tag.d.ts
-//
-// @public
-export type HellBadgeUi = HellUi<HellBadgePart>;
-
-// @public
 export class HellKbd {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellKbd, "kbd[hellKbd], [hellKbd]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellKbd, never>;
 }
-
-// @public
-export type HellKbdPart = 'root';
-
-// @public
-export type HellKbdUi = HellUi<HellKbdPart>;
 
 // @public
 export class HellTag {
@@ -52,12 +38,6 @@ export class HellTag {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTag, "[hellTag]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTag, never>;
 }
-
-// @public
-export type HellTagPart = 'root';
-
-// @public
-export type HellTagUi = HellUi<HellTagPart>;
 
 // (No @packageDocumentation comment for this package)
 

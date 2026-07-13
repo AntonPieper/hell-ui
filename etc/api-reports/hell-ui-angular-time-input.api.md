@@ -153,9 +153,6 @@ export interface HellTimeValue {
 // @public
 export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider;
 
-// @public
-export function provideHellTimeInputLabels(overrides: Partial<HellTimeInputLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

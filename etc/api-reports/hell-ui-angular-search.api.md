@@ -33,20 +33,6 @@ export class HellSearchClear {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearchClear, never>;
 }
 
-// @public
-export type HellSearchClearPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-search.d.ts
-//
-// @public
-export type HellSearchClearUi = HellUi<HellSearchClearPart>;
-
-// @public
-export type HellSearchPart = 'root';
-
-// @public
-export type HellSearchUi = HellUi<HellSearchPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

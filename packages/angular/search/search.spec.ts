@@ -2,11 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellInput } from '@hell-ui/angular/input';
-import {
-  HELL_SEARCH_DIRECTIVES,
-  type HellSearchClearUi,
-  type HellSearchUi,
-} from './search';
+import { HELL_SEARCH_DIRECTIVES } from './search';
 
 @Component({
   imports: [HellInput, ...HELL_SEARCH_DIRECTIVES],
@@ -25,11 +21,11 @@ import {
 class SearchPartStyleHost {
   readonly searchUi = {
     root: 'grid gap-hell-3',
-  } satisfies HellSearchUi;
+  };
 
   readonly clearUi = {
     root: 'flex text-hell-info',
-  } satisfies HellSearchClearUi;
+  };
 }
 
 describe('HellSearch Part Style Map', () => {

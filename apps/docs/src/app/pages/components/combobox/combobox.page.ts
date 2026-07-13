@@ -241,22 +241,22 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>flip</code>: <code>NgpFlipInput</code> — flip on overflow. Default <code>true</code>.</li>
         <li><code>options</code>: <code>readonly T[]</code> — full option registry for virtualized/manually ordered lists (aliases <code>ngpComboboxOptions</code>).</li>
         <li><code>wrapNavigation</code>: <code>boolean</code> — lets Arrow Up/Down wrap between boundaries. Default <code>true</code>; set <code>false</code> for clamped composite flows.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — refines the <code>root</code> part.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the <code>root</code> part.</li>
         <li>Outputs: <code>valueChange: HellComboboxValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
         <li>Implements <code>ControlValueAccessor</code>, so it works with <code>ngModel</code> and reactive forms.</li>
       </ul>
-      <p><code>input[hellComboboxInput]</code> — the editable filter input; drives typing and keyboard focus. Exposes <code>ui</code> (<code>HellComboboxInputPart</code> = <code>'root'</code>).</p>
-      <p><code>button[hellComboboxButton]</code> — the dropdown toggle. Renders the chevron via a <code>::after</code> mask, so keep the element empty. Exposes <code>ui</code> (<code>HellComboboxButtonPart</code> = <code>'root'</code>).</p>
-      <p><code>[hellComboboxDropdown]</code> — the floating option surface. Pair with the <code>*hellComboboxPortal</code> structural directive so it renders in an overlay only while open: <code>&lt;div *hellComboboxPortal hellComboboxDropdown&gt;…&lt;/div&gt;</code>. Exposes <code>ui</code> (<code>HellComboboxDropdownPart</code> = <code>'root'</code>).</p>
+      <p><code>input[hellComboboxInput]</code> — the editable filter input; drives typing and keyboard focus. Exposes <code>ui</code>.</p>
+      <p><code>button[hellComboboxButton]</code> — the dropdown toggle. Renders the chevron via a <code>::after</code> mask, so keep the element empty. Exposes <code>ui</code>.</p>
+      <p><code>[hellComboboxDropdown]</code> — the floating option surface. Pair with the <code>*hellComboboxPortal</code> structural directive so it renders in an overlay only while open: <code>&lt;div *hellComboboxPortal hellComboboxDropdown&gt;…&lt;/div&gt;</code>. Exposes <code>ui</code>.</p>
       <p><code>[hellComboboxOption]</code> — an option row.</p>
       <ul>
         <li><code>value</code>: the payload emitted on selection (aliases <code>ngpComboboxOptionValue</code>).</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>index</code>: <code>number</code> — explicit ordering for virtualized lists.</li>
         <li><code>activated</code>: output emitted on click/keyboard activation (for value-less options).</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxOptionPart&gt;</code> (<code>'root'</code>).</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> (<code>'root'</code>).</li>
       </ul>
-      <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code> (<code>HellComboboxEmptyPart</code> = <code>'root'</code>).</p>
+      <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code>.</p>
       <p><code>[hellComboboxChips]</code> — the multiple-mode chips presentation. Place it inside the control, before the input; it renders each selected value as a removable chip and routes removal (chip button or Backspace-on-empty) through the combobox selection state.</p>
       <ul>
         <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>

@@ -19,14 +19,13 @@ import {
   HellSize,
   HellTagVariant,
   type HellRecipe,
-  type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
 import {
   hellChipPresentationRecipe,
   hellChipRemovePresentationRecipe,
 } from '@hell-ui/angular/internal/chip';
-import type { InjectionToken, Provider } from '@angular/core';
+import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the chip entry point. */
 export interface HellChipLabels {
@@ -36,37 +35,15 @@ export interface HellChipLabels {
   readonly removeChip: string;
 }
 
-const HELL_CHIP_LABELS_CONTRACT = hellCreateLabels<HellChipLabels>('HELL_CHIP_LABELS', {
+/** Injection token resolving to the effective chip labels. */
+export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels> = hellCreateLabels<HellChipLabels>('HELL_CHIP_LABELS', {
   remove: (label) => `Remove ${label}`,
   removeChip: 'Remove',
 });
 
-/** Injection token resolving to the effective chip labels. */
-export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels> = HELL_CHIP_LABELS_CONTRACT.token;
-
-/** Override any subset of the chip labels for an injector scope. */
-export function provideHellChipLabels(overrides: Partial<HellChipLabels>): Provider {
-  return HELL_CHIP_LABELS_CONTRACT.provide(overrides);
-}
-
-/** Public parts of the HellChipSet module, styleable through its Part Style Map. */
-export type HellChipSetPart = 'root';
-/** Part Style Map accepted by the HellChipSet `ui` input. */
-export type HellChipSetUi = HellUi<HellChipSetPart>;
-
-/** Public parts of the HellChip module, styleable through its Part Style Map. */
-export type HellChipPart = 'root';
-/** Part Style Map accepted by the HellChip `ui` input. */
-export type HellChipUi = HellUi<HellChipPart>;
-
-/** Public parts of the HellChipRemove module, styleable through its Part Style Map. */
-export type HellChipRemovePart = 'root';
-/** Part Style Map accepted by the HellChipRemove `ui` input. */
-export type HellChipRemoveUi = HellUi<HellChipRemovePart>;
-
 const HELL_CHIP_SET_RECIPE = {
   root: 'inline-flex flex-wrap items-center gap-hell-2 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch outline-none',
-} satisfies HellRecipe<HellChipSetPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * One chip's registration with its `HellChipSet`. Exposes only the closures
@@ -269,10 +246,10 @@ class HellChipSetController {
 })
 export class HellChipSet {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellChipSetPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellChipSetPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_CHIP_SET_RECIPE,
   });
@@ -355,10 +332,10 @@ class HellChipController {
 })
 export class HellChip {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellChipPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellChipPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => hellChipPresentationRecipe(this.size()),
   });
@@ -504,10 +481,10 @@ export class HellChip {
 })
 export class HellChipRemove {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellChipRemovePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellChipRemovePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: hellChipRemovePresentationRecipe,
   });

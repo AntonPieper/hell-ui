@@ -85,9 +85,6 @@ export class HellEmptyStateTitle {
 // @public
 export type HellEmptyStateUi = HellUi<HellEmptyStatePart>;
 
-// @public
-export function provideHellEmptyStateLabels(overrides: Partial<HellEmptyStateLabels>): Provider;
-
 // (No @packageDocumentation comment for this package)
 
 ```

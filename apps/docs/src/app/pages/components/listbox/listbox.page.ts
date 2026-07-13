@@ -189,13 +189,6 @@ import listboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           (all except <code>hellListboxTrigger</code>) — a shorthand class string or a
           <code>&#123; root: string &#125;</code> map.
         </li>
-        <li>
-          Exported types: <code>HellListboxPart</code>, <code>HellListboxOptionPart</code>,
-          <code>HellListboxSectionPart</code>, <code>HellListboxHeaderPart</code> (each
-          <code>'root'</code>), and their matching <code>HellListboxUi</code>,
-          <code>HellListboxOptionUi</code>, <code>HellListboxSectionUi</code>,
-          <code>HellListboxHeaderUi</code> map types.
-        </li>
       </ul>
 
       <h2>Accessibility</h2>

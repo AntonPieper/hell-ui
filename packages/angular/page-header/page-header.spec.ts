@@ -1,12 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_PAGE_HEADER_DIRECTIVES,
-  provideHellPageHeaderLabels,
-  type HellPageHeaderLevel,
-  type HellPageHeaderUi,
-} from './page-header';
+import { HELL_PAGE_HEADER_DIRECTIVES, HELL_PAGE_HEADER_LABELS, type HellPageHeaderLevel, type HellPageHeaderUi } from './page-header';
 
 @Component({
   imports: [...HELL_PAGE_HEADER_DIRECTIVES],
@@ -157,7 +153,7 @@ describe('HellPageHeaderBack', () => {
     expect(button.getAttribute('aria-label')).toBe('Return to list');
   });
 
-  it('resolves its default name from provideHellPageHeaderLabels', () => {
+  it('resolves its default name from HELL_PAGE_HEADER_LABELS', () => {
     @Component({
       imports: [...HELL_PAGE_HEADER_DIRECTIVES],
       template: `<hell-page-header-back />`,
@@ -166,7 +162,7 @@ describe('HellPageHeaderBack', () => {
 
     TestBed.configureTestingModule({
       imports: [LocalizedHost],
-      providers: [provideHellPageHeaderLabels({ back: 'Zurück' })],
+      providers: [provideHellLabels(HELL_PAGE_HEADER_LABELS, { back: 'Zurück' })],
     });
     const fixture = TestBed.createComponent(LocalizedHost);
     fixture.detectChanges();

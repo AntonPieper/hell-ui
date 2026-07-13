@@ -96,10 +96,10 @@ import separatorWithCardExampleCodeRaw from './examples/with-card.example.ts?raw
 
       <h2>Styling</h2>
       <p>
-        <code>HellSeparatorUi</code> refines the separator's only Public Part, <code>root</code> —
+        The <code>ui</code> input refines the separator's only Public Part, <code>root</code> —
         the hairline element itself. Pass <code>ui="..."</code> as shorthand, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellSeparatorUi</code> map. Both forms merge on top of the orientation/spacing recipe
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the orientation/spacing recipe
         through Hell's Tailwind merge, so conflicting height, width, and background utilities
         deterministically replace the hairline defaults.
       </p>
@@ -133,14 +133,12 @@ import separatorWithCardExampleCodeRaw from './examples/with-card.example.ts?raw
           <code>md</code>.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellSeparatorPart&gt;</code> — a shorthand class
-          string or a <code>HellSeparatorUi</code> map (<code>&#123; root: string &#125;</code>) that
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class
+          string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
         <li>
-          Exported types: <code>HellSeparatorPart</code> (<code>'root'</code>),
-          <code>HellSeparatorUi</code> (<code>HellUi&lt;HellSeparatorPart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

@@ -52,14 +52,6 @@ export class HellMenuItemCheckbox {
 }
 
 // @public
-export type HellMenuItemCheckboxPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-menu.d.ts
-//
-// @public
-export type HellMenuItemCheckboxUi = HellUi<HellMenuItemCheckboxPart>;
-
-// @public
 export class HellMenuItemIcon {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -68,27 +60,12 @@ export class HellMenuItemIcon {
 }
 
 // @public
-export type HellMenuItemIconPart = 'root';
-
-// @public
-export type HellMenuItemIconUi = HellUi<HellMenuItemIconPart>;
-
-// @public
 export class HellMenuItemIndicator {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemIndicator, "[hellMenuItemIndicator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenuItemIndicator; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemIndicator, never>;
 }
-
-// @public
-export type HellMenuItemIndicatorPart = 'root';
-
-// @public
-export type HellMenuItemIndicatorUi = HellUi<HellMenuItemIndicatorPart>;
-
-// @public
-export type HellMenuItemPart = 'root';
 
 // @public
 export class HellMenuItemRadio {
@@ -106,27 +83,12 @@ export class HellMenuItemRadioGroup {
 }
 
 // @public
-export type HellMenuItemRadioPart = 'root';
-
-// @public
-export type HellMenuItemRadioUi = HellUi<HellMenuItemRadioPart>;
-
-// @public
 export class HellMenuItemTrailing {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemTrailing, "[hellMenuItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemTrailing, never>;
 }
-
-// @public
-export type HellMenuItemTrailingPart = 'root';
-
-// @public
-export type HellMenuItemTrailingUi = HellUi<HellMenuItemTrailingPart>;
-
-// @public
-export type HellMenuItemUi = HellUi<HellMenuItemPart>;
 
 // @public
 export class HellMenuLabel {
@@ -137,15 +99,6 @@ export class HellMenuLabel {
 }
 
 // @public
-export type HellMenuLabelPart = 'root';
-
-// @public
-export type HellMenuLabelUi = HellUi<HellMenuLabelPart>;
-
-// @public
-export type HellMenuPart = 'root';
-
-// @public
 export class HellMenuSection {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -154,24 +107,12 @@ export class HellMenuSection {
 }
 
 // @public
-export type HellMenuSectionPart = 'root';
-
-// @public
-export type HellMenuSectionUi = HellUi<HellMenuSectionPart>;
-
-// @public
 export class HellMenuSeparator {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuSeparator, "[hellMenuSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuSeparator, never>;
 }
-
-// @public
-export type HellMenuSeparatorPart = 'root';
-
-// @public
-export type HellMenuSeparatorUi = HellUi<HellMenuSeparatorPart>;
 
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-menu.d.ts
 //
@@ -183,21 +124,12 @@ export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
 }
 
 // @public
-export type HellMenuUi = HellUi<HellMenuPart>;
-
-// @public
 export class HellSubmenuTrigger {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSubmenuTrigger, "[hellSubmenuTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSubmenuTrigger; inputs: { "ngpSubmenuTrigger": "hellSubmenuTrigger"; "ngpSubmenuTriggerPlacement": "placement"; "ngpSubmenuTriggerOffset": "offset"; "ngpSubmenuTriggerDisabled": "disabled"; "ngpSubmenuTriggerFlip": "flip"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSubmenuTrigger, never>;
 }
-
-// @public
-export type HellSubmenuTriggerPart = 'root';
-
-// @public
-export type HellSubmenuTriggerUi = HellUi<HellSubmenuTriggerPart>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,13 +1,8 @@
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_ALERT_DIRECTIVES,
-  HellAlertUi,
-  type HellAlertLayout,
-  type HellAlertVariant,
-  provideHellAlertLabels,
-} from './alert';
+import { HELL_ALERT_DIRECTIVES, HellAlertUi, type HellAlertLayout, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
 
 @Component({
   imports: [...HELL_ALERT_DIRECTIVES],
@@ -164,7 +159,7 @@ describe('HellAlert Label Contract', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AlertHost],
-      providers: [provideHellAlertLabels({ dismiss: 'Verwerfen' })],
+      providers: [provideHellLabels(HELL_ALERT_LABELS, { dismiss: 'Verwerfen' })],
     }).compileComponents();
   });
 

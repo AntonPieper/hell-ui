@@ -1,24 +1,14 @@
 import { Directive, input } from '@angular/core';
 import { NgpProgress, NgpProgressIndicator } from 'ng-primitives/progress';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-
-/** Public parts of the HellProgress module, styleable through its Part Style Map. */
-export type HellProgressPart = 'root';
-/** Part Style Map accepted by the HellProgress `ui` input. */
-export type HellProgressUi = HellUi<HellProgressPart>;
-
-/** Public parts of the HellProgressBar module, styleable through its Part Style Map. */
-export type HellProgressBarPart = 'root';
-/** Part Style Map accepted by the HellProgressBar `ui` input. */
-export type HellProgressBarUi = HellUi<HellProgressBarPart>;
+import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
 const HELL_PROGRESS_RECIPE = {
   root: 'relative block h-[calc(var(--spacing)*1.5)] w-full overflow-hidden rounded-full bg-hell-surface-muted',
-} satisfies HellRecipe<HellProgressPart>;
+} satisfies HellRecipe<'root'>;
 
 const HELL_PROGRESS_BAR_RECIPE = {
   root: 'block h-full rounded-[inherit] bg-hell-primary transition-[width] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
-} satisfies HellRecipe<HellProgressBarPart>;
+} satisfies HellRecipe<'root'>;
 
 /** Track for a determinate progress indicator. */
 @Directive({
@@ -36,10 +26,10 @@ const HELL_PROGRESS_BAR_RECIPE = {
 })
 export class HellProgress {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellProgressPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellProgressPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PROGRESS_RECIPE,
   });
@@ -56,10 +46,10 @@ export class HellProgress {
 })
 export class HellProgressBar {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellProgressBarPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellProgressBarPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_PROGRESS_BAR_RECIPE,
   });

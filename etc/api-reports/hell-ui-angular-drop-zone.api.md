@@ -36,14 +36,6 @@ export class HellDropZone implements OnDestroy {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDropZone, never>;
 }
 
-// @public
-export type HellDropZonePart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-drop-zone.d.ts
-//
-// @public
-export type HellDropZoneUi = HellUi<HellDropZonePart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

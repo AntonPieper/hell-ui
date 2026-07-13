@@ -124,7 +124,7 @@ import dropZoneStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         host element itself, including its hover, drag, and disabled states. Pass
         <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
-        <code>HellDropZoneUi</code> map. Both forms merge on top of the default recipe through
+        <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through
         Hell's Tailwind merge, so refinements win deterministically over the border, background,
         and text-color classes they conflict with.
       </p>
@@ -165,15 +165,13 @@ import dropZoneStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
           the auto-created fallback. Default <code>null</code>.
         </li>
         <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellDropZonePart&gt;</code> &mdash; a shorthand
-          class string or a <code>HellDropZoneUi</code> map (<code>&#123; root: string &#125;</code>)
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> &mdash; a shorthand
+          class string or a <code>&#123; root?: string &#125;</code> map
           that refines the <code>root</code> public part.
         </li>
         <li><code>(files)</code>: <code>EventEmitter&lt;File[]&gt;</code>. Emits accepted files once the user drops or selects them; never emits an empty array.</li>
         <li>
-          Exported types: <code>HellDropZonePart</code> (<code>'root'</code>),
-          <code>HellDropZoneUi</code> (<code>HellUi&lt;HellDropZonePart&gt;</code>).
-        </li>
+          </li>
       </ul>
 
       <h2>Accessibility</h2>

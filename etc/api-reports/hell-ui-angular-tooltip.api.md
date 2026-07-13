@@ -25,9 +25,6 @@ export class HellTooltip {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTooltip, never>;
 }
 
-// @public
-export type HellTooltipPart = 'root';
-
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-tooltip.d.ts
 //
 // @public
@@ -36,11 +33,6 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTooltipTrigger, "button[hellTooltipTrigger], a[hellTooltipTrigger]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpTooltipTrigger; inputs: { "ngpTooltipTrigger": "hellTooltipTrigger"; "ngpTooltipTriggerPlacement": "placement"; "ngpTooltipTriggerOffset": "offset"; "ngpTooltipTriggerShowDelay": "showDelay"; "ngpTooltipTriggerHideDelay": "hideDelay"; "ngpTooltipTriggerDisabled": "disabled"; "ngpTooltipTriggerContainer": "container"; "ngpTooltipTriggerShowOnOverflow": "showOnOverflow"; "ngpTooltipTriggerHoverableContent": "hoverableContent"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTooltipTrigger, never>;
 }
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-tooltip.d.ts
-//
-// @public
-export type HellTooltipUi = HellUi<HellTooltipPart>;
 
 // (No @packageDocumentation comment for this package)
 

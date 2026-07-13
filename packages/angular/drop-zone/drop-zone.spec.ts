@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellDropZone, type HellDropZoneUi } from './drop-zone';
+import { HellDropZone } from './drop-zone';
 
 @Component({
   imports: [HellDropZone],
@@ -117,7 +117,7 @@ class DropZonePartStyleHost {
 
   readonly dropZoneUi = {
     root: 'grid min-h-hell-8 border-hell-info bg-hell-info-soft text-hell-info-strong',
-  } satisfies HellDropZoneUi;
+  };
 }
 
 describe('HellDropZone', () => {

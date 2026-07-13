@@ -4,13 +4,7 @@ import { InteractivityChecker } from '@angular/cdk/a11y';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
 import { type HellSize } from '@hell-ui/angular/core';
-import {
-  HELL_DIALOG_DIRECTIVES,
-  type HellDialogDescriptionUi,
-  type HellDialogOverlayUi,
-  type HellDialogTitleUi,
-  type HellDialogUi,
-} from './dialog';
+import { HELL_DIALOG_DIRECTIVES } from './dialog';
 import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
 
 @Component({
@@ -182,10 +176,10 @@ class NamedDialogHost {}
   `,
 })
 class DialogPartStyleHost {
-  readonly overlayUi = { root: 'p-0' } satisfies HellDialogOverlayUi;
-  readonly dialogUi = { root: 'max-w-[640px] rounded-none shadow-none' } satisfies HellDialogUi;
-  readonly titleUi = { root: 'text-hell-danger' } satisfies HellDialogTitleUi;
-  readonly descriptionUi = { root: 'mt-0 text-hell-primary' } satisfies HellDialogDescriptionUi;
+  readonly overlayUi = { root: 'p-0' };
+  readonly dialogUi = { root: 'max-w-[640px] rounded-none shadow-none' };
+  readonly titleUi = { root: 'text-hell-danger' };
+  readonly descriptionUi = { root: 'mt-0 text-hell-primary' };
 }
 
 @Component({

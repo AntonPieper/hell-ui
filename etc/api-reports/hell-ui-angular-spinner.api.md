@@ -35,18 +35,7 @@ export interface HellSpinnerLabels {
 }
 
 // @public
-export type HellSpinnerPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-spinner.d.ts
-//
-// @public
-export type HellSpinnerUi = HellUi<HellSpinnerPart>;
-
-// @public
 export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
-
-// @public
-export function provideHellSpinnerLabels(overrides: Partial<HellSpinnerLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

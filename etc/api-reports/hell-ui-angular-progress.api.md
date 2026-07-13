@@ -30,20 +30,6 @@ export class HellProgressBar {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellProgressBar, never>;
 }
 
-// @public
-export type HellProgressBarPart = 'root';
-
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-progress.d.ts
-//
-// @public
-export type HellProgressBarUi = HellUi<HellProgressBarPart>;
-
-// @public
-export type HellProgressPart = 'root';
-
-// @public
-export type HellProgressUi = HellUi<HellProgressPart>;
-
 // (No @packageDocumentation comment for this package)
 
 ```

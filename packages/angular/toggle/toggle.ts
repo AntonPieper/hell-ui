@@ -19,25 +19,10 @@ import {
 } from 'ng-primitives/toggle-group';
 import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, HellSize, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, HellSize, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
 /** Value shape of a `[hellToggleGroup]`: a single value, `null`, or a list of values for multi-select. */
 export type HellToggleGroupValue = string | null | readonly string[];
-
-/** Public parts of the HellToggle module, styleable through its Part Style Map. */
-export type HellTogglePart = 'root';
-/** Part Style Map accepted by the HellToggle `ui` input. */
-export type HellToggleUi = HellUi<HellTogglePart>;
-
-/** Public parts of the HellToggleGroup module, styleable through its Part Style Map. */
-export type HellToggleGroupPart = 'root';
-/** Part Style Map accepted by the HellToggleGroup `ui` input. */
-export type HellToggleGroupUi = HellUi<HellToggleGroupPart>;
-
-/** Public parts of the HellToggleGroupItem module, styleable through its Part Style Map. */
-export type HellToggleGroupItemPart = 'root';
-/** Part Style Map accepted by the HellToggleGroupItem `ui` input. */
-export type HellToggleGroupItemUi = HellUi<HellToggleGroupItemPart>;
 
 const HELL_TOGGLE_BASE_RECIPE =
   'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-transparent bg-transparent font-[inherit] font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65]';
@@ -58,7 +43,7 @@ const HELL_TOGGLE_SIZE_RECIPE: Record<HellSize, string> = {
 
 const HELL_TOGGLE_GROUP_RECIPE = {
   root: 'inline-flex gap-[2px] rounded-hell-md border border-hell-border bg-hell-surface-muted p-[3px]',
-} satisfies HellRecipe<HellToggleGroupPart>;
+} satisfies HellRecipe<'root'>;
 
 /**
  * Single press-toggle button. Adds the on/off state from the toggle primitive.
@@ -85,12 +70,12 @@ export class HellToggle {
   readonly size = input<HellSize>('md');
 
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTogglePart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTogglePart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: (): HellRecipe<HellTogglePart> => ({
+    recipe: (): HellRecipe<'root'> => ({
       root: [HELL_TOGGLE_BASE_RECIPE, HELL_TOGGLE_SIZE_RECIPE[this.size()], HELL_TOGGLE_SELECTED_RECIPE].join(
         ' ',
       ),
@@ -128,10 +113,10 @@ export class HellToggle {
 })
 export class HellToggleGroup implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellToggleGroupPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellToggleGroupPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_TOGGLE_GROUP_RECIPE,
   });
@@ -253,12 +238,12 @@ export class HellToggleGroupItem {
   readonly size = input<HellSize>('sm');
 
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellToggleGroupItemPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellToggleGroupItemPart>(this.ui, {
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: (): HellRecipe<HellToggleGroupItemPart> => ({
+    recipe: (): HellRecipe<'root'> => ({
       root: [
         HELL_TOGGLE_BASE_RECIPE,
         HELL_TOGGLE_SIZE_RECIPE[this.size()],

@@ -1,13 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import {
-  HELL_CARD_DIRECTIVES,
-  type HellCardBodyUi,
-  type HellCardFooterUi,
-  type HellCardHeaderUi,
-  type HellCardUi,
-} from './card';
+import { HELL_CARD_DIRECTIVES } from './card';
 
 @Component({
   imports: [...HELL_CARD_DIRECTIVES],
@@ -33,19 +27,19 @@ import {
 class CardHost {
   protected readonly cardUi = {
     root: 'rounded-hell-pill shadow-hell-lg',
-  } satisfies HellCardUi;
+  };
 
   protected readonly headerUi = {
     root: 'px-hell-2 text-hell-danger',
-  } satisfies HellCardHeaderUi;
+  };
 
   protected readonly bodyUi = {
     root: 'p-hell-2',
-  } satisfies HellCardBodyUi;
+  };
 
   protected readonly footerUi = {
     root: 'justify-start border-t-0',
-  } satisfies HellCardFooterUi;
+  };
 }
 
 describe('HellCard', () => {

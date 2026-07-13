@@ -55,18 +55,11 @@ export interface HellDateInputLabels {
   readonly chooseDateFor: (label: string) => string;
 }
 
-const HELL_DATE_INPUT_LABELS_CONTRACT = hellCreateLabels<HellDateInputLabels>('HELL_DATE_INPUT_LABELS', {
+/** Injection token resolving to the effective date input labels. */
+export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels> = hellCreateLabels<HellDateInputLabels>('HELL_DATE_INPUT_LABELS', {
   chooseDate: 'Choose date',
   chooseDateFor: (label) => `Choose date for ${label}`,
 });
-
-/** Injection token resolving to the effective date input labels. */
-export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels> = HELL_DATE_INPUT_LABELS_CONTRACT.token;
-
-/** Override any subset of the date input labels for an injector scope. */
-export function provideHellDateInputLabels(overrides: Partial<HellDateInputLabels>): Provider {
-  return HELL_DATE_INPUT_LABELS_CONTRACT.provide(overrides);
-}
 
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
