@@ -1,21 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellPagination, HellPaginationButton, HellPaginationFirst, HellPaginationLast, HellPaginationNext, HellPaginationPrev, HellPaginationStrip, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
+import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
 
 @Component({
   selector: 'app-pagination-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    HellPagination,
-    HellPaginationFirst,
-    HellPaginationPrev,
-    HellPaginationButton,
-    HellPaginationNext,
-    HellPaginationLast,
-    HellPaginationStrip,
-  ],
+  imports: [HellPageLink, HellPagination, HellPaginationStrip],
   template: `
     <div class="flex flex-col gap-hell-4">
-      <!-- Composed directives: each [hellPagination*] control owns a single "root" part. -->
+      <!-- Composed controls: each hellPageLink owns a single "root" part. -->
       <nav
         hellPagination
         ui="gap-hell-3 rounded-hell-lg bg-hell-surface-muted p-hell-2"
@@ -23,25 +15,24 @@ import { HellPagination, HellPaginationButton, HellPaginationFirst, HellPaginati
         [pageCount]="8"
         (pageChange)="composedPage.set($event)"
       >
-        <button hellPaginationFirst type="button" [ui]="firstUi" aria-label="First page">
+        <button hellPageLink="first" type="button" [ui]="firstUi" aria-label="First page">
           First
         </button>
-        <button hellPaginationPrev type="button" [ui]="prevUi" aria-label="Previous page">
+        <button hellPageLink="previous" type="button" [ui]="prevUi" aria-label="Previous page">
           Prev
         </button>
         <button
-          hellPaginationButton
-          [page]="composedPage()"
+          [hellPageLink]="composedPage()"
           type="button"
           [ui]="buttonUi"
           [attr.aria-label]="'Page ' + composedPage()"
         >
           {{ composedPage() }}
         </button>
-        <button hellPaginationNext type="button" [ui]="nextUi" aria-label="Next page">
+        <button hellPageLink="next" type="button" [ui]="nextUi" aria-label="Next page">
           Next
         </button>
-        <button hellPaginationLast type="button" [ui]="lastUi" aria-label="Last page">
+        <button hellPageLink="last" type="button" [ui]="lastUi" aria-label="Last page">
           Last
         </button>
       </nav>

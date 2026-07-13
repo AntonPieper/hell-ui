@@ -177,8 +177,8 @@ describe('HellPdfViewer', () => {
     const nav = root.querySelector<HTMLElement>('nav[hellPagination]');
     if (!nav) throw new Error('Expected the toolbar pagination nav.');
 
-    const prev = nav.querySelector<HTMLButtonElement>('button[hellPaginationPrev]');
-    const next = nav.querySelector<HTMLButtonElement>('button[hellPaginationNext]');
+    const prev = nav.querySelector<HTMLButtonElement>('button[hellPageLink="previous"]');
+    const next = nav.querySelector<HTMLButtonElement>('button[hellPageLink="next"]');
     const pageInput = nav.querySelector<HTMLInputElement>('[data-slot="pageInput"]');
     if (!prev || !next || !pageInput) throw new Error('Expected pagination controls.');
 
