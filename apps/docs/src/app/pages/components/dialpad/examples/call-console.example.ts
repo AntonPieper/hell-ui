@@ -1,21 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellDialpad } from '@hell-ui/angular/dialpad';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellDialpad } from '@hell-ui/angular/features/dialpad';
+import { HellChip } from '@hell-ui/angular/chip';
 
 type CallState = 'idle' | 'dialing' | 'connected';
 
 @Component({
   selector: 'app-dialpad-call-console-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellDialpad, HellTag, ...HELL_CARD_DIRECTIVES],
+  imports: [HellButton, HellDialpad, HellChip, ...HELL_CARD_DIRECTIVES],
   template: `
     <div hellCard class="max-w-[340px]" [elevation]="1">
       <div hellCardHeader>
         <span>Call console</span>
         <span
-          hellTag
+          hellChip
           [variant]="callState() === 'connected' ? 'success' : callState() === 'dialing' ? 'warning' : 'default'"
         >
           {{ statusLabel() }}

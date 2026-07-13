@@ -2,6 +2,7 @@
 
 /* Flyout defaults are Tailwind utility recipes in the directive. */
 @source "./flyout.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @layer components {
   [data-hell-flyout][data-slot='root'] {

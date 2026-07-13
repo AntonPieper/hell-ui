@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
 
@@ -28,7 +28,7 @@ const STATE_VARIANT = {
   selector: 'app-split-view-master-detail-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    HellTag,
+    HellChip,
     ...HELL_CARD_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
@@ -73,7 +73,7 @@ const STATE_VARIANT = {
                 </td>
                 <td hellTableCell>{{ ticket.title }}</td>
                 <td hellTableCell>
-                  <span hellTag [variant]="stateVariant(ticket.state)">{{ ticket.state }}</span>
+                  <span hellChip [variant]="stateVariant(ticket.state)">{{ ticket.state }}</span>
                 </td>
               </tr>
             }
@@ -93,7 +93,7 @@ const STATE_VARIANT = {
                   {{ current().id }} · assigned to {{ current().owner }}
                 </span>
               </div>
-              <span hellTag [variant]="stateVariant(current().state)">{{ current().state }}</span>
+              <span hellChip [variant]="stateVariant(current().state)">{{ current().state }}</span>
             </div>
             <div hellCardBody class="text-sm text-hell-foreground-muted">
               Ticket {{ index() + 1 }} of {{ tickets.length }}. Selecting a row in the table opens

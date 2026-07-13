@@ -34,9 +34,9 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
       <hd-page-header
         title="Dialpad"
         icon="faSolidPhone"
-        category="Composite"
-        importPath="@hell-ui/angular/dialpad"
-        stylesPath="@hell-ui/angular/dialpad/styles.css"
+        category="Feature"
+        importPath="@hell-ui/angular/features/dialpad"
+        stylesPath="@hell-ui/angular/features/dialpad/styles.css"
       >
         A phone-style keypad for entering and calling a number, with owned display, key, and
         action anatomy end to end.
@@ -54,6 +54,11 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
         uncontrolled out of the box — tap keys or type on the keyboard and read
         <code>(valueChange)</code> — or controlled by binding <code>[value]</code> for scripted or
         externally-driven digits (for example, replaying a number from a call log).
+      </p>
+      <p>
+        Like the code editor and PDF viewer, the dialpad ships behind an optional feature entry
+        point (<code>&#64;hell-ui/angular/features/dialpad</code>), so telephony markup only travels
+        with the apps that opt into it rather than the core import surface.
       </p>
 
       <h2>Basic</h2>
@@ -76,7 +81,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
       <h2>With button and card</h2>
       <p>
         A small call console: the dialpad supplies the number, a <code>hellCard</code> gives it a
-        titled surface with a status <code>hellTag</code>, and <code>hellButton</code> drives the
+        titled surface with a status <code>hellChip</code>, and <code>hellButton</code> drives the
         dial/hang-up action. The dialpad switches to <code>readOnly</code> once a call starts so
         the number stays visible without accepting edits mid-call.
       </p>

@@ -5,13 +5,13 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-card-entity-summary-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidEllipsisVertical })],
-  imports: [...HELL_CARD_DIRECTIVES, HellAvatar, HellButton, HellIcon, HellTag],
+  imports: [...HELL_CARD_DIRECTIVES, HellAvatar, HellButton, HellIcon, HellChip],
   template: `
     <div hellCard class="max-w-95" [elevation]="2">
       <div hellCardHeader>
@@ -29,8 +29,8 @@ import { HellTag } from '@hell-ui/angular/tag';
       <div hellCardBody class="flex flex-col gap-3">
         <p>Renewal due in 12 days. Usage is trending 18% above plan for the third month running.</p>
         <div class="flex flex-wrap gap-2">
-          <span hellTag variant="warning">Renewal due</span>
-          <span hellTag variant="info">Over plan</span>
+          <span hellChip variant="warning">Renewal due</span>
+          <span hellChip variant="info">Over plan</span>
         </div>
       </div>
       <div hellCardFooter>

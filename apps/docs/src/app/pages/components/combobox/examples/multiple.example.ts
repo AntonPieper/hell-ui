@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HELL_COMBOBOX_DIRECTIVES, type HellComboboxValue } from '@hell-ui/angular/combobox';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const LABELS = [
   'billing',
@@ -18,7 +18,7 @@ const LABELS = [
 @Component({
   selector: 'app-combobox-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES, HellTag],
+  imports: [...HELL_COMBOBOX_DIRECTIVES, HellChip],
   template: `
     <div class="flex max-w-80 flex-col gap-hell-2">
       <div hellCombobox multiple [value]="selected()" (valueChange)="onValueChange($event)">
@@ -40,7 +40,7 @@ const LABELS = [
 
       <div class="flex flex-wrap gap-hell-1">
         @for (label of selected(); track label) {
-          <span hellTag variant="primary">{{ label }}</span>
+          <span hellChip variant="primary">{{ label }}</span>
         } @empty {
           <span class="text-xs text-hell-foreground-subtle">No labels applied</span>
         }

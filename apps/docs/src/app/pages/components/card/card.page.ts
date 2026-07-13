@@ -111,7 +111,7 @@ import { PageHeader } from '../../../shared/page-header';
       <p>
         A realistic composite: <code>hellCardHeader</code> carries a <code>hell-avatar</code> and
         name/role, an overflow button sits opposite it, the body mixes prose with
-        <code>hellTag</code> status labels, and <code>hellCardFooter</code> closes with a
+        <code>hellChip</code> status labels, and <code>hellCardFooter</code> closes with a
         secondary/primary action pair. Each nested component keeps its own behavior and Part Style
         Map — the card only supplies the surface and regions.
       </p>

@@ -7,7 +7,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const WITH_BUTTON_AND_TAG_EXAMPLE_ICONS = {
   faSolidCircleCheck,
@@ -18,12 +18,12 @@ const WITH_BUTTON_AND_TAG_EXAMPLE_ICONS = {
 @Component({
   selector: 'app-icon-with-button-and-tag-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellTag],
+  imports: [HellButton, HellIcon, HellChip],
   providers: [provideIcons(WITH_BUTTON_AND_TAG_EXAMPLE_ICONS)],
   template: `
     <div class="flex items-center justify-between gap-hell-4 rounded-hell-md border border-hell-border p-hell-3">
       <div class="flex items-center gap-hell-2">
-        <span hellTag variant="success">
+        <span hellChip variant="success">
           <hell-icon name="faSolidCircleCheck" />
           Online
         </span>
@@ -37,7 +37,7 @@ const WITH_BUTTON_AND_TAG_EXAMPLE_ICONS = {
 
     <div class="flex items-center justify-between gap-hell-4 rounded-hell-md border border-hell-border p-hell-3">
       <div class="flex items-center gap-hell-2">
-        <span hellTag variant="danger">
+        <span hellChip variant="danger">
           <hell-icon name="faSolidTriangleExclamation" />
           Degraded
         </span>

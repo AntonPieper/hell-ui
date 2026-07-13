@@ -1,0 +1,8 @@
+{
+  "category": "feature",
+  "header": [
+    "/**",
+    " * @experimental Kept optional telephony dialpad feature entry point.",
+    " */"
+  ]
+}

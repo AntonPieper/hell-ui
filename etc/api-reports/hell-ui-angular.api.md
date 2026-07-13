@@ -18,6 +18,9 @@ export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
 export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link' | 'danger' | 'success';
 
 // @public
+export type HellChipVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
+
+// @public
 export function hellCreateLabels<T extends object>(description: string, defaults: T): InjectionToken<T>;
 
 // @public
@@ -28,7 +31,23 @@ export class HellFloatingElement implements AfterViewInit {
 }
 
 // @public
+export function hellInvalidTypedValue(): HellTypedValueInvalidParse;
+
+// @public
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
+
+// @public
+export interface HellOption<T = string> {
+    readonly disabled?: boolean;
+    readonly label: string;
+    readonly value: T;
+}
+
+// @public
+export type HellOptionCompareWith<T = unknown> = (a: T, b: T) => boolean;
+
+// @public
+export type HellOptionDisplayWith<T = unknown> = (value: T) => string;
 
 // @public
 export type HellOrientation = 'horizontal' | 'vertical';
@@ -120,10 +139,27 @@ export function hellSearchWords(value: string): readonly string[];
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // @public
-export type HellTagVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
+export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public
-export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
+export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
+
+// @public
+export interface HellTypedValueInvalidParse {
+    // (undocumented)
+    readonly valid: false;
+}
+
+// @public
+export type HellTypedValueParseResult<TValue> = HellTypedValueValidParse<TValue> | HellTypedValueInvalidParse;
+
+// @public
+export interface HellTypedValueValidParse<TValue> {
+    // (undocumented)
+    readonly valid: true;
+    // (undocumented)
+    readonly value: TValue | null;
+}
 
 // @public
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
@@ -136,6 +172,12 @@ export function provideHellLabels<T extends object>(token: InjectionToken<T>, ov
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
+
+// Warnings were encountered during analysis:
+//
+// types/hell-ui-angular-internal-core.d.ts:472:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:473:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:477:5 - (ae-undocumented) Missing documentation for "valid".
 
 // (No @packageDocumentation comment for this package)
 

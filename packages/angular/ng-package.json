@@ -67,8 +67,8 @@
     },
     {
       "glob": "dialpad.ts",
-      "input": "dialpad",
-      "output": "dialpad"
+      "input": "features/dialpad",
+      "output": "features/dialpad"
     },
     {
       "glob": "menu.ts",
@@ -211,6 +211,16 @@
       "output": "internal/chip"
     },
     {
+      "glob": "option-presentation.ts",
+      "input": "internal/option",
+      "output": "internal/option"
+    },
+    {
+      "glob": "floating-presentation.ts",
+      "input": "internal/floating",
+      "output": "internal/floating"
+    },
+    {
       "glob": "drop-zone.ts",
       "input": "drop-zone",
       "output": "drop-zone"
@@ -271,11 +281,6 @@
       "output": "switch"
     },
     {
-      "glob": "tag.ts",
-      "input": "tag",
-      "output": "tag"
-    },
-    {
       "glob": "toggle.ts",
       "input": "toggle",
       "output": "toggle"
@@ -299,11 +304,6 @@
       "glob": "toast.ts",
       "input": "toast",
       "output": "toast"
-    },
-    {
-      "glob": "multi-select-menu-button.ts",
-      "input": "multi-select-menu-button",
-      "output": "multi-select-menu-button"
     },
     {
       "glob": "code-editor.ts",

@@ -90,6 +90,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/guide/guide.page').then((m) => m.GuidePage),
       },
       {
+        routePath: 'guide/overlays',
+        label: 'Overlays',
+        icon: 'faSolidLayerGroup',
+        loadComponent: () =>
+          import('./pages/guide/overlays/overlays.page').then((m) => m.OverlaysPage),
+      },
+      {
         routePath: 'theming',
         label: 'Theming',
         icon: 'faSolidPalette',
@@ -121,13 +128,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidToggleOn',
         loadComponent: () =>
           import('./pages/components/toggle/toggle.page').then((m) => m.TogglePage),
-      },
-      {
-        routePath: 'components/tag',
-        label: 'Tag',
-        icon: 'faSolidTag',
-        loadComponent: () =>
-          import('./pages/components/tag/tag.page').then((m) => m.TagPage),
       },
       {
         routePath: 'components/chip',
@@ -275,13 +275,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidFileArrowUp',
         loadComponent: () =>
           import('./pages/components/file-upload/file-upload.page').then((m) => m.FileUploadPage),
-      },
-      {
-        routePath: 'components/dialpad',
-        label: 'Dialpad',
-        icon: 'faSolidPhone',
-        loadComponent: () =>
-          import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
       {
         routePath: 'components/save-bar',
@@ -519,6 +512,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidCode',
         loadComponent: () =>
           import('./pages/components/code-editor/code-editor.page').then((m) => m.CodeEditorPage),
+      },
+      {
+        routePath: 'components/dialpad',
+        label: 'Dialpad',
+        icon: 'faSolidPhone',
+        loadComponent: () =>
+          import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
       {
         routePath: 'components/pdf-viewer',

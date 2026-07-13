@@ -1,4 +1,4 @@
-/* Chip, chip set, and remove-button defaults are Tailwind utility recipes. */
+/* Chip, chip set, remove-button, badge, and kbd defaults are Tailwind utility recipes. */
 @source "./chip.ts";
 @source "../internal/chip/chip-presentation.ts";
 

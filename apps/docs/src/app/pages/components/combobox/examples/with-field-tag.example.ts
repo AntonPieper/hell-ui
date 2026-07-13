@@ -5,7 +5,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HELL_COMBOBOX_DIRECTIVES, type HellComboboxValue } from '@hell-ui/angular/combobox';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 const REVIEWERS = [
   'Ada Lovelace',
@@ -24,7 +24,7 @@ const REVIEWERS = [
     ...HELL_FIELD_DIRECTIVES,
     HellButton,
     HellIcon,
-    HellTag,
+    HellChip,
   ],
   providers: [provideIcons({ faSolidXmark })],
   template: `
@@ -53,7 +53,7 @@ const REVIEWERS = [
       @if (selected().length) {
         <div class="mt-hell-2 flex flex-wrap gap-hell-1">
           @for (person of selected(); track person) {
-            <span hellTag variant="info" class="ps-hell-2 pe-hell-1">
+            <span hellChip variant="info" class="ps-hell-2 pe-hell-1">
               {{ person }}
               <button
                 hellButton

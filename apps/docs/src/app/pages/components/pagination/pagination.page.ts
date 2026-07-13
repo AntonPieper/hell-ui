@@ -48,18 +48,20 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         importPath="@hell-ui/angular/pagination"
         stylesPath="@hell-ui/angular/pagination/styles.css"
       >
-        Page navigation as composable button directives or a ready-made strip, in numbered,
+        Page navigation as a composable button directive or a ready-made strip, in numbered,
         previous/next, and page-jump layouts.
       </hd-page-header>
       <p>
         Pagination is a <code>ng-primitives/pagination</code>-backed entry point with two ways in.
         Compose the <code>[hellPagination]</code> directive with
-        <code>hellPaginationFirst</code>/<code>Prev</code>/<code>Button</code>/<code>Next</code>/<code>Last</code>
-        on your own <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> elements when you need
-        custom markup or non-standard controls in between. Or drop in
-        <code>&lt;hell-pagination&gt;</code>, a ready-made strip that renders the whole first /
-        previous / numbered window / next / last sequence — or a compact previous/next or
-        page-jump layout — and emits <code>(pageChange)</code> with the new 1-based page number.
+        <code>hellPageLink</code> controls on your own <code>&lt;button&gt;</code> or
+        <code>&lt;a&gt;</code> elements when you need custom markup or non-standard controls in
+        between — each <code>hellPageLink</code> targets a boundary
+        (<code>first</code>/<code>previous</code>/<code>next</code>/<code>last</code>) or a page
+        number. Or drop in <code>&lt;hell-pagination&gt;</code>, a ready-made strip that renders
+        the whole first / previous / numbered window / next / last sequence — or a compact
+        previous/next or page-jump layout — and emits <code>(pageChange)</code> with the new
+        1-based page number.
       </p>
       <p>
         Reach for pagination whenever a table, list, or search result set is too large to render
@@ -106,10 +108,10 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
 
       <h2>Composing your own layout</h2>
       <p>
-        Skip <code>&lt;hell-pagination&gt;</code> and compose the directives directly when you
+        Skip <code>&lt;hell-pagination&gt;</code> and compose the controls directly when you
         need custom markup — text labels instead of icons, a different control order, or extra
         elements interleaved with the controls. <code>[hellPagination]</code> provides the shared
-        page/pageCount/disabled state; each <code>hellPagination*</code> directive reads it and
+        page/pageCount/disabled state; each <code>hellPageLink</code> reads it and
         exposes its own single <code>root</code> part.
       </p>
       <hd-example-tabs [code]="paginationComposedExampleCode">
@@ -151,29 +153,9 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
             <td>The <code>[hellPagination]</code> host — layout of composed controls.</td>
           </tr>
           <tr>
-            <td><code>HellPaginationFirst</code></td>
+            <td><code>HellPageLink</code></td>
             <td><code>root</code></td>
-            <td>The first-page button/anchor host.</td>
-          </tr>
-          <tr>
-            <td><code>HellPaginationPrev</code></td>
-            <td><code>root</code></td>
-            <td>The previous-page button/anchor host.</td>
-          </tr>
-          <tr>
-            <td><code>HellPaginationNext</code></td>
-            <td><code>root</code></td>
-            <td>The next-page button/anchor host.</td>
-          </tr>
-          <tr>
-            <td><code>HellPaginationLast</code></td>
-            <td><code>root</code></td>
-            <td>The last-page button/anchor host.</td>
-          </tr>
-          <tr>
-            <td><code>HellPaginationButton</code></td>
-            <td><code>root</code></td>
-            <td>A numbered page button/anchor host.</td>
+            <td>Every first/previous/next/last/numbered button/anchor host.</td>
           </tr>
           <tr>
             <td rowspan="8"><code>HellPaginationStrip</code></td>
@@ -223,21 +205,19 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li><code>pageChange</code>: <code>EventEmitter&lt;number&gt;</code>. Emits the new 1-based page.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the single <code>root</code> part.</li>
       </ul>
-      <h3>
-        <code>HellPaginationFirst</code> / <code>HellPaginationPrev</code> /
-        <code>HellPaginationNext</code> / <code>HellPaginationLast</code>
-      </h3>
+      <h3><code>HellPageLink</code></h3>
       <ul>
-        <li>Selectors: <code>button[hellPaginationFirst]</code>, <code>a[hellPaginationFirst]</code> (and the equivalent <code>Prev</code>/<code>Next</code>/<code>Last</code> selectors).</li>
+        <li>Selectors: <code>button[hellPageLink]</code>, <code>a[hellPageLink]</code>.</li>
+        <li>
+          <code>hellPageLink</code>: <code>HellPageLinkTarget</code> —
+          <code>'first' | 'previous' | 'next' | 'last' | number</code>. The navigation target:
+          a boundary keyword or a 1-based page number. Boundary controls disable themselves at the
+          matching range edge; numbered controls set <code>aria-current</code>/<code>data-selected</code>
+          when they equal the current page.
+        </li>
         <li><code>disabled</code>: <code>boolean</code>. Explicit disable in addition to the boundary state derived from <code>page</code>/<code>pageCount</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;Part&gt;</code> — refines the module's single <code>root</code> part.</li>
-      </ul>
-      <h3><code>HellPaginationButton</code></h3>
-      <ul>
-        <li>Selectors: <code>button[hellPaginationButton]</code>, <code>a[hellPaginationButton]</code>.</li>
-        <li><code>page</code>: <code>number</code>. The page this button navigates to.</li>
-        <li><code>disabled</code>: <code>boolean</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the single <code>root</code> part.</li>
+        <li>Exported type: <code>HellPageLinkTarget</code>.</li>
       </ul>
       <h3><code>HellPaginationStrip</code> (<code>&lt;hell-pagination&gt;</code>)</h3>
       <ul>

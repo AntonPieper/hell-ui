@@ -3,31 +3,17 @@ import {
   Component,
   Directive,
   ElementRef,
+  booleanAttribute,
   computed,
+  effect,
   inject,
   input,
+  signal,
   type InjectionToken,
 } from '@angular/core';
-import {
-  NgpPagination,
-  NgpPaginationButton,
-  NgpPaginationFirst,
-  NgpPaginationLast,
-  NgpPaginationNext,
-  NgpPaginationPrevious,
-  injectPaginationButtonState,
-  injectPaginationFirstState,
-  injectPaginationLastState,
-  injectPaginationNextState,
-  injectPaginationPreviousState,
-  injectPaginationState,
-  providePaginationButtonState,
-  providePaginationFirstState,
-  providePaginationLastState,
-  providePaginationNextState,
-  providePaginationPreviousState,
-} from 'ng-primitives/pagination';
-import { HellNativeSelect } from '@hell-ui/angular/input';
+import { NgpPagination, injectPaginationState } from 'ng-primitives/pagination';
+import { ngpButton } from 'ng-primitives/button';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
@@ -90,23 +76,7 @@ const HELL_PAGINATION_RECIPE = {
 const HELL_PAGINATION_CONTROL_ROOT_RECIPE =
   'inline-flex h-hell-control-sm min-w-[var(--spacing-hell-control-sm)] cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-transparent bg-transparent px-hell-3 font-[inherit] text-xs font-medium leading-none text-hell-foreground transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-[0.45] data-selected:border-hell-primary data-selected:bg-hell-primary data-selected:text-hell-primary-foreground data-selected:font-semibold';
 
-const HELL_PAGINATION_FIRST_RECIPE = {
-  root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<'root'>;
-
-const HELL_PAGINATION_PREV_RECIPE = {
-  root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<'root'>;
-
-const HELL_PAGINATION_NEXT_RECIPE = {
-  root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<'root'>;
-
-const HELL_PAGINATION_LAST_RECIPE = {
-  root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
-} satisfies HellRecipe<'root'>;
-
-const HELL_PAGINATION_BUTTON_RECIPE = {
+const HELL_PAGE_LINK_RECIPE = {
   root: HELL_PAGINATION_CONTROL_ROOT_RECIPE,
 } satisfies HellRecipe<'root'>;
 
@@ -124,9 +94,6 @@ const HELL_PAGINATION_STRIP_RECIPE = {
 
 interface HellPaginationNativeControl {
   nativeButtonType(): 'button' | null;
-  nativeButtonDisabled(disabled: boolean): '' | null;
-  anchorAriaDisabled(disabled: boolean): 'true' | null;
-  disabledAnchorTabIndex(disabled: boolean): -1 | null;
   preventDisabledAnchor(event: Event, disabled: boolean): void;
 }
 
@@ -137,9 +104,6 @@ function injectPaginationNativeControl(): HellPaginationNativeControl {
 
   return {
     nativeButtonType: () => (isButton() ? 'button' : null),
-    nativeButtonDisabled: (disabled) => (isButton() && disabled ? '' : null),
-    anchorAriaDisabled: (disabled) => (isAnchor() && disabled ? 'true' : null),
-    disabledAnchorTabIndex: (disabled) => (isAnchor() && disabled ? -1 : null),
     preventDisabledAnchor: (event, disabled) => {
       if (!isAnchor() || !disabled) return;
 
@@ -174,9 +138,11 @@ function paginationKeyboardActivation(
 /**
  * Wrappers around `ng-primitives/pagination`. Two ways to use:
  *
- *   1. Compose with the `[hellPagination*]` directives on plain `<button>`
- *      elements. Each directive exposes a local `root` part through `[ui]`.
- *      Useful when you want full control over the layout.
+ *   1. Compose the `[hellPagination]` state directive with `hellPageLink`
+ *      controls on plain `<button>`/`<a>` elements. Each `hellPageLink` targets
+ *      a boundary (`first`/`previous`/`next`/`last`) or a page number, and
+ *      exposes a local `root` part through `[ui]`. Useful when you want full
+ *      control over the layout.
  *
  *   2. Drop in `<hell-pagination>` for a ready-made first/prev/pages/next/last
  *      strip that calls back via `(pageChange)`.
@@ -210,212 +176,130 @@ export class HellPagination {
   });
 }
 
-/** Directive turning a `<button>` or `<a>` into the first-page pagination control. */
+/** Navigation target of a `hellPageLink`: a boundary keyword or a 1-based page number. */
+export type HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number;
+
+/**
+ * Turns a `<button>` or `<a>` into a single pagination control. `hellPageLink`
+ * selects the target: a boundary keyword (`first`/`previous`/`next`/`last`) or a
+ * 1-based page number. Reads the shared `[hellPagination]` state to derive the
+ * boundary-aware disabled state, the numbered selected state, and navigation.
+ */
 @Directive({
-  selector: 'button[hellPaginationFirst], a[hellPaginationFirst]',
-  hostDirectives: [
-    { directive: NgpPaginationFirst, inputs: ['ngpPaginationFirstDisabled:disabled'] },
-  ],
-  providers: [providePaginationFirstState()],
+  selector: 'button[hellPageLink], a[hellPageLink]',
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.type]': 'native.nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
-    '[attr.disabled]': 'native.nativeButtonDisabled(disabled())',
-    '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
-    '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
-    '(click)': 'native.preventDisabledAnchor($event, disabled())',
+    '[attr.tabindex]': 'controlDisabled() ? -1 : 0',
+    '[attr.aria-current]': 'ariaCurrent()',
+    '[attr.data-selected]': 'dataSelected()',
+    '(click)': 'onClick($event)',
     '(keydown.enter)': 'activate($event)',
     '(keydown.space)': 'activate($event)',
   },
 })
-export class HellPaginationFirst {
+export class HellPageLink {
+  /** The page this control navigates to: a boundary keyword or a 1-based page number. */
+  readonly hellPageLink = input.required<HellPageLinkTarget>({ alias: 'hellPageLink' });
+  /** Explicit disable, layered on top of the boundary state derived from the pagination. */
+  readonly disabled = input(false, { transform: booleanAttribute });
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_PAGINATION_FIRST_RECIPE,
+    recipe: () => HELL_PAGE_LINK_RECIPE,
   });
-  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
+  /** Host-tag-aware native control helpers (button `type`, disabled-anchor guard). */
   protected readonly native = injectPaginationNativeControl();
-  private readonly state = injectPaginationFirstState();
-  /** Whether this control is currently disabled by pagination state. */
-  protected readonly disabled = computed(() => this.state().disabled());
-  /** Keyboard (Enter/Space) activation handler that navigates to the first page. */
-  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
-    this.state().goToFirstPage(),
-  );
-}
+  private readonly state = injectPaginationState();
 
-/** Directive turning a `<button>` or `<a>` into the previous-page pagination control. */
-@Directive({
-  selector: 'button[hellPaginationPrev], a[hellPaginationPrev]',
-  hostDirectives: [
-    { directive: NgpPaginationPrevious, inputs: ['ngpPaginationPreviousDisabled:disabled'] },
-  ],
-  providers: [providePaginationPreviousState()],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.type]': 'native.nativeButtonType()',
-    '[attr.data-variant]': '"ghost"',
-    '[attr.data-icon-only]': '""',
-    '[attr.disabled]': 'native.nativeButtonDisabled(disabled())',
-    '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
-    '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
-    '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'activate($event)',
-    '(keydown.space)': 'activate($event)',
-  },
-})
-export class HellPaginationPrev {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_PAGINATION_PREV_RECIPE,
+  /**
+   * Whether this control is disabled: an explicit `disabled`, the pagination's
+   * own disabled state, or a boundary (first/previous on page 1, next/last on
+   * the last page). Numbered targets are never boundary-disabled.
+   */
+  protected readonly controlDisabled = computed(() => {
+    const target = this.hellPageLink();
+    const state = this.state();
+    if (this.disabled() || state.disabled()) return true;
+    if (target === 'first' || target === 'previous') return state.firstPage();
+    if (target === 'next' || target === 'last') return state.lastPage();
+    return false;
   });
-  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
-  protected readonly native = injectPaginationNativeControl();
-  private readonly state = injectPaginationPreviousState();
-  /** Whether this control is currently disabled by pagination state. */
-  protected readonly disabled = computed(() => this.state().disabled());
-  /** Keyboard (Enter/Space) activation handler that navigates to the previous page. */
-  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
-    this.state().goToPreviousPage(),
-  );
-}
 
-/** Directive turning a `<button>` or `<a>` into the next-page pagination control. */
-@Directive({
-  selector: 'button[hellPaginationNext], a[hellPaginationNext]',
-  hostDirectives: [
-    { directive: NgpPaginationNext, inputs: ['ngpPaginationNextDisabled:disabled'] },
-  ],
-  providers: [providePaginationNextState()],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.type]': 'native.nativeButtonType()',
-    '[attr.data-variant]': '"ghost"',
-    '[attr.data-icon-only]': '""',
-    '[attr.disabled]': 'native.nativeButtonDisabled(disabled())',
-    '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
-    '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
-    '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'activate($event)',
-    '(keydown.space)': 'activate($event)',
-  },
-})
-export class HellPaginationNext {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+  /**
+   * `ngpButton` wires the shared interaction contract (hover/press/focus-visible
+   * data attributes, plus the native `disabled`/`aria-disabled` state), matching
+   * the five directives this replaces. It reads this plain mirror signal — never
+   * the required `hellPageLink` input directly — so its eager setup cannot touch
+   * the input before Angular binds it. An effect keeps the mirror in sync with
+   * the boundary-aware disabled state.
+   */
+  private readonly ngpDisabled = signal(false);
+  private readonly interactions = ngpButton({ disabled: this.ngpDisabled });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_PAGINATION_NEXT_RECIPE,
+  /** Whether a numbered target equals the current page. */
+  private readonly selected = computed(() => {
+    const target = this.hellPageLink();
+    return typeof target === 'number' && target === this.state().page();
   });
-  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
-  protected readonly native = injectPaginationNativeControl();
-  private readonly state = injectPaginationNextState();
-  /** Whether this control is currently disabled by pagination state. */
-  protected readonly disabled = computed(() => this.state().disabled());
-  /** Keyboard (Enter/Space) activation handler that navigates to the next page. */
-  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
-    this.state().goToNextPage(),
+
+  /** `aria-current` for numbered targets (`true`/`false`); absent on boundary controls. */
+  protected readonly ariaCurrent = computed(() =>
+    typeof this.hellPageLink() === 'number' ? this.selected() : null,
   );
-}
 
-/** Directive turning a `<button>` or `<a>` into the last-page pagination control. */
-@Directive({
-  selector: 'button[hellPaginationLast], a[hellPaginationLast]',
-  hostDirectives: [
-    { directive: NgpPaginationLast, inputs: ['ngpPaginationLastDisabled:disabled'] },
-  ],
-  providers: [providePaginationLastState()],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.type]': 'native.nativeButtonType()',
-    '[attr.data-variant]': '"ghost"',
-    '[attr.data-icon-only]': '""',
-    '[attr.disabled]': 'native.nativeButtonDisabled(disabled())',
-    '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
-    '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
-    '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'activate($event)',
-    '(keydown.space)': 'activate($event)',
-  },
-})
-export class HellPaginationLast {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+  /** `data-selected` marker driving the selected recipe styling on the current page. */
+  protected readonly dataSelected = computed(() => (this.selected() ? '' : null));
 
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_PAGINATION_LAST_RECIPE,
-  });
-  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
-  protected readonly native = injectPaginationNativeControl();
-  private readonly state = injectPaginationLastState();
-  /** Whether this control is currently disabled by pagination state. */
-  protected readonly disabled = computed(() => this.state().disabled());
-  /** Keyboard (Enter/Space) activation handler that navigates to the last page. */
-  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
-    this.state().goToLastPage(),
+  /** Keyboard (Enter/Space) activation handler that navigates to this control's target. */
+  protected readonly activate = paginationKeyboardActivation(
+    this.native,
+    this.controlDisabled,
+    () => this.navigate(),
   );
-}
 
-/** Directive turning a `<button>` or `<a>` into a numbered page pagination control. */
-@Directive({
-  selector: 'button[hellPaginationButton], a[hellPaginationButton]',
-  hostDirectives: [
-    {
-      directive: NgpPaginationButton,
-      inputs: ['ngpPaginationButtonPage:page', 'ngpPaginationButtonDisabled:disabled'],
-    },
-  ],
-  providers: [providePaginationButtonState()],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.type]': 'native.nativeButtonType()',
-    '[attr.data-variant]': '"ghost"',
-    '[attr.data-icon-only]': '""',
-    '[attr.disabled]': 'native.nativeButtonDisabled(disabled())',
-    '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
-    '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
-    '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'activate($event)',
-    '(keydown.space)': 'activate($event)',
-  },
-})
-export class HellPaginationButton {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+  constructor() {
+    // Runs during change detection (inputs bound), before `ngpButton`'s
+    // after-render effects, so the mirror is current when they read it.
+    effect(() => this.ngpDisabled.set(this.controlDisabled()));
+  }
 
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_PAGINATION_BUTTON_RECIPE,
-  });
-  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
-  protected readonly native = injectPaginationNativeControl();
-  private readonly state = injectPaginationButtonState();
-  /** Whether this control is currently disabled by pagination state. */
-  protected readonly disabled = computed(() => this.state().disabled());
-  /** Keyboard (Enter/Space) activation handler that navigates to this button's page. */
-  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
-    this.state().goToPage(),
-  );
+  /** Pointer activation: guard disabled anchors, otherwise navigate to the target. */
+  protected onClick(event: Event): void {
+    if (this.controlDisabled()) {
+      this.native.preventDisabledAnchor(event, true);
+      return;
+    }
+    this.navigate();
+  }
+
+  /** Navigate the shared pagination state to this control's target. */
+  private navigate(): void {
+    const target = this.hellPageLink();
+    const state = this.state();
+    switch (target) {
+      case 'first':
+        state.goToPage(1);
+        break;
+      case 'previous':
+        state.goToPage(state.page() - 1);
+        break;
+      case 'next':
+        state.goToPage(state.page() + 1);
+        break;
+      case 'last':
+        state.goToPage(state.pageCount());
+        break;
+      default:
+        state.goToPage(target);
+    }
+  }
 }
 
 /**
@@ -427,14 +311,7 @@ export class HellPaginationButton {
 @Component({
   selector: 'hell-pagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    HellPaginationFirst,
-    HellPaginationPrev,
-    HellPaginationNext,
-    HellPaginationLast,
-    HellPaginationButton,
-    HellNativeSelect,
-  ],
+  imports: [HellPageLink, HellNativeSelect],
   hostDirectives: [
     {
       directive: NgpPagination,
@@ -456,7 +333,7 @@ export class HellPaginationButton {
   template: `
     @if (mode() === 'pages') {
       <button
-        hellPaginationFirst
+        hellPageLink="first"
         type="button"
         data-slot="control"
         [ui]="controlUi()"
@@ -468,7 +345,7 @@ export class HellPaginationButton {
       </button>
     }
     <button
-      hellPaginationPrev
+      hellPageLink="previous"
       type="button"
       data-slot="control"
       [ui]="controlUi()"
@@ -481,8 +358,7 @@ export class HellPaginationButton {
     @if (mode() === 'pages') {
       @for (p of pages(); track trackPage($index, p)) {
         <button
-          hellPaginationButton
-          [page]="p"
+          [hellPageLink]="p"
           type="button"
           data-slot="control"
           [ui]="controlUi()"
@@ -518,7 +394,7 @@ export class HellPaginationButton {
       </label>
     }
     <button
-      hellPaginationNext
+      hellPageLink="next"
       type="button"
       data-slot="control"
       [ui]="controlUi()"
@@ -530,7 +406,7 @@ export class HellPaginationButton {
     </button>
     @if (mode() === 'pages') {
       <button
-        hellPaginationLast
+        hellPageLink="last"
         type="button"
         data-slot="control"
         [ui]="controlUi()"
@@ -648,10 +524,6 @@ export class HellPaginationStrip {
 /** All HellPagination directives and components, for convenient bulk import. */
 export const HELL_PAGINATION_DIRECTIVES = [
   HellPagination,
-  HellPaginationFirst,
-  HellPaginationPrev,
-  HellPaginationNext,
-  HellPaginationLast,
-  HellPaginationButton,
+  HellPageLink,
   HellPaginationStrip,
 ] as const;

@@ -1,23 +1,18 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  Directive,
-  ElementRef,
-  booleanAttribute,
-  OnDestroy,
-  computed,
-  forwardRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, booleanAttribute, OnDestroy, computed, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import {
+  hellOptionRowLabel,
+  hellOptionSurfaceRecipe,
+  hellPickedValueLabel,
+} from '@hell-ui/angular/internal/option';
+import {
+  HELL_FLOATING_POP_IN,
+  HELL_FLOATING_SURFACE,
+  HELL_FLOATING_Z_POPOVER,
+} from '@hell-ui/angular/internal/floating';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -34,32 +29,27 @@ import {
   NgpSelectPortal,
   injectSelectState,
 } from 'ng-primitives/select';
-import {
-  injectFormFieldState,
-  ngpFormField,
-  provideFormFieldState,
-} from 'ng-primitives/form-field';
+import { NgpInput } from 'ng-primitives/input';
+import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
 export type HellSelectMultipleValue<T = unknown> = readonly T[];
 export type HellSelectFormValue<T = unknown> =
   | HellSelectSingleValue<T>
   | HellSelectMultipleValue<T>;
-export type HellSelectDisplayWith<T = unknown> = (value: T) => string;
-export type HellSelectCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
-/** Public parts of the HellSelectBasic module, styleable through its Part Style Map. */
-export type HellSelectBasicPart =
+/** Public parts of the HellSelect module, styleable through its Part Style Map. */
+export type HellSelectPart =
   | 'root'
   | 'trigger'
   | 'value'
   | 'placeholder'
   | 'dropdown'
   | 'option';
-/** Part Style Map accepted by the HellSelectBasic `ui` input. */
-export type HellSelectBasicUi = HellUi<HellSelectBasicPart>;
+/** Part Style Map accepted by the HellSelect `ui` input. */
+export type HellSelectUi = HellUi<HellSelectPart>;
 
-const HELL_SELECT_RECIPE = {
+const HELL_SELECT_TRIGGER_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-pointer items-center gap-hell-3 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-hell-3 text-start font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
@@ -72,29 +62,27 @@ const HELL_SELECT_PLACEHOLDER_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_SELECT_DROPDOWN_RECIPE = {
-  root: 'fixed z-[var(--hell-z-popover,60)] flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 shadow-hell-lg outline-none origin-[var(--ngp-select-transform-origin,top)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: `fixed ${HELL_FLOATING_Z_POPOVER} flex max-h-[min(320px,var(--ngp-select-available-height,320px))] w-[var(--ngp-select-width,220px)] flex-col gap-px overflow-y-auto ${HELL_FLOATING_SURFACE} p-hell-2 ${HELL_FLOATING_POP_IN} origin-[var(--ngp-select-transform-origin,top)]`,
 } satisfies HellRecipe<'root'>;
 
-const HELL_SELECT_OPTION_RECIPE = {
-  root: 'flex cursor-pointer items-center gap-hell-3 rounded-hell-sm bg-transparent px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-[13px] text-hell-foreground outline-none data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]',
-} satisfies HellRecipe<'root'>;
+const HELL_SELECT_OPTION_RECIPE = hellOptionSurfaceRecipe();
 
-const HELL_SELECT_BASIC_RECIPE = {
+const HELL_SELECT_RECIPE = {
   root: '',
   trigger: '',
   value: '',
   placeholder: '',
   dropdown: '',
   option: '',
-} satisfies HellRecipe<HellSelectBasicPart>;
+} satisfies HellRecipe<HellSelectPart>;
 
-/** Rich, headless select. Trigger element is the host of `[hellSelect]`;
+/** Rich, headless select. Trigger element is the host of `[hellSelectTrigger]`;
  *  use ng-content to render the selected value (or a placeholder), pair
  *  with `[hellSelectDropdown]` inside a `*hellSelectPortal`, and emit
  *  `valueChange` to react to selection. For native `<select>` controls,
  *  use `[hellNativeSelect]` instead. */
 @Directive({
-  selector: '[hellSelect]',
+  selector: '[hellSelectTrigger]',
   hostDirectives: [
     {
       directive: NgpSelect,
@@ -114,7 +102,7 @@ const HELL_SELECT_BASIC_RECIPE = {
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSelect),
+      useExisting: forwardRef(() => HellSelectTrigger),
       multi: true,
     },
   ],
@@ -124,14 +112,14 @@ const HELL_SELECT_BASIC_RECIPE = {
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellSelect<T = unknown> implements ControlValueAccessor {
+export class HellSelectTrigger<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_SELECT_RECIPE,
+    recipe: () => HELL_SELECT_TRIGGER_RECIPE,
   });
 
   private readonly select = inject(NgpSelect);
@@ -276,8 +264,8 @@ export class HellSelectDropdown implements OnDestroy {
   });
 
   private readonly dropdownElement = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly select = inject(HellSelect, { optional: true });
-  private readonly basicSelect = inject(HellSelectBasic, { optional: true });
+  private readonly select = inject(HellSelectTrigger, { optional: true });
+  private readonly basicSelect = inject(HellSelect, { optional: true });
 
   constructor() {
     hellRegisterFloatingHost();
@@ -338,13 +326,13 @@ export class HellSelectOption {
 }
 
 @Component({
-  selector: 'hell-select-basic',
+  selector: 'hell-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [provideFormFieldState()],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSelectBasic),
+      useExisting: forwardRef(() => HellSelect),
       multi: true,
     },
   ],
@@ -353,7 +341,7 @@ export class HellSelectOption {
     'data-slot': 'root',
   },
   imports: [
-    HellSelect,
+    HellSelectTrigger,
     HellSelectDropdown,
     HellSelectOption,
     HellSelectPortal,
@@ -362,7 +350,7 @@ export class HellSelectOption {
   ],
   template: `
     <button
-      hellSelect
+      hellSelectTrigger
       type="button"
       [value]="effectiveValue()"
       [multiple]="multiple()"
@@ -390,14 +378,15 @@ export class HellSelectOption {
       }
       <ng-template hellSelectPortal>
         <div hellSelectDropdown data-slot="dropdown" [ui]="part('dropdown')">
-          @for (option of options(); track option) {
+          @for (option of options(); track option.value) {
             <div
               hellSelectOption
               data-slot="option"
               [ui]="part('option')"
-              [value]="option"
+              [value]="option.value"
+              [disabled]="option.disabled ?? false"
             >
-              {{ displayWith()(option) }}
+              {{ optionLabel(option) }}
             </div>
           }
         </div>
@@ -405,32 +394,34 @@ export class HellSelectOption {
     </button>
   `,
 })
-export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
+export class HellSelect<T = unknown> implements ControlValueAccessor {
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellSelectBasicPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<HellSelectPart>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellSelectBasicPart>(this.ui, {
+  protected readonly part = hellPartStyler<HellSelectPart>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_SELECT_BASIC_RECIPE,
+    recipe: () => HELL_SELECT_RECIPE,
   });
 
-  readonly options = input<readonly T[]>([]);
+  /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
+  readonly options = input<readonly HellOption<T>[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly placeholder = input('Select');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
   readonly disabled = input(false, { transform: booleanAttribute });
-  readonly compareWith = input<HellSelectCompareWith<T>>((a, b) => a === b);
-  readonly displayWith = input<HellSelectDisplayWith<T>>((value) => String(value));
+  readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
+  /** Overrides option labels; also labels selected values missing from `options`. */
+  readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
   readonly value = input<HellSelectFormValue<T> | null>(null);
 
   readonly valueChange = output<HellSelectFormValue<T>>();
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly innerSelect = viewChild(HellSelect);
+  private readonly innerSelect = viewChild(HellSelectTrigger);
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
@@ -442,8 +433,10 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
     initialValue: null,
   });
 
-  protected readonly effectiveValue = this.controlledValue.value;
-  protected readonly effectiveDisabled = this.controlledValue.disabled;
+  // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
+  // types inferred through internal entry points, shipping unbound `Signal`.
+  protected readonly effectiveValue: Signal<HellSelectFormValue<T>> = this.controlledValue.value;
+  protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
   protected readonly triggerAriaLabel = () =>
     this.ariaLabel() ?? this.host.nativeElement.getAttribute('aria-label');
   private readonly triggerAriaLabelledby = computed(
@@ -458,12 +451,22 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
     if (this.multiple()) {
       const selectedValues = Array.isArray(value) ? value : value == null ? [] : [value as T];
       if (!selectedValues.length) return null;
-      return selectedValues.map((item) => this.displayWith()(item)).join(', ');
+      return selectedValues.map((item) => this.labelFor(item)).join(', ');
     }
 
     if (value == null) return null;
-    return this.displayWith()(value as T);
+    return this.labelFor(value as T);
   });
+
+  /** Display text for one option row. */
+  protected optionLabel(option: HellOption<T>): string {
+    return hellOptionRowLabel(option, this.displayWith());
+  }
+
+  /** Display text for a picked value: `displayWith`, else its option's label. */
+  private labelFor(value: T): string {
+    return hellPickedValueLabel(value, this.options(), this.displayWith(), this.compareWith());
+  }
 
   constructor() {
     hellSyncFormFieldLabels(this.formField, this.triggerAriaLabelledby);
@@ -520,8 +523,42 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
   }
 }
 
+const HELL_NATIVE_SELECT_STATE_CLASSES =
+  'outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] focus:border-hell-border-focus focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] disabled:cursor-not-allowed disabled:border-hell-border disabled:bg-hell-surface-subtle disabled:text-hell-foreground-muted data-disabled:cursor-not-allowed data-disabled:border-hell-border data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted aria-invalid:!border-hell-danger invalid:!border-hell-danger';
+
+const HELL_NATIVE_SELECT_RECIPE = {
+  root: `inline-flex h-hell-control-md w-full appearance-none rounded-hell-md border border-hell-border bg-hell-surface-elevated bg-[image:linear-gradient(45deg,transparent_50%,var(--color-hell-foreground-muted)_50%),linear-gradient(135deg,var(--color-hell-foreground-muted)_50%,transparent_50%)] bg-[length:4px_4px] bg-[position:calc(100%_-_12px)_50%,calc(100%_-_8px)_50%] bg-no-repeat ps-hell-4 pe-[calc(var(--spacing-hell-4)+1rem)] font-[inherit] text-[13px] text-hell-foreground ${HELL_NATIVE_SELECT_STATE_CLASSES} data-[size=sm]:h-hell-control-sm data-[size=sm]:ps-hell-3 data-[size=sm]:pe-[calc(var(--spacing-hell-3)+1rem)] data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:ps-hell-5 data-[size=lg]:pe-[calc(var(--spacing-hell-5)+1rem)] data-[size=lg]:text-sm`,
+} satisfies HellRecipe<'root'>;
+
+/** Styled native `<select>` built on `NgpInput`, with a CSS-drawn chevron. */
+@Directive({
+  selector: 'select[hellNativeSelect]',
+  hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.data-size]': 'size()',
+    '[attr.aria-invalid]': 'invalid() ? "true" : null',
+  },
+})
+export class HellNativeSelect {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_SELECT_RECIPE,
+  });
+
+  /** Control size; `sm`, `md`, or `lg`. */
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Marks the control invalid for styling and `aria-invalid`. */
+  readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
+}
+
 export const HELL_SELECT_DIRECTIVES = [
-  HellSelect,
+  HellSelectTrigger,
   HellSelectValue,
   HellSelectPlaceholder,
   HellSelectDropdown,
@@ -529,4 +566,3 @@ export const HELL_SELECT_DIRECTIVES = [
   HellSelectOption,
 ] as const;
 
-export const HELL_SELECT_BASIC_DIRECTIVES = [HellSelectBasic] as const;

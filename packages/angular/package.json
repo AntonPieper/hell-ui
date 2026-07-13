@@ -27,7 +27,7 @@
     "field/field.ts",
     "input/input.ts",
     "tabs/tabs.ts",
-    "dialpad/dialpad.ts",
+    "features/dialpad/dialpad.ts",
     "menu/menu.ts",
     "listbox/listbox.ts",
     "popover/popover.ts",
@@ -56,6 +56,8 @@
     "checkbox/checkbox.ts",
     "chip/chip.ts",
     "internal/chip/chip-presentation.ts",
+    "internal/option/option-presentation.ts",
+    "internal/floating/floating-presentation.ts",
     "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
     "file-upload/file-upload.ts",
@@ -68,13 +70,11 @@
     "slider/slider.ts",
     "spinner/spinner.ts",
     "switch/switch.ts",
-    "tag/tag.ts",
     "toggle/toggle.ts",
     "omnibar/omnibar.ts",
     "page-header/page-header.ts",
     "filter-bar/filter-bar.ts",
     "toast/toast.ts",
-    "multi-select-menu-button/multi-select-menu-button.ts",
     "features/code-editor/code-editor.ts",
     "assets/**"
   ],
@@ -94,11 +94,17 @@
     "./internal/core": {
       "@heinrich/source": "./internal/core/public-api.ts"
     },
+    "./internal/floating": {
+      "@heinrich/source": "./internal/floating/public-api.ts"
+    },
     "./internal/hotkeys": {
       "@heinrich/source": "./internal/hotkeys/public-api.ts"
     },
     "./internal/ng-primitives": {
       "@heinrich/source": "./internal/ng-primitives/public-api.ts"
+    },
+    "./internal/option": {
+      "@heinrich/source": "./internal/option/public-api.ts"
     },
     "./testing": {
       "@heinrich/source": "./testing/public-api.ts"
@@ -169,9 +175,6 @@
     "./radio": {
       "@heinrich/source": "./radio/public-api.ts"
     },
-    "./search": {
-      "@heinrich/source": "./search/public-api.ts"
-    },
     "./separator": {
       "@heinrich/source": "./separator/public-api.ts"
     },
@@ -189,9 +192,6 @@
     },
     "./tabs": {
       "@heinrich/source": "./tabs/public-api.ts"
-    },
-    "./tag": {
-      "@heinrich/source": "./tag/public-api.ts"
     },
     "./toggle": {
       "@heinrich/source": "./toggle/public-api.ts"
@@ -232,17 +232,11 @@
     "./date-picker": {
       "@heinrich/source": "./date-picker/public-api.ts"
     },
-    "./dialpad": {
-      "@heinrich/source": "./dialpad/public-api.ts"
-    },
     "./file-upload": {
       "@heinrich/source": "./file-upload/public-api.ts"
     },
     "./filter-bar": {
       "@heinrich/source": "./filter-bar/public-api.ts"
-    },
-    "./multi-select-menu-button": {
-      "@heinrich/source": "./multi-select-menu-button/public-api.ts"
     },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
@@ -273,6 +267,9 @@
     },
     "./features/code-editor": {
       "@heinrich/source": "./features/code-editor/public-api.ts"
+    },
+    "./features/dialpad": {
+      "@heinrich/source": "./features/dialpad/public-api.ts"
     },
     "./features/pdf-viewer": {
       "@heinrich/source": "./features/pdf-viewer/public-api.ts"
@@ -417,11 +414,6 @@
       "style": "./tabs/styles.css",
       "default": "./tabs/styles.css"
     },
-    "./tag/styles.css": {
-      "@heinrich/source": "./tag/styles.css",
-      "style": "./tag/styles.css",
-      "default": "./tag/styles.css"
-    },
     "./toggle/styles.css": {
       "@heinrich/source": "./toggle/styles.css",
       "style": "./toggle/styles.css",
@@ -487,11 +479,6 @@
       "style": "./date-picker/styles.css",
       "default": "./date-picker/styles.css"
     },
-    "./dialpad/styles.css": {
-      "@heinrich/source": "./dialpad/styles.css",
-      "style": "./dialpad/styles.css",
-      "default": "./dialpad/styles.css"
-    },
     "./file-upload/styles.css": {
       "@heinrich/source": "./file-upload/styles.css",
       "style": "./file-upload/styles.css",
@@ -501,11 +488,6 @@
       "@heinrich/source": "./filter-bar/styles.css",
       "style": "./filter-bar/styles.css",
       "default": "./filter-bar/styles.css"
-    },
-    "./multi-select-menu-button/styles.css": {
-      "@heinrich/source": "./multi-select-menu-button/styles.css",
-      "style": "./multi-select-menu-button/styles.css",
-      "default": "./multi-select-menu-button/styles.css"
     },
     "./omnibar/styles.css": {
       "@heinrich/source": "./omnibar/styles.css",
@@ -551,6 +533,11 @@
       "@heinrich/source": "./features/code-editor/styles.css",
       "style": "./features/code-editor/styles.css",
       "default": "./features/code-editor/styles.css"
+    },
+    "./features/dialpad/styles.css": {
+      "@heinrich/source": "./features/dialpad/styles.css",
+      "style": "./features/dialpad/styles.css",
+      "default": "./features/dialpad/styles.css"
     },
     "./features/pdf-viewer/styles.css": {
       "@heinrich/source": "./features/pdf-viewer/styles.css",

@@ -110,7 +110,7 @@ import dropZoneStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <h2>With progress and tag</h2>
       <p>
         A realistic upload queue: dropped files enter a caller-owned list, each with its own
-        <code>hellProgress</code> track and a <code>hellTag</code> reflecting status. The drop
+        <code>hellProgress</code> track and a <code>hellChip</code> reflecting status. The drop
         zone stays a thin file source &mdash; all queueing, progress simulation, and removal logic
         lives in the consumer component.
       </p>

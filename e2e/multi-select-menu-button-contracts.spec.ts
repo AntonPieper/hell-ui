@@ -20,7 +20,7 @@ async function gotoRecipeClean(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
-test.describe('multi-select menu button browser contract', () => {
+test.describe('multi-select menu button recipe browser contract', () => {
   test('exposes checkbox items, keeps the menu open on toggle, and reflects the whole selection', async ({
     page,
   }) => {

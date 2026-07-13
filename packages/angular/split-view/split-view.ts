@@ -20,11 +20,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidArrowLeft } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import {
-  HellPagination,
-  HellPaginationNext,
-  HellPaginationPrev,
-} from '@hell-ui/angular/pagination';
+import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellResizable, HellResizableHandle, HellResizablePane } from '@hell-ui/angular/resizable';
 
@@ -83,9 +79,8 @@ export class HellSplitDetail {
     NgTemplateOutlet,
     HellButton,
     HellIcon,
+    HellPageLink,
     HellPagination,
-    HellPaginationPrev,
-    HellPaginationNext,
     HellResizable,
     HellResizablePane,
     HellResizableHandle,
@@ -116,7 +111,7 @@ export class HellSplitDetail {
             (pageChange)="goToItemPage($any($event))"
           >
             <button
-              hellPaginationPrev
+              hellPageLink="previous"
               type="button"
               [disabled]="previousItemDisabled()"
               [attr.aria-label]="previousItemLabel()"
@@ -124,7 +119,7 @@ export class HellSplitDetail {
               <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
             </button>
             <button
-              hellPaginationNext
+              hellPageLink="next"
               type="button"
               [disabled]="nextItemDisabled()"
               [attr.aria-label]="nextItemLabel()"

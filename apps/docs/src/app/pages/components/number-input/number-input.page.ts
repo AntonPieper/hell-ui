@@ -200,10 +200,14 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         The built-in <code>HELL_NUMBER_INPUT_ADAPTER</code> parses a plain decimal string (optional
         sign, digits, a single <code>.</code> decimal point) and rejects exponent notation; integer
         mode additionally rejects fractional parts. Empty text commits a clear to <code>null</code>.
-        For comma-decimal locales, thousands separators, or a custom numeric model, provide a
-        <code>HellNumberInputAdapter</code> with explicit <code>parseText</code> and
+        For comma-decimal locales, thousands separators, or a custom numeric model, implement the
+        <code>HellNumberInputAdapter</code> interface with explicit <code>parseText</code> and
         <code>format</code> (plus optional <code>normalize</code> / <code>isSameValue</code>)
-        functions via <code>provideHellNumberInputAdapter</code>.
+        functions and register it with <code>provideHellNumberInputAdapter</code>. In
+        <code>parseText</code>, return <code>hellTypedValue(value)</code> for a committable value
+        (<code>null</code> clears the field) or <code>hellInvalidTypedValue()</code> to keep the
+        typed text as a visible invalid draft — both imported from
+        <code>&#64;hell-ui/angular/core</code>.
       </p>
 
       <h2>Accessibility</h2>

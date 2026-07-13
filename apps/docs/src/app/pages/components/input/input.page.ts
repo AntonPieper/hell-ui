@@ -53,15 +53,17 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
         importPath="@hell-ui/angular/input"
         stylesPath="@hell-ui/angular/input/styles.css"
       >
-        Three directives — <code>hellInput</code>, <code>hellNativeSelect</code>,
-        <code>hellTextarea</code> — style native text controls without hiding them behind a
-        component.
+        <code>hellInput</code> and <code>hellTextarea</code> style native text controls without
+        hiding them behind a component; the search-field pair
+        (<code>hellSearch</code>/<code>hellSearchClear</code>) ships from here too, and
+        <code>hellNativeSelect</code> lives in the select entry point.
       </hd-page-header>
       <p>
         This entry point styles native form controls in place instead of wrapping them: attach
-        <code>hellInput</code> to a native <code>&lt;input&gt;</code>, <code>hellNativeSelect</code>
-        to a <code>&lt;select&gt;</code>, and <code>hellTextarea</code> to a
-        <code>&lt;textarea&gt;</code>. Each is a thin directive over the matching
+        <code>hellInput</code> to a native <code>&lt;input&gt;</code> and
+        <code>hellTextarea</code> to a <code>&lt;textarea&gt;</code>;
+        <code>hellNativeSelect</code> (imported from <code>&#64;hell-ui/angular/select</code>,
+        shown here for the shared field styling) does the same for a <code>&lt;select&gt;</code>. Each is a thin directive over the matching
         <code>ng-primitives</code> primitive (<code>NgpInput</code> or <code>NgpTextarea</code>) —
         you keep the real element, so native behavior like autofill, IME composition, spellcheck,
         <code>type</code> switching, and browser autocomplete all keep working exactly as they do
@@ -212,7 +214,8 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
           </ul>
         </li>
         <li>
-          <code>select[hellNativeSelect]</code> — host directive <code>NgpInput</code> (forwards
+          <code>select[hellNativeSelect]</code> — exported from
+          <code>&#64;hell-ui/angular/select</code>; host directive <code>NgpInput</code> (forwards
           <code>disabled</code>, <code>id</code>).
           <ul>
             <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>

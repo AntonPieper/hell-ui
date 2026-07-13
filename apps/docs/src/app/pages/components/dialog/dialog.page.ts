@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { DialogBasicExample } from './examples/basic.example';
@@ -32,6 +33,7 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
   imports: [
     ExampleTabs,
     PageHeader,
+    RouterLink,
     DialogBasicExample,
     DialogSizesExample,
     DialogDismissalExample,
@@ -67,6 +69,10 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         when an action needs a deliberate confirmation or a self-contained form (delete a record,
         edit a row, resolve a conflict). For lightweight, non-blocking hints, prefer Popover or
         Tooltip instead.
+      </p>
+      <p>
+        Deciding between a dialog and a lighter surface? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
       </p>
 
       <h2>Basic</h2>

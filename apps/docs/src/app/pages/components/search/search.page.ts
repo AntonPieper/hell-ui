@@ -35,7 +35,7 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
         title="Search"
         icon="faSolidMagnifyingGlass"
         category="Styled primitive"
-        importPath="@hell-ui/angular/search"
+        importPath="@hell-ui/angular/input"
       >
         Wires a search input to a clear affordance and an empty-state signal — you own the input,
         the results, and the filtering logic.

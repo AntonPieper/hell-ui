@@ -16,25 +16,21 @@ const seenConsoleMessages = new Set();
  * Entry points without an API report, with the reason they are excluded.
  * Everything else discovered through the entrypoint manifest is guarded.
  *
- * "extractor crash": @microsoft/api-extractor fails analyzing the flattened
- * d.ts ("InternalError: Unable to follow symbol") when a followed cross-entry
- * declaration uses a named @angular/core import alongside a namespace import.
- * Re-probe on api-extractor upgrades.
+ * If api-extractor crashes with "Unable to follow symbol" on a new entry
+ * point, the flattened d.ts is shipping an unbound identifier (ng-packagr
+ * drops imports for types inferred through internal entry points). Fix it at
+ * the source member with an explicit type annotation — see the annotated
+ * `Signal` members in select, combobox, date-input, and audio-player.
  */
 const apiReportExclusions = new Map([
-  ['audio-player', 'extractor crash'],
-  ['combobox', 'extractor crash'],
-  ['date-input', 'extractor crash'],
-  ['select', 'extractor crash'],
   ['features/audio-transcript', 'experimental feature surface, not yet under report'],
   ['features/code-editor', 'feature surface, not yet under report'],
+  ['features/dialpad', 'feature surface, not yet under report'],
   ['features/pdf-viewer', 'feature surface, not yet under report'],
   ['internal/audio-transcript', 'internal seam, not part of the public surface'],
   ['internal/chip', 'internal seam, not part of the public surface'],
   ['internal/core', 'internal seam, not part of the public surface'],
   ['internal/ng-primitives', 'internal seam, not part of the public surface'],
-  ['table-tanstack', 'adapter surface, not yet under report'],
-  ['table-tanstack/virtual', 'adapter surface, not yet under report'],
 ]);
 
 const apiReportEntrypoints = entrypointPublicApiFiles()

@@ -1,8 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellBadge } from '@hell-ui/angular/tag';
+import { HellBadge } from '@hell-ui/angular/chip';
 
 @Component({
-  selector: 'app-tag-badge-example',
+  selector: 'app-chip-badge-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellBadge],
   template: `
@@ -16,4 +16,4 @@ import { HellBadge } from '@hell-ui/angular/tag';
     </span>
   `,
 })
-export class TagBadgeExample {}
+export class ChipBadgeExample {}

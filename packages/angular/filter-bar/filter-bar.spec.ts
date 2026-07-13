@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import {
-  hellIsDateInputValueWithinBounds,
+  HELL_DEFAULT_DATE_INPUT_ADAPTER,
   provideHellDateInputAdapter,
 } from '@hell-ui/angular/date-input';
 
@@ -150,7 +150,7 @@ class AdvancedHostComponent {
           date.getFullYear().toString()
         : '',
       coerce: (date) => date && date.getDate() >= 3 ? date : null,
-      isWithinBounds: hellIsDateInputValueWithinBounds,
+      isWithinBounds: HELL_DEFAULT_DATE_INPUT_ADAPTER.isWithinBounds,
     }),
   ],
   template: `

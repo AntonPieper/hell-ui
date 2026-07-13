@@ -6,6 +6,7 @@
     "./part-style-merge",
     "./search",
     "./labels",
-    "./floating-element"
+    "./floating-element",
+    "./typed-value"
   ]
 }

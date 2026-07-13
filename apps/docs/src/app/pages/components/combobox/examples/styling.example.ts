@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  HELL_COMBOBOX_BASIC_DIRECTIVES,
-  type HellComboboxBasicUi,
-} from '@hell-ui/angular/combobox';
+import type { HellOption } from '@hell-ui/angular/core';
+import { HellCombobox, type HellComboboxUi } from '@hell-ui/angular/combobox';
 
-const PRIORITIES = ['Blocker', 'Critical', 'High', 'Medium', 'Low'];
+
+const PRIORITIES: readonly HellOption<string>[] = (
+  ['Blocker', 'Critical', 'High', 'Medium', 'Low'] as const
+).map((label) => ({ value: label.toLowerCase(), label }));
 
 @Component({
   selector: 'app-combobox-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_BASIC_DIRECTIVES],
+  imports: [HellCombobox],
   template: `
-    <!-- HellComboboxBasicPart: root | control | input | button | dropdown | option | empty. -->
-    <hell-combobox-basic
+    <!-- HellComboboxPart: root | control | input | button | dropdown | option | empty. -->
+    <hell-combobox
       class="block max-w-72"
       aria-label="Priority"
       placeholder="Set priority…"
@@ -28,7 +29,7 @@ export class ComboboxStylingExample {
   protected readonly priorities = PRIORITIES;
   protected readonly value = signal<string | null>(null);
 
-  protected readonly ui: HellComboboxBasicUi = {
+  protected readonly ui: HellComboboxUi = {
     root: 'font-medium',
     control:
       'h-hell-control-lg rounded-hell-xl border-hell-primary bg-hell-primary-soft data-focus:shadow-[0_0_0_3px_var(--color-hell-primary-soft)]',

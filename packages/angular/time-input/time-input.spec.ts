@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 
 import {
   HellTimeInput,
-  hellParseTimeInputText,
+  HELL_DEFAULT_TIME_INPUT_ADAPTER,
   provideHellTimeInputAdapter,
   type HellTimeInputPart,
   type HellTimeInputUi,
@@ -296,19 +296,19 @@ describe('HellTimeInput', () => {
   });
 
   it('keeps default parser support for text adapters and direct parser consumers', () => {
-    expect(hellParseTimeInputText('9:05 pm', { seconds: false })).toEqual({
+    expect(HELL_DEFAULT_TIME_INPUT_ADAPTER.parseText('9:05 pm', { seconds: false })).toEqual({
       valid: true,
       value: { hour: 21, minute: 5, second: 0 },
     });
-    expect(hellParseTimeInputText('930', { seconds: false })).toEqual({
+    expect(HELL_DEFAULT_TIME_INPUT_ADAPTER.parseText('930', { seconds: false })).toEqual({
       valid: true,
       value: { hour: 9, minute: 30, second: 0 },
     });
-    expect(hellParseTimeInputText('17', { seconds: false })).toEqual({
+    expect(HELL_DEFAULT_TIME_INPUT_ADAPTER.parseText('17', { seconds: false })).toEqual({
       valid: true,
       value: { hour: 17, minute: 0, second: 0 },
     });
-    expect(hellParseTimeInputText('9p', { seconds: false })).toEqual({
+    expect(HELL_DEFAULT_TIME_INPUT_ADAPTER.parseText('9p', { seconds: false })).toEqual({
       valid: true,
       value: { hour: 21, minute: 0, second: 0 },
     });

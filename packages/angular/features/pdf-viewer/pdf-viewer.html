@@ -26,7 +26,7 @@
     (pageChange)="goTo($any($event))"
     [attr.aria-label]="labels.page"
   >
-    <button hellPaginationPrev [attr.aria-label]="labels.previousPage">
+    <button hellPageLink="previous" [attr.aria-label]="labels.previousPage">
       <hell-icon name="faSolidChevronLeft" />
     </button>
 
@@ -45,7 +45,7 @@
     />
     <span data-slot="toolbarText" [class]="part('toolbarText')">/ {{ totalPages() || '…' }}</span>
 
-    <button hellPaginationNext [attr.aria-label]="labels.nextPage">
+    <button hellPageLink="next" [attr.aria-label]="labels.nextPage">
       <hell-icon name="faSolidChevronRight" />
     </button>
   </nav>

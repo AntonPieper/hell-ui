@@ -70,6 +70,10 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
         <a routerLink="/components/dialog">Dialog</a> instead when the interaction needs a focus
         trap.
       </p>
+      <p>
+        Weighing flyout against the other floating surfaces? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
+      </p>
 
       <h2>Basic</h2>
       <p>
@@ -108,8 +112,8 @@ import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.
       <h2>With a filters panel</h2>
       <p>
         A toolbar button that opens a checklist of status filters and reflects the active count
-        back onto the trigger with <code>hellTag</code> (narrow entry point
-        <code>@hell-ui/angular/tag</code>). Each option is a <code>hellCheckbox</code> wrapped in
+        back onto the trigger with <code>hellChip</code> (narrow entry point
+        <code>@hell-ui/angular/chip</code>). Each option is a <code>hellCheckbox</code> wrapped in
         <code>hellField</code> (narrow entry point <code>@hell-ui/angular/field</code>) for label
         association. Because the flyout doesn't trap focus, the rest of the toolbar stays usable
         while the panel is open.

@@ -7,6 +7,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added `hell-menu-options` to the menu entry point: a data-driven checkable
+  option list rendering one checkbox menu item per core `HellOption`
+  (`{ value, label, disabled? }`) with a controlled `selected` model and
+  `selectedChange` output. Disabled options render but cannot be toggled, so a
+  consumer enforces a selection floor by disabling still-selected options. It
+  composes freely inside a `[hellMenu]` panel next to hand-written items,
+  sections, and separators, and joins `HELL_MENU_DIRECTIVES`. Closes #150
+  (spec #147). Evidence: menu unit suite, docs data-driven options example.
+- Brought the select, combobox, date-input, audio-player, and TanStack table
+  shell (including its virtual-rows strategy) entry points under API reports:
+  59 entry points are now guarded. The api-extractor "Unable to follow symbol"
+  crashes came from ng-packagr's d.ts flattener shipping unbound identifiers
+  for types inferred through internal entry points; those members now carry
+  explicit annotations, which also fixes the shipped typings for consumers
+  compiling without `skipLibCheck`. Closes #148.
+
 - Extended Filter Bar with the remaining `entity` and `dateRange` field kinds.
   Entity editors orchestrate a consumer-owned `HellSearchSource` with debounce,
   cancellation, stale-result protection, loading/empty/error states, and a
@@ -309,6 +325,30 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Extracted the elevated floating-panel surface, pop-in animation, and default
+  popover z-index into a shared internal presentation module so the popover,
+  flyout, menu, select, and combobox panels can no longer drift (class sets
+  verified unchanged; tooltip and dialog stay deliberately local as an inverse
+  mini-surface and a modal card). A new "When to use which overlay" guide page
+  documents the tooltip/popover/flyout/dialog/picker taxonomy with cross-links
+  from the four overlay pages. Closes #155.
+- Omnibar items now render through the shared option-surface presentation, so
+  they carry the same metrics and active/selected treatment as select,
+  combobox, and listbox options (item padding unifies on the shared metric;
+  the active-state background is unchanged). The item base/active CSS rules
+  moved out of the omnibar stylesheet into the recipe. The active-descendant
+  keyboard model deliberately stays local with the reason documented in code:
+  the omnibar drives its list from a text input over an async item set, which
+  ng-primitives' focus-owning listbox model does not serve. Closes #160.
+- The select, combobox, and listbox option rows now draw their surface from
+  one internal option-surface presentation (metrics, active/selected states,
+  and form-disabled treatment), so hover/active/selected/disabled styling
+  cannot drift between the list modules. Rendered class sets are unchanged
+  (verified by set-equality during the refactor). Menu items deliberately keep
+  local styling (full-bleed rows with indicator gutters, no selection
+  surface); the omnibar's item states stay in its stylesheet until #160
+  rebases its list machinery. No public API change. Closes #154.
+
 - Hell's duration-token-driven transitions and entrance animations now collapse
   under `prefers-reduced-motion: reduce`; Spinner, Skeleton, and Audio Player
   also disable their hardcoded keyframe motion locally. The shared token
@@ -343,6 +383,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/omnibar-a11y-contracts.spec.ts`. Closes #115 (spec #95).
 
 ### Fixed
+
+- Code editor line-number and fold gutters now use the muted foreground token
+  instead of the subtle one, meeting WCAG AA 4.5:1 contrast on the gutter
+  background (surfaced by the axe smoke suite once a docs page rendered a
+  longer always-visible code block). Evidence: `e2e/docs-axe-smoke.spec.ts`.
 
 - `HellNumberInput` now commits a pending typed draft before stepping, so typing
   a value and then clicking a stepper or pressing Arrow / Page / Home / End steps
@@ -506,6 +551,97 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Adopted the selector convention (attribute selector = headless behavior
+  suite on a consumer-owned element; element selector = owned-anatomy
+  component) and removed the "Basic" names. `hell-select-basic` is now
+  `hell-select` (class `HellSelect`) and `hell-combobox-basic` is
+  `hell-combobox` (class `HellCombobox`). To free those names, the headless
+  select trigger renamed from `[hellSelect]`/`HellSelect` to
+  `[hellSelectTrigger]`/`HellSelectTrigger` (matching the menu/popover/listbox
+  trigger family), and the headless combobox container class renamed from
+  `HellCombobox` to `HellComboboxRoot` (its `[hellCombobox]` attribute selector
+  is unchanged). Part types renamed `HellSelectBasicPart/Ui` →
+  `HellSelectPart/Ui` and `HellComboboxBasicPart/Ui` → `HellComboboxPart/Ui`;
+  the `HELL_SELECT_BASIC_DIRECTIVES`/`HELL_COMBOBOX_BASIC_DIRECTIVES` arrays
+  are gone — import the components directly. The convention is recorded in
+  CONTEXT.md and the Part Style Map ADR. Closes #158 (spec #147). Evidence:
+  select/combobox unit suites, migrated docs, themes, and harnesses.
+- The typed-value adapter parse-result contract is now one public core seam:
+  `hellTypedValue`, `hellInvalidTypedValue`, `HellTypedValueParseResult`,
+  `HellTypedValueValidParse`, and `HellTypedValueInvalidParse` export from
+  `@hell-ui/angular/core`. The number-input, time-input, and date-input entry
+  points no longer export their standalone parse/format/normalize/compare
+  helper functions or per-entry-point `Hell*InputParseResult` aliases — build
+  custom adapters with the core constructors and register them with the kept
+  `provideHell<X>InputAdapter` functions; reuse built-in behavior through the
+  exported `HELL_DEFAULT_<X>_INPUT_ADAPTER` objects. Closes #156 (spec-free;
+  see the three docs pages for the one shared authoring convention). Evidence:
+  rewritten input suites, migrated filter-bar serialization paths.
+- Dialpad moved behind a feature entry point. Import `HellDialpad`, its
+  Part Style Map types, `HellDialpadLabels`, and `HELL_DIALPAD_LABELS` from
+  `@hell-ui/angular/features/dialpad` (styles from
+  `@hell-ui/angular/features/dialpad/styles.css`) instead of
+  `@hell-ui/angular/dialpad`. The component itself is unchanged; the core
+  component set stays domain-agnostic, matching the code editor and PDF
+  viewer feature entry points. No re-export from the old path. Closes #161.
+- Moved two directive homes so entry points match their semantics.
+  `HellNativeSelect` now exports from `@hell-ui/angular/select` (the entry
+  point whose docs already pointed at it) instead of `@hell-ui/angular/input`.
+  The `@hell-ui/angular/search` entry point is removed: `HellSearch`,
+  `HellSearchClear`, and `HELL_SEARCH_DIRECTIVES` now export from
+  `@hell-ui/angular/input`, so "search" in Hell unambiguously means core's
+  `HellSearchService`/ranker infrastructure. Selectors, behavior, recipes, and
+  `data-slot` contracts are unchanged — only import paths move. Closes #157.
+  Evidence: migrated omnibar/table-tanstack/pagination/pdf-viewer consumers,
+  input and search unit suites, docs pages.
+- Collapsed the five `@hell-ui/angular/pagination` nav-button directives
+  (`HellPaginationFirst`, `HellPaginationPrev`, `HellPaginationNext`,
+  `HellPaginationLast`, `HellPaginationButton`) into one `HellPageLink`
+  directive on `button[hellPageLink], a[hellPageLink]`. The target is the
+  required `hellPageLink` input, typed by the exported
+  `HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number`.
+  Migrate `hellPaginationFirst` → `hellPageLink="first"`, `hellPaginationPrev`
+  → `hellPageLink="previous"`, `hellPaginationNext` → `hellPageLink="next"`,
+  `hellPaginationLast` → `hellPageLink="last"`, and
+  `hellPaginationButton [page]="p"` → `[hellPageLink]="p"`. Boundary-aware
+  disabled state, numbered `aria-current`/`data-selected`, the pagination
+  Label Contract, the single `root` part, and the Enter/Space keyboard
+  workaround with anchor guards all carry over; `HellPaginationStrip` and
+  `HELL_PAGINATION_LABELS` are unchanged. Closes #153. Evidence: rewritten
+  pagination unit suite; strip, pdf-viewer, and split-view consumers migrated.
+- Removed the `@hell-ui/angular/tag` entry point and folded it into
+  `@hell-ui/angular/chip`: one pill module. `HellTag` is gone — use a static
+  `<span hellChip variant="…">` for non-interactive pills (the six variants
+  are unchanged); `HellBadge` and `HellKbd` now import from
+  `@hell-ui/angular/chip` with identical behavior, recipes, and `data-slot`
+  contracts; the core type `HellTagVariant` renames to `HellChipVariant`; and
+  `@hell-ui/angular/tag/styles.css` imports repoint to the chip stylesheet.
+  No deprecated aliases are provided. Closes #152. Evidence: chip unit suite
+  including the ported tag assertions, migrated docs and theme skins.
+- Removed the `@hell-ui/angular/multi-select-menu-button` Package Entry Point.
+  The composite is now a documented recipe: `hellButton` + `[hellMenu]` +
+  `hell-menu-options`, with the count badge as consumer markup, the reset item
+  as an ordinary menu item, and the selection floor expressed by disabling
+  still-selected options (see the Multi-select menu button recipe page).
+  `HellMultiSelectMenuButton`, `HellMultiSelectOption`,
+  `HELL_MULTI_SELECT_MENU_BUTTON_LABELS`, and its labels interface are gone —
+  migrate `HellMultiSelectOption` to core's `HellOption`. Closes #151
+  (spec #147). Evidence: recipe page examples, migrated browser contract suite
+  `e2e/multi-select-menu-button-contracts.spec.ts`.
+- The select and combobox presets now consume the shared core option contract:
+  `hell-select-basic` and `hell-combobox-basic` take
+  `options: readonly HellOption<T>[]` (`{ value, label, disabled? }`, exported
+  from `@hell-ui/angular/core` with `HellOptionDisplayWith` and
+  `HellOptionCompareWith`) instead of raw value arrays. Display text defaults
+  to each option's `label`; `displayWith` becomes a nullable override that also
+  labels selected values missing from `options`; combobox filtering matches
+  the rendered label; per-option `disabled` flows to the option rows. The
+  entry-point-local `HellSelectDisplayWith`/`HellSelectCompareWith`/
+  `HellComboboxDisplayWith`/`HellComboboxCompareWith` aliases are gone —
+  migrate `[options]="['A', 'B']"` to
+  `[options]="[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]"` and
+  import the callback types from core. Closes #149 (spec #147). Evidence:
+  select and combobox unit suites, updated docs examples.
 - Removed the 278 information-free single-part Part Style Map aliases
   (`Hell<Module>Part = 'root'` and their `Hell<Module>Ui = HellUi<...>`
   counterparts) from every entry point. Single-part modules now type their

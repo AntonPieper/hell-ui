@@ -63,8 +63,8 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         assignee and label selectors, warehouse or account lookups — where a plain
         <code>&lt;select&gt;</code> or a <code>radio</code> group would be slower. In multiple mode
         the value follows the primitive's array contract, which pairs naturally with
-        <code>hellTag</code> chips for a token filter. When wiring the full directive set is more
-        boilerplate than the screen deserves, the <code>&lt;hell-combobox-basic&gt;</code>
+        <code>hellChip</code> chips for a token filter. When wiring the full directive set is more
+        boilerplate than the screen deserves, the <code>&lt;hell-combobox&gt;</code>
         convenience component composes the whole anatomy and handles display filtering for you.
       </p>
 
@@ -80,7 +80,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
 
       <h2>Preset</h2>
       <p>
-        <code>&lt;hell-combobox-basic&gt;</code> composes the input, button, portal, dropdown, and
+        <code>&lt;hell-combobox&gt;</code> composes the input, button, portal, dropdown, and
         options into one component and filters by <code>displayWith</code> internally. Pass
         <code>[options]</code>, bind <code>[value]</code>/<code>(valueChange)</code>, and set
         <code>allowDeselect</code> to let users clear a single selection by re-picking it.
@@ -93,7 +93,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p>
         Add <code>multiple</code> to <code>hellCombobox</code> and the value becomes a read-only
         array; selecting an option toggles its membership and the dropdown stays open for the next
-        pick. Render the current selection as <code>hellTag</code> chips below the control so the
+        pick. Render the current selection as <code>hellChip</code> chips below the control so the
         applied tokens stay scannable.
       </p>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
@@ -122,7 +122,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p>
         A realistic reviewer picker: <code>hellField</code> wires a <code>hellFieldLabel</code> and
         <code>hellFieldDescription</code> to the combobox for accessible naming, while each selected
-        teammate renders as a dismissible <code>hellTag</code> chip with a
+        teammate renders as a dismissible <code>hellChip</code> chip with a
         <code>hellButton iconOnly</code> remove control. Every piece imports from its own narrow
         entry point.
       </p>
@@ -140,7 +140,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       </p>
       <p>
         The single-host directives each expose one <code>root</code> part (their host element).
-        <code>&lt;hell-combobox-basic&gt;</code> owns the full anatomy, so its <code>ui</code> map
+        <code>&lt;hell-combobox&gt;</code> owns the full anatomy, so its <code>ui</code> map
         keys the named parts of every element it renders:
       </p>
       <table class="hd-doc-table">
@@ -183,7 +183,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
             <td>The no-results placeholder — muted text and padding.</td>
           </tr>
           <tr>
-            <td><code>&lt;hell-combobox-basic&gt;</code></td>
+            <td><code>&lt;hell-combobox&gt;</code></td>
             <td><code>root</code></td>
             <td>The component host wrapping the control.</td>
           </tr>
@@ -220,7 +220,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         </tbody>
       </table>
       <p>
-        The example below refines every <code>&lt;hell-combobox-basic&gt;</code> part — and through
+        The example below refines every <code>&lt;hell-combobox&gt;</code> part — and through
         it every underlying module — with Hell design tokens. Open the dropdown to see the styled
         surface and options.
       </p>
@@ -235,7 +235,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>multiple</code>: <code>boolean</code>. Switches to array-valued multi-select. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>allowDeselect</code>: <code>boolean</code>. Lets a single selection be cleared by re-picking it. Default <code>false</code>.</li>
-        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code> — <code>(a, b) =&gt; boolean</code> for non-reference option identity.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code> (from core) — <code>(a, b) =&gt; boolean</code> for non-reference option identity.</li>
         <li><code>placement</code>: <code>NgpComboboxPlacement</code> — dropdown side/alignment. Default <code>bottom</code>.</li>
         <li><code>container</code>: <code>string | HTMLElement | null</code> — overlay mount target. Default <code>body</code>.</li>
         <li><code>flip</code>: <code>NgpFlipInput</code> — flip on overflow. Default <code>true</code>.</li>
@@ -259,36 +259,36 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code>.</p>
       <p><code>[hellComboboxChips]</code> — the multiple-mode chips presentation. Place it inside the control, before the input; it renders each selected value as a removable chip and routes removal (chip button or Backspace-on-empty) through the combobox selection state.</p>
       <ul>
-        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>
+        <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>
         <li><code>size</code>: <code>HellSize</code> — chip size. Default <code>'sm'</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxChipsPart&gt;</code> — map of <code>root | chip</code> (the remove button styles through the chip entry point).</li>
       </ul>
       <p><code>[hellComboboxPortal]</code> — structural directive that renders the dropdown as a floating overlay while open. No inputs.</p>
-      <p><code>&lt;hell-combobox-basic&gt;</code> — the convenience component composing the whole anatomy.</p>
+      <p><code>&lt;hell-combobox&gt;</code> — the convenience component composing the whole anatomy.</p>
       <ul>
-        <li><code>options</code>: <code>readonly T[]</code>. Default <code>[]</code>.</li>
+        <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
         <li><code>value</code>: <code>HellComboboxValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
         <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
         <li><code>emptyLabel</code>: <code>string</code>. Default <code>'No matches'</code>.</li>
         <li><code>aria-label</code>: <code>string | null</code> — accessible name for the input. Default <code>null</code>.</li>
-        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code>. Default reference equality.</li>
-        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code>. Default <code>String</code>.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxBasicPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
+        <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt; | null</code> — overrides option labels (and labels selected values missing from <code>options</code>). Default <code>null</code>: the matching option's <code>label</code> renders. Filtering also matches against the rendered label.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
       </ul>
       <p>
         Exported types: <code>HellComboboxValue&lt;T&gt;</code>,
         <code>HellComboboxSingleValue&lt;T&gt;</code>, <code>HellComboboxMultipleValue&lt;T&gt;</code>,
-        <code>HellComboboxCompareWith&lt;T&gt;</code>, <code>HellComboboxDisplayWith&lt;T&gt;</code>;
+        the core option contract <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>;
         and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
         <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
         <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>,
-        <code>ComboboxChips</code>, and <code>ComboboxBasic</code>. The bundles
-        <code>HELL_COMBOBOX_DIRECTIVES</code> (which now includes
-        <code>hellComboboxChips</code>) and <code>HELL_COMBOBOX_BASIC_DIRECTIVES</code> ease
-        <code>imports</code>.
+        <code>ComboboxChips</code>, and the owned-anatomy <code>hell-combobox</code>. The
+        <code>HELL_COMBOBOX_DIRECTIVES</code> bundle (which includes
+        <code>hellComboboxChips</code>) eases <code>imports</code>; the
+        <code>hell-combobox</code> component imports directly as <code>HellCombobox</code>.
       </p>
 
       <h2>Accessibility</h2>
@@ -298,16 +298,16 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li>Keyboard: Arrow Down/Up open and move the active option, Home/End jump to first/last, Enter selects the active option, and Escape closes the dropdown.</li>
         <li>With <code>hellComboboxChips</code>, the selected chips form one roving tab stop. Arrow Left/Right and Home/End move chip focus; Delete/Backspace removes the focused chip and keeps focus in the collection. Backspace in the empty input removes the last selection.</li>
         <li>The toggle button is <code>tabindex="-1"</code> with <code>aria-haspopup="listbox"</code>, so the input stays the single keyboard entry point while the button remains a pointer affordance.</li>
-        <li>Give the input an accessible name via a <code>&lt;label&gt;</code> (for example inside <code>hellField</code>), <code>aria-label</code>, or <code>aria-labelledby</code>. On <code>&lt;hell-combobox-basic&gt;</code> pass <code>aria-label</code>.</li>
+        <li>Give the input an accessible name via a <code>&lt;label&gt;</code> (for example inside <code>hellField</code>), <code>aria-label</code>, or <code>aria-labelledby</code>. On <code>&lt;hell-combobox&gt;</code> pass <code>aria-label</code>.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
         <li>Use combobox when a list is large enough that typing to filter beats scanning.</li>
-        <li>Use <code>hellComboboxChips</code> for editable multiple selections; keep <code>hellTag</code> for static or read-only summaries.</li>
+        <li>Use <code>hellComboboxChips</code> for editable multiple selections; keep <code>hellChip</code> for static or read-only summaries.</li>
         <li>Leave <code>hellComboboxButton</code> empty — its chevron is drawn by the stylesheet.</li>
         <li>Provide an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
-        <li>Reach for <code>&lt;hell-combobox-basic&gt;</code> when composing the directives is just boilerplate.</li>
+        <li>Reach for <code>&lt;hell-combobox&gt;</code> when composing the directives is just boilerplate.</li>
       </ul>
 
       <h2>Don't</h2>

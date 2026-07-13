@@ -26,7 +26,7 @@ const PART_STYLE_MAP_CODE = `<!-- String shorthand refines the component's defau
 
 const STATE_ATTRIBUTE_CODE = `/* Style by contract, not by internal DOM. Public Parts render data-slot;
    states render data-* attributes. */
-[hellSelect][data-slot='trigger'][data-open] {
+[hellSelectTrigger][data-slot='trigger'][data-open] {
   border-color: var(--color-hell-primary);
 }`;
 
@@ -83,7 +83,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
         <li>
           <strong>Mixed Entry Points</strong> (select, combobox, pagination) export primitive
           directives plus a small convenience component, for example
-          <code>hell-select-basic</code>, when assembling the primitive is boilerplate.
+          <code>hell-select</code>, when assembling the primitive is boilerplate.
         </li>
         <li>
           <strong>Composites</strong> (app shell, omnibar, date picker, toast, …) combine

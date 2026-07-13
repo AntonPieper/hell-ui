@@ -1,5 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
+import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
 import { NgpTextarea } from 'ng-primitives/textarea';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
@@ -12,10 +13,6 @@ const HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES =
 
 const HELL_INPUT_RECIPE = {
   root: `inline-flex h-hell-control-md w-full rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 font-[inherit] text-[13px] text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:h-hell-control-sm data-[size=sm]:px-hell-3 data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:px-hell-5 data-[size=lg]:text-sm`,
-} satisfies HellRecipe<'root'>;
-
-const HELL_NATIVE_SELECT_RECIPE = {
-  root: `inline-flex h-hell-control-md w-full appearance-none rounded-hell-md border border-hell-border bg-hell-surface-elevated bg-[image:linear-gradient(45deg,transparent_50%,var(--color-hell-foreground-muted)_50%),linear-gradient(135deg,var(--color-hell-foreground-muted)_50%,transparent_50%)] bg-[length:4px_4px] bg-[position:calc(100%_-_12px)_50%,calc(100%_-_8px)_50%] bg-no-repeat ps-hell-4 pe-[calc(var(--spacing-hell-4)+1rem)] font-[inherit] text-[13px] text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} data-[size=sm]:h-hell-control-sm data-[size=sm]:ps-hell-3 data-[size=sm]:pe-[calc(var(--spacing-hell-3)+1rem)] data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:ps-hell-5 data-[size=lg]:pe-[calc(var(--spacing-hell-5)+1rem)] data-[size=lg]:text-sm`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_TEXTAREA_RECIPE = {
@@ -41,33 +38,6 @@ export class HellInput {
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_INPUT_RECIPE,
-  });
-
-  /** Control size; `sm`, `md`, or `lg`. */
-  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  /** Marks the control invalid for styling and `aria-invalid`. */
-  readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
-}
-
-/** Styled native `<select>` built on `NgpInput`, with a CSS-drawn chevron. */
-@Directive({
-  selector: 'select[hellNativeSelect]',
-  hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-size]': 'size()',
-    '[attr.aria-invalid]': 'invalid() ? "true" : null',
-  },
-})
-export class HellNativeSelect {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_NATIVE_SELECT_RECIPE,
   });
 
   /** Control size; `sm`, `md`, or `lg`. */
@@ -117,3 +87,55 @@ export class HellTextarea {
    */
   readonly autoGrow = input(false, { alias: 'autoGrow', transform: booleanAttribute });
 }
+
+const HELL_SEARCH_RECIPE = {
+  root: '',
+} satisfies HellRecipe<'root'>;
+
+const HELL_SEARCH_CLEAR_RECIPE = {
+  root: '',
+} satisfies HellRecipe<'root'>;
+
+/** Root container for a search field, coordinating its clear control. */
+@Directive({
+  selector: '[hellSearch]',
+  hostDirectives: [NgpSearch],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
+})
+export class HellSearch {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SEARCH_RECIPE,
+  });
+}
+
+/** Button that clears the value of an enclosing `hellSearch` field. */
+@Directive({
+  selector: 'button[hellSearchClear]',
+  hostDirectives: [NgpSearchClear],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    type: 'button',
+  },
+})
+export class HellSearchClear {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SEARCH_CLEAR_RECIPE,
+  });
+}
+
+/** Search-field directives of the input entry point, for bulk `imports`. */
+export const HELL_SEARCH_DIRECTIVES = [HellSearch, HellSearchClear] as const;

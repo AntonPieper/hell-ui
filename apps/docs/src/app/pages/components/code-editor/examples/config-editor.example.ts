@@ -4,7 +4,7 @@ import { type Extension } from '@codemirror/state';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/select';
+import { HellSelect } from '@hell-ui/angular/select';
 
 type ConfigLanguage = 'TypeScript' | 'JavaScript' | 'JSX';
 
@@ -18,7 +18,7 @@ const INITIAL_CONFIG = `export default {
 @Component({
   selector: 'app-code-editor-config-editor-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellCodeEditor, HellButton, ...HELL_CARD_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES],
+  imports: [HellCodeEditor, HellButton, ...HELL_CARD_DIRECTIVES, HellSelect],
   template: `
     <div hellCard class="max-w-140">
       <div hellCardHeader class="flex items-center justify-between gap-4">
@@ -26,7 +26,7 @@ const INITIAL_CONFIG = `export default {
           <strong>service.config.ts</strong>
           <span class="text-sm text-hell-foreground-muted">Environment: production</span>
         </div>
-        <hell-select-basic
+        <hell-select
           class="inline-flex w-40"
           aria-label="Editor language"
           [options]="languages"
@@ -63,7 +63,9 @@ const INITIAL_CONFIG = `export default {
   `,
 })
 export class CodeEditorConfigEditorExample {
-  protected readonly languages: readonly ConfigLanguage[] = ['TypeScript', 'JavaScript', 'JSX'];
+  protected readonly languages = (['TypeScript', 'JavaScript', 'JSX'] as const).map(
+    (language): { value: ConfigLanguage; label: string } => ({ value: language, label: language }),
+  );
   protected readonly language = signal<ConfigLanguage>('TypeScript');
 
   protected readonly saved = signal(INITIAL_CONFIG);

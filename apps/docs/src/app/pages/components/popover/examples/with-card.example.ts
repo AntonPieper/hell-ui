@@ -3,12 +3,12 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-popover-with-card-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAvatar, HellButton, HellPopover, HellPopoverTrigger, HellTag, ...HELL_CARD_DIRECTIVES],
+  imports: [HellAvatar, HellButton, HellPopover, HellPopoverTrigger, HellChip, ...HELL_CARD_DIRECTIVES],
   template: `
     <div class="min-h-[220px]">
       <button
@@ -32,8 +32,8 @@ import { HellTag } from '@hell-ui/angular/tag';
               <p id="assignee-card-name" class="truncate text-sm font-semibold">Mara Voss</p>
               <p class="hd-muted truncate text-sm">Platform team &middot; Berlin</p>
               <div class="mt-2 flex flex-wrap gap-1">
-                <span hellTag variant="info">On call</span>
-                <span hellTag>4 open tickets</span>
+                <span hellChip variant="info">On call</span>
+                <span hellChip>4 open tickets</span>
               </div>
             </div>
           </div>

@@ -133,7 +133,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/app-shell',
  detail:'components/app-shell/examples/sidenav.example.ts',
  terms:
-'app-shell hellAppShell hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellTag hell-icon collapsible section aria-current badge count rail icon-only',
+'app-shell hellAppShell hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellChip hell-icon collapsible section aria-current badge count rail icon-only',
  },
  {
  title:'App Shell: Styling (all parts)',
@@ -175,7 +175,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/audio-player',
  detail:'components/audio-player/examples/voicemail-inbox.example.ts',
  terms:
-'audio-player voicemail-inbox components/audio-player/examples/voicemail-inbox.example hell-audio-player hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellTag tag card composite unread urgent allowDownload',
+'audio-player voicemail-inbox components/audio-player/examples/voicemail-inbox.example hell-audio-player hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellChip tag card composite unread urgent allowDownload',
  },
  {
  title:'Audio Player: Title and date',
@@ -259,7 +259,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/avatar',
  detail:'components/avatar/examples/with-card-profile.example.ts',
  terms:
-'with-card-profile profile header composite components/avatar/examples/with-card-profile.example components/avatar hell-avatar hellCard hellCardBody hellTag directory people settings',
+'with-card-profile profile header composite components/avatar/examples/with-card-profile.example components/avatar hell-avatar hellCard hellCardBody hellChip directory people settings',
  },
  {
  title:'Breadcrumbs: All Parts Styling',
@@ -378,7 +378,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/card',
  detail:'components/card/examples/entity-summary.example.ts',
  terms:
-'entity-summary hellCard hellCardHeader hellCardBody hellCardFooter hell-avatar hellTag hellButton hell-icon composite account owner overflow menu renewal',
+'entity-summary hellCard hellCardHeader hellCardBody hellCardFooter hell-avatar hellChip hellButton hell-icon composite account owner overflow menu renewal',
  },
  {
  title:'Card: With Footer',
@@ -476,7 +476,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/chip',
  detail:'components/chip/examples/variants.example.ts',
  terms:
-'components/chip/examples/variants.example components/chip hellChip variant HellTagVariant default primary info success warning danger data-variant palette tag',
+'components/chip/examples/variants.example components/chip hellChip variant HellChipVariant default primary info success warning danger data-variant palette tag',
  },
  {
  title:'Code Editor: Basic',
@@ -490,7 +490,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/code-editor',
  detail:'components/code-editor/examples/config-editor.example.ts',
  terms:
-'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select-basic HELL_CARD_DIRECTIVES HELL_SELECT_BASIC_DIRECTIVES hellButton language picker dirty reset apply ui root',
+'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select HELL_CARD_DIRECTIVES HellSelect hellButton language picker dirty reset apply ui root',
  },
  {
  title:'Code Editor: Supplying a language',
@@ -532,28 +532,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/multiple.example.ts',
  terms:
-'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellTag HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
  },
  {
  title:'Combobox: Preset',
  path:'/components/combobox',
  detail:'components/combobox/examples/preset.example.ts',
  terms:
-'components/combobox/examples/preset.example components/combobox hell-combobox-basic HellComboboxBasic HELL_COMBOBOX_BASIC_DIRECTIVES options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
+'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
  },
  {
  title:'Combobox: Styling',
  path:'/components/combobox',
  detail:'components/combobox/examples/styling.example.ts',
  terms:
-'components/combobox/examples/styling.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi HELL_COMBOBOX_BASIC_DIRECTIVES ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
+'components/combobox/examples/styling.example components/combobox hell-combobox HellCombobox HellComboboxUi HellCombobox ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
  },
  {
  title:'Combobox: With field and tag',
  path:'/components/combobox',
  detail:'components/combobox/examples/with-field-tag.example.ts',
  terms:
-'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellTag hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
+'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
  },
  {
  title:'Confirm: Basic',
@@ -742,7 +742,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/dialpad',
  detail:'components/dialpad/examples/call-console.example.ts',
  terms:
-'call-console hell-dialpad hellButton hellCard hellCardHeader hellCardBody hellCardFooter hellTag composite call console dial hang up readOnly',
+'call-console hell-dialpad hellButton hellCard hellCardHeader hellCardBody hellCardFooter hellChip composite call console dial hang up readOnly',
  },
  {
  title:'Dialpad: States',
@@ -791,7 +791,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/drop-zone',
  detail:'components/drop-zone/examples/upload-queue.example.ts',
  terms:
-'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/tag hellDropzone hellProgress hellProgressBar hellTag hellButton hellIcon invoices progress status',
+'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/chip hellDropzone hellProgress hellProgressBar hellChip hellButton hellIcon invoices progress status',
  },
  {
  title:'File Upload: Reference integration with a mock upload adapter',
@@ -924,7 +924,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/flyout',
  detail:'components/flyout/examples/with-filters-panel.example.ts',
  terms:
-'components/flyout/examples/with-filters-panel.example components/flyout hellFlyout hellFlyoutTrigger hellCheckbox hellField hellFieldLabel hellTag hellButton hell-icon faSolidFilter composite toolbar status active count badge',
+'components/flyout/examples/with-filters-panel.example components/flyout hellFlyout hellFlyoutTrigger hellCheckbox hellField hellFieldLabel hellChip hellButton hell-icon faSolidFilter composite toolbar status active count badge',
  },
  {
  title:'Icon: Basic',
@@ -959,7 +959,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/icon',
  detail:'components/icon/examples/with-button-and-tag.example.ts',
  terms:
-'composite hell-icon HellIcon hellButton hellTag status glyph connection row trunk sip disabled faSolidCircleCheck faSolidPhone faSolidTriangleExclamation',
+'composite hell-icon HellIcon hellButton hellChip status glyph connection row trunk sip disabled faSolidCircleCheck faSolidPhone faSolidTriangleExclamation',
  },
  {
  title:'Input: All Parts Styling',
@@ -1060,6 +1060,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItemCheckbox hellMenuItemRadioGroup hellMenuItemRadio hellMenuItemIndicator hellMenuSeparator checkbox radio group preferences toggle multi-select single-choice checked valueChange',
  },
  {
+ title:'Menu: Data-driven options',
+ path:'/components/menu',
+ detail:'components/menu/examples/options.example.ts',
+ terms:
+'options components/menu/examples/options.example components/menu hell-menu-options HellOption hellMenuTrigger hellMenu data-driven checkable options selected selectedChange compareWith disabled selection floor controlled column visibility menuitemcheckbox',
+ },
+ {
  title:'Menu: With avatar (account menu)',
  path:'/components/menu',
  detail:'components/menu/examples/profile-menu.example.ts',
@@ -1099,14 +1106,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/basic.example.ts',
  terms:
-'multi-select-menu-button basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hell-multi-select-menu-button options selected selectedChange minSelected resettable reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels HellMultiSelectOption disabled floor Label Contract',
+'multi-select-menu-button recipe basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hellButton hellMenuTrigger hellMenu hell-menu-options HellOption options selected selectedChange reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels disabled selection floor',
  },
  {
  title:'Multi-Select Menu Button: TanStack column visibility',
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/tanstack-columns.example.ts',
  terms:
-'multi-select-menu-button tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hell-multi-select-menu-button TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns minSelected reset',
+'multi-select-menu-button recipe tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hellButton hellMenu hell-menu-options TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
  },
  {
  title:'Omnibar: Async search',
@@ -1127,14 +1134,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'components/omnibar/examples/command-palette.example.ts',
  terms:
-'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/tag hotkey mod+k hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemTrailing hell-icon HellIcon topbar grouped commands shortcut chips composite',
+'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/chip hotkey mod+k hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemTrailing hell-icon HellIcon topbar grouped commands shortcut chips composite',
  },
  {
  title:'Omnibar: Global hotkey',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/hotkey.example.ts',
  terms:
-'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut hellOmnibarTrailing hellKbd kbd @hell-ui/angular/tag hellOmnibarGroup hellOmnibarItem hellOmnibarItemText searchItems searchFields command palette',
+'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut hellOmnibarTrailing hellKbd kbd @hell-ui/angular/chip hellOmnibarGroup hellOmnibarItem hellOmnibarItemText searchItems searchFields command palette',
  },
  {
  title:'Omnibar: Sizes',
@@ -1162,7 +1169,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pagination',
  detail:'components/pagination/examples/composed.example.ts',
  terms:
-'composed custom hellPagination hellPaginationFirst hellPaginationPrev hellPaginationNext hellPaginationLast directive composition nav aria-label',
+'composed custom hellPagination hellPageLink directive composition nav aria-label',
  },
  {
  title:'Pagination: Page Jump',
@@ -1204,7 +1211,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pdf-viewer',
  detail:'components/pdf-viewer/examples/document-review.example.ts',
  terms:
-'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellTag master detail review queue approve invoice',
+'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellChip master detail review queue approve invoice',
  },
  {
  title:'Pdf Viewer: Events And Error Handling',
@@ -1267,7 +1274,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/popover',
  detail:'components/popover/examples/with-card.example.ts',
  terms:
-'composite hellCard hellCardBody hellCardFooter hell-avatar hellTag profile summary assignee reassign',
+'composite hellCard hellCardBody hellCardFooter hell-avatar hellChip profile summary assignee reassign',
  },
  {
  title:'Progress: All Parts Styling',
@@ -1309,7 +1316,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/progress',
  detail:'components/progress/examples/with-job-status-card.example.ts',
  terms:
-'composite hellCard hellCardHeader hellCardBody hellProgress hellProgressBar hellTag export nightly running tag',
+'composite hellCard hellCardHeader hellCardBody hellProgress hellProgressBar hellChip export nightly running tag',
  },
  {
  title:'Radio: All Parts Styling',
@@ -1344,7 +1351,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/radio',
  detail:'components/radio/examples/plan-picker.example.ts',
  terms:
-'hellRadioGroup hellRadio hellCard hellCardHeader hellCardBody hellCardFooter hellField hellFieldLabel hellFieldDescription hellTag composite pricing tiers required validation',
+'hellRadioGroup hellRadio hellCard hellCardHeader hellCardBody hellCardFooter hellField hellFieldLabel hellFieldDescription hellChip composite pricing tiers required validation',
  },
  {
  title:'Resizable: Basic',
@@ -1365,7 +1372,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/resizable',
  detail:'components/resizable/examples/inspector.example.ts',
  terms:
-'inspector hellResizable hellResizablePane hellResizableHandle hellCard hellCardHeader hellCardBody hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTag aria-controls list detail composite grip appearance selection',
+'inspector hellResizable hellResizablePane hellResizableHandle hellCard hellCardHeader hellCardBody hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellChip aria-controls list detail composite grip appearance selection',
  },
  {
  title:'Resizable: Minimum sizes',
@@ -1449,49 +1456,49 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/search',
  detail:'components/search/examples/with-table-filter-toolbar.example.ts',
  terms:
-'composite hellSearch hellListbox hellListboxOption HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableRow hellTableHeaderCell hellTableCell hellTag invoices status',
+'composite hellSearch hellListbox hellListboxOption HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableRow hellTableHeaderCell hellTableCell hellChip invoices status',
  },
  {
  title:'Select: Basic',
  path:'/components/select',
  detail:'components/select/examples/basic.example.ts',
  terms:
-'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
+'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
  },
  {
  title:'Select: Multiple',
  path:'/components/select',
  detail:'components/select/examples/multiple.example.ts',
  terms:
-'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellTag HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
+'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
  },
  {
  title:'Select: Preset',
  path:'/components/select',
  detail:'components/select/examples/preset.example.ts',
  terms:
-'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
+'hell-select HellSelect hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
  },
  {
  title:'Select: Rich options',
  path:'/components/select',
  detail:'components/select/examples/rich-options.example.ts',
  terms:
-'rich-options hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
+'rich-options hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
  },
  {
  title:'Select: Styling',
  path:'/components/select',
  detail:'components/select/examples/styling.example.ts',
  terms:
-'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES HellSelectBasicUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
+'hell-select HellSelect HellSelectUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
  },
  {
  title:'Select: With field and tag',
  path:'/components/select',
  detail:'components/select/examples/with-field-status.example.ts',
  terms:
-'with-field-status hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellTag HellTagVariant hellButton composite form review decision status submit error',
+'with-field-status hell-select HellSelect hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton composite form review decision status submit error',
  },
  {
  title:'Separator: All Parts Styling',
@@ -1680,7 +1687,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/split-view',
  detail:'components/split-view/examples/master-detail.example.ts',
  terms:
-'split-view master-detail hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTableRowAction HELL_TABLE_UTILITIES_DIRECTIVES hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellTag itemNavigation active tickets composite master detail',
+'split-view master-detail hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTableRowAction HELL_TABLE_UTILITIES_DIRECTIVES hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellChip itemNavigation active tickets composite master detail',
  },
  {
  title:'Split View: Sizing',
@@ -1792,49 +1799,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/tabs',
  detail:'components/tabs/examples/with-card.example.ts',
  terms:
-'hellCard hellCardHeader hellCardBody hellTag composite server metrics processes logs status detail sections',
+'hellCard hellCardHeader hellCardBody hellChip composite server metrics processes logs status detail sections',
  },
  {
- title:'Tag: Badge',
- path:'/components/tag',
- detail:'components/tag/examples/badge.example.ts',
+ title:'Chip: Badge',
+ path:'/components/chip',
+ detail:'components/chip/examples/badge.example.ts',
  terms:
 'hellBadge counter notification count numeric indicator',
  },
  {
- title:'Tag: Basic',
- path:'/components/tag',
- detail:'components/tag/examples/basic.example.ts',
- terms:
-'hellTag variant status label simple smallest usage',
- },
- {
- title:'Tag: Keyboard Hint',
- path:'/components/tag',
- detail:'components/tag/examples/keyboard-hint.example.ts',
+ title:'Chip: Keyboard Hint',
+ path:'/components/chip',
+ detail:'components/chip/examples/keyboard-hint.example.ts',
  terms:
 'keyboard-hint hellKbd kbd shortcut keycap command palette',
- },
- {
- title:'Tag: Styling',
- path:'/components/tag',
- detail:'components/tag/examples/styling.example.ts',
- terms:
-'hellTag hellBadge hellKbd ui part style map root refinement all-parts tailwind hell design tokens',
- },
- {
- title:'Tag: Variants',
- path:'/components/tag',
- detail:'components/tag/examples/variants.example.ts',
- terms:
-'hellTag variant default primary info success warning danger color semantic',
- },
- {
- title:'Tag: With Table',
- path:'/components/tag',
- detail:'components/tag/examples/with-table.example.ts',
- terms:
-'with-table hellTag hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell hellTableHeaderCell hell-avatar HellAvatar HELL_TABLE_UTILITIES_DIRECTIVES status column team member composite realistic',
  },
  {
  title:'Time Input: Basic',
@@ -2113,7 +2092,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/theming',
  detail:'theming/examples/scoped-theme-demo.example.ts',
  terms:
-'scoped-theme-demo theming/examples/scoped-theme-demo.example hellCard hellCardHeader hellTag hellCardBody hellButton',
+'scoped-theme-demo theming/examples/scoped-theme-demo.example hellCard hellCardHeader hellChip hellCardBody hellButton',
  },
 ];
 
@@ -2175,9 +2154,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Select portal pattern',
  path:'/components/select',
- detail:'hellSelect with hellSelectPortal and hellSelectDropdown',
+ detail:'hellSelectTrigger with hellSelectPortal and hellSelectDropdown',
  terms:
-'HELL_SELECT_DIRECTIVES hellSelect hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption valueChange',
+'HELL_SELECT_DIRECTIVES hellSelectTrigger hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption valueChange',
  },
  {
  title:'Tabs anatomy',

@@ -13,42 +13,40 @@ import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
 // @public
-export const HELL_PAGINATION_DIRECTIVES: readonly [typeof HellPagination, typeof HellPaginationFirst, typeof HellPaginationPrev, typeof HellPaginationNext, typeof HellPaginationLast, typeof HellPaginationButton, typeof HellPaginationStrip];
+export const HELL_PAGINATION_DIRECTIVES: readonly [typeof HellPagination, typeof HellPageLink, typeof HellPaginationStrip];
 
 // @public
 export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels>;
 
 // @public
-export class HellPagination {
+export class HellPageLink {
+    constructor();
+    protected readonly activate: (event: Event) => void;
+    protected readonly ariaCurrent: _angular_core.Signal<boolean | null>;
+    protected readonly controlDisabled: _angular_core.Signal<boolean>;
+    protected readonly dataSelected: _angular_core.Signal<"" | null>;
+    readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly hellPageLink: _angular_core.InputSignal<HellPageLinkTarget>;
+    // Warning: (ae-forgotten-export) The symbol "HellPaginationNativeControl" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
+    protected readonly native: HellPaginationNativeControl;
+    protected onClick(event: Event): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPageLink, "button[hellPageLink], a[hellPageLink]", never, { "hellPageLink": { "alias": "hellPageLink"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPageLink, never>;
+}
+
+// @public
+export type HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number;
+
+// @public
+export class HellPagination {
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPagination, "[hellPagination]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPagination, never>;
-}
-
-// @public
-export class HellPaginationButton {
-    protected readonly activate: (event: Event) => void;
-    protected readonly disabled: _angular_core.Signal<boolean>;
-    // Warning: (ae-forgotten-export) The symbol "HellPaginationNativeControl" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-    protected readonly native: HellPaginationNativeControl;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationButton, "button[hellPaginationButton], a[hellPaginationButton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationButton; inputs: { "ngpPaginationButtonPage": "page"; "ngpPaginationButtonDisabled": "disabled"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationButton, never>;
-}
-
-// @public
-export class HellPaginationFirst {
-    protected readonly activate: (event: Event) => void;
-    protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly native: HellPaginationNativeControl;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationFirst, "button[hellPaginationFirst], a[hellPaginationFirst]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationFirst; inputs: { "ngpPaginationFirstDisabled": "disabled"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationFirst, never>;
 }
 
 // @public
@@ -65,40 +63,7 @@ export interface HellPaginationLabels {
 }
 
 // @public
-export class HellPaginationLast {
-    protected readonly activate: (event: Event) => void;
-    protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly native: HellPaginationNativeControl;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationLast, "button[hellPaginationLast], a[hellPaginationLast]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationLast; inputs: { "ngpPaginationLastDisabled": "disabled"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationLast, never>;
-}
-
-// @public
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
-
-// @public
-export class HellPaginationNext {
-    protected readonly activate: (event: Event) => void;
-    protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly native: HellPaginationNativeControl;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationNext, "button[hellPaginationNext], a[hellPaginationNext]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationNext; inputs: { "ngpPaginationNextDisabled": "disabled"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationNext, never>;
-}
-
-// @public
-export class HellPaginationPrev {
-    protected readonly activate: (event: Event) => void;
-    protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly native: HellPaginationNativeControl;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationPrev, "button[hellPaginationPrev], a[hellPaginationPrev]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationPrevious; inputs: { "ngpPaginationPreviousDisabled": "disabled"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationPrev, never>;
-}
 
 // @public
 export class HellPaginationStrip {

@@ -4,10 +4,12 @@
 
 /* Combobox defaults are Tailwind utility recipes in the directives. */
 @source "./combobox.ts";
+@source "../internal/option/option-presentation.ts";
+@source "../internal/floating/floating-presentation.ts";
 
 @layer components {
   [hellComboboxButton][data-slot='root']::after,
-  hell-combobox-basic [hellComboboxButton][data-slot='button']::after {
+  hell-combobox [hellComboboxButton][data-slot='button']::after {
     content: '';
     display: block;
     width: 10px;
@@ -25,7 +27,7 @@
   }
 
   [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after,
-  hell-combobox-basic [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after {
+  hell-combobox [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after {
     rotate: 180deg;
   }
 }

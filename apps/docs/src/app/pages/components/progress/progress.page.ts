@@ -106,7 +106,7 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
       <h2>With job status card</h2>
       <p>
         A realistic composite: a <code>hellCard</code> names the job and its current
-        <code>hellTag</code> status, then a labeled <code>hellProgress</code>/<code>hellProgressBar</code>
+        <code>hellChip</code> status, then a labeled <code>hellProgress</code>/<code>hellProgressBar</code>
         pair reports how far the export has gotten. Each nested component keeps its own behavior and
         Part Style Map — the card only supplies the surface and header/body regions.
       </p>
@@ -216,7 +216,7 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>Don't fake a slowly-ticking percentage for unknown-duration work; use the indeterminate state or a spinner instead.</li>
-        <li>Don't rely on fill color alone to convey status — pair it with a <code>hellTag</code> or text label.</li>
+        <li>Don't rely on fill color alone to convey status — pair it with a <code>hellChip</code> or text label.</li>
         <li>Don't style descendants of <code>hellProgress</code> directly; refine <code>hellProgressBar</code>'s own <code>ui</code> instead.</li>
       </ul>
     </article>

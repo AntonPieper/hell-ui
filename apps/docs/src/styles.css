@@ -16,7 +16,7 @@
 @import '@hell-ui/angular/confirm/styles.css';
 @import '@hell-ui/angular/date-input/styles.css';
 @import '@hell-ui/angular/date-picker/styles.css';
-@import '@hell-ui/angular/dialpad/styles.css';
+@import '@hell-ui/angular/features/dialpad/styles.css';
 @import '@hell-ui/angular/dialog/styles.css';
 @import '@hell-ui/angular/drop-zone/styles.css';
 @import '@hell-ui/angular/empty-state/styles.css';
@@ -28,7 +28,6 @@
 @import '@hell-ui/angular/input/styles.css';
 @import '@hell-ui/angular/listbox/styles.css';
 @import '@hell-ui/angular/menu/styles.css';
-@import '@hell-ui/angular/multi-select-menu-button/styles.css';
 @import '@hell-ui/angular/number-input/styles.css';
 @import '@hell-ui/angular/omnibar/styles.css';
 @import '@hell-ui/angular/page-header/styles.css';
@@ -48,7 +47,6 @@
 @import '@hell-ui/angular/table-tanstack/styles.css';
 @import '@hell-ui/angular/table/styles.css';
 @import '@hell-ui/angular/tabs/styles.css';
-@import '@hell-ui/angular/tag/styles.css';
 @import '@hell-ui/angular/time-input/styles.css';
 @import '@hell-ui/angular/toast/styles.css';
 @import '@hell-ui/angular/toggle/styles.css';

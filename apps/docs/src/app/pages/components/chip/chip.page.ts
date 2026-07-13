@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
+import { ChipBadgeExample } from './examples/badge.example';
+import chipBadgeExampleCodeRaw from './examples/badge.example.ts?raw' with { loader: 'text' };
 import { ChipBasicExample } from './examples/basic.example';
 import chipBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { ChipClickableExample } from './examples/clickable.example';
@@ -9,6 +11,10 @@ import chipClickableExampleCodeRaw from './examples/clickable.example.ts?raw' wi
 };
 import { ChipDisabledExample } from './examples/disabled.example';
 import chipDisabledExampleCodeRaw from './examples/disabled.example.ts?raw' with {
+  loader: 'text',
+};
+import { ChipKeyboardHintExample } from './examples/keyboard-hint.example';
+import chipKeyboardHintExampleCodeRaw from './examples/keyboard-hint.example.ts?raw' with {
   loader: 'text',
 };
 import { ChipSizesExample } from './examples/sizes.example';
@@ -33,6 +39,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
     ChipClickableExample,
     ChipDisabledExample,
     ChipStylingExample,
+    ChipBadgeExample,
+    ChipKeyboardHintExample,
     PageHeader,
   ],
   template: `
@@ -44,23 +52,33 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         importPath="@hell-ui/angular/chip"
         stylesPath="@hell-ui/angular/chip/styles.css"
       >
-        Interactive, token-shaped chips with an optional leading icon, a label, and an optional
-        remove button — grouped in a chip set with roving keyboard focus and keyboard removal.
+        One pill module: token-shaped chips — static or interactive, with an optional remove
+        button and roving-focus chip sets — plus compact numeric badges and keyboard-key hints.
       </hd-page-header>
 
       <p>
-        <code>@hell-ui/angular/chip</code> provides three directives: <code>hellChip</code> for the
-        chip host (a <code>&lt;span&gt;</code>, <code>&lt;button&gt;</code>, or
-        <code>&lt;a&gt;</code>), <code>hellChipRemove</code> for a real sibling remove button, and
-        <code>hellChipSet</code> for a container that manages roving focus and keyboard removal.
-        For static, non-interactive labels reach for
-        <a href="/components/tag"><code>hellTag</code></a> instead — chip is for tokens the user can
-        focus, activate, or remove.
+        <code>@hell-ui/angular/chip</code> is the home for every pill-shaped token.
+        <code>hellChip</code> is the chip host (a <code>&lt;span&gt;</code>,
+        <code>&lt;button&gt;</code>, or <code>&lt;a&gt;</code>): on a plain <code>&lt;span&gt;</code>
+        it is a static, non-interactive label; add a sibling <code>hellChipRemove</code> button or
+        drop it inside a <code>hellChipSet</code> and the same host becomes an interactive, removable
+        token with roving keyboard focus. The entry point also ships <code>hellBadge</code> for a
+        small numeric or dot indicator and <code>hellKbd</code> for a styled keyboard key.
       </p>
       <p>
         Removal is event-only: a chip emits <code>(remove)</code> and you own the collection, so
-        chips work with any state shape. Variants and sizes match <code>hellTag</code> so
-        interactive and static tokens share one visual language.
+        chips work with any state shape. Static and interactive chips share one <code>variant</code>
+        palette and <code>size</code> scale, so a status label and a removable filter pill never
+        drift apart visually.
+      </p>
+      <p class="hd-note">
+        <strong>Migrating from Tag.</strong> The former <code>@hell-ui/angular/tag</code> entry point
+        has been folded into this one. Replace a <code>hellTag</code> with a static
+        <code>&lt;span hellChip&gt;</code> — the six <code>variant</code> values
+        (<code>default</code>, <code>primary</code>, <code>info</code>, <code>success</code>,
+        <code>warning</code>, <code>danger</code>) are unchanged — and import
+        <code>HellBadge</code> and <code>HellKbd</code> from <code>@hell-ui/angular/chip</code>
+        instead of the old tag path.
       </p>
 
       <h2>Basic</h2>
@@ -77,9 +95,10 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
 
       <h2>Variants</h2>
       <p>
-        <code>variant</code> shares the <code>hellTag</code> palette: <code>default</code>,
-        <code>primary</code>, <code>info</code>, <code>success</code>, <code>warning</code>, and
-        <code>danger</code>.
+        <code>variant</code> picks the semantic color: <code>default</code>, <code>primary</code>,
+        <code>info</code>, <code>success</code>, <code>warning</code>, and <code>danger</code>. These
+        static <code>&lt;span hellChip&gt;</code> pills are the direct replacement for the old
+        <code>hellTag</code> — same six variants, no interactive semantics.
       </p>
       <hd-example-tabs [code]="chipVariantsExampleCode" previewClass="flex flex-wrap gap-2">
         <app-chip-variants-example />
@@ -151,6 +170,26 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <app-chip-styling-example />
       </hd-example-tabs>
 
+      <h2>Badge</h2>
+      <p>
+        <code>hellBadge</code> is a small counter, typically absolutely positioned over another
+        element such as a nav icon or inbox label. It carries no variant input — position it with
+        your own layout classes and pass the count or short label as content.
+      </p>
+      <hd-example-tabs [code]="chipBadgeExampleCode" previewClass="flex items-center gap-6">
+        <app-chip-badge-example />
+      </hd-example-tabs>
+
+      <h2>Keyboard hint</h2>
+      <p>
+        <code>hellKbd</code> renders a real <code>&lt;kbd&gt;</code> element (or attaches to one you
+        provide) styled as a keycap, for documenting shortcuts inline in menus, tooltips, or help
+        text.
+      </p>
+      <hd-example-tabs [code]="chipKeyboardHintExampleCode">
+        <app-chip-keyboard-hint-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <p><code>hellChipSet</code></p>
       <ul>
@@ -166,7 +205,7 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       </ul>
       <p><code>hellChip</code> (selector <code>[hellChip]</code> on span, button, or anchor)</p>
       <ul>
-        <li><code>variant</code>: <code>HellTagVariant</code>. Defaults to <code>default</code>.</li>
+        <li><code>variant</code>: <code>HellChipVariant</code>. Defaults to <code>default</code>.</li>
         <li><code>size</code>: <code>HellSize</code>. Defaults to <code>md</code>.</li>
         <li>
           <code>disabled</code>: <code>boolean</code> — disables the chip and its remove button.
@@ -193,6 +232,22 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>, <code>HellChip</code>,
         and <code>HellChipRemove</code>, for bulk <code>imports</code>.
       </p>
+      <p><code>hellBadge</code> (selector <code>[hellBadge]</code>)</p>
+      <ul>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — string shorthand or a
+          <code>&#123; root?: string &#125;</code> map that refines the <code>root</code> part. No
+          other inputs.
+        </li>
+      </ul>
+      <p><code>hellKbd</code> (selector <code>kbd[hellKbd], [hellKbd]</code>)</p>
+      <ul>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — string shorthand or a
+          <code>&#123; root?: string &#125;</code> map that refines the <code>root</code> part. No
+          other inputs.
+        </li>
+      </ul>
 
       <h2>Accessibility</h2>
       <ul>
@@ -236,7 +291,9 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <li>Don't put <code>hellChipRemove</code> as an interactive child inside a
           <code>&lt;button hellChip&gt;</code> — nested buttons are invalid; use a span host with a
           sibling remove button.</li>
-        <li>Don't reach for chip when a static label will do — use <code>hellTag</code>.</li>
+        <li>Don't make a static <code>&lt;span hellChip&gt;</code> look clickable (hover or press
+          styling) unless it is really a <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code>
+          host.</li>
         <li>Don't rely on color alone to convey a chip's meaning.</li>
       </ul>
     </article>
@@ -249,4 +306,6 @@ export class ChipPage {
   protected readonly chipClickableExampleCode = chipClickableExampleCodeRaw;
   protected readonly chipDisabledExampleCode = chipDisabledExampleCodeRaw;
   protected readonly chipStylingExampleCode = chipStylingExampleCodeRaw;
+  protected readonly chipBadgeExampleCode = chipBadgeExampleCodeRaw;
+  protected readonly chipKeyboardHintExampleCode = chipKeyboardHintExampleCodeRaw;
 }

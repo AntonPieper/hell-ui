@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellInput } from '@hell-ui/angular/input';
-import { HELL_SEARCH_DIRECTIVES } from './search';
+import { HELL_SEARCH_DIRECTIVES, HellInput } from './input';
 
 @Component({
   imports: [HellInput, ...HELL_SEARCH_DIRECTIVES],

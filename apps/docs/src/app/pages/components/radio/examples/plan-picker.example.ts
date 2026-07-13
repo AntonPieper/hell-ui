@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/radio';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HellTag } from '@hell-ui/angular/tag';
+import { HellChip } from '@hell-ui/angular/chip';
 
 type Plan = 'starter' | 'team' | 'enterprise';
 
@@ -15,7 +15,7 @@ type Plan = 'starter' | 'team' | 'enterprise';
     HellRadioIndicator,
     ...HELL_CARD_DIRECTIVES,
     ...HELL_FIELD_DIRECTIVES,
-    HellTag,
+    HellChip,
   ],
   template: `
     <div hellCard class="max-w-md" [elevation]="0">
@@ -58,7 +58,7 @@ type Plan = 'starter' | 'team' | 'enterprise';
             </button>
             <label hellFieldLabel for="plan-team" class="gap-hell-2">
               Team
-              <span hellTag variant="primary">Popular</span>
+              <span hellChip variant="primary">Popular</span>
             </label>
             <div hellFieldDescription>Up to 20 seats, priority support.</div>
           </div>

@@ -11,6 +11,8 @@ import { MenuCheckableExample } from './examples/checkable.example';
 import menuCheckableExampleCodeRaw from './examples/checkable.example.ts?raw' with {
   loader: 'text',
 };
+import { MenuOptionsExample } from './examples/options.example';
+import menuOptionsExampleCodeRaw from './examples/options.example.ts?raw' with { loader: 'text' };
 import { MenuProfileMenuExample } from './examples/profile-menu.example';
 import menuProfileMenuExampleCodeRaw from './examples/profile-menu.example.ts?raw' with {
   loader: 'text',
@@ -29,6 +31,7 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
     MenuBasicExample,
     MenuSectionsExample,
     MenuCheckableExample,
+    MenuOptionsExample,
     MenuProfileMenuExample,
     MenuStylingExample,
   ],
@@ -92,6 +95,20 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
       </p>
       <hd-example-tabs [code]="menuCheckableExampleCode">
         <app-menu-checkable-example />
+      </hd-example-tabs>
+
+      <h2>Data-driven options</h2>
+      <p>
+        When the checkable items are a plain list, skip the hand-written children:
+        <code>&lt;hell-menu-options&gt;</code> renders one checkbox item per
+        <code>HellOption</code> (<code>&#123; value, label, disabled? &#125;</code> from core) with a
+        controlled <code>selected</code> model — the input is the single source of truth and
+        <code>selectedChange</code> emits the next selection. Disabled options render but cannot be
+        toggled, which is how a consumer enforces a selection floor. Compose it freely next to
+        sections, separators, and hand-written items.
+      </p>
+      <hd-example-tabs [code]="menuOptionsExampleCode">
+        <app-menu-options-example />
       </hd-example-tabs>
 
       <h2>With avatar (account menu)</h2>
@@ -336,6 +353,7 @@ export class MenuPage {
   protected readonly menuBasicExampleCode = menuBasicExampleCodeRaw;
   protected readonly menuSectionsExampleCode = menuSectionsExampleCodeRaw;
   protected readonly menuCheckableExampleCode = menuCheckableExampleCodeRaw;
+  protected readonly menuOptionsExampleCode = menuOptionsExampleCodeRaw;
   protected readonly menuProfileMenuExampleCode = menuProfileMenuExampleCodeRaw;
   protected readonly menuStylingExampleCode = menuStylingExampleCodeRaw;
 }

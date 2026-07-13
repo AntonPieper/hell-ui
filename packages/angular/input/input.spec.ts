@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HellInput, HellNativeSelect, HellTextarea } from './input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
+import { HellInput, HellTextarea } from './input';
 
 @Component({
   imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_DIRECTIVES],

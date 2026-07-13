@@ -66,6 +66,10 @@ import popoverWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' 
         <a routerLink="/components/flyout">Flyout</a> when nearby controls must stay reachable
         without a focus trap.
       </p>
+      <p>
+        Weighing popover against the other floating surfaces? See
+        <a routerLink="/guide/overlays">When to use which overlay</a>.
+      </p>
 
       <h2>Basic</h2>
       <p>
@@ -103,7 +107,7 @@ import popoverWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' 
       <p>
         A link-styled trigger opens a profile summary built from <code>hellCard</code> (narrow
         entry point <code>@hell-ui/angular/card</code>), <code>hell-avatar</code>, and
-        <code>hellTag</code>. The popover surface itself stays an unpadded frame — its own
+        <code>hellChip</code>. The popover surface itself stays an unpadded frame — its own
         <code>ui</code> refinement removes padding and constrains width — while the nested card
         owns its own Public Parts and visual chrome. This is the shape most "click a name to see
         details" interactions take in a dense business app.

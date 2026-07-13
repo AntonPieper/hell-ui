@@ -43,7 +43,7 @@ import {
   hellChipPresentationRecipe,
   hellChipRemovePresentationRecipe,
 } from '@hell-ui/angular/internal/chip';
-import { HellSearch, HellSearchClear } from '@hell-ui/angular/search';
+import { HellSearch, HellSearchClear } from '@hell-ui/angular/input';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 import {
   HellGlobalKeydownService,
@@ -52,6 +52,10 @@ import {
 } from '@hell-ui/angular/internal/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import {
+  HELL_OPTION_SURFACE_METRICS,
+  HELL_OPTION_SURFACE_SELECTED_STATES,
+} from '@hell-ui/angular/internal/option';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the omnibar entry point. */
@@ -177,7 +181,10 @@ const HELL_OMNIBAR_GROUP_LABEL_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_OMNIBAR_ITEM_RECIPE = {
-  root: 'flex w-full items-center gap-hell-3 rounded-hell-sm',
+  // The shared option surface (metrics + active/selected treatment) keeps
+  // omnibar items visually in family with select/combobox/listbox options;
+  // width/reset atoms are the button-host specifics.
+  root: `flex w-full items-center gap-hell-3 border-0 text-start font-[inherit] ${HELL_OPTION_SURFACE_METRICS} ${HELL_OPTION_SURFACE_SELECTED_STATES} focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_OMNIBAR_ITEM_ICON_RECIPE = {

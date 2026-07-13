@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellCheckbox } from '@hell-ui/angular/checkbox';
-import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import { HellInput } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 
 @Component({
   selector: 'app-field-with-form-section-example',

@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 
-import { HellNumberInput, hellFormatNumberInputValue, hellParseNumberInputText, provideHellNumberInputAdapter, HELL_NUMBER_INPUT_LABELS, type HellNumberInputPart, type HellNumberInputUi } from './number-input';
+import { HellNumberInput, HELL_DEFAULT_NUMBER_INPUT_ADAPTER, provideHellNumberInputAdapter, HELL_NUMBER_INPUT_LABELS, type HellNumberInputPart, type HellNumberInputUi } from './number-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
@@ -702,16 +702,23 @@ describe('HellNumberInput', () => {
     );
   });
 
-  it('parses and formats through the default helpers', () => {
-    expect(hellParseNumberInputText('  12 ', { integer: false })).toEqual({
+  it('parses and formats through the default adapter', () => {
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.parseText('  12 ', { integer: false })).toEqual({
       valid: true,
       value: 12,
     });
-    expect(hellParseNumberInputText('', { integer: false })).toEqual({ valid: true, value: null });
-    expect(hellParseNumberInputText('1e3', { integer: false })).toEqual({ valid: false });
-    expect(hellParseNumberInputText('3.5', { integer: true })).toEqual({ valid: false });
-    expect(hellFormatNumberInputValue(42, { integer: false })).toBe('42');
-    expect(hellFormatNumberInputValue(null, { integer: false })).toBe('');
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.parseText('', { integer: false })).toEqual({
+      valid: true,
+      value: null,
+    });
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.parseText('1e3', { integer: false })).toEqual({
+      valid: false,
+    });
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.parseText('3.5', { integer: true })).toEqual({
+      valid: false,
+    });
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.format(42, { integer: false })).toBe('42');
+    expect(HELL_DEFAULT_NUMBER_INPUT_ADAPTER.format(null, { integer: false })).toBe('');
   });
 
   it('merges ui object classes into stepper and suffix parts', () => {
