@@ -33,7 +33,8 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import { HellInput } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
 import {
   hellPartStyler,

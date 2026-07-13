@@ -522,6 +522,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Moved two directive homes so entry points match their semantics.
+  `HellNativeSelect` now exports from `@hell-ui/angular/select` (the entry
+  point whose docs already pointed at it) instead of `@hell-ui/angular/input`.
+  The `@hell-ui/angular/search` entry point is removed: `HellSearch`,
+  `HellSearchClear`, and `HELL_SEARCH_DIRECTIVES` now export from
+  `@hell-ui/angular/input`, so "search" in Hell unambiguously means core's
+  `HellSearchService`/ranker infrastructure. Selectors, behavior, recipes, and
+  `data-slot` contracts are unchanged — only import paths move. Closes #157.
+  Evidence: migrated omnibar/table-tanstack/pagination/pdf-viewer consumers,
+  input and search unit suites, docs pages.
 - Collapsed the five `@hell-ui/angular/pagination` nav-button directives
   (`HellPaginationFirst`, `HellPaginationPrev`, `HellPaginationNext`,
   `HellPaginationLast`, `HellPaginationButton`) into one `HellPageLink`

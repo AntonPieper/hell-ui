@@ -237,6 +237,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li>Output: <code>activated</code> — emitted when the row is activated.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
+      <p>
+        <code>select[hellNativeSelect]</code> — the styled native <code>&lt;select&gt;</code>
+        (moved here from the input entry point): host directive <code>NgpInput</code> (forwards
+        <code>disabled</code>, <code>id</code>), <code>size</code> (<code>'sm' | 'md' | 'lg'</code>),
+        <code>invalid</code>, and <code>ui: HellUiInput&lt;'root'&gt;</code>. Reach for it when OS
+        pickers and mobile ergonomics matter more than custom rendering.
+      </p>
       <p><code>&lt;hell-select-basic&gt;</code> — the preset composing all of the above.</p>
       <ul>
         <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>

@@ -339,7 +339,7 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     protected readonly providerViews: HellTableStatusViews;
     // (undocumented)
-    readonly rowClass: i0.InputSignal<HellClassValue | ((row: Row<TData>) => HellClassValue)>;
+    readonly rowClass: i0.InputSignal<((row: Row<TData>) => HellClassValue) | HellClassValue>;
     // (undocumented)
     protected rowClassValue(row: Row<TData>): string;
     // (undocumented)

@@ -43,7 +43,7 @@ import {
   hellChipPresentationRecipe,
   hellChipRemovePresentationRecipe,
 } from '@hell-ui/angular/internal/chip';
-import { HellSearch, HellSearchClear } from '@hell-ui/angular/search';
+import { HellSearch, HellSearchClear } from '@hell-ui/angular/input';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 import {
   HellGlobalKeydownService,

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellNativeSelect } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 

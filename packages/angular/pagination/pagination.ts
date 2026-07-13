@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { NgpPagination, injectPaginationState } from 'ng-primitives/pagination';
 import { ngpButton } from 'ng-primitives/button';
-import { HellNativeSelect } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 

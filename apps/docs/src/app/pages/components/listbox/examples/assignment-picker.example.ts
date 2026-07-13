@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
 import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 
 interface Teammate {
   readonly id: string;

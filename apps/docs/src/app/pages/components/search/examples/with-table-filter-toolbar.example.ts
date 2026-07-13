@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
 import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellChip } from '@hell-ui/angular/chip';
 

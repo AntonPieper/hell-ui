@@ -3,8 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidXmark } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput } from '@hell-ui/angular/input';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
+import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-search-empty-state-example',

@@ -31,9 +31,9 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellEmptyState } from '@hell-ui/angular/empty-state';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import { HellInput, HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/input';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 type ɵHellStrategyCleanup = VoidFunction | void;

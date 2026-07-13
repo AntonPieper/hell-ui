@@ -167,9 +167,6 @@
     "./radio": {
       "@heinrich/source": "./radio/public-api.ts"
     },
-    "./search": {
-      "@heinrich/source": "./search/public-api.ts"
-    },
     "./separator": {
       "@heinrich/source": "./separator/public-api.ts"
     },

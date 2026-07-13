@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellInput } from '@hell-ui/angular/input';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
+import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
 
 const NAMES = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson', 'Margaret Hamilton'];
 

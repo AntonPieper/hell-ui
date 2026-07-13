@@ -8,10 +8,14 @@ import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import * as i1 from 'ng-primitives/input';
 import * as i2 from 'ng-primitives/textarea';
+import * as i3 from 'ng-primitives/search';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+
+// @public
+export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSearchClear];
 
 // @public
 export class HellInput {
@@ -22,16 +26,6 @@ export class HellInput {
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellInput, "input[hellInput]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellInput, never>;
-}
-
-// @public
-export class HellNativeSelect {
-    readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
 }
 
 // @public
@@ -48,6 +42,22 @@ export interface HellPartStylerOptions<Part extends string> {
 
 // @public
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
+
+// @public
+export class HellSearch {
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSearch, "[hellSearch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i3.NgpSearch; inputs: {}; outputs: {}; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSearch, never>;
+}
+
+// @public
+export class HellSearchClear {
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSearchClear, "button[hellSearchClear]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i3.NgpSearchClear; inputs: {}; outputs: {}; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSearchClear, never>;
+}
 
 // @public
 export class HellTextarea {
