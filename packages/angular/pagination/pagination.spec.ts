@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellPagination, HellPaginationButton, HellPaginationFirst, HellPaginationLast, HellPaginationNext, HellPaginationPrev, HellPaginationStrip, type HellPaginationMode, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';
+import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationMode, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -43,10 +43,38 @@ class PaginationModeHost {
 }
 
 @Component({
-  imports: [HellPagination, HellPaginationFirst],
+  imports: [HellPagination, HellPageLink],
+  template: `
+    <nav
+      hellPagination
+      [page]="page()"
+      [pageCount]="pageCount()"
+      [disabled]="disabled()"
+      (pageChange)="pageEvents.push($event)"
+    >
+      <button id="first" hellPageLink="first" type="button" aria-label="First page">First</button>
+      <button id="previous" hellPageLink="previous" type="button" aria-label="Previous page">
+        Prev
+      </button>
+      <button id="page-2" [hellPageLink]="2" type="button" aria-label="Page 2">2</button>
+      <button id="page-3" [hellPageLink]="3" type="button" aria-label="Page 3">3</button>
+      <button id="next" hellPageLink="next" type="button" aria-label="Next page">Next</button>
+      <button id="last" hellPageLink="last" type="button" aria-label="Last page">Last</button>
+    </nav>
+  `,
+})
+class PaginationRolesHost {
+  readonly page = signal(3);
+  readonly pageCount = signal(5);
+  readonly disabled = signal(false);
+  readonly pageEvents: number[] = [];
+}
+
+@Component({
+  imports: [HellPagination, HellPageLink],
   template: `
     <nav hellPagination [page]="page()" [pageCount]="pageCount()">
-      <a hellPaginationFirst href="#first">First</a>
+      <a hellPageLink="first" href="#first">First</a>
     </nav>
   `,
 })
@@ -56,11 +84,11 @@ class PaginationAnchorHost {
 }
 
 @Component({
-  imports: [HellPagination, HellPaginationNext],
+  imports: [HellPagination, HellPageLink],
   template: `
     <nav hellPagination [page]="2" [pageCount]="3">
-      <button id="disabled-next-button" hellPaginationNext type="button" disabled>Next</button>
-      <a id="disabled-next-anchor" hellPaginationNext href="#next" disabled>Next</a>
+      <button id="disabled-next-button" hellPageLink="next" type="button" disabled>Next</button>
+      <a id="disabled-next-anchor" hellPageLink="next" href="#next" disabled>Next</a>
     </nav>
   `,
 })
@@ -80,15 +108,7 @@ class PaginationExplicitDisabledHost {}
 class LocalizedPaginationHost {}
 
 @Component({
-  imports: [
-    HellPagination,
-    HellPaginationFirst,
-    HellPaginationPrev,
-    HellPaginationButton,
-    HellPaginationNext,
-    HellPaginationLast,
-    HellPaginationStrip,
-  ],
+  imports: [HellPagination, HellPageLink, HellPaginationStrip],
   template: `
     <nav
       id="ui-root"
@@ -98,13 +118,11 @@ class LocalizedPaginationHost {}
       [pageCount]="pageCount()"
       (pageChange)="pageEvents.push($event)"
     >
-      <button id="ui-first" hellPaginationFirst type="button" [ui]="firstUi">First</button>
-      <button id="ui-prev" hellPaginationPrev type="button" [ui]="prevUi">Prev</button>
-      <button id="ui-page" hellPaginationButton type="button" [page]="2" [ui]="buttonUi">
-        2
-      </button>
-      <button id="ui-next" hellPaginationNext type="button" [ui]="nextUi">Next</button>
-      <button id="ui-last" hellPaginationLast type="button" [ui]="lastUi">Last</button>
+      <button id="ui-first" hellPageLink="first" type="button" [ui]="firstUi">First</button>
+      <button id="ui-prev" hellPageLink="previous" type="button" [ui]="prevUi">Prev</button>
+      <button id="ui-page" [hellPageLink]="2" type="button" [ui]="buttonUi">2</button>
+      <button id="ui-next" hellPageLink="next" type="button" [ui]="nextUi">Next</button>
+      <button id="ui-last" hellPageLink="last" type="button" [ui]="lastUi">Last</button>
     </nav>
 
     <hell-pagination
@@ -142,12 +160,13 @@ class PaginationUiHost {
   } satisfies HellPaginationStripUi;
 }
 
-describe('HellPaginationStrip', () => {
+describe('HellPageLink', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         PaginationHost,
         PaginationModeHost,
+        PaginationRolesHost,
         PaginationAnchorHost,
         PaginationExplicitDisabledHost,
         LocalizedPaginationHost,
@@ -156,30 +175,110 @@ describe('HellPaginationStrip', () => {
     }).compileComponents();
   });
 
-  it('renders a clamped sibling window around the current page', () => {
-    const fixture = TestBed.createComponent(PaginationHost);
+  it('renders every role with the shared control contract', () => {
+    const fixture = TestBed.createComponent(PaginationRolesHost);
     fixture.detectChanges();
 
-    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['4', '5', '6', '7', '8']);
+    const root = fixture.nativeElement as HTMLElement;
+    for (const id of ['first', 'previous', 'page-2', 'page-3', 'next', 'last']) {
+      const control = query(root, `#${id}`);
+      expect(control.getAttribute('data-slot')).toBe('root');
+      expect(control.getAttribute('data-variant')).toBe('ghost');
+      expect(control.getAttribute('data-icon-only')).toBe('');
+      expect(control.getAttribute('type')).toBe('button');
+    }
+  });
 
-    fixture.componentInstance.page.set(1);
+  it('disables boundary controls at the matching range edge', () => {
+    const fixture = TestBed.createComponent(PaginationRolesHost);
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+
+    // Page 3 of 5 sits away from both edges: every control is reachable.
+    fixture.detectChanges();
+    for (const id of ['first', 'previous', 'next', 'last']) {
+      expect(pageButton(root, id).disabled).toBe(false);
+    }
+
+    host.page.set(1);
+    fixture.detectChanges();
+    for (const id of ['first', 'previous']) {
+      const control = pageButton(root, id);
+      expect(control.disabled).toBe(true);
+      expect(control.getAttribute('data-disabled')).toBe('');
+      expect(control.getAttribute('tabindex')).toBe('-1');
+    }
+    expect(pageButton(root, 'next').disabled).toBe(false);
+    expect(pageButton(root, 'last').disabled).toBe(false);
+
+    host.page.set(5);
+    fixture.detectChanges();
+    expect(pageButton(root, 'first').disabled).toBe(false);
+    expect(pageButton(root, 'previous').disabled).toBe(false);
+    expect(pageButton(root, 'next').disabled).toBe(true);
+    expect(pageButton(root, 'last').disabled).toBe(true);
+
+    host.disabled.set(true);
+    fixture.detectChanges();
+    for (const id of ['first', 'previous', 'page-2', 'next', 'last']) {
+      expect(pageButton(root, id).disabled).toBe(true);
+    }
+  });
+
+  it('marks the numbered control that equals the current page', () => {
+    const fixture = TestBed.createComponent(PaginationRolesHost);
+    const root = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
 
-    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['1', '2', '3', '4', '5']);
+    const current = pageButton(root, 'page-3');
+    const other = pageButton(root, 'page-2');
+    expect(current.getAttribute('aria-current')).toBe('true');
+    expect(current.getAttribute('data-selected')).toBe('');
+    expect(other.getAttribute('aria-current')).toBe('false');
+    expect(other.getAttribute('data-selected')).toBeNull();
 
-    fixture.componentInstance.page.set(10);
+    // Boundary controls never expose the numbered selected contract.
+    expect(pageButton(root, 'next').getAttribute('aria-current')).toBeNull();
+    expect(pageButton(root, 'next').getAttribute('data-selected')).toBeNull();
+
+    fixture.componentInstance.page.set(2);
+    fixture.detectChanges();
+    expect(pageButton(root, 'page-2').getAttribute('aria-current')).toBe('true');
+    expect(pageButton(root, 'page-3').getAttribute('aria-current')).toBe('false');
+  });
+
+  it('navigates from each role on click', () => {
+    const fixture = TestBed.createComponent(PaginationRolesHost);
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
 
-    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['6', '7', '8', '9', '10']);
+    pageButton(root, 'next').click();
+    pageButton(root, 'previous').click();
+    pageButton(root, 'page-2').click();
+    pageButton(root, 'first').click();
+    pageButton(root, 'last').click();
+
+    expect(host.pageEvents).toEqual([4, 2, 2, 1, 5]);
+  });
+
+  it('activates each role with Enter and Space', () => {
+    const fixture = TestBed.createComponent(PaginationRolesHost);
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
+
+    dispatchKey(pageButton(root, 'next'), 'Enter');
+    dispatchKey(pageButton(root, 'first'), ' ');
+
+    expect(host.pageEvents).toEqual([4, 1]);
   });
 
   it('guards disabled anchor pagination controls', () => {
     const fixture = TestBed.createComponent(PaginationAnchorHost);
     fixture.detectChanges();
 
-    const first = fixture.nativeElement.querySelector(
-      'a[hellPaginationFirst]',
-    ) as HTMLAnchorElement;
+    const first = fixture.nativeElement.querySelector('a[hellPageLink]') as HTMLAnchorElement;
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(first.getAttribute('aria-disabled')).toBe('true');
@@ -205,6 +304,70 @@ describe('HellPaginationStrip', () => {
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('merges pagination ui classes through local roots', () => {
+    const fixture = TestBed.createComponent(PaginationUiHost);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const pagination = query(root, '#ui-root');
+    const first = query(root, '#ui-first');
+    const prev = query(root, '#ui-prev');
+    const numbered = query(root, '#ui-page');
+    const next = query(root, '#ui-next');
+    const last = query(root, '#ui-last');
+
+    expect(pagination.getAttribute('data-slot')).toBe('root');
+    expect(pagination.className).toContain('gap-hell-4');
+    expect(pagination.className).not.toContain('gap-hell-1');
+
+    for (const control of [first, prev, numbered, next, last]) {
+      expect(control.getAttribute('data-slot')).toBe('root');
+      expect(control.getAttribute('data-variant')).toBe('ghost');
+      expect(control.getAttribute('data-icon-only')).toBe('');
+    }
+
+    expect(first.className).toContain('bg-hell-danger');
+    expect(first.className).toContain('px-hell-7');
+    expect(prev.className).toContain('bg-hell-surface-muted');
+    expect(prev.className).toContain('px-hell-6');
+    expect(numbered.className).toContain('rounded-hell-pill');
+    expect(numbered.className).toContain('px-hell-8');
+    expect(next.className).toContain('border-hell-danger');
+    expect(next.className).toContain('px-hell-5');
+    expect(last.className).toContain('bg-hell-danger');
+    expect(last.className).toContain('px-hell-7');
+  });
+});
+
+describe('HellPaginationStrip', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        PaginationHost,
+        PaginationModeHost,
+        LocalizedPaginationHost,
+        PaginationUiHost,
+      ],
+    }).compileComponents();
+  });
+
+  it('renders a clamped sibling window around the current page', () => {
+    const fixture = TestBed.createComponent(PaginationHost);
+    fixture.detectChanges();
+
+    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['4', '5', '6', '7', '8']);
+
+    fixture.componentInstance.page.set(1);
+    fixture.detectChanges();
+
+    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['1', '2', '3', '4', '5']);
+
+    fixture.componentInstance.page.set(10);
+    fixture.detectChanges();
+
+    expect(pageButtonLabels(fixture.nativeElement)).toEqual(['6', '7', '8', '9', '10']);
   });
 
   it('uses injected labels for the ready-made strip', () => {
@@ -295,44 +458,17 @@ describe('HellPaginationStrip', () => {
     expect(fixture.componentInstance.pageEvents).toEqual([8, 7]);
   });
 
-  it('merges pagination ui classes through local roots and strip anatomy parts', () => {
+  it('merges pagination ui classes through strip anatomy parts', () => {
     const fixture = TestBed.createComponent(PaginationUiHost);
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
-    const pagination = query(root, '#ui-root');
-    const first = query(root, '#ui-first');
-    const prev = query(root, '#ui-prev');
-    const numbered = query(root, '#ui-page');
-    const next = query(root, '#ui-next');
-    const last = query(root, '#ui-last');
     const strip = query(root, '#ui-strip');
     const stripGlyph = query(strip, '[data-slot="controlGlyph"]');
     const jump = query(strip, '[data-slot="jump"]');
     const jumpSelect = query(strip, '[data-slot="jumpSelect"]') as HTMLSelectElement;
-    const stripPrev = strip.querySelector('[hellPaginationPrev]') as HTMLButtonElement;
-    const stripNext = strip.querySelector('[hellPaginationNext]') as HTMLButtonElement;
-
-    expect(pagination.getAttribute('data-slot')).toBe('root');
-    expect(pagination.className).toContain('gap-hell-4');
-    expect(pagination.className).not.toContain('gap-hell-1');
-
-    for (const control of [first, prev, numbered, next, last]) {
-      expect(control.getAttribute('data-slot')).toBe('root');
-      expect(control.getAttribute('data-variant')).toBe('ghost');
-      expect(control.getAttribute('data-icon-only')).toBe('');
-    }
-
-    expect(first.className).toContain('bg-hell-danger');
-    expect(first.className).toContain('px-hell-7');
-    expect(prev.className).toContain('bg-hell-surface-muted');
-    expect(prev.className).toContain('px-hell-6');
-    expect(numbered.className).toContain('rounded-hell-pill');
-    expect(numbered.className).toContain('px-hell-8');
-    expect(next.className).toContain('border-hell-danger');
-    expect(next.className).toContain('px-hell-5');
-    expect(last.className).toContain('bg-hell-danger');
-    expect(last.className).toContain('px-hell-7');
+    const stripPrev = strip.querySelector('[hellPageLink="previous"]') as HTMLButtonElement;
+    const stripNext = strip.querySelector('[hellPageLink="next"]') as HTMLButtonElement;
 
     expect(strip.getAttribute('data-slot')).toBe('root');
     expect(strip.getAttribute('data-mode')).toBe('jump');
@@ -362,6 +498,12 @@ function pageButtonLabels(root: HTMLElement): string[] {
 function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
   const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
+  return element;
+}
+
+function pageButton(root: HTMLElement, id: string): HTMLButtonElement {
+  const element = root.querySelector(`#${id}`);
+  if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected #${id} button.`);
   return element;
 }
 

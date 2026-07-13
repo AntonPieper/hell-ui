@@ -34,11 +34,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
-import {
-  HellPagination,
-  HellPaginationNext,
-  HellPaginationPrev,
-} from '@hell-ui/angular/pagination';
+import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
 import {
   hellPartStyler,
   type HellRecipe,
@@ -163,9 +159,8 @@ const HELL_PDF_VIEWER_ICONS = {
     HellIcon,
     HellInput,
     HellNativeSelect,
+    HellPageLink,
     HellPagination,
-    HellPaginationNext,
-    HellPaginationPrev,
   ],
   providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   // Sibling-entrypoint directives (pagination, icon, input) are not matched by

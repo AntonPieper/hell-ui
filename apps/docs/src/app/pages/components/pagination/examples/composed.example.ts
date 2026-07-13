@@ -1,22 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import {
-  HellPagination,
-  HellPaginationFirst,
-  HellPaginationLast,
-  HellPaginationNext,
-  HellPaginationPrev,
-} from '@hell-ui/angular/pagination';
+import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
 
 @Component({
   selector: 'app-pagination-composed-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    HellPagination,
-    HellPaginationFirst,
-    HellPaginationPrev,
-    HellPaginationNext,
-    HellPaginationLast,
-  ],
+  imports: [HellPageLink, HellPagination],
   template: `
     <nav
       hellPagination
@@ -26,13 +14,13 @@ import {
       [pageCount]="pageCount"
       (pageChange)="page.set($event)"
     >
-      <button hellPaginationFirst type="button" aria-label="First page">First</button>
-      <button hellPaginationPrev type="button" aria-label="Previous page">Prev</button>
+      <button hellPageLink="first" type="button" aria-label="First page">First</button>
+      <button hellPageLink="previous" type="button" aria-label="Previous page">Prev</button>
       <span class="whitespace-nowrap px-hell-2 text-xs text-hell-foreground-muted">
         {{ page() }} / {{ pageCount }}
       </span>
-      <button hellPaginationNext type="button" aria-label="Next page">Next</button>
-      <button hellPaginationLast type="button" aria-label="Last page">Last</button>
+      <button hellPageLink="next" type="button" aria-label="Next page">Next</button>
+      <button hellPageLink="last" type="button" aria-label="Last page">Last</button>
     </nav>
   `,
 })
