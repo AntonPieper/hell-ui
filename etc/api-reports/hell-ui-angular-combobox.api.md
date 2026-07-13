@@ -225,21 +225,21 @@ export type HellComboboxUi = HellUi<HellComboboxPart>;
 // types/hell-ui-angular-combobox.d.ts:223:5 - (ae-undocumented) Missing documentation for "value".
 // types/hell-ui-angular-combobox.d.ts:224:5 - (ae-undocumented) Missing documentation for "valueChange".
 // types/hell-ui-angular-combobox.d.ts:225:5 - (ae-undocumented) Missing documentation for "openChange".
-// types/hell-ui-angular-combobox.d.ts:231:5 - (ae-undocumented) Missing documentation for "effectiveValue".
-// types/hell-ui-angular-combobox.d.ts:232:5 - (ae-undocumented) Missing documentation for "effectiveDisabled".
-// types/hell-ui-angular-combobox.d.ts:233:5 - (ae-undocumented) Missing documentation for "selectedLabel".
-// types/hell-ui-angular-combobox.d.ts:234:5 - (ae-undocumented) Missing documentation for "filterValue".
-// types/hell-ui-angular-combobox.d.ts:235:5 - (ae-undocumented) Missing documentation for "filteredOptions".
-// types/hell-ui-angular-combobox.d.ts:240:5 - (ae-undocumented) Missing documentation for "onValueChange".
-// types/hell-ui-angular-combobox.d.ts:241:5 - (ae-undocumented) Missing documentation for "onFilterInput".
-// types/hell-ui-angular-combobox.d.ts:242:5 - (ae-undocumented) Missing documentation for "onOpenChange".
-// types/hell-ui-angular-combobox.d.ts:243:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-combobox.d.ts:244:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-combobox.d.ts:245:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-combobox.d.ts:246:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-combobox.d.ts:247:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-combobox.d.ts:248:5 - (ae-undocumented) Missing documentation for "filter".
-// types/hell-ui-angular-combobox.d.ts:254:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_DIRECTIVES".
+// types/hell-ui-angular-combobox.d.ts:232:5 - (ae-undocumented) Missing documentation for "effectiveValue".
+// types/hell-ui-angular-combobox.d.ts:233:5 - (ae-undocumented) Missing documentation for "effectiveDisabled".
+// types/hell-ui-angular-combobox.d.ts:234:5 - (ae-undocumented) Missing documentation for "selectedLabel".
+// types/hell-ui-angular-combobox.d.ts:235:5 - (ae-undocumented) Missing documentation for "filterValue".
+// types/hell-ui-angular-combobox.d.ts:236:5 - (ae-undocumented) Missing documentation for "filteredOptions".
+// types/hell-ui-angular-combobox.d.ts:241:5 - (ae-undocumented) Missing documentation for "onValueChange".
+// types/hell-ui-angular-combobox.d.ts:242:5 - (ae-undocumented) Missing documentation for "onFilterInput".
+// types/hell-ui-angular-combobox.d.ts:243:5 - (ae-undocumented) Missing documentation for "onOpenChange".
+// types/hell-ui-angular-combobox.d.ts:244:5 - (ae-undocumented) Missing documentation for "markControlTouched".
+// types/hell-ui-angular-combobox.d.ts:245:5 - (ae-undocumented) Missing documentation for "writeValue".
+// types/hell-ui-angular-combobox.d.ts:246:5 - (ae-undocumented) Missing documentation for "registerOnChange".
+// types/hell-ui-angular-combobox.d.ts:247:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
+// types/hell-ui-angular-combobox.d.ts:248:5 - (ae-undocumented) Missing documentation for "setDisabledState".
+// types/hell-ui-angular-combobox.d.ts:249:5 - (ae-undocumented) Missing documentation for "filter".
+// types/hell-ui-angular-combobox.d.ts:255:15 - (ae-undocumented) Missing documentation for "HELL_COMBOBOX_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

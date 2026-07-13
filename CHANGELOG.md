@@ -325,6 +325,19 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- The owned-anatomy `hell-combobox` now filters options through the core
+  search seam: labels are ranked by `hellRankLocalSearch` under the
+  `HELL_SEARCH_RANKER` token — accent-insensitive, word-based, exact-word
+  above word-prefix above substring — instead of a private lowercase
+  `includes()` filter, so `provideHellSearchRanker` now governs combobox
+  matching exactly as it does omnibar and docs search. Matching is a superset
+  of the old behavior (substring hits still appear, ranked last); result
+  order changes from array order to relevance order, and queries that
+  normalize to no words (for example punctuation only) now show every option.
+  Empty queries still show every option and disabled options still render
+  (unpickable) when they match. A docs example reorders results with an
+  injected recency-aware ranker. Closes #165. Evidence: combobox filtering
+  unit suite, docs "Filtering and ranking" example.
 - Extracted the shared picker control plumbing (ControlValueAccessor bridge,
   dropdown floating-scope registration, outside-control focus checks, and
   mode-aware pick-value normalization) from the select trigger and combobox

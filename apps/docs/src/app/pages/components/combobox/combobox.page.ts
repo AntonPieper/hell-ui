@@ -21,6 +21,10 @@ import { ComboboxStylingExample } from './examples/styling.example';
 import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
+import { ComboboxRankedFilteringExample } from './examples/ranked-filtering.example';
+import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-combobox',
@@ -33,6 +37,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
     ComboboxChipsExample,
     ComboboxWithFieldTagExample,
     ComboboxStylingExample,
+    ComboboxRankedFilteringExample,
     PageHeader,
   ],
   template: `
@@ -87,6 +92,21 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       </p>
       <hd-example-tabs [code]="comboboxPresetExampleCode">
         <app-combobox-preset-example />
+      </hd-example-tabs>
+
+      <h2>Filtering and ranking</h2>
+      <p>
+        <code>&lt;hell-combobox&gt;</code> filters through the core search seam: option labels are
+        ranked by <code>hellRankLocalSearch</code> under the <code>HELL_SEARCH_RANKER</code> token —
+        the same accent-insensitive, word-based ranking behind the omnibar and filter bar. Exact
+        word matches rank above word-prefix matches, which rank above substring hits, so typing
+        "no" lists "Nordhafen Terminal" before "Hannover Süd" instead of preserving array order.
+        Swap the strategy for an injector scope with <code>provideHellSearchRanker</code>; here a
+        recency-aware ranker reorders the results so the just-dispatched "Hannover Süd" outranks
+        the better text matches.
+      </p>
+      <hd-example-tabs [code]="comboboxRankedFilteringExampleCode">
+        <app-combobox-ranked-filtering-example />
       </hd-example-tabs>
 
       <h2>Multiple</h2>
@@ -328,4 +348,5 @@ export class ComboboxPage {
   protected readonly comboboxChipsExampleCode = comboboxChipsExampleCodeRaw;
   protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;
   protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
+  protected readonly comboboxRankedFilteringExampleCode = comboboxRankedFilteringExampleCodeRaw;
 }

@@ -535,6 +535,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
  },
  {
+ title:'Combobox: Filtering and ranking',
+ path:'/components/combobox',
+ detail:'components/combobox/examples/ranked-filtering.example.ts',
+ terms:
+'components/combobox/examples/ranked-filtering.example components/combobox hell-combobox HellCombobox hellRankLocalSearch provideHellSearchRanker HELL_SEARCH_RANKER ranked filtering ranking prefix substring word match score custom ranker recency recently used reorder search seam stations',
+ },
+ {
  title:'Combobox: Preset',
  path:'/components/combobox',
  detail:'components/combobox/examples/preset.example.ts',

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
+import { provideHellSearchRanker, type HellOption, type HellSearchRanker } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -131,6 +131,18 @@ class ComboboxBasicValueHost {
   `,
 })
 class ComboboxBasicLabelsHost {}
+
+@Component({
+  imports: [HellCombobox],
+  template: `<hell-combobox aria-label="Choose an instrument" [options]="options" />`,
+})
+class ComboboxRankingHost {
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'piano', label: 'Piano' },
+    { value: 'banjo', label: 'Banjo', disabled: true },
+    { value: 'nova', label: 'Nova Synth' },
+  ];
+}
 
 @Component({
   imports: [HellCombobox],
@@ -616,6 +628,87 @@ describe('HellComboboxRoot', () => {
     expect(option.getAttribute('data-slot')).toBe('option');
     expect(option.className).toContain('px-hell-8');
     expect(option.className).toContain('bg-hell-primary-soft');
+  });
+});
+
+describe('HellCombobox filtering', () => {
+  afterEach(() => {
+    cleanupPortaledTestElements('[hellComboboxDropdown]');
+  });
+
+  async function openAndFilter(
+    fixture: {
+      detectChanges: () => void;
+      whenStable: () => Promise<unknown>;
+      nativeElement: HTMLElement;
+    },
+    filter: string,
+  ): Promise<HTMLElement> {
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox input[hellComboboxInput]',
+    );
+    const button = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-combobox button[hellComboboxButton]',
+    );
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    input.value = filter;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    return dropdown;
+  }
+
+  function optionLabels(dropdown: HTMLElement): readonly string[] {
+    return Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]')).map(
+      (option) => option.textContent?.trim() ?? '',
+    );
+  }
+
+  it('shows every option for an empty query', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxRankingHost);
+
+    const dropdown = await openAndFilter(fixture, '');
+
+    expect(optionLabels(dropdown)).toEqual(['Piano', 'Banjo', 'Nova Synth']);
+  });
+
+  it('ranks prefix matches above substring matches through the default ranker', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxRankingHost);
+
+    const dropdown = await openAndFilter(fixture, 'no');
+
+    expect(optionLabels(dropdown)).toEqual(['Nova Synth', 'Piano']);
+  });
+
+  it('keeps matching disabled options listed but disabled', async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxRankingHost);
+
+    const dropdown = await openAndFilter(fixture, 'banjo');
+
+    expect(optionLabels(dropdown)).toEqual(['Banjo']);
+    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+    expect(option.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('honors a ranker override provided through provideHellSearchRanker', async () => {
+    const reversingRanker: HellSearchRanker = <T>(items: readonly T[]) =>
+      items.map((item, index) => ({ item, score: items.length - index })).reverse();
+    await TestBed.configureTestingModule({
+      imports: [ComboboxRankingHost],
+      providers: [provideHellSearchRanker(reversingRanker)],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ComboboxRankingHost);
+
+    const dropdown = await openAndFilter(fixture, 'no');
+
+    expect(optionLabels(dropdown)).toEqual(['Nova Synth', 'Banjo', 'Piano']);
   });
 });
 

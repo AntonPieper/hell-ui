@@ -3,7 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HELL_SEARCH_RANKER, hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSearchRanker, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { hellContainsFloatingTarget, hellNormalizePickValue, hellRegisterFloatingHost, HellPickerControl } from '@hell-ui/angular/internal/core';
 import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import {
@@ -643,6 +643,10 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  // Annotated: when ng-packagr compiles this entry point against core's
+  // flattened d.ts, inference for the injected ranker collapses to `unknown`
+  // and the lib build fails without the explicit type.
+  private readonly ranker: HellSearchRanker = inject(HELL_SEARCH_RANKER);
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
   private readonly controlledValue = new HellControlledValueState<HellPickValue<T>>({
     externalValue: this.value,
@@ -672,11 +676,12 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   protected readonly filterValue = computed(() => this.filterOverride() ?? this.selectedLabel());
 
   protected readonly filteredOptions = computed(() => {
-    const term = this.filterValue().trim().toLowerCase();
-    if (!term) return this.options();
-    return this.options().filter((option) =>
-      this.optionLabel(option).toLowerCase().includes(term),
-    );
+    const query = this.filterValue().trim();
+    if (!query) return this.options();
+    return this.ranker<HellOption<T>>(this.options(), {
+      query,
+      fields: [{ name: 'label', get: (option: HellOption<T>) => this.optionLabel(option) }],
+    }).map(({ item }) => item);
   });
 
   /** Display text for one option row. */
