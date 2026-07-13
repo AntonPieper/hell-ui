@@ -235,7 +235,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>multiple</code>: <code>boolean</code>. Switches to array-valued multi-select. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>allowDeselect</code>: <code>boolean</code>. Lets a single selection be cleared by re-picking it. Default <code>false</code>.</li>
-        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code> — <code>(a, b) =&gt; boolean</code> for non-reference option identity.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code> (from core) — <code>(a, b) =&gt; boolean</code> for non-reference option identity.</li>
         <li><code>placement</code>: <code>NgpComboboxPlacement</code> — dropdown side/alignment. Default <code>bottom</code>.</li>
         <li><code>container</code>: <code>string | HTMLElement | null</code> — overlay mount target. Default <code>body</code>.</li>
         <li><code>flip</code>: <code>NgpFlipInput</code> — flip on overflow. Default <code>true</code>.</li>
@@ -259,29 +259,29 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code>.</p>
       <p><code>[hellComboboxChips]</code> — the multiple-mode chips presentation. Place it inside the control, before the input; it renders each selected value as a removable chip and routes removal (chip button or Backspace-on-empty) through the combobox selection state.</p>
       <ul>
-        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>
+        <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code> label for each chip. Default <code>String</code>.</li>
         <li><code>size</code>: <code>HellSize</code> — chip size. Default <code>'sm'</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxChipsPart&gt;</code> — map of <code>root | chip</code> (the remove button styles through the chip entry point).</li>
       </ul>
       <p><code>[hellComboboxPortal]</code> — structural directive that renders the dropdown as a floating overlay while open. No inputs.</p>
       <p><code>&lt;hell-combobox-basic&gt;</code> — the convenience component composing the whole anatomy.</p>
       <ul>
-        <li><code>options</code>: <code>readonly T[]</code>. Default <code>[]</code>.</li>
+        <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
         <li><code>value</code>: <code>HellComboboxValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
         <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
         <li><code>emptyLabel</code>: <code>string</code>. Default <code>'No matches'</code>.</li>
         <li><code>aria-label</code>: <code>string | null</code> — accessible name for the input. Default <code>null</code>.</li>
-        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code>. Default reference equality.</li>
-        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code>. Default <code>String</code>.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
+        <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt; | null</code> — overrides option labels (and labels selected values missing from <code>options</code>). Default <code>null</code>: the matching option's <code>label</code> renders. Filtering also matches against the rendered label.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxBasicPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
       </ul>
       <p>
         Exported types: <code>HellComboboxValue&lt;T&gt;</code>,
         <code>HellComboboxSingleValue&lt;T&gt;</code>, <code>HellComboboxMultipleValue&lt;T&gt;</code>,
-        <code>HellComboboxCompareWith&lt;T&gt;</code>, <code>HellComboboxDisplayWith&lt;T&gt;</code>;
+        the core option contract <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>;
         and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
         <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
         <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>,

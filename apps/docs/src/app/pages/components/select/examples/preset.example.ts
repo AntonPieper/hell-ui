@@ -1,8 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/select';
 
-const REGIONS = ['eu-central-1', 'eu-west-1', 'us-east-1', 'ap-south-1'];
+const REGIONS: readonly HellOption<string>[] = [
+  { value: 'eu-central-1', label: 'EU (Frankfurt)' },
+  { value: 'eu-west-1', label: 'EU (Ireland)' },
+  { value: 'us-east-1', label: 'US East (N. Virginia)' },
+  { value: 'ap-south-1', label: 'AP (Mumbai)' },
+];
 
 @Component({
   selector: 'app-select-preset-example',

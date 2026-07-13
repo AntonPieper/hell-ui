@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import { HELL_COMBOBOX_BASIC_DIRECTIVES } from '@hell-ui/angular/combobox';
 
-const WAREHOUSES = [
-  'Berlin DC',
-  'Frankfurt Hub',
-  'Hamburg Port',
-  'Leipzig Cross-dock',
-  'Munich South',
-  'Stuttgart Returns',
+
+const WAREHOUSES: readonly HellOption<string>[] = [
+  { value: 'ber-dc', label: 'Berlin DC' },
+  { value: 'fra-hub', label: 'Frankfurt Hub' },
+  { value: 'ham-port', label: 'Hamburg Port' },
+  { value: 'lej-xd', label: 'Leipzig Cross-dock' },
+  { value: 'muc-south', label: 'Munich South' },
+  { value: 'str-returns', label: 'Stuttgart Returns' },
 ];
 
 @Component({

@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -73,7 +74,10 @@ class SelectMultipleFormHost {
   `,
 })
 class SelectBasicFormHost {
-  readonly options = ['Low', 'High'];
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'low', label: 'Low' },
+    { value: 'high', label: 'High' },
+  ];
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
 }
@@ -92,13 +96,16 @@ class SelectBasicFormHost {
   `,
 })
 class SelectBasicLabelledHost {
-  readonly options = ['Low', 'High'];
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'low', label: 'Low' },
+    { value: 'high', label: 'High' },
+  ];
   readonly value = signal<string | null>(null);
 }
 
 @Component({
   imports: [HellSelectBasic],
-  template: `<hell-select-basic [ui]="selectUi" [options]="['Low']" />`,
+  template: `<hell-select-basic [ui]="selectUi" [options]="[{ value: 'low', label: 'Low' }]" />`,
 })
 class SelectBasicUiHost {
   protected readonly selectUi = {
@@ -108,6 +115,25 @@ class SelectBasicUiHost {
     dropdown: 'rounded-hell-pill',
     option: 'px-hell-8 bg-hell-primary-soft',
   } satisfies HellSelectBasicUi;
+}
+
+@Component({
+  imports: [HellSelectBasic],
+  template: `
+    <hell-select-basic
+      aria-label="Priority"
+      [options]="options"
+      [displayWith]="displayWith()"
+      [value]="'high'"
+    />
+  `,
+})
+class SelectBasicOptionHost {
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'low', label: 'Low' },
+    { value: 'high', label: 'High', disabled: true },
+  ];
+  readonly displayWith = signal<((value: string) => string) | null>(null);
 }
 
 @Component({
@@ -357,7 +383,7 @@ describe('HellSelect', () => {
     expect(trigger.getAttribute('aria-label')).toBe('Priority');
     expect(trigger.getAttribute('aria-describedby')).toBe('priority-help');
 
-    host.control.setValue('High');
+    host.control.setValue('high');
     fixture.detectChanges();
 
     expect(trigger.textContent?.trim()).toContain('High');
@@ -391,19 +417,19 @@ describe('HellSelect', () => {
     const debug = fixture.debugElement.query(By.directive(HellSelect));
     const ngpSelect = debug.injector.get(NgpSelect);
 
-    host.control.setValue('Low');
+    host.control.setValue('low');
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(host.values).toEqual([]);
     expect(trigger.textContent?.trim()).toContain('Low');
 
-    ngpSelect.valueChange.emit('High');
+    ngpSelect.valueChange.emit('high');
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(host.control.value).toBe('High');
-    expect(host.values).toEqual(['High']);
+    expect(host.control.value).toBe('high');
+    expect(host.values).toEqual(['high']);
 
     host.control.disable();
     fixture.detectChanges();
@@ -424,7 +450,7 @@ describe('HellSelect', () => {
     expect(trigger.getAttribute('aria-describedby')).toBe('priority-description');
     expect(accessibleName(root, trigger)).toBe('Priority');
 
-    host.value.set('High');
+    host.value.set('high');
     fixture.detectChanges();
 
     expect(trigger.textContent?.trim()).toContain('High');
@@ -457,6 +483,33 @@ describe('HellSelect', () => {
     expect(option.getAttribute('data-slot')).toBe('option');
     expect(option.className).toContain('px-hell-8');
     expect(option.className).toContain('bg-hell-primary-soft');
+  });
+
+  it('labels the basic select from HellOption entries, honors displayWith overrides, and disables options', async () => {
+    const fixture = TestBed.createComponent(SelectBasicOptionHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const trigger = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-select-basic button[hellSelect]',
+    );
+
+    expect(trigger.textContent?.trim()).toContain('High');
+
+    host.displayWith.set((value) => value.toUpperCase());
+    fixture.detectChanges();
+    expect(trigger.textContent?.trim()).toContain('HIGH');
+
+    host.displayWith.set(null);
+    fixture.detectChanges();
+
+    const dropdown = await openSelectDropdown(fixture, trigger);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellSelectOption]'));
+
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['Low', 'High']);
+    expect(options[0]?.getAttribute('aria-disabled')).toBeNull();
+    expect(options[1]?.getAttribute('aria-disabled')).toBe('true');
   });
 });
 

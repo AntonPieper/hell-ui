@@ -221,7 +221,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode. Default <code>null</code>.</li>
         <li><code>multiple</code>: <code>boolean</code>. Accumulates selections into an array and keeps the list open. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Disables the trigger. Default <code>false</code>.</li>
-        <li><code>compareWith</code>: <code>HellSelectCompareWith&lt;T&gt;</code> — <code>(a, b) =&gt; boolean</code> for matching values by identity. Default reference equality.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code> (from core) — <code>(a, b) =&gt; boolean</code> for matching values by identity. Default reference equality.</li>
         <li><code>placement</code>, <code>container</code>, <code>flip</code>: floating-panel positioning, forwarded to the primitive.</li>
         <li><code>options</code>: optional value list forwarded to the primitive (used for virtualization scenarios).</li>
         <li>Outputs: <code>valueChange: EventEmitter&lt;HellSelectFormValue&lt;T&gt;&gt;</code>, <code>openChange: EventEmitter&lt;boolean&gt;</code>.</li>
@@ -239,13 +239,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </ul>
       <p><code>&lt;hell-select-basic&gt;</code> — the preset composing all of the above.</p>
       <ul>
-        <li><code>options</code>: <code>readonly T[]</code>. The option values. Default <code>[]</code>.</li>
+        <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
         <li><code>value</code>: <code>HellSelectFormValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Select'</code>.</li>
-        <li><code>displayWith</code>: <code>HellSelectDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code>. Default <code>String(value)</code>.</li>
-        <li><code>compareWith</code>: <code>HellSelectCompareWith&lt;T&gt;</code>. Default reference equality.</li>
+        <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt; | null</code> — overrides option labels (and labels selected values missing from <code>options</code>). Default <code>null</code>: the matching option's <code>label</code> renders.</li>
+        <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
         <li><code>aria-label</code> / <code>aria-labelledby</code> / <code>aria-describedby</code>: forwarded to the trigger; inside a <code>hellField</code> these are inherited automatically.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellSelectBasicPart&gt;</code> — a <code>HellSelectBasicUi</code> map over <code>root | trigger | value | placeholder | dropdown | option</code>.</li>
@@ -253,7 +253,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p>Exported types (from source):</p>
       <ul>
         <li>Values: <code>HellSelectSingleValue&lt;T&gt;</code> (<code>T | null</code>), <code>HellSelectMultipleValue&lt;T&gt;</code> (<code>readonly T[]</code>), <code>HellSelectFormValue&lt;T&gt;</code> (their union).</li>
-        <li>Callbacks: <code>HellSelectDisplayWith&lt;T&gt;</code>, <code>HellSelectCompareWith&lt;T&gt;</code>.</li>
+        <li>Option contract (from <code>@hell-ui/angular/core</code>): <code>HellOption&lt;T&gt;</code>, <code>HellOptionDisplayWith&lt;T&gt;</code>, <code>HellOptionCompareWith&lt;T&gt;</code>.</li>
         <li>Parts / maps: <code>HellSelectBasicPart</code> &amp; <code>HellSelectBasicUi</code>; each composable directive exposes a single <code>root</code> part (<code>ui: HellUiInput&lt;'root'&gt;</code>).</li>
         <li>Directive bundles: <code>HELL_SELECT_DIRECTIVES</code> (the composable suite), <code>HELL_SELECT_BASIC_DIRECTIVES</code> (the preset).</li>
       </ul>

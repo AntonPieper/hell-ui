@@ -31,6 +31,19 @@ export class HellFloatingElement implements AfterViewInit {
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
 
 // @public
+export interface HellOption<T = string> {
+    readonly disabled?: boolean;
+    readonly label: string;
+    readonly value: T;
+}
+
+// @public
+export type HellOptionCompareWith<T = unknown> = (a: T, b: T) => boolean;
+
+// @public
+export type HellOptionDisplayWith<T = unknown> = (value: T) => string;
+
+// @public
 export type HellOrientation = 'horizontal' | 'vertical';
 
 // @public

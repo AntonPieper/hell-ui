@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -99,7 +100,10 @@ class ComboboxChipsHost {
   `,
 })
 class ComboboxBasicFormHost {
-  readonly options = ['Atlas', 'Nova'];
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'atlas', label: 'Atlas' },
+    { value: 'nova', label: 'Nova' },
+  ];
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
 }
@@ -113,8 +117,11 @@ class ComboboxBasicFormHost {
   />`,
 })
 class ComboboxBasicValueHost {
-  readonly options = ['Atlas', 'Nova'];
-  readonly value = signal<string | null>('Atlas');
+  readonly options: readonly HellOption<string>[] = [
+    { value: 'atlas', label: 'Atlas' },
+    { value: 'nova', label: 'Nova' },
+  ];
+  readonly value = signal<string | null>('atlas');
 }
 
 @Component({
@@ -132,7 +139,7 @@ class ComboboxBasicLabelsHost {}
 
 @Component({
   imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic [ui]="comboboxUi" [options]="['Atlas']" />`,
+  template: `<hell-combobox-basic [ui]="comboboxUi" [options]="[{ value: 'atlas', label: 'Atlas' }]" />`,
 })
 class ComboboxBasicUiHost {
   protected readonly comboboxUi = {
@@ -480,7 +487,7 @@ describe('HellCombobox', () => {
 
     expect(input.placeholder).toBe('Search');
 
-    host.control.setValue('Nova');
+    host.control.setValue('nova');
     fixture.detectChanges();
 
     expect(input.value).toBe('Nova');
@@ -524,8 +531,8 @@ describe('HellCombobox', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(host.control.value).toBe('Nova');
-    expect(host.values).toEqual(['Nova']);
+    expect(host.control.value).toBe('nova');
+    expect(host.values).toEqual(['nova']);
 
     host.control.disable();
     fixture.detectChanges();
@@ -579,7 +586,7 @@ describe('HellCombobox', () => {
 
     expect(input.value).toBe('Atlas');
 
-    host.value.set('Nova');
+    host.value.set('nova');
     fixture.detectChanges();
     await fixture.whenStable();
 

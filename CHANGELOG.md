@@ -514,6 +514,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- The select and combobox presets now consume the shared core option contract:
+  `hell-select-basic` and `hell-combobox-basic` take
+  `options: readonly HellOption<T>[]` (`{ value, label, disabled? }`, exported
+  from `@hell-ui/angular/core` with `HellOptionDisplayWith` and
+  `HellOptionCompareWith`) instead of raw value arrays. Display text defaults
+  to each option's `label`; `displayWith` becomes a nullable override that also
+  labels selected values missing from `options`; combobox filtering matches
+  the rendered label; per-option `disabled` flows to the option rows. The
+  entry-point-local `HellSelectDisplayWith`/`HellSelectCompareWith`/
+  `HellComboboxDisplayWith`/`HellComboboxCompareWith` aliases are gone —
+  migrate `[options]="['A', 'B']"` to
+  `[options]="[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]"` and
+  import the callback types from core. Closes #149 (spec #147). Evidence:
+  select and combobox unit suites, updated docs examples.
 - Removed the 278 information-free single-part Part Style Map aliases
   (`Hell<Module>Part = 'root'` and their `Hell<Module>Ui = HellUi<...>`
   counterparts) from every entry point. Single-part modules now type their

@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import {
   HELL_COMBOBOX_BASIC_DIRECTIVES,
   type HellComboboxBasicUi,
 } from '@hell-ui/angular/combobox';
 
-const PRIORITIES = ['Blocker', 'Critical', 'High', 'Medium', 'Low'];
+
+const PRIORITIES: readonly HellOption<string>[] = (
+  ['Blocker', 'Critical', 'High', 'Medium', 'Low'] as const
+).map((label) => ({ value: label.toLowerCase(), label }));
 
 @Component({
   selector: 'app-combobox-styling-example',

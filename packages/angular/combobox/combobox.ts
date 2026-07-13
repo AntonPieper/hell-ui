@@ -22,6 +22,9 @@ import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
 import {
   hellPartStyler,
+  type HellOption,
+  type HellOptionCompareWith,
+  type HellOptionDisplayWith,
   type HellRecipe,
   type HellSize,
   type HellUi,
@@ -51,8 +54,6 @@ export type HellComboboxMultipleValue<T = unknown> = readonly T[];
 export type HellComboboxValue<T = unknown> =
   | HellComboboxSingleValue<T>
   | HellComboboxMultipleValue<T>;
-export type HellComboboxDisplayWith<T = unknown> = (value: T) => string;
-export type HellComboboxCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
 /** Public parts of the HellComboboxChips module, styleable through its Part Style Map. */
 export type HellComboboxChipsPart = 'root' | 'chip';
@@ -576,7 +577,7 @@ export class HellComboboxChips<T = unknown> {
    * the chip Label Contract also reuses as the remove button's accessible name
    * (`Remove {label}`). Defaults to `String`.
    */
-  readonly displayWith = input<HellComboboxDisplayWith<T>>((value) => String(value));
+  readonly displayWith = input<HellOptionDisplayWith<T>>((value) => String(value));
   /** Size of the rendered chips. Defaults to `sm`. */
   readonly size = input<HellSize>('sm');
 
@@ -669,14 +670,15 @@ export class HellComboboxChips<T = unknown> {
         data-slot="dropdown"
         [ui]="part('dropdown')"
       >
-        @for (option of filteredOptions(); track option) {
+        @for (option of filteredOptions(); track option.value) {
           <div
             hellComboboxOption
             data-slot="option"
             [ui]="part('option')"
-            [value]="option"
+            [value]="option.value"
+            [disabled]="option.disabled ?? false"
           >
-            {{ displayWith()(option) }}
+            {{ optionLabel(option) }}
           </div>
         } @empty {
           <div hellComboboxEmpty data-slot="empty" [ui]="part('empty')">
@@ -697,7 +699,8 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     recipe: () => HELL_COMBOBOX_BASIC_RECIPE,
   });
 
-  readonly options = input<readonly T[]>([]);
+  /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
+  readonly options = input<readonly HellOption<T>[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly allowDeselect = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -705,8 +708,9 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
   readonly toggleLabel = input('Toggle options');
   readonly emptyLabel = input('No matches');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
-  readonly compareWith = input<HellComboboxCompareWith<T>>((a, b) => a === b);
-  readonly displayWith = input<HellComboboxDisplayWith<T>>((value) => String(value));
+  readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
+  /** Overrides option labels; also labels selected values missing from `options`. */
+  readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
   readonly value = input<HellComboboxValue<T> | null>(null);
 
   readonly valueChange = output<HellComboboxValue<T>>();
@@ -732,11 +736,11 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     if (this.multiple()) {
       const selectedValues = Array.isArray(value) ? value : value == null ? [] : [value as T];
       if (!selectedValues.length) return '';
-      return selectedValues.map((option) => this.displayWith()(option)).join(', ');
+      return selectedValues.map((item) => this.labelFor(item)).join(', ');
     }
 
     if (value == null) return '';
-    return this.displayWith()(value as T);
+    return this.labelFor(value as T);
   });
 
   protected readonly filterValue = computed(() => this.filterOverride() ?? this.selectedLabel());
@@ -745,9 +749,22 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
     const term = this.filterValue().trim().toLowerCase();
     if (!term) return this.options();
     return this.options().filter((option) =>
-      this.displayWith()(option).toLowerCase().includes(term),
+      this.optionLabel(option).toLowerCase().includes(term),
     );
   });
+
+  /** Display text for one option row. */
+  protected optionLabel(option: HellOption<T>): string {
+    return this.displayWith()?.(option.value) ?? option.label;
+  }
+
+  /** Display text for a picked value: `displayWith`, else its option's label. */
+  private labelFor(value: T): string {
+    const override = this.displayWith();
+    if (override) return override(value);
+    const compare = this.compareWith();
+    return this.options().find((option) => compare(option.value, value))?.label ?? String(value);
+  }
 
   protected onValueChange(next: HellComboboxValue<T>): void {
     this.controlledValue.acceptUserValue(next);

@@ -63,7 +63,9 @@ const INITIAL_CONFIG = `export default {
   `,
 })
 export class CodeEditorConfigEditorExample {
-  protected readonly languages: readonly ConfigLanguage[] = ['TypeScript', 'JavaScript', 'JSX'];
+  protected readonly languages = (['TypeScript', 'JavaScript', 'JSX'] as const).map(
+    (language): { value: ConfigLanguage; label: string } => ({ value: language, label: language }),
+  );
   protected readonly language = signal<ConfigLanguage>('TypeScript');
 
   protected readonly saved = signal(INITIAL_CONFIG);

@@ -1,10 +1,16 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { HellOption } from '@hell-ui/angular/core';
 import {
   HELL_SELECT_BASIC_DIRECTIVES,
   type HellSelectBasicUi,
 } from '@hell-ui/angular/select';
 
-const ENVIRONMENTS = ['Production', 'Staging', 'Preview', 'Local'];
+const ENVIRONMENTS: readonly HellOption<string>[] = [
+  { value: 'production', label: 'Production' },
+  { value: 'staging', label: 'Staging' },
+  { value: 'preview', label: 'Preview' },
+  { value: 'local', label: 'Local' },
+];
 
 @Component({
   selector: 'app-select-styling-example',

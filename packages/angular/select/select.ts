@@ -18,7 +18,15 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import {
+  hellPartStyler,
+  type HellOption,
+  type HellOptionCompareWith,
+  type HellOptionDisplayWith,
+  type HellRecipe,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -46,8 +54,6 @@ export type HellSelectMultipleValue<T = unknown> = readonly T[];
 export type HellSelectFormValue<T = unknown> =
   | HellSelectSingleValue<T>
   | HellSelectMultipleValue<T>;
-export type HellSelectDisplayWith<T = unknown> = (value: T) => string;
-export type HellSelectCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
 /** Public parts of the HellSelectBasic module, styleable through its Part Style Map. */
 export type HellSelectBasicPart =
@@ -391,14 +397,15 @@ export class HellSelectOption {
       }
       <ng-template hellSelectPortal>
         <div hellSelectDropdown data-slot="dropdown" [ui]="part('dropdown')">
-          @for (option of options(); track option) {
+          @for (option of options(); track option.value) {
             <div
               hellSelectOption
               data-slot="option"
               [ui]="part('option')"
-              [value]="option"
+              [value]="option.value"
+              [disabled]="option.disabled ?? false"
             >
-              {{ displayWith()(option) }}
+              {{ optionLabel(option) }}
             </div>
           }
         </div>
@@ -416,15 +423,17 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
     recipe: () => HELL_SELECT_BASIC_RECIPE,
   });
 
-  readonly options = input<readonly T[]>([]);
+  /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
+  readonly options = input<readonly HellOption<T>[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly placeholder = input('Select');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
   readonly disabled = input(false, { transform: booleanAttribute });
-  readonly compareWith = input<HellSelectCompareWith<T>>((a, b) => a === b);
-  readonly displayWith = input<HellSelectDisplayWith<T>>((value) => String(value));
+  readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
+  /** Overrides option labels; also labels selected values missing from `options`. */
+  readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
   readonly value = input<HellSelectFormValue<T> | null>(null);
 
   readonly valueChange = output<HellSelectFormValue<T>>();
@@ -461,12 +470,25 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
     if (this.multiple()) {
       const selectedValues = Array.isArray(value) ? value : value == null ? [] : [value as T];
       if (!selectedValues.length) return null;
-      return selectedValues.map((item) => this.displayWith()(item)).join(', ');
+      return selectedValues.map((item) => this.labelFor(item)).join(', ');
     }
 
     if (value == null) return null;
-    return this.displayWith()(value as T);
+    return this.labelFor(value as T);
   });
+
+  /** Display text for one option row. */
+  protected optionLabel(option: HellOption<T>): string {
+    return this.displayWith()?.(option.value) ?? option.label;
+  }
+
+  /** Display text for a picked value: `displayWith`, else its option's label. */
+  private labelFor(value: T): string {
+    const override = this.displayWith();
+    if (override) return override(value);
+    const compare = this.compareWith();
+    return this.options().find((option) => compare(option.value, value))?.label ?? String(value);
+  }
 
   constructor() {
     hellSyncFormFieldLabels(this.formField, this.triggerAriaLabelledby);

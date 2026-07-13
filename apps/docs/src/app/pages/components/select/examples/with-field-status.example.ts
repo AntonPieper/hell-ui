@@ -9,6 +9,8 @@ type Decision = 'Approved' | 'Changes requested' | 'Rejected';
 
 const DECISIONS: readonly Decision[] = ['Approved', 'Changes requested', 'Rejected'];
 
+const DECISION_OPTIONS = DECISIONS.map((decision) => ({ value: decision, label: decision }));
+
 const DECISION_VARIANT: Record<Decision, HellTagVariant> = {
   Approved: 'success',
   'Changes requested': 'warning',
@@ -31,7 +33,7 @@ const DECISION_VARIANT: Record<Decision, HellTagVariant> = {
         <hell-select-basic
           id="review-decision"
           placeholder="Choose a decision"
-          [options]="decisions"
+          [options]="decisionOptions"
           [value]="decision()"
           (valueChange)="onDecisionChange($any($event))"
         />
@@ -48,7 +50,7 @@ const DECISION_VARIANT: Record<Decision, HellTagVariant> = {
   `,
 })
 export class SelectWithFieldStatusExample {
-  protected readonly decisions = DECISIONS;
+  protected readonly decisionOptions = DECISION_OPTIONS;
   protected readonly decision = signal<Decision | null>(null);
   private readonly submitted = signal(false);
   protected readonly showError = computed(() => this.submitted() && this.decision() === null);
