@@ -522,6 +522,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Collapsed the five `@hell-ui/angular/pagination` nav-button directives
+  (`HellPaginationFirst`, `HellPaginationPrev`, `HellPaginationNext`,
+  `HellPaginationLast`, `HellPaginationButton`) into one `HellPageLink`
+  directive on `button[hellPageLink], a[hellPageLink]`. The target is the
+  required `hellPageLink` input, typed by the exported
+  `HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number`.
+  Migrate `hellPaginationFirst` → `hellPageLink="first"`, `hellPaginationPrev`
+  → `hellPageLink="previous"`, `hellPaginationNext` → `hellPageLink="next"`,
+  `hellPaginationLast` → `hellPageLink="last"`, and
+  `hellPaginationButton [page]="p"` → `[hellPageLink]="p"`. Boundary-aware
+  disabled state, numbered `aria-current`/`data-selected`, the pagination
+  Label Contract, the single `root` part, and the Enter/Space keyboard
+  workaround with anchor guards all carry over; `HellPaginationStrip` and
+  `HELL_PAGINATION_LABELS` are unchanged. Closes #153. Evidence: rewritten
+  pagination unit suite; strip, pdf-viewer, and split-view consumers migrated.
 - Removed the `@hell-ui/angular/tag` entry point and folded it into
   `@hell-ui/angular/chip`: one pill module. `HellTag` is gone — use a static
   `<span hellChip variant="…">` for non-interactive pills (the six variants

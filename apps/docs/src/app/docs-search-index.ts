@@ -1169,7 +1169,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pagination',
  detail:'components/pagination/examples/composed.example.ts',
  terms:
-'composed custom hellPagination hellPaginationFirst hellPaginationPrev hellPaginationNext hellPaginationLast directive composition nav aria-label',
+'composed custom hellPagination hellPageLink directive composition nav aria-label',
  },
  {
  title:'Pagination: Page Jump',
