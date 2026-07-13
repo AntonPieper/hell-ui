@@ -384,6 +384,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Fixed
 
+- Code editor line-number and fold gutters now use the muted foreground token
+  instead of the subtle one, meeting WCAG AA 4.5:1 contrast on the gutter
+  background (surfaced by the axe smoke suite once a docs page rendered a
+  longer always-visible code block). Evidence: `e2e/docs-axe-smoke.spec.ts`.
+
 - `HellNumberInput` now commits a pending typed draft before stepping, so typing
   a value and then clicking a stepper or pressing Arrow / Page / Home / End steps
   from what was typed instead of the stale committed value it shadowed (commit

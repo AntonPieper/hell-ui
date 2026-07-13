@@ -142,7 +142,9 @@ export const hellCodeEditorTheme: Extension = [
       backgroundColor:
         'color-mix(in oklab, var(--color-hell-surface-subtle) 90%, var(--color-hell-surface-muted))',
       borderRight: '1px solid var(--color-hell-border)',
-      color: 'var(--color-hell-foreground-subtle)',
+      // foreground-muted, not -subtle: 12.5px line numbers need WCAG AA 4.5:1
+      // on the subtle gutter background (axe color-contrast).
+      color: 'var(--color-hell-foreground-muted)',
     },
     '.cm-lineNumbers .cm-gutterElement': {
       minWidth: '2.5rem',
@@ -151,7 +153,7 @@ export const hellCodeEditorTheme: Extension = [
     '.cm-foldGutter .cm-gutterElement': {
       width: '1.3rem',
       paddingInline: '0',
-      color: 'var(--color-hell-foreground-subtle)',
+      color: 'var(--color-hell-foreground-muted)',
       cursor: 'pointer',
       textAlign: 'center',
     },
