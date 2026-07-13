@@ -18,7 +18,9 @@ export interface HellOmnibarActiveItemMovement<T extends HellOmnibarActiveItemOp
 }
 
 /**
- * Pure active-descendant state policy for HellOmnibar.
+ * @internal Pure active-descendant state policy for HellOmnibar. Module-level
+ * export for the omnibar runtime and its tests only — deliberately not
+ * re-exported through the entry point's public API.
  *
  * The Angular runtime owns signals, DOM scrolling, and event handling. This
  * controller owns only the list projection rules: disabled options are skipped,
