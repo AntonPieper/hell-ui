@@ -13,6 +13,7 @@ import {
   output,
   signal,
   viewChild,
+  type Signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
@@ -442,8 +443,10 @@ export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
     initialValue: null,
   });
 
-  protected readonly effectiveValue = this.controlledValue.value;
-  protected readonly effectiveDisabled = this.controlledValue.disabled;
+  // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
+  // types inferred through internal entry points, shipping unbound `Signal`.
+  protected readonly effectiveValue: Signal<HellSelectFormValue<T>> = this.controlledValue.value;
+  protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
   protected readonly triggerAriaLabel = () =>
     this.ariaLabel() ?? this.host.nativeElement.getAttribute('aria-label');
   private readonly triggerAriaLabelledby = computed(

@@ -14,6 +14,7 @@ import {
   output,
   signal,
   viewChild,
+  type Signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
@@ -721,8 +722,10 @@ export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
   private readonly filterOverride = signal<string | null>(null);
   private readonly combobox = viewChild(HellCombobox);
 
-  protected readonly effectiveValue = this.controlledValue.value;
-  protected readonly effectiveDisabled = this.controlledValue.disabled;
+  // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
+  // types inferred through internal entry points, shipping unbound `Signal`.
+  protected readonly effectiveValue: Signal<HellComboboxValue<T>> = this.controlledValue.value;
+  protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
 
   protected readonly selectedLabel = computed(() => {
     const value = this.effectiveValue();

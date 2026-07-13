@@ -10,6 +10,7 @@ import {
   input,
   signal,
   viewChild,
+  type Signal,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -473,12 +474,14 @@ export class HellAudioPlayer {
   protected readonly playbackRate = this.audioRuntime.playbackRate;
   protected readonly seekMax = this.audioRuntime.seekMax;
   protected readonly volumeLevel = this.audioRuntime.volumeLevel;
-  protected readonly transcript = this.transcriptRuntime.transcript;
-  protected readonly interim = this.transcriptRuntime.interim;
-  protected readonly transcribing = this.transcriptRuntime.transcribing;
-  protected readonly error = this.transcriptRuntime.error;
-  protected readonly copied = this.transcriptRuntime.copied;
-  protected readonly speechSupported = this.transcriptRuntime.speechSupported;
+  // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
+  // types inferred through internal entry points, shipping unbound `Signal`.
+  protected readonly transcript: Signal<string> = this.transcriptRuntime.transcript;
+  protected readonly interim: Signal<string> = this.transcriptRuntime.interim;
+  protected readonly transcribing: Signal<boolean> = this.transcriptRuntime.transcribing;
+  protected readonly error: Signal<string | null> = this.transcriptRuntime.error;
+  protected readonly copied: Signal<boolean> = this.transcriptRuntime.copied;
+  protected readonly speechSupported: Signal<boolean> = this.transcriptRuntime.speechSupported;
   protected readonly labels = inject(HELL_AUDIO_PLAYER_LABELS);
   protected readonly speechTranscriptLabel =
     this.labels.speechTranscript ?? 'Speech transcript';

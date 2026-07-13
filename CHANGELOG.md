@@ -7,6 +7,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Brought the select, combobox, date-input, audio-player, and TanStack table
+  shell (including its virtual-rows strategy) entry points under API reports:
+  59 entry points are now guarded. The api-extractor "Unable to follow symbol"
+  crashes came from ng-packagr's d.ts flattener shipping unbound identifiers
+  for types inferred through internal entry points; those members now carry
+  explicit annotations, which also fixes the shipped typings for consumers
+  compiling without `skipLibCheck`. Closes #148.
+
 - Extended Filter Bar with the remaining `entity` and `dateRange` field kinds.
   Entity editors orchestrate a consumer-owned `HellSearchSource` with debounce,
   cancellation, stale-result protection, loading/empty/error states, and a

@@ -14,6 +14,7 @@ import {
   output,
   signal,
   viewChild,
+  type Signal,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -303,7 +304,9 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     format: (date) => this.dateAdapter.format(date),
     externalChanged: (base, current) => !this.sameDate(base, current),
   });
-  protected readonly current = this.valueState.current;
+  // Annotated like number-input's `current`: ng-packagr's d.ts flattener would
+  // otherwise ship the internal state's detached `TValue` type parameter.
+  protected readonly current: Signal<Date | null> = this.valueState.current;
   protected readonly display = this.valueState.display;
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () =>
