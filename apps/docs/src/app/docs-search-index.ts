@@ -1060,6 +1060,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItemCheckbox hellMenuItemRadioGroup hellMenuItemRadio hellMenuItemIndicator hellMenuSeparator checkbox radio group preferences toggle multi-select single-choice checked valueChange',
  },
  {
+ title:'Menu: Data-driven options',
+ path:'/components/menu',
+ detail:'components/menu/examples/options.example.ts',
+ terms:
+'options components/menu/examples/options.example components/menu hell-menu-options HellOption hellMenuTrigger hellMenu data-driven checkable options selected selectedChange compareWith disabled selection floor controlled column visibility menuitemcheckbox',
+ },
+ {
  title:'Menu: With avatar (account menu)',
  path:'/components/menu',
  detail:'components/menu/examples/profile-menu.example.ts',
@@ -1099,14 +1106,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/basic.example.ts',
  terms:
-'multi-select-menu-button basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hell-multi-select-menu-button options selected selectedChange minSelected resettable reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels HellMultiSelectOption disabled floor Label Contract',
+'multi-select-menu-button recipe basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hellButton hellMenuTrigger hellMenu hell-menu-options HellOption options selected selectedChange reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels disabled selection floor',
  },
  {
  title:'Multi-Select Menu Button: TanStack column visibility',
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/tanstack-columns.example.ts',
  terms:
-'multi-select-menu-button tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hell-multi-select-menu-button TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns minSelected reset',
+'multi-select-menu-button recipe tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hellButton hellMenu hell-menu-options TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
  },
  {
  title:'Omnibar: Async search',

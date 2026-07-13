@@ -522,6 +522,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Removed the `@hell-ui/angular/multi-select-menu-button` Package Entry Point.
+  The composite is now a documented recipe: `hellButton` + `[hellMenu]` +
+  `hell-menu-options`, with the count badge as consumer markup, the reset item
+  as an ordinary menu item, and the selection floor expressed by disabling
+  still-selected options (see the Multi-select menu button recipe page).
+  `HellMultiSelectMenuButton`, `HellMultiSelectOption`,
+  `HELL_MULTI_SELECT_MENU_BUTTON_LABELS`, and its labels interface are gone —
+  migrate `HellMultiSelectOption` to core's `HellOption`. Closes #151
+  (spec #147). Evidence: recipe page examples, migrated browser contract suite
+  `e2e/multi-select-menu-button-contracts.spec.ts`.
 - The select and combobox presets now consume the shared core option contract:
   `hell-select-basic` and `hell-combobox-basic` take
   `options: readonly HellOption<T>[]` (`{ value, label, disabled? }`, exported

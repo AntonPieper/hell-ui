@@ -74,7 +74,6 @@
     "page-header/page-header.ts",
     "filter-bar/filter-bar.ts",
     "toast/toast.ts",
-    "multi-select-menu-button/multi-select-menu-button.ts",
     "features/code-editor/code-editor.ts",
     "assets/**"
   ],
@@ -240,9 +239,6 @@
     },
     "./filter-bar": {
       "@heinrich/source": "./filter-bar/public-api.ts"
-    },
-    "./multi-select-menu-button": {
-      "@heinrich/source": "./multi-select-menu-button/public-api.ts"
     },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
@@ -501,11 +497,6 @@
       "@heinrich/source": "./filter-bar/styles.css",
       "style": "./filter-bar/styles.css",
       "default": "./filter-bar/styles.css"
-    },
-    "./multi-select-menu-button/styles.css": {
-      "@heinrich/source": "./multi-select-menu-button/styles.css",
-      "style": "./multi-select-menu-button/styles.css",
-      "default": "./multi-select-menu-button/styles.css"
     },
     "./omnibar/styles.css": {
       "@heinrich/source": "./omnibar/styles.css",

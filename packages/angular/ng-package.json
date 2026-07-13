@@ -301,11 +301,6 @@
       "output": "toast"
     },
     {
-      "glob": "multi-select-menu-button.ts",
-      "input": "multi-select-menu-button",
-      "output": "multi-select-menu-button"
-    },
-    {
       "glob": "code-editor.ts",
       "input": "features/code-editor",
       "output": "features/code-editor"
