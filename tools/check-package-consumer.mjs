@@ -1406,9 +1406,9 @@ const pageButtonUi = {
   template: \`
     <hell-pagination mode="jump" [page]="2" [pageCount]="6" [ui]="stripUi" />
     <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
-      <button hellPaginationPrev type="button">Previous</button>
-      <button hellPaginationButton type="button" [page]="2" [ui]="pageButtonUi">2</button>
-      <button hellPaginationNext type="button" ui="text-hell-danger">Next</button>
+      <button hellPageLink="previous" type="button">Previous</button>
+      <button type="button" [hellPageLink]="2" [ui]="pageButtonUi">2</button>
+      <button hellPageLink="next" type="button" ui="text-hell-danger">Next</button>
     </nav>
   \`,
 })
