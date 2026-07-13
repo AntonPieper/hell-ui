@@ -522,6 +522,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Removed the `@hell-ui/angular/tag` entry point and folded it into
+  `@hell-ui/angular/chip`: one pill module. `HellTag` is gone — use a static
+  `<span hellChip variant="…">` for non-interactive pills (the six variants
+  are unchanged); `HellBadge` and `HellKbd` now import from
+  `@hell-ui/angular/chip` with identical behavior, recipes, and `data-slot`
+  contracts; the core type `HellTagVariant` renames to `HellChipVariant`; and
+  `@hell-ui/angular/tag/styles.css` imports repoint to the chip stylesheet.
+  No deprecated aliases are provided. Closes #152. Evidence: chip unit suite
+  including the ported tag assertions, migrated docs and theme skins.
 - Removed the `@hell-ui/angular/multi-select-menu-button` Package Entry Point.
   The composite is now a documented recipe: `hellButton` + `[hellMenu]` +
   `hell-menu-options`, with the count badge as consumer markup, the reset item

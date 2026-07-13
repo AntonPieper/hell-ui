@@ -18,6 +18,9 @@ export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
 export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link' | 'danger' | 'success';
 
 // @public
+export type HellChipVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
+
+// @public
 export function hellCreateLabels<T extends object>(description: string, defaults: T): InjectionToken<T>;
 
 // @public
@@ -131,9 +134,6 @@ export function hellSearchWords(value: string): readonly string[];
 
 // @public
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
-// @public
-export type HellTagVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
 
 // @public
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
