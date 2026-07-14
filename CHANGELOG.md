@@ -339,6 +339,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- The filter bar's entity editors now delegate their async lifecycle to the
+  shared Search Orchestration seam: abort, newer-supersedes-older, and
+  stale-result protection come from the same internal module behind the
+  omnibar and combobox, while per-field debounce policy, editor chrome,
+  per-field labels, and the `searchError` output stay filter-bar-owned.
+  No public API or behavior change; the private AbortController/generation
+  bookkeeping is deleted. Closes #167. Evidence: filter-bar unit suites,
+  unchanged filter-bar API report.
 - The owned-anatomy `hell-combobox` now filters options through the core
   search seam: labels are ranked by `hellRankLocalSearch` under the
   `HELL_SEARCH_RANKER` token — accent-insensitive, word-based, exact-word

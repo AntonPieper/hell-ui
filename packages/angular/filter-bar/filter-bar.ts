@@ -23,6 +23,7 @@ import {
   hellRankLocalSearch,
   HellSearchService,
   type HellRecipe,
+  type HellSearchResult,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
@@ -36,6 +37,7 @@ import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
 } from '@hell-ui/angular/internal/core';
+import { HellSearchOrchestrator } from '@hell-ui/angular/internal/search';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 
 import {
@@ -700,13 +702,13 @@ export class HellFilterBar {
 
   private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
-  private readonly searchService = inject(HellSearchService);
+  private readonly entityOrchestrator = new HellSearchOrchestrator<HellFilterEntityOption>(
+    inject(HellSearchService),
+  );
   private readonly dateAdapter = inject<HellDateInputAdapter>(HELL_DATE_INPUT_ADAPTER);
   private readonly floatingScope = inject(HellFilterBarFloatingScope);
   private liveTimer: ReturnType<typeof setTimeout> | null = null;
   private entitySearchTimer: ReturnType<typeof setTimeout> | null = null;
-  private entitySearchAbort: AbortController | null = null;
-  private entitySearchGeneration = 0;
   private suppressEditorClose = false;
   protected readonly instanceId = ++nextFilterBarId;
 
@@ -1282,56 +1284,50 @@ export class HellFilterBar {
 
     const field = state.field;
     const query = state.query;
-    const generation = this.entitySearchGeneration;
     this.entityStatus.set('loading');
     this.entityLiveMessage.set(this.labels.loading(field.label));
     this.entityResults.set([]);
+    // Per-field debounce stays filter-bar policy; abort and stale-result
+    // protection delegate to the shared Search Orchestration seam.
     const delay = Math.max(0, field.debounceMs ?? this.entityDebounceMs());
     this.entitySearchTimer = setTimeout(() => {
       this.entitySearchTimer = null;
-      const controller = new AbortController();
-      this.entitySearchAbort = controller;
-      void this.searchService.search({
-        query,
-        source: field.search,
-        limit: field.limit,
-        signal: controller.signal,
-        fields: [
-          { weight: 2, get: (option) => option.label },
-          { weight: 1, get: (option) => option.id },
-        ],
-      }).then((results) => {
-        if (!this.isCurrentEntitySearch(generation, field, query, controller)) return;
-        this.entitySearchAbort = null;
-        const items = results.map(({ item }) => item);
-        this.entityResults.set(items);
-        this.entityStatus.set('ready');
-        this.entityLiveMessage.set(items.length ? '' : this.labels.empty(field.label));
-        queueMicrotask(() => this.activateFirstEntityResult());
-      }).catch((error: unknown) => {
-        if (!this.isCurrentEntitySearch(generation, field, query, controller)) return;
-        this.entitySearchAbort = null;
-        this.entityResults.set([]);
-        this.entityStatus.set('error');
-        this.entityLiveMessage.set(this.labels.error(field.label));
-        this.searchError.emit({ field, query, error });
-      });
+      void this.entityOrchestrator
+        .searchNow(query, {
+          source: field.search,
+          limit: field.limit,
+          fields: [
+            { weight: 2, get: (option) => option.label },
+            { weight: 1, get: (option) => option.id },
+          ],
+        })
+        .then((current) => {
+          if (current) this.applyEntityOutcome(field, query);
+        });
     }, delay);
   }
 
-  private isCurrentEntitySearch(
-    generation: number,
-    field: HellFilterEntityField,
-    query: string,
-    controller: AbortController,
-  ): boolean {
+  /** Applies the settled orchestrator state to editor chrome, unless the editor moved on. */
+  private applyEntityOutcome(field: HellFilterEntityField, query: string): void {
     const state = this.editor();
-    return (
-      !controller.signal.aborted &&
-      generation === this.entitySearchGeneration &&
-      state?.field === field &&
-      state.query === query
-    );
+    if (state?.field !== field || state.query !== query) return;
+    const error = this.entityOrchestrator.error();
+    if (error !== null) {
+      this.entityResults.set([]);
+      this.entityStatus.set('error');
+      this.entityLiveMessage.set(this.labels.error(field.label));
+      this.searchError.emit({ field, query, error });
+      return;
+    }
+    // Annotated: when ng-packagr compiles this entry point against the internal
+    // search module's flattened d.ts, the result generic collapses to `unknown`.
+    const items = this.entityOrchestrator
+      .results()
+      .map((result: HellSearchResult<HellFilterEntityOption>) => result.item);
+    this.entityResults.set(items);
+    this.entityStatus.set('ready');
+    this.entityLiveMessage.set(items.length ? '' : this.labels.empty(field.label));
+    queueMicrotask(() => this.activateFirstEntityResult());
   }
 
   private activateFirstEntityResult(): void {
@@ -1350,13 +1346,12 @@ export class HellFilterBar {
   }
 
   private cancelEntitySearch(): void {
-    this.entitySearchGeneration += 1;
     if (this.entitySearchTimer !== null) {
       clearTimeout(this.entitySearchTimer);
       this.entitySearchTimer = null;
     }
-    this.entitySearchAbort?.abort();
-    this.entitySearchAbort = null;
+    this.entityOrchestrator.cancel();
+    this.entityOrchestrator.clearResults();
     this.entityResults.set([]);
     this.entityStatus.set('idle');
     this.entityLiveMessage.set('');

@@ -67,10 +67,26 @@ describe('HellSearchOrchestrator', () => {
 
     service.pending[0]?.resolve(results('stale'));
     service.pending[1]?.resolve(results('fresh'));
-    await Promise.all([first, second]);
+    const [firstWon, secondWon] = await Promise.all([first, second]);
 
+    expect(firstWon).toBe(false);
+    expect(secondWon).toBe(true);
     expect(orchestrator.results().map(({ item }) => item)).toEqual(['fresh']);
     expect(orchestrator.loading()).toBe(false);
+  });
+
+  it('resolves false for searches superseded while their response was still pending', async () => {
+    const service = new FakeSearchService();
+    const orchestrator = new HellSearchOrchestrator<string>(
+      service as unknown as HellSearchService,
+    );
+
+    const inflight = orchestrator.searchNow('one', {});
+    orchestrator.cancel();
+    service.pending[0]?.resolve(results('stale'));
+
+    expect(await inflight).toBe(false);
+    expect(orchestrator.results()).toEqual([]);
   });
 
   it('captures errors from the active request only', async () => {
@@ -84,8 +100,10 @@ describe('HellSearchOrchestrator', () => {
 
     service.pending[0]?.reject(new Error('stale failure'));
     service.pending[1]?.reject(new Error('fresh failure'));
-    await Promise.all([first, second]);
+    const [firstWon, secondWon] = await Promise.all([first, second]);
 
+    expect(firstWon).toBe(false);
+    expect(secondWon).toBe(true);
     expect((orchestrator.error() as Error).message).toBe('fresh failure');
     expect(orchestrator.results()).toEqual([]);
     expect(orchestrator.loading()).toBe(false);

@@ -20,7 +20,7 @@ export class HellSearchOrchestrator<T> {
     // Warning: (ae-forgotten-export) The symbol "HellSearchResult" needs to be exported by the entry point hell-ui-angular-internal-search.d.ts
     readonly results: _angular_core.WritableSignal<readonly HellSearchResult<T>[]>;
     scheduleSearch(query: string, options: HellSearchOrchestratorOptions<T>, debounceMs: number): void;
-    searchNow(query: string, options: HellSearchOrchestratorOptions<T>): Promise<void>;
+    searchNow(query: string, options: HellSearchOrchestratorOptions<T>): Promise<boolean>;
 }
 
 // @public

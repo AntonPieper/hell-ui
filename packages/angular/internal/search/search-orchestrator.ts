@@ -56,8 +56,13 @@ export class HellSearchOrchestrator<T> {
     }, delay);
   }
 
-  /** Run a search immediately and ignore/abort any older in-flight request. */
-  async searchNow(query: string, options: HellSearchOrchestratorOptions<T>): Promise<void> {
+  /**
+   * Run a search immediately and ignore/abort any older in-flight request.
+   * Resolves `true` when this request's outcome is the one left in the
+   * signals, `false` when a newer search or `cancel` superseded it — callers
+   * chaining settle work must not treat superseded settles as current.
+   */
+  async searchNow(query: string, options: HellSearchOrchestratorOptions<T>): Promise<boolean> {
     const id = ++this.requestId;
     this.controller?.abort();
     const controller = new AbortController();
@@ -76,12 +81,14 @@ export class HellSearchOrchestrator<T> {
         signal: controller.signal,
       };
       const results = await this.searchService.search<T>(request);
-      if (id !== this.requestId || controller.signal.aborted) return;
+      if (id !== this.requestId || controller.signal.aborted) return false;
       this.results.set(results);
+      return true;
     } catch (error) {
-      if (id !== this.requestId || controller.signal.aborted) return;
+      if (id !== this.requestId || controller.signal.aborted) return false;
       this.results.set([]);
       this.error.set(error);
+      return true;
     } finally {
       if (id === this.requestId) this.loading.set(false);
     }
