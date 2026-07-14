@@ -371,6 +371,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: `hell-pagination` is the numbered strip only. The `mode` input,
+  `HellPaginationMode` type, and the `status`/`jump`/`jumpLabel`/
+  `jumpSelect`/`jumpTotal` parts are gone, and `HellPaginationLabels` slims
+  to the strip's own copy (`navigation`, boundary controls, `page(n)`).
+  The compact previous/next and page-jump forms are documented recipes
+  composed from `[hellPagination]` + `hellPageLink` (+ `hellNativeSelect`),
+  exactly like the multi-select-menu-button precedent — recipe copy
+  localizes with app strings instead of the Label Contract. Closes #172.
+  Evidence: pagination unit suite incl. new recipe contracts, migrated
+  pagination/navigation e2e, updated docs recipes.
 - BREAKING: the three typed-input adapter contracts are one shape. Core
   exports `HellTypedInputAdapter<TValue, TContext>` (parseText / format /
   normalize / isSameValue / isWithinBounds, all context-aware), and

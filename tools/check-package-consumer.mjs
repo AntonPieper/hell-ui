@@ -1392,7 +1392,7 @@ import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '${packag
 
 const stripUi = {
   root: 'gap-hell-4',
-  jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+  control: 'rounded-hell-pill',
 } satisfies HellPaginationStripUi;
 
 const pageButtonUi = {
@@ -1404,7 +1404,7 @@ const pageButtonUi = {
   standalone: true,
   imports: [...HELL_PAGINATION_DIRECTIVES],
   template: \`
-    <hell-pagination mode="jump" [page]="2" [pageCount]="6" [ui]="stripUi" />
+    <hell-pagination [page]="2" [pageCount]="6" [ui]="stripUi" />
     <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
       <button hellPageLink="previous" type="button">Previous</button>
       <button type="button" [hellPageLink]="2" [ui]="pageButtonUi">2</button>

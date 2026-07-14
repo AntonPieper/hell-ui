@@ -1155,21 +1155,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pagination',
  detail:'components/pagination/examples/jump.example.ts',
  terms:
-'mode select hellNativeSelect large set page-jump HellPaginationStrip hell-pagination',
+'recipe select hellNativeSelect large set page-jump hellPagination hellPageLink compose',
  },
  {
  title:'Pagination: Previous / Next',
  path:'/components/pagination',
  detail:'components/pagination/examples/previous-next.example.ts',
  terms:
-'previous-next mode compact status aria-live HellPaginationStrip hell-pagination boundary disabled',
+'previous-next recipe compact status aria-live hellPagination hellPageLink boundary disabled compose',
  },
  {
  title:'Pagination: Styling',
  path:'/components/pagination',
  detail:'components/pagination/examples/styling.example.ts',
  terms:
-'ui Part Style Map HellPaginationStripUi root control controlGlyph jump jumpLabel jumpSelect jumpTotal status all-parts tokens',
+'ui Part Style Map HellPaginationStripUi root control controlGlyph all-parts tokens',
  },
  {
  title:'Pagination: With table and page size',

@@ -48,8 +48,8 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         importPath="@hell-ui/angular/pagination"
         stylesPath="@hell-ui/angular/pagination/styles.css"
       >
-        Page navigation as a composable button directive or a ready-made strip, in numbered,
-        previous/next, and page-jump layouts.
+        Page navigation as a composable button directive or a ready-made numbered strip, with
+        compact previous/next and page-jump forms as documented recipes.
       </hd-page-header>
       <p>
         Pagination is a <code>ng-primitives/pagination</code>-backed entry point with two ways in.
@@ -59,9 +59,9 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         between — each <code>hellPageLink</code> targets a boundary
         (<code>first</code>/<code>previous</code>/<code>next</code>/<code>last</code>) or a page
         number. Or drop in <code>&lt;hell-pagination&gt;</code>, a ready-made strip that renders
-        the whole first / previous / numbered window / next / last sequence — or a compact
-        previous/next or page-jump layout — and emits <code>(pageChange)</code> with the new
-        1-based page number.
+        the whole first / previous / numbered window / next / last sequence and emits
+        <code>(pageChange)</code> with the new 1-based page number. Compact previous/next and
+        page-jump layouts are recipes composed from the same primitives.
       </p>
       <p>
         Reach for pagination whenever a table, list, or search result set is too large to render
@@ -79,11 +79,12 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <app-pagination-basic-example />
       </hd-example-tabs>
 
-      <h2>Previous / next only</h2>
+      <h2>Previous / next recipe</h2>
       <p>
-        Set <code>mode="previous-next"</code> when a numbered window would be noisy but users
-        still need clear position and disabled boundary states. The strip renders only the
-        previous/next controls plus a live <code>status</code> text such as "Page 1 of 9".
+        Compose previous/next controls around your own live status text when a numbered window
+        would be noisy but users still need clear position and disabled boundary states. The
+        recipe is <code>[hellPagination]</code> + two <code>hellPageLink</code> buttons + an
+        <code>aria-live</code> span you own — no strip mode required.
       </p>
       <hd-example-tabs
         [code]="paginationPreviousNextExampleCode"
@@ -92,12 +93,11 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <app-pagination-previous-next-example />
       </hd-example-tabs>
 
-      <h2>Page jump</h2>
+      <h2>Page-jump recipe</h2>
       <p>
-        Set <code>mode="jump"</code> for large page sets where a numbered window doesn't scale.
-        The strip renders previous/next controls around a native
-        <code>hellNativeSelect</code>, keeping the current page and total page count keyboard-
-        and screen-reader-reachable in a compact footprint.
+        For large page sets where a numbered window doesn't scale, compose previous/next
+        controls around a native <code>hellNativeSelect</code> you own, keeping the current page
+        and total page count keyboard- and screen-reader-reachable in a compact footprint.
       </p>
       <hd-example-tabs
         [code]="paginationJumpExampleCode"
@@ -121,9 +121,8 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h2>With table and page size</h2>
       <p>
         A common shape in dense business apps: a table body sliced to the active page, a
-        <code>hellNativeSelect</code> for rows-per-page, and a <code>previous-next</code>
-        pagination strip anchoring the row. Changing the page size resets to page one so the
-        slice stays valid.
+        <code>hellNativeSelect</code> for rows-per-page, and the compact previous/next recipe
+        anchoring the row. Changing the page size resets to page one so the slice stays valid.
       </p>
       <hd-example-tabs [code]="paginationWithTableExampleCode">
         <app-pagination-with-table-example />
@@ -158,7 +157,7 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
             <td>Every first/previous/next/last/numbered button/anchor host.</td>
           </tr>
           <tr>
-            <td rowspan="8"><code>HellPaginationStrip</code></td>
+            <td rowspan="3"><code>HellPaginationStrip</code></td>
             <td><code>root</code></td>
             <td>The <code>&lt;hell-pagination&gt;</code> host — gap and wrapping of the whole strip.</td>
           </tr>
@@ -169,26 +168,6 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           <tr>
             <td><code>controlGlyph</code></td>
             <td>The chevron glyph inside each control.</td>
-          </tr>
-          <tr>
-            <td><code>status</code></td>
-            <td>The live "Page X of Y" text in <code>previous-next</code> mode.</td>
-          </tr>
-          <tr>
-            <td><code>jump</code></td>
-            <td>The label wrapping the page-jump control in <code>jump</code> mode.</td>
-          </tr>
-          <tr>
-            <td><code>jumpLabel</code></td>
-            <td>The leading "Page" text in <code>jump</code> mode.</td>
-          </tr>
-          <tr>
-            <td><code>jumpSelect</code></td>
-            <td>Forwarded to the embedded <code>hellNativeSelect</code>'s <code>root</code> part.</td>
-          </tr>
-          <tr>
-            <td><code>jumpTotal</code></td>
-            <td>The trailing "of Y" text in <code>jump</code> mode.</td>
           </tr>
         </tbody>
       </table>
@@ -224,25 +203,23 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li><code>page</code>: <code>number</code>. 1-based current page, two-way bindable via <code>(pageChange)</code>.</li>
         <li><code>pageCount</code>: <code>number</code>. Total number of pages.</li>
         <li><code>disabled</code>: <code>boolean</code>. Disables every rendered control.</li>
-        <li><code>mode</code>: <code>HellPaginationMode</code> — <code>'pages' | 'previous-next' | 'jump'</code>. Default <code>'pages'</code>.</li>
-        <li><code>siblingCount</code>: <code>number</code>. Numbered buttons rendered on each side of the current page in <code>pages</code> mode. Default <code>2</code>.</li>
+        <li><code>siblingCount</code>: <code>number</code>. Numbered buttons rendered on each side of the current page. Default <code>2</code>.</li>
         <li><code>pageChange</code>: <code>EventEmitter&lt;number&gt;</code>. Emits the new 1-based page.</li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;HellPaginationStripPart&gt;</code> — a shorthand
           string refining <code>root</code>, or a map over <code>root</code>,
-          <code>control</code>, <code>controlGlyph</code>, <code>status</code>, <code>jump</code>,
-          <code>jumpLabel</code>, <code>jumpSelect</code>, and <code>jumpTotal</code>.
+          <code>control</code>, and <code>controlGlyph</code>.
         </li>
-        <li>Exported types: <code>HellPaginationStripPart</code>, <code>HellPaginationStripUi</code>, <code>HellPaginationMode</code>.</li>
+        <li>Exported types: <code>HellPaginationStripPart</code>, <code>HellPaginationStripUi</code>.</li>
       </ul>
       <h3>Labels</h3>
       <ul>
         <li>
           <code>provideHellLabels(HELL_PAGINATION_LABELS, overrides)</code>:
           overrides any subset of <code>navigation</code>, <code>firstPage</code>,
-          <code>previousPage</code>, <code>nextPage</code>, <code>lastPage</code>,
-          <code>page(page)</code>, <code>pageStatus(page, pageCount)</code>,
-          <code>jumpToPage</code>, and <code>pageTotal(pageCount)</code> for an injector scope.
+          <code>previousPage</code>, <code>nextPage</code>, <code>lastPage</code>, and
+          <code>page(page)</code> for an injector scope. Recipe copy — status text, jump label,
+          totals — is consumer markup and localizes with your app strings.
         </li>
         <li><code>HELL_PAGINATION_LABELS</code>: the injection token resolving to the effective labels.</li>
       </ul>
@@ -272,13 +249,9 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           <code>ng-primitives</code> regression (see the entry point's source comment).
         </li>
         <li>
-          In <code>previous-next</code> mode, the <code>status</code> text is
-          <code>aria-live="polite"</code>, so screen reader users hear the new page after
-          navigating without focus moving.
-        </li>
-        <li>
-          In <code>jump</code> mode, the native <code>&lt;select&gt;</code> carries an
-          <code>aria-label</code> from <code>jumpToPage</code> and is disabled whenever pagination
+          In the recipes, give the status text <code>aria-live="polite"</code> so screen reader
+          users hear the new page after navigating, and give the page-jump
+          <code>&lt;select&gt;</code> an <code>aria-label</code>; disable it whenever pagination
           is disabled or there is only one page.
         </li>
       </ul>
@@ -286,7 +259,7 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h2>Do</h2>
       <ul class="hd-do">
         <li>Use pagination when a result set is too large to render at once and the total is meaningful.</li>
-        <li>Use <code>previous-next</code> or <code>jump</code> mode once the numbered window would need to scroll or wrap.</li>
+        <li>Switch to the previous/next or page-jump recipe once the numbered window would need to scroll or wrap.</li>
         <li>Preserve filters, sorting, and page size when the page changes.</li>
         <li>Reset to page one when the page size or filters change so the current slice stays valid.</li>
       </ul>
@@ -294,7 +267,7 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>Don't paginate a list short enough to show in full.</li>
-        <li>Don't hide the total page count when it informs the task — prefer <code>jump</code> mode over hiding it.</li>
+        <li>Don't hide the total page count when it informs the task — prefer the page-jump recipe over hiding it.</li>
         <li>Don't reach for a custom composed layout unless the ready-made strip's markup genuinely doesn't fit.</li>
       </ul>
     </article>

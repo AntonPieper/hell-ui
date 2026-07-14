@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { provideHellLabels } from '@hell-ui/angular/core';
+import { HellNativeSelect } from '@hell-ui/angular/select';
 import { TestBed } from '@angular/core/testing';
 
-import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationMode, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';
+import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -23,23 +24,67 @@ class PaginationHost {
 }
 
 @Component({
-  imports: [HellPaginationStrip],
+  imports: [HellPagination, HellPageLink, HellNativeSelect],
   template: `
-    <hell-pagination
-      [mode]="mode()"
+    <nav
+      id="compact-recipe"
+      hellPagination
       [page]="page()"
       [pageCount]="pageCount()"
       [disabled]="disabled()"
       (pageChange)="pageEvents.push($event)"
-    />
+      aria-label="Pagination"
+    >
+      <button hellPageLink="previous" type="button" aria-label="Previous page">&lsaquo;</button>
+      <span aria-live="polite">Page {{ page() }} of {{ pageCount() }}</span>
+      <button hellPageLink="next" type="button" aria-label="Next page">&rsaquo;</button>
+    </nav>
+
+    <nav
+      id="jump-recipe"
+      hellPagination
+      [page]="page()"
+      [pageCount]="pageCount()"
+      [disabled]="disabled()"
+      (pageChange)="pageEvents.push($event)"
+      aria-label="Pagination"
+    >
+      <button hellPageLink="previous" type="button" aria-label="Previous page">&lsaquo;</button>
+      <label>
+        Page
+        <select
+          hellNativeSelect
+          size="sm"
+          aria-label="Page"
+          [value]="page()"
+          [disabled]="disabled() || pageCount() < 2"
+          (change)="jumpTo($event)"
+        >
+          @for (p of pageOptions(); track p) {
+            <option [value]="p" [selected]="p === page()">{{ p }}</option>
+          }
+        </select>
+        of {{ pageCount() }}
+      </label>
+      <button hellPageLink="next" type="button" aria-label="Next page">&rsaquo;</button>
+    </nav>
   `,
 })
-class PaginationModeHost {
-  readonly mode = signal<HellPaginationMode>('previous-next');
+class PaginationRecipesHost {
   readonly page = signal(1);
   readonly pageCount = signal(5);
   readonly disabled = signal(false);
   readonly pageEvents: number[] = [];
+  readonly pageOptions = computed(() =>
+    Array.from({ length: this.pageCount() }, (_, i) => i + 1),
+  );
+
+  jumpTo(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    const page = Number.parseInt(target.value, 10);
+    if (Number.isFinite(page)) this.pageEvents.push(page);
+  }
 }
 
 @Component({
@@ -127,7 +172,6 @@ class LocalizedPaginationHost {}
 
     <hell-pagination
       id="ui-strip"
-      mode="jump"
       [page]="2"
       [pageCount]="pageCount()"
       [ui]="stripUi"
@@ -155,8 +199,6 @@ class PaginationUiHost {
     root: 'gap-hell-4 bg-hell-surface-muted',
     control: 'rounded-hell-pill px-hell-9',
     controlGlyph: 'text-hell-danger text-lg',
-    jump: 'gap-hell-4 text-hell-danger',
-    jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
   } satisfies HellPaginationStripUi;
 }
 
@@ -165,7 +207,7 @@ describe('HellPageLink', () => {
     await TestBed.configureTestingModule({
       imports: [
         PaginationHost,
-        PaginationModeHost,
+        PaginationRecipesHost,
         PaginationRolesHost,
         PaginationAnchorHost,
         PaginationExplicitDisabledHost,
@@ -346,7 +388,7 @@ describe('HellPaginationStrip', () => {
     await TestBed.configureTestingModule({
       imports: [
         PaginationHost,
-        PaginationModeHost,
+        PaginationRecipesHost,
         LocalizedPaginationHost,
         PaginationUiHost,
       ],
@@ -394,14 +436,14 @@ describe('HellPaginationStrip', () => {
     expect(fixture.componentInstance.pageEvents).toEqual([8, 7, 5, 1, 10]);
   });
 
-  it('renders explicit previous-next mode with boundary disabled state', () => {
-    const fixture = TestBed.createComponent(PaginationModeHost);
+  it('composes the compact previous/next recipe with boundary disabled state', () => {
+    const fixture = TestBed.createComponent(PaginationRecipesHost);
     fixture.detectChanges();
 
-    const root = fixture.nativeElement as HTMLElement;
-    const nav = root.querySelector('hell-pagination') as HTMLElement;
+    const root = (fixture.nativeElement as HTMLElement).querySelector(
+      '#compact-recipe',
+    ) as HTMLElement;
 
-    expect(nav.getAttribute('data-mode')).toBe('previous-next');
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(root.textContent).toContain('Page 1 of 5');
     expect(button(root, 'Previous page').disabled).toBe(true);
@@ -416,19 +458,18 @@ describe('HellPaginationStrip', () => {
     expect(button(root, 'Next page').disabled).toBe(true);
   });
 
-  it('renders jump mode as previous/select/next and emits selected pages', () => {
-    const fixture = TestBed.createComponent(PaginationModeHost);
-    fixture.componentInstance.mode.set('jump');
+  it('composes the page-jump recipe through a native select', () => {
+    const fixture = TestBed.createComponent(PaginationRecipesHost);
     fixture.componentInstance.page.set(2);
     fixture.detectChanges();
 
-    const root = fixture.nativeElement as HTMLElement;
+    const root = (fixture.nativeElement as HTMLElement).querySelector(
+      '#jump-recipe',
+    ) as HTMLElement;
     const select = root.querySelector('select[hellNativeSelect]') as HTMLSelectElement;
 
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(select.getAttribute('aria-label')).toBe('Page');
-    expect(select.getAttribute('data-slot')).toBe('jumpSelect');
-    expect(root.querySelector('[data-slot="jumpSelect"]')).toBeInstanceOf(HTMLElement);
     expect(select.classList.contains('appearance-none')).toBe(true);
     expect(select.value).toBe('2');
     expect(root.textContent).toContain('of 5');
@@ -442,10 +483,6 @@ describe('HellPaginationStrip', () => {
     fixture.detectChanges();
 
     expect(select.disabled).toBe(true);
-    select.value = '5';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-
-    expect(fixture.componentInstance.pageEvents).toEqual([4]);
   });
 
   it('supports keyboard activation for numbered and navigation controls', () => {
@@ -465,19 +502,11 @@ describe('HellPaginationStrip', () => {
     const root = fixture.nativeElement as HTMLElement;
     const strip = query(root, '#ui-strip');
     const stripGlyph = query(strip, '[data-slot="controlGlyph"]');
-    const jump = query(strip, '[data-slot="jump"]');
-    const jumpSelect = query(strip, '[data-slot="jumpSelect"]') as HTMLSelectElement;
     const stripPrev = strip.querySelector('[hellPageLink="previous"]') as HTMLButtonElement;
     const stripNext = strip.querySelector('[hellPageLink="next"]') as HTMLButtonElement;
 
     expect(strip.getAttribute('data-slot')).toBe('root');
-    expect(strip.getAttribute('data-mode')).toBe('jump');
     expect(strip.className).toContain('gap-hell-4');
-    expect(jump.className).toContain('text-hell-danger');
-    expect(jump.className).toContain('gap-hell-4');
-    expect(jumpSelect.tagName).toBe('SELECT');
-    expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
-    expect(jumpSelect.className).toContain('h-hell-control-sm');
     expect(stripGlyph.className).toContain('text-hell-danger');
 
     for (const control of [stripPrev, stripNext]) {

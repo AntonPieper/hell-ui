@@ -52,18 +52,12 @@ export class HellPagination {
 // @public
 export interface HellPaginationLabels {
     readonly firstPage: string;
-    readonly jumpToPage?: string;
     readonly lastPage: string;
     readonly navigation: string;
     readonly nextPage: string;
     readonly page: (page: number) => string;
-    readonly pageStatus?: (page: number, pageCount: number) => string;
-    readonly pageTotal?: (pageCount: number) => string;
     readonly previousPage: string;
 }
-
-// @public
-export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
 // @public
 export class HellPaginationStrip {
@@ -71,29 +65,19 @@ export class HellPaginationStrip {
         root: string;
     };
     protected currentPage(): number;
-    protected goToSelectedPage(event: Event): void;
-    protected jumpSelectUi(): {
-        root: string;
-    };
     protected readonly labels: HellPaginationLabels;
-    readonly mode: _angular_core.InputSignal<HellPaginationMode>;
     protected pageCount(): number;
-    protected pageJumpLabel(): string;
-    protected readonly pageOptions: _angular_core.Signal<number[]>;
     protected readonly pages: _angular_core.Signal<number[]>;
-    protected pageStatusLabel(): string;
-    protected pageTotalLabel(): string;
-    protected paginationDisabled(): boolean;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellPaginationStripPart>;
     readonly siblingCount: _angular_core.InputSignal<number>;
     protected readonly trackPage: (_: number, page: number) => number;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellPaginationStripPart>>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellPaginationStrip, "hell-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "siblingCount": { "alias": "siblingCount"; "required": false; "isSignal": true; }; "mode": { "alias": "mode"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellPaginationStrip, "hell-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "siblingCount": { "alias": "siblingCount"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationStrip, never>;
 }
 
 // @public
-export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph' | 'status' | 'jump' | 'jumpLabel' | 'jumpSelect' | 'jumpTotal';
+export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
 //
