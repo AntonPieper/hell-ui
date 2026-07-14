@@ -7,6 +7,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The native/styled control pairs (checkbox, switch, radio, select) are a
+  written contract: `docs/adr/native-styled-control-pairs.md` decides the
+  pairs stay two products — delegated rich controls for owned anatomy,
+  styled native elements for forms-first platform semantics — and rejects
+  rebuilding on visually-hidden native inputs (it forfeits ng-primitives
+  delegation and cannot collapse the select pair at all). No API change.
+  Closes #181.
 - CONTEXT.md gains the Projection Marker domain term, closing the
   marker-directive audit with a written convention instead of a breaking
   sweep: content-projection markers stay exported directive classes even
