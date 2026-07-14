@@ -43,6 +43,10 @@ Public Parts are reserved for meaningful styling surfaces such as roots, panels,
 Single-host public directives use `root` as their sole Public Part; the directive name supplies semantic identity, while multi-part owned-anatomy components use semantic part names inside their root Part Style Map.
 _Avoid_: Private element, arbitrary descendant.
 
+**Projection Marker**
+An exported attribute directive whose job is routing consumer content into an owned-anatomy component's region (`hellEmptyStateActions`, `hellAlertIcon`, `hellPageHeaderMeta`). Markers stay directive classes even when their bodies are empty: components detect projected regions through `contentChild` queries (Angular cannot query bare attributes), directive arrays keep imports uniform, and template type-checking catches marker typos that plain attributes would silently drop. Markers own content routing; the Public Part of the same region owns styling — they are complementary surfaces, not duplicates.
+_Avoid_: Bare-attribute projection selector, slot input, marker deletion for symmetry.
+
 **Part Style Map**
 The shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUiInput<Part>` shape: either a shorthand class string for the module's default Public Part or a `HellUi<Part>` map from component-local Public Part names to class strings.
 For directive suites and Composites with projected children, a Part Style Map only styles the DOM owned by the directive or component that exposes it; projected child directives expose their own Part Style Maps.

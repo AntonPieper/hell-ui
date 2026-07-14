@@ -7,6 +7,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- CONTEXT.md gains the Projection Marker domain term, closing the
+  marker-directive audit with a written convention instead of a breaking
+  sweep: content-projection markers stay exported directive classes even
+  when empty, because components detect projected regions through
+  `contentChild` queries (Angular cannot query bare attributes), directive
+  arrays keep imports uniform, and template type-checking catches marker
+  typos that plain attributes would silently drop. The same term settles
+  the "double customization path" question — markers own content routing,
+  Public Parts own styling; they are complementary, not duplicates.
+  Closes #175, #176.
 - The Anchored Surface Contract is now a documented domain term, and the menu
   and tooltip triggers conform to it: both gain a reactive `open()` signal, an
   `(openChange)` boolean output, and an `exportAs` matching the directive name;
