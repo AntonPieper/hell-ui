@@ -198,7 +198,7 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         </li>
         <li>
           <code>provideHellDateInputAdapter</code>: replace the default strict ISO
-          parse/format/coerce/compare/bounds policy — see below.
+          parse/format/normalize/compare/bounds policy — see below.
         </li>
         <li>
           <code>HELL_DATE_INPUT_LABELS</code>: override the <code>chooseDate</code> /
@@ -214,8 +214,8 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         treats it as a local-midnight date without locale parsing. Empty text commits a clear to
         <code>null</code>; anything else that doesn't match commits nothing and marks the draft
         invalid. If your product needs locale-aware parsing, a masked input, or a Temporal-backed
-        model, implement the <code>HellDateInputAdapter</code> interface with explicit
-        <code>parseText</code>, <code>format</code>, and optional <code>coerce</code> /
+        model, implement the <code>HellDateInputAdapter</code> shape — the core <code>HellTypedInputAdapter</code> instantiated for <code>Date</code> — with explicit
+        <code>parseText</code>, <code>format</code>, and optional <code>normalize</code> /
         <code>isSameValue</code> / <code>isWithinBounds</code> functions and register it with
         <code>provideHellDateInputAdapter</code>. In <code>parseText</code>, return
         <code>hellTypedValue(value)</code> for a committable value (<code>null</code> clears the

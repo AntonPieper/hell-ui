@@ -44,6 +44,7 @@ import {
   hellInvalidTypedValue,
   hellTypedValue,
   type HellRecipe,
+  type HellTypedInputAdapter,
   type HellTypedValueParseResult,
   type HellUi,
   type HellUiInput,
@@ -99,23 +100,15 @@ export interface HellNumberInputAdapterContext {
   readonly integer: boolean;
 }
 
-/** Strategy for parsing, formatting, normalizing, and comparing numeric values. */
-export interface HellNumberInputAdapter {
-  /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
-  readonly parseText: (
-    text: string,
-    context: HellNumberInputAdapterContext,
-  ) => HellTypedValueParseResult<number>;
-  /** Format a committed value for the text field. */
-  readonly format: (value: number | null, context: HellNumberInputAdapterContext) => string;
-  /** Coerce external form/input values before display; non-finite values should return null. */
-  readonly normalize?: (
-    value: number | null | undefined,
-    context: HellNumberInputAdapterContext,
-  ) => number | null;
-  /** Compare numeric values semantically instead of by object identity. */
-  readonly isSameValue?: (a: number | null, b: number | null) => boolean;
-}
+/**
+ * Strategy for parsing, formatting, normalizing, and comparing numeric values —
+ * the core `HellTypedInputAdapter` instantiated for `number` with the
+ * integer-mode context.
+ */
+export type HellNumberInputAdapter = HellTypedInputAdapter<
+  number,
+  HellNumberInputAdapterContext
+>;
 
 const INTEGER_PATTERN = /^[+-]?\d+$/;
 const DECIMAL_PATTERN = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;

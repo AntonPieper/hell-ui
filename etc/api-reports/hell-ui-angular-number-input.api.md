@@ -83,14 +83,10 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNumberInput, never>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HellTypedInputAdapter" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
+//
 // @public
-export interface HellNumberInputAdapter {
-    readonly format: (value: number | null, context: HellNumberInputAdapterContext) => string;
-    readonly isSameValue?: (a: number | null, b: number | null) => boolean;
-    readonly normalize?: (value: number | null | undefined, context: HellNumberInputAdapterContext) => number | null;
-    // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
-    readonly parseText: (text: string, context: HellNumberInputAdapterContext) => HellTypedValueParseResult<number>;
-}
+export type HellNumberInputAdapter = HellTypedInputAdapter<number, HellNumberInputAdapterContext>;
 
 // @public
 export interface HellNumberInputAdapterContext {

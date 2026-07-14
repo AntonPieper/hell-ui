@@ -43,6 +43,7 @@ import {
   hellInvalidTypedValue,
   hellTypedValue,
   type HellRecipe,
+  type HellTypedInputAdapter,
   type HellTypedValueParseResult,
   type HellUi,
   type HellUiInput,
@@ -168,23 +169,15 @@ export interface HellTimeInputAdapterContext {
 
 type HellTimeUnit = HellTimeInputPickerUnit;
 
-/** Strategy for parsing, formatting, normalizing, and comparing time values. */
-export interface HellTimeInputAdapter {
-  /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
-  readonly parseText: (
-    text: string,
-    context: HellTimeInputAdapterContext,
-  ) => HellTypedValueParseResult<HellTimeValue>;
-  /** Format a committed time value for the text field and picker readout. */
-  readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
-  /** Coerce external form/input values before display; invalid values should return null. */
-  readonly normalize?: (
-    value: HellTimeValue | null | undefined,
-    context: HellTimeInputAdapterContext,
-  ) => HellTimeValue | null;
-  /** Compare structured time values semantically instead of by object identity. */
-  readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
-}
+/**
+ * Strategy for parsing, formatting, normalizing, and comparing time values —
+ * the core `HellTypedInputAdapter` instantiated for `HellTimeValue` with the
+ * seconds-awareness context.
+ */
+export type HellTimeInputAdapter = HellTypedInputAdapter<
+  HellTimeValue,
+  HellTimeInputAdapterContext
+>;
 
 /** Default time input adapter parsing and formatting the built-in `HH:mm`/`HH:mm:ss` formats. */
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter = {
@@ -211,9 +204,10 @@ function pad(n: number) {
 
 /** Format a time value as `HH:mm`, or `HH:mm:ss` when seconds are enabled. */
 function hellFormatTimeInputValue(
-  t: HellTimeValue,
+  t: HellTimeValue | null,
   context: HellTimeInputAdapterContext,
 ): string {
+  if (!t) return '';
   return context.seconds
     ? `${pad(t.hour)}:${pad(t.minute)}:${pad(t.second)}`
     : `${pad(t.hour)}:${pad(t.minute)}`;

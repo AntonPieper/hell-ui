@@ -97,7 +97,7 @@ class TimeInputBlurFormHost {
         text.trim().toLowerCase() === 'noon'
           ? { valid: true, value: { hour: 12, minute: 0, second: 0 } }
           : { valid: false },
-      format: (value) => `${value.hour}h${value.minute.toString().padStart(2, '0')}`,
+      format: (value) => (value ? `${value.hour}h${value.minute.toString().padStart(2, '0')}` : ''),
       normalize: (value) => (value && value.hour >= 12 ? value : null),
       isSameValue: (a, b) =>
         a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
@@ -137,7 +137,7 @@ class TimeInputValidationHost {
           : text.trim() === ''
             ? { valid: true, value: null }
             : { valid: false },
-      format: (value) => `${value.hour}h${value.minute.toString().padStart(2, '0')}`,
+      format: (value) => (value ? `${value.hour}h${value.minute.toString().padStart(2, '0')}` : ''),
       normalize: (value) => value ?? null,
       isSameValue: (a, b) =>
         a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,

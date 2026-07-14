@@ -89,14 +89,10 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HellTypedInputAdapter" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
+//
 // @public
-export interface HellTimeInputAdapter {
-    readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
-    readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
-    readonly normalize?: (value: HellTimeValue | null | undefined, context: HellTimeInputAdapterContext) => HellTimeValue | null;
-    // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-    readonly parseText: (text: string, context: HellTimeInputAdapterContext) => HellTypedValueParseResult<HellTimeValue>;
-}
+export type HellTimeInputAdapter = HellTypedInputAdapter<HellTimeValue, HellTimeInputAdapterContext>;
 
 // @public
 export interface HellTimeInputAdapterContext {

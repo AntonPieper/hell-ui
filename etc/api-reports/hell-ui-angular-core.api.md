@@ -151,6 +151,15 @@ export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public
+export interface HellTypedInputAdapter<TValue, TContext = void> {
+    readonly format: (value: TValue | null, context: TContext) => string;
+    readonly isSameValue?: (a: TValue | null, b: TValue | null) => boolean;
+    readonly isWithinBounds?: (value: TValue | null, min: TValue | null, max: TValue | null, context: TContext) => boolean;
+    readonly normalize?: (value: TValue | null | undefined, context: TContext) => TValue | null;
+    readonly parseText: (text: string, context: TContext) => HellTypedValueParseResult<TValue>;
+}
+
+// @public
 export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
 
 // @public

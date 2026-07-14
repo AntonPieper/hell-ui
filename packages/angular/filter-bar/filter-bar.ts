@@ -1221,9 +1221,9 @@ export class HellFilterBar {
   }
 
   private coerceDateInputValue(value: Date | null): Date | null {
-    return this.dateAdapter.coerce
-      ? this.dateAdapter.coerce(value)
-      : HELL_DEFAULT_DATE_INPUT_ADAPTER.coerce!(value);
+    return this.dateAdapter.normalize
+      ? this.dateAdapter.normalize(value)
+      : HELL_DEFAULT_DATE_INPUT_ADAPTER.normalize!(value);
   }
 
   private parseDateRangeDraft(

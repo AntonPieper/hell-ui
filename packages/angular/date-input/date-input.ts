@@ -47,6 +47,7 @@ import {
   hellInvalidTypedValue,
   hellTypedValue,
   type HellRecipe,
+  type HellTypedInputAdapter,
   type HellTypedValueParseResult,
   type HellUi,
   type HellUiInput,
@@ -87,23 +88,17 @@ const HELL_DATE_INPUT_RECIPE = {
   pickerPanel: 'block rounded-hell-md border-0 bg-transparent p-0 shadow-none',
 } satisfies HellRecipe<HellDateInputPart>;
 
-export interface HellDateInputAdapter {
-  /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
-  readonly parseText: (text: string) => HellTypedValueParseResult<Date>;
-  /** Format the committed value for the text field. */
-  readonly format: (value: Date | null) => string;
-  /** Coerce external form/input values before display; invalid dates should return null. */
-  readonly coerce?: (value: Date | null | undefined) => Date | null;
-  /** Compare external values by semantic day/value instead of object identity. */
-  readonly isSameValue?: (a: Date | null, b: Date | null) => boolean;
-  /** Enforce business bounds after parsing and before emitting typed input. */
-  readonly isWithinBounds?: (value: Date | null, min: Date | null, max: Date | null) => boolean;
-}
+/**
+ * Strategy for parsing, formatting, normalizing, and bounds-checking dates —
+ * the core `HellTypedInputAdapter` instantiated for `Date` values with no
+ * extra context.
+ */
+export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
 
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
   parseText: hellParseDateInputText,
   format: hellFormatDateInputValue,
-  coerce: hellCoerceDateInputValue,
+  normalize: hellCoerceDateInputValue,
   isSameValue: hellSameDateInputValue,
   isWithinBounds: hellIsDateInputValueWithinBounds,
 };
@@ -411,8 +406,8 @@ export class HellDateInput implements ControlValueAccessor, Validator {
   }
 
   private coerceDate(value: Date | null | undefined): Date | null {
-    return this.dateAdapter.coerce
-      ? this.dateAdapter.coerce(value)
+    return this.dateAdapter.normalize
+      ? this.dateAdapter.normalize(value)
       : hellCoerceDateInputValue(value);
   }
 

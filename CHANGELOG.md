@@ -371,6 +371,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: the three typed-input adapter contracts are one shape. Core
+  exports `HellTypedInputAdapter<TValue, TContext>` (parseText / format /
+  normalize / isSameValue / isWithinBounds, all context-aware), and
+  `HellDateInputAdapter`, `HellTimeInputAdapter`, and
+  `HellNumberInputAdapter` are now its instantiations — per-module tokens,
+  defaults, and `provideHell*InputAdapter` functions are unchanged. The
+  date adapter's `coerce` hook is renamed `normalize` to match the others,
+  and the time adapter's `format` now receives `HellTimeValue | null`
+  (return `''` for null) like its siblings. Custom adapters migrate by
+  renaming `coerce` and null-guarding time `format`. Closes #171.
+  Evidence: date/time/number/filter-bar unit suites (783 green).
 - The filter bar's entity editors now delegate their async lifecycle to the
   shared Search Orchestration seam: abort, newer-supersedes-older, and
   stale-result protection come from the same internal module behind the
