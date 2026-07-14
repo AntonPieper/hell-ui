@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { provideIcons } from '@ng-icons/core';
 import { faSolidChevronDown } from '@ng-icons/font-awesome/solid';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar-group';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';

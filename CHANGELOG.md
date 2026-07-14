@@ -560,6 +560,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- BREAKING: the avatar-group entry point folds into avatar. Import
+  `HellAvatarGroup`, `HellAvatarGroupItem`, `HellAvatarGroupOverflow`, and
+  `HELL_AVATAR_GROUP_DIRECTIVES` from `@hell-ui/angular/avatar`, and its
+  stylesheet from `@hell-ui/angular/avatar/styles.css` — the
+  `@hell-ui/angular/avatar-group` import path and stylesheet are gone.
+  One avatar family, one entry point. Closes #178. Evidence: avatar and
+  avatar-group unit suites green from the merged entry point, migrated
+  docs imports.
 - BREAKING: the flyout entry point is retired. `@hell-ui/angular/flyout`,
   its stylesheet, `HellFlyout`, and `HellFlyoutTrigger` are gone — a
   popover with `[trapFocus]="false"` is the anchored, non-modal,

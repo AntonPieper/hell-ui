@@ -50,7 +50,7 @@
     "table-tanstack/table-tanstack.ts",
     "alert/alert.ts",
     "avatar/avatar.ts",
-    "avatar-group/avatar-group.ts",
+    "avatar/avatar-group.ts",
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
     "chip/chip.ts",
@@ -218,9 +218,6 @@
     },
     "./audio-player": {
       "@heinrich/source": "./audio-player/public-api.ts"
-    },
-    "./avatar-group": {
-      "@heinrich/source": "./avatar-group/public-api.ts"
     },
     "./confirm": {
       "@heinrich/source": "./confirm/public-api.ts"
@@ -452,11 +449,6 @@
       "@heinrich/source": "./audio-player/styles.css",
       "style": "./audio-player/styles.css",
       "default": "./audio-player/styles.css"
-    },
-    "./avatar-group/styles.css": {
-      "@heinrich/source": "./avatar-group/styles.css",
-      "style": "./avatar-group/styles.css",
-      "default": "./avatar-group/styles.css"
     },
     "./confirm/styles.css": {
       "@heinrich/source": "./confirm/styles.css",

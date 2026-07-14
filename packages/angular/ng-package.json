@@ -182,8 +182,8 @@
     },
     {
       "glob": "avatar-group.ts",
-      "input": "avatar-group",
-      "output": "avatar-group"
+      "input": "avatar",
+      "output": "avatar"
     },
     {
       "glob": "breadcrumbs.ts",
