@@ -1277,6 +1277,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'closeOnOutsideClick closeOnEscape hellSwitch confirmation delete destructive',
  },
  {
+ title:'Popover: Non-modal',
+ path:'/components/popover',
+ detail:'components/popover/examples/non-modal.example.ts',
+ terms:
+'components/popover/examples/non-modal.example components/popover hellPopoverTrigger hellPopover trapFocus false non-modal nonmodal light dismiss boundary anchor open signal no focus trap volume slider flyout replacement',
+ },
+ {
  title:'Popover: Placement',
  path:'/components/popover',
  detail:'components/popover/examples/placement.example.ts',

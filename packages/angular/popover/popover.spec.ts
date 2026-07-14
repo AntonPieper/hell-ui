@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+
+import {
+  HELL_FLOATING_SCOPE,
+  containsNode,
+  type HellFloatingScope,
+} from '@hell-ui/angular/internal/core';
 
 import { HellPopover, HellPopoverTrigger } from './popover';
 
@@ -92,6 +98,82 @@ class CloseablePopoverTriggerHost {
   readonly openEvents: boolean[] = [];
 }
 
+@Component({
+  selector: 'hell-popover-non-modal-host',
+  imports: [HellPopover, HellPopoverTrigger],
+  template: `
+    <ng-template #popover>
+      <div hellPopover id="nonmodal-panel">
+        <button id="panel-action" type="button">Panel action</button>
+        Popover
+      </div>
+    </ng-template>
+    <button
+      id="nonmodal-trigger"
+      type="button"
+      [hellPopoverTrigger]="popover"
+      [container]="container"
+      [trapFocus]="trapFocus"
+      [boundary]="boundary"
+      (openChange)="openEvents.push($event)"
+    >
+      Trigger
+    </button>
+    <div id="boundary-zone">
+      <button id="boundary-action" type="button">Boundary action</button>
+    </div>
+    <button id="outside-target" type="button">Outside</button>
+    <div id="popover-container" #container></div>
+  `,
+})
+class NonModalPopoverHost {
+  trapFocus = false;
+  boundary: HTMLElement | null = null;
+  readonly openEvents: boolean[] = [];
+}
+
+@Injectable()
+class FakeFloatingScope implements HellFloatingScope {
+  readonly registered: HTMLElement[] = [];
+
+  registerFloatingElement(element: HTMLElement): void {
+    this.registered.push(element);
+  }
+
+  unregisterFloatingElement(element: HTMLElement): void {
+    const index = this.registered.indexOf(element);
+    if (index >= 0) this.registered.splice(index, 1);
+  }
+
+  containsFloatingTarget(target: EventTarget | Node | null): boolean {
+    return this.registered.some((element) => containsNode(element, target));
+  }
+}
+
+@Component({
+  selector: 'hell-popover-scoped-non-modal-host',
+  imports: [HellPopover, HellPopoverTrigger],
+  providers: [FakeFloatingScope, { provide: HELL_FLOATING_SCOPE, useExisting: FakeFloatingScope }],
+  template: `
+    <ng-template #popover>
+      <div hellPopover>Popover</div>
+    </ng-template>
+    <button
+      id="scoped-trigger"
+      type="button"
+      [hellPopoverTrigger]="popover"
+      [container]="container"
+      [trapFocus]="false"
+    >
+      Trigger
+    </button>
+    <button id="nested-surface" type="button">Nested surface</button>
+    <button id="outside-target" type="button">Outside</button>
+    <div id="popover-container" #container></div>
+  `,
+})
+class ScopedNonModalPopoverHost {}
+
 describe('HellPopoverTrigger', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -99,6 +181,8 @@ describe('HellPopoverTrigger', () => {
         EnabledPopoverAnchorTriggerHost,
         DisabledPopoverTriggerHost,
         CloseablePopoverTriggerHost,
+        NonModalPopoverHost,
+        ScopedNonModalPopoverHost,
       ],
     }).compileComponents();
   });
@@ -220,6 +304,166 @@ describe('HellPopoverTrigger', () => {
     await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
     await waitForPopoverTriggerClosed(fixture, trigger);
     await waitForPopoverCloseEvent(fixture);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('skips the focus trap and keeps focus on the trigger when trapFocus is false', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.focus();
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+
+    const panel = query<HTMLElement>(container, '[hellPopover]');
+    expect(panel.hasAttribute('data-focus-trap')).toBe(false);
+    expect(panel.getAttribute('aria-modal')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }));
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+    expect(document.activeElement).toBe(trigger);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('keeps the focus trap and modal semantics by default', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.componentInstance.trapFocus = true;
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+
+    const panel = query<HTMLElement>(container, '[hellPopover]');
+    expect(panel.hasAttribute('data-focus-trap')).toBe(true);
+    expect(panel.hasAttribute('aria-modal')).toBe(false);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('does not restore focus to the trigger when an outside click closes a non-modal popover', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    query<HTMLButtonElement>(container, '#panel-action').focus();
+
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+    outside.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+    expect(document.activeElement).not.toBe(trigger);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('closes a non-modal popover when focus moves outside', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.focus();
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+    outside.focus();
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('treats interactions inside the boundary as inside the popover', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.componentInstance.boundary = query<HTMLElement>(
+      fixture.nativeElement,
+      '#boundary-zone',
+    );
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+
+    const boundaryAction = query<HTMLButtonElement>(fixture.nativeElement, '#boundary-action');
+    boundaryAction.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }),
+    );
+    boundaryAction.focus();
+    for (let i = 0; i < 5; i++) await settle(fixture);
+
+    expect(container.textContent).toContain('Popover');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+    outside.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('treats nested Hell floating surfaces registered with the Floating Scope as inside', async () => {
+    const fixture = TestBed.createComponent(ScopedNonModalPopoverHost);
+    fixture.detectChanges();
+
+    const scope = fixture.debugElement.injector.get(FakeFloatingScope);
+    const nested = query<HTMLButtonElement>(fixture.nativeElement, '#nested-surface');
+    scope.registerFloatingElement(nested);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#scoped-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+
+    nested.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
+    nested.focus();
+    for (let i = 0; i < 5; i++) await settle(fixture);
+
+    expect(container.textContent).toContain('Popover');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+    outside.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('exposes reactive open state on the trigger', async () => {
+    const fixture = TestBed.createComponent(NonModalPopoverHost);
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#nonmodal-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    const directive = fixture.debugElement
+      .query((node) => node.nativeElement === trigger)
+      .injector.get(HellPopoverTrigger);
+
+    expect(directive.open()).toBe(false);
+
+    trigger.click();
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    expect(directive.open()).toBe(true);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }));
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    expect(directive.open()).toBe(false);
   }, POPOVER_TEST_CASE_TIMEOUT_MS);
 
   it('does not emit through destroyed outputs when a previously opened popover tears down', async () => {

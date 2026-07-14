@@ -6,10 +6,14 @@
 
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import { ElementRef } from '@angular/core';
 import { FocusOrigin } from '@angular/cdk/a11y';
-import * as i1 from 'ng-primitives/popover';
 import { InjectionToken } from '@angular/core';
-import { NgpPopoverTrigger } from 'ng-primitives/popover';
+import * as ng_primitives_portal from 'ng-primitives/portal';
+import { NgpDismissGuard } from 'ng-primitives/portal';
+import { NgpDismissGuardInput } from 'ng-primitives/portal';
+import { NgpOverlayContent } from 'ng-primitives/portal';
+import { NgpPopoverPlacement } from 'ng-primitives/popover';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';

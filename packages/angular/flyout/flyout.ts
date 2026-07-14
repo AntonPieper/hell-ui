@@ -1,6 +1,6 @@
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { HELL_FLOATING_SURFACE_SHELL } from '@hell-ui/angular/internal/floating';
-import { HELL_FLOATING_SCOPE, type HellFloatingScope } from '@hell-ui/angular/internal/core';
+import { HELL_FLOATING_SCOPE, hellResolveElementTarget, type HellFloatingScope } from '@hell-ui/angular/internal/core';
 import {
   HellFloatingInteractionController,
   hellDismissOn,
@@ -240,8 +240,8 @@ export class HellFlyout {
         surface: () => panel,
         inside: () => [
           this.trigger().element.nativeElement,
-          this.resolveElementTarget(this.anchor()),
-          this.resolveElementTarget(this.boundary()),
+          hellResolveElementTarget(this.anchor()),
+          hellResolveElementTarget(this.boundary()),
         ],
         scope: this.floatingScope,
         active: () => this.trigger().open(),
@@ -265,14 +265,7 @@ export class HellFlyout {
   }
 
   private referenceElement(): HTMLElement {
-    return this.resolveElementTarget(this.anchor()) ?? this.trigger().element.nativeElement;
+    return hellResolveElementTarget(this.anchor()) ?? this.trigger().element.nativeElement;
   }
 
-  private resolveElementTarget(
-    target: HTMLElement | ElementRef<HTMLElement> | null | undefined,
-  ): HTMLElement | null {
-    if (!target) return null;
-    if ('nativeElement' in target) return target.nativeElement;
-    return target;
-  }
 }

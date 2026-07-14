@@ -7,6 +7,29 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The popover absorbs the flyout's anchored-surface capabilities: the trigger
+  gains `trapFocus` (default `true`), `anchor` (position against a different
+  element than the trigger), `boundary` (widen the light-dismiss "inside"
+  region), and a reactive `open` signal. With `trapFocus` false the panel is
+  non-modal — `aria-modal="false"`, no focus trap, no focus steal on open,
+  outside clicks and outside focus dismiss without yanking focus, and only
+  Escape restores focus to the trigger. Internally the pair now drives the
+  ng-primitives popover engine through its primitive functions instead of
+  host-directive wrapping, so dismiss guards evaluate live inputs per event
+  (toggling `closeOnOutsideClick` while open now applies immediately) and
+  nested surfaces registered with the surrounding Floating Scope count as
+  inside. The outside-dismiss name settles on `closeOnOutsideClick` — for
+  non-modal panels it also governs outside-focus dismissal — and flyout's
+  `closeOnOutsideInteraction` leaves with the flyout entry point. Input
+  names, defaults, guard-function support, and modal behavior are unchanged
+  for existing consumers; the one removal is that the panel no longer hosts
+  the `NgpPopover` directive, so `#ref="ngpPopover"` template references on
+  `[hellPopover]` elements no longer resolve. The floating-dismissal ADR is
+  amended accordingly. Closes #168. Evidence: popover unit suite (14 tests
+  incl. seven new non-modal/boundary/scope/open contracts), green
+  date-input/time-input/filter-bar/confirm suites, the new popover e2e
+  browser contracts (12 passing on chromium, firefox, and webkit), and the
+  docs "Non-modal" example.
 - The owned-anatomy `hell-combobox` is now an async entity picker: a
   `source` input accepts the core `HellSearchSource` shape (mutually
   exclusive with `options`; supplying both throws). Queries dispatch through
