@@ -8,7 +8,7 @@ import { HellButton } from '@hell-ui/angular/button';
   imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton],
   template: `
     <div class="h-72 rounded-hell-lg border border-hell-border bg-hell-surface">
-      <hell-empty-state preset="noData">
+      <hell-empty-state glyph="noData">
         <span hellEmptyStateTitle>No invoices yet</span>
         <span hellEmptyStateDescription>
           Invoices you create will show up here with their status and due dates.

@@ -28,6 +28,6 @@ When the architecture check fails, it lists the page/example import edge that cr
 
 | From                                                                | To                                                                            | Rationale                                                                                                                                               |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/docs/src/app/pages/components/flyout/flyout.page.ts` | `apps/docs/src/app/pages/testing/floating-dismissal-harness.page.ts` | Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell. |
+| `apps/docs/src/app/pages/components/popover/popover.page.ts` | `apps/docs/src/app/pages/testing/floating-dismissal-harness.page.ts` | Popover exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy popover route, not the docs shell. |
 
 No other page-to-page or example-to-other-page imports are allowed. Future test harnesses should either live under the routed page that owns them or be promoted to `apps/docs/src/app/shared/` if more than one lazy route needs them.

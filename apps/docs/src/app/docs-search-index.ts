@@ -514,6 +514,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'code-editor all-parts part style map hell-code-editor ui HellCodeEditorUi root rounded-hell-xl border-hell-primary bg-hell-surface-elevated shadow-hell-lg min-h-40',
  },
  {
+ title:'Combobox: Async source',
+ path:'/components/combobox',
+ detail:'components/combobox/examples/async-source.example.ts',
+ terms:
+'components/combobox/examples/async-source.example components/combobox hell-combobox HellCombobox HellSearchSource source sourceDebounce async entity picker remote server loading empty error status chrome AbortSignal debounce displayWith HELL_COMBOBOX_LABELS provideHellLabels customers',
+ },
+ {
  title:'Combobox: Basic',
  path:'/components/combobox',
  detail:'components/combobox/examples/basic.example.ts',
@@ -525,21 +532,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/chips.example.ts',
  terms:
-'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
+'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
  },
  {
  title:'Combobox: Multiple',
  path:'/components/combobox',
  detail:'components/combobox/examples/multiple.example.ts',
  terms:
-'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+ },
+ {
+ title:'Combobox: Filtering and ranking',
+ path:'/components/combobox',
+ detail:'components/combobox/examples/ranked-filtering.example.ts',
+ terms:
+'components/combobox/examples/ranked-filtering.example components/combobox hell-combobox HellCombobox hellRankLocalSearch provideHellSearchRanker HELL_SEARCH_RANKER ranked filtering ranking prefix substring word match score custom ranker recency recently used reorder search seam stations',
  },
  {
  title:'Combobox: Preset',
  path:'/components/combobox',
  detail:'components/combobox/examples/preset.example.ts',
  terms:
-'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
+'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect placeholder aria-label HELL_COMBOBOX_LABELS provideHellLabels convenience warehouse ui data-slot root control input button dropdown option empty',
  },
  {
  title:'Combobox: Styling',
@@ -553,7 +567,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/with-field-tag.example.ts',
  terms:
-'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
+'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
  },
  {
  title:'Confirm: Basic',
@@ -819,35 +833,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/empty-state',
  detail:'components/empty-state/examples/no-data.example.ts',
  terms:
-'empty-state no-data components/empty-state/examples/no-data.example components/empty-state hell-empty-state hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton preset noData create your first invoice glyph media title description actions blank region',
+'empty-state no-data components/empty-state/examples/no-data.example components/empty-state hell-empty-state hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton glyph noData HELL_EMPTY_STATE_COPY create your first invoice media title description actions blank region',
  },
  {
  title:'Empty State: No results',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/no-results.example.ts',
  terms:
-'empty-state no-results components/empty-state/examples/no-results.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset noResults clear filters filtered search no matches blank region',
+'empty-state no-results components/empty-state/examples/no-results.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph noResults HELL_EMPTY_STATE_COPY clear filters filtered search no matches blank region',
  },
  {
  title:'Empty State: Error',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/error.example.ts',
  terms:
-'empty-state error components/empty-state/examples/error.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset error retry failed load in-place recovery',
+'empty-state error components/empty-state/examples/error.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph error HELL_EMPTY_STATE_COPY retry failed load in-place recovery',
  },
  {
  title:'Empty State: Forbidden',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/forbidden.example.ts',
  terms:
-'empty-state forbidden components/empty-state/examples/forbidden.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset forbidden permission access denied request access',
+'empty-state forbidden components/empty-state/examples/forbidden.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph forbidden HELL_EMPTY_STATE_COPY permission access denied request access',
  },
  {
  title:'Empty State: Custom content',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/custom-content.example.ts',
  terms:
-'empty-state custom-content components/empty-state/examples/custom-content.example components/empty-state hell-empty-state hellEmptyStateMedia hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton hell-icon headingLevel projection override illustration HELL_EMPTY_STATE_LABELS label contract',
+'empty-state custom-content components/empty-state/examples/custom-content.example components/empty-state hell-empty-state hellEmptyStateMedia hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton hell-icon headingLevel projection override illustration custom copy',
  },
  {
  title:'Empty State: Conditional content',
@@ -890,41 +904,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/field/examples/with-form-section.example.ts',
  terms:
 'with-form-section hellField hellFieldLabel hellFieldDescription hellCard hellCardHeader hellCardBody hellCheckbox hellInput hellNativeSelect invite teammate composite',
- },
- {
- title:'Flyout: All Parts Styling',
- path:'/components/flyout',
- detail:'components/flyout/examples/all-parts-styling.example.ts',
- terms:
-'components/flyout/examples/all-parts-styling.example components/flyout hellFlyout hellFlyoutTrigger ui root Part Style Map data-slot bg-hell-primary-soft border-hell-primary rounded-hell-lg',
- },
- {
- title:'Flyout: Anchor And Boundary',
- path:'/components/flyout',
- detail:'components/flyout/examples/anchor-and-boundary.example.ts',
- terms:
-'components/flyout/examples/anchor-and-boundary.example components/flyout hellFlyout hellFlyoutTrigger hellInput sibling input light-dismiss outside-click outside-focus escape',
- },
- {
- title:'Flyout: Basic',
- path:'/components/flyout',
- detail:'components/flyout/examples/basic.example.ts',
- terms:
-'components/flyout/examples/basic.example components/flyout hellFlyout hellFlyoutTrigger openChange open show hide toggle non-modal light-dismiss anchored panel',
- },
- {
- title:'Flyout: Placement',
- path:'/components/flyout',
- detail:'components/flyout/examples/placement.example.ts',
- terms:
-'components/flyout/examples/placement.example components/flyout hellFlyout hellFlyoutTrigger flip shift floating-ui top right bottom left viewport collision',
- },
- {
- title:'Flyout: With A Filters Panel',
- path:'/components/flyout',
- detail:'components/flyout/examples/with-filters-panel.example.ts',
- terms:
-'components/flyout/examples/with-filters-panel.example components/flyout hellFlyout hellFlyoutTrigger hellCheckbox hellField hellFieldLabel hellChip hellButton hell-icon faSolidFilter composite toolbar status active count badge',
  },
  {
  title:'Icon: Basic',
@@ -1176,21 +1155,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pagination',
  detail:'components/pagination/examples/jump.example.ts',
  terms:
-'mode select hellNativeSelect large set page-jump HellPaginationStrip hell-pagination',
+'recipe select hellNativeSelect large set page-jump hellPagination hellPageLink compose',
  },
  {
  title:'Pagination: Previous / Next',
  path:'/components/pagination',
  detail:'components/pagination/examples/previous-next.example.ts',
  terms:
-'previous-next mode compact status aria-live HellPaginationStrip hell-pagination boundary disabled',
+'previous-next recipe compact status aria-live hellPagination hellPageLink boundary disabled compose',
  },
  {
  title:'Pagination: Styling',
  path:'/components/pagination',
  detail:'components/pagination/examples/styling.example.ts',
  terms:
-'ui Part Style Map HellPaginationStripUi root control controlGlyph jump jumpLabel jumpSelect jumpTotal status all-parts tokens',
+'ui Part Style Map HellPaginationStripUi root control controlGlyph all-parts tokens',
  },
  {
  title:'Pagination: With table and page size',
@@ -1261,6 +1240,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/popover/examples/dismissal.example.ts',
  terms:
 'closeOnOutsideClick closeOnEscape hellSwitch confirmation delete destructive',
+ },
+ {
+ title:'Popover: Non-modal',
+ path:'/components/popover',
+ detail:'components/popover/examples/non-modal.example.ts',
+ terms:
+'components/popover/examples/non-modal.example components/popover hellPopoverTrigger hellPopover trapFocus false non-modal nonmodal light dismiss boundary anchor open signal no focus trap volume slider flyout replacement',
  },
  {
  title:'Popover: Placement',
@@ -2216,9 +2202,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Toolbar directives',
  path:'/components/toolbar',
- detail:'hell-toolbar, hellToolbarAction, hellResolveToolbarOverflow',
+ detail:'hell-toolbar, hellToolbarAction',
  terms:
-'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction hellResolveToolbarOverflow priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
+'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
  },
  {
  title:'Time input adapter',

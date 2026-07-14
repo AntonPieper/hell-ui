@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
-import { HellCombobox, type HellComboboxUi } from '@hell-ui/angular/combobox';
+import { provideHellLabels, type HellOption } from '@hell-ui/angular/core';
+import { HELL_COMBOBOX_LABELS, HellCombobox, type HellComboboxUi } from '@hell-ui/angular/combobox';
 
 
 const PRIORITIES: readonly HellOption<string>[] = (
@@ -10,14 +10,14 @@ const PRIORITIES: readonly HellOption<string>[] = (
 @Component({
   selector: 'app-combobox-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideHellLabels(HELL_COMBOBOX_LABELS, { empty: 'No priority matches' })],
   imports: [HellCombobox],
   template: `
-    <!-- HellComboboxPart: root | control | input | button | dropdown | option | empty. -->
+    <!-- HellComboboxPart: root | control | input | button | dropdown | option | empty | loading | error. -->
     <hell-combobox
       class="block max-w-72"
       aria-label="Priority"
       placeholder="Set priority…"
-      emptyLabel="No priority matches"
       [options]="priorities"
       [value]="value()"
       [ui]="ui"

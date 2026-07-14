@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_COPY, HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
@@ -8,7 +8,7 @@ import { HellButton } from '@hell-ui/angular/button';
   imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton],
   template: `
     <div class="h-72 rounded-hell-lg border border-hell-border bg-hell-surface">
-      <hell-empty-state preset="error">
+      <hell-empty-state glyph="error" [title]="copy.title">
         <span hellEmptyStateDescription>We could not load your invoices.</span>
 
         <!--
@@ -34,6 +34,7 @@ import { HellButton } from '@hell-ui/angular/button';
   `,
 })
 export class EmptyStateConditionalExample {
+  protected readonly copy = HELL_EMPTY_STATE_COPY.error;
   protected readonly attemptsLeft = signal(2);
 
   protected retry(): void {

@@ -4,6 +4,15 @@ import { NgpTooltipTrigger } from 'ng-primitives/tooltip';
 
 import { HellTooltip, HellTooltipTrigger } from './tooltip';
 
+beforeAll(() => {
+  const elementPrototype = Element.prototype as Element & {
+    getAnimations?: () => readonly Animation[];
+  };
+  if (typeof elementPrototype.getAnimations !== 'function') {
+    elementPrototype.getAnimations = () => [];
+  }
+});
+
 @Component({
   imports: [HellTooltip, HellTooltipTrigger],
   template: `
@@ -31,6 +40,7 @@ class DisabledTooltipTriggerHost {}
       [hellTooltipTrigger]="tooltip"
       [container]="tooltipContainer"
       [showDelay]="0"
+      (openChange)="openEvents.push($event)"
     >
       Button
     </button>
@@ -38,6 +48,8 @@ class DisabledTooltipTriggerHost {}
 })
 class TooltipUiHost {
   readonly primitiveTrigger = viewChild.required(NgpTooltipTrigger);
+  readonly hellTrigger = viewChild.required(HellTooltipTrigger);
+  readonly openEvents: boolean[] = [];
 }
 
 describe('HellTooltipTrigger', () => {
@@ -79,6 +91,28 @@ describe('HellTooltipTrigger', () => {
     expect(tooltip.className).toContain('rounded-hell-pill');
     expect(tooltip.className).not.toContain('rounded-hell-sm');
     expect(tooltip.className).toContain('bg-hell-primary');
+  });
+
+  it('exposes the Anchored Surface Contract state on the trigger', async () => {
+    const fixture = TestBed.createComponent(TooltipUiHost);
+    fixture.detectChanges();
+
+    const directive = fixture.componentInstance.hellTrigger();
+    expect(directive.open()).toBe(false);
+
+    directive.show();
+    await waitForTooltip(fixture, fixture.nativeElement);
+    expect(directive.open()).toBe(true);
+    expect(fixture.componentInstance.openEvents).toEqual([true]);
+
+    directive.hide();
+    const timeout = Date.now() + 10_000;
+    while (directive.open() && Date.now() < timeout) {
+      fixture.detectChanges();
+      await nextFrame();
+    }
+    expect(directive.open()).toBe(false);
+    expect(fixture.componentInstance.openEvents).toEqual([true, false]);
   });
 });
 

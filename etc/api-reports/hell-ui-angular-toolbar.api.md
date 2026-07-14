@@ -19,9 +19,6 @@ export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellT
 export const HELL_TOOLBAR_LABELS: InjectionToken<HellToolbarLabels>;
 
 // @public
-export function hellResolveToolbarOverflow(items: readonly HellToolbarOverflowItem[], metrics: HellToolbarOverflowMetrics): HellToolbarOverflowResult;
-
-// @public
 export class HellToolbar {
     constructor();
     protected actionOf(view: HellToolbarItemModel): HellToolbarAction;
@@ -81,29 +78,10 @@ export interface HellToolbarLabels {
 }
 
 // @public
-export interface HellToolbarOverflowItem {
-    readonly group?: number;
-    readonly kind?: HellToolbarItemKind;
-    readonly priority?: HellToolbarActionPriority;
-    readonly width: number;
-}
-
-// @public
-export interface HellToolbarOverflowMetrics {
-    readonly available: number;
-    readonly gap: number;
-    readonly triggerWidth: number;
-}
-
-// @public
-export interface HellToolbarOverflowResult {
-    readonly inline: readonly number[];
-    readonly overflow: readonly number[];
-}
-
-// @public
 export type HellToolbarPart = 'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator';
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "@hell-ui/angular" does not have an export "hellResolveToolbarOverflow"
+//
 // @public
 export class HellToolbarSeparator extends HellToolbarItem {
     readonly kind: "separator";

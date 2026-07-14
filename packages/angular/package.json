@@ -32,7 +32,6 @@
     "listbox/listbox.ts",
     "popover/popover.ts",
     "tooltip/tooltip.ts",
-    "flyout/flyout.ts",
     "select/select.ts",
     "combobox/combobox.ts",
     "date-input/date-input.ts",
@@ -51,7 +50,7 @@
     "table-tanstack/table-tanstack.ts",
     "alert/alert.ts",
     "avatar/avatar.ts",
-    "avatar-group/avatar-group.ts",
+    "avatar/avatar-group.ts",
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
     "chip/chip.ts",
@@ -106,6 +105,9 @@
     "./internal/option": {
       "@heinrich/source": "./internal/option/public-api.ts"
     },
+    "./internal/search": {
+      "@heinrich/source": "./internal/search/public-api.ts"
+    },
     "./testing": {
       "@heinrich/source": "./testing/public-api.ts"
     },
@@ -147,9 +149,6 @@
     },
     "./field": {
       "@heinrich/source": "./field/public-api.ts"
-    },
-    "./flyout": {
-      "@heinrich/source": "./flyout/public-api.ts"
     },
     "./icon": {
       "@heinrich/source": "./icon/public-api.ts"
@@ -219,9 +218,6 @@
     },
     "./audio-player": {
       "@heinrich/source": "./audio-player/public-api.ts"
-    },
-    "./avatar-group": {
-      "@heinrich/source": "./avatar-group/public-api.ts"
     },
     "./confirm": {
       "@heinrich/source": "./confirm/public-api.ts"
@@ -339,11 +335,6 @@
       "style": "./field/styles.css",
       "default": "./field/styles.css"
     },
-    "./flyout/styles.css": {
-      "@heinrich/source": "./flyout/styles.css",
-      "style": "./flyout/styles.css",
-      "default": "./flyout/styles.css"
-    },
     "./icon/styles.css": {
       "@heinrich/source": "./icon/styles.css",
       "style": "./icon/styles.css",
@@ -458,11 +449,6 @@
       "@heinrich/source": "./audio-player/styles.css",
       "style": "./audio-player/styles.css",
       "default": "./audio-player/styles.css"
-    },
-    "./avatar-group/styles.css": {
-      "@heinrich/source": "./avatar-group/styles.css",
-      "style": "./avatar-group/styles.css",
-      "default": "./avatar-group/styles.css"
     },
     "./confirm/styles.css": {
       "@heinrich/source": "./confirm/styles.css",

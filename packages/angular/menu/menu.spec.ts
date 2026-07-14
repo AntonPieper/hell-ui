@@ -3,7 +3,7 @@ import type { HellOption } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
-import { HELL_MENU_DIRECTIVES } from './menu';
+import { HELL_MENU_DIRECTIVES, HellMenuTrigger } from './menu';
 
 @Component({
   imports: [...HELL_MENU_DIRECTIVES],
@@ -55,12 +55,22 @@ class MenuUiHost {
     <ng-template #menu>
       <div hellMenu><button hellMenuItem type="button">Item</button></div>
     </ng-template>
-    <a id="enabled-anchor" href="#menu" [hellMenuTrigger]="menu" [container]="menuContainer">
+    <a
+      id="enabled-anchor"
+      href="#menu"
+      [hellMenuTrigger]="menu"
+      #menuTrigger="hellMenuTrigger"
+      [container]="menuContainer"
+      (openChange)="openEvents.push($event)"
+    >
       Anchor
     </a>
   `,
 })
-class EnabledMenuAnchorTriggerHost {}
+class EnabledMenuAnchorTriggerHost {
+  readonly menuTrigger = viewChild.required('menuTrigger', { read: HellMenuTrigger });
+  readonly openEvents: boolean[] = [];
+}
 
 @Component({
   imports: [...HELL_MENU_DIRECTIVES],
@@ -225,6 +235,32 @@ describe('HellMenuItem', () => {
     );
     expect(menuItem).toBeTruthy();
     expect(menuItem.textContent).toBe('Item');
+  });
+
+  it('exposes the Anchored Surface Contract state on the trigger', async () => {
+    const fixture = TestBed.createComponent(EnabledMenuAnchorTriggerHost);
+    await settle(fixture);
+
+    const directive = fixture.componentInstance.menuTrigger();
+    expect(directive.open()).toBe(false);
+
+    directive.show();
+    await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      fixture.nativeElement,
+      'button[hellMenuItem]',
+    );
+    expect(directive.open()).toBe(true);
+    expect(fixture.componentInstance.openEvents).toEqual([true]);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }));
+    const timeout = Date.now() + 10_000;
+    while (directive.open() && Date.now() < timeout) {
+      await settle(fixture);
+    }
+    await settle(fixture);
+    expect(directive.open()).toBe(false);
+    expect(fixture.componentInstance.openEvents).toEqual([true, false]);
   });
 
   it('merges local root part styles while preserving menu item state attributes', async () => {

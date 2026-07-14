@@ -208,10 +208,6 @@ const packageConsumerScenarioCatalog = [
     mainTs: paginationConsumerMainTs,
     stylesCss: paginationConsumerStylesCss,
     cssIncludes: [
-      'min-width:calc(var(--spacing)*18)',
-      'max-width:calc(var(--spacing)*26)',
-      'appearance:none',
-      'background-repeat:no-repeat',
       'transition-property:background-color,border-color,color,box-shadow',
       'background-color:var(--color-hell-primary)',
     ],
@@ -1146,6 +1142,15 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
+  if (Object.keys(workspaceOverrides).length) {
+    // pnpm >= 10.14 reads overrides from pnpm-workspace.yaml, not from
+    // package.json "pnpm.overrides"; emit both so every toolchain applies
+    // the repo's patched transitive versions.
+    const overrideLines = Object.entries(workspaceOverrides)
+      .map(([name, version]) => `  ${JSON.stringify(name)}: ${JSON.stringify(version)}`)
+      .join('\n');
+    writeFileSync(join(workspace, 'pnpm-workspace.yaml'), `overrides:\n${overrideLines}\n`);
+  }
   writeFileSync(
     join(workspace, '.npmrc'),
     'strict-peer-dependencies=true\nauto-install-peers=false\n',
@@ -1392,7 +1397,7 @@ import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '${packag
 
 const stripUi = {
   root: 'gap-hell-4',
-  jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+  control: 'rounded-hell-pill',
 } satisfies HellPaginationStripUi;
 
 const pageButtonUi = {
@@ -1404,7 +1409,7 @@ const pageButtonUi = {
   standalone: true,
   imports: [...HELL_PAGINATION_DIRECTIVES],
   template: \`
-    <hell-pagination mode="jump" [page]="2" [pageCount]="6" [ui]="stripUi" />
+    <hell-pagination [page]="2" [pageCount]="6" [ui]="stripUi" />
     <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
       <button hellPageLink="previous" type="button">Previous</button>
       <button type="button" [hellPageLink]="2" [ui]="pageButtonUi">2</button>
@@ -1457,7 +1462,6 @@ import { HELL_CARD_DIRECTIVES } from '${packageName}/card';
 import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '${packageName}/checkbox';
 import { HellDropZone } from '${packageName}/drop-zone';
 import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
-import { HellFlyout, HellFlyoutTrigger } from '${packageName}/flyout';
 import { HellIcon } from '${packageName}/icon';
 import { HellInput } from '${packageName}/input';
 import { HELL_LISTBOX_DIRECTIVES } from '${packageName}/listbox';
@@ -1494,8 +1498,6 @@ const primitiveRootPart: HellAvatarPart = 'root';
     HellNativeCheckbox,
     HellDropZone,
     ...HELL_FIELD_DIRECTIVES,
-    HellFlyout,
-    HellFlyoutTrigger,
     HellIcon,
     HellInput,
     ...HELL_LISTBOX_DIRECTIVES,
@@ -1609,13 +1611,6 @@ const primitiveRootPart: HellAvatarPart = 'root';
       <span hellTooltip [ui]="tooltipUi">Helpful hint</span>
     </ng-template>
 
-    <button hellFlyoutTrigger #flyoutTrigger="hellFlyoutTrigger" type="button">Flyout</button>
-    @if (true) {
-      <div [hellFlyout]="flyoutTrigger" aria-label="Package consumer flyout" [ui]="flyoutUi">
-        Flyout panel
-      </div>
-    }
-
     <button hellSelectTrigger type="button" [options]="selectOptions" [ui]="selectUi">
       <span hellSelectPlaceholder>Pick priority</span>
       <ng-template hellSelectPortal>
@@ -1703,7 +1698,6 @@ class App {
   protected readonly cardHeaderUi = { root: 'items-start' };
   protected readonly checkboxUi = { root: 'border-hell-info' } satisfies HellCheckboxUi;
   protected readonly dropZoneUi = { root: 'border-hell-info' };
-  protected readonly flyoutUi = { root: 'rounded-hell-pill' };
   protected readonly iconUi = { root: 'text-hell-info' };
   protected readonly inputUi = { root: 'border-hell-info' };
   protected readonly kbdUi = { root: 'border-hell-info' };
@@ -2474,7 +2468,6 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/button/styles.css";
 @import "${packageName}/card/styles.css";
 @import "${packageName}/field/styles.css";
-@import "${packageName}/flyout/styles.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/input/styles.css";
 @import "${packageName}/avatar/styles.css";
@@ -2584,7 +2577,6 @@ function audioPlayerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/button/styles.css";
-@import "${packageName}/flyout/styles.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/slider/styles.css";
 @import "${packageName}/audio-player/styles.css";

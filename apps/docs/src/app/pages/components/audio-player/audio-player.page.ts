@@ -50,8 +50,8 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <code>hell-audio-player</code> wraps a native <code>&lt;audio&gt;</code> element in a
         single dense row of Hell controls: a play/pause button, an elapsed/duration pair around a
         draggable seek slider, a mute button, a volume slider, and an optional download link. It
-        composes the <code>Button</code>, <code>Slider</code>, <code>Icon</code>, and
-        <code>Flyout</code> primitives, and its playback, seek, and volume logic live in a small
+        composes the <code>Button</code>, <code>Slider</code>, and <code>Icon</code>
+        primitives, and its playback, seek, and volume logic live in a small
         internal Audio Runtime rather than the template.
       </p>
       <p>

@@ -2,6 +2,7 @@
   "category": "core",
   "exports": [
     "./types",
+    "./pick-value",
     "./styleable",
     "./part-style-merge",
     "./search",

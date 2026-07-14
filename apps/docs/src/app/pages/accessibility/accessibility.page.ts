@@ -33,8 +33,8 @@ const ACCESSIBILITY_OWNERSHIP: readonly AccessibilityOwnership[] = [
   },
   {
     owner: 'Hell runtime adapters',
-    examples: 'Flyout, omnibar, resizable, date/time input',
-    path: '/components/flyout',
+    examples: 'Omnibar, resizable, date/time input, audio player captions',
+    path: '/components/omnibar',
     libraryContract:
       'Hell owns the documented behavior that cannot be delegated: scoped dismissal, active-item movement, separator resizing, and typed draft state.',
     consumerContract:

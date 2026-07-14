@@ -1,4 +1,4 @@
-import { Directive, inject, input } from '@angular/core';
+import { Directive, computed, effect, inject, input, output } from '@angular/core';
 import { NgpTooltip, NgpTooltipTrigger, injectTooltipTriggerState } from 'ng-primitives/tooltip';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
@@ -15,6 +15,7 @@ const HELL_TOOLTIP_RECIPE = {
  */
 @Directive({
   selector: 'button[hellTooltipTrigger], a[hellTooltipTrigger]',
+  exportAs: 'hellTooltipTrigger',
   hostDirectives: [
     {
       directive: NgpTooltipTrigger,
@@ -43,6 +44,34 @@ const HELL_TOOLTIP_RECIPE = {
 export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
   /** Underlying ng-primitives tooltip trigger state. */
   protected readonly trigger = inject(NgpTooltipTrigger);
+  private readonly triggerState = injectTooltipTriggerState();
+
+  /** Whether the tooltip is currently open (Anchored Surface Contract). */
+  readonly open = computed(() => this.triggerState().open());
+  /** Emits the new open state whenever the tooltip shows or hides. */
+  readonly openChange = output<boolean>();
+
+  constructor() {
+    super();
+    let previousOpen = false;
+    effect(() => {
+      const open = this.open();
+      if (open !== previousOpen) {
+        previousOpen = open;
+        this.openChange.emit(open);
+      }
+    });
+  }
+
+  /** Shows the tooltip. */
+  show(): void {
+    this.triggerState().show();
+  }
+
+  /** Hides the tooltip. */
+  hide(): void {
+    this.triggerState().hide();
+  }
 }
 
 /**

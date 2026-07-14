@@ -317,13 +317,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/tooltip/tooltip.page').then((m) => m.TooltipPage),
       },
       {
-        routePath: 'components/flyout',
-        label: 'Flyout',
-        icon: 'faSolidCommentDots',
-        loadComponent: () =>
-          import('./pages/components/flyout/flyout.page').then((m) => m.FlyoutPage),
-      },
-      {
         routePath: 'components/menu',
         label: 'Menu',
         icon: 'faSolidEllipsisVertical',

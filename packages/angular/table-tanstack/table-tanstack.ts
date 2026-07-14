@@ -29,7 +29,7 @@ import {
   type Table,
 } from '@tanstack/angular-table';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellEmptyState } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_COPY, HellEmptyState } from '@hell-ui/angular/empty-state';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellInput, HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/input';
 import { HellNativeSelect } from '@hell-ui/angular/select';
@@ -955,9 +955,16 @@ export class HellDefaultTableLoadingState {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellEmptyState],
-  template: `<hell-empty-state preset="noData" />`,
+  template: `<hell-empty-state
+    glyph="noData"
+    [title]="copy.title"
+    [description]="copy.description"
+  />`,
 })
-export class HellDefaultTableEmptyState {}
+export class HellDefaultTableEmptyState {
+  /** Localize by providing custom status views via `provideHellTableStatusViews`. */
+  protected readonly copy = HELL_EMPTY_STATE_COPY.noData;
+}
 
 @Component({
   selector: 'hell-default-table-error-state',

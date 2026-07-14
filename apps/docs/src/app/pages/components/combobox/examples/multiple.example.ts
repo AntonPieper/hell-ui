@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES, type HellComboboxValue } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import type { HellPickValue } from '@hell-ui/angular/core';
 import { HellChip } from '@hell-ui/angular/chip';
 
 const LABELS = [
@@ -56,7 +57,7 @@ export class ComboboxMultipleExample {
     return q ? LABELS.filter((l) => l.includes(q)) : LABELS;
   });
 
-  protected onValueChange(next: HellComboboxValue<string>): void {
+  protected onValueChange(next: HellPickValue<string>): void {
     this.selected.set(Array.isArray(next) ? next : []);
   }
 }

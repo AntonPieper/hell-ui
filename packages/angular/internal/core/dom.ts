@@ -1,3 +1,14 @@
+import type { ElementRef } from '@angular/core';
+
+/** Unwraps element-or-ElementRef inputs shared by anchored floating surfaces. */
+export function hellResolveElementTarget(
+  target: HTMLElement | ElementRef<HTMLElement> | null | undefined,
+): HTMLElement | null {
+  if (!target) return null;
+  if ('nativeElement' in target) return target.nativeElement;
+  return target;
+}
+
 /**
  * Type guards and DOM helpers that remain valid across document realms.
  */

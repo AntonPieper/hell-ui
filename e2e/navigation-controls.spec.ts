@@ -57,17 +57,14 @@ async function dispatchPointerResize(page: Page, handle: Locator, deltaX: number
 }
 
 test.describe('pagination navigation controls', () => {
-  test('previous-next mode and page jump remain keyboard and screen-reader reachable', async ({
+  test('previous-next and page-jump recipes remain keyboard and screen-reader reachable', async ({
     page,
   }) => {
     await page.goto('/components/pagination');
     await expect(page.getByRole('heading', { name: 'Pagination', level: 1 })).toBeVisible();
 
     const previousNext = page.locator('app-pagination-previous-next-example');
-    await expect(previousNext.locator('hell-pagination')).toHaveAttribute(
-      'data-mode',
-      'previous-next',
-    );
+    await expect(previousNext.getByRole('navigation', { name: 'Pagination' })).toBeVisible();
     await expect(previousNext.getByRole('button', { name: 'Previous page' })).toBeDisabled();
     await expect(previousNext.getByText('Page 1 of 9')).toBeVisible();
 
@@ -77,7 +74,7 @@ test.describe('pagination navigation controls', () => {
 
     const jump = page.locator('app-pagination-jump-example');
     const select = jump.getByRole('combobox', { name: 'Page' });
-    await expect(jump.locator('hell-pagination')).toHaveAttribute('data-mode', 'jump');
+    await expect(jump.getByRole('navigation', { name: 'Pagination' })).toBeVisible();
     await expect(jump.getByText('of 40')).toBeVisible();
     await expect(select).toHaveValue('6');
 

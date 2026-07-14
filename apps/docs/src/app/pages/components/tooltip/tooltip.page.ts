@@ -69,8 +69,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         text, a keyboard shortcut. Because the surface carries <code>role="tooltip"</code> and no
         focus trap, it can never hold the one piece of information a user actually needs; anything
         interactive or essential belongs in a
-        <a routerLink="/components/popover">Popover</a> or a
-        <a routerLink="/components/flyout">Flyout</a> instead.
+        <a routerLink="/components/popover">Popover</a> instead.
       </p>
       <p>
         Not sure which floating surface fits? See
@@ -196,6 +195,11 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         </li>
         <li><code>showOnOverflow</code>: <code>boolean</code>, default <code>false</code> — show the tooltip only when the trigger's own content is visually truncated.</li>
         <li><code>hoverableContent</code>: <code>boolean</code>, default <code>false</code> — keep the tooltip open while the pointer is over the tooltip surface itself.</li>
+        <li><code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new open state.</li>
+        <li>
+          Exported as <code>hellTooltipTrigger</code> with the Anchored Surface Contract state:
+          a reactive <code>open()</code> signal plus <code>show()</code> and <code>hide()</code>.
+        </li>
       </ul>
 
       <h3><code>hellTooltip</code></h3>

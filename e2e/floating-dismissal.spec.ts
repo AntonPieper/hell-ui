@@ -10,7 +10,7 @@ declare global {
 
 type HarnessLayer = 'primary' | 'parent' | 'child' | 'omnibar';
 
-const HARNESS_PATH = '/components/flyout?floatingDismissalHarness=1';
+const HARNESS_PATH = '/components/popover?floatingDismissalHarness=1';
 
 const PANEL_NAMES = {
   primary: 'Primary floating panel',
@@ -28,7 +28,7 @@ test.describe('floating dismissal browser contracts', () => {
   test('guards pointerdown-inside focus races and closes once on the outside click', async ({
     page,
   }) => {
-    const { panel, trigger } = await openPrimaryFlyout(page);
+    const { panel, trigger } = await openPrimaryPopover(page);
     await page.getByTestId('inside-action').focus();
     const before = await closeCount(page, 'primary');
 
@@ -74,7 +74,7 @@ test.describe('floating dismissal browser contracts', () => {
   test('keeps delayed focus/click races to one close after an inside pointer guard expires', async ({
     page,
   }) => {
-    const { panel, trigger } = await openPrimaryFlyout(page);
+    const { panel, trigger } = await openPrimaryPopover(page);
     await page.getByTestId('inside-action').focus();
     const before = await closeCount(page, 'primary');
 
@@ -120,7 +120,7 @@ test.describe('floating dismissal browser contracts', () => {
   test('dismisses outside pointer clicks once without restoring focus to the trigger', async ({
     page,
   }) => {
-    const { panel, trigger } = await openPrimaryFlyout(page);
+    const { panel, trigger } = await openPrimaryPopover(page);
     await page.getByTestId('inside-action').focus();
     const before = await closeCount(page, 'primary');
 
@@ -140,7 +140,7 @@ test.describe('floating dismissal browser contracts', () => {
   });
 
   test('dismisses outside focus once and leaves focus on the outside target', async ({ page }) => {
-    const { panel, trigger } = await openPrimaryFlyout(page);
+    const { panel, trigger } = await openPrimaryPopover(page);
     await page.getByTestId('inside-action').focus();
     const before = await closeCount(page, 'primary');
 
@@ -161,7 +161,7 @@ test.describe('floating dismissal browser contracts', () => {
   });
 
   test('Escape closes once and skips unsafe focus restoration targets', async ({ page }) => {
-    const { panel, trigger } = await openPrimaryFlyout(page);
+    const { panel, trigger } = await openPrimaryPopover(page);
     await page.getByTestId('inside-action').focus();
     const beforeSafeEscape = await closeCount(page, 'primary');
 
@@ -205,7 +205,7 @@ test.describe('floating dismissal browser contracts', () => {
   test('nested floating surfaces keep child interactions inside and close only the layer that exits', async ({
     page,
   }) => {
-    await openNestedFlyouts(page);
+    await openNestedPopovers(page);
     const parentPanel = panel(page, 'parent');
     const childPanel = panel(page, 'child');
     const parentBefore = await closeCount(page, 'parent');
@@ -295,7 +295,7 @@ test.describe('floating dismissal browser contracts', () => {
   });
 });
 
-async function openPrimaryFlyout(page: Page) {
+async function openPrimaryPopover(page: Page) {
   const trigger = page.getByTestId('primary-trigger');
   const primaryPanel = panel(page, 'primary');
 
@@ -305,7 +305,7 @@ async function openPrimaryFlyout(page: Page) {
   return { trigger, panel: primaryPanel };
 }
 
-async function openNestedFlyouts(page: Page): Promise<void> {
+async function openNestedPopovers(page: Page): Promise<void> {
   await page.getByTestId('parent-trigger').click();
   await expect(panel(page, 'parent')).toBeVisible();
 

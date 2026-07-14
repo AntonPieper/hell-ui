@@ -65,6 +65,15 @@ export interface HellPartStylerOptions<Part extends string> {
 }
 
 // @public
+export type HellPickMultipleValue<T = unknown> = readonly T[];
+
+// @public
+export type HellPickSingleValue<T = unknown> = T | null;
+
+// @public
+export type HellPickValue<T = unknown> = HellPickSingleValue<T> | HellPickMultipleValue<T>;
+
+// @public
 export function hellRankLocalSearch<T>(items: readonly T[], request: HellSearchRankRequest<T>): readonly HellSearchResult<T>[];
 
 // @public
@@ -142,6 +151,15 @@ export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public
+export interface HellTypedInputAdapter<TValue, TContext = void> {
+    readonly format: (value: TValue | null, context: TContext) => string;
+    readonly isSameValue?: (a: TValue | null, b: TValue | null) => boolean;
+    readonly isWithinBounds?: (value: TValue | null, min: TValue | null, max: TValue | null, context: TContext) => boolean;
+    readonly normalize?: (value: TValue | null | undefined, context: TContext) => TValue | null;
+    readonly parseText: (text: string, context: TContext) => HellTypedValueParseResult<TValue>;
+}
+
+// @public
 export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
 
 // @public
@@ -175,9 +193,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-internal-core.d.ts:472:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-angular-internal-core.d.ts:473:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:477:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:551:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:552:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:556:5 - (ae-undocumented) Missing documentation for "valid".
 
 // (No @packageDocumentation comment for this package)
 

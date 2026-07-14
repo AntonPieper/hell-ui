@@ -4,23 +4,17 @@ import {
   Directive,
   computed,
   contentChild,
-  inject,
   input,
 } from '@angular/core';
 import {
-  hellCreateLabels,
   hellPartStyler,
   type HellRecipe,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
-import type { InjectionToken } from '@angular/core';
 
-/**
- * Preset situations an empty state can represent. Each preset supplies a
- * default glyph and default title/description strings from the Label Contract.
- */
-export type HellEmptyStatePreset = 'noData' | 'noResults' | 'error' | 'forbidden';
+/** Built-in dependency-free glyphs the empty state can render in its `media` part. */
+export type HellEmptyStateGlyph = 'noData' | 'noResults' | 'error' | 'forbidden';
 
 /**
  * Heading level the title is promoted to when
@@ -29,40 +23,30 @@ export type HellEmptyStatePreset = 'noData' | 'noResults' | 'error' | 'forbidden
  */
 export type HellEmptyStateHeadingLevel = 2 | 3 | 4 | 5 | 6;
 
-/** Built-in preset copy owned by the empty-state entry point. */
-export interface HellEmptyStateLabels {
-  /** Default title for the `noData` preset. */
-  readonly noDataTitle: string;
-  /** Default description for the `noData` preset. */
-  readonly noDataDescription: string;
-  /** Default title for the `noResults` preset. */
-  readonly noResultsTitle: string;
-  /** Default description for the `noResults` preset. */
-  readonly noResultsDescription: string;
-  /** Default title for the `error` preset. */
-  readonly errorTitle: string;
-  /** Default description for the `error` preset. */
-  readonly errorDescription: string;
-  /** Default title for the `forbidden` preset. */
-  readonly forbiddenTitle: string;
-  /** Default description for the `forbidden` preset. */
-  readonly forbiddenDescription: string;
+/** A ready-made title/description pair for a common empty situation. */
+export interface HellEmptyStateCopy {
+  /** Title string for the situation. */
+  readonly title: string;
+  /** Description string for the situation. */
+  readonly description: string;
 }
 
-/** Injection token resolving to the effective empty-state labels. */
-export const HELL_EMPTY_STATE_LABELS: InjectionToken<HellEmptyStateLabels> = hellCreateLabels<HellEmptyStateLabels>(
-  'HELL_EMPTY_STATE_LABELS',
-  {
-    noDataTitle: 'Nothing here yet',
-    noDataDescription: 'There is no data to show.',
-    noResultsTitle: 'No matches',
-    noResultsDescription: 'No results match your current filters.',
-    errorTitle: 'Something went wrong',
-    errorDescription: 'We could not load this content.',
-    forbiddenTitle: 'Access restricted',
-    forbiddenDescription: 'You do not have permission to view this.',
+/**
+ * Ready-made English copy for the common empty situations. Pass the strings
+ * through the `title`/`description` inputs (or replace them with your app's
+ * localized strings) — copy is plain data, not a component mode.
+ *
+ *   <hell-empty-state glyph="noResults" [title]="copy.title" [description]="copy.description" />
+ */
+export const HELL_EMPTY_STATE_COPY: Record<HellEmptyStateGlyph, HellEmptyStateCopy> = {
+  noData: { title: 'Nothing here yet', description: 'There is no data to show.' },
+  noResults: { title: 'No matches', description: 'No results match your current filters.' },
+  error: { title: 'Something went wrong', description: 'We could not load this content.' },
+  forbidden: {
+    title: 'Access restricted',
+    description: 'You do not have permission to view this.',
   },
-);
+};
 
 /** Public parts of the HellEmptyState module, styleable through its Part Style Map. */
 export type HellEmptyStatePart = 'root' | 'media' | 'title' | 'description' | 'actions';
@@ -97,15 +81,16 @@ export class HellEmptyStateActions {}
  * `hell-empty-state` — a centered media/title/description/actions presentation
  * for any content region that has nothing to show.
  *
- * A `preset` (`noData | noResults | error | forbidden`) supplies a default glyph
- * and default title/description strings from the Label Contract. Any region can
- * be overridden by projecting content with `hellEmptyStateMedia`,
- * `hellEmptyStateTitle`, `hellEmptyStateDescription`, or `hellEmptyStateActions`;
- * projected content always wins over the preset default. The component owns
- * container-filling centering, so call sites need no margin hacks.
+ * `title` and `description` take the visible strings — pass your own copy or
+ * spread `HELL_EMPTY_STATE_COPY` — and `glyph` picks one of the built-in
+ * dependency-free SVG glyphs. Any region can be overridden by projecting
+ * content with `hellEmptyStateMedia`, `hellEmptyStateTitle`,
+ * `hellEmptyStateDescription`, or `hellEmptyStateActions`; projected content
+ * always wins over the inputs. The component owns container-filling centering,
+ * so call sites need no margin hacks.
  *
  * Usage:
- *   <hell-empty-state preset="noResults">
+ *   <hell-empty-state glyph="noResults" [title]="copy.title" [description]="copy.description">
  *     <button hellEmptyStateActions hellButton (click)="clear()">Clear filters</button>
  *   </hell-empty-state>
  */
@@ -115,17 +100,17 @@ export class HellEmptyStateActions {}
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.data-preset]': 'preset()',
+    '[attr.data-glyph]': 'glyph()',
   },
   template: `
-    @if (hasCustomMedia() || preset()) {
+    @if (hasCustomMedia() || glyph()) {
       <div data-slot="media" [class]="part('media')">
         @if (hasCustomMedia()) {
           <ng-content select="[hellEmptyStateMedia]" />
         } @else {
-          <!-- Preset glyphs are inline SVG so the entry point stays dependency-free
+          <!-- Glyphs are inline SVG so the entry point stays dependency-free
                (table-shell composes it in minimal consumers without icon packages). -->
-          @switch (preset()) {
+          @switch (glyph()) {
             @case ('noData') {
               <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M22 12h-6l-2 3h-4l-2-3H2" />
@@ -156,7 +141,7 @@ export class HellEmptyStateActions {}
       </div>
     }
 
-    @if (hasCustomTitle() || resolvedTitle()) {
+    @if (hasCustomTitle() || title()) {
       <div
         data-slot="title"
         [class]="part('title')"
@@ -166,17 +151,17 @@ export class HellEmptyStateActions {}
         @if (hasCustomTitle()) {
           <ng-content select="[hellEmptyStateTitle]" />
         } @else {
-          {{ resolvedTitle() }}
+          {{ title() }}
         }
       </div>
     }
 
-    @if (hasCustomDescription() || resolvedDescription()) {
+    @if (hasCustomDescription() || description()) {
       <div data-slot="description" [class]="part('description')">
         @if (hasCustomDescription()) {
           <ng-content select="[hellEmptyStateDescription]" />
         } @else {
-          {{ resolvedDescription() }}
+          {{ description() }}
         }
       </div>
     }
@@ -199,11 +184,16 @@ export class HellEmptyState {
   });
 
   /**
-   * Situation this empty state represents. Selects the default glyph and the
-   * default title/description strings. Defaults to `null` — with no preset and
-   * no projected content the component renders only what is projected.
+   * Built-in glyph rendered in the `media` part. Defaults to `null` — with no
+   * glyph and no projected media the `media` part does not render.
    */
-  readonly preset = input<HellEmptyStatePreset | null>(null);
+  readonly glyph = input<HellEmptyStateGlyph | null>(null);
+
+  /** Title string. Ignored when a `hellEmptyStateTitle` is projected. */
+  readonly title = input<string | null>(null);
+
+  /** Description string. Ignored when a `hellEmptyStateDescription` is projected. */
+  readonly description = input<string | null>(null);
 
   /**
    * Heading level the built-in preset title is promoted to. `null` (default)
@@ -213,8 +203,6 @@ export class HellEmptyState {
    * owns its own semantics, so the wrapper never doubles up `role="heading"`.
    */
   readonly headingLevel = input<HellEmptyStateHeadingLevel | null>(null);
-
-  private readonly labels = inject(HELL_EMPTY_STATE_LABELS);
 
   private readonly customMedia = contentChild(HellEmptyStateMedia);
   private readonly customTitle = contentChild(HellEmptyStateTitle);
@@ -229,18 +217,6 @@ export class HellEmptyState {
   protected readonly hasCustomDescription = computed(() => this.customDescription() != null);
   /** Whether any actions are projected, gating the `actions` part. */
   protected readonly hasActions = computed(() => this.customActions() != null);
-
-  /** Default title string for the active preset, or `null` when no preset is set. */
-  protected readonly resolvedTitle = computed(() => {
-    const preset = this.preset();
-    return preset ? this.labels[`${preset}Title`] : null;
-  });
-
-  /** Default description string for the active preset, or `null` when no preset is set. */
-  protected readonly resolvedDescription = computed(() => {
-    const preset = this.preset();
-    return preset ? this.labels[`${preset}Description`] : null;
-  });
 }
 
 /** All directives that make up the empty-state entry point, for bulk `imports`. */

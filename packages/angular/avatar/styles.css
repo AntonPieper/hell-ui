@@ -1,2 +1,84 @@
 /* Avatar defaults are Tailwind utility recipes. */
 @source "./avatar.ts";
+@source "./avatar-group.ts";
+
+@layer components {
+  /* Avatar group structural selectors; default utility classes live in avatar-group.ts. */
+
+  hell-avatar-group[data-slot='root']
+    > :is([hellAvatarGroupItem][data-slot='root'], [hellAvatarGroupOverflow][data-slot='root']):not(
+      :first-child
+    ) {
+    margin-inline-start: var(--_hell-avatar-group-overlap);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a) {
+    border-width: 0;
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a):active {
+    box-shadow: var(--_hell-avatar-group-hover-shadow);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected] {
+    --_hell-avatar-group-ring-color: var(--color-hell-primary);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected]:is(hell-avatar[data-slot='root']),
+  [hellAvatarGroupItem][data-slot='root'][data-selected] > hell-avatar[data-slot='root'] {
+    --_hell-avatar-border: var(--_hell-avatar-group-ring-color);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected]:not(hell-avatar[data-slot='root']):not(
+      :has(> hell-avatar[data-slot='root'])
+    ) {
+    box-shadow: 0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-ring-color);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:focus-visible {
+    z-index: 2;
+    --_hell-avatar-group-ring-color: var(--color-hell-focus-ring);
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2)
+        var(--_hell-avatar-group-ring-color),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3)
+        var(--_hell-avatar-group-cutout);
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a) {
+    cursor: pointer;
+  }
+
+  /* State colors (hover/active/open background, text, border) live in the
+     overflow Tailwind recipe so they merge through the Part-Class Pipeline;
+     only the ring stack that composes group-level cutout variables stays here. */
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):active,
+  [hellAvatarGroupOverflow][data-slot='root'][data-open],
+  [hellAvatarGroupOverflow][data-slot='root'][aria-expanded='true'] {
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-border-strong);
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:focus-visible {
+    z-index: 5;
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-focus-ring),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3)
+        var(--_hell-avatar-group-cutout);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a):hover:not(:active),
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):hover:not(:active):not(
+      [data-open]
+    ):not([aria-expanded='true']) {
+    box-shadow: var(--_hell-avatar-group-hover-shadow);
+  }
+}

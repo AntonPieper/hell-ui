@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellNativeSelect } from '@hell-ui/angular/select';
-import { HellPaginationStrip } from '@hell-ui/angular/pagination';
+import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
 interface Invoice {
@@ -21,7 +21,7 @@ const INVOICES: readonly Invoice[] = [
 @Component({
   selector: 'app-pagination-with-table-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellNativeSelect, HellPaginationStrip],
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellNativeSelect, HellPagination, HellPageLink],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div hellTableContainer>
@@ -62,12 +62,24 @@ const INVOICES: readonly Invoice[] = [
             <option [value]="5">5</option>
           </select>
         </label>
-        <hell-pagination
-          mode="previous-next"
+        <nav
+          hellPagination
+          aria-label="Pagination"
+          class="flex items-center gap-hell-2"
           [page]="page()"
           [pageCount]="pageCount()"
           (pageChange)="page.set($event)"
-        />
+        >
+          <button hellPageLink="previous" type="button" aria-label="Previous page">
+            <span aria-hidden="true">&lsaquo;</span>
+          </button>
+          <span class="text-xs whitespace-nowrap text-hell-foreground-muted" aria-live="polite">
+            Page {{ page() }} of {{ pageCount() }}
+          </span>
+          <button hellPageLink="next" type="button" aria-label="Next page">
+            <span aria-hidden="true">&rsaquo;</span>
+          </button>
+        </nav>
       </div>
     </div>
   `,

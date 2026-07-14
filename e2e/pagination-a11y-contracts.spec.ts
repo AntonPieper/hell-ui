@@ -6,7 +6,7 @@ async function gotoPagination(page: Page): Promise<void> {
 }
 
 test.describe('pagination browser accessibility contract', () => {
-  test('pages mode exposes labelled controls, current-page announcement, and disabled range edges', async ({
+  test('the numbered strip exposes labelled controls, current-page announcement, and disabled range edges', async ({
     page,
   }) => {
     await gotoPagination(page);
@@ -20,7 +20,6 @@ test.describe('pagination browser accessibility contract', () => {
 
     await expect(nav).toHaveAttribute('role', 'navigation');
     await expect(nav).toHaveAttribute('aria-label', 'Pagination');
-    await expect(nav).toHaveAttribute('data-mode', 'pages');
 
     const currentPage = example.getByRole('button', { name: 'Page 3' });
     await expect(currentPage).toHaveAttribute('aria-current', 'true');
@@ -105,19 +104,17 @@ test.describe('pagination browser accessibility contract', () => {
     );
   });
 
-  test('previous-next mode names its controls and disables the previous boundary', async ({
+  test('previous-next recipe names its controls and disables the previous boundary', async ({
     page,
   }) => {
     await gotoPagination(page);
 
     const example = page.locator('app-pagination-previous-next-example');
-    const nav = example.locator('hell-pagination');
+    const nav = example.getByRole('navigation', { name: 'Pagination' });
     const previous = example.getByRole('button', { name: 'Previous page' });
     const next = example.getByRole('button', { name: 'Next page' });
 
-    await expect(nav).toHaveAttribute('role', 'navigation');
-    await expect(nav).toHaveAttribute('aria-label', 'Pagination');
-    await expect(nav).toHaveAttribute('data-mode', 'previous-next');
+    await expect(nav).toBeVisible();
     await expect(example.getByText('Page 1 of 9')).toBeVisible();
 
     await expect(previous).toBeDisabled();

@@ -21,6 +21,14 @@ import { ComboboxStylingExample } from './examples/styling.example';
 import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
+import { ComboboxRankedFilteringExample } from './examples/ranked-filtering.example';
+import comboboxRankedFilteringExampleCodeRaw from './examples/ranked-filtering.example.ts?raw' with {
+  loader: 'text',
+};
+import { ComboboxAsyncSourceExample } from './examples/async-source.example';
+import comboboxAsyncSourceExampleCodeRaw from './examples/async-source.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-combobox',
@@ -33,6 +41,8 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
     ComboboxChipsExample,
     ComboboxWithFieldTagExample,
     ComboboxStylingExample,
+    ComboboxRankedFilteringExample,
+    ComboboxAsyncSourceExample,
     PageHeader,
   ],
   template: `
@@ -87,6 +97,37 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       </p>
       <hd-example-tabs [code]="comboboxPresetExampleCode">
         <app-combobox-preset-example />
+      </hd-example-tabs>
+
+      <h2>Filtering and ranking</h2>
+      <p>
+        <code>&lt;hell-combobox&gt;</code> filters through the core search seam: option labels are
+        ranked by <code>hellRankLocalSearch</code> under the <code>HELL_SEARCH_RANKER</code> token —
+        the same accent-insensitive, word-based ranking behind the omnibar and filter bar. Exact
+        word matches rank above word-prefix matches, which rank above substring hits, so typing
+        "no" lists "Nordhafen Terminal" before "Hannover Süd" instead of preserving array order.
+        Swap the strategy for an injector scope with <code>provideHellSearchRanker</code>; here a
+        recency-aware ranker reorders the results so the just-dispatched "Hannover Süd" outranks
+        the better text matches.
+      </p>
+      <hd-example-tabs [code]="comboboxRankedFilteringExampleCode">
+        <app-combobox-ranked-filtering-example />
+      </hd-example-tabs>
+
+      <h2>Async source</h2>
+      <p>
+        Pass a <code>HellSearchSource</code> through <code>[source]</code> (mutually exclusive with
+        <code>[options]</code>) and <code>&lt;hell-combobox&gt;</code> becomes an entity picker:
+        each keystroke dispatches a debounced query (<code>sourceDebounce</code>, default 120ms),
+        newer searches abort older ones via the request's <code>AbortSignal</code>, and stale
+        responses never overwrite fresh results — the same lifecycle the omnibar uses. While a
+        request is in flight the dropdown shows the <code>loading</code> part; a rejected source
+        shows the <code>error</code> part; both render copy from the combobox Label Contract.
+        Supply <code>displayWith</code> so picked values stay labelled when their option is no
+        longer in the loaded results.
+      </p>
+      <hd-example-tabs [code]="comboboxAsyncSourceExampleCode">
+        <app-combobox-async-source-example />
       </hd-example-tabs>
 
       <h2>Multiple</h2>
@@ -217,6 +258,16 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
             <td><code>empty</code></td>
             <td>The <code>hellComboboxEmpty</code> placeholder.</td>
           </tr>
+          <tr>
+            <td></td>
+            <td><code>loading</code></td>
+            <td>The in-flight message while an async <code>source</code> loads.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>error</code></td>
+            <td>The failure message when an async <code>source</code> rejects.</td>
+          </tr>
         </tbody>
       </table>
       <p>
@@ -231,7 +282,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <h2>API</h2>
       <p><code>[hellCombobox]</code> — the control container (host of <code>NgpCombobox</code>).</p>
       <ul>
-        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
         <li><code>multiple</code>: <code>boolean</code>. Switches to array-valued multi-select. Default <code>false</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>allowDeselect</code>: <code>boolean</code>. Lets a single selection be cleared by re-picking it. Default <code>false</code>.</li>
@@ -242,7 +293,7 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>options</code>: <code>readonly T[]</code> — full option registry for virtualized/manually ordered lists (aliases <code>ngpComboboxOptions</code>).</li>
         <li><code>wrapNavigation</code>: <code>boolean</code> — lets Arrow Up/Down wrap between boundaries. Default <code>true</code>; set <code>false</code> for clamped composite flows.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the <code>root</code> part.</li>
-        <li>Outputs: <code>valueChange: HellComboboxValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
+        <li>Outputs: <code>valueChange: HellPickValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
         <li>Implements <code>ControlValueAccessor</code>, so it works with <code>ngModel</code> and reactive forms.</li>
       </ul>
       <p><code>input[hellComboboxInput]</code> — the editable filter input; drives typing and keyboard focus. Exposes <code>ui</code>.</p>
@@ -267,22 +318,24 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       <p><code>&lt;hell-combobox&gt;</code> — the convenience component composing the whole anatomy.</p>
       <ul>
         <li><code>options</code>: <code>readonly HellOption&lt;T&gt;[]</code> (from core) — <code>&#123; value, label, disabled? &#125;</code> entries. Default <code>[]</code>.</li>
-        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
+        <li><code>value</code>: <code>HellPickValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
         <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
-        <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
-        <li><code>emptyLabel</code>: <code>string</code>. Default <code>'No matches'</code>.</li>
+        <li><code>source</code>: <code>HellSearchSource&lt;HellOption&lt;T&gt;&gt; | null</code> — async option source, mutually exclusive with <code>options</code>. Default <code>null</code>.</li>
+        <li><code>sourceDebounce</code>: <code>number</code> — milliseconds between typing and dispatching to <code>source</code>. Default <code>120</code>.</li>
         <li><code>aria-label</code>: <code>string | null</code> — accessible name for the input. Default <code>null</code>.</li>
         <li><code>compareWith</code>: <code>HellOptionCompareWith&lt;T&gt;</code>. Default reference equality.</li>
         <li><code>displayWith</code>: <code>HellOptionDisplayWith&lt;T&gt; | null</code> — overrides option labels (and labels selected values missing from <code>options</code>). Default <code>null</code>: the matching option's <code>label</code> renders. Filtering also matches against the rendered label.</li>
-        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty | loading | error</code>.</li>
         <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
+        <li>Labels (toggle button aria-label, empty, loading, and error copy) come from the combobox Label Contract: override with <code>provideHellLabels(HELL_COMBOBOX_LABELS, &#123; … &#125;)</code>.</li>
       </ul>
       <p>
-        Exported types: <code>HellComboboxValue&lt;T&gt;</code>,
-        <code>HellComboboxSingleValue&lt;T&gt;</code>, <code>HellComboboxMultipleValue&lt;T&gt;</code>,
-        the core option contract <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>;
-        and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
+        Value and option types come from <code>&#64;hell-ui/angular/core</code>:
+        <code>HellPickValue&lt;T&gt;</code>, <code>HellPickSingleValue&lt;T&gt;</code>,
+        <code>HellPickMultipleValue&lt;T&gt;</code>, and the option contract
+        <code>HellOption&lt;T&gt;</code> / <code>HellOptionDisplayWith&lt;T&gt;</code> / <code>HellOptionCompareWith&lt;T&gt;</code>.
+        This entry point exports per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
         <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
         <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>,
         <code>ComboboxChips</code>, and the owned-anatomy <code>hell-combobox</code>. The
@@ -327,4 +380,6 @@ export class ComboboxPage {
   protected readonly comboboxChipsExampleCode = comboboxChipsExampleCodeRaw;
   protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;
   protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
+  protected readonly comboboxRankedFilteringExampleCode = comboboxRankedFilteringExampleCodeRaw;
+  protected readonly comboboxAsyncSourceExampleCode = comboboxAsyncSourceExampleCodeRaw;
 }

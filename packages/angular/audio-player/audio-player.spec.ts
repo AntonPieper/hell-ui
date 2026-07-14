@@ -238,7 +238,7 @@ describe('HellAudioPlayer', () => {
     playSpy.mockRestore();
   });
 
-  it('names the speech transcript flyout independently from trigger action labels', async () => {
+  it('names the speech transcript strip independently from trigger action labels', async () => {
     const { fixture, component } = await createPlayer();
 
     const transcriptButton = fixture.nativeElement.querySelector(
@@ -247,17 +247,17 @@ describe('HellAudioPlayer', () => {
     transcriptButton.click();
     fixture.detectChanges();
 
-    const flyout = fixture.nativeElement.querySelector('[data-slot="captions"]') as HTMLElement;
+    const strip = fixture.nativeElement.querySelector('[data-slot="captions"]') as HTMLElement;
     expect(transcriptButton.getAttribute('aria-label')).toBe('Hide speech transcript');
-    expect(flyout.getAttribute('role')).toBe('dialog');
-    expect(flyout.getAttribute('aria-modal')).toBe('false');
-    expect(flyout.getAttribute('aria-label')).toBe('Speech transcript');
+    expect(strip.getAttribute('role')).toBe('dialog');
+    expect(strip.getAttribute('aria-modal')).toBe('false');
+    expect(strip.getAttribute('aria-label')).toBe('Speech transcript');
 
     component.error.set('Speech error: network');
     component.transcript.set('Existing transcript');
     fixture.detectChanges();
 
-    expect(flyout.getAttribute('aria-label')).toBe('Speech transcript');
+    expect(strip.getAttribute('aria-label')).toBe('Speech transcript');
   });
 
   it('keeps the experimental speech transcript toggle opt-in', async () => {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, 
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   hellOptionRowLabel,
   hellOptionSurfaceRecipe,
@@ -15,8 +15,9 @@ import {
 } from '@hell-ui/angular/internal/floating';
 import {
   hellContainsFloatingTarget,
+  hellNormalizePickValue,
   hellRegisterFloatingHost,
-  HellFloatingScopeRegistry,
+  HellPickerControl,
 } from '@hell-ui/angular/internal/core';
 import {
   hellSyncFormFieldDescriptions,
@@ -31,12 +32,6 @@ import {
 } from 'ng-primitives/select';
 import { NgpInput } from 'ng-primitives/input';
 import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
-
-export type HellSelectSingleValue<T = unknown> = T | null;
-export type HellSelectMultipleValue<T = unknown> = readonly T[];
-export type HellSelectFormValue<T = unknown> =
-  | HellSelectSingleValue<T>
-  | HellSelectMultipleValue<T>;
 
 /** Public parts of the HellSelect module, styleable through its Part Style Map. */
 export type HellSelectPart =
@@ -123,88 +118,52 @@ export class HellSelectTrigger<T = unknown> implements ControlValueAccessor {
   });
 
   private readonly select = inject(NgpSelect);
-  private readonly selectState = injectSelectState<HellSelectFormValue<T>>();
+  private readonly selectState = injectSelectState<HellPickValue<T>>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
-  private readonly floatingScope = new HellFloatingScopeRegistry();
-  private dropdownOpen = false;
+  private readonly control = new HellPickerControl<T>({
+    host: () => this.host.nativeElement,
+    multiple: () => this.select.multiple(),
+    valueChanges: this.select.valueChange,
+    openChanges: this.select.openChange,
+    writeValue: (value) => this.selectState().setValue(value, { emit: false }),
+    setDisabled: (disabled) => this.selectState().setDisabled(disabled),
+  });
 
   constructor() {
-    const valueSub = this.select.valueChange.subscribe((value) => {
-      this.valueAccessor.emitValue(this.normalizeValue(value));
-    });
-    const openSub = this.select.openChange.subscribe((open) => {
-      this.dropdownOpen = open;
-    });
-    this.destroyRef.onDestroy(() => {
-      valueSub.unsubscribe();
-      openSub.unsubscribe();
-    });
+    this.control.connect(this.destroyRef);
   }
 
-  writeValue(value: HellSelectFormValue<T>): void {
-    this.selectState().setValue(this.normalizeWriteValue(value), { emit: false });
+  writeValue(value: HellPickValue<T>): void {
+    this.control.writeValue(value);
   }
 
-  registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
-    this.valueAccessor.registerOnChange(fn);
+  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
+    this.control.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
+    this.control.registerOnTouched(fn);
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.selectState().setDisabled(isDisabled);
+    this.control.setDisabledState(isDisabled);
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {
-    return !hellContainsFloatingTarget(
-      {
-        root: () => this.host.nativeElement,
-        scope: this.floatingScope,
-        floatingActive: () => this.dropdownOpen,
-      },
-      next,
-    );
+    return this.control.isOutsideControl(next);
   }
 
   markControlTouched(event: FocusEvent): void {
-    if (this.isOutsideControl(event.relatedTarget)) {
-      this.valueAccessor.markTouched();
-    }
+    this.control.markControlTouched(event);
   }
 
   registerDropdown(dropdown: HTMLElement): void {
-    this.floatingScope.registerFloatingElement(dropdown);
+    this.control.registerDropdown(dropdown);
   }
 
   unregisterDropdown(dropdown: HTMLElement): void {
-    this.floatingScope.unregisterFloatingElement(dropdown);
-  }
-
-  private normalizeValue(value: unknown): HellSelectFormValue<T> {
-    if (this.select.multiple()) {
-      return this.normalizeMultipleValue(value);
-    }
-    return this.normalizeSingleValue(value);
-  }
-
-  private normalizeSingleValue(value: unknown): HellSelectSingleValue<T> {
-    if (value == null) return null;
-    return value as T;
-  }
-
-  private normalizeMultipleValue(value: unknown): HellSelectMultipleValue<T> {
-    if (value == null) return [];
-    if (Array.isArray(value)) return [...value];
-    return [value as T];
-  }
-
-  private normalizeWriteValue(value: HellSelectFormValue<T>): HellSelectFormValue<T> {
-    if (this.select.multiple()) return this.normalizeMultipleValue(value);
-    return this.normalizeSingleValue(value);
+    this.control.unregisterDropdown(dropdown);
   }
 }
 
@@ -415,19 +374,19 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
   readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
   /** Overrides option labels; also labels selected values missing from `options`. */
   readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
-  readonly value = input<HellSelectFormValue<T> | null>(null);
+  readonly value = input<HellPickValue<T> | null>(null);
 
-  readonly valueChange = output<HellSelectFormValue<T>>();
+  readonly valueChange = output<HellPickValue<T>>();
   readonly openChange = output<boolean>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly innerSelect = viewChild(HellSelectTrigger);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
+  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
     this.inheritedFormField() ??
     ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
-  private readonly controlledValue = new HellControlledValueState<HellSelectFormValue<T>>({
+  private readonly controlledValue = new HellControlledValueState<HellPickValue<T>>({
     externalValue: this.value,
     externalDisabled: this.disabled,
     initialValue: null,
@@ -435,7 +394,7 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
 
   // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
   // types inferred through internal entry points, shipping unbound `Signal`.
-  protected readonly effectiveValue: Signal<HellSelectFormValue<T>> = this.controlledValue.value;
+  protected readonly effectiveValue: Signal<HellPickValue<T>> = this.controlledValue.value;
   protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
   protected readonly triggerAriaLabel = () =>
     this.ariaLabel() ?? this.host.nativeElement.getAttribute('aria-label');
@@ -473,7 +432,7 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     hellSyncFormFieldDescriptions(this.formField, this.triggerAriaDescribedby);
   }
 
-  protected onValueChange(next: HellSelectFormValue<T>): void {
+  protected onValueChange(next: HellPickValue<T>): void {
     this.controlledValue.acceptUserValue(next);
     this.valueChange.emit(next);
     this.valueAccessor.emitValue(next);
@@ -488,11 +447,11 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     if (outside) this.valueAccessor.markTouched();
   }
 
-  writeValue(value: HellSelectFormValue<T>): void {
-    this.controlledValue.writeValue(this.normalizeWriteValue(value));
+  writeValue(value: HellPickValue<T>): void {
+    this.controlledValue.writeValue(hellNormalizePickValue<T>(value, this.multiple()));
   }
 
-  registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
+  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
@@ -502,24 +461,6 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.controlledValue.setDisabledState(isDisabled);
-  }
-
-  private normalizeSingleValue(value: unknown): HellSelectSingleValue<T> {
-    if (value == null) return null;
-    return value as T;
-  }
-
-  private normalizeMultipleValue(value: unknown): HellSelectMultipleValue<T> {
-    if (value == null) return [];
-    if (Array.isArray(value)) return [...value];
-    return [value as T];
-  }
-
-  private normalizeWriteValue(value: HellSelectFormValue<T>): HellSelectFormValue<T> {
-    if (this.multiple()) {
-      return this.normalizeMultipleValue(value);
-    }
-    return this.normalizeSingleValue(value);
   }
 }
 

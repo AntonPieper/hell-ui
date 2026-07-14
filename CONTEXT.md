@@ -43,6 +43,10 @@ Public Parts are reserved for meaningful styling surfaces such as roots, panels,
 Single-host public directives use `root` as their sole Public Part; the directive name supplies semantic identity, while multi-part owned-anatomy components use semantic part names inside their root Part Style Map.
 _Avoid_: Private element, arbitrary descendant.
 
+**Projection Marker**
+An exported attribute directive whose job is routing consumer content into an owned-anatomy component's region (`hellEmptyStateActions`, `hellAlertIcon`, `hellPageHeaderMeta`). Markers stay directive classes even when their bodies are empty: components detect projected regions through `contentChild` queries (Angular cannot query bare attributes), directive arrays keep imports uniform, and template type-checking catches marker typos that plain attributes would silently drop. Markers own content routing; the Public Part of the same region owns styling — they are complementary surfaces, not duplicates.
+_Avoid_: Bare-attribute projection selector, slot input, marker deletion for symmetry.
+
 **Part Style Map**
 The shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUiInput<Part>` shape: either a shorthand class string for the module's default Public Part or a `HellUi<Part>` map from component-local Public Part names to class strings.
 For directive suites and Composites with projected children, a Part Style Map only styles the DOM owned by the directive or component that exposes it; projected child directives expose their own Part Style Maps.
@@ -72,11 +76,15 @@ _Avoid_: Part Style Map, class override API.
 The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
 
 **Label Contract**
-The injectable text Interface for built-in accessibility labels and status strings. Each Package Entry Point owns its label interface, English defaults, injection token, and `provideHell<Module>Labels` function (built on core's `hellCreateLabels` factory), so consumers replace labels per imported module instead of forking components or accepting hardcoded ARIA text. Core owns no aggregate label bag; a consumer bundle carries only the label strings of the entry points it imports.
-_Avoid_: Central `HellLabels` bag, `provideHellLabels`, cross-entry-point label registries.
+The injectable text Interface for built-in accessibility labels and status strings. Each Package Entry Point owns its label interface, English defaults, and injection token (built on core's `hellCreateLabels` factory); consumers override any subset per injector scope with core's token-scoped `provideHellLabels(token, overrides)` instead of forking components or accepting hardcoded ARIA text. Core owns no aggregate label bag; a consumer bundle carries only the label strings of the entry points it imports.
+_Avoid_: Central `HellLabels` bag, per-module label string inputs, `provideHell<Module>Labels` wrapper functions, cross-entry-point label registries.
 
 **Floating Interaction**
-Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, flyouts, selects, comboboxes, and omnibar child overlays.
+Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, selects, comboboxes, and omnibar child overlays.
+
+**Anchored Surface Contract**
+The shared trigger Interface for Hell's anchored floating surfaces. Positioned triggers expose `placement`, `offset`, `flip`, `shift`, `container`, and `disabled` under those exact names; dismissable surfaces expose `closeOnEscape` and `closeOnOutsideClick` (guard functions where the engine supports them — there is no other outside-dismiss input name); stateful triggers expose a reactive `open` signal, an `(openChange)` boolean output, `show()`/`hide()` methods, and an `exportAs` matching the directive name. Each surface implements the applicable subset: tooltip omits dismissal inputs by design, menu closing stays engine-owned (item select, outside click, Escape — the menu trigger exposes `show()` but no `hide()`), and dialog replaces `openChange` with its result-carrying `(closed)` output.
+_Avoid_: closeOnOutsideInteraction, per-surface trigger input dialects.
 
 **Floating Scope**
 The set of DOM targets that count as "inside" one floating interaction, even when a floating surface is rendered outside the logical host.
@@ -187,7 +195,15 @@ _Avoid_: Experimental table adapter, compatibility table route, grid mode.
 The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts table primitive header cells to Resize Behavior. Initial column sizing, persisted sizing state, and table-engine sizing policy belong to the app or TanStack. The runtime may measure rendered columns and emit primitive resize events, but it must not become a table sizing model. Resize Behavior remains layout-agnostic.
 
 **Omnibar Runtime**
-The query state, open state, search orchestration, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+The query state, open state, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Async searching delegates to the shared Search Orchestration module. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+
+**Search Orchestration**
+The shared async search lifecycle behind search-driven composites (omnibar, combobox): debounced dispatch to core's search service, newer-aborts-older cancellation, stale-result protection, and loading/error state. It lives in one internal module; composites own their chrome and item rendering, not the lifecycle.
+_Avoid_: Per-composite debounce/abort re-implementations.
 
 **Typed Value Input**
 The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.
+
+**Pick Value**
+The value shape shared by Hell's option-driven pickers: `T | null` in single mode, `readonly T[]` in multiple mode, and their union, exported once from core as `HellPickSingleValue`, `HellPickMultipleValue`, and `HellPickValue`. Pickers such as select and combobox retype onto this family instead of exporting per-module value types.
+_Avoid_: Per-module value twins, `HellSelectFormValue`, `HellComboboxValue`.

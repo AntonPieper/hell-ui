@@ -91,11 +91,6 @@
       "output": "tooltip"
     },
     {
-      "glob": "flyout.ts",
-      "input": "flyout",
-      "output": "flyout"
-    },
-    {
       "glob": "select.ts",
       "input": "select",
       "output": "select"
@@ -187,8 +182,8 @@
     },
     {
       "glob": "avatar-group.ts",
-      "input": "avatar-group",
-      "output": "avatar-group"
+      "input": "avatar",
+      "output": "avatar"
     },
     {
       "glob": "breadcrumbs.ts",

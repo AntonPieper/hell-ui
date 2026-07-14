@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_COPY, HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
@@ -8,7 +8,7 @@ import { HellButton } from '@hell-ui/angular/button';
   imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton],
   template: `
     <div class="h-72 rounded-hell-lg border border-hell-border bg-hell-surface">
-      <hell-empty-state preset="forbidden">
+      <hell-empty-state glyph="forbidden" [title]="copy.title">
         <span hellEmptyStateDescription>
           You do not have access to the billing workspace. Ask an administrator for the Billing
           role.
@@ -20,4 +20,6 @@ import { HellButton } from '@hell-ui/angular/button';
     </div>
   `,
 })
-export class EmptyStateForbiddenExample {}
+export class EmptyStateForbiddenExample {
+  protected readonly copy = HELL_EMPTY_STATE_COPY.forbidden;
+}

@@ -71,16 +71,16 @@ export class HellDateRangePicker {
     protected readonly label: _angular_core.Signal<string>;
     protected readonly labels: HellDatePickerLabels;
     readonly locale: _angular_core.InputSignal<string | null>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDateRangePickerPart>;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     protected readonly rangeComplete: _angular_core.Signal<boolean>;
-    readonly ui: _angular_core.InputSignal<HellUiInput<HellDateRangePickerPart>>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDateRangePicker, "hell-date-range-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDateRangePicker; inputs: { "ngpDateRangePickerStartDate": "startDate"; "ngpDateRangePickerEndDate": "endDate"; "ngpDateRangePickerFocusedDate": "focusedDate"; "ngpDateRangePickerMin": "min"; "ngpDateRangePickerMax": "max"; "ngpDateRangePickerDisabled": "disabled"; "ngpDateRangePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDateRangePickerStartDateChange": "startDateChange"; "ngpDateRangePickerEndDateChange": "endDateChange"; "ngpDateRangePickerFocusedDateChange": "focusedDateChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateRangePicker, never>;
 }
 
 // @public
-export type HellDateRangePickerPart = 'root' | 'header' | 'nav' | 'navButton' | 'label' | 'grid' | 'weekdayHeader' | 'cell' | 'dateButton';
+export type HellDateRangePickerPart = HellDatePickerPart;
 
 // @public
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;

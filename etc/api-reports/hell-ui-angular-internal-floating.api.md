@@ -11,9 +11,6 @@ export const HELL_FLOATING_POP_IN = "animate-[hell-pop-in_var(--hell-duration-fa
 export const HELL_FLOATING_SURFACE = "rounded-hell-md bg-hell-surface-elevated shadow-hell-lg outline-none border border-solid border-hell-border";
 
 // @public
-export const HELL_FLOATING_SURFACE_SHELL = "rounded-hell-md bg-hell-surface-elevated shadow-hell-lg outline-none";
-
-// @public
 export const HELL_FLOATING_Z_POPOVER = "z-[var(--hell-z-popover,60)]";
 
 // (No @packageDocumentation comment for this package)

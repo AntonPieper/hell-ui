@@ -13,7 +13,6 @@ import {
 } from '@angular/core';
 import { NgpPagination, injectPaginationState } from 'ng-primitives/pagination';
 import { ngpButton } from 'ng-primitives/button';
-import { HellNativeSelect } from '@hell-ui/angular/select';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
@@ -31,12 +30,6 @@ export interface HellPaginationLabels {
   readonly lastPage: string;
   /** Accessible label for a numbered page button. */
   readonly page: (page: number) => string;
-  /** Status text announcing the current page in `previous-next` mode. */
-  readonly pageStatus?: (page: number, pageCount: number) => string;
-  /** Label for the page-jump select in `jump` mode. */
-  readonly jumpToPage?: string;
-  /** Trailing text showing the total page count in `jump` mode. */
-  readonly pageTotal?: (pageCount: number) => string;
 }
 
 /** Injection token resolving to the effective pagination labels. */
@@ -48,29 +41,15 @@ export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels> =
     nextPage: 'Next page',
     lastPage: 'Last page',
     page: (page) => `Page ${page}`,
-    pageStatus: (page, pageCount) => `Page ${page} of ${pageCount}`,
-    jumpToPage: 'Page',
-    pageTotal: (pageCount) => `of ${pageCount}`,
   });
 
-/** Layout variant of the `HellPaginationStrip`: full page buttons, a compact previous/next control, or a page-jump select. */
-export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
-
 /** Public parts of the HellPaginationStrip module, styleable through its Part Style Map. */
-export type HellPaginationStripPart =
-  | 'root'
-  | 'control'
-  | 'controlGlyph'
-  | 'status'
-  | 'jump'
-  | 'jumpLabel'
-  | 'jumpSelect'
-  | 'jumpTotal';
+export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph';
 /** Part Style Map accepted by the HellPaginationStrip `ui` input. */
 export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;
 
 const HELL_PAGINATION_RECIPE = {
-  root: 'inline-flex flex-wrap items-center gap-hell-1 data-[mode=jump]:gap-hell-2 data-[mode=previous-next]:gap-hell-2',
+  root: 'inline-flex flex-wrap items-center gap-hell-1',
 } satisfies HellRecipe<'root'>;
 
 const HELL_PAGINATION_CONTROL_ROOT_RECIPE =
@@ -84,12 +63,6 @@ const HELL_PAGINATION_STRIP_RECIPE = {
   root: HELL_PAGINATION_RECIPE.root,
   control: '',
   controlGlyph: 'inline-flex min-w-[1em] items-center justify-center text-base leading-none',
-  status:
-    'inline-flex min-h-hell-control-sm items-center whitespace-nowrap text-xs leading-none text-hell-foreground-muted',
-  jump: 'inline-flex min-h-hell-control-sm min-w-0 items-center gap-hell-2 whitespace-nowrap text-xs leading-none text-hell-foreground-muted',
-  jumpLabel: 'flex-none',
-  jumpSelect: 'min-w-[calc(var(--spacing)*18)] max-w-[calc(var(--spacing)*26)]',
-  jumpTotal: 'flex-none',
 } satisfies HellRecipe<HellPaginationStripPart>;
 
 interface HellPaginationNativeControl {
@@ -303,15 +276,15 @@ export class HellPageLink {
 }
 
 /**
- * Ready-made pagination strip. Numbered buttons are clamped to a sliding
- * window of `siblingCount * 2 + 1` around the active page. Set `mode` to
- * `previous-next` for a compact previous/next-only control or `jump` for a
- * previous/select/next control.
+ * Ready-made numbered pagination strip: first/prev/pages/next/last. Numbered
+ * buttons are clamped to a sliding window of `siblingCount * 2 + 1` around the
+ * active page. Compact previous/next and page-jump forms are documented
+ * recipes composed from `[hellPagination]` + `hellPageLink`.
  */
 @Component({
   selector: 'hell-pagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellPageLink, HellNativeSelect],
+  imports: [HellPageLink],
   hostDirectives: [
     {
       directive: NgpPagination,
@@ -326,24 +299,21 @@ export class HellPageLink {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.data-mode]': 'mode()',
     '[attr.aria-label]': 'labels.navigation',
     role: 'navigation',
   },
   template: `
-    @if (mode() === 'pages') {
-      <button
-        hellPageLink="first"
-        type="button"
-        data-slot="control"
-        [ui]="controlUi()"
-        [attr.aria-label]="labels.firstPage"
-      >
-        <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
-          &laquo;
-        </span>
-      </button>
-    }
+    <button
+      hellPageLink="first"
+      type="button"
+      data-slot="control"
+      [ui]="controlUi()"
+      [attr.aria-label]="labels.firstPage"
+    >
+      <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
+        &laquo;
+      </span>
+    </button>
     <button
       hellPageLink="previous"
       type="button"
@@ -355,43 +325,16 @@ export class HellPageLink {
         &lsaquo;
       </span>
     </button>
-    @if (mode() === 'pages') {
-      @for (p of pages(); track trackPage($index, p)) {
-        <button
-          [hellPageLink]="p"
-          type="button"
-          data-slot="control"
-          [ui]="controlUi()"
-          [attr.aria-label]="labels.page(p)"
-        >
-          {{ p }}
-        </button>
-      }
-    }
-    @if (mode() === 'previous-next') {
-      <span data-slot="status" [class]="part('status')" aria-live="polite">{{
-        pageStatusLabel()
-      }}</span>
-    }
-    @if (mode() === 'jump' && pageCount() > 0) {
-      <label data-slot="jump" [class]="part('jump')">
-        <span data-slot="jumpLabel" [class]="part('jumpLabel')">{{ pageJumpLabel() }}</span>
-        <select
-          hellNativeSelect
-          data-slot="jumpSelect"
-          size="sm"
-          [ui]="jumpSelectUi()"
-          [attr.aria-label]="pageJumpLabel()"
-          [value]="currentPage()"
-          [disabled]="paginationDisabled() || pageCount() < 2"
-          (change)="goToSelectedPage($event)"
-        >
-          @for (p of pageOptions(); track trackPage($index, p)) {
-            <option [value]="p" [selected]="p === currentPage()">{{ p }}</option>
-          }
-        </select>
-        <span data-slot="jumpTotal" [class]="part('jumpTotal')">{{ pageTotalLabel() }}</span>
-      </label>
+    @for (p of pages(); track trackPage($index, p)) {
+      <button
+        [hellPageLink]="p"
+        type="button"
+        data-slot="control"
+        [ui]="controlUi()"
+        [attr.aria-label]="labels.page(p)"
+      >
+        {{ p }}
+      </button>
     }
     <button
       hellPageLink="next"
@@ -404,19 +347,17 @@ export class HellPageLink {
         &rsaquo;
       </span>
     </button>
-    @if (mode() === 'pages') {
-      <button
-        hellPageLink="last"
-        type="button"
-        data-slot="control"
-        [ui]="controlUi()"
-        [attr.aria-label]="labels.lastPage"
-      >
-        <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
-          &raquo;
-        </span>
-      </button>
-    }
+    <button
+      hellPageLink="last"
+      type="button"
+      data-slot="control"
+      [ui]="controlUi()"
+      [attr.aria-label]="labels.lastPage"
+    >
+      <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
+        &raquo;
+      </span>
+    </button>
   `,
 })
 export class HellPaginationStrip {
@@ -431,8 +372,6 @@ export class HellPaginationStrip {
 
   /** Number of page buttons to show on each side of the active page. Defaults to `2`. */
   readonly siblingCount = input<number>(2);
-  /** Layout variant of the strip. Defaults to `pages`. */
-  readonly mode = input<HellPaginationMode>('pages');
 
   /** Effective accessibility labels for the strip's controls. */
   protected readonly labels = inject(HELL_PAGINATION_LABELS);
@@ -441,11 +380,6 @@ export class HellPaginationStrip {
 
   /** `@for` track function keying rendered pages by page number. */
   protected readonly trackPage = (_: number, page: number) => page;
-
-  /** All page numbers (1…pageCount), used to populate the jump select. */
-  protected readonly pageOptions = computed(() =>
-    Array.from({ length: this.pageCount() }, (_, i) => i + 1),
-  );
 
   /** Windowed page numbers to render as buttons, clamped around the active page. */
   protected readonly pages = computed(() => {
@@ -475,49 +409,9 @@ export class HellPaginationStrip {
     return Number.isFinite(pageCount) ? Math.max(0, pageCount) : 0;
   }
 
-  /** Whether pagination is currently disabled. */
-  protected paginationDisabled(): boolean {
-    return this.state().disabled();
-  }
-
-  /** Status text announcing the current page, used in `previous-next` mode. */
-  protected pageStatusLabel(): string {
-    return (
-      this.labels.pageStatus?.(this.currentPage(), this.pageCount()) ??
-      `Page ${this.currentPage()} of ${this.pageCount()}`
-    );
-  }
-
-  /** Label for the page-jump select, used in `jump` mode. */
-  protected pageJumpLabel(): string {
-    return this.labels.jumpToPage ?? 'Page';
-  }
-
-  /** Trailing total-page text shown next to the jump select. */
-  protected pageTotalLabel(): string {
-    return this.labels.pageTotal?.(this.pageCount()) ?? `of ${this.pageCount()}`;
-  }
-
-  /** Part Style Map forwarded to the embedded `hellNativeSelect` jump control. */
-  protected jumpSelectUi(): { root: string } {
-    return { root: this.part('jumpSelect') };
-  }
-
   /** Part Style Map forwarded to each rendered `[hellPagination*]` control button. */
   protected controlUi(): { root: string } {
     return { root: this.part('control') };
-  }
-
-  /** Navigate to the page chosen in the jump select. */
-  protected goToSelectedPage(event: Event): void {
-    if (this.paginationDisabled()) return;
-    const target = event.target;
-    if (!(target instanceof HTMLSelectElement)) return;
-
-    const page = Number.parseInt(target.value, 10);
-    if (Number.isFinite(page)) {
-      this.state().goToPage(page);
-    }
   }
 }
 

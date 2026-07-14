@@ -5,7 +5,6 @@
 @import '@hell-ui/angular/alert/styles.css';
 @import '@hell-ui/angular/app-shell/styles.css';
 @import '@hell-ui/angular/audio-player/styles.css';
-@import '@hell-ui/angular/avatar-group/styles.css';
 @import '@hell-ui/angular/avatar/styles.css';
 @import '@hell-ui/angular/breadcrumbs/styles.css';
 @import '@hell-ui/angular/button/styles.css';
@@ -22,7 +21,6 @@
 @import '@hell-ui/angular/empty-state/styles.css';
 @import '@hell-ui/angular/field/styles.css';
 @import '@hell-ui/angular/file-upload/styles.css';
-@import '@hell-ui/angular/flyout/styles.css';
 @import '@hell-ui/angular/filter-bar/styles.css';
 @import '@hell-ui/angular/icon/styles.css';
 @import '@hell-ui/angular/input/styles.css';

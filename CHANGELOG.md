@@ -7,6 +7,69 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The native/styled control pairs (checkbox, switch, radio, select) are a
+  written contract: `docs/adr/native-styled-control-pairs.md` decides the
+  pairs stay two products — delegated rich controls for owned anatomy,
+  styled native elements for forms-first platform semantics — and rejects
+  rebuilding on visually-hidden native inputs (it forfeits ng-primitives
+  delegation and cannot collapse the select pair at all). No API change.
+  Closes #181.
+- CONTEXT.md gains the Projection Marker domain term, closing the
+  marker-directive audit with a written convention instead of a breaking
+  sweep: content-projection markers stay exported directive classes even
+  when empty, because components detect projected regions through
+  `contentChild` queries (Angular cannot query bare attributes), directive
+  arrays keep imports uniform, and template type-checking catches marker
+  typos that plain attributes would silently drop. The same term settles
+  the "double customization path" question — markers own content routing,
+  Public Parts own styling; they are complementary, not duplicates.
+  Closes #175, #176.
+- The Anchored Surface Contract is now a documented domain term, and the menu
+  and tooltip triggers conform to it: both gain a reactive `open()` signal, an
+  `(openChange)` boolean output, and an `exportAs` matching the directive name;
+  the tooltip trigger adds `show()`/`hide()` and the menu trigger adds `show()`
+  (menu closing stays engine-owned by design). Positioning and dismissal input
+  names were already aligned across popover, dialog, menu, and tooltip; the
+  contract in CONTEXT.md now pins them, including dialog's result-carrying
+  `(closed)` variation. Closes #170. Evidence: menu and tooltip unit contract
+  tests, unchanged e2e keyboard suites.
+- The popover absorbs the flyout's anchored-surface capabilities: the trigger
+  gains `trapFocus` (default `true`), `anchor` (position against a different
+  element than the trigger), `boundary` (widen the light-dismiss "inside"
+  region), and a reactive `open` signal. With `trapFocus` false the panel is
+  non-modal — `aria-modal="false"`, no focus trap, no focus steal on open,
+  outside clicks and outside focus dismiss without yanking focus, and only
+  Escape restores focus to the trigger. Internally the pair now drives the
+  ng-primitives popover engine through its primitive functions instead of
+  host-directive wrapping, so dismiss guards evaluate live inputs per event
+  (toggling `closeOnOutsideClick` while open now applies immediately) and
+  nested surfaces registered with the surrounding Floating Scope count as
+  inside. The outside-dismiss name settles on `closeOnOutsideClick` — for
+  non-modal panels it also governs outside-focus dismissal — and flyout's
+  `closeOnOutsideInteraction` leaves with the flyout entry point. Input
+  names, defaults, guard-function support, and modal behavior are unchanged
+  for existing consumers; the one removal is that the panel no longer hosts
+  the `NgpPopover` directive, so `#ref="ngpPopover"` template references on
+  `[hellPopover]` elements no longer resolve. The floating-dismissal ADR is
+  amended accordingly. Closes #168. Evidence: popover unit suite (14 tests
+  incl. seven new non-modal/boundary/scope/open contracts), green
+  date-input/time-input/filter-bar/confirm suites, the new popover e2e
+  browser contracts (12 passing on chromium, firefox, and webkit), and the
+  docs "Non-modal" example.
+- The owned-anatomy `hell-combobox` is now an async entity picker: a
+  `source` input accepts the core `HellSearchSource` shape (mutually
+  exclusive with `options`; supplying both throws). Queries dispatch through
+  the shared search lifecycle — `sourceDebounce` (default 120ms) between
+  keystrokes, newer searches abort older ones via the request `AbortSignal`,
+  and stale responses never overwrite fresh results — the same orchestration
+  the omnibar uses, now extracted into one internal module both consume.
+  While a request is in flight the dropdown renders a `loading` Public Part;
+  a rejected source renders an `error` Public Part; copy for both comes from
+  the new combobox Label Contract. Supply `displayWith` so picked values
+  stay labelled while their option is not in the loaded results. Closes #166.
+  Evidence: combobox async-source unit suite, search-orchestrator contract
+  suite, docs "Async source" example.
+
 - Added `hell-menu-options` to the menu entry point: a data-driven checkable
   option list rendering one checkbox menu item per core `HellOption`
   (`{ value, label, disabled? }`) with a controlled `selected` model and
@@ -325,6 +388,79 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- `HellDateRangePickerPart` is now an alias of `HellDatePickerPart` — the
+  two pickers already render one shared calendar template, so one part
+  family serves both and cannot drift. The components stay separate
+  because their engines and value models genuinely differ (single date vs
+  range with hover preview). No consumer-visible change. Closes #180.
+- BREAKING: the alert's `layout` input and `HellAlertLayout` type are
+  removed — `banner` was pure root styling, so the full-bleed look is a
+  one-line Part Style Map refinement (`ui="w-full rounded-none
+  border-x-0"`), shown in the docs banner example. The save bar's `mode`
+  input is deliberately kept: it selects rendering lifecycle and
+  announcement behavior, not styling. The new mode-inputs ADR records the
+  rule and every audited verdict. Closes #174. Evidence: alert unit suite,
+  docs banner example, `docs/adr/mode-inputs.md`.
+- BREAKING: the empty state's `preset` mode is gone. `hell-empty-state` takes
+  `glyph` (the built-in dependency-free SVGs), `title`, and `description`
+  inputs; `HELL_EMPTY_STATE_COPY` exports the former preset strings as plain
+  `HellEmptyStateCopy` data to pass through those inputs, and the
+  `HELL_EMPTY_STATE_LABELS` token and `HellEmptyStateLabels`/
+  `HellEmptyStatePreset` types are removed — copy now localizes with app
+  strings instead of the Label Contract, matching the Customization Surface
+  rule against bundled preset modes. The TanStack table shell's default
+  empty view passes the `noData` copy explicitly. Closes #173. Evidence:
+  rewritten empty-state unit suite, green table-tanstack suite, migrated
+  docs examples.
+- BREAKING: `hell-pagination` is the numbered strip only. The `mode` input,
+  `HellPaginationMode` type, and the `status`/`jump`/`jumpLabel`/
+  `jumpSelect`/`jumpTotal` parts are gone, and `HellPaginationLabels` slims
+  to the strip's own copy (`navigation`, boundary controls, `page(n)`).
+  The compact previous/next and page-jump forms are documented recipes
+  composed from `[hellPagination]` + `hellPageLink` (+ `hellNativeSelect`),
+  exactly like the multi-select-menu-button precedent — recipe copy
+  localizes with app strings instead of the Label Contract. Closes #172.
+  Evidence: pagination unit suite incl. new recipe contracts, migrated
+  pagination/navigation e2e, updated docs recipes.
+- BREAKING: the three typed-input adapter contracts are one shape. Core
+  exports `HellTypedInputAdapter<TValue, TContext>` (parseText / format /
+  normalize / isSameValue / isWithinBounds, all context-aware), and
+  `HellDateInputAdapter`, `HellTimeInputAdapter`, and
+  `HellNumberInputAdapter` are now its instantiations — per-module tokens,
+  defaults, and `provideHell*InputAdapter` functions are unchanged. The
+  date adapter's `coerce` hook is renamed `normalize` to match the others,
+  and the time adapter's `format` now receives `HellTimeValue | null`
+  (return `''` for null) like its siblings. Custom adapters migrate by
+  renaming `coerce` and null-guarding time `format`. Closes #171.
+  Evidence: date/time/number/filter-bar unit suites (783 green).
+- The filter bar's entity editors now delegate their async lifecycle to the
+  shared Search Orchestration seam: abort, newer-supersedes-older, and
+  stale-result protection come from the same internal module behind the
+  omnibar and combobox, while per-field debounce policy, editor chrome,
+  per-field labels, and the `searchError` output stay filter-bar-owned.
+  No public API or behavior change; the private AbortController/generation
+  bookkeeping is deleted. Closes #167. Evidence: filter-bar unit suites,
+  unchanged filter-bar API report.
+- The owned-anatomy `hell-combobox` now filters options through the core
+  search seam: labels are ranked by `hellRankLocalSearch` under the
+  `HELL_SEARCH_RANKER` token — accent-insensitive, word-based, exact-word
+  above word-prefix above substring — instead of a private lowercase
+  `includes()` filter, so `provideHellSearchRanker` now governs combobox
+  matching exactly as it does omnibar and docs search. Matching is a superset
+  of the old behavior (substring hits still appear, ranked last); result
+  order changes from array order to relevance order, and queries that
+  normalize to no words (for example punctuation only) now show every option.
+  Empty queries still show every option and disabled options still render
+  (unpickable) when they match. A docs example reorders results with an
+  injected recency-aware ranker. Closes #165. Evidence: combobox filtering
+  unit suite, docs "Filtering and ranking" example.
+- Extracted the shared picker control plumbing (ControlValueAccessor bridge,
+  dropdown floating-scope registration, outside-control focus checks, and
+  mode-aware pick-value normalization) from the select trigger and combobox
+  root into one internal seam consumed by both directive suites and both
+  owned-anatomy components. Zero public API change (report declarations
+  verified identical); a contract test covers the seam, including
+  dropdown-counts-as-inside while open. Closes #164.
 - Extracted the elevated floating-panel surface, pop-in animation, and default
   popover z-index into a shared internal presentation module so the popover,
   flyout, menu, select, and combobox panels can no longer drift (class sets
@@ -436,6 +572,38 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- BREAKING: `hellResolveToolbarOverflow` and its
+  `HellToolbarOverflowItem`/`Metrics`/`Result` types leave the public API.
+  The pure overflow policy is the toolbar's internal measurement core —
+  it stays unit-tested in its own module file but was never a consumer
+  surface. Closes #179. Evidence: toolbar unit suite (25 green), toolbar
+  API report shrinks by four symbols.
+- BREAKING: the avatar-group entry point folds into avatar. Import
+  `HellAvatarGroup`, `HellAvatarGroupItem`, `HellAvatarGroupOverflow`, and
+  `HELL_AVATAR_GROUP_DIRECTIVES` from `@hell-ui/angular/avatar`, and its
+  stylesheet from `@hell-ui/angular/avatar/styles.css` — the
+  `@hell-ui/angular/avatar-group` import path and stylesheet are gone.
+  One avatar family, one entry point. Closes #178. Evidence: avatar and
+  avatar-group unit suites green from the merged entry point, migrated
+  docs imports.
+- BREAKING: the flyout entry point is retired. `@hell-ui/angular/flyout`,
+  its stylesheet, `HellFlyout`, and `HellFlyoutTrigger` are gone — a
+  popover with `[trapFocus]="false"` is the anchored, non-modal,
+  light-dismiss surface, with `anchor`, `boundary`, a reactive `open`
+  signal, and `closeOnOutsideClick` covering `closeOnOutsideInteraction`'s
+  job. The audio player's captions strip (a docked disclosure whose panel
+  never used floating positioning) now composes the internal Floating
+  Dismissal rules directly as the named manual exception recorded in the
+  floating-dismissal ADR. The floating-dismissal browser harness runs on
+  non-modal popovers, and nested-surface containment is Hell-owned: each
+  panel provides the owning trigger's panel scope to descendants, so
+  nested popovers/menus keep parents open (the ngp overlay registry cannot
+  link portaled child overlays across the embedded-view injector).
+  Closes #169. Evidence: migrated `e2e/floating-dismissal.spec.ts` plus
+  `e2e/popover-contracts.spec.ts` (33 green on chromium, firefox, and
+  webkit against the production build), green audio-player suites, and
+  the flyout docs page replaced by the popover "Non-modal" section and
+  overlays guide updates.
 - Removed duplicate public pass-throughs from
   `@hell-ui/angular/table-tanstack`: import TanStack's FlexRender helpers
   directly from `@tanstack/angular-table`. Internal PDF/toast/tooling exports
@@ -551,6 +719,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- The combobox joins the Label Contract: the `toggleLabel` and `emptyLabel`
+  string inputs on `hell-combobox` are gone. Built-in copy (toggle button
+  aria-label, empty, loading, and error messages) now comes from
+  `HELL_COMBOBOX_LABELS`; override per injector scope with
+  `provideHellLabels(HELL_COMBOBOX_LABELS, { toggle: …, empty: …, loading: …,
+  error: … })` like every other Hell module. Closes #166. Evidence: combobox
+  labels unit test, migrated docs examples.
+- The pick-value model is one core family: `HellPickSingleValue<T>`
+  (`T | null`), `HellPickMultipleValue<T>` (`readonly T[]`), and their union
+  `HellPickValue<T>` export from `@hell-ui/angular/core`, and the select and
+  combobox entry points no longer export per-module twins. Migration is a
+  rename: `HellSelectSingleValue` → `HellPickSingleValue`,
+  `HellSelectMultipleValue` → `HellPickMultipleValue`, `HellSelectFormValue` →
+  `HellPickValue`, `HellComboboxSingleValue` → `HellPickSingleValue`,
+  `HellComboboxMultipleValue` → `HellPickMultipleValue`, and
+  `HellComboboxValue` → `HellPickValue`, importing from
+  `@hell-ui/angular/core`. Behavior, inputs, and outputs are unchanged.
+  Closes #163. Evidence: select/combobox unit suites, refreshed API reports,
+  migrated docs examples.
 - Adopted the selector convention (attribute selector = headless behavior
   suite on a consumer-owned element; element selector = owned-anatomy
   component) and removed the "Basic" names. `hell-select-basic` is now

@@ -6,7 +6,7 @@ async function gotoEmptyState(page: Page): Promise<void> {
 }
 
 test.describe('empty state browser accessibility contract', () => {
-  test('preset empty states read as plain content with a keyboard-reachable actions slot', async ({
+  test('empty states read as plain content with a keyboard-reachable actions slot', async ({
     page,
   }) => {
     await gotoEmptyState(page);

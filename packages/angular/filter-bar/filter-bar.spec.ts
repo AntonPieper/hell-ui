@@ -149,7 +149,7 @@ class AdvancedHostComponent {
           `${(date.getMonth() + 1).toString().padStart(2, '0')}.` +
           date.getFullYear().toString()
         : '',
-      coerce: (date) => date && date.getDate() >= 3 ? date : null,
+      normalize: (date) => date && date.getDate() >= 3 ? date : null,
       isWithinBounds: HELL_DEFAULT_DATE_INPUT_ADAPTER.isWithinBounds,
     }),
   ],

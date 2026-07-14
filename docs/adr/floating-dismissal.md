@@ -1,6 +1,6 @@
 # ADR: Floating dismissal delegation spike
 
-- Status: Accepted
+- Status: Accepted (amended 2026-07-14, see "Amendment: non-modal popover")
 - Date: 2026-05-29
 
 ## Context
@@ -95,6 +95,55 @@ Tests naming this seam:
 
 - `packages/angular/omnibar/omnibar.spec.ts` covers focus input → panel action, focus panel → nested registered menu surface, and focus nested surface → outside target close.
 - `e2e/floating-dismissal.spec.ts` continues to cover the browser-level portaled omnibar panel focus path and true outside focus dismissal.
+
+## Amendment: non-modal popover (2026-07-14)
+
+This ADR's reopen clause has been exercised: `ng-primitives@0.123` dismiss
+guards accept per-event guard functions, which is the custom inside-boundary
+hook the original decision was waiting for. `HellPopover`/`HellPopoverTrigger`
+now drive the ng-primitives popover engine through its primitive functions and
+gain `trapFocus` (default `true`), `anchor`, `boundary`, and a reactive `open`
+signal. With `trapFocus` false the popover reproduces the flyout contract on
+the delegated overlay engine: non-modal, no focus trap, no focus steal,
+widened `boundary` inside region, nested surfaces registered with the
+surrounding `HELL_FLOATING_SCOPE` count as inside, and focus restores to the
+trigger only on Escape (`restoreFocus` computed on the overlay's
+`closeOrigin`).
+
+One narrow manual rule remains: for non-modal panels the trigger listens for
+document `focusin` and closes when focus lands outside the same inside region,
+mirroring the omnibar's focus-only exception. It is trigger-owned, evaluates
+the same guard policy, and is not a promoted public abstraction.
+
+Consequence updates:
+
+- The "sibling-control surfaces must remain interactive" niche is now covered
+  by the delegated popover path; retiring `HellFlyout` no longer requires
+  reopening this ADR provided the browser contract in
+  `e2e/popover-contracts.spec.ts` (modal trap/restore, non-modal no-steal,
+  boundary-inside, outside click/focus dismissal, Escape restore) stays green.
+- The ngp overlay registry does not link portaled child overlays to their
+  parent overlay across the embedded-view injector, so nested-surface
+  containment is Hell-owned: each popover panel provides the owning trigger's
+  panel scope to its descendants, registers itself with the surrounding scope,
+  and the trigger's guards consult both. `e2e/floating-dismissal.spec.ts`
+  pins the nested keep-open/close-one-layer contract.
+- The flyout entry point is retired: its consumers migrated (the audio player
+  captions strip inherits the manual exception below), its dismissal races are
+  pinned by the popover-backed floating-dismissal harness, and the unit
+  contracts formerly in the flyout spec live on as popover unit and browser
+  contracts. Copying the manual path into new surfaces is still not allowed.
+
+## Audio player captions exception (2026-07-14)
+
+The retired flyout's named manual exception transfers to the audio player's
+captions strip: a docked disclosure whose panel is consumer-rendered inline
+DOM (its recipe owns anchoring below the player), so the delegated overlay
+engine is the wrong shape. It composes `HellFloatingInteractionController`
+directly with the same rule set the flyout used — outside click, outside
+focus, and Escape with focus restore to the caption toggle — with the player
+host as the inside boundary. No other surface may copy this without reopening
+this ADR.
 
 ## Consequences
 

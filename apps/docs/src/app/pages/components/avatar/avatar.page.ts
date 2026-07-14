@@ -63,7 +63,7 @@ import avatarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         Reach for it anywhere a business app represents a person or entity compactly: table rows, list
         items, comment threads, assignee pickers, profile headers. For stacks of overlapping avatars
         (an assignee list, "who's online"), compose several <code>hell-avatar</code> elements inside
-        <code>@hell-ui/angular/avatar-group</code> instead of hand-rolling the overlap.
+        the group directives from the same entry point instead of hand-rolling the overlap.
       </p>
 
       <h2>Basic</h2>
@@ -160,7 +160,7 @@ import avatarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <ul class="hd-dont">
         <li>Don't leave <code>fallback</code> empty — a blank circle gives users nothing to read while the image loads or if it fails.</li>
         <li>Don't encode status (online, verified, at-risk) through avatar color alone; pair it with a tag or label.</li>
-        <li>Don't hand-roll avatar stacking; compose <code>hell-avatar</code> with <code>@hell-ui/angular/avatar-group</code> instead.</li>
+        <li>Don't hand-roll avatar stacking; compose <code>hell-avatar</code> with <code>hell-avatar-group</code> from the same entry point instead.</li>
       </ul>
     </article>
   `,

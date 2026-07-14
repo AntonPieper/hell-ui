@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES, type HellComboboxValue } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import type { HellPickValue } from '@hell-ui/angular/core';
 
 const GROUPS = [
   'Administrators',
@@ -61,7 +62,7 @@ export class ComboboxChipsExample {
     return query ? GROUPS.filter((group) => group.toLowerCase().includes(query)) : GROUPS;
   });
 
-  protected onValueChange(next: HellComboboxValue<string>): void {
+  protected onValueChange(next: HellPickValue<string>): void {
     this.selected.set(Array.isArray(next) ? next : []);
   }
 }

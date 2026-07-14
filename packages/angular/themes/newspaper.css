@@ -14,8 +14,7 @@
       [hellMenu],
       [hellComboboxDropdown],
       [hellSelectDropdown],
-      [hellListbox],
-      [data-hell-flyout]
+      [hellListbox]
     )[data-slot='root'],
   [data-hell-skin="newspaper"] hell-toaster[data-slot='root'] [data-slot='toast'] {
     border-width: 2px;

@@ -37,30 +37,19 @@ import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationS
         </button>
       </nav>
 
-      <!-- HellPaginationStrip in "jump" mode: root, control, controlGlyph, jump, jumpLabel, jumpSelect, jumpTotal. -->
+      <!-- HellPaginationStrip: root, control, controlGlyph. -->
       <hell-pagination
-        mode="jump"
-        [page]="jumpPage()"
+        [page]="stripPage()"
         [pageCount]="24"
-        [ui]="jumpStripUi"
-        (pageChange)="jumpPage.set($event)"
-      />
-
-      <!-- HellPaginationStrip in "previous-next" mode: covers the "status" part. -->
-      <hell-pagination
-        mode="previous-next"
-        [page]="statusPage()"
-        [pageCount]="9"
-        [ui]="statusStripUi"
-        (pageChange)="statusPage.set($event)"
+        [ui]="stripUi"
+        (pageChange)="stripPage.set($event)"
       />
     </div>
   `,
 })
 export class PaginationStylingExample {
   protected readonly composedPage = signal(3);
-  protected readonly jumpPage = signal(6);
-  protected readonly statusPage = signal(2);
+  protected readonly stripPage = signal(6);
 
   protected readonly firstUi = {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
@@ -78,18 +67,9 @@ export class PaginationStylingExample {
     root: 'rounded-hell-pill bg-hell-surface-elevated',
   };
 
-  protected readonly jumpStripUi = {
+  protected readonly stripUi = {
     root: 'rounded-hell-lg bg-hell-surface-muted p-hell-2',
     control: 'rounded-hell-pill',
     controlGlyph: 'text-hell-primary',
-    jump: 'rounded-hell-md bg-hell-surface-elevated px-hell-3 py-hell-1',
-    jumpLabel: 'font-semibold text-hell-primary',
-    jumpSelect: 'rounded-hell-md border-hell-primary',
-    jumpTotal: 'text-hell-foreground-subtle',
-  } satisfies HellPaginationStripUi;
-
-  protected readonly statusStripUi = {
-    root: 'rounded-hell-lg bg-hell-surface-muted p-hell-2',
-    status: 'font-semibold text-hell-primary',
   } satisfies HellPaginationStripUi;
 }

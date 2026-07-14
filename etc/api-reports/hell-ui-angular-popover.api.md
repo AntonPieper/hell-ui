@@ -5,11 +5,15 @@
 ```ts
 
 import { AfterViewInit } from '@angular/core';
+import * as _angular_core from '@angular/core';
+import { ElementRef } from '@angular/core';
 import { FocusOrigin } from '@angular/cdk/a11y';
-import * as i0 from '@angular/core';
-import * as i1 from 'ng-primitives/popover';
 import { InjectionToken } from '@angular/core';
-import { NgpPopoverTrigger } from 'ng-primitives/popover';
+import * as ng_primitives_portal from 'ng-primitives/portal';
+import { NgpDismissGuard } from 'ng-primitives/portal';
+import { NgpDismissGuardInput } from 'ng-primitives/portal';
+import { NgpOverlayContent } from 'ng-primitives/portal';
+import { NgpPopoverPlacement } from 'ng-primitives/popover';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
@@ -17,23 +21,38 @@ import * as tailwind_merge from 'tailwind-merge';
 // @public
 export class HellPopover {
     constructor();
+    protected readonly ariaModal: _angular_core.Signal<"false" | null>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-popover.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-popover.d.ts
-    readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPopover, "[hellPopover]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPopover; inputs: {}; outputs: {}; }]>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellPopover, never>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPopover, "[hellPopover]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopover, never>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-popover.d.ts
 //
 // @public
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
+    constructor();
+    readonly anchor: _angular_core.InputSignal<HTMLElement | ElementRef<HTMLElement> | null>;
+    readonly boundary: _angular_core.InputSignal<HTMLElement | ElementRef<HTMLElement> | null>;
+    readonly closeOnEscape: _angular_core.InputSignalWithTransform<NgpDismissGuard<KeyboardEvent>, NgpDismissGuardInput<KeyboardEvent>>;
+    readonly closeOnOutsideClick: _angular_core.InputSignalWithTransform<NgpDismissGuard<Element>, NgpDismissGuardInput<Element>>;
+    readonly container: _angular_core.InputSignal<string | HTMLElement | null>;
+    readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly flip: _angular_core.InputSignalWithTransform<boolean | ng_primitives_portal.NgpFlipOptions | undefined, ng_primitives_portal.NgpFlipInput | null>;
     hide(origin?: FocusOrigin): Promise<void>;
+    readonly offset: _angular_core.InputSignalWithTransform<ng_primitives_portal.NgpOffset, ng_primitives_portal.NgpOffsetInput | null | undefined>;
+    readonly open: _angular_core.Signal<boolean>;
+    readonly openChange: _angular_core.OutputEmitterRef<boolean>;
+    readonly placement: _angular_core.InputSignal<NgpPopoverPlacement>;
+    readonly popover: _angular_core.InputSignal<NgpOverlayContent<unknown> | undefined>;
+    readonly shift: _angular_core.InputSignalWithTransform<boolean | ng_primitives_portal.NgpShiftOptions | undefined, ng_primitives_portal.NgpShiftInput | null>;
     show(): Promise<void>;
-    protected readonly trigger: NgpPopoverTrigger<any>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPopoverTrigger, "button[hellPopoverTrigger], a[hellPopoverTrigger]", ["hellPopoverTrigger"], {}, {}, never, never, true, [{ directive: typeof i1.NgpPopoverTrigger; inputs: { "ngpPopoverTrigger": "hellPopoverTrigger"; "ngpPopoverTriggerPlacement": "placement"; "ngpPopoverTriggerOffset": "offset"; "ngpPopoverTriggerFlip": "flip"; "ngpPopoverTriggerShift": "shift"; "ngpPopoverTriggerContainer": "container"; "ngpPopoverTriggerDisabled": "disabled"; "ngpPopoverTriggerCloseOnEscape": "closeOnEscape"; "ngpPopoverTriggerCloseOnOutsideClick": "closeOnOutsideClick"; }; outputs: { "ngpPopoverTriggerOpenChange": "openChange"; }; }]>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellPopoverTrigger, never>;
+    readonly trapFocus: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPopoverTrigger, "button[hellPopoverTrigger], a[hellPopoverTrigger]", ["hellPopoverTrigger"], { "popover": { "alias": "hellPopoverTrigger"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placement": { "alias": "placement"; "required": false; "isSignal": true; }; "offset": { "alias": "offset"; "required": false; "isSignal": true; }; "flip": { "alias": "flip"; "required": false; "isSignal": true; }; "shift": { "alias": "shift"; "required": false; "isSignal": true; }; "container": { "alias": "container"; "required": false; "isSignal": true; }; "closeOnEscape": { "alias": "closeOnEscape"; "required": false; "isSignal": true; }; "closeOnOutsideClick": { "alias": "closeOnOutsideClick"; "required": false; "isSignal": true; }; "anchor": { "alias": "anchor"; "required": false; "isSignal": true; }; "boundary": { "alias": "boundary"; "required": false; "isSignal": true; }; "trapFocus": { "alias": "trapFocus"; "required": false; "isSignal": true; }; }, { "openChange": "openChange"; }, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopoverTrigger, never>;
 }
 
 // (No @packageDocumentation comment for this package)

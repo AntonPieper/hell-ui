@@ -26,8 +26,6 @@ export const HELL_ALERT_LABELS: InjectionToken<HellAlertLabels> = hellCreateLabe
 
 /** Severity of an alert; drives its Semantic Theme Token color scheme and default glyph. */
 export type HellAlertVariant = 'info' | 'success' | 'warning' | 'danger';
-/** Placement layout of an alert: an inline card, or a full-bleed app-level banner. */
-export type HellAlertLayout = 'inline' | 'banner';
 
 /** Public parts of the HellAlert module, styleable through its Part Style Map. */
 export type HellAlertPart = 'root' | 'icon' | 'content';
@@ -40,8 +38,7 @@ const HELL_ALERT_RECIPE = {
     '[--_hell-alert-surface:var(--color-hell-info-soft)] [--_hell-alert-border:var(--color-hell-info)] [--_hell-alert-accent:var(--color-hell-info-strong)] ' +
     'data-[variant=success]:[--_hell-alert-surface:var(--color-hell-success-soft)] data-[variant=success]:[--_hell-alert-border:var(--color-hell-success)] data-[variant=success]:[--_hell-alert-accent:var(--color-hell-success-strong)] ' +
     'data-[variant=warning]:[--_hell-alert-surface:var(--color-hell-warning-soft)] data-[variant=warning]:[--_hell-alert-border:var(--color-hell-warning)] data-[variant=warning]:[--_hell-alert-accent:var(--color-hell-warning-strong)] ' +
-    'data-[variant=danger]:[--_hell-alert-surface:var(--color-hell-danger-soft)] data-[variant=danger]:[--_hell-alert-border:var(--color-hell-danger)] data-[variant=danger]:[--_hell-alert-accent:var(--color-hell-danger-strong)] ' +
-    'data-[layout=banner]:w-full data-[layout=banner]:rounded-none data-[layout=banner]:border-x-0',
+    'data-[variant=danger]:[--_hell-alert-surface:var(--color-hell-danger-soft)] data-[variant=danger]:[--_hell-alert-border:var(--color-hell-danger)] data-[variant=danger]:[--_hell-alert-accent:var(--color-hell-danger-strong)]',
   icon: 'mt-px flex h-5 w-5 flex-none items-center justify-center text-[var(--_hell-alert-accent)] [&>svg]:h-full [&>svg]:w-full',
   content: 'flex min-w-0 flex-1 flex-col gap-hell-1',
 } satisfies HellRecipe<HellAlertPart>;
@@ -71,8 +68,9 @@ export class HellAlertIcon {}
 
 /**
  * Persistent inline message with severity variants, an optional default glyph,
- * projected title/description/actions, an optional dismiss button, and a
- * full-width banner layout.
+ * projected title/description/actions, and an optional dismiss button. For a
+ * full-bleed app-level banner, refine the root through the Part Style Map:
+ * `ui="w-full rounded-none border-x-0"`.
  *
  * The alert carries no live-region semantics by default so pages with several
  * alerts do not produce announcement storms; statically rendered alerts read
@@ -93,7 +91,6 @@ export class HellAlertIcon {}
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-variant]': 'variant()',
-    '[attr.data-layout]': 'layout()',
   },
   template: `
     @if (showIcon()) {
@@ -147,8 +144,6 @@ export class HellAlert {
 
   /** Severity of the alert; drives colors and the default glyph. Defaults to `info`. */
   readonly variant = input<HellAlertVariant>('info');
-  /** Placement layout: inline card or full-bleed `banner`. Defaults to `inline`. */
-  readonly layout = input<HellAlertLayout>('inline');
   /**
    * Whether to render the icon slot. Defaults to `true`. Set to `false` to
    * remove the default glyph (and any projected `hellAlertIcon` content).

@@ -45,16 +45,9 @@ import { PageHeader } from '../../../shared/page-header';
           <tr>
             <td><a routerLink="/components/popover">Popover</a></td>
             <td>Click</td>
-            <td>Yes</td>
+            <td>Yes (default) / No with <code>trapFocus="false"</code></td>
             <td>Non-modal</td>
-            <td>Outside click, Escape</td>
-          </tr>
-          <tr>
-            <td><a routerLink="/components/flyout">Flyout</a></td>
-            <td>Click</td>
-            <td>No</td>
-            <td>Non-modal</td>
-            <td>Light-dismiss (outside click / focus, Escape)</td>
+            <td>Outside click, Escape; non-modal panels also dismiss on outside focus</td>
           </tr>
           <tr>
             <td><a routerLink="/components/dialog">Dialog</a></td>
@@ -83,26 +76,26 @@ import { PageHeader } from '../../../shared/page-header';
         keyboard focus. It has <code>role="tooltip"</code>, no focus trap, and no interactive
         content — it can never hold the one thing a user actually needs. Use it for an icon button's
         name, a truncated label's full text, or a keyboard shortcut. The trigger must make sense on
-        its own; the tooltip is supplementary. Anything interactive belongs in a popover or flyout.
+        its own; the tooltip is supplementary. Anything interactive belongs in a popover.
       </p>
 
       <h2>Popover</h2>
       <p>
-        An <strong>anchored, focus-trapping</strong> surface with <code>role="dialog"</code>, richer
-        than a tooltip and lighter than a modal dialog. Because it traps focus while open, reach for
-        it whenever the anchored content itself needs keyboard interaction — a profile summary with
-        actions, an inline confirmation, a small settings form. It stays non-modal, so the page
-        underneath is not blocked; dismissal is outside click and Escape.
+        An <strong>anchored</strong> surface with <code>role="dialog"</code>, richer than a tooltip
+        and lighter than a modal dialog. By default it <strong>traps focus</strong> while open —
+        reach for that whenever the anchored content itself needs keyboard interaction: a profile
+        summary with actions, an inline confirmation, a small settings form. It stays non-modal, so
+        the page underneath is not blocked; dismissal is outside click and Escape.
       </p>
-
-      <h2>Flyout</h2>
       <p>
-        An <strong>anchored, non-modal, light-dismiss</strong> surface that
-        <strong>does not trap focus</strong>. It carries <code>role="dialog"</code> with
-        <code>aria-modal="false"</code>. Reach for it precisely when the surrounding context must
-        stay interactive while the panel is open — a toolbar filter panel, an audio player's caption
-        settings, an inspector pinned beside a row. Because a stray click elsewhere dismisses it,
-        never place a critical confirmation flow in a flyout.
+        With <code>[trapFocus]="false"</code> the same surface becomes a
+        <strong>light-dismiss panel that does not trap focus</strong>
+        (<code>aria-modal="false"</code>). Reach for it precisely when the surrounding context must
+        stay interactive while the panel is open — a toolbar filter panel, a volume slider, an
+        inspector pinned beside a row. Pass <code>boundary</code> so sibling controls count as
+        inside, and <code>anchor</code> to position against a different element than the trigger.
+        Because a stray click elsewhere dismisses it, never place a critical confirmation flow in a
+        non-modal panel.
       </p>
 
       <h2>Dialog</h2>
@@ -122,8 +115,8 @@ import { PageHeader } from '../../../shared/page-header';
         typeahead, and selection semantics: <a routerLink="/components/menu">menu</a> for command and
         action lists, <a routerLink="/components/select">select</a> for choosing one option from a
         closed set, and <a routerLink="/components/combobox">combobox</a> for filtering a set as you
-        type. Don't reach for them to render arbitrary anchored content — that's what popover and
-        flyout are for.
+        type. Don't reach for them to render arbitrary anchored content — that's what popover is
+        for.
       </p>
 
       <h2>How to choose</h2>
@@ -135,7 +128,7 @@ import { PageHeader } from '../../../shared/page-header';
         </li>
         <li>
           Anchored content, but nearby controls must stay usable?
-          <a routerLink="/components/flyout">Flyout</a>.
+          <a routerLink="/components/popover">Popover</a> with <code>[trapFocus]="false"</code>.
         </li>
         <li>
           A decision or task that should block everything else until resolved?

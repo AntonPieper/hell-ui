@@ -41,6 +41,7 @@ export const HELL_FLOATING_SCOPE = new InjectionToken<HellFloatingScope>('HELL_F
  */
 export class HellFloatingScopeRegistry implements HellFloatingScope {
   private readonly elements = new Set<HTMLElement>();
+  private readonly childScopes = new Set<HellFloatingScope>();
 
   constructor(private readonly root?: () => HTMLElement | null | undefined) {}
 
@@ -52,6 +53,16 @@ export class HellFloatingScopeRegistry implements HellFloatingScope {
     this.elements.delete(element);
   }
 
+  /**
+   * Adopt a nested surface's own scope so containment is transitive: targets
+   * inside any depth of nested floating surfaces count as inside this scope.
+   * Returns the release function for the child's teardown.
+   */
+  adoptChildScope(scope: HellFloatingScope): () => void {
+    this.childScopes.add(scope);
+    return () => this.childScopes.delete(scope);
+  }
+
   containsFloatingTarget(target: EventTarget | Node | null): boolean {
     const node = hellFloatingTargetNode(target);
     if (!node) return false;
@@ -61,6 +72,10 @@ export class HellFloatingScopeRegistry implements HellFloatingScope {
 
     for (const element of this.elements) {
       if (element.contains(node)) return true;
+    }
+
+    for (const scope of this.childScopes) {
+      if (scope.containsFloatingTarget(node)) return true;
     }
 
     return false;

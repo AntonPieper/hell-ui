@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_COPY, HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
@@ -8,7 +8,7 @@ import { HellButton } from '@hell-ui/angular/button';
   imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton],
   template: `
     <div class="h-72 rounded-hell-lg border border-hell-border bg-hell-surface">
-      <hell-empty-state preset="noResults">
+      <hell-empty-state glyph="noResults" [title]="copy.title">
         <span hellEmptyStateDescription>
           No customers match "{{ query() }}". Try a different search or clear the filters.
         </span>
@@ -20,6 +20,7 @@ import { HellButton } from '@hell-ui/angular/button';
   `,
 })
 export class EmptyStateNoResultsExample {
+  protected readonly copy = HELL_EMPTY_STATE_COPY.noResults;
   protected readonly query = signal('acme industrial holdings');
 
   protected clear(): void {

@@ -23,14 +23,13 @@ export class HellAlert {
     dismiss(): void;
     readonly dismissed: OutputEmitterRef<void>;
     protected readonly hasCustomIcon: i0.Signal<boolean>;
-    readonly layout: i0.InputSignal<HellAlertLayout>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-alert.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellAlertPart>;
     readonly showIcon: i0.InputSignalWithTransform<boolean, unknown>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-alert.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellAlertPart>>;
     readonly variant: i0.InputSignal<HellAlertVariant>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellAlert, "hell-alert", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "layout": { "alias": "layout"; "required": false; "isSignal": true; }; "showIcon": { "alias": "showIcon"; "required": false; "isSignal": true; }; }, { "dismissed": "dismissed"; }, ["projectedIcon"], ["[hellAlertIcon]", "*", "[hellAlertDismiss]"], true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellAlert, "hell-alert", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "showIcon": { "alias": "showIcon"; "required": false; "isSignal": true; }; }, { "dismissed": "dismissed"; }, ["projectedIcon"], ["[hellAlertIcon]", "*", "[hellAlertDismiss]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlert, never>;
 }
 
@@ -71,9 +70,6 @@ export class HellAlertIcon {
 export interface HellAlertLabels {
     readonly dismiss: string;
 }
-
-// @public
-export type HellAlertLayout = 'inline' | 'banner';
 
 // @public
 export type HellAlertPart = 'root' | 'icon' | 'content';

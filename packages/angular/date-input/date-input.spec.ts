@@ -105,7 +105,7 @@ class DateInputBlurFormHost {
           ? { valid: true, value: new Date(2026, 0, 2) }
           : { valid: false },
       format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
-      coerce: (value) => (value instanceof Date && value.getFullYear() >= 2026 ? value : null),
+      normalize: (value) => (value instanceof Date && value.getFullYear() >= 2026 ? value : null),
       isSameValue: (a, b) => a?.getTime() === b?.getTime(),
     }),
   ],
@@ -514,7 +514,7 @@ describe('HellDateInput', () => {
   });
 
   it('coerces external Date values to local midnight', () => {
-    const coerced = HELL_DEFAULT_DATE_INPUT_ADAPTER.coerce!(new Date(2026, 3, 22, 16, 45, 30, 12));
+    const coerced = HELL_DEFAULT_DATE_INPUT_ADAPTER.normalize!(new Date(2026, 3, 22, 16, 45, 30, 12));
 
     expect(formatDate(coerced)).toBe('2026-04-22');
     expect(coerced?.getHours()).toBe(0);

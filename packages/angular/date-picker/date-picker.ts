@@ -76,17 +76,12 @@ export type HellDatePickerPart =
 /** Part Style Map accepted by the HellDatePicker `ui` input. */
 export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
-/** Public parts of the HellDateRangePicker module, styleable through its Part Style Map. */
-export type HellDateRangePickerPart =
-  | 'root'
-  | 'header'
-  | 'nav'
-  | 'navButton'
-  | 'label'
-  | 'grid'
-  | 'weekdayHeader'
-  | 'cell'
-  | 'dateButton';
+/**
+ * Public parts of the HellDateRangePicker module. The range picker renders the
+ * same calendar chrome as HellDatePicker (they share one template), so one
+ * part family serves both and cannot drift.
+ */
+export type HellDateRangePickerPart = HellDatePickerPart;
 
 /** Part Style Map accepted by the HellDateRangePicker `ui` input. */
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
