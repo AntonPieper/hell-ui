@@ -7,6 +7,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The Anchored Surface Contract is now a documented domain term, and the menu
+  and tooltip triggers conform to it: both gain a reactive `open()` signal, an
+  `(openChange)` boolean output, and an `exportAs` matching the directive name;
+  the tooltip trigger adds `show()`/`hide()` and the menu trigger adds `show()`
+  (menu closing stays engine-owned by design). Positioning and dismissal input
+  names were already aligned across popover, dialog, menu, and tooltip; the
+  contract in CONTEXT.md now pins them, including dialog's result-carrying
+  `(closed)` variation. Closes #170. Evidence: menu and tooltip unit contract
+  tests, unchanged e2e keyboard suites.
 - The popover absorbs the flyout's anchored-surface capabilities: the trigger
   gains `trapFocus` (default `true`), `anchor` (position against a different
   element than the trigger), `boundary` (widen the light-dismiss "inside"

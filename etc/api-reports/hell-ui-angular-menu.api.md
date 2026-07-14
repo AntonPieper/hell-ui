@@ -144,8 +144,12 @@ export class HellMenuSeparator {
 //
 // @public
 export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
+    constructor();
+    readonly open: Signal<boolean>;
+    readonly openChange: i0.OutputEmitterRef<boolean>;
+    show(): void;
     protected readonly trigger: NgpMenuTrigger<any>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuTrigger, "button[hellMenuTrigger], a[hellMenuTrigger]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpMenuTrigger; inputs: { "ngpMenuTrigger": "hellMenuTrigger"; "ngpMenuTriggerPlacement": "placement"; "ngpMenuTriggerOffset": "offset"; "ngpMenuTriggerDisabled": "disabled"; "ngpMenuTriggerContainer": "container"; "ngpMenuTriggerFlip": "flip"; "ngpMenuTriggerShift": "shift"; "ngpMenuTriggerScrollBehavior": "scrollBehavior"; "ngpMenuTriggerCooldown": "cooldown"; "ngpMenuTriggerContext": "context"; "ngpMenuTriggerOpenTriggers": "openTriggers"; "ngpMenuTriggerShowDelay": "showDelay"; "ngpMenuTriggerHideDelay": "hideDelay"; }; outputs: {}; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuTrigger, "button[hellMenuTrigger], a[hellMenuTrigger]", ["hellMenuTrigger"], {}, { "openChange": "openChange"; }, never, never, true, [{ directive: typeof i1.NgpMenuTrigger; inputs: { "ngpMenuTrigger": "hellMenuTrigger"; "ngpMenuTriggerPlacement": "placement"; "ngpMenuTriggerOffset": "offset"; "ngpMenuTriggerDisabled": "disabled"; "ngpMenuTriggerContainer": "container"; "ngpMenuTriggerFlip": "flip"; "ngpMenuTriggerShift": "shift"; "ngpMenuTriggerScrollBehavior": "scrollBehavior"; "ngpMenuTriggerCooldown": "cooldown"; "ngpMenuTriggerContext": "context"; "ngpMenuTriggerOpenTriggers": "openTriggers"; "ngpMenuTriggerShowDelay": "showDelay"; "ngpMenuTriggerHideDelay": "hideDelay"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuTrigger, never>;
 }
 
@@ -159,9 +163,9 @@ export class HellSubmenuTrigger {
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-menu.d.ts:196:5 - (ae-undocumented) Missing documentation for "isSelected".
-// types/hell-ui-angular-menu.d.ts:197:5 - (ae-undocumented) Missing documentation for "toggle".
-// types/hell-ui-angular-menu.d.ts:203:15 - (ae-undocumented) Missing documentation for "HELL_MENU_DIRECTIVES".
+// types/hell-ui-angular-menu.d.ts:204:5 - (ae-undocumented) Missing documentation for "isSelected".
+// types/hell-ui-angular-menu.d.ts:205:5 - (ae-undocumented) Missing documentation for "toggle".
+// types/hell-ui-angular-menu.d.ts:211:15 - (ae-undocumented) Missing documentation for "HELL_MENU_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

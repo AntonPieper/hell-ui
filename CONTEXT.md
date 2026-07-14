@@ -78,6 +78,10 @@ _Avoid_: Central `HellLabels` bag, per-module label string inputs, `provideHell<
 **Floating Interaction**
 Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, selects, comboboxes, and omnibar child overlays.
 
+**Anchored Surface Contract**
+The shared trigger Interface for Hell's anchored floating surfaces. Positioned triggers expose `placement`, `offset`, `flip`, `shift`, `container`, and `disabled` under those exact names; dismissable surfaces expose `closeOnEscape` and `closeOnOutsideClick` (guard functions where the engine supports them — there is no other outside-dismiss input name); stateful triggers expose a reactive `open` signal, an `(openChange)` boolean output, `show()`/`hide()` methods, and an `exportAs` matching the directive name. Each surface implements the applicable subset: tooltip omits dismissal inputs by design, menu closing stays engine-owned (item select, outside click, Escape — the menu trigger exposes `show()` but no `hide()`), and dialog replaces `openChange` with its result-carrying `(closed)` output.
+_Avoid_: closeOnOutsideInteraction, per-surface trigger input dialects.
+
 **Floating Scope**
 The set of DOM targets that count as "inside" one floating interaction, even when a floating surface is rendered outside the logical host.
 

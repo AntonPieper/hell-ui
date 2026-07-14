@@ -6,6 +6,8 @@ import {
   ElementRef,
   Renderer2,
   afterNextRender,
+  computed,
+  effect,
   inject,
   input,
   output,
@@ -20,6 +22,7 @@ import {
   NgpMenuItemRadioGroup,
   NgpMenuTrigger,
   NgpSubmenuTrigger,
+  injectMenuTriggerState,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
@@ -76,6 +79,7 @@ const HELL_MENU_TYPEAHEAD_TIMEOUT_MS = 500;
 /** Trigger that opens a `[hellMenu]` when activated. Apply to a `<button>` or `<a>`. */
 @Directive({
   selector: 'button[hellMenuTrigger], a[hellMenuTrigger]',
+  exportAs: 'hellMenuTrigger',
   hostDirectives: [
     {
       directive: NgpMenuTrigger,
@@ -109,6 +113,29 @@ const HELL_MENU_TYPEAHEAD_TIMEOUT_MS = 500;
 export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
   /** Underlying ng-primitives menu trigger state. */
   protected readonly trigger = inject(NgpMenuTrigger);
+  private readonly triggerState = injectMenuTriggerState();
+
+  /** Whether the menu is currently open (Anchored Surface Contract). */
+  readonly open = computed(() => this.triggerState().open());
+  /** Emits the new open state whenever the menu opens or closes. */
+  readonly openChange = output<boolean>();
+
+  constructor() {
+    super();
+    let previousOpen = false;
+    effect(() => {
+      const open = this.open();
+      if (open !== previousOpen) {
+        previousOpen = open;
+        this.openChange.emit(open);
+      }
+    });
+  }
+
+  /** Opens the menu. Closing stays engine-owned: item select, outside click, or Escape. */
+  show(): void {
+    this.triggerState().show();
+  }
 }
 
 /** Submenu trigger for nested menus. Apply to a `[hellMenuItem]` whose

@@ -195,6 +195,11 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         </li>
         <li><code>showOnOverflow</code>: <code>boolean</code>, default <code>false</code> — show the tooltip only when the trigger's own content is visually truncated.</li>
         <li><code>hoverableContent</code>: <code>boolean</code>, default <code>false</code> — keep the tooltip open while the pointer is over the tooltip surface itself.</li>
+        <li><code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new open state.</li>
+        <li>
+          Exported as <code>hellTooltipTrigger</code> with the Anchored Surface Contract state:
+          a reactive <code>open()</code> signal plus <code>show()</code> and <code>hide()</code>.
+        </li>
       </ul>
 
       <h3><code>hellTooltip</code></h3>

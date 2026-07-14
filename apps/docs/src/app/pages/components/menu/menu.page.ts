@@ -250,6 +250,12 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         </li>
         <li><code>cooldown</code>, <code>showDelay</code>, <code>hideDelay</code>: <code>number</code> (ms). Default <code>0</code>.</li>
         <li><code>context</code>: value passed to the menu content.</li>
+        <li><code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new open state.</li>
+        <li>
+          Exported as <code>hellMenuTrigger</code> with the Anchored Surface Contract state: a
+          reactive <code>open()</code> signal plus <code>show()</code>. Closing stays engine-owned
+          (item select, outside click, Escape).
+        </li>
       </ul>
       <p><strong><code>hellSubmenuTrigger</code></strong> — on a <code>[hellMenuItem]</code> host:</p>
       <ul>
