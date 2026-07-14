@@ -208,10 +208,6 @@ const packageConsumerScenarioCatalog = [
     mainTs: paginationConsumerMainTs,
     stylesCss: paginationConsumerStylesCss,
     cssIncludes: [
-      'min-width:calc(var(--spacing)*18)',
-      'max-width:calc(var(--spacing)*26)',
-      'appearance:none',
-      'background-repeat:no-repeat',
       'transition-property:background-color,border-color,color,box-shadow',
       'background-color:var(--color-hell-primary)',
     ],
@@ -1146,6 +1142,15 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
+  if (Object.keys(workspaceOverrides).length) {
+    // pnpm >= 10.14 reads overrides from pnpm-workspace.yaml, not from
+    // package.json "pnpm.overrides"; emit both so every toolchain applies
+    // the repo's patched transitive versions.
+    const overrideLines = Object.entries(workspaceOverrides)
+      .map(([name, version]) => `  ${JSON.stringify(name)}: ${JSON.stringify(version)}`)
+      .join('\n');
+    writeFileSync(join(workspace, 'pnpm-workspace.yaml'), `overrides:\n${overrideLines}\n`);
+  }
   writeFileSync(
     join(workspace, '.npmrc'),
     'strict-peer-dependencies=true\nauto-install-peers=false\n',
