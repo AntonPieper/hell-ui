@@ -833,35 +833,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/empty-state',
  detail:'components/empty-state/examples/no-data.example.ts',
  terms:
-'empty-state no-data components/empty-state/examples/no-data.example components/empty-state hell-empty-state hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton preset noData create your first invoice glyph media title description actions blank region',
+'empty-state no-data components/empty-state/examples/no-data.example components/empty-state hell-empty-state hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton glyph noData HELL_EMPTY_STATE_COPY create your first invoice media title description actions blank region',
  },
  {
  title:'Empty State: No results',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/no-results.example.ts',
  terms:
-'empty-state no-results components/empty-state/examples/no-results.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset noResults clear filters filtered search no matches blank region',
+'empty-state no-results components/empty-state/examples/no-results.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph noResults HELL_EMPTY_STATE_COPY clear filters filtered search no matches blank region',
  },
  {
  title:'Empty State: Error',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/error.example.ts',
  terms:
-'empty-state error components/empty-state/examples/error.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset error retry failed load in-place recovery',
+'empty-state error components/empty-state/examples/error.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph error HELL_EMPTY_STATE_COPY retry failed load in-place recovery',
  },
  {
  title:'Empty State: Forbidden',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/forbidden.example.ts',
  terms:
-'empty-state forbidden components/empty-state/examples/forbidden.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton preset forbidden permission access denied request access',
+'empty-state forbidden components/empty-state/examples/forbidden.example components/empty-state hell-empty-state hellEmptyStateDescription hellEmptyStateActions hellButton glyph forbidden HELL_EMPTY_STATE_COPY permission access denied request access',
  },
  {
  title:'Empty State: Custom content',
  path:'/components/empty-state',
  detail:'components/empty-state/examples/custom-content.example.ts',
  terms:
-'empty-state custom-content components/empty-state/examples/custom-content.example components/empty-state hell-empty-state hellEmptyStateMedia hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton hell-icon headingLevel projection override illustration HELL_EMPTY_STATE_LABELS label contract',
+'empty-state custom-content components/empty-state/examples/custom-content.example components/empty-state hell-empty-state hellEmptyStateMedia hellEmptyStateTitle hellEmptyStateDescription hellEmptyStateActions hellButton hell-icon headingLevel projection override illustration custom copy',
  },
  {
  title:'Empty State: Conditional content',

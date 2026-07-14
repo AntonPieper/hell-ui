@@ -12,13 +12,15 @@ import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
 // @public
+export const HELL_EMPTY_STATE_COPY: Record<HellEmptyStateGlyph, HellEmptyStateCopy>;
+
+// @public
 export const HELL_EMPTY_STATE_DIRECTIVES: readonly [typeof HellEmptyState, typeof HellEmptyStateMedia, typeof HellEmptyStateTitle, typeof HellEmptyStateDescription, typeof HellEmptyStateActions];
 
 // @public
-export const HELL_EMPTY_STATE_LABELS: InjectionToken<HellEmptyStateLabels>;
-
-// @public
 export class HellEmptyState {
+    readonly description: i0.InputSignal<string | null>;
+    readonly glyph: i0.InputSignal<HellEmptyStateGlyph | null>;
     protected readonly hasActions: i0.Signal<boolean>;
     protected readonly hasCustomDescription: i0.Signal<boolean>;
     protected readonly hasCustomMedia: i0.Signal<boolean>;
@@ -26,12 +28,10 @@ export class HellEmptyState {
     readonly headingLevel: i0.InputSignal<HellEmptyStateHeadingLevel | null>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-empty-state.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellEmptyStatePart>;
-    readonly preset: i0.InputSignal<HellEmptyStatePreset | null>;
-    protected readonly resolvedDescription: i0.Signal<string | null>;
-    protected readonly resolvedTitle: i0.Signal<string | null>;
+    readonly title: i0.InputSignal<string | null>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-empty-state.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellEmptyStatePart>>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellEmptyState, "hell-empty-state", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "preset": { "alias": "preset"; "required": false; "isSignal": true; }; "headingLevel": { "alias": "headingLevel"; "required": false; "isSignal": true; }; }, {}, ["customMedia", "customTitle", "customDescription", "customActions"], ["[hellEmptyStateMedia]", "[hellEmptyStateTitle]", "[hellEmptyStateDescription]", "[hellEmptyStateActions]"], true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellEmptyState, "hell-empty-state", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "glyph": { "alias": "glyph"; "required": false; "isSignal": true; }; "title": { "alias": "title"; "required": false; "isSignal": true; }; "description": { "alias": "description"; "required": false; "isSignal": true; }; "headingLevel": { "alias": "headingLevel"; "required": false; "isSignal": true; }; }, {}, ["customMedia", "customTitle", "customDescription", "customActions"], ["[hellEmptyStateMedia]", "[hellEmptyStateTitle]", "[hellEmptyStateDescription]", "[hellEmptyStateActions]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellEmptyState, never>;
 }
 
@@ -42,25 +42,22 @@ export class HellEmptyStateActions {
 }
 
 // @public
+export interface HellEmptyStateCopy {
+    readonly description: string;
+    readonly title: string;
+}
+
+// @public
 export class HellEmptyStateDescription {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellEmptyStateDescription, "[hellEmptyStateDescription]", never, {}, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellEmptyStateDescription, never>;
 }
 
 // @public
-export type HellEmptyStateHeadingLevel = 2 | 3 | 4 | 5 | 6;
+export type HellEmptyStateGlyph = 'noData' | 'noResults' | 'error' | 'forbidden';
 
 // @public
-export interface HellEmptyStateLabels {
-    readonly errorDescription: string;
-    readonly errorTitle: string;
-    readonly forbiddenDescription: string;
-    readonly forbiddenTitle: string;
-    readonly noDataDescription: string;
-    readonly noDataTitle: string;
-    readonly noResultsDescription: string;
-    readonly noResultsTitle: string;
-}
+export type HellEmptyStateHeadingLevel = 2 | 3 | 4 | 5 | 6;
 
 // @public
 export class HellEmptyStateMedia {
@@ -70,9 +67,6 @@ export class HellEmptyStateMedia {
 
 // @public
 export type HellEmptyStatePart = 'root' | 'media' | 'title' | 'description' | 'actions';
-
-// @public
-export type HellEmptyStatePreset = 'noData' | 'noResults' | 'error' | 'forbidden';
 
 // @public
 export class HellEmptyStateTitle {

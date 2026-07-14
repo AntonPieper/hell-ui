@@ -49,13 +49,13 @@ import { PageHeader } from '../../../shared/page-header';
         stylesPath="@hell-ui/angular/empty-state/styles.css"
       >
         A centered media, title, description, and actions presentation for any region that has
-        nothing to show — with presets and calls to action so blank screens still move the user
+        nothing to show — with ready-made glyphs, reusable copy, and calls to action so blank screens still move the user
         forward.
       </hd-page-header>
       <p>
         <code>hell-empty-state</code> is one owned-anatomy component with five Public Parts —
         <code>root</code>, <code>media</code>, <code>title</code>, <code>description</code>, and
-        <code>actions</code>. Set a <code>preset</code> to get a sensible default glyph and copy for
+        <code>actions</code>. Set a <code>glyph</code> plus the <code>title</code>/<code>description</code> inputs — spread <code>HELL_EMPTY_STATE_COPY</code> for ready-made English strings — for
         the four situations blank regions actually fall into, then project your own title,
         description, media, or actions to override any part. The component owns its own centering
         and fills the block you drop it into, so call sites never add margin hacks.
@@ -68,16 +68,16 @@ import { PageHeader } from '../../../shared/page-header';
         step.
       </p>
 
-      <h2>Presets and their calls to action</h2>
+      <h2>Situations and their calls to action</h2>
       <p>
-        Each preset answers a different question, so the copy and the call to action differ. Pick
-        the preset that matches <em>why</em> the region is empty; the consumer states the situation,
+        Each situation answers a different question, so the copy and the call to action differ. Pick
+        the glyph and copy that match <em>why</em> the region is empty; the consumer states the situation,
         the component does not guess it.
       </p>
 
       <h3>No data — "Create your first…"</h3>
       <p>
-        Use <code>preset="noData"</code> when a feature is empty because nothing has been created
+        Use the <code>noData</code> glyph and copy when a feature is empty because nothing has been created
         yet. Invite the first item rather than reporting absence.
       </p>
       <hd-example-tabs [code]="emptyStateNoDataExampleCode">
@@ -86,8 +86,8 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h3>No results — "Clear filters"</h3>
       <p>
-        Use <code>preset="noResults"</code> when data exists but the current search or filters
-        excluded all of it. The dedicated preset stops users concluding their data is gone; offer a
+        Use the <code>noResults</code> glyph and copy when data exists but the current search or filters
+        excluded all of it. The dedicated copy stops users concluding their data is gone; offer a
         way back to everything.
       </p>
       <hd-example-tabs [code]="emptyStateNoResultsExampleCode">
@@ -96,7 +96,7 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h3>Error — "Retry"</h3>
       <p>
-        Use <code>preset="error"</code> when a load failed. Keeping recovery in place beats sending
+        Use the <code>error</code> glyph and copy when a load failed. Keeping recovery in place beats sending
         the user to reload the page or hunt for a toast.
       </p>
       <hd-example-tabs [code]="emptyStateErrorExampleCode">
@@ -105,7 +105,7 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h3>Forbidden — "Request access"</h3>
       <p>
-        Use <code>preset="forbidden"</code> when the user lacks permission, so missing rights do not
+        Use the <code>forbidden</code> glyph and copy when the user lacks permission, so missing rights do not
         read as missing data.
       </p>
       <hd-example-tabs [code]="emptyStateForbiddenExampleCode">
@@ -114,13 +114,13 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h2>Custom media, heading level, and multiple actions</h2>
       <p>
-        Skip <code>preset</code> and project everything yourself for high-traffic screens: a branded
+        Skip the inputs and project everything yourself for high-traffic screens: a branded
         glyph or illustration through <code>hellEmptyStateMedia</code>, your own copy through
         <code>hellEmptyStateTitle</code> and <code>hellEmptyStateDescription</code>, and one or more
         buttons through <code>hellEmptyStateActions</code>. A projected title owns its own
         semantics — project a real heading element (an <code>&lt;h2&gt;</code> here) when the empty
         state stands in for a whole region; <code>headingLevel</code> promotes only the built-in
-        preset title, so heading roles are never doubled.
+        input-driven title, so heading roles are never doubled.
       </p>
       <hd-example-tabs [code]="emptyStateCustomContentExampleCode">
         <app-empty-state-custom-content-example />
@@ -148,9 +148,9 @@ import { PageHeader } from '../../../shared/page-header';
         The <a href="/components/table">TanStack Table shell</a>'s built-in empty chrome
         (<code>HellDefaultTableEmptyState</code>, registered through
         <code>provideHellTableStatusViews()</code>) is this component with
-        <code>preset="noData"</code>, so tables and non-table regions speak one empty-state language.
+        the <code>noData</code> glyph and copy, so tables and non-table regions speak one empty-state language.
         Project a <code>hellTableShellEmpty</code> template to swap in the
-        <code>noResults</code> preset and a "clear filters" action when you can tell a filtered table
+        <code>noResults</code> copy and a "clear filters" action when you can tell a filtered table
         from a truly empty one.
       </p>
 
@@ -183,7 +183,7 @@ import { PageHeader } from '../../../shared/page-header';
           <tr>
             <td><code>title</code></td>
             <td><code>title</code></td>
-            <td>The emphasized headline — preset default or projected content.</td>
+            <td>The emphasized headline — the title input or projected content.</td>
           </tr>
           <tr>
             <td><code>description</code></td>
@@ -204,13 +204,19 @@ import { PageHeader } from '../../../shared/page-header';
           <code>&lt;hell-empty-state&gt;</code> — the owned-anatomy component.
           <ul>
             <li>
-              <code>preset</code>:
-              <code>'noData' | 'noResults' | 'error' | 'forbidden' | null</code>. Selects the
-              default glyph and default title/description strings. Default <code>null</code>.
+              <code>glyph</code>:
+              <code>'noData' | 'noResults' | 'error' | 'forbidden' | null</code>. Picks the
+              built-in dependency-free SVG glyph for the <code>media</code> part. Default
+              <code>null</code>.
+            </li>
+            <li>
+              <code>title</code>, <code>description</code>: <code>string | null</code>. The
+              visible strings — pass your app copy or spread
+              <code>HELL_EMPTY_STATE_COPY</code> (ready-made English pairs per glyph).
             </li>
             <li>
               <code>headingLevel</code>: <code>2 | 3 | 4 | 5 | 6 | null</code>. Promotes the
-              built-in preset title to a heading (via <code>role="heading"</code> and
+              input-driven title to a heading (via <code>role="heading"</code> and
               <code>aria-level</code>). Default <code>null</code> keeps it as non-semantic emphasis.
               Ignored when a <code>hellEmptyStateTitle</code> is projected — project a real heading
               element instead.
@@ -225,13 +231,13 @@ import { PageHeader } from '../../../shared/page-header';
         <li>
           <code>[hellEmptyStateMedia]</code>, <code>[hellEmptyStateTitle]</code>,
           <code>[hellEmptyStateDescription]</code>, <code>[hellEmptyStateActions]</code> — projection
-          markers. Content projected with a marker always wins over the preset default for that
+          markers. Content projected with a marker always wins over the inputs for that
           part.
         </li>
         <li>
-          <code>provideHellLabels(HELL_EMPTY_STATE_LABELS, overrides)</code> — override any subset of the preset
-          title/description strings (<code>HellEmptyStateLabels</code>) for an injector scope.
-          Exposed token: <code>HELL_EMPTY_STATE_LABELS</code>.
+          <code>HELL_EMPTY_STATE_COPY</code> — ready-made <code>HellEmptyStateCopy</code>
+          title/description pairs for each glyph. Copy is plain data passed through the inputs,
+          so app localization owns the strings.
         </li>
         <li>
           <code>HELL_EMPTY_STATE_DIRECTIVES</code>: array of the component plus all four projection
@@ -250,7 +256,7 @@ import { PageHeader } from '../../../shared/page-header';
           carry the meaning.
         </li>
         <li>
-          The preset title is a non-semantic emphasized element by default. Set
+          The input-driven title is a non-semantic emphasized element by default. Set
           <code>headingLevel</code> when the empty state stands in for a whole region so it joins
           the page's heading outline without skipping levels. A projected title owns its own
           semantics: use a real heading element, and the wrapper stays inert so heading roles are
@@ -264,9 +270,9 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Match the preset to the reason the region is empty, then keep or refine its call to action.</li>
+        <li>Match the glyph and copy to the reason the region is empty, then keep or refine its call to action.</li>
         <li>Use <code>noResults</code> for a filtered-to-empty view so users do not think their data vanished.</li>
-        <li>Give failed loads the <code>error</code> preset with an in-place retry instead of a silent blank.</li>
+        <li>Give failed loads the <code>error</code> glyph and copy with an in-place retry instead of a silent blank.</li>
         <li>Drop the component straight into a table cell, card, or route region and let it center itself.</li>
       </ul>
 

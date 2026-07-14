@@ -15,7 +15,7 @@ import { HellIcon } from '@hell-ui/angular/icon';
       <hell-empty-state>
         <hell-icon hellEmptyStateMedia name="faSolidCloudArrowUp" class="text-hell-primary" />
         <!-- A projected title owns its own semantics — use a real heading
-             element. headingLevel only promotes the built-in preset title. -->
+             element. headingLevel only promotes the input-driven title. -->
         <h2 hellEmptyStateTitle class="m-0 text-[length:inherit] font-[inherit]">
           Upload your first document
         </h2>

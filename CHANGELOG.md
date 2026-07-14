@@ -371,6 +371,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: the empty state's `preset` mode is gone. `hell-empty-state` takes
+  `glyph` (the built-in dependency-free SVGs), `title`, and `description`
+  inputs; `HELL_EMPTY_STATE_COPY` exports the former preset strings as plain
+  `HellEmptyStateCopy` data to pass through those inputs, and the
+  `HELL_EMPTY_STATE_LABELS` token and `HellEmptyStateLabels`/
+  `HellEmptyStatePreset` types are removed — copy now localizes with app
+  strings instead of the Label Contract, matching the Customization Surface
+  rule against bundled preset modes. The TanStack table shell's default
+  empty view passes the `noData` copy explicitly. Closes #173. Evidence:
+  rewritten empty-state unit suite, green table-tanstack suite, migrated
+  docs examples.
 - BREAKING: `hell-pagination` is the numbered strip only. The `mode` input,
   `HellPaginationMode` type, and the `status`/`jump`/`jumpLabel`/
   `jumpSelect`/`jumpTotal` parts are gone, and `HellPaginationLabels` slims
