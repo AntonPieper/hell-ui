@@ -371,6 +371,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: the alert's `layout` input and `HellAlertLayout` type are
+  removed — `banner` was pure root styling, so the full-bleed look is a
+  one-line Part Style Map refinement (`ui="w-full rounded-none
+  border-x-0"`), shown in the docs banner example. The save bar's `mode`
+  input is deliberately kept: it selects rendering lifecycle and
+  announcement behavior, not styling. The new mode-inputs ADR records the
+  rule and every audited verdict. Closes #174. Evidence: alert unit suite,
+  docs banner example, `docs/adr/mode-inputs.md`.
 - BREAKING: the empty state's `preset` mode is gone. `hell-empty-state` takes
   `glyph` (the built-in dependency-free SVGs), `title`, and `description`
   inputs; `HELL_EMPTY_STATE_COPY` exports the former preset strings as plain

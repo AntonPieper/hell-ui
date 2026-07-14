@@ -7,7 +7,8 @@ import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
   imports: [...HELL_ALERT_DIRECTIVES],
   template: `
     <div class="overflow-hidden rounded-hell-md border border-hell-border">
-      <hell-alert variant="warning" layout="banner">
+      <!-- The banner look is a Part Style Map refinement, not a component mode. -->
+      <hell-alert variant="warning" ui="w-full rounded-none border-x-0">
         <h3 hellAlertTitle>Unsupported browser</h3>
         <p hellAlertDescription>
           Some call-control features need a current browser. Update to keep the console fully

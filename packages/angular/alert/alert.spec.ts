@@ -2,14 +2,13 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_ALERT_DIRECTIVES, HellAlertUi, type HellAlertLayout, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
+import { HELL_ALERT_DIRECTIVES, HellAlertUi, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
 
 @Component({
   imports: [...HELL_ALERT_DIRECTIVES],
   template: `
     <hell-alert
       [variant]="variant()"
-      [layout]="layout()"
       [showIcon]="showIcon()"
       [ui]="ui()"
       (dismissed)="onDismissed()"
@@ -30,7 +29,6 @@ import { HELL_ALERT_DIRECTIVES, HellAlertUi, type HellAlertLayout, type HellAler
 })
 class AlertHost {
   readonly variant = signal<HellAlertVariant>('info');
-  readonly layout = signal<HellAlertLayout>('inline');
   readonly showIcon = signal(true);
   readonly customIcon = signal(false);
   readonly dismissible = signal(true);
@@ -48,23 +46,20 @@ describe('HellAlert', () => {
     await TestBed.configureTestingModule({ imports: [AlertHost] }).compileComponents();
   });
 
-  it('reflects variant and layout as data attributes without a live-region role', () => {
+  it('reflects the variant as a data attribute without a live-region role', () => {
     const fixture = TestBed.createComponent(AlertHost);
     fixture.detectChanges();
 
     const alert = queryAlert(fixture.nativeElement);
     expect(alert.getAttribute('data-slot')).toBe('root');
     expect(alert.getAttribute('data-variant')).toBe('info');
-    expect(alert.getAttribute('data-layout')).toBe('inline');
     expect(alert.getAttribute('role')).toBeNull();
     expect(alert.getAttribute('aria-live')).toBeNull();
 
     fixture.componentInstance.variant.set('danger');
-    fixture.componentInstance.layout.set('banner');
     fixture.detectChanges();
 
     expect(alert.getAttribute('data-variant')).toBe('danger');
-    expect(alert.getAttribute('data-layout')).toBe('banner');
     expect(alert.getAttribute('role')).toBeNull();
   });
 

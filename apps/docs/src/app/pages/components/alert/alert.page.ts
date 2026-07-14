@@ -104,9 +104,10 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
 
       <h2>Banner</h2>
       <p>
-        <code>layout="banner"</code> spans the full container width with flush edges — for
-        app-level messages like an unsupported-browser or version-update notice at the top of a
-        shell. It is the same component with one input; behavior and parts are unchanged.
+        A full-bleed banner — for app-level messages like an unsupported-browser or
+        version-update notice at the top of a shell — is a Part Style Map refinement, not a
+        component mode: <code>ui="w-full rounded-none border-x-0"</code>. Behavior and parts are
+        unchanged.
       </p>
       <hd-example-tabs [code]="alertBannerExampleCode">
         <app-alert-banner-example />
@@ -232,7 +233,6 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
       <p><code>hell-alert</code></p>
       <ul>
         <li><code>variant</code>: <code>HellAlertVariant</code> — <code>info | success | warning | danger</code>. Defaults to <code>info</code>.</li>
-        <li><code>layout</code>: <code>HellAlertLayout</code> — <code>inline | banner</code>. Defaults to <code>inline</code>.</li>
         <li><code>showIcon</code>: <code>boolean</code> — render the icon slot. Defaults to <code>true</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellAlertPart&gt;</code> — refines <code>root</code>, <code>icon</code>, and <code>content</code>.</li>
         <li><code>(dismissed)</code>: emitted when a projected <code>hellAlertDismiss</code> button is activated; the alert never removes itself.</li>
