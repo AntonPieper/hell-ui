@@ -69,8 +69,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         text, a keyboard shortcut. Because the surface carries <code>role="tooltip"</code> and no
         focus trap, it can never hold the one piece of information a user actually needs; anything
         interactive or essential belongs in a
-        <a routerLink="/components/popover">Popover</a> or a
-        <a routerLink="/components/flyout">Flyout</a> instead.
+        <a routerLink="/components/popover">Popover</a> instead.
       </p>
       <p>
         Not sure which floating surface fits? See

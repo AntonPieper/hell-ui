@@ -72,6 +72,34 @@ describe('Floating Scope', () => {
     expect(contains(option)).toBe(false);
   });
 
+  it('keeps containment transitive through adopted child scopes at any depth', () => {
+    const parentPanel = document.createElement('div');
+    const childPanel = document.createElement('div');
+    const grandchildPanel = document.createElement('div');
+    const grandchildAction = document.createElement('button');
+    grandchildPanel.append(grandchildAction);
+    document.body.append(parentPanel, childPanel, grandchildPanel);
+
+    const parentScope = new HellFloatingScopeRegistry();
+    const childScope = new HellFloatingScopeRegistry();
+    const grandchildScope = new HellFloatingScopeRegistry();
+
+    parentScope.registerFloatingElement(childPanel);
+    const releaseChild = parentScope.adoptChildScope(childScope);
+    childScope.registerFloatingElement(grandchildPanel);
+    childScope.adoptChildScope(grandchildScope);
+
+    expect(parentScope.containsFloatingTarget(grandchildAction)).toBe(true);
+    expect(childScope.containsFloatingTarget(grandchildAction)).toBe(true);
+
+    releaseChild();
+    expect(parentScope.containsFloatingTarget(grandchildAction)).toBe(false);
+
+    parentPanel.remove();
+    childPanel.remove();
+    grandchildPanel.remove();
+  });
+
   it('writes scoped inset vars to foreign-realm elements without falling back globally', () => {
     const iframe = document.createElement('iframe');
     document.body.append(iframe);

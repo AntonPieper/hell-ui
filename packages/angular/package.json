@@ -32,7 +32,6 @@
     "listbox/listbox.ts",
     "popover/popover.ts",
     "tooltip/tooltip.ts",
-    "flyout/flyout.ts",
     "select/select.ts",
     "combobox/combobox.ts",
     "date-input/date-input.ts",
@@ -150,9 +149,6 @@
     },
     "./field": {
       "@heinrich/source": "./field/public-api.ts"
-    },
-    "./flyout": {
-      "@heinrich/source": "./flyout/public-api.ts"
     },
     "./icon": {
       "@heinrich/source": "./icon/public-api.ts"
@@ -341,11 +337,6 @@
       "@heinrich/source": "./field/styles.css",
       "style": "./field/styles.css",
       "default": "./field/styles.css"
-    },
-    "./flyout/styles.css": {
-      "@heinrich/source": "./flyout/styles.css",
-      "style": "./flyout/styles.css",
-      "default": "./flyout/styles.css"
     },
     "./icon/styles.css": {
       "@heinrich/source": "./icon/styles.css",

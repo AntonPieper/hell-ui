@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
+import { FloatingDismissalHarnessPage } from '../../testing/floating-dismissal-harness.page';
 import { PopoverAllPartsStylingExample } from './examples/all-parts-styling.example';
 import popoverAllPartsStylingExampleCodeRaw from './examples/all-parts-styling.example.ts?raw' with {
   loader: 'text',
@@ -40,8 +41,12 @@ import popoverNonModalExampleCodeRaw from './examples/non-modal.example.ts?raw' 
     PopoverWithCardExample,
     PopoverNonModalExample,
     PageHeader,
+    FloatingDismissalHarnessPage,
   ],
   template: `
+    @if (showFloatingDismissalHarness) {
+      <hd-floating-dismissal-harness />
+    } @else {
     <article class="hd-prose">
       <hd-page-header
         title="Popover"
@@ -284,13 +289,18 @@ import popoverNonModalExampleCodeRaw from './examples/non-modal.example.ts?raw' 
       <ul class="hd-dont">
         <li>Don't put essential page content only in a popover — it is unavailable until the trigger is activated.</li>
         <li>Don't disable <code>closeOnEscape</code> without another obvious way to close the panel.</li>
-        <li>Don't use popover for a non-modal panel that must leave surrounding controls interactive — use Flyout instead.</li>
+        <li>Don't keep the default focus trap on a panel that must leave surrounding controls interactive — set <code>[trapFocus]="false"</code>.</li>
         <li>Don't target private descendants for styling — <code>root</code> is the only public part.</li>
       </ul>
     </article>
+    }
   `,
 })
 export class PopoverPage {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly showFloatingDismissalHarness =
+    this.route.snapshot.queryParamMap.has('floatingDismissalHarness');
   protected readonly popoverAllPartsStylingExampleCode = popoverAllPartsStylingExampleCodeRaw;
   protected readonly popoverBasicExampleCode = popoverBasicExampleCodeRaw;
   protected readonly popoverDismissalExampleCode = popoverDismissalExampleCodeRaw;

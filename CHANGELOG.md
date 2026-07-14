@@ -501,6 +501,24 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- BREAKING: the flyout entry point is retired. `@hell-ui/angular/flyout`,
+  its stylesheet, `HellFlyout`, and `HellFlyoutTrigger` are gone — a
+  popover with `[trapFocus]="false"` is the anchored, non-modal,
+  light-dismiss surface, with `anchor`, `boundary`, a reactive `open`
+  signal, and `closeOnOutsideClick` covering `closeOnOutsideInteraction`'s
+  job. The audio player's captions strip (a docked disclosure whose panel
+  never used floating positioning) now composes the internal Floating
+  Dismissal rules directly as the named manual exception recorded in the
+  floating-dismissal ADR. The floating-dismissal browser harness runs on
+  non-modal popovers, and nested-surface containment is Hell-owned: each
+  panel provides the owning trigger's panel scope to descendants, so
+  nested popovers/menus keep parents open (the ngp overlay registry cannot
+  link portaled child overlays across the embedded-view injector).
+  Closes #169. Evidence: migrated `e2e/floating-dismissal.spec.ts` plus
+  `e2e/popover-contracts.spec.ts` (33 green on chromium, firefox, and
+  webkit against the production build), green audio-player suites, and
+  the flyout docs page replaced by the popover "Non-modal" section and
+  overlays guide updates.
 - Removed duplicate public pass-throughs from
   `@hell-ui/angular/table-tanstack`: import TanStack's FlexRender helpers
   directly from `@tanstack/angular-table`. Internal PDF/toast/tooling exports

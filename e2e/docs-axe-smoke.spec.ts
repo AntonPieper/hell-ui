@@ -163,13 +163,13 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
-    name: 'flyout',
-    path: '/components/flyout',
-    heading: 'Flyout',
-    include: ['main', '[data-hell-flyout][data-slot="root"]'],
+    name: 'popover non-modal',
+    path: '/components/popover',
+    heading: 'Popover',
+    include: ['main', '[hellPopover][data-slot="root"]'],
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'Show suggestions' }).click();
-      await expect(page.getByRole('dialog', { name: 'Anchored to the input' })).toBeVisible();
+      await page.getByRole('button', { name: 'Playback volume' }).click();
+      await expect(page.getByRole('dialog', { name: 'Volume' })).toBeVisible();
     },
   },
   {

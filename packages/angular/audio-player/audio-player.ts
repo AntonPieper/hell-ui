@@ -23,7 +23,6 @@ import {
   faSolidVolumeXmark,
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellSlider } from '@hell-ui/angular/slider';
 import { hellCreateLabels } from '@hell-ui/angular/core';
@@ -34,7 +33,20 @@ import {
   HellAudioTranscriptUnavailableRuntime,
   type HellAudioTranscriptRuntimeFactory,
 } from '@hell-ui/angular/internal/audio-transcript';
+import {
+  HELL_FLOATING_SCOPE,
+  HellFloatingInteractionController,
+  hellDismissOn,
+  hellEscapeKey,
+  hellOutsideClick,
+  hellOutsideFocus,
+  hellWithDismissEffect,
+  type HellFloatingScope,
+} from '@hell-ui/angular/internal/core';
+import { InteractivityChecker } from '@angular/cdk/a11y';
 import type { InjectionToken } from '@angular/core';
+
+let nextAudioCaptionsId = 0;
 
 /** Built-in accessibility labels owned by the audio player entry point. */
 export interface HellAudioPlayerLabels {
@@ -187,7 +199,7 @@ function parseIsoDateOnly(value: string): Date | null {
  */
 @Component({
   selector: 'hell-audio-player',
-  imports: [HellButton, HellFlyout, HellFlyoutTrigger, HellIcon, HellSlider],
+  imports: [HellButton, HellIcon, HellSlider],
   providers: [provideIcons(HELL_AUDIO_PLAYER_ICONS)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -284,19 +296,21 @@ function parseIsoDateOnly(value: string): Date | null {
         @if (speechTranscriptEnabled() && speechSupported()) {
           <button
             hellButton
-            hellFlyoutTrigger
-            #ccTrigger="hellFlyoutTrigger"
+            #ccTrigger
             variant="ghost"
             [ui]="part('captionToggle')"
             [iconOnly]="true"
             type="button"
             data-slot="captionToggle"
+            aria-haspopup="dialog"
             [attr.aria-pressed]="captions()"
+            [attr.aria-expanded]="captions()"
+            [attr.aria-controls]="captions() ? captionsPanelId : null"
             [attr.aria-label]="
               captions() ? labels.hideLiveCaptions : labels.showLiveCaptions
             "
             [attr.data-active]="captions() ? 'true' : null"
-            (openChange)="captions.set($event)"
+            (click)="toggleCaptions()"
           >
             <hell-icon name="faSolidClosedCaptioning" />
           </button>
@@ -321,16 +335,18 @@ function parseIsoDateOnly(value: string): Date | null {
       </div>
     </div>
 
-    @if (captions() && ccTrigger(); as ccTriggerInstance) {
-      <!-- Captions strip anchors below the player through its own recipe; the
-           classes flow through the flyout's Part Style Map so the strip's
-           absolute anchoring deterministically replaces the flyout's fixed
-           floating-ui positioning. -->
+    @if (captions()) {
+      <!-- Captions strip is a docked disclosure: it anchors below the player
+           through its own recipe and owns light dismiss directly through the
+           internal Floating Dismissal rules (the retired flyout's manual
+           exception, inherited per the floating-dismissal ADR). -->
       <section
-        [hellFlyout]="ccTriggerInstance"
-        [boundary]="hostElement"
+        #captionsPanel
+        role="dialog"
+        aria-modal="false"
+        [id]="captionsPanelId"
         data-slot="captions"
-        [ui]="part('captions')"
+        [class]="part('captions')"
         [aria-label]="speechTranscriptLabel"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >
@@ -519,11 +535,17 @@ export class HellAudioPlayer {
   private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');
   private readonly media = hellHtmlAudioElementAdapter(() => this.audio().nativeElement);
   private readonly captionScroll = viewChild<ElementRef<HTMLElement>>('captionScroll');
-  protected readonly ccTrigger = viewChild('ccTrigger', { read: HellFlyoutTrigger });
+  private readonly ccTrigger = viewChild<ElementRef<HTMLElement>>('ccTrigger');
+  private readonly captionsPanel = viewChild<ElementRef<HTMLElement>>('captionsPanel');
 
-  /** Host element — passed to the transcript flyout as its boundary so all
-   * player controls (seek slider, play, volume, etc.) keep the flyout
-   * open when interacted with. */
+  /** Stable id wiring the caption toggle's `aria-controls` to the strip. */
+  protected readonly captionsPanelId = `hell-audio-captions-${++nextAudioCaptionsId}`;
+  /** Bumped on every captions open/close to re-key the dismissal lifecycle. */
+  private readonly captionsVersion = signal(0);
+
+  /** Host element — the dismissal boundary, so all player controls (seek
+   * slider, play, volume, etc.) keep the captions strip open when
+   * interacted with. */
   protected readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   constructor() {
@@ -531,6 +553,29 @@ export class HellAudioPlayer {
       this.transcriptRuntime.destroy();
       if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
     });
+
+    // The captions strip is a docked disclosure: light dismiss (outside
+    // click/focus, Escape with focus restore) composes the internal Floating
+    // Dismissal rules — the retired flyout's manual exception, inherited per
+    // the floating-dismissal ADR.
+    const captionsInteraction = new HellFloatingInteractionController({
+      surface: () => this.captionsPanel()?.nativeElement ?? null,
+      inside: () => [this.hostElement],
+      scope: inject<HellFloatingScope | null>(HELL_FLOATING_SCOPE, { optional: true }),
+      active: () => this.captions(),
+      activeKey: () => this.captionsVersion(),
+      focusTargetChecker: inject(InteractivityChecker, { optional: true }),
+      dismiss: hellDismissOn(
+        hellOutsideClick,
+        hellOutsideFocus,
+        hellWithDismissEffect(hellEscapeKey, {
+          stopPropagation: true,
+          restoreFocus: () => this.ccTrigger()?.nativeElement ?? null,
+        }),
+      ),
+      onDismiss: () => this.closeCaptions(),
+    });
+    captionsInteraction.connect(inject(DestroyRef));
     // Apply audio properties from runtime state.
     effect(() => this.audioRuntime.syncMedia(this.media));
 
@@ -596,9 +641,17 @@ export class HellAudioPlayer {
     this.audioRuntime.cyclePlaybackRate();
   }
 
-  protected toggleCaptions(_trigger?: HellFlyoutTrigger) {
-    // Kept for back-compat; trigger drives state via openChange now.
-    this.captions.update((v) => !v);
+  /** Toggles the captions strip; every flip re-keys the dismissal lifecycle. */
+  protected toggleCaptions() {
+    this.captionsVersion.update((version) => version + 1);
+    this.captions.update((open) => !open);
+  }
+
+  /** Closes the captions strip, if open. */
+  private closeCaptions() {
+    if (!this.captions()) return;
+    this.captionsVersion.update((version) => version + 1);
+    this.captions.set(false);
   }
 
   protected onSeeking() {

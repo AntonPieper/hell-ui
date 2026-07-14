@@ -76,7 +76,7 @@ The injectable text Interface for built-in accessibility labels and status strin
 _Avoid_: Central `HellLabels` bag, per-module label string inputs, `provideHell<Module>Labels` wrapper functions, cross-entry-point label registries.
 
 **Floating Interaction**
-Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, flyouts, selects, comboboxes, and omnibar child overlays.
+Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, selects, comboboxes, and omnibar child overlays.
 
 **Floating Scope**
 The set of DOM targets that count as "inside" one floating interaction, even when a floating surface is rendered outside the logical host.

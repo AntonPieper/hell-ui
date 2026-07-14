@@ -122,8 +122,28 @@ Consequence updates:
   reopening this ADR provided the browser contract in
   `e2e/popover-contracts.spec.ts` (modal trap/restore, non-modal no-steal,
   boundary-inside, outside click/focus dismissal, Escape restore) stays green.
-- The flyout manual path remains named and unchanged until its consumers
-  migrate; copying it into new surfaces is still not allowed.
+- The ngp overlay registry does not link portaled child overlays to their
+  parent overlay across the embedded-view injector, so nested-surface
+  containment is Hell-owned: each popover panel provides the owning trigger's
+  panel scope to its descendants, registers itself with the surrounding scope,
+  and the trigger's guards consult both. `e2e/floating-dismissal.spec.ts`
+  pins the nested keep-open/close-one-layer contract.
+- The flyout entry point is retired: its consumers migrated (the audio player
+  captions strip inherits the manual exception below), its dismissal races are
+  pinned by the popover-backed floating-dismissal harness, and the unit
+  contracts formerly in the flyout spec live on as popover unit and browser
+  contracts. Copying the manual path into new surfaces is still not allowed.
+
+## Audio player captions exception (2026-07-14)
+
+The retired flyout's named manual exception transfers to the audio player's
+captions strip: a docked disclosure whose panel is consumer-rendered inline
+DOM (its recipe owns anchoring below the player), so the delegated overlay
+engine is the wrong shape. It composes `HellFloatingInteractionController`
+directly with the same rule set the flyout used — outside click, outside
+focus, and Escape with focus restore to the caption toggle — with the player
+host as the inside boundary. No other surface may copy this without reopening
+this ADR.
 
 ## Consequences
 

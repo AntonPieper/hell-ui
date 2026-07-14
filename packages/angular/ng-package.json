@@ -91,11 +91,6 @@
       "output": "tooltip"
     },
     {
-      "glob": "flyout.ts",
-      "input": "flyout",
-      "output": "flyout"
-    },
-    {
       "glob": "select.ts",
       "input": "select",
       "output": "select"

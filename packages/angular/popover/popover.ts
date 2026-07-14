@@ -1,4 +1,5 @@
 import {
+  DestroyRef,
   Directive,
   ElementRef,
   booleanAttribute,
@@ -32,7 +33,8 @@ import {
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HELL_FLOATING_SCOPE,
-  hellRegisterFloatingHost,
+  HellFloatingScopeRegistry,
+  hellRegisterFloatingElement,
   hellResolveElementTarget,
   HellNativeInteractiveDisabledGuard,
   type HellFloatingScope,
@@ -46,6 +48,24 @@ import {
 const HELL_POPOVER_RECIPE = {
   root: `absolute ${HELL_FLOATING_Z_POPOVER} max-w-[320px] ${HELL_FLOATING_SURFACE} p-hell-4 text-[13px] text-hell-foreground ${HELL_FLOATING_POP_IN}`,
 } satisfies HellRecipe<'root'>;
+
+/**
+ * Module-private scope per trigger: the panel provides it to its descendants
+ * (so nested Hell floating surfaces register as inside) and the trigger's
+ * dismissal guards consult it. The ngp overlay registry cannot link portaled
+ * child overlays to their parent through the embedded-view injector, so Hell
+ * owns this half of the nesting contract.
+ */
+const HELL_POPOVER_PANEL_SCOPES = new WeakMap<HellPopoverTrigger, HellFloatingScopeRegistry>();
+
+function hellPopoverPanelScope(trigger: HellPopoverTrigger): HellFloatingScopeRegistry {
+  let scope = HELL_POPOVER_PANEL_SCOPES.get(trigger);
+  if (!scope) {
+    scope = new HellFloatingScopeRegistry();
+    HELL_POPOVER_PANEL_SCOPES.set(trigger, scope);
+  }
+  return scope;
+}
 
 /**
  * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
@@ -190,8 +210,10 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
 
   /**
    * Whether `target` is outside the trigger, panel, anchor, boundary, and any
-   * nested Hell floating surface registered with the surrounding Floating
-   * Scope — a menu opened from inside the panel must count as inside.
+   * nested Hell floating surface — a menu or child popover opened from inside
+   * the panel must count as inside. Nested surfaces reach this trigger through
+   * the panel-provided Floating Scope; surfaces registered with a surrounding
+   * scope count as well.
    */
   private isOutsideInteraction(target: Element): boolean {
     if (this.element.nativeElement.contains(target)) return false;
@@ -199,6 +221,7 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
     if (anchor?.contains(target)) return false;
     const boundary = hellResolveElementTarget(this.boundary());
     if (boundary?.contains(target)) return false;
+    if (hellPopoverPanelScope(this).containsFloatingTarget(target)) return false;
     if (this.floatingScope?.containsFloatingTarget(target)) return false;
     const overlay = this.state.overlay();
     return !overlay?.getElements().some((element) => element.contains(target));
@@ -213,7 +236,23 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
  */
 @Directive({
   selector: '[hellPopover]',
-  providers: [providePopoverState(), provideFocusTrapState(), provideControlContainerIsolation()],
+  providers: [
+    providePopoverState(),
+    provideFocusTrapState(),
+    provideControlContainerIsolation(),
+    {
+      // Descendants (nested menus, selects, child popovers) register with the
+      // owning trigger's panel scope so its dismissal guards count them as
+      // inside even though their overlays portal outside this panel's DOM.
+      // Without a Hell trigger the surrounding scope keeps flowing through.
+      provide: HELL_FLOATING_SCOPE,
+      useFactory: () => {
+        const trigger = inject(HellPopoverTrigger, { optional: true });
+        if (trigger) return hellPopoverPanelScope(trigger);
+        return inject(HELL_FLOATING_SCOPE, { optional: true, skipSelf: true });
+      },
+    },
+  ],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -241,7 +280,23 @@ export class HellPopover {
   constructor() {
     ngpPopover({});
     ngpFocusTrap({ disabled: computed(() => !(this.trigger?.trapFocus() ?? true)) });
-    hellRegisterFloatingHost();
+    // Register with the surrounding scope (skipping the panel's own provider)
+    // so enclosing surfaces count this panel as inside, and adopt this
+    // panel's scope there so containment stays transitive at any depth.
+    const parentScope = inject<HellFloatingScope | null>(HELL_FLOATING_SCOPE, {
+      optional: true,
+      skipSelf: true,
+    });
+    const destroyRef = inject(DestroyRef);
+    hellRegisterFloatingElement(
+      parentScope,
+      inject<ElementRef<HTMLElement>>(ElementRef).nativeElement,
+      destroyRef,
+    );
+    if (this.trigger && parentScope instanceof HellFloatingScopeRegistry) {
+      const release = parentScope.adoptChildScope(hellPopoverPanelScope(this.trigger));
+      destroyRef.onDestroy(release);
+    }
   }
 }
 

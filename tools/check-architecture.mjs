@@ -23,10 +23,10 @@ const failures = [];
 
 const allowedDocsLazyRouteCrossImports = [
   {
-    from: 'apps/docs/src/app/pages/components/flyout/flyout.page.ts',
+    from: 'apps/docs/src/app/pages/components/popover/popover.page.ts',
     to: 'apps/docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
     rationale:
-      'Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell.',
+      'Popover exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy popover route, not the docs shell.',
   },
 ];
 

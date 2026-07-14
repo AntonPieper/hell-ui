@@ -1,6 +1,6 @@
 /* Theme adapter: Glass
  *
- * Coverage: Card, Dialog, Popover, Menu, Select, Combobox, Flyout, Listbox,
+ * Coverage: Card, Dialog, Popover, Menu, Select, Combobox, Listbox,
  * Toast, and Omnibar panel surfaces. Components not listed here intentionally
  * fall back to their default entrypoint styles.
  */
@@ -14,8 +14,7 @@
       [hellMenu],
       [hellComboboxDropdown],
       [hellSelectDropdown],
-      [hellListbox],
-      [data-hell-flyout]
+      [hellListbox]
     )[data-slot='root'] {
     border-color: color-mix(in oklab, var(--color-hell-foreground) 16%, transparent);
     background-color: color-mix(in oklab, var(--color-hell-surface-elevated) 84%, transparent);

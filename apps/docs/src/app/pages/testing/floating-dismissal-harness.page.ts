@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { type HellSearchField } from '@hell-ui/angular/core';
-import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
+import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 
 interface HarnessSearchItem {
@@ -20,7 +20,7 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
 @Component({
   selector: 'hd-floating-dismissal-harness',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellFlyout, HellFlyoutTrigger, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellPopover, HellPopoverTrigger, ...HELL_OMNIBAR_DIRECTIVES],
   template: `
     <section
       class="harness"
@@ -29,20 +29,20 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
     >
       <h1>Floating dismissal harness</h1>
 
-      <section aria-label="Primary flyout dismissal harness" data-testid="primary-region">
+      <section aria-label="Primary non-modal popover dismissal harness" data-testid="primary-region">
         <button
           data-testid="primary-trigger"
-          hellFlyoutTrigger
-          #primary="hellFlyoutTrigger"
+          [hellPopoverTrigger]="primaryPanel"
+          [trapFocus]="false"
           type="button"
           [disabled]="primaryTriggerDisabled()"
           (openChange)="recordOpenChange('primary', $event)"
         >
-          Primary flyout
+          Primary popover
         </button>
 
-        @if (primary.open()) {
-          <div [hellFlyout]="primary" aria-label="Primary floating panel" data-testid="primary-panel">
+        <ng-template #primaryPanel>
+          <div hellPopover aria-label="Primary floating panel" data-testid="primary-panel">
             <p>Primary floating panel</p>
             <button data-testid="inside-action" type="button">Inside action</button>
             <button
@@ -53,42 +53,42 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
               Disable trigger while open
             </button>
           </div>
-        }
+        </ng-template>
       </section>
 
-      <section aria-label="Nested flyout dismissal harness" data-testid="nested-region">
+      <section aria-label="Nested popover dismissal harness" data-testid="nested-region">
         <button
           data-testid="parent-trigger"
-          hellFlyoutTrigger
-          #parent="hellFlyoutTrigger"
+          [hellPopoverTrigger]="parentPanel"
+          [trapFocus]="false"
           type="button"
           (openChange)="recordOpenChange('parent', $event)"
         >
-          Parent flyout
+          Parent popover
         </button>
 
-        @if (parent.open()) {
-          <div [hellFlyout]="parent" aria-label="Parent floating panel" data-testid="parent-panel">
+        <ng-template #parentPanel>
+          <div hellPopover aria-label="Parent floating panel" data-testid="parent-panel">
             <p>Parent floating panel</p>
             <button data-testid="parent-inside-action" type="button">Parent inside action</button>
             <button
               data-testid="child-trigger"
-              hellFlyoutTrigger
-              #child="hellFlyoutTrigger"
+              [hellPopoverTrigger]="childPanel"
+              [trapFocus]="false"
               type="button"
               (openChange)="recordOpenChange('child', $event)"
             >
-              Child flyout
+              Child popover
             </button>
 
-            @if (child.open()) {
-              <div [hellFlyout]="child" aria-label="Child floating panel" data-testid="child-panel">
+            <ng-template #childPanel>
+              <div hellPopover aria-label="Child floating panel" data-testid="child-panel">
                 <p>Child floating panel</p>
                 <button data-testid="child-inside-action" type="button">Child inside action</button>
               </div>
-            }
+            </ng-template>
           </div>
-        }
+        </ng-template>
       </section>
 
       <section aria-label="Portaled floating scope harness" data-testid="portaled-region">
@@ -143,18 +143,6 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
       display: grid;
       gap: 1rem;
       padding: 2rem;
-    }
-
-    [data-hell-flyout] {
-      display: grid;
-      gap: 0.5rem;
-      width: max-content;
-      max-width: 20rem;
-      margin-block-start: 0.5rem;
-      padding: 1rem;
-      border: 1px solid CanvasText;
-      background: Canvas;
-      box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 20%);
     }
 
     [data-testid='outside-pointer-target'],

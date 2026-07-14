@@ -906,41 +906,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'with-form-section hellField hellFieldLabel hellFieldDescription hellCard hellCardHeader hellCardBody hellCheckbox hellInput hellNativeSelect invite teammate composite',
  },
  {
- title:'Flyout: All Parts Styling',
- path:'/components/flyout',
- detail:'components/flyout/examples/all-parts-styling.example.ts',
- terms:
-'components/flyout/examples/all-parts-styling.example components/flyout hellFlyout hellFlyoutTrigger ui root Part Style Map data-slot bg-hell-primary-soft border-hell-primary rounded-hell-lg',
- },
- {
- title:'Flyout: Anchor And Boundary',
- path:'/components/flyout',
- detail:'components/flyout/examples/anchor-and-boundary.example.ts',
- terms:
-'components/flyout/examples/anchor-and-boundary.example components/flyout hellFlyout hellFlyoutTrigger hellInput sibling input light-dismiss outside-click outside-focus escape',
- },
- {
- title:'Flyout: Basic',
- path:'/components/flyout',
- detail:'components/flyout/examples/basic.example.ts',
- terms:
-'components/flyout/examples/basic.example components/flyout hellFlyout hellFlyoutTrigger openChange open show hide toggle non-modal light-dismiss anchored panel',
- },
- {
- title:'Flyout: Placement',
- path:'/components/flyout',
- detail:'components/flyout/examples/placement.example.ts',
- terms:
-'components/flyout/examples/placement.example components/flyout hellFlyout hellFlyoutTrigger flip shift floating-ui top right bottom left viewport collision',
- },
- {
- title:'Flyout: With A Filters Panel',
- path:'/components/flyout',
- detail:'components/flyout/examples/with-filters-panel.example.ts',
- terms:
-'components/flyout/examples/with-filters-panel.example components/flyout hellFlyout hellFlyoutTrigger hellCheckbox hellField hellFieldLabel hellChip hellButton hell-icon faSolidFilter composite toolbar status active count badge',
- },
- {
  title:'Icon: Basic',
  path:'/components/icon',
  detail:'components/icon/examples/basic.example.ts',

@@ -181,7 +181,7 @@ Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
 Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
 directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
 `HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltip`,
-`HellFlyout`, `HellSelect`, and `HellCombobox` families), SelectBasic,
+`HellSelect`, and `HellCombobox` families), SelectBasic,
 ComboboxBasic, the App Shell/nav directives, Resizable directives,
 Pagination/PaginationStrip, and Table primitives have migrated from
 Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
@@ -235,7 +235,7 @@ Rules for migration:
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
   RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
-  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Flyout, Select, Combobox,
+  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Select, Combobox,
   Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
@@ -267,7 +267,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 | Code editor                         | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible.                                                                                                                    | Experimental in package/source comments; stable API report promotion stays policy-owned.                                                                                                                                       |
 | PDF viewer                          | Keep behind the optional `@hell-ui/angular/features/pdf-viewer` entry point; install the exact pdf.js peer and pass an app-owned worker source.                                                                                                                                                            | Experimental/browser-only feature entry point.                                                                                                                                                                               |
 | Audio speech transcript             | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider.                                                                                                                           |
-| Floating/flyout/omnibar dismissal   | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals.                                                                                                                                                                                               | Browser contracts exist for key paths; remaining seams must stay covered by current browser evidence.                                                                                                                         |
+| Floating/popover/omnibar dismissal   | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals.                                                                                                                                                                                               | Browser contracts exist for key paths; remaining seams must stay covered by current browser evidence.                                                                                                                         |
 | Resize behavior                     | Treat split/table resizing as browser behavior requiring current browser evidence.                                                                                                                                                                                                                         | Browser resize contracts must stay current before production-ready claims.                                                                                                                                                     |
 
 ## Known experimental and deprecated APIs
