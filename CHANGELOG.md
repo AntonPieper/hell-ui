@@ -381,6 +381,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- `HellDateRangePickerPart` is now an alias of `HellDatePickerPart` — the
+  two pickers already render one shared calendar template, so one part
+  family serves both and cannot drift. The components stay separate
+  because their engines and value models genuinely differ (single date vs
+  range with hover preview). No consumer-visible change. Closes #180.
 - BREAKING: the alert's `layout` input and `HellAlertLayout` type are
   removed — `banner` was pure root styling, so the full-bleed look is a
   one-line Part Style Map refinement (`ui="w-full rounded-none
