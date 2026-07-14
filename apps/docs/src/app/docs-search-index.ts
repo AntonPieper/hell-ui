@@ -2202,9 +2202,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Toolbar directives',
  path:'/components/toolbar',
- detail:'hell-toolbar, hellToolbarAction, hellResolveToolbarOverflow',
+ detail:'hell-toolbar, hellToolbarAction',
  terms:
-'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction hellResolveToolbarOverflow priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
+'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
  },
  {
  title:'Time input adapter',

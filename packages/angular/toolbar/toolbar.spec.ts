@@ -2,7 +2,8 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_TOOLBAR_DIRECTIVES, hellResolveToolbarOverflow, HELL_TOOLBAR_LABELS, type HellToolbarOverflowItem, type HellToolbarUi } from './toolbar';
+import { HELL_TOOLBAR_DIRECTIVES, HELL_TOOLBAR_LABELS, type HellToolbarUi } from './toolbar';
+import { hellResolveToolbarOverflow, type HellToolbarOverflowItem } from './toolbar-overflow';
 
 describe('hellResolveToolbarOverflow', () => {
   const item = (

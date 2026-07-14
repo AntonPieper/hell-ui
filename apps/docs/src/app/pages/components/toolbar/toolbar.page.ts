@@ -260,10 +260,6 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               Contract for the overflow-trigger name and its English default.
             </li>
             <li>
-              <code>hellResolveToolbarOverflow</code> — the pure priority/overflow policy used
-              internally and exported for testing.
-            </li>
-            <li>
               <code>HellToolbarPart</code> —
               <code>'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator'</code>;
               <code>HellToolbarUi</code> is <code>HellUi&lt;HellToolbarPart&gt;</code>.

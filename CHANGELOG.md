@@ -560,6 +560,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- BREAKING: `hellResolveToolbarOverflow` and its
+  `HellToolbarOverflowItem`/`Metrics`/`Result` types leave the public API.
+  The pure overflow policy is the toolbar's internal measurement core —
+  it stays unit-tested in its own module file but was never a consumer
+  surface. Closes #179. Evidence: toolbar unit suite (25 green), toolbar
+  API report shrinks by four symbols.
 - BREAKING: the avatar-group entry point folds into avatar. Import
   `HellAvatarGroup`, `HellAvatarGroupItem`, `HellAvatarGroupOverflow`, and
   `HELL_AVATAR_GROUP_DIRECTIVES` from `@hell-ui/angular/avatar`, and its
