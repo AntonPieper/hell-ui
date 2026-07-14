@@ -1335,9 +1335,15 @@ function hellPartStylerPartType(moduleSource) {
   return /hellPartStyler\s*<\s*([A-Za-z0-9_]+)\s*>\s*\(\s*this\.ui/.exec(moduleSource)?.[1] ?? null;
 }
 
-function literalUnionMembers(source, typeName) {
+function literalUnionMembers(source, typeName, depth = 0) {
   const match = new RegExp(`export\\s+type\\s+${typeName}\\s*=([\\s\\S]*?);`).exec(source);
   if (!match) return [];
+
+  // Deliberately shared part families may alias another exported literal
+  // union (e.g. HellDateRangePickerPart = HellDatePickerPart); resolve one
+  // level so the data-slot contract still validates against the members.
+  const aliasTarget = /^\s*([A-Za-z0-9_]+)\s*$/.exec(match[1])?.[1];
+  if (aliasTarget && depth < 2) return literalUnionMembers(source, aliasTarget, depth + 1);
 
   return [...match[1].matchAll(/['"]([^'"]+)['"]/g)].map((candidate) => candidate[1]);
 }
