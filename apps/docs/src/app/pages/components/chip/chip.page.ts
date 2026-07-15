@@ -53,7 +53,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         stylesPath="@hell-ui/angular/chip/styles.css"
       >
         One pill module: token-shaped chips — static or interactive, with an optional remove
-        button and roving-focus chip sets — plus compact numeric badges and keyboard-key hints.
+        button, roving-focus chip sets, and an optional editable Chip Input — plus compact numeric
+        badges and keyboard-key hints.
       </hd-page-header>
 
       <p>
@@ -62,8 +63,10 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <code>&lt;button&gt;</code>, or <code>&lt;a&gt;</code>): on a plain <code>&lt;span&gt;</code>
         it is a static, non-interactive label; add a sibling <code>hellChipRemove</code> button or
         drop it inside a <code>hellChipSet</code> and the same host becomes an interactive, removable
-        token with roving keyboard focus. The entry point also ships <code>hellBadge</code> for a
-        small numeric or dot indicator and <code>hellKbd</code> for a styled keyboard key.
+        token with roving keyboard focus. Add <code>hellChipInput</code> to a real input inside the
+        set to connect empty-input navigation without giving Hell a value model. The entry point
+        also ships <code>hellBadge</code> for a small numeric or dot indicator and
+        <code>hellKbd</code> for a styled keyboard key.
       </p>
       <p>
         Removal is event-only: a chip emits <code>(remove)</code> and you own the collection, so
@@ -83,11 +86,14 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
 
       <h2>Basic</h2>
       <p>
-        A chip set of removable chips. Tab moves into the set once; arrow keys move between chips;
-        <code>Delete</code> or <code>Backspace</code> removes the focused chip and keeps focus in
-        the set. Each remove button is an empty <code>&lt;button hellChipRemove&gt;</code>: it ships
-        a built-in × glyph and is named <code>Remove {{ '{' }}label{{ '}' }}</code> — derived from
-        the chip's own text through the Label Contract — so you never write the label twice.
+        A consumer-owned assignee list composed with Control Group, a Chip Set, and a real
+        <code>&lt;input hellChipInput&gt;</code>. On an empty input, <code>Backspace</code> focuses
+        the final removable chip while <code>Arrow Left</code> focuses the final enabled chip.
+        The chip set then owns <code>Delete</code>/<code>Backspace</code> removal, while the
+        example owns the array and creates new values on Enter. Each remove button is an empty
+        <code>&lt;button hellChipRemove&gt;</code>: it ships a built-in × glyph and is named
+        <code>Remove {{ '{' }}label{{ '}' }}</code> from the chip's own text through the Label
+        Contract, so you never write the label twice.
       </p>
       <hd-example-tabs [code]="chipBasicExampleCode">
         <app-chip-basic-example />
@@ -166,6 +172,10 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           </tr>
         </tbody>
       </table>
+      <p>
+        <code>hellChipInput</code> is behavior-only and owns no Public Part. Style the consumer-owned
+        input directly or compose it with <code>hellInput</code> and Control Group.
+      </p>
       <hd-example-tabs [code]="chipStylingExampleCode" previewClass="flex flex-wrap items-center gap-3">
         <app-chip-styling-example />
       </hd-example-tabs>
@@ -203,6 +213,24 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           <code>root</code> part.
         </li>
       </ul>
+      <p><code>hellChipInput</code> (selector <code>input[hellChipInput]</code>)</p>
+      <ul>
+        <li>Must be a real input inside <code>hellChipSet</code>, with at most one per set.</li>
+        <li>
+          On an empty value, <code>Backspace</code> focuses the final enabled, removable chip;
+          <code>Arrow Left</code> focuses the final enabled chip. Neither changes the
+          consumer-owned collection.
+        </li>
+        <li>
+          Roving order includes enabled non-removable chips. <code>Arrow Right</code> from the true
+          final enabled chip, or removing that chip while focused, returns focus to the input.
+        </li>
+        <li>
+          Modified <code>Alt</code>, <code>Control</code>, and <code>Meta</code> shortcuts stay
+          native.
+        </li>
+        <li>Has no inputs, outputs, value model, renderer, or styling contract.</li>
+      </ul>
       <p><code>hellChip</code> (selector <code>[hellChip]</code> on span, button, or anchor)</p>
       <ul>
         <li><code>variant</code>: <code>HellChipVariant</code>. Defaults to <code>default</code>.</li>
@@ -229,8 +257,9 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p>
-        <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>, <code>HellChip</code>,
-        and <code>HellChipRemove</code>, for bulk <code>imports</code>.
+        <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>,
+        <code>HellChipInput</code>, <code>HellChip</code>, and <code>HellChipRemove</code>, for bulk
+        <code>imports</code>.
       </p>
       <p><code>hellBadge</code> (selector <code>[hellBadge]</code>)</p>
       <ul>
@@ -252,14 +281,23 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       <h2>Accessibility</h2>
       <ul>
         <li>
-          The chip set is a single tab stop: <code>Tab</code> enters it, arrow keys and
-          <code>Home</code>/<code>End</code> move between chips, and focus never falls out of the
-          set during keyboard use.
+          A standalone chip collection is a single roving tab stop: arrow keys and
+          <code>Home</code>/<code>End</code> move between its enabled chips. A Chip Input remains a
+          separate native tab stop inside the same consumer-owned field.
         </li>
         <li>
           <code>Delete</code> and <code>Backspace</code> remove the focused chip; focus then moves
-          to the next chip, the previous one, or the set itself, so you are never dropped out of
-          context.
+          to the next chip, the previous one, or the set itself. When a Chip Input is present,
+          removing its final focused chip returns focus to the input instead.
+        </li>
+        <li>
+          The first <code>Backspace</code> in an empty Chip Input only focuses the final removable
+          chip. A second <code>Backspace</code> invokes the existing chip removal path, preventing
+          accidental one-keystroke deletion from the editable field.
+        </li>
+        <li>
+          <code>Arrow Left</code> enters at the final enabled chip, including a non-removable one;
+          <code>Arrow Right</code> returns to the input only from that true collection boundary.
         </li>
         <li>
           The remove affordance is its own button with an explicit <code>Remove {{ '{' }}label{{ '}' }}</code>
@@ -282,6 +320,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <li>Give a removable chip visible text so its remove button is named automatically; reach
           for <code>label</code> only to override that name.</li>
         <li>Handle <code>(remove)</code> by updating your own collection.</li>
+        <li>Place <code>hellChipInput</code> inside its <code>hellChipSet</code> and keep the input's
+          draft plus chip collection in consumer-owned form or signal state.</li>
         <li>Use a <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> host when the whole chip is
           clickable.</li>
       </ul>
@@ -295,6 +335,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           styling) unless it is really a <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code>
           host.</li>
         <li>Don't rely on color alone to convey a chip's meaning.</li>
+        <li>Don't make Chip Input own token creation or selection state; handle input and
+          <code>(remove)</code> events in your application model.</li>
       </ul>
     </article>
   `,

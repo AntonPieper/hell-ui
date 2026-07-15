@@ -2,7 +2,15 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellBadge, HellChip, HellChipRemove, HellChipSet, HellKbd, HELL_CHIP_LABELS } from './chip';
+import {
+  HellBadge,
+  HellChip,
+  HellChipInput,
+  HellChipRemove,
+  HellChipSet,
+  HellKbd,
+  HELL_CHIP_LABELS,
+} from './chip';
 
 @Component({
   imports: [HellChip, HellChipRemove],
@@ -80,6 +88,54 @@ class ChipSetHost {
     this.chips.update((chips) => chips.filter((chip) => chip.id !== id));
   }
 }
+
+@Component({
+  imports: [HellChipSet, HellChipInput, HellChip, HellChipRemove],
+  template: `
+    <div hellChipSet aria-label="Recipients">
+      @for (chip of chips(); track chip.id) {
+        <span
+          [id]="'input-chip-' + chip.id"
+          hellChip
+          [disabled]="chip.disabled"
+          (remove)="remove(chip.id)"
+        >
+          {{ chip.label }}
+          @if (chip.removable) {
+            <button hellChipRemove></button>
+          }
+        </span>
+      }
+      <input id="chip-input" hellChipInput [value]="inputValue()" />
+    </div>
+  `,
+})
+class ChipInputHost {
+  readonly inputValue = signal('');
+  readonly chips = signal([
+    { id: 'a', label: 'Anna', disabled: false, removable: true },
+    { id: 'b', label: 'Ben', disabled: true, removable: true },
+    { id: 'c', label: 'Cara', disabled: false, removable: true },
+    { id: 'd', label: 'Dan', disabled: true, removable: true },
+  ]);
+  readonly removed: string[] = [];
+
+  remove(id: string): void {
+    this.removed.push(id);
+    this.chips.update((chips) => chips.filter((chip) => chip.id !== id));
+  }
+}
+
+@Component({
+  imports: [HellChipSet, HellChipInput],
+  template: `
+    <div hellChipSet>
+      <input hellChipInput aria-label="First chip input" />
+      <input hellChipInput aria-label="Second chip input" />
+    </div>
+  `,
+})
+class MultipleChipInputsHost {}
 
 @Component({
   imports: [HellChip, HellChipRemove],
@@ -310,6 +366,23 @@ describe('HellChipSet roving focus and removal', () => {
     expect(doc.activeElement).toBe(a);
   });
 
+  it('keeps ArrowRight clamped on the final chip when no chip input is present', () => {
+    const fixture = TestBed.createComponent(ChipSetHost);
+    fixture.detectChanges();
+    const d = query(fixture, '#chip-d');
+
+    d.focus();
+    expect(press(d, 'ArrowRight').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(d);
+
+    // Preserve the standalone set's pre-existing modifier handling. Chip Input
+    // opts its composed interaction out without changing this path.
+    expect(press(d, 'ArrowRight', { altKey: true }).defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(d);
+  });
+
   it('ignores cross-axis arrows for the set orientation', () => {
     const fixture = TestBed.createComponent(ChipSetHost);
     fixture.detectChanges();
@@ -384,6 +457,147 @@ describe('HellChipSet roving focus and removal', () => {
 
     const set = query(fixture, '[hellChipSet]');
     expect(doc.activeElement).toBe(set);
+  });
+});
+
+describe('HellChipInput public keyboard behavior', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ChipInputHost, MultipleChipInputsHost],
+    }).compileComponents();
+  });
+
+  it('uses the first empty Backspace to focus the final eligible chip and the second to remove it', async () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const doc = fixture.nativeElement.ownerDocument;
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+
+    input.focus();
+    expect(press(input, 'Backspace').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    const finalEligible = query(fixture, '#input-chip-c');
+    expect(doc.activeElement).toBe(finalEligible);
+    expect(host.removed).toEqual([]);
+
+    expect(press(finalEligible, 'Backspace').defaultPrevented).toBe(true);
+    expect(host.removed).toEqual(['c']);
+    fixture.detectChanges();
+    await flushMicrotasks();
+
+    expect(doc.activeElement).toBe(input);
+  });
+
+  it('moves from an empty input to the final enabled chip with ArrowLeft and back with ArrowRight', () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    fixture.detectChanges();
+    const doc = fixture.nativeElement.ownerDocument;
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+
+    input.focus();
+    expect(press(input, 'ArrowLeft').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    const finalEligible = query(fixture, '#input-chip-c');
+    expect(doc.activeElement).toBe(finalEligible);
+    expect(press(finalEligible, 'ArrowRight').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(doc.activeElement).toBe(input);
+  });
+
+  it('preserves mixed-chip roving order and removal focus before the true input boundary', async () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    const host = fixture.componentInstance;
+    host.chips.set([
+      { id: 'removable', label: 'Removable', disabled: false, removable: true },
+      { id: 'fixed', label: 'Fixed', disabled: false, removable: false },
+    ]);
+    fixture.detectChanges();
+    const doc = fixture.nativeElement.ownerDocument;
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+    const removable = query(fixture, '#input-chip-removable');
+    const fixed = query(fixture, '#input-chip-fixed');
+
+    input.focus();
+    expect(press(input, 'ArrowLeft').defaultPrevented).toBe(true);
+    expect(doc.activeElement).toBe(fixed);
+    expect(press(fixed, 'ArrowRight').defaultPrevented).toBe(true);
+    expect(doc.activeElement).toBe(input);
+
+    expect(press(input, 'Backspace').defaultPrevented).toBe(true);
+    expect(doc.activeElement).toBe(removable);
+    expect(press(removable, 'ArrowRight').defaultPrevented).toBe(true);
+    expect(doc.activeElement).toBe(fixed);
+
+    expect(press(fixed, 'ArrowRight', { altKey: true }).defaultPrevented).toBe(false);
+    expect(doc.activeElement).toBe(fixed);
+    expect(press(fixed, 'ArrowLeft', { altKey: true }).defaultPrevented).toBe(false);
+    expect(doc.activeElement).toBe(fixed);
+
+    removable.focus();
+    expect(press(removable, 'Backspace').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+    await flushMicrotasks();
+
+    expect(host.removed).toEqual(['removable']);
+    expect(doc.activeElement).toBe(fixed);
+  });
+
+  it('preserves native Backspace and ArrowLeft behavior while the input has text', () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    const host = fixture.componentInstance;
+    host.inputValue.set('draft');
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+
+    input.focus();
+    expect(press(input, 'Backspace').defaultPrevented).toBe(false);
+    expect(press(input, 'ArrowLeft').defaultPrevented).toBe(false);
+
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(input);
+    expect(host.removed).toEqual([]);
+  });
+
+  it('preserves modified Backspace and ArrowLeft shortcuts on an empty input', () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+
+    input.focus();
+    expect(press(input, 'ArrowLeft', { altKey: true }).defaultPrevented).toBe(false);
+    expect(press(input, 'Backspace', { ctrlKey: true }).defaultPrevented).toBe(false);
+    expect(press(input, 'ArrowLeft', { metaKey: true }).defaultPrevented).toBe(false);
+
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(input);
+  });
+
+  it('rejects more than one Chip Input in the same Chip Set', () => {
+    expect(() => {
+      const fixture = TestBed.createComponent(MultipleChipInputsHost);
+      fixture.detectChanges();
+    }).toThrowError(/only one input\[hellChipInput\]/);
+  });
+
+  it('keeps Backspace native but lets ArrowLeft enter a set with no removable chip', () => {
+    const fixture = TestBed.createComponent(ChipInputHost);
+    const host = fixture.componentInstance;
+    host.chips.set([
+      { id: 'fixed', label: 'Fixed', disabled: false, removable: false },
+    ]);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture, '#chip-input');
+
+    input.focus();
+    expect(press(input, 'Backspace').defaultPrevented).toBe(false);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(input);
+
+    expect(press(input, 'ArrowLeft').defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(
+      query(fixture, '#input-chip-fixed'),
+    );
   });
 });
 
@@ -469,8 +683,12 @@ function query<T extends HTMLElement>(fixture: { nativeElement: HTMLElement }, s
   return element;
 }
 
-function press(element: HTMLElement, key: string): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+function press(
+  element: HTMLElement,
+  key: string,
+  init: Omit<KeyboardEventInit, 'key'> = {},
+): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { ...init, key, bubbles: true, cancelable: true });
   element.dispatchEvent(event);
   return event;
 }

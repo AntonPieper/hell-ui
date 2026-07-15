@@ -3,6 +3,7 @@ import {
   Directive,
   ElementRef,
   Injectable,
+  Renderer2,
   afterNextRender,
   booleanAttribute,
   computed,
@@ -66,6 +67,12 @@ interface HellChipRegistration {
   readonly focus: () => void;
 }
 
+/** Editable input registered with its enclosing chip set. */
+interface HellChipInputRegistration {
+  readonly element: HTMLInputElement;
+  readonly focus: () => void;
+}
+
 type HellChipMovement = 'first' | 'last' | 'next' | 'previous';
 
 /**
@@ -83,9 +90,11 @@ class HellChipSetController {
   private readonly destroyRef = inject(DestroyRef);
   private readonly chips = signal<readonly HellChipRegistration[]>([]);
   private readonly active = signal<HellChipRegistration | null>(null);
+  private input: HellChipInputRegistration | null = null;
   private pendingRefocus: {
     readonly removed: HellChipRegistration;
     readonly target: HellChipRegistration | null;
+    readonly returnToInput: boolean;
   } | null = null;
   private destroyed = false;
 
@@ -106,6 +115,17 @@ class HellChipSetController {
     this.chips.update((chips) => [...chips, chip]);
   }
 
+  registerInput(input: HellChipInputRegistration): void {
+    if (this.input) {
+      throw new Error('HellChipSet supports only one input[hellChipInput] descendant.');
+    }
+    this.input = input;
+  }
+
+  unregisterInput(input: HellChipInputRegistration): void {
+    if (this.input === input) this.input = null;
+  }
+
   unregisterChip(chip: HellChipRegistration): void {
     this.chips.update((chips) => chips.filter((registered) => registered !== chip));
     if (this.active() === chip) this.active.set(null);
@@ -119,6 +139,24 @@ class HellChipSetController {
     return this.tabStop() === chip;
   }
 
+  /** Moves ArrowLeft focus from an empty input to the final enabled chip. */
+  focusLastEnabledChip(): boolean {
+    return this.focusLastChip(this.enabledChips());
+  }
+
+  /** Moves Backspace focus from an empty input to the final enabled, removable chip. */
+  focusLastRemovableChip(): boolean {
+    return this.focusLastChip(this.removableChips());
+  }
+
+  private focusLastChip(chips: readonly HellChipRegistration[]): boolean {
+    const chip = chips[chips.length - 1];
+    if (!chip) return false;
+    this.setActiveChip(chip);
+    chip.focus();
+    return true;
+  }
+
   /**
    * Records where focus should land after `removed` leaves the DOM. Called at
    * removal-request time so the neighbour resolves while the removed element is
@@ -126,7 +164,11 @@ class HellChipSetController {
    * unreliable).
    */
   prepareRefocus(removed: HellChipRegistration): void {
-    this.pendingRefocus = { removed, target: this.neighbourOf(removed.element) };
+    this.pendingRefocus = {
+      removed,
+      target: this.neighbourOf(removed.element),
+      returnToInput: this.isFinalEnabledChip(removed),
+    };
   }
 
   /**
@@ -139,9 +181,15 @@ class HellChipSetController {
     if (!pending || pending.removed !== removed) return;
     this.pendingRefocus = null;
 
-    const { target } = pending;
+    const { returnToInput, target } = pending;
     queueMicrotask(() => {
       if (this.destroyed) return;
+      if (returnToInput && this.focusInput()) {
+        // Keep reverse tab order anchored at the surviving chip nearest the
+        // input even though browser focus returns to the editable field.
+        if (target && target.element.isConnected) this.setActiveChip(target);
+        return;
+      }
       if (target && target.element.isConnected) {
         this.setActiveChip(target);
         target.focus();
@@ -157,10 +205,20 @@ class HellChipSetController {
     const chip = this.chips().find((registered) => registered.element === event.target);
     if (!chip) return;
 
+    // Once an editable input is composed with the set, preserve browser and
+    // platform shortcuts across the whole interaction instead of handling the
+    // same modified key differently depending on which member has focus.
+    if (this.input && (event.altKey || event.ctrlKey || event.metaKey)) return;
+
     if (event.key === 'Delete' || event.key === 'Backspace') {
       if (!chip.removable() || chip.disabled()) return;
       event.preventDefault();
       chip.requestRemove();
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && this.isFinalEnabledChip(chip) && this.focusInput()) {
+      event.preventDefault();
       return;
     }
 
@@ -206,6 +264,23 @@ class HellChipSetController {
 
   private enabledChips(): readonly HellChipRegistration[] {
     return this.sortedChips().filter((chip) => !chip.disabled());
+  }
+
+  private removableChips(): readonly HellChipRegistration[] {
+    return this.enabledChips().filter((chip) => chip.removable());
+  }
+
+  private isFinalEnabledChip(chip: HellChipRegistration): boolean {
+    if (!this.input) return false;
+    const chips = this.enabledChips();
+    return chips[chips.length - 1] === chip;
+  }
+
+  private focusInput(): boolean {
+    const input = this.input;
+    if (!input || !input.element.isConnected || input.element.disabled) return false;
+    input.focus();
+    return true;
   }
 
   private sortedChips(): readonly HellChipRegistration[] {
@@ -274,6 +349,62 @@ export class HellChipSet {
   /** Delegates roving navigation and keyboard removal to the set controller. */
   protected onKeydown(event: KeyboardEvent): void {
     this.controller.onKeydown(event);
+  }
+}
+
+/**
+ * Keyboard bridge from a consumer-owned editable input to its enclosing
+ * `hellChipSet`. On an empty input, `Backspace` moves focus to the final
+ * enabled, removable chip while `ArrowLeft` moves to the final enabled chip.
+ * The first Backspace therefore selects a chip; the chip set's existing
+ * Backspace behavior performs removal only once that chip is focused.
+ *
+ * Place exactly one of these directives on a real input inside the chip set.
+ * It owns no value or styling model, so consumers may combine it with
+ * `hellInput`, Control Group, native forms, or their own input presentation.
+ */
+@Directive({
+  selector: 'input[hellChipInput]',
+})
+export class HellChipInput {
+  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly set = inject(HellChipSetController);
+  private readonly registration: HellChipInputRegistration = {
+    element: this.host.nativeElement,
+    focus: () => this.host.nativeElement.focus({ preventScroll: true }),
+  };
+
+  constructor() {
+    this.set.registerInput(this.registration);
+
+    const stopKeydownListener = inject(Renderer2).listen(
+      this.host.nativeElement,
+      'keydown',
+      (event: KeyboardEvent) => {
+        if (
+          event.defaultPrevented ||
+          event.isComposing ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey
+        ) {
+          return;
+        }
+        if (this.host.nativeElement.value !== '') return;
+
+        const moved =
+          event.key === 'Backspace'
+            ? this.set.focusLastRemovableChip()
+            : event.key === 'ArrowLeft'
+              ? this.set.focusLastEnabledChip()
+              : false;
+        if (!moved) return;
+        event.preventDefault();
+      },
+    );
+    this.destroyRef.onDestroy(stopKeydownListener);
+    this.destroyRef.onDestroy(() => this.set.unregisterInput(this.registration));
   }
 }
 
@@ -560,4 +691,4 @@ export class HellKbd {
 }
 
 /** All chip-set directives of the chip entry point, for bulk `imports`. */
-export const HELL_CHIP_DIRECTIVES = [HellChipSet, HellChip, HellChipRemove] as const;
+export const HELL_CHIP_DIRECTIVES = [HellChipSet, HellChipInput, HellChip, HellChipRemove] as const;

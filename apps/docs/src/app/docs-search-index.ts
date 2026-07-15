@@ -441,7 +441,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/chip',
  detail:'components/chip/examples/basic.example.ts',
  terms:
-'components/chip/examples/basic.example components/chip hellChipSet hellChip hellChipRemove remove event roving focus arrow Home End Delete Backspace label removable token assignees',
+'components/chip/examples/basic.example components/chip hellChipSet hellChipInput hellChip hellChipRemove input editable empty consumer-owned remove event roving focus arrow ArrowLeft ArrowRight Home End Delete Backspace two-step return label removable token assignees',
  },
  {
  title:'Chip: Clickable',
@@ -2123,6 +2123,13 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  detail:'hellComboboxInput, hellComboboxOption, hellComboboxEmpty',
  terms:
 'HELL_COMBOBOX_DIRECTIVES hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty',
+ },
+ {
+ title:'Chip Input keyboard bridge',
+ path:'/components/chip',
+ detail:'input[hellChipInput] with hellChipSet',
+ terms:
+'HELL_CHIP_DIRECTIVES HellChipInput hellChipInput hellChipSet hellChip hellChipRemove input editable empty Backspace ArrowLeft ArrowRight focus removal consumer-owned value model',
  },
  {
  title:'Dialog scoping',
