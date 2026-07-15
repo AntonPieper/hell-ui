@@ -1,9 +1,12 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, NO_ERRORS_SCHEMA, NgZone, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
+// eslint-disable-next-line no-restricted-imports -- A private HostBinding keeps the root Part Styler out of the public component declaration.
+import { HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, InjectionToken, NO_ERRORS_SCHEMA, NgZone, Renderer2, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { hellCreateLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import type { InjectionToken } from '@angular/core';
+import { NgpRovingFocusItem } from 'ng-primitives/roving-focus';
+import { NgpToolbar } from 'ng-primitives/toolbar';
 import {
   hellResolveToolbarOverflow,
   type HellToolbarOverflowItem,
@@ -12,37 +15,28 @@ import {
 } from './toolbar-overflow';
 
 /**
- * How a toolbar action participates in responsive overflow:
+ * How a declared action participates in Overflow Toolbar placement:
  *
- *   - `primary`      never overflows; it always renders inline as a button.
- *   - `default`      renders inline while it fits and collapses into the
- *                    overflow menu (last-declared first) when space runs out.
- *   - `overflowOnly` never renders inline; it always lives in the overflow menu.
+ *   - `never`  stays inline.
+ *   - `auto`   stays inline while it fits, then moves to the overflow menu.
+ *   - `always` only renders in the overflow menu.
  */
-export type HellToolbarActionPriority = 'primary' | 'default' | 'overflowOnly';
+export type HellToolbarActionOverflow = 'never' | 'auto' | 'always';
 
-/**
- * The kind of a declared toolbar item.
- *
- *   - `action`    a dual-rendered button/menu-item (see {@link HellToolbarAction}).
- *   - `separator` a group divider that renders inline and as a menu separator.
- *   - `widget`    projected content that stays inline and never menu-ifies.
- */
-export type HellToolbarItemKind = 'action' | 'separator' | 'widget';
-
-/** Built-in accessibility labels owned by the toolbar entry point. */
-export interface HellToolbarLabels {
+/** Built-in accessibility labels owned by Overflow Toolbar. */
+export interface HellOverflowToolbarLabels {
   /** Accessible name for the trailing button that opens the overflow menu. */
   readonly overflowTrigger: string;
 }
 
-/** Injection token resolving to the effective toolbar labels. */
-export const HELL_TOOLBAR_LABELS: InjectionToken<HellToolbarLabels> = hellCreateLabels<HellToolbarLabels>('HELL_TOOLBAR_LABELS', {
-  overflowTrigger: 'More actions',
-});
+/** Injection token resolving to the effective Overflow Toolbar labels. */
+export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellOverflowToolbarLabels> =
+  hellCreateLabels<HellOverflowToolbarLabels>('HELL_OVERFLOW_TOOLBAR_LABELS', {
+    overflowTrigger: 'More actions',
+  });
 
-/** Public parts of the HellToolbar module, styleable through its Part Style Map. */
-export type HellToolbarPart =
+/** Public parts of HellOverflowToolbar, styleable through its Part Style Map. */
+export type HellOverflowToolbarPart =
   | 'root'
   | 'action'
   | 'separator'
@@ -51,41 +45,125 @@ export type HellToolbarPart =
   | 'overflowMenu'
   | 'overflowItem'
   | 'overflowSeparator';
-/** Part Style Map accepted by the HellToolbar `ui` input. */
-export type HellToolbarUi = HellUi<HellToolbarPart>;
+/** Part Style Map accepted by the HellOverflowToolbar `ui` input. */
+export type HellOverflowToolbarUi = HellUi<HellOverflowToolbarPart>;
 
+const HELL_TOOLBAR_RECIPE = {
+  root: 'flex w-full min-w-0 items-center gap-hell-2 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch',
+} satisfies HellRecipe<'root'>;
 
-
-/**
- * Base marker for the three kinds of declared toolbar item. Each concrete
- * directive registers itself under this token so the toolbar can query actions,
- * separators, and widgets together in declaration order.
- */
-abstract class HellToolbarItem {
-  /** Discriminates the item kind for the toolbar's rendering and overflow logic. */
-  abstract readonly kind: HellToolbarItemKind;
+function createOverflowToolbarRootStyler(ui: Signal<HellUiInput<'root'>>) {
+  return hellPartStyler<'root'>(ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OVERFLOW_TOOLBAR_ROOT_RECIPE,
+  });
 }
 
 /**
+ * Ordinary toolbar behavior on consumer-owned markup. It owns only the toolbar
+ * role, accessible name, orientation, root recipe, and delegated roving-focus
+ * group; consumers own every control and click handler.
+ */
+@Directive({
+  selector: '[hellToolbar]',
+  hostDirectives: [
+    {
+      directive: NgpToolbar,
+      inputs: ['ngpToolbarOrientation:orientation'],
+    },
+  ],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.aria-label]': 'label() || null',
+    '[attr.aria-labelledby]': 'labelledBy() || null',
+  },
+})
+export class HellToolbar {
+  /** Tailwind class refinements for the root Public Part. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+  /** Accessible name for the toolbar region. Prefer `label` or `labelledBy`. */
+  readonly label = input('');
+  /** ID of an element that labels the toolbar, mapped to `aria-labelledby`. */
+  readonly labelledBy = input('');
+  /** Layout axis and arrow-key direction. Defaults to `horizontal`. */
+  readonly orientation = input<HellOrientation>('horizontal');
+
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TOOLBAR_RECIPE,
+  });
+}
+
+/**
+ * Registers a consumer-owned control in its nearest `[hellToolbar]` roving
+ * focus group. It deliberately contributes no classes or activation behavior,
+ * so native buttons, HellButton, and Tooltip remain consumer-owned.
+ */
+@Directive({
+  selector: '[hellToolbarItem]',
+  hostDirectives: [
+    {
+      directive: NgpRovingFocusItem,
+      inputs: ['ngpRovingFocusItemDisabled:disabled'],
+    },
+  ],
+})
+export class HellToolbarItem {}
+
+type HellOverflowToolbarDeclaration =
+  | { readonly kind: 'action'; readonly action: HellToolbarAction; readonly icon: TemplateRef<unknown> }
+  | { readonly kind: 'separator' }
+  | { readonly kind: 'widget'; readonly content: TemplateRef<unknown> };
+
+const HELL_OVERFLOW_TOOLBAR_DECLARATION =
+  new InjectionToken<HellOverflowToolbarDeclaration>('HELL_OVERFLOW_TOOLBAR_DECLARATION');
+
+interface HellOverflowToolbarHostState {
+  readonly declarations: Signal<readonly HellOverflowToolbarDeclaration[]>;
+}
+
+const HELL_OVERFLOW_TOOLBAR_HOST =
+  new InjectionToken<HellOverflowToolbarHostState>('HELL_OVERFLOW_TOOLBAR_HOST');
+
+function createActionDeclaration(
+  action: HellToolbarAction,
+  icon: TemplateRef<unknown>,
+): HellOverflowToolbarDeclaration {
+  return { kind: 'action', action, icon };
+}
+
+function createWidgetDeclaration(content: TemplateRef<unknown>): HellOverflowToolbarDeclaration {
+  return { kind: 'widget', content };
+}
+
+const SEPARATOR_DECLARATION: HellOverflowToolbarDeclaration = { kind: 'separator' };
+
+/**
  * A single toolbar action, declared once on an `<ng-template>` and rendered by
- * `HellToolbar` in one of two ways depending on available width: as an inline
+ * `HellOverflowToolbar` in one of two ways depending on available width: as an inline
  * Hell button, or as an item in the trailing overflow menu. The template's
  * projected content is the action's optional leading icon; `label`, `disabled`,
- * and `priority` stay identical between both renderings.
+ * and `overflow` stay identical between both renderings.
  */
 @Directive({
   selector: 'ng-template[hellToolbarAction]',
-  providers: [{ provide: HellToolbarItem, useExisting: forwardRef(() => HellToolbarAction) }],
+  providers: [
+    {
+      provide: HELL_OVERFLOW_TOOLBAR_DECLARATION,
+      useFactory: createActionDeclaration,
+      deps: [forwardRef(() => HellToolbarAction), TemplateRef],
+    },
+  ],
 })
-export class HellToolbarAction extends HellToolbarItem {
-  /** Discriminates this item as a dual-rendered action. */
-  override readonly kind = 'action' as const;
+export class HellToolbarAction {
   /** Accessible, human-readable label. Rendered as button text and menu-item text. */
   readonly label = input.required<string>();
   /** Whether the action is disabled in both renderings. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Overflow priority. Defaults to `'default'`. */
-  readonly priority = input<HellToolbarActionPriority>('default');
+  /** Overflow placement policy. Defaults to `'auto'`. */
+  readonly overflow = input<HellToolbarActionOverflow>('auto');
   /** Inline button variant. Ignored by the overflow menu-item rendering. Defaults to `'default'`. */
   readonly variant = input<HellButtonVariant>('default');
   /**
@@ -97,9 +175,6 @@ export class HellToolbarAction extends HellToolbarItem {
   readonly iconOnly = input(false, { transform: booleanAttribute });
   /** Emits when the action is activated from either rendering. */
   readonly activated = output<void>();
-
-  /** The projected icon template, rendered before the label in both renderings. */
-  readonly icon = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
 /**
@@ -112,39 +187,49 @@ export class HellToolbarAction extends HellToolbarItem {
  */
 @Directive({
   selector: 'ng-template[hellToolbarSeparator]',
-  providers: [{ provide: HellToolbarItem, useExisting: forwardRef(() => HellToolbarSeparator) }],
+  providers: [{ provide: HELL_OVERFLOW_TOOLBAR_DECLARATION, useValue: SEPARATOR_DECLARATION }],
 })
-export class HellToolbarSeparator extends HellToolbarItem {
-  /** Discriminates this item as a group divider. */
-  override readonly kind = 'separator' as const;
-}
+export class HellToolbarSeparator {}
 
 /**
  * Projected arbitrary content — a search field, select, toggle group, etc. —
  * declared on an `<ng-template>`. A widget participates in toolbar layout and
  * the roving tab order but never collapses into the overflow menu (it is
- * primary-like) and never menu-ifies. This is the honest boundary: things that
+ * pinned like a `never` action) and never menu-ifies. This is the honest boundary: things that
  * can menu-ify are actions; things that cannot are widgets that stay visible.
  */
 @Directive({
   selector: 'ng-template[hellToolbarWidget]',
-  providers: [{ provide: HellToolbarItem, useExisting: forwardRef(() => HellToolbarWidget) }],
+  providers: [
+    {
+      provide: HELL_OVERFLOW_TOOLBAR_DECLARATION,
+      useFactory: createWidgetDeclaration,
+      deps: [TemplateRef],
+    },
+  ],
 })
-export class HellToolbarWidget extends HellToolbarItem {
-  /** Discriminates this item as never-collapsing projected content. */
-  override readonly kind = 'widget' as const;
-  /** The projected content template rendered inline in the toolbar. */
-  readonly content = inject<TemplateRef<unknown>>(TemplateRef);
-}
+export class HellToolbarWidget {}
 
 /** A resolved toolbar item paired with its declaration index and group. */
 type HellToolbarItemModel =
-  | { readonly kind: 'action'; readonly index: number; readonly group: number; readonly action: HellToolbarAction }
+  | { readonly kind: 'action'; readonly index: number; readonly group: number; readonly action: HellToolbarAction; readonly icon: TemplateRef<unknown> }
   | { readonly kind: 'separator'; readonly index: number; readonly group: number }
-  | { readonly kind: 'widget'; readonly index: number; readonly group: number; readonly widget: HellToolbarWidget };
+  | { readonly kind: 'widget'; readonly index: number; readonly group: number; readonly content: TemplateRef<unknown> };
 
-const HELL_TOOLBAR_RECIPE = {
+const HELL_OVERFLOW_TOOLBAR_ROOT_RECIPE = {
   root: 'relative flex w-full min-w-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch',
+} satisfies HellRecipe<'root'>;
+
+export type HellOverflowToolbarRendererPart =
+  | 'action'
+  | 'separator'
+  | 'widget'
+  | 'overflowTrigger'
+  | 'overflowMenu'
+  | 'overflowItem'
+  | 'overflowSeparator';
+
+const HELL_OVERFLOW_TOOLBAR_RENDERER_RECIPE = {
   action: '',
   separator:
     'shrink-0 self-stretch bg-hell-border data-[orientation=vertical]:w-px data-[orientation=vertical]:mx-hell-1 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:my-hell-1',
@@ -153,7 +238,7 @@ const HELL_TOOLBAR_RECIPE = {
   overflowMenu: '',
   overflowItem: '',
   overflowSeparator: '',
-} satisfies HellRecipe<HellToolbarPart>;
+} satisfies HellRecipe<HellOverflowToolbarRendererPart>;
 
 const DEFAULT_GAP = 8;
 const DEFAULT_TRIGGER_WIDTH = 40;
@@ -163,58 +248,38 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
   triggerWidth: DEFAULT_TRIGGER_WIDTH,
 };
 
-/**
- * A responsive action toolbar following the WAI-ARIA toolbar pattern. Consumers
- * declare each action once with a `hellToolbarAction` template — plus optional
- * `hellToolbarSeparator` group dividers and `hellToolbarWidget` projected
- * controls — and the toolbar renders the items that fit as inline Hell controls
- * and collapses the rest into a trailing overflow menu (the Hell menu). Overflow
- * membership is recalculated from a container-driven `ResizeObserver` — measured
- * against an off-screen sizing row and committed once per resize frame — so no
- * action is ever unreachable at any width and container growth never feeds a
- * stale zero width back into the policy. A roving tabindex spans the visible
- * controls and the overflow trigger, giving the toolbar a single tab stop with
- * arrow-key navigation; when the focused action collapses out of the row, focus
- * moves to the overflow trigger rather than dropping to the document body.
- */
+/** Package-local renderer and runtime coordination for `HellOverflowToolbar`. */
 @Component({
-  selector: 'hell-toolbar',
+  selector: 'hell-overflow-toolbar-renderer',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, HellButton, ...HELL_MENU_DIRECTIVES],
   schemas: [NO_ERRORS_SCHEMA],
   host: {
-    role: 'toolbar',
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-orientation]': 'orientation()',
-    '[attr.aria-orientation]': 'orientation()',
-    '[attr.aria-label]': 'label() || null',
-    '[attr.aria-labelledby]': 'labelledBy() || null',
-    '(keydown)': 'onKeydown($event)',
-    '(focusin)': 'onFocusIn($event)',
+    class: 'contents',
   },
   template: `
-    <ng-template #actionInner let-action="action">
-      @if (action.icon) {
-        <ng-container [ngTemplateOutlet]="action.icon" />
+    <ng-template #actionInner let-view="view">
+      @let action = actionOf(view);
+      @if (iconOf(view); as icon) {
+        <ng-container [ngTemplateOutlet]="icon" />
       }
       @if (!action.iconOnly()) {
-        <span class="hell-toolbar-action-label">{{ action.label() }}</span>
+        <span class="hell-overflow-toolbar-action-label">{{ action.label() }}</span>
       }
     </ng-template>
 
-    <div #actionsRow class="hell-toolbar-actions" data-hell-toolbar-actions>
-      @for (view of inlineViews(); track view.index) {
-        @switch (view.kind) {
+    <div #actionsRow class="hell-overflow-toolbar-actions" data-hell-overflow-toolbar-actions>
+      @for (view of inlineViews(); track $any(view).index) {
+        @switch ($any(view).kind) {
           @case ('action') {
             @let action = actionOf(view);
             <button
               hellButton
               type="button"
               data-slot="action"
-              data-hell-toolbar-control
+              data-hell-overflow-toolbar-control
               tabindex="-1"
-              [attr.data-item-index]="view.index"
+              [attr.data-item-index]="$any(view).index"
               [variant]="action.variant()"
               [size]="size()"
               [iconOnly]="action.iconOnly()"
@@ -224,7 +289,7 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
               [attr.title]="action.iconOnly() ? action.label() : null"
               (click)="activate(action)"
             >
-              <ng-container [ngTemplateOutlet]="actionInner" [ngTemplateOutletContext]="{ action }" />
+              <ng-container [ngTemplateOutlet]="actionInner" [ngTemplateOutletContext]="{ view }" />
             </button>
           }
           @case ('separator') {
@@ -239,11 +304,11 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
           @case ('widget') {
             <div
               data-slot="widget"
-              data-hell-toolbar-widget
-              [attr.data-item-index]="view.index"
+              data-hell-overflow-toolbar-widget
+              [attr.data-item-index]="$any(view).index"
               [class]="part('widget')"
             >
-              <ng-container [ngTemplateOutlet]="widgetOf(view).content" />
+              <ng-container [ngTemplateOutlet]="widgetContentOf(view)" />
             </div>
           }
         }
@@ -256,14 +321,14 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
           variant="ghost"
           iconOnly
           data-slot="overflowTrigger"
-          data-hell-toolbar-control
+          data-hell-overflow-toolbar-control
           tabindex="-1"
           [size]="size()"
           [hellMenuTrigger]="overflowMenu"
           [ui]="part('overflowTrigger')"
           [attr.aria-label]="effectiveOverflowLabel()"
         >
-          <span class="hell-toolbar-overflow-glyph" aria-hidden="true">
+          <span class="hell-overflow-toolbar-overflow-glyph" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" focusable="false">
               <circle cx="3" cy="8" r="1.5" />
               <circle cx="8" cy="8" r="1.5" />
@@ -278,30 +343,30 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
          width, so the policy always has fresh widths regardless of what is
          currently visible. Inert and aria-hidden, so it never reaches focus or
          the accessibility tree. -->
-    <div #measureRow class="hell-toolbar-measure" aria-hidden="true" inert>
-      @for (view of measureViews(); track view.index) {
-        @switch (view.kind) {
+    <div #measureRow class="hell-overflow-toolbar-measure" aria-hidden="true" inert>
+      @for (view of measureViews(); track $any(view).index) {
+        @switch ($any(view).kind) {
           @case ('action') {
             @let action = actionOf(view);
             <button
               hellButton
               type="button"
               tabindex="-1"
-              class="hell-toolbar-measure-item"
-              [attr.data-item-index]="view.index"
+              class="hell-overflow-toolbar-measure-item"
+              [attr.data-item-index]="$any(view).index"
               [variant]="action.variant()"
               [size]="size()"
               [iconOnly]="action.iconOnly()"
               [ui]="part('action')"
             >
-              <ng-container [ngTemplateOutlet]="actionInner" [ngTemplateOutletContext]="{ action }" />
+              <ng-container [ngTemplateOutlet]="actionInner" [ngTemplateOutletContext]="{ view }" />
             </button>
           }
           @case ('separator') {
             <span
-              class="hell-toolbar-measure-item"
+              class="hell-overflow-toolbar-measure-item"
               [class]="part('separator')"
-              [attr.data-item-index]="view.index"
+              [attr.data-item-index]="$any(view).index"
               [attr.data-orientation]="separatorOrientation()"
             ></span>
           }
@@ -311,8 +376,8 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
 
     <ng-template #overflowMenu>
       <div hellMenu data-slot="overflowMenu" [ui]="part('overflowMenu')">
-        @for (view of overflowViews(); track view.index) {
-          @switch (view.kind) {
+        @for (view of overflowViews(); track $any(view).index) {
+          @switch ($any(view).kind) {
             @case ('action') {
               @let action = actionOf(view);
               <button
@@ -323,9 +388,9 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
                 [ui]="part('overflowItem')"
                 (click)="activate(action)"
               >
-                @if (action.icon) {
-                  <span class="hell-toolbar-overflow-item-icon" aria-hidden="true">
-                    <ng-container [ngTemplateOutlet]="action.icon" />
+                @if (iconOf(view); as icon) {
+                  <span class="hell-overflow-toolbar-overflow-item-icon" aria-hidden="true">
+                    <ng-container [ngTemplateOutlet]="icon" />
                   </span>
                 }
                 <span>{{ action.label() }}</span>
@@ -340,36 +405,26 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
     </ng-template>
   `,
 })
-export class HellToolbar {
+export class HellOverflowToolbarRenderer {
+  private readonly toolbarHost = inject(HELL_OVERFLOW_TOOLBAR_HOST);
+
   /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellToolbarPart>>(undefined, { alias: 'ui' });
+  readonly ui = input<HellUiInput<HellOverflowToolbarRendererPart>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellToolbarPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_TOOLBAR_RECIPE,
+  protected readonly part = hellPartStyler<HellOverflowToolbarRendererPart>(this.ui, {
+    defaultPart: 'action',
+    recipe: () => HELL_OVERFLOW_TOOLBAR_RENDERER_RECIPE,
   });
 
-  /** Accessible name for the toolbar region. Prefer `label` or `labelledBy`. */
-  readonly label = input('');
-  /** ID of an element that labels the toolbar, mapped to `aria-labelledby`. */
-  readonly labelledBy = input('');
-  /** Layout axis and arrow-key direction. Defaults to `'horizontal'`. */
   readonly orientation = input<HellOrientation>('horizontal');
-  /** Size applied to inline action buttons and the overflow trigger. Defaults to `'sm'`. */
   readonly size = input<HellSize>('sm');
-  /**
-   * Accessible label for the overflow trigger button. When left empty (the
-   * default) it falls back to the toolbar Label Contract's `overflowTrigger`
-   * string (`HELL_TOOLBAR_LABELS`), so the English default lives in the
-   * contract rather than a hardcoded input value.
-   */
   readonly overflowLabel = input('');
 
   /** All declared items (actions, separators, widgets) in declaration order. */
-  private readonly declaredItems = contentChildren(HellToolbarItem);
+  private readonly declaredItems = this.toolbarHost.declarations;
 
-  private readonly labels = inject(HELL_TOOLBAR_LABELS);
+  private readonly labels = inject(HELL_OVERFLOW_TOOLBAR_LABELS);
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
@@ -378,7 +433,7 @@ export class HellToolbar {
 
   /**
    * The committed overflow resolution, or `null` before the first measurement.
-   * While `null` the toolbar starts collapsed to its pinned items (primaries
+   * While `null` the toolbar starts collapsed to its pinned items (`never`
    * and widgets), so first paint never flashes a clipped, over-full row.
    */
   private readonly committed = signal<HellToolbarOverflowResult | null>(null);
@@ -389,14 +444,14 @@ export class HellToolbar {
   private lastFocusedControl: HTMLElement | null = null;
 
   /** Declared items paired with their declaration index and separator group. */
-  protected readonly itemModels = computed<readonly HellToolbarItemModel[]>(() => {
+  private readonly itemModels = computed<readonly HellToolbarItemModel[]>(() => {
     let group = 0;
     return this.declaredItems().map((item, index): HellToolbarItemModel => {
-      if (item instanceof HellToolbarAction) {
-        return { kind: 'action', index, group, action: item };
+      if (item.kind === 'action') {
+        return { kind: 'action', index, group, action: item.action, icon: item.icon };
       }
-      if (item instanceof HellToolbarWidget) {
-        return { kind: 'widget', index, group, widget: item };
+      if (item.kind === 'widget') {
+        return { kind: 'widget', index, group, content: item.content };
       }
       const separator: HellToolbarItemModel = { kind: 'separator', index, group };
       group += 1;
@@ -410,31 +465,40 @@ export class HellToolbar {
   );
 
   /** Items rendered inline, in declaration order. */
-  protected readonly inlineViews = computed<readonly HellToolbarItemModel[]>(() =>
+  private readonly inlineViewModels = computed<readonly HellToolbarItemModel[]>(() =>
     this.viewsFor(this.resolution().inline),
   );
 
   /** Items rendered in the overflow menu, in declaration order. */
-  protected readonly overflowViews = computed<readonly HellToolbarItemModel[]>(() =>
+  private readonly overflowViewModels = computed<readonly HellToolbarItemModel[]>(() =>
     this.viewsFor(this.resolution().overflow),
   );
 
   /** Collapsible items rendered off-screen for width measurement (never widgets). */
-  protected readonly measureViews = computed<readonly HellToolbarItemModel[]>(() =>
+  private readonly measureViewModels = computed<readonly HellToolbarItemModel[]>(() =>
     this.itemModels().filter((model) => model.kind !== 'widget'),
   );
 
-  /** Whether the overflow trigger and menu are rendered. */
+  /** @internal Template-only projection of the private inline view models. */
+  protected readonly inlineViews: Signal<readonly unknown[]> = this.inlineViewModels;
+
+  /** @internal Template-only projection of the private overflow view models. */
+  protected readonly overflowViews: Signal<readonly unknown[]> = this.overflowViewModels;
+
+  /** @internal Template-only projection of the private measurement view models. */
+  protected readonly measureViews: Signal<readonly unknown[]> = this.measureViewModels;
+
+  /** @internal Whether the overflow trigger and menu are rendered. */
   protected readonly showOverflow = computed(() =>
-    this.overflowViews().some((view) => view.kind === 'action'),
+    this.overflowViewModels().some((view) => view.kind === 'action'),
   );
 
-  /** Axis of an inline separator: perpendicular to the toolbar's own axis. */
+  /** @internal Axis of an inline separator: perpendicular to the toolbar's own axis. */
   protected readonly separatorOrientation = computed<HellOrientation>(() =>
     this.orientation() === 'vertical' ? 'horizontal' : 'vertical',
   );
 
-  /** The resolved overflow-trigger label: the input override, else the contract default. */
+  /** @internal The resolved overflow-trigger label: the input override, else the contract default. */
   protected readonly effectiveOverflowLabel = computed(
     () => this.overflowLabel() || this.labels.overflowTrigger,
   );
@@ -453,27 +517,33 @@ export class HellToolbar {
     // Keep exactly one control in the tab order after every layout commit, and
     // rescue focus if the focused action just collapsed out of the row.
     afterRenderEffect(() => {
-      this.inlineViews();
-      this.overflowViews();
+      this.inlineViewModels();
+      this.overflowViewModels();
       this.syncRovingTabindex();
       this.restoreFocusAfterCollapse();
     });
   }
 
-  /** Emits the action's activation output from either rendering. */
+  /** @internal Emits the action's activation output from either rendering. */
   protected activate(action: HellToolbarAction): void {
     if (action.disabled()) return;
     action.activated.emit();
   }
 
-  /** Narrows a view model to its action; only called from the `action` branch. */
-  protected actionOf(view: HellToolbarItemModel): HellToolbarAction {
+  /** @internal Narrows a view model to its action; only called from the `action` branch. */
+  protected actionOf(view: unknown): HellToolbarAction {
     return (view as Extract<HellToolbarItemModel, { kind: 'action' }>).action;
   }
 
-  /** Narrows a view model to its widget; only called from the `widget` branch. */
-  protected widgetOf(view: HellToolbarItemModel): HellToolbarWidget {
-    return (view as Extract<HellToolbarItemModel, { kind: 'widget' }>).widget;
+  /** @internal Returns the projected icon for an action view. */
+  protected iconOf(view: unknown): TemplateRef<unknown> | null {
+    const model = view as HellToolbarItemModel;
+    return model.kind === 'action' ? model.icon : null;
+  }
+
+  /** @internal Returns the projected content for a widget view. */
+  protected widgetContentOf(view: unknown): TemplateRef<unknown> {
+    return (view as Extract<HellToolbarItemModel, { kind: 'widget' }>).content;
   }
 
   private viewsFor(indices: readonly number[]): readonly HellToolbarItemModel[] {
@@ -489,7 +559,7 @@ export class HellToolbar {
   private policyItems(): HellToolbarOverflowItem[] {
     return this.itemModels().map((model) => ({
       kind: model.kind,
-      priority: model.kind === 'action' ? model.action.priority() : undefined,
+      overflow: model.kind === 'action' ? model.action.overflow() : undefined,
       width: this.widths.get(model.index) ?? 0,
       group: model.group,
     }));
@@ -536,7 +606,7 @@ export class HellToolbar {
     if (!view || !row || !row.isConnected) return;
 
     // Overflow collapsing is a horizontal concern; a vertical toolbar keeps
-    // every action inline (except overflowOnly) and relies on surrounding
+    // every action inline (except `always`) and relies on surrounding
     // layout to scroll, so it resolves against an unbounded width.
     const horizontal = this.orientation() !== 'vertical';
     const available = horizontal ? row.clientWidth : Number.MAX_SAFE_INTEGER;
@@ -576,7 +646,7 @@ export class HellToolbar {
     // Widgets are never in the sizing row (their content may have side effects);
     // they are always inline, so measure them where they render.
     row
-      .querySelectorAll<HTMLElement>('[data-hell-toolbar-widget][data-item-index]')
+      .querySelectorAll<HTMLElement>('[data-hell-overflow-toolbar-widget][data-item-index]')
       .forEach(record);
   }
 
@@ -599,11 +669,11 @@ export class HellToolbar {
     if (!row) return [];
 
     const nodes = row.querySelectorAll<HTMLElement>(
-      '[data-hell-toolbar-control], [data-hell-toolbar-widget]',
+      '[data-hell-overflow-toolbar-control], [data-hell-overflow-toolbar-widget]',
     );
     const controls: HTMLElement[] = [];
     for (const node of Array.from(nodes)) {
-      if (node.hasAttribute('data-hell-toolbar-widget')) {
+      if (node.hasAttribute('data-hell-overflow-toolbar-widget')) {
         const focusable = this.firstFocusable(node);
         if (focusable) controls.push(focusable);
       } else if (!node.hasAttribute('disabled')) {
@@ -667,7 +737,7 @@ export class HellToolbar {
   }
 
   /** Moves the roving focus across visible controls per the APG toolbar pattern. */
-  protected onKeydown(event: KeyboardEvent): void {
+  handleKeydown(event: KeyboardEvent): void {
     // Interactive widgets (text fields, selects, editable regions) own their own
     // keys; leave the toolbar's arrow/Home/End roving to non-editable controls.
     if (this.isEditableTarget(this.host.ownerDocument.activeElement)) return;
@@ -715,8 +785,8 @@ export class HellToolbar {
     return null;
   }
 
-  /** Tracks the roving tab stop as focus enters a control (Tab, click, or programmatic). */
-  protected onFocusIn(event: FocusEvent): void {
+  /** Tracks the roving tab stop as focus enters a control. */
+  handleFocusIn(event: FocusEvent): void {
     const controls = this.focusableControls();
     const target = event.target as Node | null;
     const index = controls.findIndex(
@@ -727,6 +797,107 @@ export class HellToolbar {
     this.activeIndex = index;
     this.lastFocusedControl = controls[index];
     this.syncRovingTabindex();
+  }
+}
+
+/**
+ * A responsive action toolbar following the WAI-ARIA toolbar pattern. Consumers
+ * declare each action once with a `hellToolbarAction` template — plus optional
+ * `hellToolbarSeparator` group dividers and `hellToolbarWidget` projected
+ * controls — and the toolbar renders the items that fit as inline Hell controls
+ * and collapses the rest into a trailing overflow menu (the Hell menu). Overflow
+ * membership is recalculated from a container-driven `ResizeObserver` — measured
+ * against an off-screen sizing row and committed once per resize frame — so no
+ * action is ever unreachable at any width and container growth never feeds a
+ * stale zero width back into the policy. A roving tabindex spans the visible
+ * controls and the overflow trigger, giving the toolbar a single tab stop with
+ * arrow-key navigation; when the focused action collapses out of the row, focus
+ * moves to the overflow trigger rather than dropping to the document body.
+ */
+@Component({
+  selector: 'hell-overflow-toolbar',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellOverflowToolbarRenderer],
+  providers: [
+    {
+      provide: HELL_OVERFLOW_TOOLBAR_HOST,
+      useExisting: forwardRef(() => HellOverflowToolbar),
+    },
+  ],
+  host: {
+    role: 'toolbar',
+    'data-slot': 'root',
+    '[attr.data-orientation]': 'orientation()',
+    '[attr.aria-orientation]': 'orientation()',
+    '[attr.aria-label]': 'label() || null',
+    '[attr.aria-labelledby]': 'labelledBy() || null',
+  },
+  template: `
+    <hell-overflow-toolbar-renderer
+      [ui]="$any(this).rendererUi()"
+      [orientation]="orientation()"
+      [size]="size()"
+      [overflowLabel]="overflowLabel()"
+    >
+      <ng-content />
+    </hell-overflow-toolbar-renderer>
+  `,
+})
+export class HellOverflowToolbar {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input(undefined as HellUiInput<HellOverflowToolbarPart>, { alias: 'ui' });
+  /** Accessible name for the toolbar region. Prefer `label` or `labelledBy`. */
+  readonly label = input('');
+  /** ID of an element that labels the toolbar, mapped to `aria-labelledby`. */
+  readonly labelledBy = input('');
+  /** Layout axis and arrow-key direction. Defaults to `'horizontal'`. */
+  readonly orientation = input<HellOrientation>('horizontal');
+  /** Size applied to inline action buttons and the overflow trigger. Defaults to `'sm'`. */
+  readonly size = input<HellSize>('sm');
+  /**
+   * Accessible label for the overflow trigger button. When left empty (the
+   * default) it falls back to the Overflow Toolbar Label Contract's
+   * `overflowTrigger` string (`HELL_OVERFLOW_TOOLBAR_LABELS`).
+   */
+  readonly overflowLabel = input('');
+
+  private readonly declarations = contentChildren(HELL_OVERFLOW_TOOLBAR_DECLARATION);
+  private readonly rendererView = viewChild(HellOverflowToolbarRenderer);
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly domRenderer = inject(Renderer2);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly hostEvents = this.bindHostEvents();
+  private readonly rootUi = computed<HellUiInput<'root'>>(() => {
+    const ui = this.ui();
+    return typeof ui === 'string' ? ui : ui?.root;
+  });
+  private readonly rendererUi = computed<HellUiInput<HellOverflowToolbarRendererPart>>(() => {
+    const ui = this.ui();
+    return typeof ui === 'string' ? undefined : ui;
+  });
+
+  @HostBinding('class')
+  private get hostClass(): string {
+    return this.part('root');
+  }
+
+  private readonly part = createOverflowToolbarRootStyler(this.rootUi);
+
+  private bindHostEvents(): void {
+    const stopKeydown = this.domRenderer.listen(
+      this.host,
+      'keydown',
+      (event: KeyboardEvent) => this.rendererView()?.handleKeydown(event),
+    );
+    const stopFocusIn = this.domRenderer.listen(
+      this.host,
+      'focusin',
+      (event: FocusEvent) => this.rendererView()?.handleFocusIn(event),
+    );
+    this.destroyRef.onDestroy(() => {
+      stopKeydown();
+      stopFocusIn();
+    });
   }
 }
 
@@ -742,11 +913,12 @@ function sameOrder(a: readonly number[], b: readonly number[]): boolean {
 }
 
 /**
- * Standalone imports for the complete toolbar API: the toolbar, its action, and
- * the separator and widget declarations.
+ * Standalone imports for plain Toolbar plus the complete Overflow Toolbar API.
  */
 export const HELL_TOOLBAR_DIRECTIVES = [
   HellToolbar,
+  HellToolbarItem,
+  HellOverflowToolbar,
   HellToolbarAction,
   HellToolbarSeparator,
   HellToolbarWidget,

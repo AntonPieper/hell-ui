@@ -33,11 +33,11 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
 
       <span hellPageHeaderTitle>Ada Lovelace</span>
 
-      <hell-toolbar hellPageHeaderToolbar label="Record actions">
+      <hell-overflow-toolbar hellPageHeaderToolbar label="Record actions">
         <ng-template
           hellToolbarAction
           label="Edit"
-          priority="primary"
+          overflow="never"
           iconOnly
           (activated)="run('edit')"
         >
@@ -49,12 +49,12 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
         <ng-template
           hellToolbarAction
           label="Delete"
-          priority="overflowOnly"
+          overflow="always"
           (activated)="run('delete')"
         >
           <hell-icon name="faSolidTrash" size="13px" />
         </ng-template>
-      </hell-toolbar>
+      </hell-overflow-toolbar>
     </hell-page-header>
 
     <p class="mt-hell-3 text-sm text-hell-foreground-muted">

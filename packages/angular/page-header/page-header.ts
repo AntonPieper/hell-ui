@@ -154,7 +154,7 @@ const HELL_PAGE_HEADER_RECIPE = {
  *   - `[hellPageHeaderTitle]`       → the heading element's content
  *   - `[hellPageHeaderMeta]`        → status badges beside the title
  *   - `[hellPageHeaderDescription]` → a supporting line under the title
- *   - `[hellPageHeaderToolbar]`     → trailing actions (typically `hell-toolbar`)
+ *   - `[hellPageHeaderToolbar]`     → trailing actions (typically `hell-overflow-toolbar`)
  */
 @Component({
   selector: 'hell-page-header',

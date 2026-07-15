@@ -17,12 +17,12 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       <span hellChip hellPageHeaderMeta variant="warning">Past due</span>
       <p hellPageHeaderDescription>Invoices and payment methods for your organization.</p>
 
-      <hell-toolbar hellPageHeaderToolbar label="Billing actions">
-        <ng-template hellToolbarAction label="New invoice" priority="primary" variant="primary">
+      <hell-overflow-toolbar hellPageHeaderToolbar label="Billing actions">
+        <ng-template hellToolbarAction label="New invoice" overflow="never" variant="primary">
           <hell-icon name="faSolidPlus" size="13px" />
         </ng-template>
         <ng-template hellToolbarAction label="Export"></ng-template>
-      </hell-toolbar>
+      </hell-overflow-toolbar>
     </hell-page-header>
   `,
 })

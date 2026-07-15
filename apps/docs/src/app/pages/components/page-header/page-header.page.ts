@@ -43,7 +43,7 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           with <code>hellPageHeaderTitle</code> (it becomes the page's main heading), badges with
           <code>hellPageHeaderMeta</code>, a supporting line with <code>hellPageHeaderDescription</code>,
           and trailing actions with <code>hellPageHeaderToolbar</code> — typically a
-          <code>hell-toolbar</code>, which brings its own responsive overflow. The header is
+          <code>hell-overflow-toolbar</code>, which brings its own responsive overflow. The header is
           responsive by default: the toolbar drops below the title on narrow widths.
         </p>
 
@@ -142,7 +142,7 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           <li><code>[hellPageHeaderTitle]</code> — the heading content.</li>
           <li><code>[hellPageHeaderMeta]</code> — badges beside the title.</li>
           <li><code>[hellPageHeaderDescription]</code> — the supporting line.</li>
-          <li><code>[hellPageHeaderToolbar]</code> — trailing actions (typically <code>hell-toolbar</code>).</li>
+          <li><code>[hellPageHeaderToolbar]</code> — trailing actions (typically <code>hell-overflow-toolbar</code>).</li>
         </ul>
         <p>
           <strong><code>hell-page-header-back</code></strong> (<code>HellPageHeaderBack</code>)
@@ -171,7 +171,7 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <ul class="hd-do">
           <li>Project a title on every page header; it is the page's main heading.</li>
           <li>Use the <code>meta</code> region for status badges and counts that belong beside the title.</li>
-          <li>Reach for <code>hell-toolbar</code> in the toolbar region so actions overflow gracefully on narrow screens.</li>
+          <li>Reach for <code>hell-overflow-toolbar</code> in the toolbar region so actions overflow gracefully on narrow screens.</li>
         </ul>
 
         <h2>Don't</h2>

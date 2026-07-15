@@ -46,7 +46,15 @@ const packageConsumerCiGroups = [
   { name: 'button', scenarios: ['button'] },
   {
     name: 'composite-foundations',
-    scenarios: ['composite-css', 'app-shell', 'filter-bar', 'page-header', 'resizable', 'split-view'],
+    scenarios: [
+      'composite-css',
+      'toolbar',
+      'app-shell',
+      'filter-bar',
+      'page-header',
+      'resizable',
+      'split-view',
+    ],
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
@@ -291,6 +299,23 @@ const packageConsumerScenarioCatalog = [
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
       'mask:var(--hell-icon-refresh) center/contain no-repeat',
+      'hell-overflow-toolbar[data-slot=root]',
+    ],
+  },
+  {
+    name: 'toolbar',
+    description: 'isolated Toolbar entry with composed Button and Menu styles',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: toolbarConsumerMainTs,
+    stylesCss: toolbarConsumerStylesCss,
+    cssIncludes: [
+      'transition-property:background-color,border-color,color,box-shadow',
+      '[hellMenuItem][data-slot=root]',
+      'hell-overflow-toolbar[data-slot=root]',
     ],
   },
   {
@@ -2053,6 +2078,10 @@ import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import {
+  HELL_TOOLBAR_DIRECTIVES,
+  type HellOverflowToolbarUi,
+} from '${packageName}/toolbar';
+import {
   HELL_TOAST_DIRECTIVES,
   HellToastService,
   type HellToasterUi,
@@ -2084,6 +2113,7 @@ interface SearchItem {
     HellDialpad,
     HellFileUpload,
     HellTimeInput,
+    ...HELL_TOOLBAR_DIRECTIVES,
     ...HELL_TOAST_DIRECTIVES,
   ],
   template: \`
@@ -2139,6 +2169,33 @@ interface SearchItem {
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
         <hell-file-upload [items]="uploadItems" [ui]="fileUploadUi" />
+
+        <div hellToolbar label="Formatting" ui="w-fit">
+          <button hellToolbarItem type="button" (click)="toolbarActivations += 1">Bold</button>
+          <button hellToolbarItem type="button" disabled>Locked</button>
+          <button hellToolbarItem type="button" (click)="toolbarActivations += 1">Share</button>
+        </div>
+
+        <hell-overflow-toolbar label="Package actions" [ui]="overflowToolbarUi">
+          <ng-template
+            hellToolbarAction
+            label="Create"
+            overflow="never"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+          <ng-template
+            hellToolbarAction
+            label="Duplicate"
+            overflow="auto"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+          <ng-template
+            hellToolbarAction
+            label="Settings"
+            overflow="always"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+        </hell-overflow-toolbar>
       </main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
@@ -2169,7 +2226,11 @@ class App {
   protected readonly dialogOverlayUi = { root: 'p-hell-4' };
   protected readonly dialogUi = { root: 'max-w-[520px]' };
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
+  protected readonly overflowToolbarUi = {
+    root: 'max-w-[480px]',
+  } satisfies HellOverflowToolbarUi;
   protected readonly toasterUi = { toast: 'ring-1 ring-hell-border' } satisfies HellToasterUi;
+  protected toolbarActivations = 0;
   protected toastRef: HellToastRef | null = null;
   protected readonly searchItems: readonly SearchItem[] = [
     { label: 'Dialog', section: 'Feedback' },
@@ -2209,6 +2270,63 @@ class App {
   protected dismissToast(): void {
     this.toastRef?.dismiss();
   }
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function toolbarConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HELL_TOOLBAR_DIRECTIVES,
+  type HellOverflowToolbarUi,
+} from '${packageName}/toolbar';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  template: \`
+    <div hellToolbar label="Formatting">
+      <button hellToolbarItem type="button" (click)="activations += 1">Bold</button>
+      <button hellToolbarItem type="button" disabled>Locked</button>
+      <button hellToolbarItem type="button" (click)="activations += 1">Share</button>
+    </div>
+
+    <hell-overflow-toolbar
+      label="Package actions"
+      data-test-id="toolbar-overflow"
+      [ui]="overflowUi"
+    >
+      <ng-template
+        hellToolbarAction
+        label="Create"
+        overflow="never"
+        (activated)="activations += 1"
+      ></ng-template>
+      <ng-template
+        hellToolbarAction
+        label="Duplicate"
+        overflow="auto"
+        (activated)="activations += 1"
+      ></ng-template>
+      <ng-template hellToolbarSeparator></ng-template>
+      <ng-template
+        hellToolbarAction
+        label="Settings"
+        overflow="always"
+        (activated)="activations += 1"
+      ></ng-template>
+    </hell-overflow-toolbar>
+  \`,
+})
+class App {
+  protected activations = 0;
+  protected readonly overflowUi = {
+    root: 'max-w-[480px]',
+  } satisfies HellOverflowToolbarUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -2861,7 +2979,15 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/file-upload/styles.css";
 @import "${packageName}/omnibar/styles.css";
 @import "${packageName}/time-input/styles.css";
+@import "${packageName}/toolbar/styles.css";
 @import "${packageName}/toast/styles.css";
+`;
+}
+
+function toolbarConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/toolbar/styles.css";
 `;
 }
 

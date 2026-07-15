@@ -1,19 +1,28 @@
-import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
+import { HellButton } from '@hell-ui/angular/button';
+import { provideHellLabels } from '@hell-ui/angular/core';
+import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
-import { HELL_TOOLBAR_DIRECTIVES, HELL_TOOLBAR_LABELS, type HellToolbarUi } from './toolbar';
+import {
+  HELL_OVERFLOW_TOOLBAR_LABELS,
+  HELL_TOOLBAR_DIRECTIVES,
+  HellOverflowToolbarRenderer,
+  type HellOverflowToolbarRendererPart,
+  type HellOverflowToolbarUi,
+} from './toolbar';
 import { hellResolveToolbarOverflow, type HellToolbarOverflowItem } from './toolbar-overflow';
 
 describe('hellResolveToolbarOverflow', () => {
   const item = (
-    priority: HellToolbarOverflowItem['priority'],
+    overflow: HellToolbarOverflowItem['overflow'],
     width: number,
-  ): HellToolbarOverflowItem => ({ priority, width });
+  ): HellToolbarOverflowItem => ({ overflow, width });
 
   it('keeps every action inline when the row is wide enough', () => {
     const result = hellResolveToolbarOverflow(
-      [item('default', 100), item('default', 100), item('primary', 100)],
+      [item('auto', 100), item('auto', 100), item('never', 100)],
       { available: 1000, gap: 8, triggerWidth: 40 },
     );
 
@@ -21,10 +30,10 @@ describe('hellResolveToolbarOverflow', () => {
     expect(result.overflow).toEqual([]);
   });
 
-  it('overflows default actions from the last-declared first, reserving trigger width', () => {
-    // widths 100, gap 8, trigger 40. available 300 fits 2 defaults + trigger.
+  it('overflows auto actions from the last-declared first, reserving trigger width', () => {
+    // widths 100, gap 8, trigger 40. available 300 fits 2 auto actions + trigger.
     const result = hellResolveToolbarOverflow(
-      [item('default', 100), item('default', 100), item('default', 100), item('default', 100)],
+      [item('auto', 100), item('auto', 100), item('auto', 100), item('auto', 100)],
       { available: 300, gap: 8, triggerWidth: 40 },
     );
 
@@ -32,20 +41,20 @@ describe('hellResolveToolbarOverflow', () => {
     expect(result.overflow).toEqual([2, 3]);
   });
 
-  it('never overflows a primary action, even when it does not fit', () => {
+  it('keeps a never-overflow action inline, even when it does not fit', () => {
     const result = hellResolveToolbarOverflow(
-      [item('default', 100), item('primary', 100), item('primary', 100)],
+      [item('auto', 100), item('never', 100), item('never', 100)],
       { available: 10, gap: 8, triggerWidth: 40 },
     );
 
-    // Both primaries stay inline; only the default collapses.
+    // Both never-overflow actions stay inline; only the auto action collapses.
     expect(result.inline).toEqual([1, 2]);
     expect(result.overflow).toEqual([0]);
   });
 
-  it('never renders an overflowOnly action inline, even with unlimited room', () => {
+  it('never renders an always-overflow action inline, even with unlimited room', () => {
     const result = hellResolveToolbarOverflow(
-      [item('overflowOnly', 100), item('default', 100), item('primary', 100)],
+      [item('always', 100), item('auto', 100), item('never', 100)],
       { available: 100_000, gap: 8, triggerWidth: 40 },
     );
 
@@ -53,19 +62,19 @@ describe('hellResolveToolbarOverflow', () => {
     expect(result.overflow).toEqual([0]);
   });
 
-  it('preserves declaration order across mixed priorities', () => {
+  it('preserves declaration order across mixed overflow policies', () => {
     const result = hellResolveToolbarOverflow(
       [
-        item('default', 100),
-        item('overflowOnly', 100),
-        item('primary', 100),
-        item('default', 100),
+        item('auto', 100),
+        item('always', 100),
+        item('never', 100),
+        item('auto', 100),
       ],
       { available: 148, gap: 8, triggerWidth: 40 },
     );
 
-    // Room for the single primary + trigger only; both defaults collapse and
-    // join the overflowOnly action in declaration order.
+    // Room for the never-overflow action + trigger only; both auto actions
+    // collapse and join the always-overflow action in declaration order.
     expect(result.inline).toEqual([2]);
     expect(result.overflow).toEqual([0, 1, 3]);
   });
@@ -74,12 +83,12 @@ describe('hellResolveToolbarOverflow', () => {
     const result = hellResolveToolbarOverflow(
       [
         { kind: 'widget', width: 200 },
-        { kind: 'action', priority: 'default', width: 100 },
+        { kind: 'action', overflow: 'auto', width: 100 },
       ],
       { available: 0, gap: 8, triggerWidth: 40 },
     );
 
-    // The widget stays inline; the default collapses into the menu.
+    // The widget stays inline; the auto action collapses into the menu.
     expect(result.inline).toEqual([0]);
     expect(result.overflow).toEqual([1]);
   });
@@ -87,9 +96,9 @@ describe('hellResolveToolbarOverflow', () => {
   it('renders a separator inline only when it divides two visible groups', () => {
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'default', width: 100, group: 0 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
       ],
       { available: 1000, gap: 8, triggerWidth: 40 },
     );
@@ -102,10 +111,10 @@ describe('hellResolveToolbarOverflow', () => {
     // Only the leading group fits; the separator and trailing group collapse.
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'default', width: 100, group: 0 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
       ],
       { available: 150, gap: 8, triggerWidth: 40 },
     );
@@ -120,10 +129,10 @@ describe('hellResolveToolbarOverflow', () => {
     // Widths chosen so action 2 alone would fit, but its group [2,3] is atomic.
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'default', width: 100, group: 0 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
       ],
       // Enough for [0] + separator + one of the trailing group, but not both.
       { available: 268, gap: 8, triggerWidth: 40 },
@@ -137,13 +146,13 @@ describe('hellResolveToolbarOverflow', () => {
   it('collapses the leading group action-by-action even with a trailing group present', () => {
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'default', width: 100, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 0 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 0 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
       ],
       // Room for two controls + trigger: the trailing group goes first (atomic),
-      // then the leading group erodes from its last-declared default.
+      // then the leading group erodes from its last-declared auto action.
       { available: 300, gap: 8, triggerWidth: 40 },
     );
 
@@ -153,15 +162,15 @@ describe('hellResolveToolbarOverflow', () => {
 
   it('places a separator inline and in the menu when it divides both views', () => {
     // Pinned items surround two collapsed groups: the surviving inline divider
-    // sits between the primary and the widget, while the separator between the
+    // sits between the never-overflow action and the widget, while the separator between the
     // two collapsed groups also divides them in the menu.
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'primary', width: 100, group: 0 },
+        { kind: 'action', overflow: 'never', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'default', width: 100, group: 1 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 1 },
         { kind: 'separator', width: 10, group: 1 },
-        { kind: 'action', priority: 'default', width: 100, group: 2 },
+        { kind: 'action', overflow: 'auto', width: 100, group: 2 },
         { kind: 'widget', width: 100, group: 2 },
       ],
       { available: 260, gap: 8, triggerWidth: 40 },
@@ -174,27 +183,184 @@ describe('hellResolveToolbarOverflow', () => {
   it('places a menu separator between two overflowed groups', () => {
     const result = hellResolveToolbarOverflow(
       [
-        { kind: 'action', priority: 'primary', width: 100, group: 0 },
+        { kind: 'action', overflow: 'never', width: 100, group: 0 },
         { kind: 'separator', width: 10, group: 0 },
-        { kind: 'action', priority: 'overflowOnly', width: 100, group: 1 },
+        { kind: 'action', overflow: 'always', width: 100, group: 1 },
         { kind: 'separator', width: 10, group: 1 },
-        { kind: 'action', priority: 'overflowOnly', width: 100, group: 2 },
+        { kind: 'action', overflow: 'always', width: 100, group: 2 },
       ],
       { available: 1000, gap: 8, triggerWidth: 40 },
     );
 
-    // Primary inline (no inline separator — nothing inline after it); the menu
-    // shows both overflowOnly actions divided by their separator.
+    // The never-overflow action is inline; the menu shows both always-overflow
+    // actions divided by their separator.
     expect(result.inline).toEqual([0]);
     expect(result.overflow).toEqual([2, 3, 4]);
   });
 });
 
 @Component({
+  imports: [HellButton, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
+  template: `
+    <div hellToolbar label="Formatting actions" [orientation]="orientation()" ui="rounded-hell-md">
+      <button hellButton hellToolbarItem type="button" (click)="run('bold')">Bold</button>
+      <button hellButton hellToolbarItem type="button" disabled (click)="run('disabled')">
+        Disabled
+      </button>
+      <button
+        hellButton
+        hellToolbarItem
+        type="button"
+        [hellTooltipTrigger]="shareHint"
+        (click)="run('share')"
+      >
+        Share
+      </button>
+      <ng-template #shareHint><span hellTooltip>Share this document</span></ng-template>
+    </div>
+  `,
+})
+class PlainToolbarHost {
+  readonly orientation = signal<'horizontal' | 'vertical'>('horizontal');
+  readonly events: string[] = [];
+
+  run(action: string): void {
+    this.events.push(action);
+  }
+}
+
+@Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
   template: `
-    <hell-toolbar label="Record actions" [ui]="ui">
-      <ng-template hellToolbarAction label="Save" priority="primary" (activated)="log('save')">
+    <div hellToolbar label="Native actions">
+      <button hellToolbarItem type="button">One</button>
+      <button hellToolbarItem type="button">Two</button>
+    </div>
+  `,
+})
+class PlainNativeToolbarHost {}
+
+describe('HellToolbar', () => {
+  const mounted: HTMLElement[] = [];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [PlainToolbarHost, PlainNativeToolbarHost],
+    }).compileComponents();
+  });
+
+  afterEach(() => {
+    while (mounted.length) mounted.pop()?.remove();
+    cleanupPortaledTestElements('[hellTooltip]');
+  });
+
+  const create = async () => {
+    const fixture = TestBed.createComponent(PlainToolbarHost);
+    document.body.appendChild(fixture.nativeElement);
+    mounted.push(fixture.nativeElement);
+    await settle(fixture);
+    return fixture;
+  };
+
+  it('owns only the toolbar role, name, orientation, and root Part Style Map', async () => {
+    const fixture = await create();
+    const toolbar = query(fixture.nativeElement, '[hellToolbar]');
+
+    expect(toolbar.getAttribute('role')).toBe('toolbar');
+    expect(toolbar.getAttribute('aria-label')).toBe('Formatting actions');
+    expect(toolbar.getAttribute('aria-orientation')).toBe('horizontal');
+    expect(toolbar.getAttribute('data-orientation')).toBe('horizontal');
+    expect(toolbar.className).toContain('rounded-hell-md');
+  });
+
+  it('delegates one-tab-stop horizontal roving focus and skips disabled items', async () => {
+    const fixture = await create();
+    const root = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+
+    expect(buttons.map((button) => button.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
+    buttons[0].focus();
+    buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(buttons[2]);
+
+    buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(buttons[0]);
+
+    buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(buttons[2]);
+  });
+
+  it('updates vertical roving focus without changing consumer-owned controls', async () => {
+    const fixture = await create();
+    fixture.componentInstance.orientation.set('vertical');
+    await settle(fixture);
+
+    const toolbar = query(fixture.nativeElement, '[hellToolbar]');
+    const root = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+    expect(toolbar.getAttribute('aria-orientation')).toBe('vertical');
+
+    buttons[0].focus();
+    buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(buttons[2]);
+
+    buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(buttons[0]);
+  });
+
+  it('leaves activation, HellButton classes, and Tooltip composition with the consumer', async () => {
+    const fixture = await create();
+    const root = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
+
+    expect(buttons[0].className).toContain('inline-flex');
+    expect(fixture.debugElement.queryAll(By.directive(HellTooltipTrigger))).toHaveLength(1);
+    buttons[0].click();
+    buttons[2].click();
+    expect(fixture.componentInstance.events).toEqual(['bold', 'share']);
+  });
+
+  it('creates no ResizeObserver, measurement row, overflow trigger, portal, or duplicate controls', async () => {
+    const originalResizeObserver = globalThis.ResizeObserver;
+    let observerCount = 0;
+    class CountingResizeObserver {
+      constructor() {
+        observerCount += 1;
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    }
+    globalThis.ResizeObserver = CountingResizeObserver as unknown as typeof ResizeObserver;
+
+    try {
+      const fixture = TestBed.createComponent(PlainNativeToolbarHost);
+      document.body.appendChild(fixture.nativeElement);
+      mounted.push(fixture.nativeElement);
+      await settle(fixture);
+      const toolbar = query(fixture.nativeElement, '[hellToolbar]');
+
+      expect(observerCount).toBe(0);
+      expect(toolbar.querySelectorAll('button')).toHaveLength(2);
+      expect(toolbar.querySelector('[data-slot="overflowTrigger"]')).toBeNull();
+      expect(toolbar.querySelector('[class*="measure"]')).toBeNull();
+      expect(fixture.nativeElement.querySelector('hell-overflow-toolbar')).toBeNull();
+    } finally {
+      globalThis.ResizeObserver = originalResizeObserver;
+    }
+  });
+});
+
+@Component({
+  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  template: `
+    <hell-overflow-toolbar label="Record actions" [ui]="ui">
+      <ng-template hellToolbarAction label="Save" overflow="never" (activated)="log('save')">
         <span class="icon">S</span>
       </ng-template>
       <ng-template hellToolbarAction label="Edit" (activated)="log('edit')">
@@ -203,13 +369,13 @@ describe('hellResolveToolbarOverflow', () => {
       <ng-template
         hellToolbarAction
         label="Archive"
-        priority="overflowOnly"
+        overflow="always"
         [disabled]="archiveDisabled()"
         (activated)="log('archive')"
       ></ng-template>
-      <ng-template hellToolbarAction label="Delete" priority="overflowOnly" (activated)="log('delete')">
+      <ng-template hellToolbarAction label="Delete" overflow="always" (activated)="log('delete')">
       </ng-template>
-    </hell-toolbar>
+    </hell-overflow-toolbar>
   `,
 })
 class ToolbarHost {
@@ -218,7 +384,7 @@ class ToolbarHost {
   readonly ui = {
     root: 'bg-hell-surface-muted',
     action: 'font-semibold',
-  } satisfies HellToolbarUi;
+  } satisfies HellOverflowToolbarUi;
 
   log(action: string): void {
     this.events.push(action);
@@ -228,11 +394,11 @@ class ToolbarHost {
 @Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
   template: `
-    <hell-toolbar label="Bulk actions">
+    <hell-overflow-toolbar label="Bulk actions">
       @for (label of labels(); track label) {
         <ng-template hellToolbarAction [label]="label"><span>·</span></ng-template>
       }
-    </hell-toolbar>
+    </hell-overflow-toolbar>
   `,
 })
 class WidthToolbarHost {
@@ -242,7 +408,7 @@ class WidthToolbarHost {
 @Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
   template: `
-    <hell-toolbar label="Editor">
+    <hell-overflow-toolbar label="Editor">
       <ng-template hellToolbarAction label="Bold" iconOnly (activated)="log('bold')">
         <span class="glyph">B</span>
       </ng-template>
@@ -253,7 +419,7 @@ class WidthToolbarHost {
       <ng-template hellToolbarWidget>
         <input class="search" type="search" aria-label="Search" />
       </ng-template>
-    </hell-toolbar>
+    </hell-overflow-toolbar>
   `,
 })
 class CapabilitiesHost {
@@ -265,17 +431,21 @@ class CapabilitiesHost {
 
 @Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
-  providers: [provideHellLabels(HELL_TOOLBAR_LABELS, { overflowTrigger: 'Weitere Aktionen' })],
+  providers: [
+    provideHellLabels(HELL_OVERFLOW_TOOLBAR_LABELS, {
+      overflowTrigger: 'Weitere Aktionen',
+    }),
+  ],
   template: `
-    <hell-toolbar label="Localized">
-      <ng-template hellToolbarAction label="One" priority="primary"></ng-template>
-      <ng-template hellToolbarAction label="Two" priority="overflowOnly"></ng-template>
-    </hell-toolbar>
+    <hell-overflow-toolbar label="Localized">
+      <ng-template hellToolbarAction label="One" overflow="never"></ng-template>
+      <ng-template hellToolbarAction label="Two" overflow="always"></ng-template>
+    </hell-overflow-toolbar>
   `,
 })
 class LocalizedToolbarHost {}
 
-describe('HellToolbar', () => {
+describe('HellOverflowToolbar', () => {
   let originalResizeObserver: typeof ResizeObserver | undefined;
   let originalRect: typeof HTMLElement.prototype.getBoundingClientRect;
   const mounted: HTMLElement[] = [];
@@ -309,28 +479,42 @@ describe('HellToolbar', () => {
     mount(fixture);
     fixture.detectChanges();
 
-    // No measurement has run (no ResizeObserver frame), so only the primary is
-    // inline and every default sits in the overflow menu — no clipped flash.
+    // No measurement has run (no ResizeObserver frame), so only the never-overflow
+    // action is inline and every auto action sits in the menu — no clipped flash.
     expect(actionLabels(fixture.nativeElement)).toEqual(['Save']);
     expect(fixture.nativeElement.querySelector('[data-slot="overflowTrigger"]')).toBeInstanceOf(
       HTMLElement,
     );
   });
 
-  it('renders primary/default inline and keeps overflowOnly actions out of the inline row', () => {
+  it('keeps measured runtime coordination in its package-local renderer seam', () => {
+    const fixture = TestBed.createComponent(ToolbarHost);
+    mount(fixture);
+    fixture.detectChanges();
+
+    const root = query(fixture.nativeElement, 'hell-overflow-toolbar');
+    const renderer = fixture.debugElement.query(By.directive(HellOverflowToolbarRenderer));
+    expect(renderer).not.toBeNull();
+    expect(renderer.nativeElement.parentElement).toBe(root);
+    expect(renderer.nativeElement.getAttribute('role')).toBeNull();
+    expect(root.getAttribute('role')).toBe('toolbar');
+    expect(rendererPart(renderer.nativeElement, 'action')).toBeInstanceOf(HTMLElement);
+  });
+
+  it('renders never/auto inline and keeps always actions out of the inline row', () => {
     const fixture = TestBed.createComponent(ToolbarHost);
     mount(fixture);
     fixture.detectChanges();
     drive(fixture, 1000);
 
-    const toolbar = query(fixture.nativeElement, 'hell-toolbar');
+    const toolbar = query(fixture.nativeElement, 'hell-overflow-toolbar');
     expect(toolbar.getAttribute('role')).toBe('toolbar');
     expect(toolbar.getAttribute('aria-label')).toBe('Record actions');
     expect(toolbar.getAttribute('data-slot')).toBe('root');
 
     expect(actionLabels(fixture.nativeElement)).toEqual(['Save', 'Edit']);
 
-    // overflowOnly actions never render inline; the trigger is present.
+    // Always-overflow actions never render inline; the trigger is present.
     expect(fixture.nativeElement.querySelector('[data-slot="overflowTrigger"]')).toBeInstanceOf(
       HTMLElement,
     );
@@ -377,12 +561,12 @@ describe('HellToolbar', () => {
     const host = fixture.nativeElement as HTMLElement;
     const controls = Array.from(
       host.querySelectorAll<HTMLElement>(
-        '[data-hell-toolbar-actions] [data-hell-toolbar-control]',
+        '[data-hell-overflow-toolbar-actions] [data-hell-overflow-toolbar-control]',
       ),
     );
     expect(controls.map((control) => control.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
 
-    const toolbar = query(fixture.nativeElement, 'hell-toolbar');
+    const toolbar = query(fixture.nativeElement, 'hell-overflow-toolbar');
     controls[0].focus();
     toolbar.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
@@ -400,11 +584,11 @@ describe('HellToolbar', () => {
     mount(fixture);
     fixture.detectChanges();
 
-    const row = query(fixture.nativeElement, '[data-hell-toolbar-actions]');
+    const row = query(fixture.nativeElement, '[data-hell-overflow-toolbar-actions]');
     let available = 300;
     Object.defineProperty(row, 'clientWidth', { configurable: true, get: () => available });
 
-    // Narrow: only two default actions fit alongside the reserved trigger.
+    // Narrow: only two auto actions fit alongside the reserved trigger.
     observe(row, 300);
     fixture.detectChanges();
     expect(actionLabels(fixture.nativeElement)).toEqual(['One', 'Two']);
@@ -433,7 +617,7 @@ describe('HellToolbar', () => {
     fixture.detectChanges();
     drive(fixture, 1000);
 
-    const toolbar = query(fixture.nativeElement, 'hell-toolbar');
+    const toolbar = query(fixture.nativeElement, 'hell-overflow-toolbar');
     expect(toolbar.className).toContain('bg-hell-surface-muted');
     expect(actionButtons(fixture.nativeElement)[0].className).toContain('font-semibold');
   });
@@ -451,7 +635,7 @@ describe('HellToolbar', () => {
     expect(bold.getAttribute('aria-label')).toBe('Bold');
     expect(bold.getAttribute('title')).toBe('Bold');
     expect(bold.hasAttribute('data-icon-only')).toBe(true);
-    expect(bold.querySelector('.hell-toolbar-action-label')).toBeNull();
+    expect(bold.querySelector('.hell-overflow-toolbar-action-label')).toBeNull();
   });
 
   it('renders an inline separator between groups and a menu separator when collapsed', async () => {
@@ -490,7 +674,7 @@ describe('HellToolbar', () => {
     const host = fixture.nativeElement as HTMLElement;
     const rovingStops = Array.from(
       host.querySelectorAll<HTMLElement>(
-        '[data-hell-toolbar-actions] [tabindex="0"], [data-hell-toolbar-actions] [tabindex="-1"]',
+        '[data-hell-overflow-toolbar-actions] [tabindex="0"], [data-hell-overflow-toolbar-actions] [tabindex="-1"]',
       ),
     );
     expect(rovingStops).toContain(search);
@@ -510,7 +694,7 @@ describe('HellToolbar', () => {
     mount(fixture);
     fixture.detectChanges();
 
-    const row = query(fixture.nativeElement, '[data-hell-toolbar-actions]');
+    const row = query(fixture.nativeElement, '[data-hell-overflow-toolbar-actions]');
     let available = 1000;
     Object.defineProperty(row, 'clientWidth', { configurable: true, get: () => available });
 
@@ -561,8 +745,8 @@ describe('HellToolbar', () => {
 function measuredRect(this: HTMLElement): DOMRect {
   let width = 0;
   if (this.matches('[data-slot="action"]')) width = 100;
-  else if (this.matches('button.hell-toolbar-measure-item')) width = 100;
-  else if (this.matches('.hell-toolbar-measure-item')) width = 12;
+  else if (this.matches('button.hell-overflow-toolbar-measure-item')) width = 100;
+  else if (this.matches('.hell-overflow-toolbar-measure-item')) width = 12;
   else if (this.matches('[data-slot="separator"]')) width = 12;
   else if (this.matches('[data-slot="widget"]')) width = 160;
   else if (this.matches('[data-slot="overflowTrigger"]')) width = 40;
@@ -585,7 +769,7 @@ function actionButtons(root: HTMLElement): HTMLButtonElement[] {
 
 function actionLabels(root: HTMLElement): string[] {
   return actionButtons(root).map(
-    (button) => button.querySelector('.hell-toolbar-action-label')?.textContent?.trim() ?? '',
+    (button) => button.querySelector('.hell-overflow-toolbar-action-label')?.textContent?.trim() ?? '',
   );
 }
 
@@ -620,7 +804,7 @@ function drive(
   fixture: { nativeElement: HTMLElement; detectChanges(): void },
   width: number,
 ): void {
-  const row = query(fixture.nativeElement, '[data-hell-toolbar-actions]');
+  const row = query(fixture.nativeElement, '[data-hell-overflow-toolbar-actions]');
   Object.defineProperty(row, 'clientWidth', { configurable: true, get: () => width });
   observe(row, width);
   fixture.detectChanges();
@@ -655,6 +839,13 @@ function query<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: 
   const element = root.querySelector<T>(selector);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
   return element as T;
+}
+
+function rendererPart(
+  root: ParentNode,
+  part: HellOverflowToolbarRendererPart,
+): HTMLElement | null {
+  return root.querySelector<HTMLElement>(`[data-slot="${part}"]`);
 }
 
 function cleanupPortaledTestElements(selector: string): void {

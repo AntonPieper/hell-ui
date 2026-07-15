@@ -13,7 +13,7 @@ import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
 
 @Component({
-  selector: 'app-toolbar-priorities-example',
+  selector: 'app-toolbar-overflow-policies-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
@@ -30,8 +30,8 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
   template: `
     <div class="flex flex-col gap-hell-3">
       <div class="max-w-[360px] rounded-hell-md border border-hell-border bg-hell-surface p-hell-3">
-        <hell-toolbar label="Record actions">
-          <ng-template hellToolbarAction label="New" priority="primary" (activated)="run('new')">
+        <hell-overflow-toolbar label="Record actions">
+          <ng-template hellToolbarAction label="New" overflow="never" (activated)="run('new')">
             <hell-icon name="faSolidPlus" size="13px" />
           </ng-template>
           <ng-template hellToolbarAction label="Edit" (activated)="run('edit')">
@@ -49,7 +49,7 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
           <ng-template
             hellToolbarAction
             label="Settings"
-            priority="overflowOnly"
+            overflow="always"
             (activated)="run('settings')"
           >
             <hell-icon name="faSolidGear" size="13px" />
@@ -57,24 +57,23 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
           <ng-template
             hellToolbarAction
             label="Archive"
-            priority="overflowOnly"
+            overflow="always"
             (activated)="run('archive')"
           >
             <hell-icon name="faSolidBoxOpen" size="13px" />
           </ng-template>
-        </hell-toolbar>
+        </hell-overflow-toolbar>
       </div>
 
       <p class="m-0 text-sm text-hell-foreground-muted">
-        A deliberately narrow container: “New” is <code>primary</code> and never overflows, the
-        middle actions are <code>default</code> and collapse last-declared first, and “Settings” and
-        “Archive” are <code>overflowOnly</code> so they only ever appear in the menu. Last action:
-        <strong>{{ lastAction() }}</strong>.
+        A deliberately narrow container: “New” uses <code>never</code>, the middle actions use the
+        default <code>auto</code> policy, and “Settings” and “Archive” use <code>always</code>. Last
+        action: <strong>{{ lastAction() }}</strong>.
       </p>
     </div>
   `,
 })
-export class ToolbarPrioritiesExample {
+export class ToolbarOverflowPoliciesExample {
   protected readonly lastAction = signal('none yet');
 
   protected run(action: string): void {

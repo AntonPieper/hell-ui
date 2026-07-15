@@ -8,6 +8,7 @@ import {
   faSolidPlus,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
+import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
 
@@ -24,39 +25,45 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       faSolidGear,
     }),
   ],
-  imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
   template: `
     <div class="flex flex-col gap-hell-3">
-      <hell-toolbar label="Document actions">
-        <ng-template hellToolbarAction label="New" priority="primary" (activated)="run('new')">
+      <div hellToolbar label="Document actions" ui="flex-wrap">
+        <button hellButton hellToolbarItem size="sm" type="button" (click)="run('new')">
           <hell-icon name="faSolidPlus" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Edit" (activated)="run('edit')">
+          New
+        </button>
+        <button hellButton hellToolbarItem size="sm" type="button" (click)="run('edit')">
           <hell-icon name="faSolidPenToSquare" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Duplicate" (activated)="run('duplicate')">
+          Edit
+        </button>
+        <button hellButton hellToolbarItem size="sm" type="button" (click)="run('duplicate')">
           <hell-icon name="faSolidCopy" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Share" (activated)="run('share')">
+          Duplicate
+        </button>
+        <button hellButton hellToolbarItem size="sm" type="button" (click)="run('share')">
           <hell-icon name="faSolidShareNodes" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Download" (activated)="run('download')">
+          Share
+        </button>
+        <button hellButton hellToolbarItem size="sm" type="button" (click)="run('download')">
           <hell-icon name="faSolidDownload" size="13px" />
-        </ng-template>
-        <ng-template
-          hellToolbarAction
-          label="Settings"
-          priority="overflowOnly"
-          (activated)="run('settings')"
+          Download
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          size="sm"
+          type="button"
+          (click)="run('settings')"
         >
           <hell-icon name="faSolidGear" size="13px" />
-        </ng-template>
-      </hell-toolbar>
+          Settings
+        </button>
+      </div>
 
       <p class="m-0 text-sm text-hell-foreground-muted">
-        Last action: <strong>{{ lastAction() }}</strong>. Narrow the preview to watch lower-priority
-        actions collapse into the overflow menu; “New” always stays visible and “Settings” always
-        lives in the menu.
+        Last action: <strong>{{ lastAction() }}</strong>. The toolbar owns the role and roving focus;
+        each real button, click handler, and wrapping layout stays consumer-owned.
       </p>
     </div>
   `,

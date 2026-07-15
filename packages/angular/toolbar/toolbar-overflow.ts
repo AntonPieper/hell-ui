@@ -1,16 +1,18 @@
 /**
- * Priority-based overflow policy for the toolbar's measurement loop.
+ * Placement policy for Overflow Toolbar's measurement loop.
  * Internal to the entry point: exported from this file only so the pure
  * policy stays unit-testable without a DOM, not part of the public API.
  */
-import type { HellToolbarActionPriority, HellToolbarItemKind } from './toolbar';
+import type { HellToolbarActionOverflow } from './toolbar';
 
-/** One item's inputs to the priority-based overflow policy. */
+type HellToolbarOverflowItemKind = 'action' | 'separator' | 'widget';
+
+/** One item's inputs to the overflow placement policy. */
 export interface HellToolbarOverflowItem {
   /** The item's kind. Defaults to `'action'` when omitted. */
-  readonly kind?: HellToolbarItemKind;
-  /** For actions, how it participates in overflow. Defaults to `'default'`. */
-  readonly priority?: HellToolbarActionPriority;
+  readonly kind?: HellToolbarOverflowItemKind;
+  /** For actions, how it participates in overflow. Defaults to `'auto'`. */
+  readonly overflow?: HellToolbarActionOverflow;
   /** Measured inline width of the item, in pixels. */
   readonly width: number;
   /**
@@ -21,7 +23,7 @@ export interface HellToolbarOverflowItem {
   readonly group?: number;
 }
 
-/** Geometry inputs to the priority-based overflow policy. */
+/** Geometry inputs to the overflow placement policy. */
 export interface HellToolbarOverflowMetrics {
   /** Available inline size of the actions row, in pixels. */
   readonly available: number;
@@ -43,11 +45,11 @@ export interface HellToolbarOverflowResult {
  * Resolves which items render inline and which collapse into the overflow menu.
  *
  * Policy:
- *   - `primary` actions and `widget`s are pinned inline and never overflow.
- *   - `overflowOnly` actions never render inline.
- *   - `default` actions collapse to make room. Collapse is group-aware: the
+ *   - `never` actions and `widget`s are pinned inline and never overflow.
+ *   - `always` actions never render inline.
+ *   - `auto` actions collapse to make room. Collapse is group-aware: the
  *     leading group (before the first separator) collapses action-by-action
- *     from the last-declared default first, while every subsequent
+ *     from the last-declared auto action first, while every subsequent
  *     separator-delimited group collapses as a unit — a trailing group whose
  *     remainder would not fit moves to the menu whole, so a separator never
  *     strands a partial cluster. A toolbar with no separators is a single
@@ -64,33 +66,33 @@ export function hellResolveToolbarOverflow(
   metrics: HellToolbarOverflowMetrics,
 ): HellToolbarOverflowResult {
   const n = items.length;
-  const kindOf = (i: number): HellToolbarItemKind => items[i].kind ?? 'action';
-  const priorityOf = (i: number): HellToolbarActionPriority => items[i].priority ?? 'default';
+  const kindOf = (i: number): HellToolbarOverflowItemKind => items[i].kind ?? 'action';
+  const overflowOf = (i: number): HellToolbarActionOverflow => items[i].overflow ?? 'auto';
   const groupOf = (i: number): number => items[i].group ?? 0;
   const widthOf = (i: number): number => items[i].width;
 
   const isPinned = (i: number): boolean =>
-    kindOf(i) === 'widget' || (kindOf(i) === 'action' && priorityOf(i) === 'primary');
+    kindOf(i) === 'widget' || (kindOf(i) === 'action' && overflowOf(i) === 'never');
   const isCollapsible = (i: number): boolean =>
-    kindOf(i) === 'action' && priorityOf(i) === 'default';
+    kindOf(i) === 'action' && overflowOf(i) === 'auto';
   const isSeparator = (i: number): boolean => kindOf(i) === 'separator';
   const isAction = (i: number): boolean => kindOf(i) === 'action';
 
-  const defaults: number[] = [];
-  for (let i = 0; i < n; i += 1) if (isCollapsible(i)) defaults.push(i);
+  const automatic: number[] = [];
+  for (let i = 0; i < n; i += 1) if (isCollapsible(i)) automatic.push(i);
 
   // Drop order: whole trailing groups (group > 0) first, highest group first,
-  // then the leading group's defaults last-declared first.
-  const trailingGroups = [...new Set(defaults.map(groupOf))]
+  // then the leading group's auto actions last-declared first.
+  const trailingGroups = [...new Set(automatic.map(groupOf))]
     .filter((group) => group !== 0)
     .sort((a, b) => b - a);
   const chunks: number[][] = trailingGroups.map((group) =>
-    defaults.filter((i) => groupOf(i) === group),
+    automatic.filter((i) => groupOf(i) === group),
   );
-  const leading = defaults.filter((i) => groupOf(i) === 0);
+  const leading = automatic.filter((i) => groupOf(i) === 0);
   for (let k = leading.length - 1; k >= 0; k -= 1) chunks.push([leading[k]]);
 
-  const inlineDefaults = new Set(defaults);
+  const inlineAutomatic = new Set(automatic);
 
   const separatorsInterior = (isInline: (i: number) => boolean): Set<number> => {
     const interior = new Set<number>();
@@ -107,7 +109,7 @@ export function hellResolveToolbarOverflow(
 
   const inlineNonSeparator = (): ((i: number) => boolean) => {
     return (i: number) =>
-      isPinned(i) || (isCollapsible(i) && inlineDefaults.has(i));
+      isPinned(i) || (isCollapsible(i) && inlineAutomatic.has(i));
   };
 
   const fits = (): boolean => {
@@ -131,7 +133,7 @@ export function hellResolveToolbarOverflow(
 
   let chunk = 0;
   while (!fits() && chunk < chunks.length) {
-    for (const index of chunks[chunk]) inlineDefaults.delete(index);
+    for (const index of chunks[chunk]) inlineAutomatic.delete(index);
     chunk += 1;
   }
 
