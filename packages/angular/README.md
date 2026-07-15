@@ -63,22 +63,28 @@ Every exported API belongs to one documented category:
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
 - `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
-The API report gate covers every non-experimental entry point (root, `/core`,
-`/testing`, and all narrow primitive, composite, and table entry points), plus
-one documented internal exception: `@hell-ui/angular/internal/hotkeys` is
-tracked to guard accidental shape drift, but it is not promoted to Stable.
-Four entry points are temporarily excluded because `@microsoft/api-extractor`
-crashes analyzing their flattened declarations (`/audio-player`, `/combobox`,
-`/date-input`, `/select`); the exclusion list lives in
-`tools/check-api-reports.mjs` as `apiReportExclusions` and is
-re-probed on extractor upgrades. Experimental surfaces
-(`/features/*`, `/table-tanstack*`) stay out of stable reports by policy.
+The API report gate is manifest-driven: every entry point is guarded unless it
+appears in `apiReportExclusions` in `tools/check-api-reports.mjs`. Report
+coverage includes root, `/core`, `/testing`, narrow primitive, composite, and
+table entry points, plus shared internal entry points whose declarations cross
+guarded boundaries. In particular, `@hell-ui/angular/internal/core` has its own
+baseline because stable root/core exports and narrow runtime contracts reference
+its shapes. Guarding an Internal, Beta, or Experimental entry point detects
+shape drift; it does not promote that surface to Stable or make it a supported
+consumer import path.
+
+The current exclusions are the experimental feature surfaces
+`/features/audio-transcript`, `/features/code-editor`, `/features/dialpad`, and
+`/features/pdf-viewer`, plus the implementation-only seams
+`/internal/audio-transcript`, `/internal/chip`, and
+`/internal/ng-primitives`. Excluded entry points are not externalized into the
+API Extractor declaration mirror, so any contract that leaks from one into a
+guarded report remains locally visible.
 
 | Surface | Category | Browser/SSR notes |
 |---|---|---|
 | Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
 | Report-guarded narrow primitives | Stable | SSR-safe unless a primitive's own docs say otherwise |
-| Extractor-blocked entry points (`/audio-player`, `/combobox`, `/date-input`, `/select`) | Beta until the extractor defect clears and they rejoin the API report policy | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |

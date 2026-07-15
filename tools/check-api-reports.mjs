@@ -34,7 +34,6 @@ const apiReportExclusions = new Map([
   ['features/pdf-viewer', 'feature surface, not yet under report'],
   ['internal/audio-transcript', 'internal seam, not part of the public surface'],
   ['internal/chip', 'internal seam, not part of the public surface'],
-  ['internal/core', 'internal seam, not part of the public surface'],
   ['internal/ng-primitives', 'internal seam, not part of the public surface'],
 ]);
 
@@ -44,18 +43,15 @@ const declarationEntrypoints = entrypointPublicApiFiles().map((entrypoint) => {
       ? 'hell-ui-angular'
       : `hell-ui-angular-${entrypoint.id.replaceAll('/', '-')}`;
   return {
+    id: entrypoint.id,
     specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,
     mainEntryPointFilePath: `dist/hell/types/${flattened}.d.ts`,
     reportFileName: `${flattened}.api.md`,
   };
 });
-const apiReportEntrypoints = declarationEntrypoints.filter((entrypoint) => {
-  const id =
-    entrypoint.specifier === packageName
-      ? 'root'
-      : entrypoint.specifier.slice(packageName.length + 1);
-  return !apiReportExclusions.has(id);
-});
+const apiReportEntrypoints = declarationEntrypoints.filter(
+  (entrypoint) => !apiReportExclusions.has(entrypoint.id),
+);
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const reportFolder = join(root, 'etc/api-reports');
@@ -79,7 +75,7 @@ const mirroredDeclarations = createApiReportDeclarationMirror({
   mirrorFolder: declarationMirrorFolder,
   packageName,
   packageJsonFullPath,
-  entrypoints: declarationEntrypoints.map((entrypoint) => ({
+  entrypoints: apiReportEntrypoints.map((entrypoint) => ({
     specifier: entrypoint.specifier,
     declarationFilePath: mainEntryPointPath(entrypoint),
   })),
@@ -235,7 +231,7 @@ function apiExtractorTsconfig(entrypoint) {
         ...apiReportSiblingPaths({
           baseUrl: root,
           currentSpecifier: entrypoint.specifier,
-          entrypoints: declarationEntrypoints,
+          entrypoints: apiReportEntrypoints,
           mirroredDeclarations,
         }),
         '*': ['packages/angular/node_modules/*', 'packages/pdf-viewer/node_modules/*'],

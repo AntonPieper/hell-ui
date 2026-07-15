@@ -2,9 +2,10 @@ import { copyFileSync, mkdirSync, rmSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
 
 /**
- * Copy built entrypoint declarations beneath a synthetic node_modules package.
- * API Extractor then models sibling entrypoints as external package contracts
- * instead of following their declarations as part of the current working package.
+ * Copy report-guarded declarations beneath a synthetic node_modules package.
+ * API Extractor then models guarded sibling entrypoints as external package
+ * contracts instead of following them as part of the current working package.
+ * Callers must not mirror an entrypoint without a corresponding API baseline.
  */
 export function createApiReportDeclarationMirror({
   mirrorFolder,
