@@ -125,9 +125,19 @@ export class OmnibarStylingExample {
 
   // Short delay keeps the consumer-projected loading chrome visible on a keystroke.
   protected readonly searchRunbooks: HellSearchResourceSource<Runbook> = ({ signal }) =>
-    new Promise((resolve) => {
-      const timer = window.setTimeout(() => resolve(RUNBOOKS), 350);
-      signal.addEventListener('abort', () => window.clearTimeout(timer), { once: true });
+    new Promise((resolve, reject) => {
+      const timer = window.setTimeout(() => {
+        if (signal.aborted) return;
+        resolve(RUNBOOKS);
+      }, 350);
+      signal.addEventListener(
+        'abort',
+        () => {
+          window.clearTimeout(timer);
+          reject(new DOMException('Search aborted', 'AbortError'));
+        },
+        { once: true },
+      );
     });
   protected readonly search = hellSearchResource({
     query: this.query,

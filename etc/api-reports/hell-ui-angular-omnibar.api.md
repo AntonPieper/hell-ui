@@ -9,7 +9,6 @@ import { ConnectedPosition } from '@angular/cdk/overlay';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
-import * as i1 from '@hell-ui/angular/chip';
 import { InjectionToken } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
 
@@ -55,7 +54,7 @@ export class HellOmnibar {
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly submit: _angular_core.OutputEmitterRef<HellOmnibarSubmitEvent<unknown>>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOmnibarPart>>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "query": { "alias": "query"; "required": false; "isSignal": true; }; "open": { "alias": "open"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "query": "queryChange"; "open": "openChange"; "submit": "submit"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, [{ directive: typeof i1.HellChipSet; inputs: {}; outputs: {}; }]>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "query": { "alias": "query"; "required": false; "isSignal": true; }; "open": { "alias": "open"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "query": "queryChange"; "open": "openChange"; "submit": "submit"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibar, never>;
 }
 
@@ -176,8 +175,8 @@ export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-omnibar.d.ts:97:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:98:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:98:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:99:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
 
 // (No @packageDocumentation comment for this package)
 

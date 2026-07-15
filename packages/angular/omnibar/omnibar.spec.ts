@@ -141,7 +141,11 @@ class OmnibarAsyncResourceHost {
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES, HellChip, HellChipRemove],
   template: `
-    <hell-omnibar [query]="query()" (queryChange)="query.set($event)">
+    <hell-omnibar
+      [query]="query()"
+      (queryChange)="query.set($event)"
+      ui="flex-nowrap gap-0"
+    >
       @if (tokens().length) {
         <span hellOmnibarLeading hellChip label="People" (remove)="tokens.set([])">
           People<button hellChipRemove></button>
@@ -362,8 +366,15 @@ describe('HellOmnibar command interaction runtime', () => {
     const fixture = TestBed.createComponent(OmnibarChipCompositionHost);
     fixture.detectChanges();
 
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
     const chip = query<HTMLElement>(fixture.nativeElement, '[hellChip]');
+    expect([...root.classList].sort()).toEqual(
+      ['flex-nowrap', 'gap-0', 'inline-flex', 'relative', 'w-full'].sort(),
+    );
+    expect(root.classList.contains('flex-wrap')).toBe(false);
+    expect(root.classList.contains('gap-hell-2')).toBe(false);
+
     input.focus();
     input.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),

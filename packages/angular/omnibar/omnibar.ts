@@ -13,6 +13,7 @@ import {
   ElementRef,
   Injectable,
   NgZone,
+  Renderer2,
   ViewChild,
   booleanAttribute,
   computed,
@@ -28,10 +29,11 @@ import {
   HellFloatingScopeRegistry,
   type HellFloatingScope,
 } from '@hell-ui/angular/internal/core';
+import { HellChipSetController } from '@hell-ui/angular/internal/chip';
 import { HellFloatingDismissController, hellOutsideFocus } from '@hell-ui/angular/internal/core';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import { NgpInput } from 'ng-primitives/input';
-import { HellChipInput, HellChipSet } from '@hell-ui/angular/chip';
+import { HellChipInput } from '@hell-ui/angular/chip';
 import { HellSearch, HellSearchClear } from '@hell-ui/angular/input';
 import {
   HellGlobalKeydownService,
@@ -246,7 +248,6 @@ class HellOmnibarController implements HellFloatingScope {
  */
 @Component({
   selector: 'hell-omnibar',
-  hostDirectives: [HellChipSet],
   imports: [
     HellChipInput,
     NgpInput,
@@ -259,11 +260,15 @@ class HellOmnibarController implements HellFloatingScope {
   providers: [
     HellOmnibarRuntime,
     HellOmnibarController,
+    HellChipSetController,
     { provide: HELL_FLOATING_SCOPE, useExisting: HellOmnibarController },
   ],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
+    'data-orientation': 'horizontal',
+    role: 'group',
+    tabindex: '-1',
     '[attr.data-open]': 'isOpen() ? "true" : null',
     '[attr.data-size]': 'size()',
     '[attr.data-empty]': 'isEmpty() ? "true" : null',
@@ -422,8 +427,10 @@ export class HellOmnibar {
 
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
   private readonly runtime = inject(HellOmnibarRuntime);
   private readonly controller = inject(HellOmnibarController);
+  private readonly chipSetController = inject(HellChipSetController);
   private readonly globalKeydown = inject(HellGlobalKeydownService);
 
   private readonly openVersion = signal(0);
@@ -494,6 +501,13 @@ export class HellOmnibar {
   private overlayGeometryFrame: number | null = null;
 
   constructor() {
+    // Projected chips bubble to the host, while input commands stay on the
+    // native search control so Escape cancels its built-in clear behavior.
+    const stopChipSetKeydown = this.renderer.listen(
+      this.host.nativeElement,
+      'keydown',
+      (event: KeyboardEvent) => this.chipSetController.onKeydown(event),
+    );
     this.controller.query = this.query;
     this.controller.close = () => this.requestClose();
     this.controller.focus = () => this.focus();
@@ -528,6 +542,7 @@ export class HellOmnibar {
 
     this.installHotkey();
     this.floatingFocusDismissal.connect(this.destroyRef);
+    this.destroyRef.onDestroy(stopChipSetKeydown);
     this.destroyRef.onDestroy(() => {
       this.stopOverlayGeometryTracking();
       this.unregisterOverlayPanel();
@@ -601,7 +616,7 @@ export class HellOmnibar {
     this.syncOverlayPanelStyles();
   }
 
-  /** Handle keyboard navigation and activation on the input. */
+  /** Handle keyboard navigation and activation at the native search input. */
   protected onKeyDown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowDown':
