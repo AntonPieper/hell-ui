@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { CodeBlock } from '../../../shared/code-block';
 import { PageHeader } from '../../../shared/page-header';
 import { SearchBasicExample } from './examples/basic.example';
 import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
@@ -18,11 +19,35 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
   loader: 'text',
 };
 
+const SEARCH_RESOURCE_CODE = `import { signal } from '@angular/core';
+import { hellSearchResource } from '@hell-ui/angular/core';
+
+readonly query = signal('');
+readonly countries = signal<readonly Country[]>(initialCountries);
+
+// Local collections rerank when either signal changes.
+readonly countrySearch = hellSearchResource({
+  query: this.query,
+  items: this.countries,
+  fields: [
+    { weight: 3, get: country => country.name },
+    { weight: 1, get: country => country.code },
+  ],
+});
+
+// Async sources receive an AbortSignal; newer queries supersede older work.
+readonly peopleSearch = hellSearchResource<Person>({
+  query: this.query,
+  source: ({ query, signal }) => this.peopleApi.search({ query, signal }),
+  debounce: 120,
+});`;
+
 @Component({
   selector: 'hd-search',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
+    CodeBlock,
     SearchBasicExample,
     SearchEmptyStateExample,
     SearchStylingExample,
@@ -56,6 +81,34 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
         popover — it is exactly the input-plus-clear wiring, nothing more. For a ranked
         command-palette experience with its own overlay and keyboard model, use
         <code>hell-omnibar</code> instead.
+      </p>
+
+      <h2>Search Resource</h2>
+      <p>
+        When ranking or asynchronous retrieval should be reusable outside one renderer, create a
+        UI-independent <code>hellSearchResource</code> from
+        <code>&#64;hell-ui/angular/core</code>. It exposes the caller-owned <code>query</code> plus
+        <code>items</code>, <code>status</code>, and <code>error</code> signals. Local resources use
+        the configured <code>provideHellSearchRanker</code> strategy; asynchronous resources own
+        debounce, cancellation, and stale-result protection while forwarding an
+        <code>AbortSignal</code> to the source.
+      </p>
+      <hd-code-block [code]="searchResourceCode" />
+      <ul>
+        <li><code>refresh()</code> reruns the current query immediately.</li>
+        <li>
+          <code>cancel()</code> stops scheduled or active work while preserving the last settled
+          items.
+        </li>
+        <li>
+          <code>clear()</code> cancels work and resets the query, items, status, and error without
+          dispatching an empty-query request.
+        </li>
+      </ul>
+      <p>
+        The resource owns data lifecycle only. Compose its signals with <code>hellSearch</code>,
+        Select, Combobox, Omnibar, a table, or application-specific markup; each renderer keeps its
+        own keyboard and accessibility semantics.
       </p>
 
       <h2>Basic</h2>
@@ -198,6 +251,7 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
   `,
 })
 export class SearchPage {
+  protected readonly searchResourceCode = SEARCH_RESOURCE_CODE;
   protected readonly searchBasicExampleCode = searchBasicExampleCodeRaw;
   protected readonly searchEmptyStateExampleCode = searchEmptyStateExampleCodeRaw;
   protected readonly searchStylingExampleCode = searchStylingExampleCodeRaw;

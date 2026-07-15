@@ -93,7 +93,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider {
 export class HellSearchService {
   private readonly ranker = inject(HELL_SEARCH_RANKER);
   /** Resolve an optional source, then either preserve source scores or rank raw items locally. */
-  async search<T>(request: HellSearchRequest<T>): Promise<readonly HellSearchResult<T>[]> {
+  async search<T, P = unknown>(
+    request: HellSearchRequest<T, P>,
+  ): Promise<readonly HellSearchResult<T>[]> {
     const response = request.source
       ? await resolveMaybeAsync(request.source(request))
       : (request.items ?? []);

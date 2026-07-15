@@ -2,6 +2,7 @@
  * @internal Shared implementation helpers for Hell-owned entry points only.
  * Not a consumer shortcut API.
  */
+export * from './async-resource-lifecycle';
 export * from './control-value-accessor';
 export * from './controlled-value-state';
 export * from './dom';
