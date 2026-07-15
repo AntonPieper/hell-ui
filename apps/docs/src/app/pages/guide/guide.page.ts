@@ -26,7 +26,7 @@ const PART_STYLE_MAP_CODE = `<!-- String shorthand refines the component's defau
 
 const STATE_ATTRIBUTE_CODE = `/* Style by contract, not by internal DOM. Public Parts render data-slot;
    states render data-* attributes. */
-[hellSelectTrigger][data-slot='trigger'][data-open] {
+[hellSelect][data-slot='root'][data-open] {
   border-color: var(--color-hell-primary);
 }`;
 
@@ -76,14 +76,14 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       </p>
       <ul>
         <li>
-          <strong>Styled Primitives</strong> (button, input, menu, dialog, …) are low-level
+          <strong>Styled Primitives</strong> (button, input, menu, dialog, select, …) are low-level
           modules. Their value is behavior, accessibility, state attributes, default Tailwind part
           recipes, and public CSS variables. You own the surrounding structure.
         </li>
         <li>
-          <strong>Mixed Entry Points</strong> (select, combobox, pagination) export primitive
-          directives plus a small convenience component, for example
-          <code>hell-select</code>, when assembling the primitive is boilerplate.
+          <strong>Mixed Entry Points</strong> (combobox, pagination) export primitive directives
+          plus a small convenience component, such as <code>hell-combobox</code> or
+          <code>hell-pagination</code>, when assembling the primitive is boilerplate.
         </li>
         <li>
           <strong>Composites</strong> (app shell, omnibar, date picker, toast, …) combine

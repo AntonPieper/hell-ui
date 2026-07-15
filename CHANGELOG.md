@@ -418,6 +418,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: rich Select is now one projection-first interaction state
+  machine. Rename `[hellSelectTrigger]`/`HellSelectTrigger` to
+  `[hellSelect]`/`HellSelect`, project domain values through
+  `[hellSelectValue]`, `[hellSelectPlaceholder]`, and
+  `[hellSelectOption]`, and keep the portaled `[hellSelectDropdown]` paired
+  through `*hellSelectPortal`. The owned `<hell-select>` renderer and its
+  `HellOption`/`displayWith` rendering model, `HellSelectPart`, and
+  `HellSelectUi` are removed; each remaining directive accepts its own
+  single-root Part Style Map. Forms, comparison, multiple selection, open
+  state, keyboard/focus behavior, dismissal, and ARIA relationships remain
+  delegated to the rich directive suite, while dropdown registration and
+  containment are now Select-local internals. Native
+  `select[hellNativeSelect]` remains a separate, unchanged product. Closes
+  #193. Evidence: Select unit and harness suites, focused keyboard and axe
+  browser contracts, projected domain-object package consumer, and the
+  contracted Select API report.
 - `HellDateRangePickerPart` is now an alias of `HellDatePickerPart` — the
   two pickers already render one shared calendar template, so one part
   family serves both and cannot drift. The components stay separate

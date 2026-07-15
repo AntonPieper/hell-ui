@@ -200,12 +200,11 @@ Hell uses semantic tokens plus Part Style Maps for migrated styling surfaces:
 ```html
 <button hellSelect [value]="country()" (valueChange)="country.set($event)">
   <span hellSelectValue>{{ country() }}</span>
+  <ng-template hellSelectPortal>
+    <div hellSelectDropdown>
+      <button hellSelectOption value="DE">Germany</button>
+      <button hellSelectOption value="FR">France</button>
+    </div>
+  </ng-template>
 </button>
-
-<ng-template hellSelectPortal>
-  <div hellSelectDropdown>
-    <button hellSelectOption value="DE">Germany</button>
-    <button hellSelectOption value="FR">France</button>
-  </div>
-</ng-template>
 ```

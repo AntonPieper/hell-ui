@@ -178,6 +178,9 @@
     "./radio": {
       "@heinrich/source": "./radio/public-api.ts"
     },
+    "./select": {
+      "@heinrich/source": "./select/public-api.ts"
+    },
     "./separator": {
       "@heinrich/source": "./separator/public-api.ts"
     },
@@ -213,9 +216,6 @@
     },
     "./pagination": {
       "@heinrich/source": "./pagination/public-api.ts"
-    },
-    "./select": {
-      "@heinrich/source": "./select/public-api.ts"
     },
     "./app-shell": {
       "@heinrich/source": "./app-shell/public-api.ts"
@@ -384,6 +384,11 @@
       "style": "./radio/styles.css",
       "default": "./radio/styles.css"
     },
+    "./select/styles.css": {
+      "@heinrich/source": "./select/styles.css",
+      "style": "./select/styles.css",
+      "default": "./select/styles.css"
+    },
     "./separator/styles.css": {
       "@heinrich/source": "./separator/styles.css",
       "style": "./separator/styles.css",
@@ -443,11 +448,6 @@
       "@heinrich/source": "./pagination/styles.css",
       "style": "./pagination/styles.css",
       "default": "./pagination/styles.css"
-    },
-    "./select/styles.css": {
-      "@heinrich/source": "./select/styles.css",
-      "style": "./select/styles.css",
-      "default": "./select/styles.css"
     },
     "./app-shell/styles.css": {
       "@heinrich/source": "./app-shell/styles.css",

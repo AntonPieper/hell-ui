@@ -49,7 +49,7 @@ const RICH_OPTION_ICONS = {
   providers: [provideIcons(RICH_OPTION_ICONS)],
   template: `
     <button
-      hellSelectTrigger
+      hellSelect
       type="button"
       aria-label="Service status"
       class="max-w-72"

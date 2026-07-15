@@ -9,7 +9,7 @@
 
 Four form controls ship in two flavors: a delegated rich control
 (`button[hellCheckbox]`, `button[hellSwitch]`, `button[hellRadio]`,
-`hell-select` / `[hellSelectTrigger]`) built on ng-primitives, and a styled
+`button[hellSelect]`) built on ng-primitives, and a styled
 native element (`input[type=checkbox][hellNativeCheckbox]`,
 `input[type=checkbox][hellNativeSwitch]`,
 `input[type=radio][hellNativeRadio]`, `select[hellNativeSelect]`). The

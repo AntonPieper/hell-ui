@@ -4,7 +4,7 @@ import { type Extension } from '@codemirror/state';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HellSelect } from '@hell-ui/angular/select';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 
 type ConfigLanguage = 'TypeScript' | 'JavaScript' | 'JSX';
 
@@ -18,7 +18,12 @@ const INITIAL_CONFIG = `export default {
 @Component({
   selector: 'app-code-editor-config-editor-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellCodeEditor, HellButton, ...HELL_CARD_DIRECTIVES, HellSelect],
+  imports: [
+    HellCodeEditor,
+    HellButton,
+    ...HELL_CARD_DIRECTIVES,
+    ...HELL_SELECT_DIRECTIVES,
+  ],
   template: `
     <div hellCard class="max-w-140">
       <div hellCardHeader class="flex items-center justify-between gap-4">
@@ -26,13 +31,23 @@ const INITIAL_CONFIG = `export default {
           <strong>service.config.ts</strong>
           <span class="text-sm text-hell-foreground-muted">Environment: production</span>
         </div>
-        <hell-select
-          class="inline-flex w-40"
+        <button
+          hellSelect
+          type="button"
+          ui="w-40"
           aria-label="Editor language"
-          [options]="languages"
           [value]="language()"
           (valueChange)="language.set($any($event) ?? 'TypeScript')"
-        />
+        >
+          <span hellSelectValue>{{ language() }}</span>
+          <ng-template hellSelectPortal>
+            <div hellSelectDropdown>
+              @for (option of languages; track option) {
+                <div hellSelectOption [value]="option">{{ option }}</div>
+              }
+            </div>
+          </ng-template>
+        </button>
       </div>
 
       <div hellCardBody class="p-0">
@@ -63,9 +78,7 @@ const INITIAL_CONFIG = `export default {
   `,
 })
 export class CodeEditorConfigEditorExample {
-  protected readonly languages = (['TypeScript', 'JavaScript', 'JSX'] as const).map(
-    (language): { value: ConfigLanguage; label: string } => ({ value: language, label: language }),
-  );
+  protected readonly languages: readonly ConfigLanguage[] = ['TypeScript', 'JavaScript', 'JSX'];
   protected readonly language = signal<ConfigLanguage>('TypeScript');
 
   protected readonly saved = signal(INITIAL_CONFIG);

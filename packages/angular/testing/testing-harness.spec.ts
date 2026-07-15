@@ -153,7 +153,7 @@ class TableHarnessHost {
 @Component({
   imports: [...HELL_SELECT_DIRECTIVES],
   template: `
-    <button hellSelectTrigger type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
+    <button hellSelect type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
       <span hellSelectValue>Priority</span>
       <div *hellSelectPortal hellSelectDropdown>
         <div hellSelectOption value="low">Low</div>

@@ -181,8 +181,8 @@ Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
 Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
 directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
 `HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltip`,
-`HellSelect`, and `HellCombobox` families), SelectBasic,
-ComboboxBasic, the App Shell/nav directives, Resizable directives,
+`HellSelect`, and `HellCombobox` families), ComboboxBasic, the App Shell/nav
+directives, Resizable directives,
 Pagination/PaginationStrip, and Table primitives have migrated from
 Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
 public parts while keeping Hell behavior, state attributes, and accessibility
@@ -241,7 +241,7 @@ Rules for migration:
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
   such as Dialpad, PaginationStrip, Split View, Slider, Switch, Dialog, Toast,
-  AudioPlayer, Omnibar, CodeEditor, SelectBasic, and ComboboxBasic.
+  AudioPlayer, Omnibar, CodeEditor, and ComboboxBasic.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 

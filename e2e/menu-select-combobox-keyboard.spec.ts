@@ -98,11 +98,18 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
 
     const select = page.getByRole('combobox', { name: 'Priority' }).first();
 
+    await expect(select).toHaveAttribute('hellSelect', '');
+    await expect(select).not.toHaveAttribute('hellSelectTrigger');
     await expect(select).toHaveAttribute('aria-expanded', 'false');
     await select.focus();
     await page.keyboard.press('ArrowDown');
 
     await expect(select).toHaveAttribute('aria-expanded', 'true');
+    const dropdownId = await select.getAttribute('aria-controls');
+    expect(dropdownId).toBeTruthy();
+    await expect(page.locator(`[id="${attributeSelectorValue(dropdownId ?? '')}"]`)).toHaveRole(
+      'listbox',
+    );
     await expectActiveDescendantText(page, select, 'Lowest', 'select opens on ArrowDown');
     await page.keyboard.press('ArrowUp');
     await expectActiveDescendantText(page, select, 'Highest', 'select ArrowUp wraps to last option');
@@ -129,6 +136,28 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await page.keyboard.press('Escape');
     await expect(select).toHaveAttribute('aria-expanded', 'false');
     await expect(select).toBeFocused();
+  });
+
+  test('select projects domain objects and keeps field label and description relationships', async ({
+    page,
+  }) => {
+    await page.goto('/components/select');
+
+    const richExample = page.locator('app-select-rich-options-example');
+    const status = richExample.getByRole('combobox', { name: 'Service status' });
+    await expect(status).toContainText('Operational');
+    await status.click();
+    await page.getByRole('option', { name: /Degraded/ }).click();
+    await expect(status).toContainText('Degraded');
+    await expect(status).toHaveAttribute('aria-expanded', 'false');
+
+    const fieldExample = page.locator('app-select-preset-example');
+    const region = fieldExample.getByRole('combobox', { name: 'Deployment region' });
+    const description = fieldExample.getByText('Data stays inside the selected region.');
+    const descriptionId = await description.getAttribute('id');
+    expect(descriptionId).toBeTruthy();
+    await expect(region).toHaveAttribute('aria-describedby', descriptionId ?? '');
+    await expect(region).toContainText('EU (Frankfurt)');
   });
 
   test('combobox keeps input focus, exposes aria-activedescendant, skips disabled filtered options, and closes with Escape', async ({
