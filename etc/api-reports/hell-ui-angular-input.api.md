@@ -4,15 +4,17 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellPartStyler } from '@hell-ui/angular/core';
+import { hellPartStyler } from '@hell-ui/angular/core';
+import { HellPartStylerOptions } from '@hell-ui/angular/core';
+import { HellRecipe } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/input';
 import * as i2 from 'ng-primitives/textarea';
 import * as i3 from 'ng-primitives/search';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSearchClear];
@@ -20,7 +22,6 @@ export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSea
 // @public
 export class HellInput {
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-input.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
@@ -28,20 +29,13 @@ export class HellInput {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellInput, never>;
 }
 
-// @public
-export type HellPartStyler<Part extends string> = (part: Part) => string;
+export { HellPartStyler }
 
-// @public
-export function hellPartStyler<Part extends string>(ui: () => HellUiInput<Part>, options: HellPartStylerOptions<Part>): HellPartStyler<Part>;
+export { hellPartStyler }
 
-// @public
-export interface HellPartStylerOptions<Part extends string> {
-    readonly defaultPart: Part;
-    readonly recipe: () => HellRecipe<Part>;
-}
+export { HellPartStylerOptions }
 
-// @public
-export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
+export { HellRecipe }
 
 // @public
 export class HellSearch {
@@ -70,11 +64,9 @@ export class HellTextarea {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;
 }
 
-// @public
-export type HellUi<Part extends string> = Partial<Record<Part, string>>;
+export { HellUi }
 
-// @public
-export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
+export { HellUiInput }
 
 // (No @packageDocumentation comment for this package)
 

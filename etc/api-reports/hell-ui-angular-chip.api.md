@@ -4,12 +4,13 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellChipVariant } from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_CHIP_DIRECTIVES: readonly [typeof HellChipSet, typeof HellChip, typeof HellChipRemove];
@@ -19,9 +20,7 @@ export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels>;
 
 // @public
 export class HellBadge {
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-chip.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-chip.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellBadge, "[hellBadge]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellBadge, never>;
@@ -38,11 +37,9 @@ export class HellChip {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected readonly removable: _angular_core.Signal<boolean>;
     readonly remove: _angular_core.OutputEmitterRef<void>;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-chip.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
     protected tabIndex(): '0' | '-1' | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // Warning: (ae-forgotten-export) The symbol "HellChipVariant" needs to be exported by the entry point hell-ui-angular-chip.d.ts
     readonly variant: _angular_core.InputSignal<HellChipVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChip, "[hellChip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, { "remove": "remove"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChip, never>;
@@ -70,7 +67,6 @@ export class HellChipRemove {
 export class HellChipSet {
     constructor();
     protected onKeydown(event: KeyboardEvent): void;
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-chip.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

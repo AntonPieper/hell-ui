@@ -4,16 +4,14 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/dialog';
-import { InjectionToken } from '@angular/core';
 import { NgpDialogRef } from 'ng-primitives/dialog';
 import { NgpDismissGuard } from 'ng-primitives/portal';
 import { NgpDismissGuardInput } from 'ng-primitives/portal';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
 // @public
@@ -22,10 +20,8 @@ export const HELL_DIALOG_DIRECTIVES: readonly [typeof HellDialogTrigger, typeof 
 // @public
 export class HellDialog {
     protected onTabKeydown(event: Event): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg" | "xl">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialog, "[hellDialog]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialog; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialog, never>;
@@ -69,8 +65,6 @@ export class HellDialogTitle {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogTitle, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
-//
 // @public
 export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellNativeInteractiveDisabledGuard {
     readonly closed: _angular_core.OutputEmitterRef<TResult | undefined>;

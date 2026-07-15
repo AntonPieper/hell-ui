@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellButtonVariant } from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/button';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellButton {
@@ -19,14 +18,10 @@ export class HellButton {
     protected disabledAnchorTabIndex(): -1 | null;
     readonly iconOnly: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected nativeButtonType(): string | null;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-button.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected preventDisabledAnchor(event: Event): void;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-button.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-button.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // Warning: (ae-forgotten-export) The symbol "HellButtonVariant" needs to be exported by the entry point hell-ui-angular-button.d.ts
     readonly variant: _angular_core.InputSignal<HellButtonVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellButton, "button[hellButton], a[hellButton]", never, { "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "iconOnly": { "alias": "iconOnly"; "required": false; "isSignal": true; }; "block": { "alias": "block"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpButton; inputs: { "disabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellButton, never>;

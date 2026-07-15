@@ -2,6 +2,11 @@ import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  apiReportSiblingPaths,
+  createApiReportDeclarationMirror,
+} from './api-report-model.mjs';
+import { checkApiReportCrossEntrypoint } from './check-api-report-cross-entrypoint.mjs';
 import { entrypointPublicApiFiles, packageName } from './entrypoint-manifest.mjs';
 
 const require = createRequire(import.meta.url);
@@ -29,27 +34,29 @@ const apiReportExclusions = new Map([
   ['features/pdf-viewer', 'feature surface, not yet under report'],
   ['internal/audio-transcript', 'internal seam, not part of the public surface'],
   ['internal/chip', 'internal seam, not part of the public surface'],
-  ['internal/core', 'internal seam, not part of the public surface'],
   ['internal/ng-primitives', 'internal seam, not part of the public surface'],
 ]);
 
-const apiReportEntrypoints = entrypointPublicApiFiles()
-  .filter((entrypoint) => !apiReportExclusions.has(entrypoint.id))
-  .map((entrypoint) => {
-    const flattened =
-      entrypoint.id === 'root'
-        ? 'hell-ui-angular'
-        : `hell-ui-angular-${entrypoint.id.replaceAll('/', '-')}`;
-    return {
-      specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,
-      mainEntryPointFilePath: `dist/hell/types/${flattened}.d.ts`,
-      reportFileName: `${flattened}.api.md`,
-    };
-  });
+const declarationEntrypoints = entrypointPublicApiFiles().map((entrypoint) => {
+  const flattened =
+    entrypoint.id === 'root'
+      ? 'hell-ui-angular'
+      : `hell-ui-angular-${entrypoint.id.replaceAll('/', '-')}`;
+  return {
+    id: entrypoint.id,
+    specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,
+    mainEntryPointFilePath: `dist/hell/types/${flattened}.d.ts`,
+    reportFileName: `${flattened}.api.md`,
+  };
+});
+const apiReportEntrypoints = declarationEntrypoints.filter(
+  (entrypoint) => !apiReportExclusions.has(entrypoint.id),
+);
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const reportFolder = join(root, 'etc/api-reports');
 const reportTempFolder = join(root, 'tmp/api-reports');
+const declarationMirrorFolder = join(root, 'tmp/api-report-declaration-mirror');
 const packageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
 
@@ -64,6 +71,16 @@ mkdirSync(reportFolder, { recursive: true });
 mkdirSync(reportTempFolder, { recursive: true });
 
 annotateCompilerGeneratedStatics();
+const mirroredDeclarations = createApiReportDeclarationMirror({
+  mirrorFolder: declarationMirrorFolder,
+  packageName,
+  packageJsonFullPath,
+  entrypoints: apiReportEntrypoints.map((entrypoint) => ({
+    specifier: entrypoint.specifier,
+    declarationFilePath: mainEntryPointPath(entrypoint),
+  })),
+});
+checkApiReportCrossEntrypoint();
 
 let failed = false;
 
@@ -136,7 +153,7 @@ function annotateCompilerGeneratedStatics() {
 function requiredBuildInputs() {
   return [
     packageJsonFullPath,
-    ...apiReportEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint)),
+    ...declarationEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint)),
   ];
 }
 
@@ -211,6 +228,12 @@ function apiExtractorTsconfig(entrypoint) {
       module: 'preserve',
       baseUrl: root,
       paths: {
+        ...apiReportSiblingPaths({
+          baseUrl: root,
+          currentSpecifier: entrypoint.specifier,
+          entrypoints: apiReportEntrypoints,
+          mirroredDeclarations,
+        }),
         '*': ['packages/angular/node_modules/*', 'packages/pdf-viewer/node_modules/*'],
       },
     },

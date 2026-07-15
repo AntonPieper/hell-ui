@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels>;
@@ -69,7 +68,6 @@ export class HellAudioPlayer {
     protected onTime(): void;
     // (undocumented)
     protected onVolume(v: number): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-audio-player.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellAudioPlayerPart>;
     // (undocumented)
     protected readonly playbackRate: _angular_core.WritableSignal<1 | 1.25 | 1.5 | 2 | 0.75>;
@@ -99,7 +97,6 @@ export class HellAudioPlayer {
     protected readonly transcribing: Signal<boolean>;
     // (undocumented)
     protected readonly transcript: Signal<string>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-audio-player.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellAudioPlayerPart>>;
     // (undocumented)
     protected readonly volume: _angular_core.WritableSignal<number>;
@@ -162,8 +159,6 @@ export interface HellAudioPlayerLabels {
 // @public
 export type HellAudioPlayerPart = 'root' | 'meta' | 'title' | 'date' | 'controls' | 'transport' | 'playButton' | 'time' | 'seek' | 'actions' | 'muteButton' | 'volume' | 'captionToggle' | 'downloadButton' | 'captions' | 'captionsBar' | 'captionsStatus' | 'captionsDot' | 'captionsActions' | 'captionAction' | 'captionsBody' | 'captionsError' | 'captionsText' | 'captionsInterim' | 'captionsEmpty';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-audio-player.d.ts
-//
 // @public
 export type HellAudioPlayerUi = HellUi<HellAudioPlayerPart>;
 

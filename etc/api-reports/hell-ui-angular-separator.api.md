@@ -4,23 +4,18 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/separator';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellSeparator {
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     readonly spacing: _angular_core.InputSignal<HellSize | "none">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSeparator, "[hellSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "spacing": { "alias": "spacing"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSeparator; inputs: { "ngpSeparatorOrientation": "orientation"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSeparator, never>;

@@ -4,12 +4,11 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_PAGE_HEADER_DIRECTIVES: readonly [typeof HellPageHeader, typeof HellPageHeaderBack, typeof HellPageHeaderLeading, typeof HellPageHeaderTitle, typeof HellPageHeaderMeta, typeof HellPageHeaderDescription, typeof HellPageHeaderToolbar];
@@ -24,9 +23,7 @@ export class HellPageHeader {
     protected readonly hasMeta: i0.Signal<boolean>;
     protected readonly hasToolbar: i0.Signal<boolean>;
     readonly level: i0.InputSignal<HellPageHeaderLevel>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-page-header.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellPageHeaderPart>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-page-header.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellPageHeaderPart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellPageHeader, "hell-page-header", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "level": { "alias": "level"; "required": false; "isSignal": true; }; }, {}, ["back", "leadingItems", "meta", "description", "toolbarItem"], ["hell-page-header-back, [hellPageHeaderLeading]", "[hellPageHeaderTitle]", "[hellPageHeaderMeta]", "[hellPageHeaderDescription]", "[hellPageHeaderToolbar]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPageHeader, never>;
@@ -84,8 +81,6 @@ export class HellPageHeaderToolbar {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPageHeaderToolbar, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-page-header.d.ts
-//
 // @public
 export type HellPageHeaderUi = HellUi<HellPageHeaderPart>;
 

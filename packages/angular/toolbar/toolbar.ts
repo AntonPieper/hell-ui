@@ -107,8 +107,8 @@ export class HellToolbarAction extends HellToolbarItem {
  * renders as an inline vertical divider between two visible groups and as a menu
  * separator between two overflowed groups; separators that would sit at an edge
  * or double up collapse away. Separators also make collapse group-aware: each
- * trailing group between separators overflows as a unit (see
- * {@link hellResolveToolbarOverflow}).
+ * trailing group between separators overflows as a unit through the internal
+ * overflow resolver.
  */
 @Directive({
   selector: 'ng-template[hellToolbarSeparator]',

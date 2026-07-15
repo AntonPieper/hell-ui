@@ -4,12 +4,10 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { TemplateRef } from '@angular/core';
 
 // @public
@@ -52,7 +50,6 @@ export class HellSplitView {
     readonly nextItem: _angular_core.OutputEmitterRef<void>;
     readonly nextItemDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly nextItemLabel: _angular_core.InputSignal<string>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSplitViewPart>;
     readonly previousItem: _angular_core.OutputEmitterRef<void>;
     readonly previousItemDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -64,7 +61,6 @@ export class HellSplitView {
         compact: boolean;
         detailOpen: boolean;
     }>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSplitViewPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSplitView, "hell-split-view", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "compactBelow": { "alias": "compactBelow"; "required": false; "isSignal": true; }; "detailOpen": { "alias": "detailOpen"; "required": false; "isSignal": true; }; "framed": { "alias": "framed"; "required": false; "isSignal": true; }; "backLabel": { "alias": "backLabel"; "required": false; "isSignal": true; }; "primaryFlex": { "alias": "primaryFlex"; "required": false; "isSignal": true; }; "detailFlex": { "alias": "detailFlex"; "required": false; "isSignal": true; }; "primaryMinSize": { "alias": "primaryMinSize"; "required": false; "isSignal": true; }; "detailMinSize": { "alias": "detailMinSize"; "required": false; "isSignal": true; }; "height": { "alias": "height"; "required": false; "isSignal": true; }; "itemNavigation": { "alias": "itemNavigation"; "required": false; "isSignal": true; }; "itemNavigationLabel": { "alias": "itemNavigationLabel"; "required": false; "isSignal": true; }; "previousItemLabel": { "alias": "previousItemLabel"; "required": false; "isSignal": true; }; "nextItemLabel": { "alias": "nextItemLabel"; "required": false; "isSignal": true; }; "previousItemDisabled": { "alias": "previousItemDisabled"; "required": false; "isSignal": true; }; "nextItemDisabled": { "alias": "nextItemDisabled"; "required": false; "isSignal": true; }; }, { "detailOpenChange": "detailOpenChange"; "previousItem": "previousItem"; "nextItem": "nextItem"; }, ["primaryTemplate", "detailTemplate"], never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSplitView, never>;
@@ -73,8 +69,6 @@ export class HellSplitView {
 // @public
 export type HellSplitViewPart = 'root' | 'resizable' | 'screen' | 'pane' | 'compactHeader' | 'backButton' | 'detailHeader' | 'itemNavigation';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
-//
 // @public
 export type HellSplitViewUi = HellUi<HellSplitViewPart>;
 

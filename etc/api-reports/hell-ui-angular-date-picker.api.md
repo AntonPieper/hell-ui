@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/date-picker';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels>;
@@ -20,9 +19,7 @@ export class HellDatePicker {
     protected readonly label: _angular_core.Signal<string>;
     protected readonly labels: HellDatePickerLabels;
     readonly locale: _angular_core.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     // Warning: (ae-forgotten-export) The symbol "HellWeekdayLabel" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
     protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
@@ -61,8 +58,6 @@ export class HellDatePickerPreviousYear {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerPreviousYear, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
-//
 // @public
 export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 

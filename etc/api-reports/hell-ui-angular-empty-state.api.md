@@ -4,12 +4,10 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_EMPTY_STATE_COPY: Record<HellEmptyStateGlyph, HellEmptyStateCopy>;
@@ -26,10 +24,8 @@ export class HellEmptyState {
     protected readonly hasCustomMedia: i0.Signal<boolean>;
     protected readonly hasCustomTitle: i0.Signal<boolean>;
     readonly headingLevel: i0.InputSignal<HellEmptyStateHeadingLevel | null>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-empty-state.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellEmptyStatePart>;
     readonly title: i0.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-empty-state.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellEmptyStatePart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellEmptyState, "hell-empty-state", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "glyph": { "alias": "glyph"; "required": false; "isSignal": true; }; "title": { "alias": "title"; "required": false; "isSignal": true; }; "description": { "alias": "description"; "required": false; "isSignal": true; }; "headingLevel": { "alias": "headingLevel"; "required": false; "isSignal": true; }; }, {}, ["customMedia", "customTitle", "customDescription", "customActions"], ["[hellEmptyStateMedia]", "[hellEmptyStateTitle]", "[hellEmptyStateDescription]", "[hellEmptyStateActions]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellEmptyState, never>;
@@ -74,8 +70,6 @@ export class HellEmptyStateTitle {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellEmptyStateTitle, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-empty-state.d.ts
-//
 // @public
 export type HellEmptyStateUi = HellUi<HellEmptyStatePart>;
 

@@ -4,13 +4,11 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
@@ -31,9 +29,7 @@ export const HELL_APP_SHELL_MOBILE_MEDIA = "(max-width: 767px)";
 export class HellAppContent {
     readonly maxWidth: _angular_core.InputSignal<string | number | null>;
     protected readonly maxWidthValue: _angular_core.Signal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-app-shell.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-app-shell.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppContent, "[hellAppContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "maxWidth": { "alias": "maxWidth"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppContent, never>;

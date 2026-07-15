@@ -5,14 +5,15 @@
 ```ts
 
 import { AbstractControl } from '@angular/forms';
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellTypedInputAdapter } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
@@ -72,7 +73,6 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     protected onInput(value: string): void;
     // (undocumented)
     protected onPick(d: Date | undefined): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDateInputPart>;
     // (undocumented)
     protected readonly pickerFocusedDate: _angular_core.WritableSignal<Date>;
@@ -90,7 +90,6 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     // (undocumented)
     protected readonly triggerAriaLabel: () => string;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDateInputPart>>;
     // (undocumented)
     validate(_control: AbstractControl | null): ValidationErrors | null;
@@ -100,8 +99,6 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateInput, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellTypedInputAdapter" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
-//
 // @public
 export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
 
@@ -116,8 +113,6 @@ export interface HellDateInputLabels {
 // @public
 export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-date-input.d.ts
-//
 // @public
 export type HellDateInputUi = HellUi<HellDateInputPart>;
 

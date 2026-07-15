@@ -4,7 +4,15 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import { HellFloatingElement } from '@hell-ui/angular/internal/core';
+import { hellInvalidTypedValue } from '@hell-ui/angular/internal/core';
+import { HellPickMultipleValue } from '@hell-ui/angular/internal/core';
+import { HellPickSingleValue } from '@hell-ui/angular/internal/core';
+import { HellPickValue } from '@hell-ui/angular/internal/core';
+import { hellTypedValue } from '@hell-ui/angular/internal/core';
+import { HellTypedValueInvalidParse } from '@hell-ui/angular/internal/core';
+import { HellTypedValueParseResult } from '@hell-ui/angular/internal/core';
+import { HellTypedValueValidParse } from '@hell-ui/angular/internal/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -23,15 +31,9 @@ export type HellChipVariant = 'default' | 'primary' | 'success' | 'info' | 'dang
 // @public
 export function hellCreateLabels<T extends object>(description: string, defaults: T): InjectionToken<T>;
 
-// @public
-export class HellFloatingElement implements AfterViewInit {
-    ngAfterViewInit(): void;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellFloatingElement, "[hellFloatingElement]", never, {}, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellFloatingElement, never>;
-}
+export { HellFloatingElement }
 
-// @public
-export function hellInvalidTypedValue(): HellTypedValueInvalidParse;
+export { hellInvalidTypedValue }
 
 // @public
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
@@ -64,14 +66,11 @@ export interface HellPartStylerOptions<Part extends string> {
     readonly recipe: () => HellRecipe<Part>;
 }
 
-// @public
-export type HellPickMultipleValue<T = unknown> = readonly T[];
+export { HellPickMultipleValue }
 
-// @public
-export type HellPickSingleValue<T = unknown> = T | null;
+export { HellPickSingleValue }
 
-// @public
-export type HellPickValue<T = unknown> = HellPickSingleValue<T> | HellPickMultipleValue<T>;
+export { HellPickValue }
 
 // @public
 export function hellRankLocalSearch<T>(items: readonly T[], request: HellSearchRankRequest<T>): readonly HellSearchResult<T>[];
@@ -159,25 +158,13 @@ export interface HellTypedInputAdapter<TValue, TContext = void> {
     readonly parseText: (text: string, context: TContext) => HellTypedValueParseResult<TValue>;
 }
 
-// @public
-export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
+export { hellTypedValue }
 
-// @public
-export interface HellTypedValueInvalidParse {
-    // (undocumented)
-    readonly valid: false;
-}
+export { HellTypedValueInvalidParse }
 
-// @public
-export type HellTypedValueParseResult<TValue> = HellTypedValueValidParse<TValue> | HellTypedValueInvalidParse;
+export { HellTypedValueParseResult }
 
-// @public
-export interface HellTypedValueValidParse<TValue> {
-    // (undocumented)
-    readonly valid: true;
-    // (undocumented)
-    readonly value: TValue | null;
-}
+export { HellTypedValueValidParse }
 
 // @public
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
@@ -190,12 +177,6 @@ export function provideHellLabels<T extends object>(token: InjectionToken<T>, ov
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-internal-core.d.ts:551:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-angular-internal-core.d.ts:552:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:556:5 - (ae-undocumented) Missing documentation for "valid".
 
 // (No @packageDocumentation comment for this package)
 

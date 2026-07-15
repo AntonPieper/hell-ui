@@ -4,14 +4,17 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellFloatingScope } from '@hell-ui/angular/internal/core';
+import { HellSearchField } from '@hell-ui/angular/core';
+import { HellSearchResult } from '@hell-ui/angular/core';
+import { HellSearchSource } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
-import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
 // @public
@@ -20,8 +23,6 @@ export const HELL_OMNIBAR_DIRECTIVES: readonly [typeof HellOmnibar, typeof HellO
 // @public
 export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels>;
 
-// Warning: (ae-forgotten-export) The symbol "HellFloatingScope" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
-//
 // @public
 export class HellOmnibar implements HellFloatingScope {
     constructor();
@@ -71,7 +72,6 @@ export class HellOmnibar implements HellFloatingScope {
     protected readonly overlayPositions: ConnectedPosition[];
     protected readonly overlayScrollStrategy: ScrollStrategy;
     readonly panelId: string;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellOmnibarPart>;
     readonly placeholder: _angular_core.InputSignal<string>;
     registerAction(action: HellOmnibarAction): void;
@@ -79,15 +79,12 @@ export class HellOmnibar implements HellFloatingScope {
     registerItem(item: HellOmnibarRegisteredItem): void;
     readonly searchDebounce: _angular_core.InputSignal<number>;
     readonly searchError: _angular_core.OutputEmitterRef<unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellSearchField" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly searchFields: _angular_core.InputSignal<readonly HellSearchField<never>[]>;
     readonly searchItems: _angular_core.InputSignal<readonly unknown[] | null>;
     readonly searchLimit: _angular_core.InputSignal<number | undefined>;
     readonly searchParams: _angular_core.InputSignal<unknown>;
     readonly searchResults: _angular_core.Signal<readonly HellSearchResult<any>[]>;
-    // Warning: (ae-forgotten-export) The symbol "HellSearchResult" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly searchResultsChange: _angular_core.OutputEmitterRef<readonly HellSearchResult<unknown>[]>;
-    // Warning: (ae-forgotten-export) The symbol "HellSearchSource" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly searchSource: _angular_core.InputSignal<HellSearchSource<unknown> | null>;
     setActive(item: HellOmnibarRegisteredItem): void;
     setValue(next: string, opts?: {
@@ -97,7 +94,6 @@ export class HellOmnibar implements HellFloatingScope {
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     protected readonly skeletonRows: _angular_core.Signal<number[]>;
     readonly submit: _angular_core.OutputEmitterRef<HellOmnibarSubmitEvent<unknown>>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOmnibarPart>>;
     unregisterAction(action: HellOmnibarAction): void;
     unregisterFloatingElement(element: HTMLElement): void;
@@ -262,8 +258,6 @@ export interface HellOmnibarSubmitEvent<T = unknown> {
     readonly value: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
-//
 // @public
 export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 

@@ -9,16 +9,18 @@ import { Cell } from '@tanstack/angular-table';
 import { Column } from '@tanstack/angular-table';
 import { FlexRenderDirective } from '@tanstack/angular-table';
 import { Header } from '@tanstack/angular-table';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import * as _hell_ui_angular_empty_state from '@hell-ui/angular/empty-state';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OnChanges } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Row } from '@tanstack/angular-table';
 import { RowData } from '@tanstack/angular-table';
 import { Table } from '@tanstack/angular-table';
-import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 import { Type } from '@angular/core';
 
@@ -30,7 +32,6 @@ export const HELL_TANSTACK_TABLE_DIRECTIVES: readonly [typeof HellTanStackTable,
 
 // @public (undocumented)
 export class HellDefaultTableEmptyState {
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_empty_state" needs to be exported by the entry point hell-ui-angular-table-tanstack.d.ts
     protected readonly copy: _hell_ui_angular_empty_state.HellEmptyStateCopy;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellDefaultTableEmptyState, "hell-default-table-empty-state", never, {}, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellDefaultTableEmptyState, never>;
@@ -245,7 +246,6 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
     protected readonly pageSizeSelectUi: {
         root: string;
     };
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-table-tanstack.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellTanStackPaginationPart>;
     // (undocumented)
     protected setPage(page: number): void;
@@ -253,7 +253,6 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
     protected setPageSize(event: Event): void;
     // (undocumented)
     readonly table: i0.InputSignal<Table<TData>>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-table-tanstack.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellTanStackPaginationPart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackPagination<any>, "hell-tanstack-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "table": { "alias": "table"; "required": true; "isSignal": true; }; "pageSizeOptions": { "alias": "pageSizeOptions"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackPagination<any>, never>;
@@ -262,8 +261,6 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
 // @public
 export type HellTanStackPaginationPart = 'root' | 'pageSize';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-table-tanstack.d.ts
-//
 // @public
 export type HellTanStackPaginationUi = HellUi<HellTanStackPaginationPart>;
 

@@ -4,34 +4,28 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ElementRef } from '@angular/core';
 import { FocusOrigin } from '@angular/cdk/a11y';
-import { InjectionToken } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as ng_primitives_portal from 'ng-primitives/portal';
 import { NgpDismissGuard } from 'ng-primitives/portal';
 import { NgpDismissGuardInput } from 'ng-primitives/portal';
 import { NgpOverlayContent } from 'ng-primitives/portal';
 import { NgpPopoverPlacement } from 'ng-primitives/popover';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellPopover {
     constructor();
     protected readonly ariaModal: _angular_core.Signal<"false" | null>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-popover.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-popover.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPopover, "[hellPopover]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopover, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-popover.d.ts
-//
 // @public
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
     constructor();

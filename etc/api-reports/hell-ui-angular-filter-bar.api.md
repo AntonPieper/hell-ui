@@ -4,19 +4,13 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import { ElementRef } from '@angular/core';
-import { FocusOrigin } from '@angular/cdk/a11y';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HellSearchSource } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import * as ng_primitives_portal from 'ng-primitives/portal';
-import { NgpDismissGuard } from 'ng-primitives/portal';
-import { NgpDismissGuardInput } from 'ng-primitives/portal';
-import { NgpOverlayContent } from 'ng-primitives/portal';
-import { NgpPopoverPlacement } from 'ng-primitives/popover';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_FILTER_BAR_LABELS: InjectionToken<HellFilterBarLabels>;
@@ -86,8 +80,6 @@ export class HellFilterBar {
     protected onEditorFocusOut(_event: FocusEvent): void;
     // (undocumented)
     protected onEditorInput(event: Event): void;
-    // Warning: (ae-forgotten-export) The symbol "HellPopoverTrigger" needs to be exported by the entry point hell-ui-angular-filter-bar.d.ts
-    //
     // (undocumented)
     protected onEditorKeydown(event: KeyboardEvent, trigger?: HellPopoverTrigger): void;
     // (undocumented)
@@ -108,7 +100,6 @@ export class HellFilterBar {
     protected onPickerOpenChange(open: boolean): void;
     // (undocumented)
     protected onTokenSetKeydown(event: KeyboardEvent): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-filter-bar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellFilterBarPart>;
     // (undocumented)
     protected readonly pickerOpen: _angular_core.WritableSignal<boolean>;
@@ -128,7 +119,6 @@ export class HellFilterBar {
     protected tokenLabel(token: HellFilterToken): string;
     // (undocumented)
     protected tokenTrack(token: HellFilterToken, index: number): string;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-filter-bar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellFilterBarPart>>;
     readonly value: _angular_core.InputSignal<readonly HellFilterToken[]>;
     readonly valueChange: _angular_core.OutputEmitterRef<readonly HellFilterToken[]>;
@@ -160,8 +150,6 @@ export interface HellFilterBarLabels {
 // @public
 export type HellFilterBarPart = 'root' | 'tokens' | 'token' | 'tokenLabel' | 'control' | 'prefix' | 'input' | 'panel' | 'option' | 'editor' | 'status' | 'dateRange' | 'dateRangeActions' | 'clear' | 'live';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-filter-bar.d.ts
-//
 // @public
 export type HellFilterBarUi = HellUi<HellFilterBarPart>;
 
@@ -184,7 +172,6 @@ export interface HellFilterEntityField extends HellFilterFieldBase {
     readonly debounceMs?: number;
     readonly kind: 'entity';
     readonly limit?: number;
-    // Warning: (ae-forgotten-export) The symbol "HellSearchSource" needs to be exported by the entry point hell-ui-angular-filter-bar.d.ts
     readonly search: HellSearchSource<HellFilterEntityOption>;
 }
 

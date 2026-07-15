@@ -5,14 +5,15 @@
 ```ts
 
 import { AbstractControl } from '@angular/forms';
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellTypedInputAdapter } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
@@ -57,7 +58,6 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     protected onStepperPointerDown(event: PointerEvent, direction: 1 | -1): void;
     protected onWheel(event: WheelEvent): void;
     protected readonly outOfRange: Signal<boolean>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellNumberInputPart>;
     readonly placeholder: _angular_core.InputSignal<string | null>;
     registerOnChange(fn: (value: number | null) => void): void;
@@ -72,7 +72,6 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     readonly steppers: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected stopHold(): void;
     readonly suffix: _angular_core.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellNumberInputPart>>;
     validate(_control: AbstractControl | null): ValidationErrors | null;
     readonly value: _angular_core.InputSignal<number | null>;
@@ -83,8 +82,6 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNumberInput, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellTypedInputAdapter" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
-//
 // @public
 export type HellNumberInputAdapter = HellTypedInputAdapter<number, HellNumberInputAdapterContext>;
 
@@ -104,8 +101,6 @@ export interface HellNumberInputLabels {
 // @public
 export type HellNumberInputPart = 'root' | 'input' | 'increment' | 'decrement' | 'suffix';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-number-input.d.ts
-//
 // @public
 export type HellNumberInputUi = HellUi<HellNumberInputPart>;
 

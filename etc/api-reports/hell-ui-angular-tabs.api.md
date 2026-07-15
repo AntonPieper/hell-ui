@@ -4,22 +4,18 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/tabs';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_TABS_DIRECTIVES: readonly [typeof HellTabset, typeof HellTabList, typeof HellTab, typeof HellTabPanel];
 
 // @public
 export class HellTab {
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTab, "button[hellTab]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabButton; inputs: { "ngpTabButtonValue": "value"; "ngpTabButtonDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTab, never>;
@@ -43,7 +39,6 @@ export class HellTabPanel {
 
 // @public
 export class HellTabset {
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
     readonly orientation: i0.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;

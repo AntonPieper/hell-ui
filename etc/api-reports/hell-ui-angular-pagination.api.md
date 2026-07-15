@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/pagination';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_PAGINATION_DIRECTIVES: readonly [typeof HellPagination, typeof HellPageLink, typeof HellPaginationStrip];
@@ -30,9 +29,7 @@ export class HellPageLink {
     // Warning: (ae-forgotten-export) The symbol "HellPaginationNativeControl" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     protected readonly native: HellPaginationNativeControl;
     protected onClick(event: Event): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPageLink, "button[hellPageLink], a[hellPageLink]", never, { "hellPageLink": { "alias": "hellPageLink"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPageLink, never>;
@@ -79,8 +76,6 @@ export class HellPaginationStrip {
 // @public
 export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-//
 // @public
 export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;
 

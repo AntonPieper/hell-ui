@@ -4,12 +4,9 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 
 // @public
 export class HellIcon {
@@ -17,10 +14,8 @@ export class HellIcon {
     readonly color: _angular_core.InputSignal<string | null>;
     readonly decorative: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly name: _angular_core.InputSignal<string>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-icon.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<string>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-icon.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellIcon, "hell-icon", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": true; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "color": { "alias": "color"; "required": false; "isSignal": true; }; "decorative": { "alias": "decorative"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellIcon, never>;
