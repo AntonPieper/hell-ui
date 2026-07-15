@@ -1,15 +1,10 @@
-/* The optional chips presentation composes the public chip primitive. Carry
-   its recipe source and built-in remove glyph for combobox-only consumers. */
-@import '../chip/styles.css';
-
 /* Combobox defaults are Tailwind utility recipes in the directives. */
 @source "./combobox.ts";
 @source "../internal/option/option-presentation.ts";
 @source "../internal/floating/floating-presentation.ts";
 
 @layer components {
-  [hellComboboxButton][data-slot='root']::after,
-  hell-combobox [hellComboboxButton][data-slot='button']::after {
+  [hellComboboxButton][data-slot='root']::after {
     content: '';
     display: block;
     width: 10px;
@@ -26,8 +21,7 @@
     transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after,
-  hell-combobox [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after {
+  [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after {
     rotate: 180deg;
   }
 }

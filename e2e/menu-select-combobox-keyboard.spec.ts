@@ -160,17 +160,43 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await expect(region).toContainText('EU (Frankfurt)');
   });
 
-  test('combobox keeps input focus, exposes aria-activedescendant, skips disabled filtered options, and closes with Escape', async ({
+  test('combobox opens projected domain objects on the first toggle activation', async ({
     page,
   }) => {
     await page.goto('/components/combobox');
 
-    const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
+    const example = page.locator('app-combobox-basic-example');
+    const input = example.getByRole('combobox', { name: 'Settlement currency' });
+
+    await expect(example.locator('[hellCombobox]')).toHaveCount(1);
+    await expect(example.locator('hell-combobox')).toHaveCount(0);
+
+    await input.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+    );
+    await example.getByRole('button', { name: 'Toggle currencies' }).click();
+    await expect(page.getByRole('option', { name: 'AUD — Australian Dollar' })).toBeVisible();
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await input.press('Escape');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).toBeFocused();
+  });
+
+  test('combobox keeps input focus, skips disabled filtered options, and closes with Escape', async ({
+    page,
+  }) => {
+    await page.goto('/components/combobox');
+
+    const example = page.locator('app-combobox-basic-example');
+    const input = example.getByRole('combobox', { name: 'Settlement currency' });
 
     await input.focus();
     await page.keyboard.press('ArrowDown');
 
     await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('option', { name: 'AUD — Australian Dollar' })).toContainText(
+      'Australian Dollar',
+    );
     await expectActiveDescendantText(page, input, 'AUD — Australian Dollar', 'combobox opens on ArrowDown');
     await page.keyboard.press('ArrowUp');
     await expectActiveDescendantText(page, input, 'USD — US Dollar', 'combobox ArrowUp wraps to last option');

@@ -518,56 +518,49 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/async-source.example.ts',
  terms:
-'components/combobox/examples/async-source.example components/combobox hell-combobox HellCombobox HellSearchSource source sourceDebounce async entity picker remote server loading empty error status chrome AbortSignal debounce displayWith HELL_COMBOBOX_LABELS provideHellLabels customers',
+'components/combobox/examples/async-source.example components/combobox hellCombobox HellCombobox hellSearchResource Search Resource source async entity picker remote server loading empty error status AbortSignal cancellation stale results debounce domain objects customers control group',
  },
  {
  title:'Combobox: Basic',
  path:'/components/combobox',
  detail:'components/combobox/examples/basic.example.ts',
  terms:
-'components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_DIRECTIVES single-select filter currency ui data-slot root',
+'components/combobox/examples/basic.example components/combobox HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_DIRECTIVES hellSearchResource hellControlGroup domain objects compareWith disabled single-select currency projection first',
  },
  {
- title:'Combobox: Chips presentation',
+ title:'Combobox: Chip Input composition',
  path:'/components/combobox',
  detail:'components/combobox/examples/chips.example.ts',
  terms:
-'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxChips hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip hellChipRemove HellChipSet HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select multiple removable chips tokens assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace remove selection state aria-selected displayWith ui data-slot root chip',
+'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellChipSet hellChipInput hellChip hellChipRemove HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_CHIP_DIRECTIVES hellControlGroup hellSearchResource domain objects multi-select removable chips assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace consumer owned selection',
  },
  {
  title:'Combobox: Multiple',
  path:'/components/combobox',
  detail:'components/combobox/examples/multiple.example.ts',
  terms:
-'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChip HellPickValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChipSet hellChip HellPickValue hellSearchResource HELL_COMBOBOX_DIRECTIVES HELL_CHIP_DIRECTIVES domain objects multi-select array labels read only summary',
  },
  {
  title:'Combobox: Filtering and ranking',
  path:'/components/combobox',
  detail:'components/combobox/examples/ranked-filtering.example.ts',
  terms:
-'components/combobox/examples/ranked-filtering.example components/combobox hell-combobox HellCombobox hellRankLocalSearch provideHellSearchRanker HELL_SEARCH_RANKER ranked filtering ranking prefix substring word match score custom ranker recency recently used reorder search seam stations',
- },
- {
- title:'Combobox: Preset',
- path:'/components/combobox',
- detail:'components/combobox/examples/preset.example.ts',
- terms:
-'components/combobox/examples/preset.example components/combobox hell-combobox HellCombobox HellCombobox options value valueChange allowDeselect placeholder aria-label HELL_COMBOBOX_LABELS provideHellLabels convenience warehouse ui data-slot root control input button dropdown option empty',
+'components/combobox/examples/ranked-filtering.example components/combobox hellCombobox HellCombobox hellSearchResource hellRankLocalSearch provideHellSearchRanker HELL_SEARCH_RANKER ranked filtering custom ranker recency recently used reorder domain objects stations control group',
  },
  {
  title:'Combobox: Styling',
  path:'/components/combobox',
  detail:'components/combobox/examples/styling.example.ts',
  terms:
-'components/combobox/examples/styling.example components/combobox hell-combobox HellCombobox HellComboboxUi HellCombobox ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
+'components/combobox/examples/styling.example components/combobox hellCombobox HellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty ui Part Style Map single root projected directives hellSearchResource domain objects tokens priority',
  },
  {
  title:'Combobox: With field and tag',
  path:'/components/combobox',
  detail:'components/combobox/examples/with-field-tag.example.ts',
  terms:
-'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
+'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChipSet hellChip hellChipRemove HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES HELL_CHIP_DIRECTIVES hellSearchResource reviewers domain objects multi-select removable chips',
  },
  {
  title:'Control Group: Basic composition',
@@ -2122,7 +2115,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'hellComboboxInput, hellComboboxOption, hellComboboxEmpty',
  terms:
-'HELL_COMBOBOX_DIRECTIVES hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty',
+'HELL_COMBOBOX_DIRECTIVES HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty projection first Search Resource Control Group Chip Set Chip Input domain objects',
  },
  {
  title:'Chip Input keyboard bridge',

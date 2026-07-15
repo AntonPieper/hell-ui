@@ -1,68 +1,98 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
 import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
 
-const GROUPS = [
-  'Administrators',
-  'Billing',
-  'Dispatch',
-  'Engineering',
-  'On-call',
-  'Reporting',
-  'Supervisors',
-  'Support',
+interface Group {
+  readonly id: string;
+  readonly name: string;
+}
+
+const GROUPS: readonly Group[] = [
+  { id: 'administrators', name: 'Administrators' },
+  { id: 'billing', name: 'Billing' },
+  { id: 'dispatch', name: 'Dispatch' },
+  { id: 'engineering', name: 'Engineering' },
+  { id: 'on-call', name: 'On-call' },
+  { id: 'reporting', name: 'Reporting' },
+  { id: 'supervisors', name: 'Supervisors' },
+  { id: 'support', name: 'Support' },
 ];
 
 @Component({
   selector: 'app-combobox-chips-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  imports: [
+    ...HELL_COMBOBOX_DIRECTIVES,
+    ...HELL_CHIP_DIRECTIVES,
+    ...HELL_CONTROL_GROUP_DIRECTIVES,
+  ],
   template: `
     <div class="flex max-w-96 flex-col gap-hell-1">
       <span id="assign-groups-label" class="text-[13px] font-medium text-hell-foreground">
         Assign groups
       </span>
-      <div
-        hellCombobox
-        multiple
-        [value]="selected()"
-        (valueChange)="onValueChange($event)"
-        [ui]="{ root: 'h-auto min-h-hell-control-md flex-wrap gap-hell-1 py-hell-1' }"
-      >
-        <div hellComboboxChips></div>
-        <input
-          hellComboboxInput
-          class="min-w-[6rem]"
-          aria-label="Assign groups"
-          placeholder="Add a group…"
-          (input)="filter.set(($any($event.target).value ?? '').toLowerCase())"
-        />
-        <button hellComboboxButton type="button" aria-label="Toggle groups"></button>
-        <div *hellComboboxPortal hellComboboxDropdown>
-          @for (group of filtered(); track group) {
-            <div hellComboboxOption [value]="group">{{ group }}</div>
-          } @empty {
-            <div hellComboboxEmpty>No groups match</div>
-          }
+      <div hellControlGroup>
+        <div
+          hellCombobox
+          multiple
+          ui="h-auto min-h-hell-control-md flex-1 flex-wrap gap-hell-1 rounded-none border-0 bg-transparent py-hell-1 ps-hell-2 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+          [options]="groupOptions()"
+          [value]="selected()"
+          [compareWith]="compareGroup"
+          (valueChange)="onValueChange($event)"
+        >
+          <div hellChipSet ui="contents" aria-label="Assigned groups">
+            @for (group of selected(); track group.id) {
+              <span hellChip size="sm" (remove)="remove(group)">
+                {{ group.name }}<button hellChipRemove></button>
+              </span>
+            }
+            <input
+              hellComboboxInput
+              hellChipInput
+              class="min-w-[6rem]"
+              aria-label="Assign groups"
+              placeholder="Add a group…"
+              [value]="groupSearch.query()"
+              (input)="groupSearch.query.set($any($event.target).value ?? '')"
+            />
+            <button hellComboboxButton type="button" aria-label="Toggle groups"></button>
+            <div *hellComboboxPortal hellComboboxDropdown>
+              @for (group of groupOptions(); track group.id) {
+                <div hellComboboxOption [value]="group">{{ group.name }}</div>
+              } @empty {
+                <div hellComboboxEmpty>No groups match</div>
+              }
+            </div>
+          </div>
         </div>
       </div>
       <p class="text-xs text-hell-foreground-subtle">
-        Shift+Tab into the chips, move with Arrow keys, and press Delete or Backspace to remove the
-        focused group. Backspace in the empty field removes the last group; each × removes just that
-        group.
+        Backspace in the empty field focuses the last removable chip; press it again to remove.
+        Arrow keys move chip focus, and each × removes only its own group.
       </p>
     </div>
   `,
 })
 export class ComboboxChipsExample {
-  protected readonly selected = signal<readonly string[]>(['Dispatch', 'On-call']);
-  protected readonly filter = signal('');
-  protected readonly filtered = computed(() => {
-    const query = this.filter().trim();
-    return query ? GROUPS.filter((group) => group.toLowerCase().includes(query)) : GROUPS;
+  protected readonly selected = signal<readonly Group[]>([GROUPS[2], GROUPS[4]]);
+  protected readonly query = signal('');
+  protected readonly groupSearch = hellSearchResource({
+    query: this.query,
+    items: GROUPS,
+    fields: [{ get: (group) => group.name }],
   });
+  protected readonly groupOptions = computed(() => [...this.groupSearch.items()]);
+  protected readonly compareGroup = (left: Group, right: Group): boolean => left.id === right.id;
 
-  protected onValueChange(next: HellPickValue<string>): void {
+  protected onValueChange(next: HellPickValue<Group>): void {
     this.selected.set(Array.isArray(next) ? next : []);
+    this.query.set('');
+  }
+
+  protected remove(group: Group): void {
+    this.selected.update((selected) => selected.filter((item) => item.id !== group.id));
   }
 }

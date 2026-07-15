@@ -1,52 +1,118 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { hellRankLocalSearch, type HellOption, type HellSearchSource } from '@hell-ui/angular/core';
-import { HellCombobox } from '@hell-ui/angular/combobox';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { hellSearchResource } from '@hell-ui/angular/core';
 
-/** Stand-in for a backend directory; only the source function sees it. */
-const CUSTOMERS: readonly HellOption<string>[] = [
-  { value: 'cus-1041', label: 'Aldona Logistics GmbH' },
-  { value: 'cus-1042', label: 'Bernward & Söhne KG' },
-  { value: 'cus-1043', label: 'Cetus Marine Services' },
-  { value: 'cus-1044', label: 'Dorstfeld Stahlhandel' },
-  { value: 'cus-1045', label: 'Elbe Kontor AG' },
-  { value: 'cus-1046', label: 'Falkenrath Spedition' },
+interface Customer {
+  readonly id: string;
+  readonly name: string;
+  readonly city: string;
+}
+
+/** Stand-in for a backend directory; only the Search Resource source sees it. */
+const CUSTOMERS: readonly Customer[] = [
+  { id: 'cus-1041', name: 'Aldona Logistics GmbH', city: 'Berlin' },
+  { id: 'cus-1042', name: 'Bernward & Söhne KG', city: 'Dortmund' },
+  { id: 'cus-1043', name: 'Cetus Marine Services', city: 'Hamburg' },
+  { id: 'cus-1044', name: 'Dorstfeld Stahlhandel', city: 'Essen' },
+  { id: 'cus-1045', name: 'Elbe Kontor AG', city: 'Bremen' },
+  { id: 'cus-1046', name: 'Falkenrath Spedition', city: 'Leipzig' },
 ];
 
 @Component({
   selector: 'app-combobox-async-source-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellCombobox],
+  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CONTROL_GROUP_DIRECTIVES],
   template: `
-    <hell-combobox
-      class="block max-w-80"
-      aria-label="Customer account"
-      placeholder="Search customers… (try “fail”)"
-      [source]="customerSource"
-      [displayWith]="displayWith"
-      [value]="value()"
-      (valueChange)="value.set($any($event))"
-    />
+    <div hellControlGroup class="max-w-80">
+      <div
+        hellCombobox
+        ui="h-auto min-h-hell-control-md flex-1 rounded-none border-0 bg-transparent ps-hell-4 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+        [options]="customerOptions()"
+        [value]="value()"
+        [compareWith]="compareCustomer"
+        (valueChange)="select($any($event))"
+      >
+        <input
+          hellComboboxInput
+          aria-label="Customer account"
+          placeholder="Search customers… (try “fail”)"
+          [value]="customerSearch.query()"
+          (input)="customerSearch.query.set($any($event.target).value ?? '')"
+        />
+        <button hellComboboxButton type="button" aria-label="Toggle customers"></button>
+        <div *hellComboboxPortal hellComboboxDropdown>
+          @if (customerSearch.status() === 'loading') {
+            <div class="px-hell-3 py-hell-2 text-xs text-hell-foreground-subtle" role="status">
+              Loading customers…
+            </div>
+          } @else if (customerSearch.status() === 'error') {
+            <div class="px-hell-3 py-hell-2 text-xs text-hell-danger" role="alert">
+              Customer directory unavailable. Try another query.
+            </div>
+          } @else {
+            @for (customer of customerOptions(); track customer.id) {
+              <div hellComboboxOption [value]="customer">
+                <strong>{{ customer.name }}</strong>
+                <span class="ms-auto text-xs text-hell-foreground-subtle">
+                  {{ customer.city }}
+                </span>
+              </div>
+            } @empty {
+              <div hellComboboxEmpty>No customers match</div>
+            }
+          }
+        </div>
+      </div>
+    </div>
   `,
 })
 export class ComboboxAsyncSourceExample {
-  protected readonly value = signal<string | null>(null);
+  protected readonly value = signal<Customer | null>(null);
+  protected readonly query = signal('');
+  protected readonly customerSearch = hellSearchResource<Customer>({
+    query: this.query,
+    source: async ({ query, signal: abortSignal }) => {
+      await waitForNetwork(abortSignal);
+      if (abortSignal.aborted) return [];
+      if (query.trim().toLocaleLowerCase() === 'fail') {
+        throw new Error('customer directory unavailable');
+      }
+      const normalized = query.trim().toLocaleLowerCase();
+      return normalized
+        ? CUSTOMERS.filter((customer) =>
+            `${customer.name} ${customer.city}`.toLocaleLowerCase().includes(normalized),
+          )
+        : CUSTOMERS;
+    },
+    fields: [
+      { weight: 3, get: (customer) => customer.name },
+      { weight: 1, get: (customer) => customer.city },
+    ],
+    debounce: 120,
+  });
+  protected readonly customerOptions = computed(() => [...this.customerSearch.items()]);
+  protected readonly compareCustomer = (
+    left: Customer | null,
+    right: Customer | null,
+  ): boolean => left?.id === right?.id;
 
-  /** Picked values stay labelled even when their option left the results. */
-  protected readonly displayWith = (value: string): string =>
-    CUSTOMERS.find((customer) => customer.value === value)?.label ?? value;
+  protected select(customer: Customer | null): void {
+    this.value.set(customer);
+    this.query.set(customer?.name ?? '');
+  }
+}
 
-  /**
-   * A `HellSearchSource` receives the query, an `AbortSignal` for superseded
-   * requests, and returns options (or a pre-ranked `HellSearchResponse`).
-   * This one simulates 600ms of network latency and a backend outage when
-   * the query is "fail".
-   */
-  protected readonly customerSource: HellSearchSource<HellOption<string>> = async (request) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    if (request.signal?.aborted) return [];
-    if (request.query.trim().toLowerCase() === 'fail') {
-      throw new Error('customer directory unavailable');
-    }
-    return hellRankLocalSearch(CUSTOMERS, { query: request.query }).map(({ item }) => item);
-  };
+function waitForNetwork(abortSignal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(resolve, 600);
+    abortSignal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timeout);
+        resolve();
+      },
+      { once: true },
+    );
+  });
 }

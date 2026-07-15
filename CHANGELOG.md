@@ -418,6 +418,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: Combobox is now one projection-first interaction state machine.
+  Rename `HellComboboxRoot` to `HellCombobox` (the `[hellCombobox]` selector is
+  unchanged) and project domain objects through `hellComboboxInput`,
+  `hellComboboxOption`, `hellComboboxDropdown`, and `hellComboboxPortal`. The
+  owned `<hell-combobox>` renderer, its `HellOption`/display/search/status
+  model, and `hellComboboxChips` are removed. Compose the public Search
+  Resource for local or async results, Control Group for a shared frame, and
+  Chip Set/Chip Input for editable multiple values. Forms, comparison, value
+  semantics, keyboard navigation, disabled options, focus restoration,
+  dismissal, and ARIA relationships remain delegated to the directive suite;
+  dropdown registration and containment are now Combobox-local internals.
+  Closes #194. Evidence: focused Combobox/CVA/controller and adapter suites,
+  keyboard, chip-input, Filter Bar, and axe browser contracts, projected
+  domain-object package consumers, and the contracted Combobox API report.
 - BREAKING: rich Select is now one projection-first interaction state
   machine. Rename `[hellSelectTrigger]`/`HellSelectTrigger` to
   `[hellSelect]`/`HellSelect`, project domain values through

@@ -8,10 +8,8 @@ async function gotoCombobox(page: Page): Promise<Locator> {
   return example;
 }
 
-test.describe('combobox chips presentation accessibility contract', () => {
-  test('renders a removable chip per selected value labelled through the chip Label Contract', async ({
-    page,
-  }) => {
+test.describe('Combobox with public Chip Input accessibility contract', () => {
+  test('projects one labelled, removable chip per selected domain object', async ({ page }) => {
     const example = await gotoCombobox(page);
     const chips = example.locator('[hellChip]');
 
@@ -20,32 +18,28 @@ test.describe('combobox chips presentation accessibility contract', () => {
     await expect(chips.nth(1)).toContainText('On-call');
     await expect(example.getByRole('button', { name: 'Remove Dispatch' })).toBeVisible();
     await expect(example.getByRole('button', { name: 'Remove On-call' })).toBeVisible();
+    await expect(example.locator('[hellChipSet]')).toHaveAttribute('aria-label', 'Assigned groups');
   });
 
-  test('chip remove button removes the value and keeps option selection state coherent', async ({
-    page,
-  }) => {
+  test('consumer-owned removal and Combobox option selection stay coherent', async ({ page }) => {
     const example = await gotoCombobox(page);
     const chips = example.locator('[hellChip]');
     const input = example.getByRole('combobox', { name: 'Assign groups' });
 
-    // Before removal the selected option announces itself as selected.
     await input.focus();
-    await page.keyboard.press('ArrowDown');
+    await input.press('ArrowDown');
     await expect(page.getByRole('option', { name: 'Dispatch' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    await page.keyboard.press('Escape');
+    await input.press('Escape');
 
     await example.getByRole('button', { name: 'Remove Dispatch' }).click();
     await expect(chips).toHaveCount(1);
-    await expect(chips.nth(0)).toContainText('On-call');
-    await expect(example.getByRole('button', { name: 'Remove Dispatch' })).toHaveCount(0);
+    await expect(chips.first()).toContainText('On-call');
 
-    // After removal the option no longer announces selection; the survivor still does.
     await input.focus();
-    await page.keyboard.press('ArrowDown');
+    await input.press('ArrowDown');
     await expect(page.getByRole('option', { name: 'Dispatch' })).not.toHaveAttribute(
       'aria-selected',
       'true',
@@ -56,7 +50,9 @@ test.describe('combobox chips presentation accessibility contract', () => {
     );
   });
 
-  test('chips form one tab stop with roving focus and keyboard removal', async ({ page }) => {
+  test('Chip Set owns one roving tab stop and returns final-removal focus to Chip Input', async ({
+    page,
+  }) => {
     const example = await gotoCombobox(page);
     const chips = example.locator('[hellChip]');
     const input = example.getByRole('combobox', { name: 'Assign groups' });
@@ -67,8 +63,6 @@ test.describe('combobox chips presentation accessibility contract', () => {
     await expect(removeButtons.nth(0)).toHaveAttribute('tabindex', '-1');
     await expect(removeButtons.nth(1)).toHaveAttribute('tabindex', '-1');
 
-    // The input follows the chips in DOM order, so Shift+Tab enters the chip
-    // collection at its single roving tab stop rather than its nested buttons.
     await input.focus();
     await page.keyboard.press('Shift+Tab');
     await expect(chips.nth(0)).toBeFocused();
@@ -78,29 +72,38 @@ test.describe('combobox chips presentation accessibility contract', () => {
 
     await page.keyboard.press('Backspace');
     await expect(chips).toHaveCount(1);
-    await expect(chips.nth(0)).toContainText('Dispatch');
-    await expect(chips.nth(0)).toBeFocused();
+    await expect(chips.first()).toContainText('Dispatch');
+    await expect(input).toBeFocused();
 
+    await input.press('Backspace');
+    await expect(chips.first()).toBeFocused();
     await page.keyboard.press('Delete');
     await expect(chips).toHaveCount(0);
-    await expect(example.locator('[hellComboboxChips]')).toBeFocused();
+    await expect(input).toBeFocused();
   });
 
-  test('Backspace in the empty input removes the last selection', async ({ page }) => {
+  test('empty-input Backspace focuses before it removes', async ({ page }) => {
     const example = await gotoCombobox(page);
     const chips = example.locator('[hellChip]');
     const input = example.getByRole('combobox', { name: 'Assign groups' });
 
-    await expect(chips).toHaveCount(2);
     await input.focus();
-    await page.keyboard.press('Escape');
+    await input.press('Escape');
+    await input.press('Backspace');
+
+    await expect(chips).toHaveCount(2);
+    await expect(chips.nth(1)).toContainText('On-call');
+    await expect(chips.nth(1)).toBeFocused();
+
     await page.keyboard.press('Backspace');
-
     await expect(chips).toHaveCount(1);
-    await expect(chips.nth(0)).toContainText('Dispatch');
-    await expect(example.getByRole('button', { name: 'Remove On-call' })).toHaveCount(0);
+    await expect(chips.first()).toContainText('Dispatch');
+    await expect(input).toBeFocused();
 
+    await input.press('Backspace');
+    await expect(chips.first()).toBeFocused();
     await page.keyboard.press('Backspace');
     await expect(chips).toHaveCount(0);
+    await expect(input).toBeFocused();
   });
 });

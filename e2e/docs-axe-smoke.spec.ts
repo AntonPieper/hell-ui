@@ -324,11 +324,14 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main', '[hellComboboxDropdown][data-slot="root"]'],
     prepare: async (page) => {
       const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
-      await input.focus();
-      await page.keyboard.press('ArrowDown');
+      await input.evaluate((element) =>
+        element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+      );
+      await page.getByRole('button', { name: 'Toggle currencies' }).click();
       await expect(
         page.getByRole('option', { name: 'AUD — Australian Dollar', exact: true }),
       ).toBeVisible();
+      await expect(input).toHaveAttribute('aria-expanded', 'true');
     },
   },
   {
