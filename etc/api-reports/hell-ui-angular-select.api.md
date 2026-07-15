@@ -4,201 +4,97 @@
 
 ```ts
 
-import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
-import { HellOption } from '@hell-ui/angular/core';
-import { HellOptionCompareWith } from '@hell-ui/angular/core';
-import { HellOptionDisplayWith } from '@hell-ui/angular/core';
 import { HellPickValue } from '@hell-ui/angular/core';
-import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
+import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/select';
 import * as i2 from 'ng-primitives/input';
-import { OnDestroy } from '@angular/core';
-import { Signal } from '@angular/core';
 
 // @public (undocumented)
-export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelectTrigger, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
+export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelect, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
 
 // @public
 export class HellNativeSelect {
-    readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
+    readonly size: i0.InputSignal<"sm" | "md" | "lg">;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNativeSelect, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellSelect<T = unknown> implements ControlValueAccessor {
-    constructor();
-    // (undocumented)
-    readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
-    readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
-    readonly compareWith: _angular_core.InputSignal<HellOptionCompareWith<T>>;
-    // (undocumented)
-    readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    readonly displayWith: _angular_core.InputSignal<HellOptionDisplayWith<T> | null>;
-    // (undocumented)
-    protected readonly effectiveDisabled: Signal<boolean>;
-    // (undocumented)
-    protected readonly effectiveValue: Signal<HellPickValue<T>>;
-    // (undocumented)
-    markControlTouched(event: FocusEvent): void;
-    // (undocumented)
-    readonly multiple: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    protected onValueChange(next: HellPickValue<T>): void;
-    // (undocumented)
-    readonly openChange: _angular_core.OutputEmitterRef<boolean>;
-    protected optionLabel(option: HellOption<T>): string;
-    readonly options: _angular_core.InputSignal<readonly HellOption<T>[]>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSelectPart>;
-    // (undocumented)
-    readonly placeholder: _angular_core.InputSignal<string>;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // (undocumented)
     registerOnChange(fn: (value: HellPickValue<T>) => void): void;
     // (undocumented)
     registerOnTouched(fn: () => void): void;
     // (undocumented)
-    protected readonly selectedLabel: Signal<string | null>;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
-    protected readonly triggerAriaLabel: () => string | null;
-    readonly ui: _angular_core.InputSignal<HellUiInput<HellSelectPart>>;
-    // (undocumented)
-    readonly value: _angular_core.InputSignal<HellPickValue<T>>;
-    // (undocumented)
-    readonly valueChange: _angular_core.OutputEmitterRef<HellPickValue<T>>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
     // (undocumented)
     writeValue(value: HellPickValue<T>): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSelect<any>, "hell-select", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "options": { "alias": "options"; "required": false; "isSignal": true; }; "multiple": { "alias": "multiple"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "compareWith": { "alias": "compareWith"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; "openChange": "openChange"; }, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelect<any>, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelect<any>, "[hellSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelect; inputs: { "ngpSelectValue": "value"; "ngpSelectMultiple": "multiple"; "ngpSelectDisabled": "disabled"; "ngpSelectCompareWith": "compareWith"; "ngpSelectDropdownPlacement": "placement"; "ngpSelectDropdownContainer": "container"; "ngpSelectDropdownFlip": "flip"; "ngpSelectOptions": "options"; }; outputs: { "ngpSelectValueChange": "valueChange"; "ngpSelectOpenChange": "openChange"; }; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelect<any>, never>;
 }
 
 // @public (undocumented)
-export class HellSelectDropdown implements OnDestroy {
+export class HellSelectDropdown {
     constructor();
-    // (undocumented)
-    markControlTouched(event: FocusEvent): void;
-    // (undocumented)
-    ngOnDestroy(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectDropdown, "[hellSelectDropdown]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectDropdown; inputs: {}; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectDropdown, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectDropdown, "[hellSelectDropdown]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectDropdown; inputs: {}; outputs: {}; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectDropdown, never>;
 }
 
 // @public (undocumented)
 export class HellSelectOption {
     // (undocumented)
-    protected readonly disabled: Signal<boolean>;
+    protected readonly disabled: i0.Signal<boolean>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectOption, "[hellSelectOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectOption; inputs: { "ngpSelectOptionValue": "value"; "ngpSelectOptionDisabled": "disabled"; "ngpSelectOptionIndex": "index"; }; outputs: { "ngpSelectOptionActivated": "activated"; }; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectOption, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectOption, "[hellSelectOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectOption; inputs: { "ngpSelectOptionValue": "value"; "ngpSelectOptionDisabled": "disabled"; "ngpSelectOptionIndex": "index"; }; outputs: { "ngpSelectOptionActivated": "activated"; }; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectOption, never>;
 }
-
-// @public
-export type HellSelectPart = 'root' | 'trigger' | 'value' | 'placeholder' | 'dropdown' | 'option';
 
 // @public (undocumented)
 export class HellSelectPlaceholder {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectPlaceholder, "[hellSelectPlaceholder]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectPlaceholder, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectPlaceholder, "[hellSelectPlaceholder]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectPlaceholder, never>;
 }
 
 // @public (undocumented)
 export class HellSelectPortal {
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectPortal, "[hellSelectPortal]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpSelectPortal; inputs: {}; outputs: {}; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectPortal, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectPortal, "[hellSelectPortal]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpSelectPortal; inputs: {}; outputs: {}; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectPortal, never>;
 }
-
-// @public
-export class HellSelectTrigger<T = unknown> implements ControlValueAccessor {
-    constructor();
-    // (undocumented)
-    isOutsideControl(next: EventTarget | Node | null): boolean;
-    // (undocumented)
-    markControlTouched(event: FocusEvent): void;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
-    registerDropdown(dropdown: HTMLElement): void;
-    // (undocumented)
-    registerOnChange(fn: (value: HellPickValue<T>) => void): void;
-    // (undocumented)
-    registerOnTouched(fn: () => void): void;
-    // (undocumented)
-    setDisabledState(isDisabled: boolean): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
-    unregisterDropdown(dropdown: HTMLElement): void;
-    // (undocumented)
-    writeValue(value: HellPickValue<T>): void;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectTrigger<any>, "[hellSelectTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelect; inputs: { "ngpSelectValue": "value"; "ngpSelectMultiple": "multiple"; "ngpSelectDisabled": "disabled"; "ngpSelectCompareWith": "compareWith"; "ngpSelectDropdownPlacement": "placement"; "ngpSelectDropdownContainer": "container"; "ngpSelectDropdownFlip": "flip"; "ngpSelectOptions": "options"; }; outputs: { "ngpSelectValueChange": "valueChange"; "ngpSelectOpenChange": "openChange"; }; }]>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectTrigger<any>, never>;
-}
-
-// @public
-export type HellSelectUi = HellUi<HellSelectPart>;
 
 // @public (undocumented)
 export class HellSelectValue {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSelectValue, "[hellSelectValue]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectValue, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectValue, "[hellSelectValue]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectValue, never>;
 }
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-select.d.ts:29:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-select.d.ts:30:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-select.d.ts:31:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-select.d.ts:32:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-select.d.ts:33:5 - (ae-undocumented) Missing documentation for "isOutsideControl".
-// types/hell-ui-angular-select.d.ts:34:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-select.d.ts:35:5 - (ae-undocumented) Missing documentation for "registerDropdown".
-// types/hell-ui-angular-select.d.ts:36:5 - (ae-undocumented) Missing documentation for "unregisterDropdown".
-// types/hell-ui-angular-select.d.ts:42:1 - (ae-undocumented) Missing documentation for "HellSelectValue".
-// types/hell-ui-angular-select.d.ts:52:1 - (ae-undocumented) Missing documentation for "HellSelectPlaceholder".
-// types/hell-ui-angular-select.d.ts:62:1 - (ae-undocumented) Missing documentation for "HellSelectDropdown".
-// types/hell-ui-angular-select.d.ts:71:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-angular-select.d.ts:72:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-select.d.ts:78:1 - (ae-undocumented) Missing documentation for "HellSelectPortal".
-// types/hell-ui-angular-select.d.ts:84:1 - (ae-undocumented) Missing documentation for "HellSelectOption".
-// types/hell-ui-angular-select.d.ts:90:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-select.d.ts:96:1 - (ae-undocumented) Missing documentation for "HellSelect".
-// types/hell-ui-angular-select.d.ts:103:5 - (ae-undocumented) Missing documentation for "multiple".
-// types/hell-ui-angular-select.d.ts:104:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-select.d.ts:105:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-select.d.ts:106:5 - (ae-undocumented) Missing documentation for "ariaLabelledby".
-// types/hell-ui-angular-select.d.ts:107:5 - (ae-undocumented) Missing documentation for "ariaDescribedby".
-// types/hell-ui-angular-select.d.ts:108:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-select.d.ts:109:5 - (ae-undocumented) Missing documentation for "compareWith".
-// types/hell-ui-angular-select.d.ts:112:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-select.d.ts:113:5 - (ae-undocumented) Missing documentation for "valueChange".
-// types/hell-ui-angular-select.d.ts:114:5 - (ae-undocumented) Missing documentation for "openChange".
-// types/hell-ui-angular-select.d.ts:121:5 - (ae-undocumented) Missing documentation for "effectiveValue".
-// types/hell-ui-angular-select.d.ts:122:5 - (ae-undocumented) Missing documentation for "effectiveDisabled".
-// types/hell-ui-angular-select.d.ts:123:5 - (ae-undocumented) Missing documentation for "triggerAriaLabel".
-// types/hell-ui-angular-select.d.ts:126:5 - (ae-undocumented) Missing documentation for "selectedLabel".
-// types/hell-ui-angular-select.d.ts:132:5 - (ae-undocumented) Missing documentation for "onValueChange".
-// types/hell-ui-angular-select.d.ts:133:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-select.d.ts:134:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-select.d.ts:135:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-select.d.ts:136:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-select.d.ts:137:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-select.d.ts:158:15 - (ae-undocumented) Missing documentation for "HELL_SELECT_DIRECTIVES".
+// types/hell-ui-angular-select.d.ts:19:5 - (ae-undocumented) Missing documentation for "writeValue".
+// types/hell-ui-angular-select.d.ts:20:5 - (ae-undocumented) Missing documentation for "registerOnChange".
+// types/hell-ui-angular-select.d.ts:21:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
+// types/hell-ui-angular-select.d.ts:22:5 - (ae-undocumented) Missing documentation for "setDisabledState".
+// types/hell-ui-angular-select.d.ts:28:1 - (ae-undocumented) Missing documentation for "HellSelectValue".
+// types/hell-ui-angular-select.d.ts:38:1 - (ae-undocumented) Missing documentation for "HellSelectPlaceholder".
+// types/hell-ui-angular-select.d.ts:48:1 - (ae-undocumented) Missing documentation for "HellSelectDropdown".
+// types/hell-ui-angular-select.d.ts:62:1 - (ae-undocumented) Missing documentation for "HellSelectPortal".
+// types/hell-ui-angular-select.d.ts:68:1 - (ae-undocumented) Missing documentation for "HellSelectOption".
+// types/hell-ui-angular-select.d.ts:74:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-select.d.ts:95:15 - (ae-undocumented) Missing documentation for "HELL_SELECT_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

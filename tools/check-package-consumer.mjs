@@ -1628,7 +1628,7 @@ import { HellProgress, HellProgressBar } from '${packageName}/progress';
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from '${packageName}/radio';
 import type { HellOption } from '${packageName}';
 import { HellSearch, HellSearchClear } from '${packageName}/input';
-import { HELL_SELECT_DIRECTIVES, HellSelect, type HellSelectUi } from '${packageName}/select';
+import { HELL_SELECT_DIRECTIVES } from '${packageName}/select';
 import { HellSeparator } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
 import { HellSkeleton } from '${packageName}/skeleton';
@@ -1641,6 +1641,12 @@ import { HellTooltip, HellTooltipTrigger } from '${packageName}/tooltip';
 import { HELL_COMBOBOX_DIRECTIVES, HellCombobox, type HellComboboxUi } from '${packageName}/combobox';
 
 const primitiveRootPart: HellAvatarPart = 'root';
+
+interface SelectPriority {
+  readonly id: string;
+  readonly label: string;
+  readonly disabled?: boolean;
+}
 
 @Component({
   selector: 'app-root',
@@ -1670,7 +1676,6 @@ const primitiveRootPart: HellAvatarPart = 'root';
     HellSearch,
     HellSearchClear,
     ...HELL_SELECT_DIRECTIVES,
-    HellSelect,
     HellSeparator,
     HellSlider,
     HellSkeleton,
@@ -1768,16 +1773,35 @@ const primitiveRootPart: HellAvatarPart = 'root';
       <span hellTooltip [ui]="tooltipUi">Helpful hint</span>
     </ng-template>
 
-    <button hellSelectTrigger type="button" [options]="selectOptions" [ui]="selectUi">
-      <span hellSelectPlaceholder>Pick priority</span>
+    <button
+      hellSelect
+      type="button"
+      aria-label="Priority"
+      [value]="selectValue"
+      (valueChange)="selectValue = $any($event)"
+      [compareWith]="compareSelectPriorities"
+      [ui]="selectUi"
+    >
+      @if (selectValue; as priority) {
+        <span hellSelectValue>{{ priority.label }}</span>
+      } @else {
+        <span hellSelectPlaceholder>Pick priority</span>
+      }
       <ng-template hellSelectPortal>
-        <div hellSelectDropdown>
-          <div hellSelectOption value="low" [ui]="selectOptionUi">Low</div>
+        <div hellSelectDropdown [ui]="selectDropdownUi">
+          @for (option of selectOptions; track option.id) {
+            <div
+              hellSelectOption
+              [value]="option"
+              [disabled]="option.disabled ?? false"
+              [ui]="selectOptionUi"
+            >
+              {{ option.label }}
+            </div>
+          }
         </div>
       </ng-template>
     </button>
-
-    <hell-select [options]="presetOptions" [ui]="selectBasicUi" />
     <div
       hellCombobox
       [value]="comboboxValue"
@@ -1874,13 +1898,16 @@ class App {
   protected readonly radioUi = { root: 'text-hell-info' };
   protected readonly searchClearUi = { root: 'text-hell-info' };
   protected readonly searchUi = { root: 'grid gap-hell-2' };
-  protected readonly selectBasicUi = {
-    trigger: 'rounded-hell-pill',
-    dropdown: 'rounded-hell-pill',
-    option: 'bg-hell-primary-soft',
-  } satisfies HellSelectUi;
+  protected readonly selectDropdownUi = { root: 'rounded-hell-pill' };
   protected readonly selectOptionUi = { root: 'bg-hell-primary-soft' };
-  protected readonly selectOptions = ['low', 'high'];
+  protected readonly selectOptions: readonly SelectPriority[] = [
+    { id: 'low', label: 'Low' },
+    { id: 'high', label: 'High' },
+    { id: 'urgent', label: 'Urgent', disabled: true },
+  ];
+  protected selectValue: SelectPriority | null = this.selectOptions[0] ?? null;
+  protected readonly compareSelectPriorities = (a: SelectPriority, b: SelectPriority): boolean =>
+    a.id === b.id;
   protected readonly presetOptions: readonly HellOption<string>[] = [
     { value: 'low', label: 'Low' },
     { value: 'high', label: 'High' },

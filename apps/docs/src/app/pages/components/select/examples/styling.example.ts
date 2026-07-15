@@ -1,41 +1,49 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
-import { HellSelect, type HellSelectUi } from '@hell-ui/angular/select';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 
-const ENVIRONMENTS: readonly HellOption<string>[] = [
-  { value: 'production', label: 'Production' },
-  { value: 'staging', label: 'Staging' },
-  { value: 'preview', label: 'Preview' },
-  { value: 'local', label: 'Local' },
-];
+const ENVIRONMENTS = ['Production', 'Staging', 'Preview', 'Local'] as const;
 
 @Component({
   selector: 'app-select-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellSelect],
+  imports: [...HELL_SELECT_DIRECTIVES],
   template: `
-    <!-- HellSelectPart: root | trigger | value | placeholder | dropdown | option -->
-    <hell-select
+    <button
+      hellSelect
+      type="button"
       class="max-w-72"
       aria-label="Target environment"
-      placeholder="Choose environment"
-      [options]="environments"
       [value]="value()"
-      [ui]="ui"
-      (valueChange)="value.set($event === null ? null : $any($event))"
-    />
+      ui="rounded-hell-lg border-hell-primary bg-hell-surface-elevated font-mono"
+      (valueChange)="value.set($any($event))"
+    >
+      @if (value(); as current) {
+        <span hellSelectValue ui="font-semibold text-hell-primary">{{ current }}</span>
+      } @else {
+        <span hellSelectPlaceholder ui="italic text-hell-foreground-subtle">
+          Choose environment
+        </span>
+      }
+      <ng-template hellSelectPortal>
+        <div
+          hellSelectDropdown
+          ui="rounded-hell-lg border-hell-primary bg-hell-surface-subtle"
+        >
+          @for (environment of environments; track environment) {
+            <div
+              hellSelectOption
+              [value]="environment"
+              ui="rounded-hell-md font-mono data-active:bg-hell-primary-soft data-selected:bg-hell-primary"
+            >
+              {{ environment }}
+            </div>
+          }
+        </div>
+      </ng-template>
+    </button>
   `,
 })
 export class SelectStylingExample {
   protected readonly environments = ENVIRONMENTS;
-  protected readonly value = signal<string | null>(null);
-
-  protected readonly ui: HellSelectUi = {
-    root: 'rounded-hell-lg bg-hell-surface-subtle p-hell-1',
-    trigger: 'rounded-hell-md border-hell-primary bg-hell-surface-elevated font-mono',
-    value: 'font-semibold text-hell-primary',
-    placeholder: 'italic text-hell-foreground-subtle',
-    dropdown: 'rounded-hell-lg border-hell-primary bg-hell-surface-subtle',
-    option: 'rounded-hell-md font-mono data-active:bg-hell-primary-soft data-selected:bg-hell-primary',
-  };
+  protected readonly value = signal<(typeof ENVIRONMENTS)[number] | null>(null);
 }

@@ -35,7 +35,7 @@
   [data-hell-skin="aurora"]
     :is(
       button[hellButton],
-      [hellSelectTrigger],
+      [hellSelect],
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],

@@ -8,7 +8,7 @@
   [data-hell-skin="compact-mono"]
     :is(
       button[hellButton],
-      [hellSelectTrigger],
+      [hellSelect],
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],

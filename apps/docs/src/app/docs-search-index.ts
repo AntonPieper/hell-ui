@@ -490,7 +490,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/code-editor',
  detail:'components/code-editor/examples/config-editor.example.ts',
  terms:
-'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select HELL_CARD_DIRECTIVES HellSelect hellButton language picker dirty reset apply ui root',
+'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hellSelect HELL_CARD_DIRECTIVES HellSelect hellButton language picker dirty reset apply ui root',
  },
  {
  title:'Code Editor: Supplying a language',
@@ -1470,42 +1470,42 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/select',
  detail:'components/select/examples/basic.example.ts',
  terms:
-'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
+'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES projection placeholder disabled option valueChange single-choice dropdown button',
  },
  {
  title:'Select: Multiple',
  path:'/components/select',
  detail:'components/select/examples/multiple.example.ts',
  terms:
-'hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
+'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES projection multi-select array selected count tags permissions',
  },
  {
- title:'Select: Preset',
+ title:'Select: Field integration',
  path:'/components/select',
  detail:'components/select/examples/preset.example.ts',
  terms:
-'hell-select HellSelect hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
+'hellSelect HellSelect hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES projection compareWith domain object value form field region',
  },
  {
  title:'Select: Rich options',
  path:'/components/select',
  detail:'components/select/examples/rich-options.example.ts',
  terms:
-'rich-options hellSelectTrigger hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
+'rich-options hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES projection compareWith domain object custom option markup icon description status',
  },
  {
  title:'Select: Styling',
  path:'/components/select',
  detail:'components/select/examples/styling.example.ts',
  terms:
-'hell-select HellSelect HellSelectUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
+'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectDropdown hellSelectOption ui part-style-map single root per-directive projection refine tokens rounded-hell bg-hell text-hell',
  },
  {
- title:'Select: With field and tag',
+ title:'Select: With field and status',
  path:'/components/select',
  detail:'components/select/examples/with-field-status.example.ts',
  terms:
-'with-field-status hell-select HellSelect hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton composite form review decision status submit error',
+'with-field-status hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton projection form review decision status submit error',
  },
  {
  title:'Separator: All Parts Styling',
@@ -2175,9 +2175,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Select portal pattern',
  path:'/components/select',
- detail:'hellSelectTrigger with hellSelectPortal and hellSelectDropdown',
+ detail:'hellSelect with hellSelectPortal and hellSelectDropdown',
  terms:
-'HELL_SELECT_DIRECTIVES hellSelectTrigger hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption valueChange',
+'HELL_SELECT_DIRECTIVES hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption projection domain value valueChange openChange',
  },
  {
  title:'Tabs anatomy',

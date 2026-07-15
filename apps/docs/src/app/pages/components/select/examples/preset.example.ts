@@ -1,34 +1,53 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HellSelect } from '@hell-ui/angular/select';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 
-const REGIONS: readonly HellOption<string>[] = [
-  { value: 'eu-central-1', label: 'EU (Frankfurt)' },
-  { value: 'eu-west-1', label: 'EU (Ireland)' },
-  { value: 'us-east-1', label: 'US East (N. Virginia)' },
-  { value: 'ap-south-1', label: 'AP (Mumbai)' },
+interface Region {
+  readonly id: string;
+  readonly label: string;
+}
+
+const REGIONS: readonly Region[] = [
+  { id: 'eu-central-1', label: 'EU (Frankfurt)' },
+  { id: 'eu-west-1', label: 'EU (Ireland)' },
+  { id: 'us-east-1', label: 'US East (N. Virginia)' },
+  { id: 'ap-south-1', label: 'AP (Mumbai)' },
 ];
 
 @Component({
   selector: 'app-select-preset-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellSelect, ...HELL_FIELD_DIRECTIVES],
+  imports: [...HELL_SELECT_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
   template: `
     <div hellField class="max-w-72">
       <label hellFieldLabel for="deploy-region">Deployment region</label>
-      <hell-select
+      <button
         id="deploy-region"
-        placeholder="Pick a region"
-        [options]="regions"
+        hellSelect
+        type="button"
         [value]="value()"
-        (valueChange)="value.set($event === null ? null : $any($event))"
-      />
+        [compareWith]="compareById"
+        (valueChange)="value.set($any($event))"
+      >
+        @if (value(); as current) {
+          <span hellSelectValue>{{ current.label }}</span>
+        } @else {
+          <span hellSelectPlaceholder>Pick a region</span>
+        }
+        <ng-template hellSelectPortal>
+          <div hellSelectDropdown>
+            @for (region of regions; track region.id) {
+              <div hellSelectOption [value]="region">{{ region.label }}</div>
+            }
+          </div>
+        </ng-template>
+      </button>
       <div hellFieldDescription>Data stays inside the selected region.</div>
     </div>
   `,
 })
 export class SelectPresetExample {
   protected readonly regions = REGIONS;
-  protected readonly value = signal<string | null>('eu-central-1');
+  protected readonly value = signal<Region | null>(REGIONS[0] ?? null);
+  protected readonly compareById = (a: Region, b: Region): boolean => a.id === b.id;
 }

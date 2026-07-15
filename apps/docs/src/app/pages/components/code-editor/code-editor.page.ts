@@ -129,7 +129,7 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h2>With card, select, and buttons</h2>
       <p>
         A config editor built from Hell composites: a <code>hellCard</code> shell, a
-        <code>hell-select</code> language picker in the header, the editor flush inside the
+        projection-first <code>[hellSelect]</code> language picker in the header, the editor flush inside the
         body, and a Reset/Apply <code>hellButton</code> pair driven by a dirty-state signal. The
         editor's <code>root</code> part is refined to sit seamlessly inside the card body.
       </p>

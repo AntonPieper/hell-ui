@@ -6,8 +6,7 @@
 @source "../internal/floating/floating-presentation.ts";
 
 @layer components {
-  [hellSelectTrigger][data-slot='root']::after,
-  hell-select [hellSelectTrigger][data-slot='trigger']::after {
+  [hellSelect][data-slot='root']::after {
     content: '';
     display: block;
     flex-shrink: 0;
@@ -26,8 +25,7 @@
     transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  [hellSelectTrigger][data-slot='root'][data-open]::after,
-  hell-select [hellSelectTrigger][data-slot='trigger'][data-open]::after {
+  [hellSelect][data-slot='root'][data-open]::after {
     rotate: 180deg;
     background-color: var(--color-hell-foreground);
   }

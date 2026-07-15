@@ -24,7 +24,7 @@
   [data-hell-skin="newspaper"]
     :is(
       button[hellButton],
-      [hellSelectTrigger],
+      [hellSelect],
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],

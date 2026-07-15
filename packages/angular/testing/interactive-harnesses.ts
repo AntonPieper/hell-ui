@@ -30,10 +30,10 @@ export interface HellStateHarnessFilters extends HellTextHarnessFilters {
   state?: string;
 }
 
-/** Test harness driving `[hellSelectTrigger]`. */
+/** Test harness driving `[hellSelect]`. */
 export class HellSelectHarness extends ComponentHarness {
   /** CSS selector that matches this harness’s host element. */
-  static hostSelector = '[hellSelectTrigger]';
+  static hostSelector = '[hellSelect]';
   /** Build a `HarnessPredicate` filtered by the given options. */
   static with(options: HellDisabledHarnessFilters = {}): HarnessPredicate<HellSelectHarness> {
     return new HarnessPredicate(HellSelectHarness, options)

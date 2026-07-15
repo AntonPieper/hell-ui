@@ -54,7 +54,7 @@ export interface HellPickerEngineAdapter<T> {
 
 /**
  * Shared ControlValueAccessor + dropdown-registration plumbing for the
- * headless picker roots (select trigger, combobox root). Owns the CVA bridge,
+ * headless picker roots (select root, combobox root). Owns the CVA bridge,
  * the floating-scope registry that makes a portaled dropdown count as
  * "inside", and the mode-aware value normalization, so each picker only
  * supplies its engine adapter.
