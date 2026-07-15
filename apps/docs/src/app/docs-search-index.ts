@@ -1053,11 +1053,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItemCheckbox hellMenuItemRadioGroup hellMenuItemRadio hellMenuItemIndicator hellMenuSeparator checkbox radio group preferences toggle multi-select single-choice checked valueChange',
  },
  {
- title:'Menu: Data-driven options',
+ title:'Menu: Consumer-owned options',
  path:'/components/menu',
  detail:'components/menu/examples/options.example.ts',
  terms:
-'options components/menu/examples/options.example components/menu hell-menu-options HellOption hellMenuTrigger hellMenu data-driven checkable options selected selectedChange compareWith disabled selection floor controlled column visibility menuitemcheckbox',
+'options components/menu/examples/options.example components/menu hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator domain objects checked checkedChange disabled selection floor consumer owned column visibility menuitemcheckbox',
  },
  {
  title:'Menu: With avatar (account menu)',
@@ -1099,14 +1099,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/basic.example.ts',
  terms:
-'multi-select-menu-button recipe basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hellButton hellMenuTrigger hellMenu hell-menu-options HellOption options selected selectedChange reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels disabled selection floor',
+'multi-select-menu-button recipe basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hellButton hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator domain objects selected checked checkedChange reset count badge data-selection-count data-has-selection consumer owned checkable menuitemcheckbox choose subset channels disabled selection floor',
  },
  {
  title:'Multi-Select Menu Button: TanStack column visibility',
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/tanstack-columns.example.ts',
  terms:
-'multi-select-menu-button recipe tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hellButton hellMenu hell-menu-options TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
+'multi-select-menu-button recipe tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hellButton hellMenu hellMenuItemCheckbox hellMenuItemIndicator TanStack Column columnVisibility getCanHide getIsVisible toggleVisibility enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
  },
  {
  title:'Omnibar: Async search',

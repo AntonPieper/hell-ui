@@ -1,16 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 
-const CHANNELS: readonly HellOption<string>[] = [
-  { value: 'email', label: 'Email' },
-  { value: 'sms', label: 'SMS' },
-  { value: 'push', label: 'Push' },
-  { value: 'webhook', label: 'Webhook', disabled: true },
+interface NotificationChannel {
+  readonly id: string;
+  readonly name: string;
+  readonly unavailable?: boolean;
+}
+
+const CHANNELS: readonly NotificationChannel[] = [
+  { id: 'email', name: 'Email' },
+  { id: 'sms', name: 'SMS' },
+  { id: 'push', name: 'Push' },
+  { id: 'webhook', name: 'Webhook', unavailable: true },
 ];
 
-const DEFAULT_CHANNELS: readonly string[] = ['email', 'push'];
+const DEFAULT_CHANNELS: readonly NotificationChannel[] = [CHANNELS[0], CHANNELS[2]];
 const MIN_SELECTED = 1;
 
 @Component({
@@ -42,11 +47,18 @@ const MIN_SELECTED = 1;
 
       <ng-template #channelsMenu>
         <div hellMenu aria-label="Channels">
-          <hell-menu-options
-            [options]="options()"
-            [selected]="selected()"
-            (selectedChange)="selected.set([...$event])"
-          />
+          @for (channel of channels; track channel.id) {
+            <button
+              hellMenuItemCheckbox
+              type="button"
+              [checked]="isSelected(channel)"
+              [disabled]="isDisabled(channel)"
+              (checkedChange)="setChecked(channel, $event)"
+            >
+              <span hellMenuItemIndicator></span>
+              <span>{{ channel.name }}</span>
+            </button>
+          }
           <div hellMenuSeparator></div>
           <button hellMenuItem type="button" (click)="reset()">Reset to default</button>
         </div>
@@ -59,28 +71,36 @@ const MIN_SELECTED = 1;
   `,
 })
 export class MultiSelectMenuButtonBasicExample {
-  // The consumer owns the selection array; the menu never mutates it.
-  protected readonly selected = signal<readonly string[]>([...DEFAULT_CHANNELS]);
+  protected readonly channels = CHANNELS;
+  // The consumer owns the selected domain objects; Menu only emits checked state.
+  protected readonly selected = signal<readonly NotificationChannel[]>([...DEFAULT_CHANNELS]);
+
+  protected isSelected(channel: NotificationChannel): boolean {
+    return this.selected().includes(channel);
+  }
 
   // Selection floor: at MIN_SELECTED the still-selected options disable, so
   // the selection can never drop below the floor — the recipe owns this policy.
-  protected readonly options = computed<readonly HellOption<string>[]>(() => {
-    const selected = this.selected();
-    const atFloor = selected.length <= MIN_SELECTED;
-    return CHANNELS.map((channel) => ({
-      ...channel,
-      disabled: (channel.disabled ?? false) || (atFloor && selected.includes(channel.value)),
-    }));
-  });
+  protected isDisabled(channel: NotificationChannel): boolean {
+    return Boolean(
+      channel.unavailable ||
+        (this.selected().length <= MIN_SELECTED && this.isSelected(channel)),
+    );
+  }
+
+  protected setChecked(channel: NotificationChannel, checked: boolean): void {
+    this.selected.update((current) => {
+      if (checked) return current.includes(channel) ? current : [...current, channel];
+      return current.filter((candidate) => candidate !== channel);
+    });
+  }
 
   protected reset(): void {
     this.selected.set([...DEFAULT_CHANNELS]);
   }
 
   protected summary(): string {
-    const labels = this.selected().map(
-      (value) => CHANNELS.find((channel) => channel.value === value)?.label ?? value,
-    );
+    const labels = this.selected().map((channel) => channel.name);
     return labels.length ? labels.join(', ') : 'nobody';
   }
 }

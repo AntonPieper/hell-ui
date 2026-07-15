@@ -35,13 +35,12 @@ import { PageHeader } from '../../../shared/page-header';
       </hd-page-header>
       <p>
         This is a <strong>recipe</strong>: compose <code>hellButton</code>, a
-        <code>[hellMenu]</code> panel, and <code>&lt;hell-menu-options&gt;</code> (the menu entry
-        point's data-driven checkbox list). Selection is <strong>controlled</strong> — you bind
-        <code>options</code> (<code>HellOption</code>: <code>{{ '{' }} value, label, disabled?
-        {{ '}' }}</code> from core) and <code>selected</code>, and own the array. Toggling an
-        option keeps the menu open — adjusting several options is one visit, not five — and emits
-        the whole next selection through <code>selectedChange</code>. Nothing here is private API:
-        every behavior below is yours to rearrange.
+        <code>[hellMenu]</code> panel, and an explicit loop of
+        <code>button[hellMenuItemCheckbox]</code> rows. Iterate real domain objects, bind each row's
+        <code>checked</code> and <code>disabled</code> state, and update your own collection from
+        <code>(checkedChange)</code>. Toggling keeps the menu open — adjusting several choices is
+        one visit, not five. Nothing here is private API: every behavior below is yours to
+        rearrange.
       </p>
       <p>
         The former <code>&#64;hell-ui/angular/multi-select-menu-button</code> entry point shipped
@@ -49,26 +48,26 @@ import { PageHeader } from '../../../shared/page-header';
         migration target.
       </p>
 
-      <h2>Controlled options, count, floor, and reset</h2>
+      <h2>Consumer-owned collection, count, floor, and reset</h2>
       <p>
         The trigger shows a count while anything is selected (the recipe reflects
         <code>data-selection-count</code> / <code>data-has-selection</code> for styling). The
-        selection floor is plain data: when the selection is at the minimum, mark the
-        still-selected options <code>disabled</code> so the selection can never drop below it. The
-        reset item is an ordinary <code>hellMenuItem</code> after a separator — you restore your
-        own defaults; no component holds a notion of a default for you.
+        selection floor is caller policy: when the collection is at the minimum, disable only its
+        still-selected row so the collection can never drop below it. The reset item is an
+        ordinary <code>hellMenuItem</code> after a separator — you restore your own defaults; no
+        component holds a notion of a default for you.
       </p>
       <hd-example-tabs [code]="basicExampleCode">
         <app-multi-select-menu-button-basic-example />
       </hd-example-tabs>
-      <p>The core of the recipe is one trigger and one data-driven list:</p>
+      <p>The core of the recipe is one trigger and one explicit checkbox loop:</p>
       <hd-code-block [code]="bindingRecipe" />
 
       <h2>Recipe: TanStack column visibility</h2>
       <p>
-        Because selection is a plain controlled array, it binds directly to a caller-owned TanStack
-        table's <code>columnVisibility</code> state. The options are the columns TanStack reports
-        as hideable via <code>column.getCanHide()</code>, so a column marked
+        Iterate the caller-owned TanStack table's real <code>Column</code> objects and route each
+        toggle through <code>column.toggleVisibility()</code>. The rows are the columns TanStack
+        reports as hideable via <code>column.getCanHide()</code>, so a column marked
         <code>enableHiding: false</code> — the identity column here — never appears in the menu.
         The floor keeps at least one toggleable column on, and the reset item restores every
         column. This keeps the table boundary intact — TanStack still owns the state, and Hell UI
@@ -89,9 +88,9 @@ import { PageHeader } from '../../../shared/page-header';
       <h2>Styling</h2>
       <p>
         Every piece keeps its own Part Style Map: the trigger is the button primitive, the panel
-        and items are the menu entry point's parts, and
-        <code>&lt;hell-menu-options&gt;</code> exposes <code>root | item | indicator</code>. The
-        count badge is your own markup — style it directly.
+        and each checkbox/indicator are independent Menu directives, and the count badge is your
+        own markup. Refine each directive through its own <code>ui</code> input; there is no shared
+        renderer map.
       </p>
 
       <h2>Accessibility</h2>
@@ -114,7 +113,7 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Own the <code>selected</code> array and set it from <code>(selectedChange)</code>.</li>
+        <li>Iterate real domain objects and update your collection from <code>(checkedChange)</code>.</li>
         <li>Disable still-selected options when an empty selection would be a broken state.</li>
         <li>Bind it to TanStack <code>columnVisibility</code> and persist the map in your own storage.</li>
         <li>Give the trigger clear text and the menu an <code>aria-label</code>.</li>
@@ -122,9 +121,9 @@ import { PageHeader } from '../../../shared/page-header';
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't mutate the array you bound to <code>selected</code>; treat every emission as a new array.</li>
+        <li>Don't introduce a parallel option schema just to render labels and disabled state.</li>
         <li>Don't reach into the menu to force it closed on toggle — staying open is the point.</li>
-        <li>Don't wire the reset item through <code>selectedChange</code>; it is an ordinary menu item you handle yourself.</li>
+        <li>Don't wire the reset item through checkbox state; it is an ordinary menu item you handle yourself.</li>
       </ul>
     </article>
   `,
@@ -138,11 +137,18 @@ export class MultiSelectMenuButtonPage {
 </button>
 <ng-template #menu>
   <div hellMenu aria-label="Columns">
-    <hell-menu-options
-      [options]="columnOptions()"
-      [selected]="visibleColumns()"
-      (selectedChange)="visibleColumns.set([...$event])"
-    />
+    @for (column of columns; track column.id) {
+      <button
+        hellMenuItemCheckbox
+        type="button"
+        [checked]="isVisible(column)"
+        [disabled]="isLastVisible(column)"
+        (checkedChange)="setVisible(column, $event)"
+      >
+        <span hellMenuItemIndicator></span>
+        <span>{{ column.name }}</span>
+      </button>
+    }
   </div>
 </ng-template>`;
 }
