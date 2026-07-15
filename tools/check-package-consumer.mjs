@@ -1715,6 +1715,12 @@ interface ComboboxFruit {
   readonly disabled?: boolean;
 }
 
+interface MenuChannel {
+  readonly id: string;
+  readonly label: string;
+  readonly unavailable?: boolean;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -1820,8 +1826,20 @@ interface ComboboxFruit {
 
     <button type="button" [hellMenuTrigger]="menu">Actions</button>
     <ng-template #menu>
-      <div hellMenu [ui]="menuUi">
+      <div hellMenu aria-label="Package actions" [ui]="menuUi">
         <button hellMenuItem type="button" [ui]="menuItemUi">Rename</button>
+        @for (channel of menuChannels; track channel.id) {
+          <button
+            hellMenuItemCheckbox
+            type="button"
+            [checked]="selectedMenuChannels.includes(channel)"
+            [disabled]="channel.unavailable ?? false"
+            (checkedChange)="setMenuChannelChecked(channel, $event)"
+          >
+            <span hellMenuItemIndicator></span>
+            <span>{{ channel.label }}</span>
+          </button>
+        }
       </div>
     </ng-template>
 
@@ -1958,6 +1976,12 @@ class App {
   protected readonly listboxUi = { root: 'gap-hell-4' };
   protected readonly menuItemUi = { root: 'bg-hell-primary-soft' };
   protected readonly menuUi = { root: 'rounded-hell-pill' };
+  protected readonly menuChannels: readonly MenuChannel[] = [
+    { id: 'email', label: 'Email' },
+    { id: 'push', label: 'Push' },
+    { id: 'webhook', label: 'Webhook', unavailable: true },
+  ];
+  protected selectedMenuChannels: readonly MenuChannel[] = [this.menuChannels[0]];
   protected readonly popoverUi = { root: 'rounded-hell-pill' };
   protected readonly progressBarUi = { root: 'bg-hell-info' };
   protected readonly progressUi = { root: 'bg-hell-info-soft' };
@@ -2006,6 +2030,11 @@ class App {
   protected readonly comboboxOptionUi = {
     root: 'bg-hell-primary-soft',
   };
+
+  protected setMenuChannelChecked(channel: MenuChannel, checked: boolean): void {
+    const without = this.selectedMenuChannels.filter((candidate) => candidate !== channel);
+    this.selectedMenuChannels = checked ? [...without, channel] : without;
+  }
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

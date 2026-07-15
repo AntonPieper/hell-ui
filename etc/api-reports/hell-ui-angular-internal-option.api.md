@@ -4,9 +4,6 @@
 
 ```ts
 
-import { HellOption } from '@hell-ui/angular/core';
-import { HellOptionCompareWith } from '@hell-ui/angular/core';
-import { HellOptionDisplayWith } from '@hell-ui/angular/core';
 import { HellRecipe } from '@hell-ui/angular/core';
 
 // @public
@@ -18,14 +15,8 @@ export const HELL_OPTION_SURFACE_METRICS = "cursor-pointer rounded-hell-sm bg-tr
 // @public
 export const HELL_OPTION_SURFACE_SELECTED_STATES = "data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]";
 
-// @public
-export function hellOptionRowLabel<T>(option: HellOption<T>, displayWith: HellOptionDisplayWith<T> | null): string;
-
 // @internal
 export function hellOptionSurfaceRecipe(): HellRecipe<'root'>;
-
-// @public
-export function hellPickedValueLabel<T>(value: T, options: readonly HellOption<T>[], displayWith: HellOptionDisplayWith<T> | null, compareWith: HellOptionCompareWith<T>): string;
 
 // (No @packageDocumentation comment for this package)
 

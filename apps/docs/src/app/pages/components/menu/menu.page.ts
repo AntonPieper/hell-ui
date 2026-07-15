@@ -97,15 +97,15 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <app-menu-checkable-example />
       </hd-example-tabs>
 
-      <h2>Data-driven options</h2>
+      <h2>Consumer-owned options</h2>
       <p>
-        When the checkable items are a plain list, skip the hand-written children:
-        <code>&lt;hell-menu-options&gt;</code> renders one checkbox item per
-        <code>HellOption</code> (<code>&#123; value, label, disabled? &#125;</code> from core) with a
-        controlled <code>selected</code> model — the input is the single source of truth and
-        <code>selectedChange</code> emits the next selection. Disabled options render but cannot be
-        toggled, which is how a consumer enforces a selection floor. Compose it freely next to
-        sections, separators, and hand-written items.
+        Iterate your domain objects directly and render one
+        <code>button[hellMenuItemCheckbox]</code> per row. Bind <code>checked</code>,
+        <code>disabled</code>, and <code>(checkedChange)</code> to your own collection state, then
+        project an ordinary <code>[hellMenuItemIndicator]</code> and label. This example keeps real
+        column objects as its selected values and disables only the last visible column, so the
+        collection can never become empty. Menu still owns roving focus, checkbox semantics,
+        typeahead, and dismissal; the caller owns data, policy, and rendering.
       </p>
       <hd-example-tabs [code]="menuOptionsExampleCode">
         <app-menu-options-example />

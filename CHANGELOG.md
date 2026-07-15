@@ -418,6 +418,18 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: Menu no longer exports the data-driven `HellMenuOptions` renderer,
+  its `HellMenuOptionsPart`/`HellMenuOptionsUi` types, or the
+  `<hell-menu-options>` selector. Replace renderer bindings with an explicit
+  `@for` over real domain objects whose `button[hellMenuItemCheckbox]` rows bind
+  caller-owned `checked`, `disabled`, and `(checkedChange)` logic and project an
+  ordinary `[hellMenuItemIndicator]`. Core's obsolete `HellOption`,
+  `HellOptionDisplayWith`, and `HellOptionCompareWith` aliases are also removed;
+  semantic `compareWith` inputs on Select, Combobox, Listbox, and Radio remain
+  unchanged. The Multi-Select Menu Button recipe demonstrates caller-owned
+  selection-floor/reset policy and direct TanStack `Column` visibility state.
+  Closes #195. Evidence: focused Menu unit and browser contracts, packed
+  consumer compilation, docs/axe coverage, and contracted Core/Menu API reports.
 - BREAKING: Omnibar now owns only difficult command-interaction coordination.
   Bind its controlled `query`/`queryChange` and `open`/`openChange` models,
   then project local or async results and loading/error/empty chrome from the

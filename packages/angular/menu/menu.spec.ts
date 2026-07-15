@@ -1,5 +1,4 @@
 import { Component, signal, viewChild } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
@@ -119,29 +118,53 @@ class CheckableMenuHost {
   readonly trigger = viewChild.required(NgpMenuTrigger);
 }
 
+interface ColumnPreference {
+  readonly id: string;
+  readonly label: string;
+  readonly unavailable?: boolean;
+}
+
 @Component({
   imports: [...HELL_MENU_DIRECTIVES],
   template: `
     <ng-template #menu>
       <div hellMenu>
-        <hell-menu-options
-          [options]="options"
-          [selected]="selected()"
-          (selectedChange)="selected.set([...$event])"
-        />
+        @for (column of columns; track column.id) {
+          <button
+            hellMenuItemCheckbox
+            type="button"
+            [checked]="isVisible(column)"
+            [disabled]="column.unavailable ?? false"
+            (checkedChange)="setVisible(column, $event)"
+          >
+            <span hellMenuItemIndicator></span>
+            <span>{{ column.label }}</span>
+          </button>
+        }
       </div>
     </ng-template>
     <button type="button" [hellMenuTrigger]="menu">Columns</button>
   `,
 })
-class MenuOptionsHost {
-  readonly options: readonly HellOption<string>[] = [
-    { value: 'name', label: 'Name' },
-    { value: 'status', label: 'Status' },
-    { value: 'owner', label: 'Owner', disabled: true },
+class MenuDomainRowsHost {
+  readonly columns: readonly ColumnPreference[] = [
+    { id: 'name', label: 'Name' },
+    { id: 'status', label: 'Status' },
+    { id: 'owner', label: 'Owner', unavailable: true },
   ];
-  readonly selected = signal<readonly string[]>(['status']);
+  readonly visible = signal<readonly ColumnPreference[]>([this.columns[1]!]);
   readonly trigger = viewChild.required(NgpMenuTrigger);
+
+  protected isVisible(column: ColumnPreference): boolean {
+    return this.visible().includes(column);
+  }
+
+  protected setVisible(column: ColumnPreference, checked: boolean): void {
+    this.visible.update((current) => {
+      if (checked) return current.includes(column) ? current : [...current, column];
+      return current.filter((candidate) => candidate !== column);
+    });
+  }
 }
 
 @Component({
@@ -193,7 +216,7 @@ describe('HellMenuItem', () => {
         EnabledMenuAnchorTriggerHost,
         DisabledMenuTriggerHost,
         CheckableMenuHost,
-        MenuOptionsHost,
+        MenuDomainRowsHost,
         SubmenuHost,
       ],
     }).compileComponents();
@@ -322,8 +345,8 @@ describe('HellMenuItem', () => {
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
   });
 
-  it('renders data-driven options as controlled checkbox items', async () => {
-    const fixture = TestBed.createComponent(MenuOptionsHost);
+  it('renders consumer-owned domain rows as controlled checkbox items', async () => {
+    const fixture = TestBed.createComponent(MenuDomainRowsHost);
     await settle(fixture);
 
     fixture.componentInstance.trigger().show();
@@ -348,15 +371,48 @@ describe('HellMenuItem', () => {
     items[0]?.click();
     await settle(fixture);
 
-    expect(fixture.componentInstance.selected()).toEqual(['status', 'name']);
+    expect(fixture.componentInstance.visible().map((column) => column.id)).toEqual([
+      'status',
+      'name',
+    ]);
     expect(items[0]?.getAttribute('aria-checked')).toBe('true');
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
 
     items[1]?.click();
     await settle(fixture);
 
-    expect(fixture.componentInstance.selected()).toEqual(['name']);
+    expect(fixture.componentInstance.visible().map((column) => column.id)).toEqual(['name']);
     expect(items[1]?.getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('excludes disabled consumer rows from printable-key typeahead', async () => {
+    const fixture = TestBed.createComponent(MenuDomainRowsHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[role="menuitemcheckbox"]',
+    );
+
+    const items = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>('[role="menuitemcheckbox"]'),
+    );
+    const name = items[0]!;
+    const owner = items[2]!;
+    name.focus();
+
+    const ownerKey = new KeyboardEvent('keydown', {
+      key: 'o',
+      bubbles: true,
+      cancelable: true,
+    });
+    name.dispatchEvent(ownerKey);
+
+    expect(owner.disabled).toBe(true);
+    expect(ownerKey.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(name);
   });
 
   it('moves focus by printable-key typeahead and cycles repeated initials', async () => {

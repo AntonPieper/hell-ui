@@ -5,13 +5,13 @@ import {
   signal,
   type WritableSignal,
 } from '@angular/core';
-import type { HellOption } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HellTableShellToolbar, HellTanStackTable } from '@hell-ui/angular/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,
+  type Column,
   type ColumnDef,
   type Updater,
   type VisibilityState,
@@ -76,11 +76,18 @@ function saveColumnVisibility(state: VisibilityState): void {
         </button>
         <ng-template #columnsMenu>
           <div hellMenu aria-label="Visible columns">
-            <hell-menu-options
-              [options]="columnOptions()"
-              [selected]="visibleColumns()"
-              (selectedChange)="setVisibleColumns($event)"
-            />
+            @for (column of hideableColumns(); track column.id) {
+              <button
+                hellMenuItemCheckbox
+                type="button"
+                [checked]="column.getIsVisible()"
+                [disabled]="isLastVisible(column)"
+                (checkedChange)="setColumnVisible(column, $event)"
+              >
+                <span hellMenuItemIndicator></span>
+                <span>{{ columnLabel(column) }}</span>
+              </button>
+            }
             <div hellMenuSeparator></div>
             <button hellMenuItem type="button" (click)="resetColumns()">Reset to default</button>
           </div>
@@ -117,38 +124,27 @@ export class MultiSelectMenuButtonTanStackExample {
     },
   }));
 
-  // Options are the columns TanStack reports as hideable (enableHiding !== false),
-  // with the selection floor applied: the last visible column disables.
-  protected readonly columnOptions = computed<readonly HellOption<string>[]>(() => {
-    const visible = this.visibleColumns();
-    const atFloor = visible.length <= MIN_VISIBLE;
-    return this.table
-      .getAllLeafColumns()
-      .filter((column) => column.getCanHide())
-      .map((column) => ({
-        value: column.id,
-        label: String(column.columnDef.header ?? column.id),
-        disabled: atFloor && visible.includes(column.id),
-      }));
+  // Iterate the real TanStack columns; enableHiding remains TanStack-owned.
+  protected readonly hideableColumns = computed(() =>
+    this.table.getAllLeafColumns().filter((column) => column.getCanHide()),
+  );
+
+  protected readonly visibleColumns = computed(() => {
+    this.columnVisibility();
+    return this.hideableColumns().filter((column) => column.getIsVisible());
   });
 
-  // The controlled selection is the set of hideable columns currently visible.
-  protected readonly visibleColumns = computed<string[]>(() => {
-    const visibility = this.columnVisibility();
-    return this.table
-      .getAllLeafColumns()
-      .filter((column) => column.getCanHide())
-      .map((column) => column.id)
-      .filter((id) => visibility[id] !== false);
-  });
+  protected columnLabel(column: Column<Person>): string {
+    const header = column.columnDef.header;
+    return typeof header === 'string' ? header : column.id;
+  }
 
-  protected setVisibleColumns(next: readonly string[]): void {
-    const visibility: VisibilityState = {};
-    for (const option of this.columnOptions()) {
-      visibility[option.value] = next.includes(option.value);
-    }
-    // Route the whole next state back through the table instance (TanStack owns it).
-    this.table.setColumnVisibility(visibility);
+  protected isLastVisible(column: Column<Person>): boolean {
+    return column.getIsVisible() && this.visibleColumns().length <= MIN_VISIBLE;
+  }
+
+  protected setColumnVisible(column: Column<Person>, visible: boolean): void {
+    column.toggleVisibility(visible);
   }
 
   protected resetColumns(): void {

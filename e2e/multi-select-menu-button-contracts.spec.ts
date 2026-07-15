@@ -21,7 +21,7 @@ async function gotoRecipeClean(page: Page): Promise<void> {
 }
 
 test.describe('multi-select menu button recipe browser contract', () => {
-  test('exposes checkbox items, keeps the menu open on toggle, and reflects the whole selection', async ({
+  test('exposes projected checkbox rows, keeps the menu open, and reflects caller state', async ({
     page,
   }) => {
     await gotoMultiSelect(page);
@@ -39,23 +39,24 @@ test.describe('multi-select menu button recipe browser contract', () => {
     await trigger.click();
     await expect(menu).toBeVisible();
 
-    // Each option is a menuitemcheckbox carrying its checked state.
+    // Each domain row is a menuitemcheckbox with a projected checked indicator.
     const email = page.getByRole('menuitemcheckbox', { name: 'Email' });
     const sms = page.getByRole('menuitemcheckbox', { name: 'SMS' });
     const push = page.getByRole('menuitemcheckbox', { name: 'Push' });
     const webhook = page.getByRole('menuitemcheckbox', { name: 'Webhook' });
     await expect(email).toHaveAttribute('aria-checked', 'true');
+    await expect(email.locator('[hellMenuItemIndicator]')).toHaveAttribute('data-checked', '');
     await expect(push).toHaveAttribute('aria-checked', 'true');
     await expect(sms).toHaveAttribute('aria-checked', 'false');
 
-    // Toggling on emits the whole next array; the menu stays open.
+    // Caller-owned collection logic adds the row; the menu stays open.
     await sms.click();
     await expect(menu).toBeVisible();
     await expect(sms).toHaveAttribute('aria-checked', 'true');
     await expect(trigger).toHaveAttribute('data-selection-count', '3');
     await expect(example.locator('strong')).toHaveText('Email, Push, SMS');
 
-    // Toggling off also emits the whole next array; still open.
+    // Caller-owned collection logic removes the row; the menu is still open.
     await email.click();
     await expect(menu).toBeVisible();
     await expect(email).toHaveAttribute('aria-checked', 'false');
@@ -120,6 +121,12 @@ test.describe('multi-select menu button recipe browser contract', () => {
     await expect(trigger).toHaveAttribute('data-selection-count', '2');
     await expect(example.locator('strong')).toHaveText('Email, Push');
 
+    // Outside interaction dismisses the menu.
+    await trigger.click();
+    await expect(menu).toBeVisible();
+    await page.getByRole('heading', { name: 'Multi-select menu button', level: 1 }).click();
+    await expect(menu).toBeHidden();
+
     // Escape closes the menu and returns focus to the trigger.
     await trigger.click();
     await expect(menu).toBeVisible();
@@ -157,8 +164,25 @@ test.describe('multi-select menu button recipe browser contract', () => {
     await expect(trigger).toHaveAttribute('data-selection-count', '3');
 
     // Showing it again brings the column back.
-    await page.getByRole('menuitemcheckbox', { name: 'Email' }).click();
+    const email = page.getByRole('menuitemcheckbox', { name: 'Email' });
+    await email.click();
     await expect(example.getByRole('columnheader', { name: 'Email' })).toBeVisible();
+    await expect(trigger).toHaveAttribute('data-selection-count', '4');
+
+    // The floor is caller-owned and disables only the last visible hideable column.
+    for (const name of ['Role', 'Status', 'Team']) {
+      await page.getByRole('menuitemcheckbox', { name }).click();
+      await expect(example.getByRole('columnheader', { name })).toHaveCount(0);
+    }
+    await expect(email).toBeDisabled();
+    await expect(trigger).toHaveAttribute('data-selection-count', '1');
+
+    // Reset is an ordinary menu item routed back through TanStack state.
+    await page.getByRole('menuitem', { name: 'Reset to default' }).click();
+    await expect(menu).toBeHidden();
+    for (const name of ['Name', 'Role', 'Status', 'Team', 'Email']) {
+      await expect(example.getByRole('columnheader', { name })).toBeVisible();
+    }
     await expect(trigger).toHaveAttribute('data-selection-count', '4');
   });
 
