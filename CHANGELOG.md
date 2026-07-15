@@ -7,6 +7,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the optional `@hell-ui/angular/features/filter-builder` Feature Package
+  Entry Point. `hell-filter-builder` accepts generic readonly
+  `HellFilter<TField, TOperator, TValue>` expressions and application-owned
+  typed field descriptors, then binds each descriptor to one projected editor
+  template with a typed `HellFilterBuilderEditorContext`. The feature owns one
+  controlled Interaction State Machine for immutable whole-array changes,
+  stable identity-based create/edit/remove targeting, Chip Set/Input keyboard
+  behavior, field Combobox selection, Popover/Floating Scope dismissal, focus
+  restoration, and polite announcements. Applications own field/operator/value
+  unions, drafts, rendering, display, validation, and external Search Resources;
+  text, options, entity, date-range, and custom operators remain recipes rather
+  than built-in kinds. This addition does not change or re-export the existing
+  Filter Bar contract; consumers can adopt the projected feature deliberately
+  by supplying stable expression ids, descriptors, and editor templates.
+  Docs, cross-browser/axe contracts, the API report, and an isolated packed
+  minimal-dependency consumer cover the new boundary. Closes #201.
 - The Chip entry point now exports the behavior-only `input[hellChipInput]`
   directive, which connects a consumer-owned editable input to its enclosing
   `hellChipSet`. On an empty input, `Backspace` focuses the final enabled

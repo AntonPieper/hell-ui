@@ -311,6 +311,16 @@
       "output": "features/code-editor"
     },
     {
+      "glob": "filter-builder.ts",
+      "input": "features/filter-builder",
+      "output": "features/filter-builder"
+    },
+    {
+      "glob": "filter-builder.renderer.ts",
+      "input": "features/filter-builder",
+      "output": "features/filter-builder"
+    },
+    {
       "glob": "hell-ui-logo.svg",
       "input": "assets",
       "output": "assets"

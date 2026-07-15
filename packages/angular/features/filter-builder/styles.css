@@ -1,0 +1,10 @@
+/* Filter Builder composes these public styled entry points. */
+@import '../../button/styles.css';
+@import '../../chip/styles.css';
+@import '../../combobox/styles.css';
+@import '../../control-group/styles.css';
+@import '../../popover/styles.css';
+
+/* Filter Builder recipe defaults are Tailwind utility recipes in the component. */
+@source "./filter-builder.ts";
+@source "./filter-builder.renderer.ts";
