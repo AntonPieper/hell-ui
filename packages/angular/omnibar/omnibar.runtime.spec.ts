@@ -4,70 +4,66 @@ import {
   HellOmnibarActiveItemController,
   type HellOmnibarActiveItemOption,
 } from './omnibar.active-item';
-import { HellOmnibarRuntime } from './omnibar.runtime';
-import type { HellSearchResponse, HellSearchSource } from '@hell-ui/angular/core';
+import {
+  HellOmnibarRuntime,
+  type HellOmnibarActionRegistration,
+  type HellOmnibarItemRegistration,
+} from './omnibar.runtime';
 
 describe('HellOmnibarRuntime', () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('keeps only the latest async search result and aborts superseded work', async () => {
-    await TestBed.configureTestingModule({
-      providers: [HellOmnibarRuntime],
-    });
-    const runtime = TestBed.inject(HellOmnibarRuntime) as HellOmnibarRuntime<{
-      readonly id: string;
-    }>;
-    const first = deferred<HellSearchResponse<{ readonly id: string }>>();
-    const second = deferred<HellSearchResponse<{ readonly id: string }>>();
-    let firstSignal: AbortSignal | undefined;
-    let secondSignal: AbortSignal | undefined;
-    const firstSource: HellSearchSource<{ readonly id: string }> = (request) => {
-      firstSignal = request.signal;
-      return first.promise;
-    };
-    const secondSource: HellSearchSource<{ readonly id: string }> = (request) => {
-      secondSignal = request.signal;
-      return second.promise;
-    };
-
-    runtime.setQuery('first');
-    const firstSearch = runtime.searchNow({ source: firstSource });
-    runtime.setQuery('second');
-    const secondSearch = runtime.searchNow({ source: secondSource });
-
-    expect(firstSignal?.aborted).toBe(true);
-    expect(secondSignal?.aborted).toBe(false);
-
-    second.resolve({ results: [{ item: { id: 'second' }, score: 1 }] });
-    await secondSearch;
-
-    expect(runtime.results().map((result) => result.item.id)).toEqual(['second']);
-    expect(runtime.loading()).toBe(false);
-
-    first.resolve({ results: [{ item: { id: 'first' }, score: 99 }] });
-    await firstSearch;
-
-    expect(runtime.results().map((result) => result.item.id)).toEqual(['second']);
-    expect(runtime.loading()).toBe(false);
-  });
-
-  it('cancels scheduled searches before the debounce fires', () => {
-    vi.useFakeTimers();
-    TestBed.configureTestingModule({
-      providers: [HellOmnibarRuntime],
-    });
+  it('keeps item and action registration behind the package-local runtime', () => {
+    TestBed.configureTestingModule({ providers: [HellOmnibarRuntime] });
     const runtime = TestBed.inject(HellOmnibarRuntime);
-    const source = vi.fn(() => ({ results: [] }));
+    const alpha = omnibarRegistration('alpha');
+    const action: HellOmnibarActionRegistration = { focus: vi.fn() };
 
-    runtime.scheduleSearch({ source }, 25);
-    vi.advanceTimersByTime(24);
-    runtime.cancel();
-    vi.advanceTimersByTime(1);
+    runtime.registerItem(alpha);
+    runtime.registerAction(action);
 
-    expect(source).not.toHaveBeenCalled();
-    expect(runtime.loading()).toBe(false);
+    expect(runtime.items()).toEqual([alpha]);
+    expect(runtime.actionItems()).toEqual([action]);
+    expect(runtime.hasActions()).toBe(true);
+
+    runtime.unregisterItem(alpha);
+    runtime.unregisterAction(action);
+
+    expect(runtime.items()).toEqual([]);
+    expect(runtime.actionItems()).toEqual([]);
+    expect(runtime.hasActions()).toBe(false);
+  });
+
+  it('moves through enabled items and keeps scrolling inside the item registration', () => {
+    TestBed.configureTestingModule({ providers: [HellOmnibarRuntime] });
+    const runtime = TestBed.inject(HellOmnibarRuntime);
+    const disabled = omnibarRegistration('disabled', true);
+    const alpha = omnibarRegistration('alpha');
+    const beta = omnibarRegistration('beta');
+
+    runtime.registerItem(disabled);
+    runtime.registerItem(alpha);
+    runtime.registerItem(beta);
+
+    expect(runtime.activeItem()).toBe(alpha);
+    runtime.moveActive(1);
+
+    expect(runtime.activeItem()).toBe(beta);
+    expect(beta.scrollIntoView).toHaveBeenCalledOnce();
+    expect(disabled.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('wraps registered action focus without exposing action methods on HellOmnibar', () => {
+    TestBed.configureTestingModule({ providers: [HellOmnibarRuntime] });
+    const runtime = TestBed.inject(HellOmnibarRuntime);
+    const first: HellOmnibarActionRegistration = { focus: vi.fn() };
+    const second: HellOmnibarActionRegistration = { focus: vi.fn() };
+    runtime.registerAction(first);
+    runtime.registerAction(second);
+
+    runtime.focusAdjacentAction(first, -1);
+    runtime.focusAdjacentAction(second, 1);
+
+    expect(first.focus).toHaveBeenCalledOnce();
+    expect(second.focus).toHaveBeenCalledOnce();
   });
 });
 
@@ -136,12 +132,12 @@ function omnibarItem(id: string, disabled = false): TestOmnibarActiveItem {
   };
 }
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
+function omnibarRegistration(id: string, disabled = false): HellOmnibarItemRegistration {
+  return {
+    itemId: id,
+    closeOnSelect: () => true,
+    disabled: () => disabled,
+    selectValue: () => id,
+    scrollIntoView: vi.fn(),
+  };
 }

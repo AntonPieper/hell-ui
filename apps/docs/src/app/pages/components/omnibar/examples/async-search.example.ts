@@ -7,7 +7,11 @@ import {
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
-import { type HellSearchField, type HellSearchSource } from '@hell-ui/angular/core';
+import {
+  hellSearchResource,
+  type HellSearchField,
+  type HellSearchResourceSource,
+} from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 interface Person {
@@ -34,25 +38,13 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
   imports: [HellIcon, ...HELL_OMNIBAR_DIRECTIVES],
   providers: [provideIcons({ faSolidFilter, faSolidMagnifyingGlass, faSolidUser, faSolidXmark })],
   template: `
-    <ng-template #peopleLoading let-message="message">
-      <div class="p-3 text-sm text-hell-foreground-muted">{{ message }} people…</div>
-    </ng-template>
-
     <hell-omnibar
-      #peopleSearch="hellOmnibar"
       class="max-w-90"
       placeholder="Search people"
       ariaLabel="Search people"
       hotkey="/"
-      [searchSource]="searchPeople"
-      [searchFields]="searchFields"
-      [searchLimit]="6"
-      [searchDebounce]="180"
-      [loadingTemplate]="peopleLoading"
-      loadingMessage="Loading"
-      [(value)]="query"
+      [(query)]="query"
       (submit)="selected.set($any($event.item))"
-      (searchError)="handleSearchError($event)"
     >
       <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
 
@@ -73,32 +65,49 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
         </button>
       </div>
 
-      <div hellOmnibarGroup label="People">
-        <div hellOmnibarGroupLabel>People</div>
-        @for (result of peopleSearch.searchResults(); track result.item.id) {
-          <button
-            hellOmnibarItem
-            type="button"
-            [value]="result.item"
-            [disabled]="isPersonDisabled(result.item)"
-          >
-            <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
-            <span hellOmnibarItemText>
-              {{ result.item.name }}
-              <span hellOmnibarItemSubtext>{{ result.item.email }}</span>
-            </span>
-            <span hellOmnibarItemTrailing>{{ result.item.team }}</span>
-          </button>
-        }
-      </div>
+      @if (peopleSearch.status() === 'success' && peopleSearch.items().length > 0) {
+        <div hellOmnibarGroup label="People">
+          <div hellOmnibarGroupLabel>People</div>
+          @for (person of peopleSearch.items(); track person.id) {
+            <button
+              hellOmnibarItem
+              type="button"
+              [value]="person"
+              [disabled]="isPersonDisabled(person)"
+            >
+              <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
+              <span hellOmnibarItemText>
+                {{ person.name }}
+                <span hellOmnibarItemSubtext>{{ person.email }}</span>
+              </span>
+              <span hellOmnibarItemTrailing>{{ person.team }}</span>
+            </button>
+          }
+        </div>
+      }
 
-      @if (lastError(); as message) {
+      @if (peopleSearch.status() === 'loading') {
+        <div
+          hellOmnibarFooter
+          role="status"
+          class="border-t border-hell-border px-3 py-2 text-sm text-hell-foreground-muted"
+        >
+          Loading people…
+        </div>
+      } @else if (peopleSearch.status() === 'error') {
         <div
           hellOmnibarFooter
           role="alert"
           class="border-t border-hell-border px-3 py-2 text-sm text-hell-danger"
         >
-          {{ message }}
+          Search failed. Try again.
+        </div>
+      } @else if (peopleSearch.status() === 'success' && peopleSearch.items().length === 0) {
+        <div
+          hellOmnibarFooter
+          class="border-t border-hell-border px-3 py-2 text-sm text-hell-foreground-muted"
+        >
+          No people found.
         </div>
       }
     </hell-omnibar>
@@ -114,7 +123,6 @@ export class OmnibarAsyncSearchExample {
   protected readonly query = signal('');
   protected readonly selected = signal<Person | null>(null);
   protected readonly filtersActive = signal(false);
-  protected readonly lastError = signal<string | null>(null);
 
   protected readonly searchFields: readonly HellSearchField<Person>[] = [
     { name: 'name', weight: 5, get: (person) => person.name },
@@ -125,19 +133,18 @@ export class OmnibarAsyncSearchExample {
   // A real source calls a backend; this fake resolves after a delay and aborts
   // superseded requests through the provided signal. Type "error" to see the
   // error footer.
-  protected readonly searchPeople: HellSearchSource<Person> = ({ query, signal }) =>
+  protected readonly searchPeople: HellSearchResourceSource<Person> = ({ query, signal }) =>
     new Promise((resolve, reject) => {
       const timer = window.setTimeout(() => {
-        if (signal?.aborted) return;
+        if (signal.aborted) return;
         if (query.trim().toLowerCase() === 'error') {
           reject(new Error('People search failed'));
           return;
         }
-        this.lastError.set(null);
         resolve(PEOPLE);
       }, 450);
 
-      signal?.addEventListener(
+      signal.addEventListener(
         'abort',
         () => {
           window.clearTimeout(timer);
@@ -146,6 +153,13 @@ export class OmnibarAsyncSearchExample {
         { once: true },
       );
     });
+  protected readonly peopleSearch = hellSearchResource({
+    query: this.query,
+    source: this.searchPeople,
+    fields: this.searchFields,
+    limit: 6,
+    debounce: 180,
+  });
 
   protected toggleFilters(): void {
     this.filtersActive.update((active) => !active);
@@ -157,10 +171,5 @@ export class OmnibarAsyncSearchExample {
 
   protected isPersonDisabled(person: Person): boolean {
     return person.id === 2;
-  }
-
-  protected handleSearchError(error: unknown): void {
-    if (error instanceof DOMException && error.name === 'AbortError') return;
-    this.lastError.set('Search failed. Try again.');
   }
 }

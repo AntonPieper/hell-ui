@@ -9,7 +9,7 @@ import {
   faSolidUser,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
@@ -61,17 +61,14 @@ const HD_APP_SHELL_FRAME_ICONS = {
           class="mx-auto w-full max-w-md"
           placeholder="Jump to…"
           ariaLabel="Search pages"
-          [searchItems]="pages"
-          [searchFields]="searchFields"
-          [(value)]="query"
-          (searchResultsChange)="results.set($any($event))"
+          [(query)]="query"
           (submit)="goTo($any($event.item))"
         >
           <div hellOmnibarGroup label="Pages">
             <div hellOmnibarGroupLabel>Pages</div>
-            @for (result of results(); track result.item.id) {
-              <button hellOmnibarItem type="button" [value]="result.item" (select)="goTo($event)">
-                <span hellOmnibarItemText>{{ result.item.label }}</span>
+            @for (page of pageSearch.items(); track page.id) {
+              <button hellOmnibarItem type="button" [value]="page" (select)="goTo($event)">
+                <span hellOmnibarItemText>{{ page.label }}</span>
               </button>
             }
           </div>
@@ -130,12 +127,16 @@ export class AppShellWithOmnibarMenuAvatarExample {
   protected readonly pages = PAGES;
   protected readonly query = signal('');
   protected readonly active = signal<string>('dashboard');
-  protected readonly results = signal<readonly HellSearchResult<Page>[]>([]);
 
   protected readonly searchFields: readonly HellSearchField<Page>[] = [
     { name: 'label', weight: 5, get: (page) => page.label },
     { name: 'id', weight: 2, get: (page) => page.id },
   ];
+  protected readonly pageSearch = hellSearchResource({
+    query: this.query,
+    items: PAGES,
+    fields: this.searchFields,
+  });
 
   private readonly icons: Record<string, string> = {
     dashboard: 'faSolidGauge',

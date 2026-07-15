@@ -15,7 +15,7 @@ import {
   faSolidUser,
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
-import { type HellSearchField } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
@@ -96,18 +96,14 @@ type StatusFilter = 'all' | Person['status'];
     >
       <hell-omnibar
         hellTableShellToolbar
-        #peopleSearch="hellOmnibar"
+        #peopleOmnibar="hellOmnibar"
         class="min-w-64 flex-1"
         size="sm"
         placeholder="Search virtual rows"
         ariaLabel="Search virtual rows"
-        [value]="globalFilter()"
-        [searchItems]="rows()"
-        [searchFields]="searchFields"
-        [searchLimit]="6"
-        [searchDebounce]="80"
+        [query]="globalFilter()"
         [minPanelWidth]="420"
-        (valueChange)="setGlobalFilter($event)"
+        (queryChange)="setGlobalFilter($event)"
         (submit)="selectAndReveal($any($event.item))"
       >
         <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
@@ -122,7 +118,7 @@ type StatusFilter = 'all' | Person['status'];
             [pressed]="filtersActive()"
             [attr.aria-pressed]="filtersActive()"
             [hellMenuTrigger]="filterMenu"
-            [container]="peopleSearch.floatingContainer()"
+            [container]="peopleOmnibar.floatingContainer()"
           >
             <hell-icon name="faSolidFilter" size="12px" />
             Filters
@@ -133,19 +129,29 @@ type StatusFilter = 'all' | Person['status'];
           </button>
         </div>
 
-        <div hellOmnibarGroup label="Virtual people">
-          <div hellOmnibarGroupLabel>People</div>
-          @for (result of peopleSearch.searchResults(); track result.item.id) {
-            <button hellOmnibarItem type="button" [value]="result.item">
-              <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
-              <span hellOmnibarItemText>
-                {{ result.item.name }}
-                <span hellOmnibarItemSubtext>{{ result.item.team }}</span>
-              </span>
-              <span hellOmnibarItemTrailing>{{ result.item.role }}</span>
-            </button>
-          }
-        </div>
+        @if (peopleSearch.status() === 'loading') {
+          <div role="status" class="px-hell-3 py-hell-4 text-sm text-hell-foreground-muted">
+            Searching virtual rows…
+          </div>
+        } @else if (peopleSearch.items().length === 0) {
+          <div class="px-hell-3 py-hell-4 text-sm text-hell-foreground-muted">
+            No virtual rows found.
+          </div>
+        } @else {
+          <div hellOmnibarGroup label="Virtual people">
+            <div hellOmnibarGroupLabel>People</div>
+            @for (person of peopleSearch.items(); track person.id) {
+              <button hellOmnibarItem type="button" [value]="person">
+                <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
+                <span hellOmnibarItemText>
+                  {{ person.name }}
+                  <span hellOmnibarItemSubtext>{{ person.team }}</span>
+                </span>
+                <span hellOmnibarItemTrailing>{{ person.role }}</span>
+              </button>
+            }
+          </div>
+        }
       </hell-omnibar>
 
       <button
@@ -307,6 +313,12 @@ export class TableTanStackVirtualExample {
     { name: 'status', weight: 2, get: (person) => person.status },
     { name: 'team', weight: 2, get: (person) => person.team },
   ];
+  protected readonly peopleSearch = hellSearchResource({
+    query: this.globalFilter,
+    items: this.rows,
+    fields: this.searchFields,
+    limit: 6,
+  });
 
   protected readonly selectedPerson = computed(() => {
     const selectedId = Object.keys(this.rowSelection())[0];

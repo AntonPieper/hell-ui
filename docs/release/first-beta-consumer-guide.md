@@ -193,6 +193,13 @@ Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 the same Part Style Map contract for their owned anatomy and no longer expose
 `unstyled`.
 
+Omnibar owns command-interaction coordination, not search or token policy.
+Bind its controlled `query` and `open` models, compose `hellSearchResource`
+for local or async data/status state, and project the resulting chrome and
+items. Omnibar composes the public Chip Set/Input keyboard behavior; project
+public Chip and Chip Remove primitives when the query includes editable scope
+tokens.
+
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
 <input hellInput ui="rounded-hell-pill px-hell-5" aria-label="Search" />
@@ -241,9 +248,11 @@ Rules for migration:
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
   such as Dialpad, PaginationStrip, Split View, Slider, Switch, Dialog, Toast,
-  AudioPlayer, Omnibar, and CodeEditor. Combobox is projection-first: refine
-  each projected directive's single `root` part and compose Search Resource,
-  Control Group, Chip Set, or Chip Input from their own entry points as needed.
+  AudioPlayer, Omnibar, and CodeEditor. Omnibar keeps owned interaction anatomy
+  but composes projected Search Resource state and public Chip primitives.
+  Combobox is projection-first: refine each projected directive's single
+  `root` part and compose Search Resource, Control Group, Chip Set, or Chip
+  Input from their own entry points as needed.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 

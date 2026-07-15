@@ -98,7 +98,7 @@ import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HellChip } from '@hell-ui/angular/chip';
 import { HellToaster } from '@hell-ui/angular/toast';
-import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
   HD_DOCS_KIND_FILTER_OPTIONS,
@@ -333,7 +333,6 @@ export class App {
   protected readonly sections = HD_DOCS_SECTIONS;
 
   protected readonly docsSearchQuery = signal('');
-  protected readonly docsSearchResults = signal<readonly HellSearchResult<DocsSearchItem>[]>([]);
   protected readonly docsKindFilter = signal<DocsSearchKindFilter>('all');
   protected readonly docsSectionFilter = signal<string>('all');
   protected readonly docsSearchLimit = signal<8 | 20 | 40>(20);
@@ -363,15 +362,17 @@ export class App {
       return true;
     });
   });
+  protected readonly docsSearch = hellSearchResource({
+    query: this.docsSearchQuery,
+    items: this.docsSearchItems,
+    fields: this.docsSearchFields,
+    limit: 40,
+  });
   protected readonly docsSectionOptions = computed(() =>
     [...new Set(HD_DOCS_SECTIONS.map((section) => section.heading ?? 'Guides'))].sort(),
   );
   protected readonly docsSearchGroups = computed<readonly DocsSearchGroup[]>(() => {
-    const rankedResults = this.docsSearchResults().map((result) => result.item);
-    const ranked =
-      rankedResults.length || this.docsSearchQuery().trim()
-        ? rankedResults
-        : this.docsSearchItems().slice(0, this.docsSearchLimit());
+    const ranked = this.docsSearch.items().slice(0, this.docsSearchLimit());
 
     return (['page', 'example', 'usage'] as const)
       .map((kind) => ({
@@ -454,10 +455,6 @@ export class App {
     void this.router.navigateByUrl(item.path);
     shell.closeMobilePanels();
     this.docsSearchQuery.set('');
-  }
-
-  protected onDocsSearchResults(results: readonly HellSearchResult<unknown>[]): void {
-    this.docsSearchResults.set(results as readonly HellSearchResult<DocsSearchItem>[]);
   }
 
   private async loadDocsSearchIndex(): Promise<void> {

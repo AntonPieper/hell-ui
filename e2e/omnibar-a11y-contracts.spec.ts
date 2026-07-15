@@ -75,6 +75,26 @@ test.describe('omnibar accessibility contract', () => {
     await expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('Escape closes, then clears, without native search behavior reopening the panel', async ({
+    page,
+  }) => {
+    await gotoOmnibar(page);
+
+    const input = page.getByRole('combobox', { name: 'Search actions' });
+    await input.fill('archive');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await page.keyboard.press('Escape');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).toHaveValue('archive');
+    await expect(input).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeFocused();
+  });
+
   test('F6 moves through the action strip without adding tab stops', async ({ page }) => {
     await gotoOmnibar(page);
 
@@ -105,6 +125,26 @@ test.describe('omnibar accessibility contract', () => {
     await page.keyboard.press('F6');
     await expect(input).toBeFocused();
     await expect(input).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('public Chip Input moves focus to a projected token and returns after removal', async ({
+    page,
+  }) => {
+    await gotoOmnibar(page);
+
+    const example = page.locator('app-omnibar-styling-example');
+    const input = example.getByRole('combobox', { name: 'Search runbooks' });
+    const chip = example.locator('[hellChip]', { hasText: 'Prod' });
+    await expect(chip).toBeVisible();
+    await expect(example.locator('[hellOmnibarChip]')).toHaveCount(0);
+
+    await input.focus();
+    await page.keyboard.press('Backspace');
+    await expect(chip).toBeFocused();
+
+    await page.keyboard.press('Backspace');
+    await expect(chip).toBeHidden();
+    await expect(input).toBeFocused();
   });
 
   test('async errors are announced and recover on the next successful query', async ({ page }) => {
