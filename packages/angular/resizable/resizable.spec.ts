@@ -51,7 +51,9 @@ class ResizableUiHost {
 
 describe('HellResizable', () => {
   afterEach(() => {
+    TestResizeObserver.instances = [];
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(async () => {
@@ -170,6 +172,116 @@ describe('HellResizable', () => {
     expect(paneFlex(paneB)).toBe('0 0 116px');
   });
 
+  it('commits pointer cancellation and removes the active resize listeners', () => {
+    const fixture = TestBed.createComponent(ResizableHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'group');
+    const paneA = byId(fixture.nativeElement, 'pane-a');
+    const paneB = byId(fixture.nativeElement, 'pane-b');
+    const paneC = byId(fixture.nativeElement, 'pane-c');
+    const handle = byId(fixture.nativeElement, 'handle-a');
+    mockElementSize(group, 300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    const pointerDown = new PointerEvent('pointerdown', {
+      button: 0,
+      pointerId: 7,
+      pointerType: 'mouse',
+      clientX: 100,
+      bubbles: true,
+      cancelable: true,
+    });
+    handle.dispatchEvent(pointerDown);
+    fixture.detectChanges();
+
+    expect(pointerDown.defaultPrevented).toBe(true);
+    expect(handle.getAttribute('data-active')).toBe('true');
+
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 7,
+        clientX: 130,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    const pointerCancel = new PointerEvent('pointercancel', {
+      pointerId: 7,
+      clientX: 130,
+      bubbles: true,
+      cancelable: true,
+    });
+    window.dispatchEvent(pointerCancel);
+    fixture.detectChanges();
+
+    expect(pointerCancel.defaultPrevented).toBe(true);
+    expect(handle.getAttribute('data-active')).toBe(null);
+    expect(paneFlex(paneA)).toBe('0 0 130px');
+    expect(paneFlex(paneB)).toBe('0 0 70px');
+    expect(paneFlex(paneC)).toBe('0 0 100px');
+
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 7,
+        clientX: 180,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(paneFlex(paneA)).toBe('0 0 130px');
+    expect(paneFlex(paneB)).toBe('0 0 70px');
+  });
+
+  it('rebalances user-sized panes after the observed container size changes', () => {
+    vi.stubGlobal('ResizeObserver', TestResizeObserver);
+    const scheduledFrames: FrameRequestCallback[] = [];
+    const requestFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback: FrameRequestCallback) => {
+        scheduledFrames.push(callback);
+        return 1;
+      });
+
+    const fixture = TestBed.createComponent(ResizableHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'group');
+    const paneA = byId(fixture.nativeElement, 'pane-a');
+    const paneB = byId(fixture.nativeElement, 'pane-b');
+    const paneC = byId(fixture.nativeElement, 'pane-c');
+    const groupWidth = vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    byId(fixture.nativeElement, 'handle-a').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    const beforeResize = [panePixelSize(paneA), panePixelSize(paneB), panePixelSize(paneC)];
+
+    groupWidth.mockReturnValue(360);
+    const observer = TestResizeObserver.instances.find(
+      (candidate) => candidate.observed === group,
+    );
+    if (!observer) throw new Error('Expected the resizable ResizeObserver.');
+    requestFrame.mockClear();
+    const scheduledFrameIndex = scheduledFrames.length;
+    observer.trigger();
+
+    expect(requestFrame).toHaveBeenCalledOnce();
+    const scheduledFrame = scheduledFrames[scheduledFrameIndex];
+    if (!scheduledFrame) throw new Error('Expected a scheduled resize frame.');
+    scheduledFrame(0);
+
+    const afterResize = [panePixelSize(paneA), panePixelSize(paneB), panePixelSize(paneC)];
+    expect(afterResize.reduce((sum, size) => sum + size, 0)).toBeCloseTo(360, 5);
+    expect(afterResize).not.toEqual(beforeResize);
+    expect(afterResize[2]).toBeGreaterThan(beforeResize[2]);
+  });
+
   it('marks a fully constrained group as disabled for handle interaction', () => {
     const fixture = TestBed.createComponent(ResizableHost);
     fixture.detectChanges();
@@ -208,4 +320,29 @@ function mockElementSize(element: HTMLElement, size: number): void {
 
 function paneFlex(pane: HTMLElement): string {
   return pane.style.getPropertyValue('--_hell-resizable-pane-flex');
+}
+
+function panePixelSize(pane: HTMLElement): number {
+  const match = /^0 0 ([\d.]+)px$/.exec(paneFlex(pane));
+  if (!match) throw new Error('Expected an explicit pane pixel size.');
+  return Number(match[1]);
+}
+
+class TestResizeObserver {
+  static instances: TestResizeObserver[] = [];
+  observed: Element | null = null;
+
+  constructor(private readonly callback: ResizeObserverCallback) {
+    TestResizeObserver.instances.push(this);
+  }
+
+  observe(element: Element): void {
+    this.observed = element;
+  }
+
+  disconnect(): void {}
+
+  trigger(): void {
+    this.callback([], this as unknown as ResizeObserver);
+  }
 }
