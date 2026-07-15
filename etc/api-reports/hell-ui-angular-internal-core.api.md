@@ -22,6 +22,25 @@ export const HELL_FLOATING_SCOPE: InjectionToken<HellFloatingScope>;
 export const HELL_RESIZE_KEY_DELTA = 16;
 
 // @public
+export type HellAsyncResourceDispatch<T> = (signal: AbortSignal) => Promise<T>;
+
+// @public
+export class HellAsyncResourceLifecycle<T> {
+    constructor(callbacks: HellAsyncResourceLifecycleCallbacks<T>);
+    cancel(): void;
+    run(dispatch: HellAsyncResourceDispatch<T>): Promise<boolean>;
+    schedule(dispatch: HellAsyncResourceDispatch<T>, delay: number): void;
+}
+
+// @public
+export interface HellAsyncResourceLifecycleCallbacks<T> {
+    readonly onError: (error: unknown) => void;
+    readonly onSettled: () => void;
+    readonly onStart: () => void;
+    readonly onSuccess: (value: T) => void;
+}
+
+// @public
 export function hellConstrainResizeValue(value: number, sum: number, minA: number, minB: number): number;
 
 // @public (undocumented)

@@ -14,3 +14,4 @@ export * from './pick-value';
 export * from './picker-control';
 export * from './resize-behavior';
 export * from './typed-value-input';
+export * from './async-resource-lifecycle';

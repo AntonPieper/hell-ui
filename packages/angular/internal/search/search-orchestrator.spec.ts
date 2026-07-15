@@ -131,6 +131,31 @@ describe('HellSearchOrchestrator', () => {
     }
   });
 
+  it('invalidates active work as soon as a newer search is scheduled', async () => {
+    vi.useFakeTimers();
+    try {
+      const service = new FakeSearchService();
+      const orchestrator = new HellSearchOrchestrator<string>(
+        service as unknown as HellSearchService,
+      );
+
+      const inflight = orchestrator.searchNow('old', {});
+      orchestrator.scheduleSearch('new', {}, 100);
+
+      expect(service.requests[0]?.signal?.aborted).toBe(true);
+      expect(orchestrator.loading()).toBe(false);
+
+      service.pending[0]?.resolve(results('stale'));
+      expect(await inflight).toBe(false);
+      expect(orchestrator.results()).toEqual([]);
+
+      vi.advanceTimersByTime(100);
+      expect(service.requests[1]?.query).toBe('new');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('cancel aborts in-flight work and pending timers without clearing rendered results', async () => {
     vi.useFakeTimers();
     try {

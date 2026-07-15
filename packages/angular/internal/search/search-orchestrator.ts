@@ -6,6 +6,7 @@ import type {
   HellSearchService,
   HellSearchSource,
 } from '@hell-ui/angular/core';
+import { HellAsyncResourceLifecycle } from '@hell-ui/angular/internal/core';
 
 /** Search inputs captured at the moment a query runs (everything but the query). */
 export interface HellSearchOrchestratorOptions<T> {
@@ -36,11 +37,22 @@ export class HellSearchOrchestrator<T> {
   /** Results of the newest completed search. */
   readonly results = signal<readonly HellSearchResult<T>[]>([]);
 
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  private controller: AbortController | null = null;
-  private requestId = 0;
+  private readonly lifecycle: HellAsyncResourceLifecycle<readonly HellSearchResult<T>[]>;
 
-  constructor(private readonly searchService: HellSearchService) {}
+  constructor(private readonly searchService: HellSearchService) {
+    this.lifecycle = new HellAsyncResourceLifecycle({
+      onStart: () => {
+        this.loading.set(true);
+        this.error.set(null);
+      },
+      onSuccess: (results) => this.results.set(results),
+      onError: (error) => {
+        this.results.set([]);
+        this.error.set(error);
+      },
+      onSettled: () => this.loading.set(false),
+    });
+  }
 
   /** Cancels pending work when `destroyRef` tears down. */
   connect(destroyRef: DestroyRef): void {
@@ -49,11 +61,7 @@ export class HellSearchOrchestrator<T> {
 
   /** Debounce a search request, replacing any pending scheduled search. */
   scheduleSearch(query: string, options: HellSearchOrchestratorOptions<T>, debounceMs: number): void {
-    this.clearTimer();
-    const delay = Math.max(0, debounceMs);
-    this.timer = setTimeout(() => {
-      void this.searchNow(query, options);
-    }, delay);
+    this.lifecycle.schedule((signal) => this.dispatch(query, options, signal), debounceMs);
   }
 
   /**
@@ -63,44 +71,12 @@ export class HellSearchOrchestrator<T> {
    * chaining settle work must not treat superseded settles as current.
    */
   async searchNow(query: string, options: HellSearchOrchestratorOptions<T>): Promise<boolean> {
-    const id = ++this.requestId;
-    this.controller?.abort();
-    const controller = new AbortController();
-    this.controller = controller;
-    this.loading.set(true);
-    this.error.set(null);
-
-    try {
-      const request: HellSearchRequest<T> = {
-        items: options.items,
-        source: options.source,
-        fields: options.fields,
-        limit: options.limit,
-        params: options.params,
-        query,
-        signal: controller.signal,
-      };
-      const results = await this.searchService.search<T>(request);
-      if (id !== this.requestId || controller.signal.aborted) return false;
-      this.results.set(results);
-      return true;
-    } catch (error) {
-      if (id !== this.requestId || controller.signal.aborted) return false;
-      this.results.set([]);
-      this.error.set(error);
-      return true;
-    } finally {
-      if (id === this.requestId) this.loading.set(false);
-    }
+    return this.lifecycle.run((signal) => this.dispatch(query, options, signal));
   }
 
   /** Cancel pending timers and active source work without clearing rendered results. */
   cancel(): void {
-    this.clearTimer();
-    this.controller?.abort();
-    this.controller = null;
-    this.requestId += 1;
-    this.loading.set(false);
+    this.lifecycle.cancel();
   }
 
   /** Reset results and error, e.g. when the search surface closes. */
@@ -109,9 +85,20 @@ export class HellSearchOrchestrator<T> {
     this.error.set(null);
   }
 
-  private clearTimer(): void {
-    if (this.timer === null) return;
-    clearTimeout(this.timer);
-    this.timer = null;
+  private dispatch(
+    query: string,
+    options: HellSearchOrchestratorOptions<T>,
+    signal: AbortSignal,
+  ): Promise<readonly HellSearchResult<T>[]> {
+    const request: HellSearchRequest<T> = {
+      items: options.items,
+      source: options.source,
+      fields: options.fields,
+      limit: options.limit,
+      params: options.params,
+      query,
+      signal,
+    };
+    return this.searchService.search<T>(request);
   }
 }

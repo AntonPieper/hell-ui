@@ -6,6 +6,7 @@
     "./styleable",
     "./part-style-merge",
     "./search",
+    "./search-resource",
     "./labels",
     "./floating-element",
     "./typed-value"

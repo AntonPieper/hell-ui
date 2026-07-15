@@ -16,6 +16,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   stylesheet, docs catalog/search page, existing Input search recipe, focused
   behavior tests, and packed consumer scenario cover the complete contract.
   Closes #185.
+- Core now exports `hellSearchResource`, a UI-independent signal resource for
+  local ranking and asynchronous search. It observes a caller-owned query,
+  publishes domain items plus idle/loading/success/error state, debounces remote
+  sources, forwards an `AbortSignal`, and prevents superseded successes or
+  failures from replacing current state. `refresh()` bypasses debounce,
+  `cancel()` preserves settled results, and `clear()` resets the complete
+  resource without dispatching an empty query. A cleared resource stays idle
+  across local collection updates until a later query change or explicit
+  refresh. The existing internal search orchestrator delegates to the same
+  generic lifecycle until its consumers migrate. Closes #184.
 - The native/styled control pairs (checkbox, switch, radio, select) are a
   written contract: `docs/adr/native-styled-control-pairs.md` decides the
   pairs stay two products — delegated rich controls for owned anatomy,

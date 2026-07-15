@@ -12,7 +12,8 @@
     "./pick-value",
     "./picker-control",
     "./resize-behavior",
-    "./typed-value-input"
+    "./typed-value-input",
+    "./async-resource-lifecycle"
   ],
   "header": [
     "/**",
