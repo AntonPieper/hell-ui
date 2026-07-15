@@ -2,6 +2,9 @@
 
 - Status: Accepted
 - Date: 2026-06-19
+- Clarified: 2026-07-15 — column visibility composes the documented
+  table-agnostic Multi-Select Menu Button recipe; it is not a table API or a
+  separate owned Composite.
 
 ## Context
 
@@ -60,5 +63,8 @@ Virtualization is an optional body strategy registered on the same shell with a 
 
 - The old table examples become either tiny native `/table` primitive examples or `/table-tanstack` examples.
 - Dynamic business-table docs route to `/table-tanstack`.
-- Column visibility UI is removed from table APIs. A separate, table-agnostic Multi-Select Menu Button composite may be designed later.
+- Column visibility UI is removed from table APIs. Consumers may compose the
+  documented table-agnostic Multi-Select Menu Button recipe from `hellButton`
+  and checkbox Menu primitives while keeping TanStack visibility state as the
+  source of truth.
 - Existing architecture, package-consumer, docs, and API gates must be rewritten around the two supported paths and must reject the removed entry points.
