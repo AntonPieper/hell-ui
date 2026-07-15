@@ -805,6 +805,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `@hell-ui/angular/toolbar` now separates ordinary roving-focus
+  toolbars from measured overflow. The former `hell-toolbar` / `HellToolbar`
+  composite is `hell-overflow-toolbar` / `HellOverflowToolbar`; its
+  `HellToolbarPart` / `HellToolbarUi` and `HellToolbarLabels` /
+  `HELL_TOOLBAR_LABELS` / `provideHellToolbarLabels` contracts are now
+  `HellOverflowToolbarPart` / `HellOverflowToolbarUi` and
+  `HellOverflowToolbarLabels` / `HELL_OVERFLOW_TOOLBAR_LABELS` /
+  `provideHellOverflowToolbarLabels`. Action placement renames the `priority`
+  input and `HellToolbarActionPriority` type to `overflow` and
+  `HellToolbarActionOverflow`, with `primary` → `never`, `default` → `auto`,
+  and `overflowOnly` → `always`; no compatibility aliases remain. For ordinary
+  consumer-owned buttons, migrate to `<div hellToolbar>` plus
+  `[hellToolbarItem]`; keep `ng-template[hellToolbarAction]`, separators, and
+  widgets under `<hell-overflow-toolbar>` when responsive measurement is
+  required. Renderer, measurement, and item-kind models are no longer public.
+  Closes #192.
 - BREAKING: `@hell-ui/angular/resizable` no longer exposes the root registry,
   measurement, constraint, and sizing methods (`registerPane()`,
   `unregisterPane()`, `getPanes()`, `indexOf()`, `getAvailableSize()`,

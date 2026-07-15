@@ -41,14 +41,14 @@ const MEMBERS: readonly Member[] = [
   imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div class="flex flex-col gap-hell-3">
-      <hell-toolbar
+      <hell-overflow-toolbar
         label="Team members"
         class="rounded-hell-md border border-hell-border bg-hell-surface-subtle p-hell-2"
       >
         <ng-template
           hellToolbarAction
           label="Invite member"
-          priority="primary"
+          overflow="never"
           variant="primary"
           (activated)="run('invite')"
         >
@@ -86,12 +86,12 @@ const MEMBERS: readonly Member[] = [
         <ng-template
           hellToolbarAction
           label="Remove selected"
-          priority="overflowOnly"
+          overflow="always"
           (activated)="run('remove')"
         >
           <hell-icon name="faSolidXmark" size="13px" />
         </ng-template>
-      </hell-toolbar>
+      </hell-overflow-toolbar>
 
       <div hellTableContainer>
         <table hellTableRoot>

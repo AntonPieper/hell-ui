@@ -291,6 +291,7 @@ const packageConsumerScenarioCatalog = [
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
       'mask:var(--hell-icon-refresh) center/contain no-repeat',
+      'hell-overflow-toolbar[data-slot=root]',
     ],
   },
   {
@@ -2053,6 +2054,10 @@ import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import {
+  HELL_TOOLBAR_DIRECTIVES,
+  type HellOverflowToolbarUi,
+} from '${packageName}/toolbar';
+import {
   HELL_TOAST_DIRECTIVES,
   HellToastService,
   type HellToasterUi,
@@ -2084,6 +2089,7 @@ interface SearchItem {
     HellDialpad,
     HellFileUpload,
     HellTimeInput,
+    ...HELL_TOOLBAR_DIRECTIVES,
     ...HELL_TOAST_DIRECTIVES,
   ],
   template: \`
@@ -2139,6 +2145,33 @@ interface SearchItem {
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
         <hell-file-upload [items]="uploadItems" [ui]="fileUploadUi" />
+
+        <div hellToolbar label="Formatting" ui="w-fit">
+          <button hellToolbarItem type="button" (click)="toolbarActivations += 1">Bold</button>
+          <button hellToolbarItem type="button" disabled>Locked</button>
+          <button hellToolbarItem type="button" (click)="toolbarActivations += 1">Share</button>
+        </div>
+
+        <hell-overflow-toolbar label="Package actions" [ui]="overflowToolbarUi">
+          <ng-template
+            hellToolbarAction
+            label="Create"
+            overflow="never"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+          <ng-template
+            hellToolbarAction
+            label="Duplicate"
+            overflow="auto"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+          <ng-template
+            hellToolbarAction
+            label="Settings"
+            overflow="always"
+            (activated)="toolbarActivations += 1"
+          ></ng-template>
+        </hell-overflow-toolbar>
       </main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
@@ -2169,7 +2202,11 @@ class App {
   protected readonly dialogOverlayUi = { root: 'p-hell-4' };
   protected readonly dialogUi = { root: 'max-w-[520px]' };
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
+  protected readonly overflowToolbarUi = {
+    root: 'max-w-[480px]',
+  } satisfies HellOverflowToolbarUi;
   protected readonly toasterUi = { toast: 'ring-1 ring-hell-border' } satisfies HellToasterUi;
+  protected toolbarActivations = 0;
   protected toastRef: HellToastRef | null = null;
   protected readonly searchItems: readonly SearchItem[] = [
     { label: 'Dialog', section: 'Feedback' },
@@ -2861,6 +2898,7 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/file-upload/styles.css";
 @import "${packageName}/omnibar/styles.css";
 @import "${packageName}/time-input/styles.css";
+@import "${packageName}/toolbar/styles.css";
 @import "${packageName}/toast/styles.css";
 `;
 }

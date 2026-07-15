@@ -7,8 +7,8 @@ import { ToolbarBasicExample } from './examples/basic.example';
 import toolbarBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import { ToolbarPrioritiesExample } from './examples/priorities.example';
-import toolbarPrioritiesExampleCodeRaw from './examples/priorities.example.ts?raw' with {
+import { ToolbarOverflowPoliciesExample } from './examples/overflow-policies.example';
+import toolbarOverflowPoliciesExampleCodeRaw from './examples/overflow-policies.example.ts?raw' with {
   loader: 'text',
 };
 import { ToolbarIconOnlyExample } from './examples/icon-only.example';
@@ -32,7 +32,7 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
     PageHeader,
     ToolbarContractHarnessPage,
     ToolbarBasicExample,
-    ToolbarPrioritiesExample,
+    ToolbarOverflowPoliciesExample,
     ToolbarIconOnlyExample,
     ToolbarTableExample,
     ToolbarStylingExample,
@@ -50,31 +50,30 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             importPath="@hell-ui/angular/toolbar"
             stylesPath="@hell-ui/angular/toolbar/styles.css"
           >
-            A responsive action toolbar: declare each action once and the toolbar renders what fits
-            as buttons and collapses the rest into a trailing overflow menu, following the WAI-ARIA
-            toolbar keyboard pattern.
+            Two focused Interfaces: a plain directive Toolbar for consumer-owned controls, and an
+            Overflow Toolbar Composite for measured action placement.
           </hd-page-header>
           <p>
-            <code>hell-toolbar</code> projects <code>ng-template hellToolbarAction</code> children —
-            one declaration per action carrying a <code>label</code>, optional icon template,
-            <code>disabled</code> state, and <code>priority</code>. The toolbar measures its own
-            container with a <code>ResizeObserver</code> and renders the actions that fit as inline
-            Hell buttons, moving the overflow into a trailing Hell menu. There is one tab stop:
-            arrow keys rove across the visible actions and the overflow trigger, so a dense toolbar
-            never costs one Tab press per button.
+            Use <code>[hellToolbar]</code> with <code>[hellToolbarItem]</code> for an ordinary
+            WAI-ARIA toolbar. It contributes the role, accessible name, orientation, root recipe,
+            and one roving tab stop; your native buttons, Hell Buttons, Tooltips, layout, and click
+            handlers stay in your template. It creates no <code>ResizeObserver</code>, measurement
+            row, portal, or duplicate rendering.
           </p>
           <p>
-            Because the same declaration drives both renderings, an action's label and disabled
-            state stay identical whether it shows as a button or a menu item, and no action ever
-            becomes unreachable as the container shrinks.
+            Use <code>hell-overflow-toolbar</code> only when actions must move between an inline row
+            and a trailing menu as the component's own container changes width. That Composite
+            keeps the existing declaration templates, measurement, focus rescue, widgets,
+            group-aware separators, and synchronized open menu.
           </p>
 
-          <h2>Basic</h2>
+          <h2>Plain Toolbar</h2>
           <p>
-            A handful of actions with icons. <code>New</code> is <code>primary</code> so it never
-            collapses; <code>Settings</code> is <code>overflowOnly</code> so it always lives in the
-            menu; everything in between overflows when space runs out. Resize the preview to watch
-            the row recompute.
+            Apply <code>hellToolbar</code> to consumer-owned markup and
+            <code>hellToolbarItem</code> to each interactive control. The root may refine its single
+            <code>root</code> Public Part through <code>ui</code>; item styling and activation remain
+            with the composed control. This example chooses <code>flex-wrap</code> as an app-owned
+            layout decision.
           </p>
         </div>
 
@@ -83,35 +82,12 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </hd-example-tabs>
 
         <div class="hd-prose">
-          <h2>Priorities</h2>
+          <h2>HellButton and Tooltip composition</h2>
           <p>
-            The three priorities in a deliberately narrow container. <code>primary</code> actions
-            never overflow, <code>default</code> actions collapse last-declared first as width
-            shrinks, and <code>overflowOnly</code> actions only ever appear in the menu. An optional
-            <code>variant</code> lets a primary action read as the emphasized button.
-          </p>
-        </div>
-
-        <hd-example-tabs [code]="prioritiesCode">
-          <app-toolbar-priorities-example />
-        </hd-example-tabs>
-
-        <div class="hd-prose">
-          <h2>Icon-only actions and separators</h2>
-          <p>
-            Add <code>iconOnly</code> to an action to render a compact, square icon button inline:
-            the label becomes the button's accessible name (<code>aria-label</code>) and a native
-            <code>title</code> tooltip, and the visible text is hidden. The overflow menu still shows
-            the full label, so the action stays legible once collapsed. Because the toolbar owns the
-            inline button, richer tooltips are a native <code>title</code>; when you need a full
-            <code>@hell-ui/angular/tooltip</code> popover, keep the action a labelled button or reach
-            for a <code>hellToolbarWidget</code>.
-          </p>
-          <p>
-            A <code>hellToolbarSeparator</code> template declares a group divider: it renders as an
-            inline divider between two visible groups and as a menu separator between two overflowed
-            groups. Collapse is group-aware — a group between separators overflows as a unit rather
-            than stranding a half-cluster, and edge or doubled separators are dropped automatically.
+            <code>hellToolbarItem</code> has no class binding and does not emit an activation event.
+            The same element can therefore remain a <code>hellButton</code>, a Tooltip trigger, and a
+            consumer-owned <code>(click)</code> target. Disabled items register as disabled and are
+            skipped by Arrow and Home/End navigation.
           </p>
         </div>
 
@@ -120,15 +96,59 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </hd-example-tabs>
 
         <div class="hd-prose">
-          <h2>Standalone above a table, with a widget</h2>
+          <h2>Overflow policies</h2>
           <p>
-            The toolbar is not tied to the page header — it works anywhere. Here it sits above a
-            <code>@hell-ui/angular/table</code> as a table action bar: a primary “Invite member”, a
-            separator, icon-only table controls that overflow on narrow screens, a
-            <code>hellToolbarWidget</code> search field, and a destructive <code>overflowOnly</code>
-            action kept out of the way in the menu. A widget projects arbitrary content that stays
-            in the layout and the roving tab order but never collapses into the menu — the honest
-            boundary between things that can menu-ify (actions) and things that cannot (widgets).
+            <code>hell-overflow-toolbar</code> renders each
+            <code>ng-template[hellToolbarAction]</code> inline or in its menu from one explicit
+            placement policy. The <code>overflow</code> input defaults to <code>auto</code>.
+          </p>
+          <table class="hd-doc-table">
+            <thead>
+              <tr>
+                <th>Policy</th>
+                <th>Placement</th>
+                <th>Pre-split migration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>never</code></td>
+                <td>Always inline.</td>
+                <td><code>priority="primary"</code></td>
+              </tr>
+              <tr>
+                <td><code>auto</code></td>
+                <td>Inline while it fits; then in the menu.</td>
+                <td><code>priority="default"</code></td>
+              </tr>
+              <tr>
+                <td><code>always</code></td>
+                <td>Only in the menu.</td>
+                <td><code>priority="overflowOnly"</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The old selector, class, input, and policy type have no aliases: rename
+            <code>hell-toolbar</code> to <code>hell-overflow-toolbar</code>,
+            <code>HellToolbar</code> to <code>HellOverflowToolbar</code>,
+            <code>priority</code> to <code>overflow</code>, and
+            <code>HellToolbarActionPriority</code> to <code>HellToolbarActionOverflow</code>.
+          </p>
+        </div>
+
+        <hd-example-tabs [code]="overflowPoliciesCode">
+          <app-toolbar-overflow-policies-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>Groups and widgets</h2>
+          <p>
+            <code>hellToolbarSeparator</code> declares a group boundary. Trailing groups move as a
+            unit, and separators render only when they divide two visible groups in the relevant
+            placement. <code>hellToolbarWidget</code> projects a search field or other control that
+            stays inline and participates in the Composite's focus engine without being duplicated
+            into the menu.
           </p>
         </div>
 
@@ -137,13 +157,11 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </hd-example-tabs>
 
         <div class="hd-prose">
-          <h2>Styling</h2>
+          <h2>Overflow Toolbar styling</h2>
           <p>
-            Toolbar follows Hell's Part Style Map contract. A <code>ui="..."</code> shorthand
-            refines the default <code>root</code> part; a <code>[ui]</code> map refines named parts.
-            The <code>action</code>, <code>overflowTrigger</code>, <code>overflowMenu</code>, and
-            <code>overflowItem</code> refinements are forwarded to the inline buttons, the trigger,
-            and the overflow menu respectively, so both renderings stay coherent.
+            The measured Composite exposes <code>HellOverflowToolbarPart</code> and
+            <code>HellOverflowToolbarUi</code>. Its flat Part Style Map owns only its anatomy; plain
+            Toolbar items keep the Part Style Maps of their consumer-owned controls.
           </p>
           <table class="hd-doc-table">
             <thead>
@@ -153,38 +171,14 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><code>root</code></td>
-                <td>The host <code>role="toolbar"</code> element and its layout.</td>
-              </tr>
-              <tr>
-                <td><code>action</code></td>
-                <td>Each inline action button (a <code>hellButton</code>).</td>
-              </tr>
-              <tr>
-                <td><code>separator</code></td>
-                <td>An inline group divider rendered from a <code>hellToolbarSeparator</code>.</td>
-              </tr>
-              <tr>
-                <td><code>widget</code></td>
-                <td>The wrapper around a <code>hellToolbarWidget</code>'s projected content.</td>
-              </tr>
-              <tr>
-                <td><code>overflowTrigger</code></td>
-                <td>The trailing “More actions” button that opens the overflow menu.</td>
-              </tr>
-              <tr>
-                <td><code>overflowMenu</code></td>
-                <td>The overflow menu panel (a <code>hellMenu</code>).</td>
-              </tr>
-              <tr>
-                <td><code>overflowItem</code></td>
-                <td>Each overflowed action rendered as a menu item.</td>
-              </tr>
-              <tr>
-                <td><code>overflowSeparator</code></td>
-                <td>A group divider between overflowed groups (a <code>hellMenuSeparator</code>).</td>
-              </tr>
+              <tr><td><code>root</code></td><td>The host toolbar and layout.</td></tr>
+              <tr><td><code>action</code></td><td>Each inline action button.</td></tr>
+              <tr><td><code>separator</code></td><td>An inline group divider.</td></tr>
+              <tr><td><code>widget</code></td><td>The wrapper around projected widget content.</td></tr>
+              <tr><td><code>overflowTrigger</code></td><td>The trailing menu trigger.</td></tr>
+              <tr><td><code>overflowMenu</code></td><td>The overflow menu panel.</td></tr>
+              <tr><td><code>overflowItem</code></td><td>Each action rendered as a menu item.</td></tr>
+              <tr><td><code>overflowSeparator</code></td><td>A divider between menu groups.</td></tr>
             </tbody>
           </table>
         </div>
@@ -195,125 +189,78 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
 
         <div class="hd-prose">
           <h2>API</h2>
-          <p><strong><code>hell-toolbar</code></strong> (<code>HellToolbar</code>) inputs:</p>
+          <p><strong><code>[hellToolbar]</code></strong> (<code>HellToolbar</code>) inputs:</p>
           <ul>
-            <li><code>label</code>: <code>string</code>. Accessible name (<code>aria-label</code>). Default <code>''</code>.</li>
-            <li><code>labelledBy</code>: <code>string</code>. ID for <code>aria-labelledby</code>. Default <code>''</code>.</li>
-            <li>
-              <code>orientation</code>: <code>'horizontal' | 'vertical'</code>. Layout axis and
-              arrow-key direction. Overflow collapsing applies to horizontal toolbars. Default
-              <code>'horizontal'</code>.
-            </li>
-            <li><code>size</code>: <code>HellSize</code>. Applied to buttons and trigger. Default <code>'sm'</code>.</li>
-            <li>
-              <code>overflowLabel</code>: <code>string</code>. Accessible label for the overflow
-              trigger. Defaults to <code>''</code>, which falls back to the toolbar Label Contract's
-              <code>overflowTrigger</code> string (<code>'More actions'</code>). Override the default
-              globally with <code>HELL_TOOLBAR_LABELS</code> rather than hardcoding the input.
-            </li>
-            <li>
-              <code>ui</code>: <code>HellUiInput&lt;HellToolbarPart&gt;</code> — a shorthand class
-              string for the <code>root</code> part or a <code>HellToolbarUi</code> map.
-            </li>
+            <li><code>label</code>: accessible name mapped to <code>aria-label</code>.</li>
+            <li><code>labelledBy</code>: ID mapped to <code>aria-labelledby</code>.</li>
+            <li><code>orientation</code>: <code>'horizontal' | 'vertical'</code>; default <code>'horizontal'</code>.</li>
+            <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
           <p>
-            <strong><code>ng-template hellToolbarAction</code></strong>
-            (<code>HellToolbarAction</code>) — one declaration, rendered inline or in the menu. The
-            template's content is the optional leading icon.
+            <strong><code>[hellToolbarItem]</code></strong> (<code>HellToolbarItem</code>) registers
+            one consumer-owned control. Its <code>disabled</code> binding feeds roving-focus
+            registration; the composed native or Hell control remains responsible for disabled
+            semantics and activation.
+          </p>
+
+          <p>
+            <strong><code>hell-overflow-toolbar</code></strong>
+            (<code>HellOverflowToolbar</code>) inputs:
           </p>
           <ul>
-            <li><code>label</code>: <code>string</code> (required). Button text and menu-item text.</li>
-            <li><code>disabled</code>: <code>boolean</code>. Disables both renderings. Default <code>false</code>.</li>
-            <li>
-              <code>priority</code>: <code>'primary' | 'default' | 'overflowOnly'</code>. Default
-              <code>'default'</code>.
-            </li>
-            <li>
-              <code>iconOnly</code>: <code>boolean</code>. Renders the inline button icon-only, taking
-              its accessible name and <code>title</code> tooltip from <code>label</code>; the menu
-              item still shows the label. Default <code>false</code>.
-            </li>
-            <li><code>variant</code>: <code>HellButtonVariant</code>. Inline button variant; ignored in the menu. Default <code>'default'</code>.</li>
-            <li><code>activated</code>: <code>output&lt;void&gt;</code>. Emits from whichever rendering is activated.</li>
+            <li><code>label</code> / <code>labelledBy</code>: accessible name.</li>
+            <li><code>orientation</code>: layout and arrow-key axis; default <code>'horizontal'</code>.</li>
+            <li><code>size</code>: inline action and trigger size; default <code>'sm'</code>.</li>
+            <li><code>overflowLabel</code>: per-instance trigger name override.</li>
+            <li><code>ui</code>: <code>HellUiInput&lt;HellOverflowToolbarPart&gt;</code>.</li>
           </ul>
-          <p>
-            <strong><code>ng-template hellToolbarSeparator</code></strong>
-            (<code>HellToolbarSeparator</code>) — a group divider. Renders inline between two visible
-            groups and as a menu separator between two overflowed groups; makes collapse group-aware.
-          </p>
-          <p>
-            <strong><code>ng-template hellToolbarWidget</code></strong>
-            (<code>HellToolbarWidget</code>) — projected content (search field, select, toggle group)
-            that stays inline and in the roving tab order but never collapses or menu-ifies. Place
-            interactive widgets like a search field at the end: they capture their own arrow keys, so
-            <code>Tab</code> (not arrows) moves out of the toolbar.
-          </p>
-          <p>Content projection and exports:</p>
+          <p><strong><code>ng-template[hellToolbarAction]</code></strong> inputs and output:</p>
+          <ul>
+            <li><code>label</code>: required button/menu-item label.</li>
+            <li><code>disabled</code>: identical disabled state in both renderings.</li>
+            <li><code>overflow</code>: <code>'never' | 'auto' | 'always'</code>; default <code>'auto'</code>.</li>
+            <li><code>iconOnly</code> and <code>variant</code>: inline HellButton presentation.</li>
+            <li><code>activated</code>: one output shared by inline and menu activation.</li>
+          </ul>
+          <p>Exports and labels:</p>
           <ul>
             <li>
-              <code>HELL_TOOLBAR_DIRECTIVES</code> — bulk-import tuple of <code>HellToolbar</code>,
-              <code>HellToolbarAction</code>, <code>HellToolbarSeparator</code>, and
-              <code>HellToolbarWidget</code>.
+              <code>HELL_TOOLBAR_DIRECTIVES</code> contains <code>HellToolbar</code>,
+              <code>HellToolbarItem</code>, <code>HellOverflowToolbar</code>, and the three measured
+              declaration directives.
             </li>
             <li>
-              <code>HELL_TOOLBAR_LABELS</code> / <code>HELL_TOOLBAR_LABELS</code> — the Label
-              Contract for the overflow-trigger name and its English default.
+              <code>HELL_OVERFLOW_TOOLBAR_LABELS</code>,
+              <code>HellOverflowToolbarLabels</code>, and
+              <code>provideHellOverflowToolbarLabels</code> own the overflow-trigger label.
             </li>
             <li>
-              <code>HellToolbarPart</code> —
-              <code>'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator'</code>;
-              <code>HellToolbarUi</code> is <code>HellUi&lt;HellToolbarPart&gt;</code>.
+              <code>HellToolbarActionOverflow</code>, <code>HellOverflowToolbarPart</code>, and
+              <code>HellOverflowToolbarUi</code> are the public policy and styling types.
             </li>
           </ul>
 
           <h2>Accessibility</h2>
           <ul>
-            <li>The host is a <code>role="toolbar"</code> with <code>aria-orientation</code>; give it a name via <code>label</code> or <code>labelledBy</code>.</li>
-            <li>
-              A roving tabindex gives the toolbar a single tab stop: arrow keys move between the
-              visible action buttons, widgets, and the overflow trigger, and
-              <code>Home</code>/<code>End</code> jump to the ends, per the WAI-ARIA toolbar pattern.
-            </li>
-            <li>
-              When the focused action collapses out of the row as the container narrows, focus moves
-              to the overflow trigger (where the action now lives) instead of dropping to the page.
-            </li>
-            <li>
-              Interactive widgets own their own keys: a focused text field or select consumes the
-              arrow keys for editing, so use <code>Tab</code> to leave the toolbar from a widget.
-            </li>
-            <li>
-              Icon-only actions keep an accessible name from <code>label</code> and expose it as a
-              native <code>title</code> tooltip, so the button is never a nameless glyph.
-            </li>
-            <li>
-              Overflowed actions live in the standard Hell menu with the same labels and disabled
-              states, so no action becomes unreachable at any width.
-            </li>
-            <li>
-              An open overflow menu stays in sync during resize: its items are driven by the same
-              reactive membership as the inline row, so an action moving back inline drops out of
-              the open menu in the same render — nothing is ever shown in both places at once, and
-              the menu stays open as long as overflowed actions remain.
-            </li>
-            <li>Overflow recalculation is measured and committed outside change detection, once per resize frame, so the row does not flicker or flash a clipped first paint.</li>
+            <li>Name every toolbar with <code>label</code> or <code>labelledBy</code>.</li>
+            <li>Plain Toolbar delegates one tab stop plus Arrow/Home/End behavior to ng-primitives; disabled items are skipped.</li>
+            <li>Overflow Toolbar preserves the same visible-control focus model and rescues focus to its trigger when a focused action moves into the menu.</li>
+            <li>An open overflow menu updates from the same reactive membership during resize, so an action never appears in both placements at once.</li>
+            <li>Icon-only consumer controls need their own accessible name; Tooltip content supplements rather than replaces it.</li>
           </ul>
 
           <h2>Do</h2>
           <ul class="hd-do">
-            <li>Give every action a clear <code>label</code>; it names both the button and the menu item.</li>
-            <li>Reserve <code>primary</code> for the one or two actions that must always stay visible.</li>
-            <li>Use <code>overflowOnly</code> for rare or destructive actions that should stay tucked away.</li>
-            <li>Group related actions with <code>hellToolbarSeparator</code> so clusters collapse together.</li>
-            <li>Put interactive widgets (search, select) at the end, and keep them to things that should never menu-ify.</li>
-            <li>Name the toolbar with <code>label</code> or <code>labelledBy</code>.</li>
+            <li>Start with plain Toolbar when controls can stay in consumer-owned markup.</li>
+            <li>Use Overflow Toolbar only for measured responsive placement.</li>
+            <li>Use <code>never</code> sparingly and group related auto actions with separators.</li>
           </ul>
 
           <h2>Don't</h2>
           <ul class="hd-dont">
-            <li>Don't put every action at <code>primary</code> — nothing overflows and the row clips on narrow screens.</li>
-            <li>Don't wire separate handlers per rendering; the single <code>activated</code> output fires from both.</li>
-            <li>Don't rely on the viewport width — the toolbar measures its own container.</li>
+            <li>Don't use Overflow Toolbar as a wrapper for a fixed row of ordinary buttons.</li>
+            <li>Don't duplicate click handlers or disabled state between inline and menu renderings.</li>
+            <li>Don't rely on viewport width; Overflow Toolbar measures its own container.</li>
           </ul>
         </div>
       </article>
@@ -326,7 +273,7 @@ export class ToolbarPage {
   protected readonly showHarness = this.route.snapshot.queryParamMap.has('toolbarHarness');
 
   protected readonly basicCode = toolbarBasicExampleCodeRaw;
-  protected readonly prioritiesCode = toolbarPrioritiesExampleCodeRaw;
+  protected readonly overflowPoliciesCode = toolbarOverflowPoliciesExampleCodeRaw;
   protected readonly iconOnlyCode = toolbarIconOnlyExampleCodeRaw;
   protected readonly tableCode = toolbarTableExampleCodeRaw;
   protected readonly stylingCode = toolbarStylingExampleCodeRaw;

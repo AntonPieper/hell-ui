@@ -2,19 +2,19 @@
 @source "./toolbar.ts";
 
 @layer components {
-  hell-toolbar[data-slot='root'] {
+  hell-overflow-toolbar[data-slot='root'] {
     position: relative;
     display: flex;
     width: 100%;
     min-width: calc(var(--spacing) * 0);
   }
 
-  hell-toolbar[data-slot='root'][data-orientation='vertical'] {
+  hell-overflow-toolbar[data-slot='root'][data-orientation='vertical'] {
     flex-direction: column;
     align-items: stretch;
   }
 
-  hell-toolbar[data-slot='root'] [data-hell-toolbar-actions] {
+  hell-overflow-toolbar[data-slot='root'] [data-hell-overflow-toolbar-actions] {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
@@ -27,27 +27,28 @@
     overflow: hidden;
   }
 
-  hell-toolbar[data-slot='root'][data-orientation='vertical'] [data-hell-toolbar-actions] {
+  hell-overflow-toolbar[data-slot='root'][data-orientation='vertical']
+    [data-hell-overflow-toolbar-actions] {
     flex-direction: column;
     align-items: stretch;
   }
 
-  hell-toolbar[data-slot='root'] [data-slot='action'],
-  hell-toolbar[data-slot='root'] [data-slot='overflowTrigger'] {
+  hell-overflow-toolbar[data-slot='root'] [data-slot='action'],
+  hell-overflow-toolbar[data-slot='root'] [data-slot='overflowTrigger'] {
     flex: 0 0 auto;
   }
 
-  hell-toolbar[data-slot='root'] .hell-toolbar-action-label {
+  hell-overflow-toolbar[data-slot='root'] .hell-overflow-toolbar-action-label {
     white-space: nowrap;
   }
 
-  hell-toolbar[data-slot='root'] .hell-toolbar-overflow-glyph {
+  hell-overflow-toolbar[data-slot='root'] .hell-overflow-toolbar-overflow-glyph {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  [data-slot='overflowItem'] .hell-toolbar-overflow-item-icon {
+  [data-slot='overflowItem'] .hell-overflow-toolbar-overflow-item-icon {
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
@@ -59,7 +60,7 @@
      width so the overflow policy always has fresh, non-zero widths regardless
      of what is currently visible. Kept inert and out of the layout so it can be
      measured without painting, taking focus, or forcing container scroll. */
-  hell-toolbar[data-slot='root'] .hell-toolbar-measure {
+  hell-overflow-toolbar[data-slot='root'] .hell-overflow-toolbar-measure {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 0;
@@ -74,7 +75,9 @@
     pointer-events: none;
   }
 
-  hell-toolbar[data-slot='root'] .hell-toolbar-measure .hell-toolbar-measure-item {
+  hell-overflow-toolbar[data-slot='root']
+    .hell-overflow-toolbar-measure
+    .hell-overflow-toolbar-measure-item {
     flex: 0 0 auto;
   }
 }

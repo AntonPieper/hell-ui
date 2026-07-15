@@ -1987,14 +1987,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/page-header',
  detail:'components/page-header/examples/list.example.ts',
  terms:
-'page header page-header components/page-header/examples/list.example hell-page-header hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar HELL_PAGE_HEADER_DIRECTIVES hell-toolbar heading title meta badge tag description toolbar list screen composite chrome',
+'page header page-header components/page-header/examples/list.example hell-page-header hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar HELL_PAGE_HEADER_DIRECTIVES hell-overflow-toolbar heading title meta badge tag description toolbar list screen composite chrome',
  },
  {
  title:'Page header: Detail screen',
  path:'/components/page-header',
  detail:'components/page-header/examples/detail.example.ts',
  terms:
-'page header page-header components/page-header/examples/detail.example hell-page-header hell-page-header-back HellPageHeaderBack back affordance event breadcrumbs hellBreadcrumbs hellPageHeaderLeading hellPageHeaderToolbar hell-toolbar detail screen leading title composite',
+'page header page-header components/page-header/examples/detail.example hell-page-header hell-page-header-back HellPageHeaderBack back affordance event breadcrumbs hellBreadcrumbs hellPageHeaderLeading hellPageHeaderToolbar hell-overflow-toolbar detail screen leading title composite',
  },
  {
  title:'Page header: Styling',
@@ -2008,35 +2008,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toolbar',
  detail:'components/toolbar/examples/basic.example.ts',
  terms:
-'toolbar components/toolbar/examples/basic.example hell-toolbar hellToolbarAction HELL_TOOLBAR_DIRECTIVES hell-icon priority primary default overflowOnly overflow menu responsive resize actions label activated smallest usage',
+'toolbar components/toolbar/examples/basic.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem HELL_TOOLBAR_DIRECTIVES hellButton consumer-owned click roving focus Arrow Home End orientation label ordinary primitive smallest usage',
  },
  {
- title:'Toolbar: Priorities',
+ title:'Toolbar: Overflow policies',
  path:'/components/toolbar',
- detail:'components/toolbar/examples/priorities.example.ts',
+ detail:'components/toolbar/examples/overflow-policies.example.ts',
  terms:
-'toolbar priorities components/toolbar/examples/priorities.example hell-toolbar hellToolbarAction priority primary default overflowOnly never overflows collapse narrow container variant overflow menu more actions',
+'toolbar overflow policies components/toolbar/examples/overflow-policies.example hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always collapse narrow container variant overflow menu more actions measured composite',
  },
  {
  title:'Toolbar: Icon-only actions and separators',
  path:'/components/toolbar',
  detail:'components/toolbar/examples/icon-only.example.ts',
  terms:
-'toolbar icon-only components/toolbar/examples/icon-only.example hell-toolbar hellToolbarAction hellToolbarSeparator iconOnly aria-label title tooltip separator group divider formatting bold italic align compact square icon button overflow menu label',
+'toolbar icon-only components/toolbar/examples/icon-only.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem hellButton hellTooltip hellTooltipTrigger iconOnly aria-label tooltip separator formatting bold italic align compact square icon button consumer-owned label',
  },
  {
  title:'Toolbar: Standalone above a table, with a widget',
  path:'/components/toolbar',
  detail:'components/toolbar/examples/table-toolbar.example.ts',
  terms:
-'toolbar table standalone widget components/toolbar/examples/table-toolbar.example hell-toolbar hellToolbarAction hellToolbarSeparator hellToolbarWidget iconOnly search field never collapses HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
+'toolbar table standalone widget components/toolbar/examples/table-toolbar.example hell-overflow-toolbar HellOverflowToolbar hellToolbarAction hellToolbarSeparator hellToolbarWidget iconOnly search field never collapses HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
  },
  {
  title:'Toolbar: Styling',
  path:'/components/toolbar',
  detail:'components/toolbar/examples/styling.example.ts',
  terms:
-'toolbar styling all-parts components/toolbar/examples/styling.example hell-toolbar hellToolbarAction ui HellToolbarUi HellToolbarPart part style map root action overflowTrigger overflowMenu overflowItem bg-hell-primary-soft rounded-hell tokens',
+'toolbar styling all-parts components/toolbar/examples/styling.example hell-overflow-toolbar HellOverflowToolbar hellToolbarAction ui HellOverflowToolbarUi HellOverflowToolbarPart part style map root action overflowTrigger overflowMenu overflowItem bg-hell-primary-soft rounded-hell tokens',
  },
  {
  title:'Tooltip: Styling',
@@ -2230,9 +2230,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Toolbar directives',
  path:'/components/toolbar',
- detail:'hell-toolbar, hellToolbarAction',
+ detail:'hellToolbar, hellToolbarItem, hell-overflow-toolbar, hellToolbarAction',
  terms:
-'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
+'HELL_TOOLBAR_DIRECTIVES hellToolbar hellToolbarItem HellToolbar HellToolbarItem hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellOverflowToolbarPart HellOverflowToolbarUi HellOverflowToolbarLabels provideHellOverflowToolbarLabels',
  },
  {
  title:'Time input adapter',

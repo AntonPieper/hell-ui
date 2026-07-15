@@ -22,8 +22,8 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       <span hellChip hellPageHeaderMeta variant="info">24 seats</span>
       <p hellPageHeaderDescription>Everyone with access to the Acme workspace.</p>
 
-      <hell-toolbar hellPageHeaderToolbar label="Member actions">
-        <ng-template hellToolbarAction label="Invite" priority="primary" (activated)="run('invite')">
+      <hell-overflow-toolbar hellPageHeaderToolbar label="Member actions">
+        <ng-template hellToolbarAction label="Invite" overflow="never" (activated)="run('invite')">
           <hell-icon name="faSolidPlus" size="13px" />
         </ng-template>
         <ng-template hellToolbarAction label="Filter" (activated)="run('filter')">
@@ -35,12 +35,12 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
         <ng-template
           hellToolbarAction
           label="Settings"
-          priority="overflowOnly"
+          overflow="always"
           (activated)="run('settings')"
         >
           <hell-icon name="faSolidGear" size="13px" />
         </ng-template>
-      </hell-toolbar>
+      </hell-overflow-toolbar>
     </hell-page-header>
 
     <p class="mt-hell-3 text-sm text-hell-foreground-muted">

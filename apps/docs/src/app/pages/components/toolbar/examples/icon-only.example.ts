@@ -7,8 +7,10 @@ import {
   faSolidBold,
   faSolidItalic,
 } from '@ng-icons/font-awesome/solid';
+import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 @Component({
   selector: 'app-toolbar-icon-only-example',
@@ -22,41 +24,90 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       faSolidAlignRight,
     }),
   ],
-  imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
   template: `
     <div class="flex flex-col gap-hell-3">
-      <hell-toolbar label="Text formatting">
-        <ng-template hellToolbarAction label="Bold" iconOnly (activated)="run('bold')">
-          <hell-icon name="faSolidBold" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Italic" iconOnly (activated)="run('italic')">
-          <hell-icon name="faSolidItalic" size="13px" />
-        </ng-template>
-
-        <ng-template hellToolbarSeparator />
-
-        <ng-template hellToolbarAction label="Align left" iconOnly (activated)="run('align-left')">
-          <hell-icon name="faSolidAlignLeft" size="13px" />
-        </ng-template>
-        <ng-template
-          hellToolbarAction
-          label="Align center"
+      <div hellToolbar label="Text formatting">
+        <button
+          hellButton
+          hellToolbarItem
           iconOnly
-          (activated)="run('align-center')"
+          size="sm"
+          type="button"
+          aria-label="Bold"
+          [hellTooltipTrigger]="boldHint"
+          (click)="run('bold')"
+        >
+          <hell-icon name="faSolidBold" size="13px" />
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Italic"
+          [hellTooltipTrigger]="italicHint"
+          (click)="run('italic')"
+        >
+          <hell-icon name="faSolidItalic" size="13px" />
+        </button>
+
+        <span
+          class="mx-hell-1 h-5 w-px bg-hell-border"
+          role="separator"
+          aria-orientation="vertical"
+        ></span>
+
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Align left"
+          [hellTooltipTrigger]="alignLeftHint"
+          (click)="run('align-left')"
+        >
+          <hell-icon name="faSolidAlignLeft" size="13px" />
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Align center"
+          [hellTooltipTrigger]="alignCenterHint"
+          (click)="run('align-center')"
         >
           <hell-icon name="faSolidAlignCenter" size="13px" />
-        </ng-template>
-        <ng-template hellToolbarAction label="Align right" iconOnly (activated)="run('align-right')">
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Align right"
+          [hellTooltipTrigger]="alignRightHint"
+          (click)="run('align-right')"
+        >
           <hell-icon name="faSolidAlignRight" size="13px" />
-        </ng-template>
-      </hell-toolbar>
+        </button>
+      </div>
+
+      <ng-template #boldHint><span hellTooltip>Bold</span></ng-template>
+      <ng-template #italicHint><span hellTooltip>Italic</span></ng-template>
+      <ng-template #alignLeftHint><span hellTooltip>Align left</span></ng-template>
+      <ng-template #alignCenterHint><span hellTooltip>Align center</span></ng-template>
+      <ng-template #alignRightHint><span hellTooltip>Align right</span></ng-template>
 
       <p class="m-0 text-sm text-hell-foreground-muted">
-        Each action sets <code>iconOnly</code>: the inline button hides its text, takes its accessible
-        name from <code>label</code> (so screen readers still announce “Bold”), and exposes the label
-        as a native <code>title</code> tooltip on hover. A <code>hellToolbarSeparator</code> groups the
-        two clusters; the overflow menu always shows the full label. Last action:
-        <strong>{{ lastAction() }}</strong>.
+        Each item is the same consumer-owned <code>hellButton</code>, Tooltip trigger, and click
+        handler it would be outside the toolbar. <code>hellToolbarItem</code> adds only focus
+        registration, so the richer tooltip and button classes compose without competing bindings.
+        Last action: <strong>{{ lastAction() }}</strong>.
       </p>
     </div>
   `,

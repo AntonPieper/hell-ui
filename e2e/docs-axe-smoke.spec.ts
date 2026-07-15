@@ -351,7 +351,11 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Toolbar',
     include: ['main', '[data-slot="overflowMenu"]'],
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'More actions' }).first().click();
+      await page
+        .locator('hell-overflow-toolbar')
+        .first()
+        .getByRole('button', { name: 'More actions' })
+        .click();
       await expect(page.getByRole('menu').first()).toBeVisible();
     },
   },

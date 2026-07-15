@@ -64,24 +64,26 @@ test.describe('page header browser contract', () => {
 
     const example = page.locator('app-page-header-list-example');
     const header = example.locator('hell-page-header');
-    const toolbar = example.locator('[data-slot="toolbar"] hell-toolbar');
+    const toolbar = example.locator('[data-slot="toolbar"] hell-overflow-toolbar');
     const overflowTrigger = toolbar.getByRole('button', { name: 'More actions' });
 
     const inlineLabels = (): Promise<string[]> =>
       toolbar
-        .locator('.hell-toolbar-actions [data-slot="action"] .hell-toolbar-action-label')
+        .locator(
+          '.hell-overflow-toolbar-actions [data-slot="action"] .hell-overflow-toolbar-action-label',
+        )
         .allInnerTexts()
         .then((texts) => texts.map((text) => text.trim()).filter(Boolean));
 
-    // Baseline at the natural docs width: the primary and both default actions
-    // render inline (polled, because the toolbar starts collapsed-to-pinned and
+    // Baseline at the natural docs width: the never-overflow and both auto actions
+    // render inline (polled, because the toolbar starts collapsed-to-never and
     // only expands after its first measurement commits — first paint never
-    // flashes a clipped row). "Settings" is overflowOnly, so the trigger shows.
+    // flashes a clipped row). "Settings" is always-overflow, so the trigger shows.
     await expect.poll(inlineLabels).toEqual(['Invite', 'Filter', 'Export']);
     await expect(overflowTrigger).toBeVisible();
 
     // Narrow the header container: the flex-1 toolbar slot shrinks, so the two
-    // default actions collapse into the overflow menu while the primary stays
+    // auto actions collapse into the overflow menu while the never-overflow action stays
     // pinned inline. Driven through the container width the toolbar's
     // ResizeObserver watches — the same lever the toolbar's own contract uses.
     await header.evaluate((element: HTMLElement) => {
@@ -89,8 +91,8 @@ test.describe('page header browser contract', () => {
     });
     await expect.poll(inlineLabels).toEqual(['Invite']);
 
-    // No action is unreachable while collapsed: the defaults and the
-    // overflowOnly action are all in the menu.
+    // No action is unreachable while collapsed: the auto actions and the
+    // always-overflow action are all in the menu.
     await overflowTrigger.click();
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
@@ -100,7 +102,7 @@ test.describe('page header browser contract', () => {
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
 
-    // Widen again: the defaults recompute back inline (widen-then-recompute),
+    // Widen again: the auto actions recompute back inline (widen-then-recompute),
     // so no action is stranded in the menu once the room returns.
     await header.evaluate((element: HTMLElement) => {
       element.style.width = '900px';

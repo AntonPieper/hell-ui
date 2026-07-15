@@ -21,6 +21,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 /**
  * Query-param-only browser contract harness for the toolbar. Rendered on
@@ -51,10 +52,69 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       faSolidMagnifyingGlass,
     }),
   ],
-  imports: [HellButton, HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
   template: `
     <section class="grid gap-6 p-6" data-testid="toolbar-contract-harness">
       <h1>Toolbar contract harness</h1>
+
+      <h2>Plain Toolbar</h2>
+
+      <div hellToolbar label="Formatting actions" data-testid="plain-toolbar" ui="w-fit">
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Bold"
+          data-testid="plain-toolbar-bold"
+          (click)="run('Bold')"
+        >
+          <hell-icon name="faSolidBold" size="13px" />
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Locked"
+          data-testid="plain-toolbar-disabled"
+          disabled
+          (click)="run('Locked')"
+        >
+          <hell-icon name="faSolidLock" size="13px" />
+        </button>
+        <button
+          hellButton
+          hellToolbarItem
+          iconOnly
+          size="sm"
+          type="button"
+          aria-label="Share"
+          data-testid="plain-toolbar-share"
+          [hellTooltipTrigger]="shareHint"
+          (click)="run('Share')"
+        >
+          <hell-icon name="faSolidShareNodes" size="13px" />
+        </button>
+      </div>
+
+      <ng-template #shareHint><span hellTooltip>Share formatting</span></ng-template>
+
+      <div
+        hellToolbar
+        orientation="vertical"
+        label="Text alignment"
+        data-testid="plain-toolbar-vertical"
+        ui="w-fit"
+      >
+        <button hellButton hellToolbarItem size="sm" type="button">Align left</button>
+        <button hellButton hellToolbarItem size="sm" type="button" disabled>Align center</button>
+        <button hellButton hellToolbarItem size="sm" type="button">Align right</button>
+      </div>
+
+      <h2>Overflow Toolbar</h2>
 
       <div class="flex flex-wrap gap-hell-2">
         @for (width of widths; track width) {
@@ -75,8 +135,8 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
         [style.width.px]="containerWidth()"
         class="rounded-hell-md border border-hell-border bg-hell-surface p-hell-2"
       >
-        <hell-toolbar label="Harness actions" data-testid="toolbar">
-          <ng-template hellToolbarAction label="New" priority="primary" (activated)="run('New')">
+        <hell-overflow-toolbar label="Harness actions" data-testid="toolbar">
+          <ng-template hellToolbarAction label="New" overflow="never" (activated)="run('New')">
             <hell-icon name="faSolidPlus" size="13px" />
           </ng-template>
           <ng-template hellToolbarAction label="Edit" (activated)="run('Edit')">
@@ -97,12 +157,12 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
           <ng-template
             hellToolbarAction
             label="Settings"
-            priority="overflowOnly"
+            overflow="always"
             (activated)="run('Settings')"
           >
             <hell-icon name="faSolidGear" size="13px" />
           </ng-template>
-        </hell-toolbar>
+        </hell-overflow-toolbar>
       </div>
 
       <p>
@@ -131,11 +191,11 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
         [style.width.px]="capWidth()"
         class="rounded-hell-md border border-hell-border bg-hell-surface p-hell-2"
       >
-        <hell-toolbar label="Formatting" data-testid="toolbar-cap">
+        <hell-overflow-toolbar label="Formatting" data-testid="toolbar-cap">
           <ng-template
             hellToolbarAction
             label="Insert"
-            priority="primary"
+            overflow="never"
             variant="primary"
             (activated)="run('Insert')"
           >
@@ -185,12 +245,12 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
           <ng-template
             hellToolbarAction
             label="Clear formatting"
-            priority="overflowOnly"
+            overflow="always"
             (activated)="run('Clear formatting')"
           >
             <hell-icon name="faSolidXmark" size="13px" />
           </ng-template>
-        </hell-toolbar>
+        </hell-overflow-toolbar>
       </div>
     </section>
   `,
