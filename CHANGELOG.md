@@ -805,6 +805,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Toast creation now returns a small immutable `HellToastRef` instead
+  of a numeric id. Retain the result of `show()`, `message()`, `success()`,
+  `info()`, `warning()`, or `error()` and call `ref.update(patch)` or
+  `ref.dismiss()` for that toast. Updates patch in place: omitted fields stay
+  unchanged, nullable title/description/action/template fields clear with
+  `null`, only an explicit `duration` patch restarts the countdown, and updates
+  do not announce again. Once dismissal begins, both reference actions are
+  idempotent no-ops. `HellToastOptions.id`, `HellToastService.dismiss(id)`, the
+  writable `toasts` signal, `pauseAll()`/`resumeAll()`, and the
+  `HellToastTemplate` marker are removed; `dismissAll()` remains the only
+  stack-wide action. Native `ng-template` bodies now receive `HellToastRef` as
+  their implicit context, while renderer records, ids, timing, and stack
+  coordination remain private. Closes #189. Evidence: focused Toast unit and
+  Chromium behavior/axe contracts, packed composite consumer compilation,
+  live docs QA, and the contracted Toast API report.
 - The combobox joins the Label Contract: the `toggleLabel` and `emptyLabel`
   string inputs on `hell-combobox` are gone. Built-in copy (toggle button
   aria-label, empty, loading, and error messages) now comes from

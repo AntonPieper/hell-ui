@@ -332,6 +332,40 @@ test.describe('Hell UI browser behavior', () => {
     await expectNoSeriousA11yIssues(page, '[role="region"][aria-label="Notifications"]');
   });
 
+  test('toast reference updates content, variant, and duration in place', async ({ page }) => {
+    await page.goto('/components/toast');
+    await page.getByRole('button', { name: 'Upload report' }).click();
+
+    const notifications = page.getByRole('region', { name: 'Notifications' });
+    const toasts = notifications.locator('[data-slot="toast"]');
+    await expect(toasts).toHaveCount(1);
+    await expect(notifications.getByText('Uploading report.pdf', { exact: true })).toBeVisible();
+
+    await expect(notifications.getByText('Upload complete', { exact: true })).toBeVisible();
+    await expect(toasts).toHaveCount(1);
+    await expect(toasts).toHaveAttribute('data-variant', 'success');
+    await expect(notifications.getByText('report.pdf is ready to share.', { exact: true })).toBeVisible();
+
+    await notifications.getByRole('button', { name: 'Dismiss' }).click();
+    await expect(toasts).toHaveCount(0);
+  });
+
+  test('toast template references and actions retain scoped dismissal behavior', async ({ page }) => {
+    await page.goto('/components/toast');
+
+    await page.getByRole('button', { name: 'New comment' }).click();
+    const notifications = page.getByRole('region', { name: 'Notifications' });
+    const toasts = notifications.locator('[data-slot="toast"]');
+    await expect(toasts).toHaveCount(1);
+    await notifications.getByRole('button', { name: 'View' }).click();
+    await expect(toasts).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Move to trash' }).click();
+    await notifications.getByRole('button', { name: 'Undo' }).click();
+    await expect(notifications.getByText('Restored', { exact: true })).toBeVisible();
+    await expect(notifications.getByText('Moved to trash', { exact: true })).toHaveCount(0);
+  });
+
   test('toast stack scrolls long bursts and exposes dismiss all', async ({ page }) => {
     await page.goto('/components/toast');
     await page.getByRole('button', { name: 'Run deploy' }).click();

@@ -12,7 +12,7 @@ import { InjectionToken } from '@angular/core';
 import { TemplateRef } from '@angular/core';
 
 // @public
-export const HELL_TOAST_DIRECTIVES: readonly [typeof HellToaster, typeof HellToastTemplate];
+export const HELL_TOAST_DIRECTIVES: readonly [typeof HellToaster];
 
 // @public
 export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels>;
@@ -25,39 +25,11 @@ export interface HellToastAction {
 
 // @public
 export class HellToaster {
-    constructor();
-    protected ctxFor(id: number): {
-        id: number;
-        dismiss: () => void;
-    };
-    protected edgeOpacity(t: ToastInternal): number;
-    protected edgeProgress(t: ToastInternal): number;
     protected readonly expanded: _angular_core.WritableSignal<boolean>;
-    protected readonly expandedViewportHeightPx: _angular_core.Signal<string>;
-    protected readonly expandedViewportHeightValue: _angular_core.Signal<number>;
-    // Warning: (ae-forgotten-export) The symbol "ToastInternal" needs to be exported by the entry point hell-ui-angular-toast.d.ts
-    protected frontDistance(t: ToastInternal): number;
-    protected readonly hasToasts: _angular_core.Signal<boolean>;
-    protected heightPx(id: number): string;
-    protected isCollapsedOverflow(t: ToastInternal): boolean;
-    protected readonly isScrollable: _angular_core.Signal<boolean>;
-    protected readonly labels: HellToastLabels;
-    protected readonly liveToastCount: _angular_core.Signal<number>;
     readonly maxVisible: _angular_core.InputSignal<number>;
-    protected readonly nativeScrollbarWidthPx: _angular_core.Signal<string>;
-    protected offsetPx(t: ToastInternal): string;
-    protected onEnter(): void;
-    protected onFocusOut(event: FocusEvent): void;
-    protected onLeave(): void;
-    protected onViewportScroll(event: Event): void;
-    protected overflow(t: ToastInternal): number;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellToasterPart>;
     readonly position: _angular_core.InputSignal<HellToastPosition>;
-    protected readonly showDismissAll: _angular_core.Signal<boolean>;
-    protected readonly stackHeightPx: _angular_core.Signal<string>;
-    protected readonly stackHeightValue: _angular_core.Signal<number>;
-    readonly svc: HellToastService;
-    protected toastControlTabIndex(t: ToastInternal): -1 | null;
+    protected readonly scrollable: _angular_core.WritableSignal<boolean>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellToasterPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellToaster, "hell-toaster", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "position": { "alias": "position"; "required": false; "isSignal": true; }; "maxVisible": { "alias": "maxVisible"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToaster, never>;
@@ -85,12 +57,8 @@ export interface HellToastOptions {
     description?: string;
     dismissible?: boolean;
     duration?: number;
-    id?: number;
     template?: TemplateRef<{
-        $implicit: {
-            id: number;
-            dismiss: () => void;
-        };
+        $implicit: HellToastRef;
     }>;
     title?: string;
     variant?: HellToastVariant;
@@ -100,26 +68,36 @@ export interface HellToastOptions {
 export type HellToastPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 // @public
+export interface HellToastRef {
+    dismiss(): void;
+    update(patch: HellToastUpdate): void;
+}
+
+// @public
 export class HellToastService {
-    dismiss(id: number): void;
+    constructor();
     dismissAll(): void;
-    error(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): number;
-    info(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): number;
-    message(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): number;
-    pauseAll(): void;
-    resumeAll(): void;
-    show(opts: HellToastOptions): number;
-    success(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): number;
-    readonly toasts: _angular_core.WritableSignal<ToastInternal[]>;
-    warning(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): number;
+    error(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): HellToastRef;
+    info(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): HellToastRef;
+    message(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): HellToastRef;
+    show(opts: HellToastOptions): HellToastRef;
+    success(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): HellToastRef;
+    warning(title: string, opts?: Omit<HellToastOptions, 'title' | 'variant'>): HellToastRef;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToastService, never>;
     static ɵprov: _angular_core.ɵɵInjectableDeclaration<HellToastService>;
 }
 
 // @public
-export class HellToastTemplate {
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToastTemplate, "[hellToastTemplate]", never, {}, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToastTemplate, never>;
+export interface HellToastUpdate {
+    action?: HellToastAction | null;
+    description?: string | null;
+    dismissible?: boolean;
+    duration?: number;
+    template?: TemplateRef<{
+        $implicit: HellToastRef;
+    }> | null;
+    title?: string | null;
+    variant?: HellToastVariant;
 }
 
 // @public

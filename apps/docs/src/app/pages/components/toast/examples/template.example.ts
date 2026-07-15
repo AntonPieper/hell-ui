@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, TemplateRef, inject, viewChild } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellToastService, HellToastTemplate } from '@hell-ui/angular/toast';
+import { HellToastService, type HellToastRef } from '@hell-ui/angular/toast';
 
 @Component({
   selector: 'app-toast-template-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellToastTemplate],
+  imports: [HellButton],
   template: `
     <button hellButton variant="primary" type="button" (click)="notify()">New comment</button>
 
-    <ng-template hellToastTemplate #comment let-ctx>
+    <ng-template #comment let-toast>
       <div class="flex items-center gap-hell-3">
         <span
           class="grid size-9 place-items-center rounded-full bg-hell-info-soft font-semibold text-hell-info-strong"
@@ -20,7 +20,7 @@ import { HellToastService, HellToastTemplate } from '@hell-ui/angular/toast';
           <div class="font-semibold text-hell-foreground">Sara Severin</div>
           <div class="hd-muted">commented on “Q4 plan”</div>
         </div>
-        <button hellButton size="sm" variant="primary" type="button" (click)="ctx.dismiss()">
+        <button hellButton size="sm" variant="primary" type="button" (click)="toast.dismiss()">
           View
         </button>
       </div>
@@ -29,8 +29,7 @@ import { HellToastService, HellToastTemplate } from '@hell-ui/angular/toast';
 })
 export class ToastTemplateExample {
   protected readonly svc = inject(HellToastService);
-  private readonly comment =
-    viewChild.required<TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>>('comment');
+  private readonly comment = viewChild.required<TemplateRef<{ $implicit: HellToastRef }>>('comment');
 
   protected notify() {
     this.svc.show({
