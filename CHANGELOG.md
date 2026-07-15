@@ -418,6 +418,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- BREAKING: Omnibar now owns only difficult command-interaction coordination.
+  Bind its controlled `query`/`queryChange` and `open`/`openChange` models,
+  then project local or async results and loading/error/empty chrome from the
+  public Search Resource. The former `value` model, built-in search source,
+  fields, limits, debounce, status templates/messages, search outputs, and
+  imperative open/close/value methods are removed. Omnibar composes the public
+  Chip Set/Input keyboard behavior; project public Chip and Chip Remove
+  primitives for editable scope tokens. The Omnibar-specific chip directives
+  are removed. Item/action/floating
+  registration is now private to the renderer controller while hotkeys,
+  activation, keyboard navigation, F6 action handoff, floating dismissal,
+  focus restoration, and scroll anchoring remain owned runtime behavior.
+  Closes #196. Evidence: focused unit/controller, browser, axe, table-anchor,
+  package-consumer, and contracted Omnibar API-report coverage.
 - BREAKING: Combobox is now one projection-first interaction state machine.
   Rename `HellComboboxRoot` to `HellCombobox` (the `[hellCombobox]` selector is
   unchanged) and project domain objects through `hellComboboxInput`,

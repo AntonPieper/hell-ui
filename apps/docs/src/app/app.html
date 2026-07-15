@@ -13,15 +13,9 @@
       placeholder="Search docs, examples, code usage"
       ariaLabel="Search docs"
       hotkey="mod+k"
-      [searchItems]="docsSearchItems()"
-      [searchFields]="docsSearchFields"
-      [searchLimit]="docsSearchLimit()"
-      [searchDebounce]="120"
-      [emptyMessage]="docsSearchEmptyMessage()"
       [minPanelWidth]="520"
-      [(value)]="docsSearchQuery"
+      [(query)]="docsSearchQuery"
       (openChange)="onDocsSearchOpenChange($event)"
-      (searchResultsChange)="onDocsSearchResults($event)"
     >
       <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
       <span hellOmnibarTrailing class="hd-docs-search-count">{{ docsSearchCount() }}</span>
@@ -149,28 +143,42 @@
         </div>
       </ng-template>
 
-      @for (group of docsSearchGroups(); track group.kind) {
-        <div hellOmnibarGroup [label]="group.label">
-          <div hellOmnibarGroupLabel>{{ group.label }}</div>
-          @for (result of group.items; track result.id) {
-            <button
-              hellOmnibarItem
-              type="button"
-              [value]="result"
-              (select)="onDocsSearchSelect($any($event), shell)"
-            >
-              <hell-icon hellOmnibarItemIcon [name]="result.icon" size="13px" />
-              <span hellOmnibarItemText>
-                <span>{{ result.title }}</span>
-                <span hellOmnibarItemSubtext>{{ result.detail }}</span>
-              </span>
-              <span hellOmnibarItemTrailing>
-                {{ result.section }}
-                <hell-icon name="faSolidArrowRight" size="10px" />
-              </span>
-            </button>
-          }
+      @if (docsSearch.status() === 'loading') {
+        <div class="px-hell-3 py-hell-2 text-xs text-hell-foreground-subtle" role="status">
+          Searching docs…
         </div>
+      } @else if (docsSearch.status() === 'error') {
+        <div class="px-hell-3 py-hell-2 text-xs text-hell-danger" role="alert">
+          Docs search is unavailable.
+        </div>
+      } @else {
+        @for (group of docsSearchGroups(); track group.kind) {
+          <div hellOmnibarGroup [label]="group.label">
+            <div hellOmnibarGroupLabel>{{ group.label }}</div>
+            @for (result of group.items; track result.id) {
+              <button
+                hellOmnibarItem
+                type="button"
+                [value]="result"
+                (select)="onDocsSearchSelect($any($event), shell)"
+              >
+                <hell-icon hellOmnibarItemIcon [name]="result.icon" size="13px" />
+                <span hellOmnibarItemText>
+                  <span>{{ result.title }}</span>
+                  <span hellOmnibarItemSubtext>{{ result.detail }}</span>
+                </span>
+                <span hellOmnibarItemTrailing>
+                  {{ result.section }}
+                  <hell-icon name="faSolidArrowRight" size="10px" />
+                </span>
+              </button>
+            }
+          </div>
+        } @empty {
+          <div class="px-hell-3 py-hell-2 text-xs text-hell-foreground-subtle" role="status">
+            {{ docsSearchEmptyMessage() }}
+          </div>
+        }
       }
     </hell-omnibar>
     <span class="hd-fill"></span>

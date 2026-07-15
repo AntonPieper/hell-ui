@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 
 interface QuickAction {
@@ -23,20 +23,23 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
       class="max-w-90"
       placeholder="Search actions"
       ariaLabel="Search actions"
-      [searchItems]="actions"
-      [searchFields]="searchFields"
-      [(value)]="query"
-      (searchResultsChange)="results.set($any($event))"
+      [(query)]="query"
       (submit)="lastAction.set($any($event.item).label)"
     >
-      <div hellOmnibarGroup label="Actions">
-        <div hellOmnibarGroupLabel>Actions</div>
-        @for (result of results(); track result.item.id) {
-          <button hellOmnibarItem type="button" [value]="result.item">
-            <span hellOmnibarItemText>{{ result.item.label }}</span>
-          </button>
-        }
-      </div>
+      @if (search.status() === 'success' && search.items().length === 0) {
+        <div class="px-hell-3 py-hell-4 text-center text-xs text-hell-foreground-muted">
+          No actions found
+        </div>
+      } @else {
+        <div hellOmnibarGroup label="Actions">
+          <div hellOmnibarGroupLabel>Actions</div>
+          @for (action of search.items(); track action.id) {
+            <button hellOmnibarItem type="button" [value]="action">
+              <span hellOmnibarItemText>{{ action.label }}</span>
+            </button>
+          }
+        </div>
+      }
     </hell-omnibar>
 
     @if (lastAction(); as action) {
@@ -47,11 +50,13 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
 export class OmnibarBasicExample {
   protected readonly query = signal('');
   protected readonly lastAction = signal<string | null>(null);
-  protected readonly results = signal<readonly HellSearchResult<QuickAction>[]>([]);
-
-  protected readonly actions = QUICK_ACTIONS;
   protected readonly searchFields: readonly HellSearchField<QuickAction>[] = [
     { name: 'label', weight: 5, get: (action) => action.label },
     { name: 'id', weight: 2, get: (action) => action.id },
   ];
+  protected readonly search = hellSearchResource({
+    query: this.query,
+    items: QUICK_ACTIONS,
+    fields: this.searchFields,
+  });
 }

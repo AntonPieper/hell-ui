@@ -290,7 +290,6 @@ const packageConsumerScenarioCatalog = [
       '.me-\\[-4px\\]{margin-inline-end:-4px}',
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
-      'animation:hell-shimmer',
       'mask:var(--hell-icon-refresh) center/contain no-repeat',
     ],
   },
@@ -2014,7 +2013,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function compositesConsumerMainTs() {
-  return `import { Component, inject } from '@angular/core';
+  return `import { Component, inject, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
@@ -2025,7 +2024,7 @@ import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import { HellToaster, HellToastService, type HellToasterUi } from '${packageName}/toast';
-import { type HellSearchField } from '${packageName}/core';
+import { hellSearchResource, type HellSearchField } from '${packageName}/core';
 
 const dialpadUi = {
   root: 'max-w-[320px]',
@@ -2072,19 +2071,20 @@ interface SearchItem {
         <hell-omnibar
           ariaLabel="Search package consumer"
           placeholder="Search"
-          [searchItems]="searchItems"
-          [searchFields]="searchFields"
+          [(query)]="searchQuery"
           [ui]="omnibarUi"
         >
           <div hellOmnibarGroup label="Docs">
-            @for (result of searchResults(); track result.item.label) {
-              <button hellOmnibarItem type="button" [value]="result.item">
+            @for (item of search.items(); track item.label) {
+              <button hellOmnibarItem type="button" [value]="item">
                 <span hellOmnibarItemText>
-                  {{ result.item.label }}
-                  <span hellOmnibarItemSubtext>{{ result.item.section }}</span>
+                  {{ item.label }}
+                  <span hellOmnibarItemSubtext>{{ item.section }}</span>
                 </span>
                 <span hellOmnibarItemTrailing>docs</span>
               </button>
+            } @empty {
+              <span role="status">No package features match</span>
             }
           </div>
         </hell-omnibar>
@@ -2136,10 +2136,12 @@ class App {
     { name: 'label', weight: 4, get: (item) => item.label },
     { name: 'section', weight: 1, get: (item) => item.section },
   ];
-
-  protected searchResults() {
-    return this.searchItems.map((item) => ({ item, score: 1 }));
-  }
+  protected readonly searchQuery = signal('');
+  protected readonly search = hellSearchResource({
+    query: this.searchQuery,
+    items: this.searchItems,
+    fields: this.searchFields,
+  });
 
   protected showToast(): void {
     this.toast.success('Package consumer toast');

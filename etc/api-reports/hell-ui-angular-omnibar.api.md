@@ -7,58 +7,35 @@
 import * as _angular_core from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
-import { HellFloatingScope } from '@hell-ui/angular/internal/core';
-import { HellSearchField } from '@hell-ui/angular/core';
-import { HellSearchResult } from '@hell-ui/angular/core';
-import { HellSearchSource } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
-import { TemplateRef } from '@angular/core';
 
 // @public
-export const HELL_OMNIBAR_DIRECTIVES: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarChip, typeof HellOmnibarChipRemove, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
+export const HELL_OMNIBAR_DIRECTIVES: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
 
 // @public
 export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels>;
 
 // @public
-export class HellOmnibar implements HellFloatingScope {
+export class HellOmnibar {
     constructor();
-    activate(item: HellOmnibarRegisteredItem, source: HellOmnibarActivationSource): void;
     protected readonly activeDescendantId: _angular_core.Signal<string | null>;
-    protected readonly activeIndex: _angular_core.Signal<number>;
     readonly ariaLabel: _angular_core.InputSignal<string>;
-    close(): void;
-    containsFloatingTarget(target: EventTarget | Node | null): boolean;
-    protected readonly cursor: _angular_core.WritableSignal<number>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    readonly emptyMessage: _angular_core.InputSignal<string>;
-    readonly emptyTemplate: _angular_core.InputSignal<TemplateRef<unknown> | null>;
-    readonly error: _angular_core.Signal<unknown>;
     floatingContainer(): HTMLElement;
     focus(): void;
-    focusAdjacentAction(action: HellOmnibarRegisteredAction, delta: number): void;
     protected readonly hasActions: _angular_core.Signal<boolean>;
     protected readonly hasListboxResults: _angular_core.Signal<boolean>;
     readonly hotkey: _angular_core.InputSignal<string | null>;
-    readonly inputId: string;
-    // @internal
-    internalControlTabIndex(): -1 | null;
-    isActive(item: HellOmnibarRegisteredItem): boolean;
+    protected readonly inputId: string;
     protected readonly isEmpty: _angular_core.Signal<boolean>;
     protected readonly isOpen: _angular_core.Signal<boolean>;
     protected readonly labels: HellOmnibarLabels;
-    readonly loading: _angular_core.Signal<boolean>;
-    readonly loadingMessage: _angular_core.InputSignal<string>;
-    readonly loadingRows: _angular_core.InputSignal<number>;
-    readonly loadingTemplate: _angular_core.InputSignal<TemplateRef<HellOmnibarLoadingTemplateContext> | null>;
-    protected readonly loadingTemplateContext: _angular_core.Signal<HellOmnibarLoadingTemplateContext>;
     readonly minPanelWidth: _angular_core.InputSignal<number>;
     protected onBlur(event: FocusEvent): void;
     protected onClearClick(event: MouseEvent): void;
-    protected onCursorChange(): void;
     protected onFocus(): void;
     protected onInput(event: Event): void;
     protected onKeyDown(event: KeyboardEvent): void;
@@ -66,47 +43,24 @@ export class HellOmnibar implements HellFloatingScope {
     protected onOverlayDetach(): void;
     protected onOverlayOutsideClick(event: MouseEvent): void;
     protected onOverlayPositionChange(): void;
-    open(): void;
-    readonly openChange: _angular_core.OutputEmitterRef<boolean>;
+    readonly open: _angular_core.ModelSignal<boolean>;
     readonly openOnFocus: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly overlayPositions: ConnectedPosition[];
     protected readonly overlayScrollStrategy: ScrollStrategy;
-    readonly panelId: string;
+    protected readonly panelId: string;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellOmnibarPart>;
     readonly placeholder: _angular_core.InputSignal<string>;
-    registerAction(action: HellOmnibarAction): void;
-    registerFloatingElement(element: HTMLElement): void;
-    registerItem(item: HellOmnibarRegisteredItem): void;
-    readonly searchDebounce: _angular_core.InputSignal<number>;
-    readonly searchError: _angular_core.OutputEmitterRef<unknown>;
-    readonly searchFields: _angular_core.InputSignal<readonly HellSearchField<never>[]>;
-    readonly searchItems: _angular_core.InputSignal<readonly unknown[] | null>;
-    readonly searchLimit: _angular_core.InputSignal<number | undefined>;
-    readonly searchParams: _angular_core.InputSignal<unknown>;
-    readonly searchResults: _angular_core.Signal<readonly HellSearchResult<any>[]>;
-    readonly searchResultsChange: _angular_core.OutputEmitterRef<readonly HellSearchResult<unknown>[]>;
-    readonly searchSource: _angular_core.InputSignal<HellSearchSource<unknown> | null>;
-    setActive(item: HellOmnibarRegisteredItem): void;
-    setValue(next: string, opts?: {
-        focus?: boolean;
-        caretToEnd?: boolean;
-    }): void;
+    readonly query: _angular_core.ModelSignal<string>;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    protected readonly skeletonRows: _angular_core.Signal<number[]>;
     readonly submit: _angular_core.OutputEmitterRef<HellOmnibarSubmitEvent<unknown>>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOmnibarPart>>;
-    unregisterAction(action: HellOmnibarAction): void;
-    unregisterFloatingElement(element: HTMLElement): void;
-    unregisterItem(item: HellOmnibarRegisteredItem): void;
-    readonly value: _angular_core.ModelSignal<string>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "emptyMessage": { "alias": "emptyMessage"; "required": false; "isSignal": true; }; "emptyTemplate": { "alias": "emptyTemplate"; "required": false; "isSignal": true; }; "loadingTemplate": { "alias": "loadingTemplate"; "required": false; "isSignal": true; }; "searchItems": { "alias": "searchItems"; "required": false; "isSignal": true; }; "searchSource": { "alias": "searchSource"; "required": false; "isSignal": true; }; "searchFields": { "alias": "searchFields"; "required": false; "isSignal": true; }; "searchLimit": { "alias": "searchLimit"; "required": false; "isSignal": true; }; "searchParams": { "alias": "searchParams"; "required": false; "isSignal": true; }; "searchDebounce": { "alias": "searchDebounce"; "required": false; "isSignal": true; }; "loadingMessage": { "alias": "loadingMessage"; "required": false; "isSignal": true; }; "loadingRows": { "alias": "loadingRows"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "submit": "submit"; "openChange": "openChange"; "searchResultsChange": "searchResultsChange"; "searchError": "searchError"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "query": { "alias": "query"; "required": false; "isSignal": true; }; "open": { "alias": "open"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "query": "queryChange"; "open": "openChange"; "submit": "submit"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibar, never>;
 }
 
 // @public
-export class HellOmnibarAction implements HellOmnibarRegisteredAction {
+export class HellOmnibarAction {
     constructor();
-    focus(): void;
     protected onKeyDown(event: KeyboardEvent): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly pressed: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -125,24 +79,7 @@ export class HellOmnibarActionsStrip {
 }
 
 // @public
-export type HellOmnibarActivationSource = 'mouse' | 'keyboard' | 'api';
-
-// @public
-export class HellOmnibarChip {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarChip, "[hellOmnibarChip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarChip, never>;
-}
-
-// @public
-export class HellOmnibarChipRemove {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected tabIndex(): -1 | null;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarChipRemove, "button[hellOmnibarChipRemove]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarChipRemove, never>;
-}
+export type HellOmnibarActivationSource = 'mouse' | 'keyboard';
 
 // @public
 export class HellOmnibarGroup {
@@ -162,21 +99,18 @@ export class HellOmnibarGroupLabel {
 }
 
 // @public
-export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
+export class HellOmnibarItem<T = unknown> {
     constructor();
-    readonly active: _angular_core.Signal<boolean>;
+    protected readonly active: _angular_core.Signal<boolean>;
     readonly closeOnSelect: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    readonly itemId: string;
+    protected readonly itemId: string;
     readonly itemValue: _angular_core.InputSignal<T>;
     protected onClick(event: MouseEvent): void;
     protected onMouseMove(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    scrollIntoView(): void;
     readonly select: _angular_core.OutputEmitterRef<T>;
-    selectValue(): unknown;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    value(): unknown;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItem<any>, "button[hellOmnibarItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "itemValue": { "alias": "value"; "required": false; "isSignal": true; }; "closeOnSelect": { "alias": "closeOnSelect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "select": "select"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItem<any>, never>;
 }
@@ -219,13 +153,6 @@ export interface HellOmnibarLabels {
 }
 
 // @public
-export interface HellOmnibarLoadingTemplateContext {
-    readonly $implicit: number;
-    readonly message: string;
-    readonly rows: number;
-}
-
-// @public
 export class HellOmnibarPanel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
@@ -234,28 +161,13 @@ export class HellOmnibarPanel {
 }
 
 // @public
-export type HellOmnibarPart = 'root' | 'control' | 'inputWrap' | 'input' | 'clear' | 'panel' | 'actions' | 'results' | 'loading' | 'skeletonRow' | 'skeletonText' | 'empty';
-
-// @public
-export interface HellOmnibarRegisteredAction {
-    focus(): void;
-}
-
-// @public
-export interface HellOmnibarRegisteredItem {
-    readonly closeOnSelect: () => boolean;
-    readonly disabled: () => boolean;
-    readonly itemId: string;
-    scrollIntoView(): void;
-    selectValue(): unknown;
-    value(): unknown;
-}
+export type HellOmnibarPart = 'root' | 'control' | 'inputWrap' | 'input' | 'clear' | 'panel' | 'actions' | 'results';
 
 // @public
 export interface HellOmnibarSubmitEvent<T = unknown> {
     readonly item: T;
+    readonly query: string;
     readonly source: HellOmnibarActivationSource;
-    readonly value: string;
 }
 
 // @public
@@ -263,8 +175,8 @@ export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-omnibar.d.ts:170:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:171:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:98:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:99:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
 
 // (No @packageDocumentation comment for this package)
 

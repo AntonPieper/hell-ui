@@ -1,97 +1,61 @@
-import { DestroyRef, Injectable, computed, inject, signal, type Signal } from '@angular/core';
-import { HellSearchService, type HellSearchResult } from '@hell-ui/angular/core';
-import {
-  HellSearchOrchestrator,
-  type HellSearchOrchestratorOptions,
-} from '@hell-ui/angular/internal/search';
-import type { HellOmnibarRegisteredAction, HellOmnibarRegisteredItem } from './omnibar';
+import { Injectable, computed, signal } from '@angular/core';
+
 import {
   HellOmnibarActiveItemController,
   type HellOmnibarActiveItemSnapshot,
 } from './omnibar.active-item';
 
-/** Search inputs captured from the component at the moment a query runs. */
-export type HellOmnibarSearchOptions<T> = HellSearchOrchestratorOptions<T>;
+export interface HellOmnibarItemRegistration {
+  readonly itemId: string;
+  readonly closeOnSelect: () => boolean;
+  readonly disabled: () => boolean;
+  readonly selectValue: () => unknown;
+  readonly scrollIntoView: () => void;
+}
 
-/** Runtime behind HellOmnibar: search orchestration, item registry, and keyboard navigation. */
+export interface HellOmnibarActionRegistration {
+  readonly focus: () => void;
+}
+
+/** Package-local registry and keyboard-navigation runtime for HellOmnibar. */
 @Injectable()
-export class HellOmnibarRuntime<T = unknown> {
-  private readonly orchestrator = new HellSearchOrchestrator<T>(inject(HellSearchService));
-  private readonly destroyRef = inject(DestroyRef);
-
-  readonly query = signal('');
-  // Annotated: when ng-packagr compiles this entry point against the internal
-  // search module's flattened d.ts, these signal generics collapse to `any`
-  // and would degrade the public omnibar surface.
-  readonly loading: Signal<boolean> = this.orchestrator.loading;
-  readonly error: Signal<unknown> = this.orchestrator.error;
-  readonly results: Signal<readonly HellSearchResult<T>[]> = this.orchestrator.results;
-  readonly items = signal<HellOmnibarRegisteredItem[]>([]);
-  readonly actionItems = signal<HellOmnibarRegisteredAction[]>([]);
+export class HellOmnibarRuntime {
+  readonly items = signal<HellOmnibarItemRegistration[]>([]);
+  readonly actionItems = signal<HellOmnibarActionRegistration[]>([]);
 
   private readonly activeItemController =
-    new HellOmnibarActiveItemController<HellOmnibarRegisteredItem>();
+    new HellOmnibarActiveItemController<HellOmnibarItemRegistration>();
   private readonly activeIndexState = signal(0);
 
   readonly activeIndex = computed(() =>
     this.activeItemController.activeIndex(this.activeSnapshot()),
   );
-
   readonly activeItemId = computed(() => this.activeItem()?.itemId ?? null);
-
-  readonly isEmpty = computed(() => !this.loading() && this.items().length === 0);
   readonly hasActions = computed(() => this.actionItems().length > 0);
-
-  constructor() {
-    this.orchestrator.connect(this.destroyRef);
-  }
 
   resetActive(): void {
     this.activeIndexState.set(this.activeItemController.reset());
   }
 
-  setQuery(query: string): void {
-    this.query.set(query);
-  }
-
-  /** Debounce a search request, replacing any pending scheduled search. */
-  scheduleSearch(options: HellOmnibarSearchOptions<T>, debounceMs: number): void {
-    this.orchestrator.scheduleSearch(this.query(), options, debounceMs);
-  }
-
-  /** Run a search immediately and ignore/abort any older in-flight request. */
-  async searchNow(options: HellOmnibarSearchOptions<T>): Promise<void> {
-    await this.orchestrator.searchNow(this.query(), options);
-  }
-
-  /** Cancel pending timers and active source work without clearing rendered results. */
-  cancel(): void {
-    this.orchestrator.cancel();
-  }
-
-  clearResults(): void {
-    this.orchestrator.clearResults();
-  }
-
-  registerItem(item: HellOmnibarRegisteredItem): void {
+  registerItem(item: HellOmnibarItemRegistration): void {
     this.items.update((list) => [...list, item]);
   }
 
-  unregisterItem(item: HellOmnibarRegisteredItem): void {
-    this.items.update((list) => list.filter((i) => i !== item));
+  unregisterItem(item: HellOmnibarItemRegistration): void {
+    this.items.update((list) => list.filter((registered) => registered !== item));
   }
 
-  setActive(item: HellOmnibarRegisteredItem): void {
+  setActive(item: HellOmnibarItemRegistration): void {
     const snapshot = this.activeSnapshot();
     const next = this.activeItemController.setActive(snapshot, item);
     if (next !== snapshot.activeIndex) this.activeIndexState.set(next);
   }
 
-  isActive(item: HellOmnibarRegisteredItem): boolean {
+  isActive(item: HellOmnibarItemRegistration): boolean {
     return this.activeItem() === item;
   }
 
-  activeItem(): HellOmnibarRegisteredItem | null {
+  activeItem(): HellOmnibarItemRegistration | null {
     return this.activeItemController.activeItem(this.activeSnapshot());
   }
 
@@ -115,15 +79,23 @@ export class HellOmnibarRuntime<T = unknown> {
     if (next !== snapshot.activeIndex) this.activeIndexState.set(next);
   }
 
-  registerAction(action: HellOmnibarRegisteredAction): void {
+  registerAction(action: HellOmnibarActionRegistration): void {
     this.actionItems.update((list) => [...list, action]);
   }
 
-  unregisterAction(action: HellOmnibarRegisteredAction): void {
-    this.actionItems.update((list) => list.filter((a) => a !== action));
+  unregisterAction(action: HellOmnibarActionRegistration): void {
+    this.actionItems.update((list) => list.filter((registered) => registered !== action));
   }
 
-  private activeSnapshot(): HellOmnibarActiveItemSnapshot<HellOmnibarRegisteredItem> {
+  focusAdjacentAction(action: HellOmnibarActionRegistration, delta: number): void {
+    const actions = this.actionItems();
+    const current = actions.indexOf(action);
+    if (current < 0 || actions.length === 0) return;
+
+    actions[(current + delta + actions.length) % actions.length]?.focus();
+  }
+
+  private activeSnapshot(): HellOmnibarActiveItemSnapshot<HellOmnibarItemRegistration> {
     return { items: this.items(), activeIndex: this.activeIndexState() };
   }
 }

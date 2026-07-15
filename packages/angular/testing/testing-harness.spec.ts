@@ -281,14 +281,14 @@ class DropZoneHarnessHost {
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES],
   template: `
-    <hell-omnibar [openOnFocus]="true" [value]="value()" (valueChange)="value.set($event)" (submit)="submitted = $event.item">
+    <hell-omnibar [openOnFocus]="true" [query]="query()" (queryChange)="query.set($event)" (submit)="submitted = $event.item">
       <button hellOmnibarItem value="alpha">Alpha</button>
       <button hellOmnibarItem value="beta">Beta</button>
     </hell-omnibar>
   `,
 })
 class OmnibarHarnessHost {
-  readonly value = signal('');
+  readonly query = signal('');
   submitted: unknown = null;
 }
 

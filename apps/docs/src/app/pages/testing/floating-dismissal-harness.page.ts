@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { type HellSearchField } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 
@@ -93,15 +93,13 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
 
       <section aria-label="Portaled floating scope harness" data-testid="portaled-region">
         <hell-omnibar
-          #scopedOmnibar="hellOmnibar"
           data-testid="scoped-omnibar"
           placeholder="Scoped command search"
           ariaLabel="Scoped command search"
-          [searchItems]="searchItems"
-          [searchFields]="searchFields"
-          [searchDebounce]="0"
-          [searchLimit]="3"
-          (openChange)="recordOpenChange('omnibar', $event)"
+          [query]="omnibarQuery()"
+          (queryChange)="omnibarQuery.set($event)"
+          [open]="omnibarOpen()"
+          (openChange)="omnibarOpen.set($event); recordOpenChange('omnibar', $event)"
         >
           <div hellOmnibarActions>
             <button data-testid="omnibar-panel-action" hellOmnibarAction type="button">
@@ -111,9 +109,9 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
 
           <div hellOmnibarGroup label="Harness results">
             <div hellOmnibarGroupLabel>Harness results</div>
-            @for (result of scopedOmnibar.searchResults(); track result.item.id) {
-              <button hellOmnibarItem type="button" [value]="result.item" [closeOnSelect]="false">
-                <span hellOmnibarItemText>{{ result.item.label }}</span>
+            @for (item of omnibarSearch.items(); track item.id) {
+              <button hellOmnibarItem type="button" [value]="item" [closeOnSelect]="false">
+                <span hellOmnibarItemText>{{ item.label }}</span>
               </button>
             }
           </div>
@@ -161,8 +159,10 @@ export class FloatingDismissalHarnessPage {
   protected readonly primaryTriggerDisabled = signal(false);
   protected readonly closeCounts = signal<Record<HarnessLayer, number>>({ ...INITIAL_CLOSE_COUNTS });
   protected readonly log = signal<string[]>([]);
+  protected readonly omnibarQuery = signal('');
+  protected readonly omnibarOpen = signal(false);
 
-  protected readonly searchItems: readonly HarnessSearchItem[] = [
+  protected readonly commands: readonly HarnessSearchItem[] = [
     { id: 'alpha', label: 'Alpha command' },
     { id: 'bravo', label: 'Bravo command' },
     { id: 'charlie', label: 'Charlie command' },
@@ -171,6 +171,12 @@ export class FloatingDismissalHarnessPage {
   protected readonly searchFields: readonly HellSearchField<HarnessSearchItem>[] = [
     { name: 'label', weight: 1, get: (item) => item.label },
   ];
+  protected readonly omnibarSearch = hellSearchResource({
+    query: this.omnibarQuery,
+    items: this.commands,
+    fields: this.searchFields,
+    limit: 3,
+  });
 
   protected closeCount(layer: HarnessLayer): number {
     return this.closeCounts()[layer];

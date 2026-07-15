@@ -48,34 +48,32 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         importPath="@hell-ui/angular/omnibar"
         stylesPath="@hell-ui/angular/omnibar/styles.css"
       >
-        A command-palette searchbox that owns query state, keyboard navigation, and a floating
-        results panel while you own every result row.
+        A command-interaction composite that coordinates query/open state, keyboard navigation,
+        hotkeys, activation, and a floating panel while consumers own search and status policy.
       </hd-page-header>
       <p>
-        <code>hell-omnibar</code> is a Composite that combines the Hell search primitive, the shared
-        <code>HellSearchService</code> ranker, and a listbox/active-descendant keyboard model behind
-        one <code>&lt;hell-omnibar&gt;</code> element. It renders the input row itself and portals the
-        results panel through Angular CDK's connected overlay so the dropdown escapes clipped
-        ancestors, but the result rows, groups, and empty/loading bodies are all projected content
-        you control. Its behavior is driven by the Omnibar Runtime: debounced search, abortable async
-        sources, active-item tracking, delegated outside-click/focus dismissal, and an optional global
-        hotkey.
+        <code>hell-omnibar</code> keeps only the difficult command interaction behavior behind one
+        <code>&lt;hell-omnibar&gt;</code>: a listbox/active-descendant keyboard model, item activation,
+        F6 action handoff, scroll anchoring, global hotkeys, and scoped floating dismissal. It renders
+        the input row and portals the panel through Angular CDK's connected overlay so the dropdown
+        escapes clipped ancestors. Result data, loading/error/empty policy, and every rendered row
+        stay in consumer-projected content.
       </p>
       <p>
         Reach for it whenever a dense business app needs a search-and-jump surface: a top-bar command
-        palette, an entity finder, a quick-action launcher, or a scoped filter box. Feed it local
-        objects through <code>searchItems</code> for small in-memory sets, or wire
-        <code>searchSource</code> to a backend for large or remote data. Because rendering is
-        projected, the same component fits people pickers, command menus, and record search without a
-        per-domain wrapper.
+        palette, an entity finder, a quick-action launcher, or a scoped filter box. Create a public
+        <code>hellSearchResource</code> beside the component for local or async search, bind its query
+        signal to <code>[(query)]</code>, and project its <code>items</code>, <code>status</code>, and
+        <code>error</code>. Because that data policy is independent, the same runtime fits people
+        finders, command menus, and record search without a per-domain wrapper.
       </p>
 
       <h2>Basic</h2>
       <p>
-        Bind local objects to <code>searchItems</code>, describe how to rank them with
-        <code>searchFields</code>, and project a group of <code>hellOmnibarItem</code> buttons from
-        the ranked <code>searchResultsChange</code> output. Each item carries a <code>value</code>
-        your <code>(submit)</code> handler receives on Enter or click.
+        Pass the Omnibar's caller-owned query signal to <code>hellSearchResource</code>, then project
+        <code>search.items()</code> as <code>hellOmnibarItem</code> buttons. Each item carries a
+        <code>value</code> your <code>(submit)</code> handler receives on Enter or click; the consumer
+        also decides what empty chrome to render from <code>search.status()</code>.
       </p>
       <hd-example-tabs [code]="basicCode" previewClass="min-h-[220px]">
         <app-omnibar-basic-example />
@@ -107,14 +105,12 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
 
       <h2>Async search</h2>
       <p>
-        Wire <code>searchSource</code> to any function returning a promise, observable, or array;
-        newer queries abort superseded requests through the <code>signal</code> on the request.
-        <code>searchDebounce</code> gates how long typing settles before a search starts,
-        <code>searchLimit</code> caps rendered rows, and <code>loadingTemplate</code> replaces the
-        default skeleton while keeping the announced status wrapper. Failures surface through
-        <code>(searchError)</code> so the panel stays usable — here an error row renders in the
-        projected footer. An actions strip above the results holds toolbar-style filters, and a
-        disabled item is skipped by keyboard navigation. Type <code>error</code> to see the failure
+        Give <code>hellSearchResource</code> an async <code>source</code>; newer queries abort
+        superseded requests through the request's <code>signal</code>. The resource owns debounce,
+        limit, loading, results, and errors. This consumer projects a <code>role="status"</code>
+        loading row, an alert on failure, and an empty row below the results while Omnibar remains
+        responsible only for command interaction. An actions strip holds toolbar-style filters, and
+        a disabled item is skipped by keyboard navigation. Type <code>error</code> to see the failure
         path.
       </p>
       <hd-example-tabs [code]="asyncCode" previewClass="min-h-[240px]">
@@ -141,8 +137,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         the same module (<code>[ui]="&#123; input: '…', panel: '…' &#125;"</code>). Refinements merge
         on top of each part's recipe through Hell's Tailwind merge, so they win deterministically over
         the defaults they conflict with. A <code>ui</code> map only styles the DOM its own module
-        owns — projected children such as items, groups, chips, and actions each expose their own
-        single-part <code>ui</code>.
+        owns — projected children such as items, groups, actions, and public Chip primitives each
+        expose their own <code>ui</code> contract.
       </p>
       <p>
         <code>HellOmnibar</code> owns the multi-part anatomy; its part names use canonical camelCase
@@ -159,7 +155,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </thead>
         <tbody>
           <tr>
-            <td rowspan="12"><code>HellOmnibar</code> (<code>hell-omnibar</code>)</td>
+            <td rowspan="8"><code>HellOmnibar</code> (<code>hell-omnibar</code>)</td>
             <td><code>root</code></td>
             <td>Host element wrapping the control and overlay origin.</td>
           </tr>
@@ -181,7 +177,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           </tr>
           <tr>
             <td><code>panel</code></td>
-            <td>The portaled dropdown surface containing actions, results, and status.</td>
+            <td>The portaled dropdown surface containing actions and projected results/status.</td>
           </tr>
           <tr>
             <td><code>actions</code></td>
@@ -190,22 +186,6 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           <tr>
             <td><code>results</code></td>
             <td>The scrollable listbox region holding projected groups and items.</td>
-          </tr>
-          <tr>
-            <td><code>loading</code></td>
-            <td>The status region shown while a search runs.</td>
-          </tr>
-          <tr>
-            <td><code>skeletonRow</code></td>
-            <td>One placeholder row in the default loading skeleton.</td>
-          </tr>
-          <tr>
-            <td><code>skeletonText</code></td>
-            <td>The stacked text placeholders inside a skeleton row.</td>
-          </tr>
-          <tr>
-            <td><code>empty</code></td>
-            <td>The default no-results message.</td>
           </tr>
           <tr>
             <td><code>HellOmnibarPanel</code> (<code>[hellOmnibarPanel]</code>)</td>
@@ -248,16 +228,6 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             <td>Trailing slot inside a result row, e.g. a shortcut chip.</td>
           </tr>
           <tr>
-            <td><code>HellOmnibarChip</code> (<code>[hellOmnibarChip]</code>)</td>
-            <td><code>root</code></td>
-            <td>Scope/filter chip placed in a leading or trailing slot.</td>
-          </tr>
-          <tr>
-            <td><code>HellOmnibarChipRemove</code> (<code>button[hellOmnibarChipRemove]</code>)</td>
-            <td><code>root</code></td>
-            <td>The remove button inside a chip.</td>
-          </tr>
-          <tr>
             <td><code>HellOmnibarActionsStrip</code> (<code>[hellOmnibarActions]</code>)</td>
             <td><code>root</code></td>
             <td>The toolbar of action buttons rendered above results.</td>
@@ -270,8 +240,10 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         </tbody>
       </table>
       <p>
-        The example below refines every public part across the modules it renders, using Hell design
-        tokens. Type to see the refined loading skeleton before results settle.
+        Omnibar composes public Chip Set/Input behavior, so a projected <code>hellChip</code> in the
+        leading slot participates in token focus/removal without an Omnibar-specific chip API. The
+        example below refines every public part across the modules it renders; type to see its
+        consumer-owned loading status before results settle.
       </p>
       <hd-example-tabs [code]="stylingCode" previewClass="min-h-[220px]">
         <app-omnibar-styling-example />
@@ -284,33 +256,24 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <li><code>disabled</code>: <code>boolean</code>. Blocks opening and editing. Default <code>false</code>.</li>
         <li><code>placeholder</code>: <code>string</code>. Input placeholder. Default <code>'Search…'</code>.</li>
         <li><code>ariaLabel</code>: <code>string</code>. Accessible name for the input. Default <code>'Search'</code>.</li>
-        <li><code>emptyMessage</code>: <code>string</code>. No-results text. Default <code>'No results'</code>.</li>
-        <li><code>emptyTemplate</code>: <code>TemplateRef&lt;unknown&gt; | null</code>. Replaces the default empty body. Default <code>null</code>.</li>
-        <li>
-          <code>loadingTemplate</code>: <code>TemplateRef&lt;HellOmnibarLoadingTemplateContext&gt; | null</code>.
-          Replaces the default skeleton; context carries <code>rows</code> and <code>message</code>. Default <code>null</code>.
-        </li>
-        <li><code>searchItems</code>: <code>readonly unknown[] | null</code>. Local items ranked by <code>HellSearchService</code>. Default <code>null</code>.</li>
-        <li><code>searchSource</code>: <code>HellSearchSource&lt;unknown&gt; | null</code>. Async/remote source; superseded requests receive an abort signal. Default <code>null</code>.</li>
-        <li><code>searchFields</code>: <code>readonly HellSearchField&lt;never&gt;[]</code>. Weighted local ranking fields. Default <code>[]</code>.</li>
-        <li><code>searchLimit</code>: <code>number | undefined</code>. Caps emitted results. Default <code>undefined</code>.</li>
-        <li><code>searchParams</code>: <code>unknown</code>. Opaque context forwarded to the source. Default <code>undefined</code>.</li>
-        <li><code>searchDebounce</code>: <code>number</code>. Milliseconds before a search runs; <code>0</code> is immediate. Default <code>120</code>.</li>
-        <li><code>loadingMessage</code>: <code>string</code>. Status announced while searching. Default <code>'Searching'</code>.</li>
-        <li><code>loadingRows</code>: <code>number</code>. Skeleton row count. Default <code>4</code>.</li>
         <li><code>hotkey</code>: <code>string | null</code>. Optional global open shortcut, e.g. <code>'mod+k'</code>. Default <code>null</code>.</li>
         <li><code>openOnFocus</code>: <code>boolean</code>. Opens on type/focus; set <code>false</code> for controlled mode. Default <code>true</code>.</li>
-        <li><code>value</code>: <code>model&lt;string&gt;</code>. Two-way bound query string. Default <code>''</code>.</li>
+        <li><code>query</code>: <code>model&lt;string&gt;</code>. Controlled query text. Default <code>''</code>.</li>
+        <li><code>open</code>: <code>model&lt;boolean&gt;</code>. Controlled panel state. Default <code>false</code>.</li>
         <li><code>minPanelWidth</code>: <code>number</code>. Minimum overlay panel width; still matches a wider control. Default <code>320</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellOmnibarPart&gt;</code>. Part Style Map for the omnibar anatomy.</li>
       </ul>
       <p><strong><code>HellOmnibar</code></strong> — outputs:</p>
       <ul>
-        <li><code>submit</code>: <code>HellOmnibarSubmitEvent</code> — <code>&#123; value, item, source &#125;</code>, emitted when an item is activated by mouse, keyboard, or API.</li>
-        <li><code>openChange</code>: <code>boolean</code> — the new open state on every open/close.</li>
-        <li><code>searchResultsChange</code>: <code>readonly HellSearchResult&lt;unknown&gt;[]</code> — ranked results for the current query.</li>
-        <li><code>searchError</code>: <code>unknown</code> — async source failures; the panel stays usable.</li>
+        <li><code>queryChange</code>: <code>string</code> — the implicit model output for query edits/clear.</li>
+        <li><code>openChange</code>: <code>boolean</code> — the implicit model output for interaction-driven open/close.</li>
+        <li><code>submit</code>: <code>HellOmnibarSubmitEvent</code> — <code>&#123; query, item, source &#125;</code>, emitted when an item is activated by mouse or keyboard.</li>
       </ul>
+      <p>
+        Imperative methods are intentionally narrow: <code>focus()</code> focuses the search input,
+        and <code>floatingContainer()</code> returns the registered outlet for a nested Menu or
+        Popover that must remain inside Omnibar dismissal scope.
+      </p>
       <p><strong><code>HellOmnibarItem</code></strong> — inputs / outputs:</p>
       <ul>
         <li><code>value</code>: <code>T</code>. Payload emitted via <code>(select)</code> and the parent <code>(submit)</code>.</li>
@@ -330,16 +293,15 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       <p><strong>Exported types</strong>:</p>
       <ul>
         <li>
-          Part unions: <code>HellOmnibarPart</code> (the 12-part anatomy above).
+          Part unions: <code>HellOmnibarPart</code> (the 8-part anatomy above).
         </li>
         <li>
           Matching <code>ui</code> map type: <code>HellOmnibarUi</code>
           (<code>HellUi&lt;HellOmnibarPart&gt;</code>).
         </li>
         <li>
-          Event/context types: <code>HellOmnibarSubmitEvent</code>,
-          <code>HellOmnibarActivationSource</code> (<code>'mouse' | 'keyboard' | 'api'</code>),
-          <code>HellOmnibarLoadingTemplateContext</code>.
+          Event types: <code>HellOmnibarSubmitEvent</code> and
+          <code>HellOmnibarActivationSource</code> (<code>'mouse' | 'keyboard'</code>).
         </li>
         <li>
           Labels: <code>HellOmnibarLabels</code> (<code>&#123; clearSearch &#125;</code>),
@@ -354,8 +316,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <code>--hell-omnibar-panel-shadow</code>, and <code>--hell-omnibar-panel-max-height</code>,
         plus control-level <code>--hell-omnibar-bg</code>, <code>--hell-omnibar-border</code>,
         <code>--hell-omnibar-radius</code>, <code>--hell-omnibar-height</code>, and
-        <code>--hell-omnibar-padding-x</code>. Replace the ranker with an external engine (Fuse.js,
-        MiniSearch, FlexSearch) through <code>provideHellSearchRanker</code>.
+        <code>--hell-omnibar-padding-x</code>. Search ranking and async lifecycle belong to the
+        separately configured public Search Resource.
       </p>
 
       <h2>Accessibility</h2>
@@ -378,15 +340,19 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           then clears the query, then blurs the input.
         </li>
         <li>
-          <code>Tab</code> stays anchored on the input while open (the control's clear button and
-          actions leave the tab order); <code>F6</code> moves into the actions strip and back, and
-          <code>ArrowLeft</code>/<code>ArrowRight</code> move between action buttons.
+          The clear button and actions leave the Tab order while open; <code>F6</code> moves into the
+          actions strip and back, and <code>ArrowLeft</code>/<code>ArrowRight</code> move between
+          action buttons. Projected Chip tokens retain the Chip Set's single roving token stop.
         </li>
         <li>
-          Groups render <code>role="group"</code> with an <code>aria-label</code>; the actions strip
-          is <code>role="toolbar"</code>; and the loading region is <code>role="status"</code> labeled
-          with <code>loadingMessage</code>, so busy/empty states are announced as content, not just
-          spinners.
+          Groups render <code>role="group"</code> with an <code>aria-label</code>, and the actions
+          strip is <code>role="toolbar"</code>. Consumers must project semantic search chrome such as
+          <code>role="status"</code> for loading and <code>role="alert"</code> for errors.
+        </li>
+        <li>
+          The native input composes <code>hellChipInput</code>. When public <code>hellChip</code>
+          tokens are projected, Backspace/ArrowLeft from an empty query moves focus to the final
+          eligible token; Chip Set owns subsequent keyboard removal and focus return.
         </li>
         <li>The clear button is labeled through the <code>clearSearch</code> label (localizable via <code>HELL_OMNIBAR_LABELS</code>).</li>
         <li>The global <code>hotkey</code> respects other editable surfaces and already-prevented keydowns before firing.</li>
@@ -394,8 +360,10 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use <code>searchSource</code> with an abort <code>signal</code> for remote data so superseded queries cancel.</li>
+        <li>Drive local/remote results and loading/error/empty policy from a public <code>hellSearchResource</code>.</li>
+        <li>Use its async source abort <code>signal</code> so superseded remote queries cancel.</li>
         <li>Project item templates so results match the domain — icon, primary/secondary text, trailing hint.</li>
+        <li>Compose structured query tokens from public <code>hellChip</code>/<code>hellChipRemove</code> primitives.</li>
         <li>Keep <code>hotkey</code> <code>null</code> when an app shortcut router owns collisions; open from app state instead.</li>
         <li>Refine visuals through each module's <code>ui</code> Part Style Map so refinements win over recipe classes.</li>
         <li>Commit filters as structured state (chips, actions), not free text encoded in the query.</li>
@@ -406,7 +374,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <li>Don't mount several always-on omnibars sharing the same global <code>hotkey</code>.</li>
         <li>Don't couple result rows to a specific API shape — map backend payloads to your item model first.</li>
         <li>Don't target private descendants; style through the named parts and each child's <code>ui</code>.</li>
-        <li>Don't debounce opening and closing the panel — debounce the search work with <code>searchDebounce</code>.</li>
+        <li>Don't debounce opening and closing the panel — configure debounce on the async Search Resource.</li>
+        <li>Don't expect Omnibar to invent loading, error, or empty copy; project domain-appropriate semantic chrome.</li>
       </ul>
     </article>
   `,

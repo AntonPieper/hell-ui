@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HellKbd } from '@hell-ui/angular/chip';
 
@@ -25,16 +25,14 @@ const COMMANDS: readonly Command[] = [
       placeholder="Type a command"
       ariaLabel="Command palette"
       hotkey="mod+k"
-      [searchItems]="commands"
-      [searchFields]="searchFields"
-      (searchResultsChange)="results.set($any($event))"
+      [(query)]="query"
     >
       <kbd hellOmnibarTrailing hellKbd>⌘K</kbd>
 
       <div hellOmnibarGroup label="Commands">
-        @for (result of results(); track result.item.id) {
-          <button hellOmnibarItem type="button" [value]="result.item">
-            <span hellOmnibarItemText>{{ result.item.label }}</span>
+        @for (command of search.items(); track command.id) {
+          <button hellOmnibarItem type="button" [value]="command">
+            <span hellOmnibarItemText>{{ command.label }}</span>
           </button>
         }
       </div>
@@ -47,9 +45,13 @@ const COMMANDS: readonly Command[] = [
   `,
 })
 export class OmnibarHotkeyExample {
-  protected readonly commands = COMMANDS;
-  protected readonly results = signal<readonly HellSearchResult<Command>[]>([]);
+  protected readonly query = signal('');
   protected readonly searchFields: readonly HellSearchField<Command>[] = [
     { name: 'label', weight: 5, get: (command) => command.label },
   ];
+  protected readonly search = hellSearchResource({
+    query: this.query,
+    items: COMMANDS,
+    fields: this.searchFields,
+  });
 }

@@ -16,7 +16,7 @@ import {
   faSolidUser,
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
-import { type HellSearchField } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
@@ -130,18 +130,14 @@ interface PeopleServerResult {
         >
           <hell-omnibar
             hellTableShellToolbar
-            #peopleSearch="hellOmnibar"
+            #peopleOmnibar="hellOmnibar"
             class="min-w-64 flex-1"
             size="sm"
             placeholder="Search people"
             ariaLabel="Search people"
-            [value]="globalFilter()"
-            [searchItems]="serverCatalog"
-            [searchFields]="searchFields"
-            [searchLimit]="5"
-            [searchDebounce]="80"
+            [query]="globalFilter()"
             [minPanelWidth]="420"
-            (valueChange)="setGlobalFilter($event)"
+            (queryChange)="setGlobalFilter($event)"
             (submit)="openPerson($any($event.item))"
           >
             <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
@@ -156,7 +152,7 @@ interface PeopleServerResult {
                 [pressed]="filtersActive()"
                 [attr.aria-pressed]="filtersActive()"
                 [hellMenuTrigger]="filterMenu"
-                [container]="peopleSearch.floatingContainer()"
+                [container]="peopleOmnibar.floatingContainer()"
               >
                 <hell-icon name="faSolidFilter" size="12px" />
                 Filters
@@ -167,19 +163,29 @@ interface PeopleServerResult {
               </button>
             </div>
 
-            <div hellOmnibarGroup label="People">
-              <div hellOmnibarGroupLabel>People</div>
-              @for (result of peopleSearch.searchResults(); track result.item.id) {
-                <button hellOmnibarItem type="button" [value]="result.item">
-                  <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
-                  <span hellOmnibarItemText>
-                    {{ result.item.name }}
-                    <span hellOmnibarItemSubtext>{{ result.item.team }}</span>
-                  </span>
-                  <span hellOmnibarItemTrailing>{{ result.item.role }}</span>
-                </button>
-              }
-            </div>
+            @if (peopleSearch.status() === 'loading') {
+              <div role="status" class="px-hell-3 py-hell-4 text-sm text-hell-foreground-muted">
+                Searching people…
+              </div>
+            } @else if (peopleSearch.items().length === 0) {
+              <div class="px-hell-3 py-hell-4 text-sm text-hell-foreground-muted">
+                No people found.
+              </div>
+            } @else {
+              <div hellOmnibarGroup label="People">
+                <div hellOmnibarGroupLabel>People</div>
+                @for (person of peopleSearch.items(); track person.id) {
+                  <button hellOmnibarItem type="button" [value]="person">
+                    <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
+                    <span hellOmnibarItemText>
+                      {{ person.name }}
+                      <span hellOmnibarItemSubtext>{{ person.team }}</span>
+                    </span>
+                    <span hellOmnibarItemTrailing>{{ person.role }}</span>
+                  </button>
+                }
+              </div>
+            }
           </hell-omnibar>
 
           <button
@@ -380,6 +386,12 @@ export class TableTanStackShellExample implements OnDestroy {
     { name: 'status', weight: 2, get: (person) => person.status },
     { name: 'team', weight: 2, get: (person) => person.team },
   ];
+  protected readonly peopleSearch = hellSearchResource({
+    query: this.globalFilter,
+    items: this.serverCatalog,
+    fields: this.searchFields,
+    limit: 5,
+  });
 
   protected readonly selectedPerson = computed(() => {
     const selectedId = Object.keys(this.rowSelection())[0];

@@ -8,7 +8,7 @@ import {
   faSolidPlus,
   faSolidUserPlus,
 } from '@ng-icons/font-awesome/solid';
-import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
+import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HellKbd } from '@hell-ui/angular/chip';
@@ -54,9 +54,7 @@ const COMMANDS: readonly Command[] = [
         placeholder="Search commands"
         ariaLabel="Command palette"
         hotkey="mod+k"
-        [searchItems]="commands"
-        [searchFields]="searchFields"
-        (searchResultsChange)="results.set($any($event))"
+        [(query)]="query"
         (submit)="ran.set($any($event.item).label)"
       >
         <hell-icon hellOmnibarLeading name="faSolidChartLine" size="13px" />
@@ -65,12 +63,12 @@ const COMMANDS: readonly Command[] = [
         @for (group of grouped(); track group.section) {
           <div hellOmnibarGroup [label]="group.section">
             <div hellOmnibarGroupLabel>{{ group.section }}</div>
-            @for (result of group.results; track result.item.id) {
-              <button hellOmnibarItem type="button" [value]="result.item">
-                <hell-icon hellOmnibarItemIcon [name]="result.item.icon" size="13px" />
-                <span hellOmnibarItemText>{{ result.item.label }}</span>
+            @for (command of group.commands; track command.id) {
+              <button hellOmnibarItem type="button" [value]="command">
+                <hell-icon hellOmnibarItemIcon [name]="command.icon" size="13px" />
+                <span hellOmnibarItemText>{{ command.label }}</span>
                 <span hellOmnibarItemTrailing>
-                  <kbd hellKbd>{{ result.item.shortcut }}</kbd>
+                  <kbd hellKbd>{{ command.shortcut }}</kbd>
                 </span>
               </button>
             }
@@ -85,22 +83,26 @@ const COMMANDS: readonly Command[] = [
   `,
 })
 export class OmnibarCommandPaletteExample {
-  protected readonly commands = COMMANDS;
+  protected readonly query = signal('');
   protected readonly ran = signal<string | null>(null);
-  protected readonly results = signal<readonly HellSearchResult<Command>[]>([]);
 
   protected readonly searchFields: readonly HellSearchField<Command>[] = [
     { name: 'label', weight: 5, get: (command) => command.label },
     { name: 'section', weight: 2, get: (command) => command.section },
   ];
+  protected readonly search = hellSearchResource({
+    query: this.query,
+    items: COMMANDS,
+    fields: this.searchFields,
+  });
 
   protected readonly grouped = computed(() => {
     const sections: Command['section'][] = ['Navigate', 'Create'];
     return sections
       .map((section) => ({
         section,
-        results: this.results().filter((result) => result.item.section === section),
+        commands: this.search.items().filter((command) => command.section === section),
       }))
-      .filter((group) => group.results.length > 0);
+      .filter((group) => group.commands.length > 0);
   });
 }
