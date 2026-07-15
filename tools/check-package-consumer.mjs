@@ -34,7 +34,14 @@ const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
   {
     name: 'primitive-foundations',
-    scenarios: ['primitive-icons-css', 'button-ui', 'control-group', 'pagination', 'combobox-chips'],
+    scenarios: [
+      'primitive-icons-css',
+      'button-ui',
+      'chip-input',
+      'control-group',
+      'pagination',
+      'combobox-chips',
+    ],
   },
   { name: 'button', scenarios: ['button'] },
   {
@@ -196,6 +203,18 @@ const packageConsumerScenarioCatalog = [
         expected: 'rgb(52, 82, 255)',
       },
     ],
+  },
+  {
+    name: 'chip-input',
+    description:
+      'narrow Chip entry exposes the Chip Input keyboard bridge with consumer-owned values',
+    coverage: ['no-css-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive-ui',
+    dependencies: coreDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: chipInputConsumerMainTs,
+    stylesCss: emptyConsumerStylesCss,
   },
   {
     name: 'control-group',
@@ -1428,6 +1447,62 @@ import { HellButton } from '${packageName}/button';
 class App {
   protected readonly disabled = true;
   protected readonly linkUi = { root: 'underline-offset-[5px]' };
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function chipInputConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HELL_CHIP_DIRECTIVES,
+  HellChip,
+  HellChipInput,
+  HellChipRemove,
+  HellChipSet,
+} from '${packageName}/chip';
+
+const chipDirectives: readonly [
+  typeof HellChipSet,
+  typeof HellChipInput,
+  typeof HellChip,
+  typeof HellChipRemove,
+] = HELL_CHIP_DIRECTIVES;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...chipDirectives],
+  template: \`
+    <div hellChipSet aria-label="Assignees">
+      @for (person of people(); track person) {
+        <span hellChip (remove)="remove(person)">
+          {{ person }}
+          <button hellChipRemove></button>
+        </span>
+      }
+      <input
+        hellChipInput
+        aria-label="Add assignee"
+        [value]="draft()"
+        (input)="updateDraft($event)"
+      />
+    </div>
+  \`,
+})
+class App {
+  protected readonly people = signal(['Anna', 'Ben']);
+  protected readonly draft = signal('');
+
+  protected remove(person: string): void {
+    this.people.update((people) => people.filter((candidate) => candidate !== person));
+  }
+
+  protected updateDraft(event: Event): void {
+    this.draft.set((event.target as HTMLInputElement).value);
+  }
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

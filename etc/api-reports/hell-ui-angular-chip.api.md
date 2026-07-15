@@ -13,7 +13,7 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 
 // @public
-export const HELL_CHIP_DIRECTIVES: readonly [typeof HellChipSet, typeof HellChip, typeof HellChipRemove];
+export const HELL_CHIP_DIRECTIVES: readonly [typeof HellChipSet, typeof HellChipInput, typeof HellChip, typeof HellChipRemove];
 
 // @public
 export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels>;
@@ -43,6 +43,13 @@ export class HellChip {
     readonly variant: _angular_core.InputSignal<HellChipVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChip, "[hellChip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, { "remove": "remove"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChip, never>;
+}
+
+// @public
+export class HellChipInput {
+    constructor();
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChipInput, "input[hellChipInput]", never, {}, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChipInput, never>;
 }
 
 // @public

@@ -7,6 +7,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- The Chip entry point now exports the behavior-only `input[hellChipInput]`
+  directive, which connects a consumer-owned editable input to its enclosing
+  `hellChipSet`. On an empty input, `Backspace` focuses the final enabled
+  removable chip without deleting it, while `Arrow Left` focuses the final
+  enabled chip. Roving order continues through every enabled chip; only
+  `Arrow Right` from the true final enabled chip or removing that focused chip
+  returns focus to the input. Each set accepts at most one Chip Input, and modified
+  browser or platform shortcuts remain native. Standalone Chip Sets keep their
+  existing focus and removal behavior. Public host tests, cross-browser focus
+  contracts, docs, and a packed consumer scenario cover the composed contract.
+  Closes #186.
 - Added the directive-first `@hell-ui/angular/control-group` Package Entry Point.
   `[hellControlGroup]` composes a consumer-owned input or trigger with local
   prefix, suffix, and native button-action surfaces while the shared frame
