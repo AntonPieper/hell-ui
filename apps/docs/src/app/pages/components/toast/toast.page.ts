@@ -60,9 +60,10 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
         The toast entry point is a <strong>Composite</strong> built on the internal
         <em>Toast Stack</em> runtime. You mount a single <code>&lt;hell-toaster /&gt;</code> near the
         root of your app and drive it from anywhere by injecting
-        <code>HellToastService</code>. The service owns the toast store, stable ids, auto-dismiss
-        timers, and pause/resume; the toaster owns the rendered stack, collapse-and-fan layout,
-        exit animations, and scrolling.
+        <code>HellToastService</code>. Creation returns a small <code>HellToastRef</code>; the
+        renderer records, numeric ids, auto-dismiss timers, and pause/resume controls stay inside
+        the private Toast Stack. The toaster owns the collapse-and-fan layout, exit animations,
+        measuring, and scrolling.
       </p>
       <p>
         Reach for a toast for transient, non-blocking feedback that follows a user action — a save
@@ -108,11 +109,12 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
 
       <h2>Custom template</h2>
       <p>
-        For layouts the title/description pair can't express, pass a <code>template</code>. Mark it
-        with the <code>hellToastTemplate</code> directive and read the implicit context
-        (<code>{{ '{' }} id, dismiss {{ '}' }}</code>) with a <code>let-ctx</code> binding to close
-        the toast from inside your own markup. Template toasts carry no derivable text, so supply an
-        explicit <code>announcement</code> for the screen-reader.
+        For layouts the title/description pair can't express, pass a native
+        <code>TemplateRef</code>. Its implicit context is the same small
+        <code>HellToastRef</code>, so a <code>let-toast</code> binding can dismiss or update its own
+        toast without exposing a renderer id. No marker directive is required. Template toasts
+        carry no derivable text, so supply an explicit <code>announcement</code> for the
+        screen-reader.
       </p>
       <hd-example-tabs [code]="toastTemplateExampleCode">
         <app-toast-template-example />
@@ -134,9 +136,10 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
       <p>
         A realistic async-feedback flow: a <code>hellButton</code> kicks off an upload and reflects
         the pending state through its own <code>disabled</code> input and label. A single sticky
-        template toast tracks progress with a <code>hellProgress</code> bar, updated in place by
-        passing the same <code>id</code> back to <code>show()</code>, then swapped to a
-        <code>success</code> toast when the upload completes.
+        template toast tracks progress with a <code>hellProgress</code> bar. Its retained
+        <code>HellToastRef</code> patches the same toast to success content, variant, and a new
+        duration when the upload completes; the update creates no second toast and makes no second
+        announcement.
       </p>
       <hd-example-tabs [code]="toastWithUploadProgressExampleCode">
         <app-toast-with-upload-progress-example />
@@ -252,15 +255,30 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
       </ul>
       <h3><code>HellToastService</code> (<code>providedIn: 'root'</code>)</h3>
       <ul>
-        <li><code>show(options: HellToastOptions): number</code> — render a toast; returns its numeric id. Pass an existing <code>id</code> to update in place.</li>
+        <li><code>show(options: HellToastOptions): HellToastRef</code> — render a toast and return its scoped reference.</li>
         <li>
           <code>message</code>, <code>success</code>, <code>info</code>, <code>warning</code>,
-          <code>error</code> <code>(title, opts?)</code> — variant shortcuts; each returns the id.
+          <code>error</code> <code>(title, opts?)</code> — variant shortcuts; each returns a
+          <code>HellToastRef</code>.
         </li>
-        <li><code>dismiss(id: number)</code> — begin the exit animation, then remove.</li>
         <li><code>dismissAll()</code> — dismiss every mounted toast.</li>
-        <li><code>pauseAll()</code> / <code>resumeAll()</code> — timer control used by the toaster's hover/focus handling.</li>
-        <li><code>toasts</code>: <code>Signal&lt;readonly toast[]&gt;</code> — reactive list of currently mounted toasts (oldest → newest).</li>
+      </ul>
+      <h3><code>HellToastRef</code></h3>
+      <ul>
+        <li>
+          <code>update(patch: HellToastUpdate)</code> — patch this toast in place. Omitted fields
+          remain unchanged; <code>null</code> clears nullable content such as
+          <code>title</code>, <code>description</code>, <code>action</code>, or
+          <code>template</code>.
+        </li>
+        <li>
+          Only an explicitly supplied <code>duration</code> restarts the countdown. Other patches
+          preserve the remaining time. Updates never run the live announcement again.
+        </li>
+        <li>
+          <code>dismiss()</code> — begin this toast's exit animation. Update and dismiss calls made
+          after dismissal begins are idempotent no-ops.
+        </li>
       </ul>
       <h3><code>HellToastOptions</code></h3>
       <ul>
@@ -269,14 +287,13 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
         <li><code>duration?</code>: <code>number</code> ms. <code>0</code> keeps the toast until dismissed. Default <code>4500</code>.</li>
         <li><code>action?</code>: <code>HellToastAction</code> — <code>{{ '{' }} label: string; onClick: (dismiss: () =&gt; void) =&gt; void {{ '}' }}</code>.</li>
         <li><code>dismissible?</code>: <code>boolean</code>. Shows the close button. Default <code>true</code>.</li>
-        <li><code>template?</code>: <code>TemplateRef&lt;{{ '{' }} $implicit: {{ '{' }} id, dismiss {{ '}' }} {{ '}' }}&gt;</code> — custom body.</li>
+        <li><code>template?</code>: <code>TemplateRef&lt;{{ '{' }} $implicit: HellToastRef {{ '}' }}&gt;</code> — custom body.</li>
         <li><code>announcement?</code>: <code>string</code>. Explicit <code>LiveAnnouncer</code> text; overrides the derived title/description announcement.</li>
-        <li><code>id?</code>: <code>number</code>. Stable id — reuse it to replace an existing toast's contents in place.</li>
       </ul>
       <h3>Also exported</h3>
       <ul>
-        <li><code>HellToastTemplate</code> — marker directive (<code>hellToastTemplate</code>) for custom toast templates.</li>
-        <li><code>HELL_TOAST_DIRECTIVES</code> — <code>[HellToaster, HellToastTemplate]</code> for bulk import.</li>
+        <li><code>HellToastRef</code> and <code>HellToastUpdate</code> — the reference and patch contracts described above.</li>
+        <li><code>HELL_TOAST_DIRECTIVES</code> — <code>[HellToaster]</code> for bulk import.</li>
         <li><code>HellToastLabels</code>, <code>HELL_TOAST_LABELS</code>, <code>provideHellLabels(HELL_TOAST_LABELS, …)</code> — the Label Contract for the region, stack, dismiss, and dismiss-all strings.</li>
       </ul>
 
@@ -286,8 +303,8 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
           New toasts are announced via CDK <code>LiveAnnouncer</code> with
           <code>'polite'</code> politeness. The announcement is the explicit
           <code>announcement</code>, else the joined <code>title</code>/<code>description</code>,
-          else the <code>notification</code> label for text-less template toasts. Updates to an
-          existing <code>id</code> are not re-announced.
+          else the <code>notification</code> label for text-less template toasts. Reference updates
+          are not re-announced.
         </li>
         <li>
           The visible stack is a labeled <code>role="region"</code> named by the
@@ -316,7 +333,7 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
         <li>Mount exactly one <code>&lt;hell-toaster /&gt;</code> in the app shell and drive it from the service everywhere else.</li>
         <li>Keep messages to a short title plus an optional one-line description.</li>
         <li>Give action toasts a longer <code>duration</code> (or <code>0</code>) so the action stays reachable.</li>
-        <li>Reuse an <code>id</code> to update a long-running toast in place instead of stacking new ones.</li>
+        <li>Retain the returned <code>HellToastRef</code> to update a long-running toast in place instead of stacking new ones.</li>
         <li>Supply an <code>announcement</code> for template toasts whose visuals have no derivable text.</li>
       </ul>
 

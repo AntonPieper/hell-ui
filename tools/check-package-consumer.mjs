@@ -2042,7 +2042,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function compositesConsumerMainTs() {
-  return `import { Component, inject, signal } from '@angular/core';
+  return `import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
@@ -2052,7 +2052,13 @@ import { HellDialpad, type HellDialpadUi } from '${packageName}/features/dialpad
 import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '${packageName}/file-upload';
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
-import { HellToaster, HellToastService, type HellToasterUi } from '${packageName}/toast';
+import {
+  HELL_TOAST_DIRECTIVES,
+  HellToastService,
+  type HellToasterUi,
+  type HellToastRef,
+  type HellToastUpdate,
+} from '${packageName}/toast';
 import { hellSearchResource, type HellSearchField } from '${packageName}/core';
 
 const dialpadUi = {
@@ -2078,7 +2084,7 @@ interface SearchItem {
     HellDialpad,
     HellFileUpload,
     HellTimeInput,
-    HellToaster,
+    ...HELL_TOAST_DIRECTIVES,
   ],
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
@@ -2119,6 +2125,12 @@ interface SearchItem {
         </hell-omnibar>
 
         <button type="button" (click)="showToast()">Show toast</button>
+        <button type="button" [disabled]="!toastRef" (click)="updateToast()">Update toast</button>
+        <button type="button" [disabled]="!toastRef" (click)="dismissToast()">Dismiss toast</button>
+        <ng-template #toastBody let-toast>
+          <span>Package consumer toast</span>
+          <button type="button" (click)="toast.dismiss()">Dismiss template toast</button>
+        </ng-template>
         <hell-toaster [ui]="toasterUi" />
 
         <hell-date-input aria-label="Ship date" [date]="date" />
@@ -2137,6 +2149,8 @@ interface SearchItem {
 })
 class App {
   private readonly toast = inject(HellToastService);
+  private readonly toastBody =
+    viewChild.required<TemplateRef<{ $implicit: HellToastRef }>>('toastBody');
   protected readonly date = new Date(2026, 3, 22);
   protected readonly rangeStart = new Date(2026, 3, 5);
   protected readonly rangeEnd = new Date(2026, 3, 12);
@@ -2156,6 +2170,7 @@ class App {
   protected readonly dialogUi = { root: 'max-w-[520px]' };
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
   protected readonly toasterUi = { toast: 'ring-1 ring-hell-border' } satisfies HellToasterUi;
+  protected toastRef: HellToastRef | null = null;
   protected readonly searchItems: readonly SearchItem[] = [
     { label: 'Dialog', section: 'Feedback' },
     { label: 'Toast', section: 'Feedback' },
@@ -2173,7 +2188,26 @@ class App {
   });
 
   protected showToast(): void {
-    this.toast.success('Package consumer toast');
+    this.toastRef = this.toast.show({
+      template: this.toastBody(),
+      announcement: 'Package consumer toast',
+      duration: 0,
+    });
+  }
+
+  protected updateToast(): void {
+    const patch = {
+      template: null,
+      title: 'Package consumer toast updated',
+      description: null,
+      variant: 'success',
+      duration: 4_000,
+    } satisfies HellToastUpdate;
+    this.toastRef?.update(patch);
+  }
+
+  protected dismissToast(): void {
+    this.toastRef?.dismiss();
   }
 }
 

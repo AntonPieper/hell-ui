@@ -1,9 +1,15 @@
-import { Component, signal, type TemplateRef } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import type { HellUiInput } from '@hell-ui/angular/core';
-import { HellToastService, HellToaster, type HellToasterPart, type HellToasterUi } from './toast';
+import {
+  HellToastService,
+  HellToaster,
+  type HellToasterPart,
+  type HellToasterUi,
+  type HellToastRef,
+} from './toast';
 import {
   hellToastFrontDistance,
   hellToastOffsetPx,
@@ -34,6 +40,49 @@ class ToasterPartStyleHost {
   } satisfies HellToasterUi;
 
   readonly ui = signal<HellUiInput<HellToasterPart>>('static');
+}
+
+@Component({
+  imports: [HellToaster],
+  providers: [HellToastService],
+  template: `
+    <button data-test-show-template type="button" (click)="show()">Show template</button>
+    <button data-test-complete-template type="button" (click)="complete()">Complete template</button>
+    <ng-template #body let-toast>
+      <button data-test-template-dismiss type="button" (click)="toast.dismiss()">
+        Dismiss template
+      </button>
+    </ng-template>
+    <hell-toaster />
+  `,
+})
+class ToastTemplateHost {
+  private readonly template = viewChild.required<TemplateRef<{ $implicit: HellToastRef }>>('body');
+  private readonly toast = inject(HellToastService);
+  private ref: HellToastRef | null = null;
+
+  show(): void {
+    this.ref = this.toast.show({
+      template: this.template(),
+      announcement: 'Template notification',
+      duration: 0,
+    });
+  }
+
+  complete(): void {
+    this.ref?.update({
+      template: null,
+      title: 'Template complete',
+      variant: 'success',
+      duration: 1000,
+    });
+  }
+}
+
+function renderedToasts(fixture: ComponentFixture<unknown>): NodeListOf<HTMLElement> {
+  return (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+    '[data-slot="toast"]',
+  );
 }
 
 describe('Toast Stack', () => {
@@ -94,37 +143,64 @@ describe('Toast Stack', () => {
 });
 
 describe('HellToastService', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     liveAnnounce.mockClear();
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
+      imports: [HellToaster, ToastTemplateHost],
       providers: [{ provide: LiveAnnouncer, useValue: announcementService }],
-    });
+    }).compileComponents();
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('updates an existing toast in place when callers reuse an id', () => {
+  it('returns an immutable reference from show and every variant shortcut', () => {
     const svc = TestBed.inject(HellToastService);
 
-    const id = svc.show({ title: 'Saving', duration: 0 });
-    const updated = svc.show({
-      id,
-      title: 'Saved',
-      description: 'Report is ready',
-      variant: 'success',
+    const refs = [
+      svc.show({ title: 'Shown', duration: 0 }),
+      svc.message('Message', { duration: 0 }),
+      svc.success('Success', { duration: 0 }),
+      svc.info('Info', { duration: 0 }),
+      svc.warning('Warning', { duration: 0 }),
+      svc.error('Error', { duration: 0 }),
+    ];
+
+    for (const ref of refs) {
+      expect(Object.isFrozen(ref)).toBe(true);
+      expect(ref).toEqual({ update: expect.any(Function), dismiss: expect.any(Function) });
+      expect(ref).not.toHaveProperty('id');
+    }
+  });
+
+  it('patches content and variant in place and clears nullable fields', () => {
+    const fixture = TestBed.createComponent(HellToaster);
+    const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
+
+    const ref = svc.show({
+      title: 'Saving',
+      description: 'Report is processing',
+      variant: 'info',
       duration: 0,
     });
+    fixture.detectChanges();
+    const original = renderedToasts(fixture)[0];
 
-    expect(updated).toBe(id);
-    expect(svc.toasts()).toHaveLength(1);
-    expect(svc.toasts()[0]).toMatchObject({
-      id,
+    ref.update({
       title: 'Saved',
-      description: 'Report is ready',
+      description: null,
       variant: 'success',
     });
+    fixture.detectChanges();
+
+    const updated = renderedToasts(fixture)[0];
+    expect(renderedToasts(fixture)).toHaveLength(1);
+    expect(updated).toBe(original);
+    expect(updated.getAttribute('data-variant')).toBe('success');
+    expect(updated.textContent).toContain('Saved');
+    expect(updated.textContent).not.toContain('Report is processing');
   });
 
   it('announces new toast text via LiveAnnouncer', () => {
@@ -152,7 +228,7 @@ describe('HellToastService', () => {
     const svc = TestBed.inject(HellToastService);
 
     svc.show({
-      template: {} as TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>,
+      template: {} as TemplateRef<{ $implicit: HellToastRef }>,
       announcement: 'Upload complete',
       duration: 0,
     });
@@ -164,104 +240,191 @@ describe('HellToastService', () => {
     const svc = TestBed.inject(HellToastService);
 
     svc.show({
-      template: {} as TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>,
+      template: {} as TemplateRef<{ $implicit: HellToastRef }>,
       duration: 0,
     });
 
     expect(liveAnnounce).toHaveBeenCalledWith('Notification', 'polite');
   });
 
-  it('does not re-announce when updating by existing toast id', () => {
+  it('does not re-announce reference updates', () => {
     const svc = TestBed.inject(HellToastService);
-    const sharedId = svc.show({ title: 'Saving', duration: 0 });
+    const ref = svc.show({ title: 'Saving', duration: 0 });
 
-    svc.show({ id: sharedId, title: 'Saved', description: 'Done', duration: 0 });
+    ref.update({ title: 'Saved', description: 'Done', variant: 'success' });
 
     expect(liveAnnounce).toHaveBeenCalledTimes(1);
   });
 
-  it('does not let a stale exit timer remove a revived toast id', () => {
+  it('makes update and dismiss idempotent no-ops after dismissal begins', () => {
     vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
 
-    const id = svc.show({ title: 'Saving', duration: 0 });
-    svc.dismiss(id);
-    vi.advanceTimersByTime(100);
-    svc.show({ id, title: 'Saved', duration: 0 });
-    vi.advanceTimersByTime(120);
+    const ref = svc.show({ title: 'Saving', duration: 0 });
+    fixture.detectChanges();
+    ref.dismiss();
+    ref.dismiss();
+    ref.update({ title: 'Saved', variant: 'success', duration: 0 });
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toMatchObject([{ id, title: 'Saved', removing: false }]);
+    expect(renderedToasts(fixture)).toHaveLength(1);
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
+    expect(renderedToasts(fixture)[0].textContent).toContain('Saving');
+    expect(renderedToasts(fixture)[0].textContent).not.toContain('Saved');
+
+    vi.advanceTimersByTime(220);
+    fixture.detectChanges();
+    ref.update({ title: 'Revived' });
+    ref.dismiss();
+    fixture.detectChanges();
+
+    expect(renderedToasts(fixture)).toHaveLength(0);
   });
 
   it('auto-dismisses after the configured duration and exit animation', () => {
     vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
 
-    const id = svc.show({ title: 'Saved', duration: 100 });
+    svc.show({ title: 'Saved', duration: 100 });
+    fixture.detectChanges();
     vi.advanceTimersByTime(100);
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toMatchObject([{ id, removing: true }]);
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
 
     vi.advanceTimersByTime(220);
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toEqual([]);
+    expect(renderedToasts(fixture)).toHaveLength(0);
   });
 
-  it('pauses and resumes auto-dismiss with the remaining duration', () => {
+  it('only restarts the countdown when duration is explicitly patched', () => {
     vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
 
-    const id = svc.show({ title: 'Uploading', duration: 1000 });
+    const original = svc.show({ title: 'Saving', duration: 1000 });
+    fixture.detectChanges();
     vi.advanceTimersByTime(400);
-    svc.pauseAll();
-    vi.advanceTimersByTime(1000);
-
-    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
-
-    svc.resumeAll();
+    original.update({ title: 'Still saving' });
+    fixture.detectChanges();
     vi.advanceTimersByTime(599);
-    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
+    fixture.detectChanges();
+
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('open');
 
     vi.advanceTimersByTime(1);
-    expect(svc.toasts()).toMatchObject([{ id, removing: true }]);
+    fixture.detectChanges();
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
+
+    vi.advanceTimersByTime(220);
+    const rescheduled = svc.show({ title: 'Uploading', duration: 1000 });
+    fixture.detectChanges();
+    vi.advanceTimersByTime(400);
+    rescheduled.update({ duration: 800 });
+    vi.advanceTimersByTime(799);
+    fixture.detectChanges();
+
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('open');
+
+    vi.advanceTimersByTime(1);
+    fixture.detectChanges();
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
   });
 
-  it('keeps pause and resume idempotent', () => {
+  it('keeps duration patches paused while the stack is hovered and resumes on leave', () => {
     vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
 
-    const id = svc.show({ title: 'Uploading', duration: 1000 });
+    const ref = svc.show({ title: 'Uploading', duration: 1000 });
+    fixture.detectChanges();
     vi.advanceTimersByTime(400);
-    svc.pauseAll();
-    svc.pauseAll();
+    const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
+    region.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    ref.update({ duration: 500 });
     vi.advanceTimersByTime(1000);
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('open');
 
-    svc.resumeAll();
-    svc.resumeAll();
-    vi.advanceTimersByTime(599);
-    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
+    region.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    vi.advanceTimersByTime(320);
+    vi.advanceTimersByTime(499);
+    fixture.detectChanges();
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('open');
 
     vi.advanceTimersByTime(1);
-    expect(svc.toasts()).toMatchObject([{ id, removing: true }]);
+    fixture.detectChanges();
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
   });
 
   it('dismisses every mounted toast with the exit animation', () => {
     vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
 
     svc.success('Saved', { duration: 0 });
     svc.info('Queued', { duration: 0 });
+    fixture.detectChanges();
 
     svc.dismissAll();
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toHaveLength(2);
-    expect(svc.toasts().every((toast) => toast.removing)).toBe(true);
+    expect(renderedToasts(fixture)).toHaveLength(2);
+    expect([...renderedToasts(fixture)].every((toast) => toast.dataset['state'] === 'closed')).toBe(
+      true,
+    );
 
     vi.advanceTimersByTime(220);
+    fixture.detectChanges();
 
-    expect(svc.toasts()).toEqual([]);
+    expect(renderedToasts(fixture)).toHaveLength(0);
+  });
+
+  it('provides the same small reference to custom templates for dismissal', () => {
+    vi.useFakeTimers();
+    const fixture = TestBed.createComponent(ToastTemplateHost);
+    fixture.detectChanges();
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[data-test-show-template]')
+      ?.click();
+    fixture.detectChanges();
+
+    const dismiss = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[data-test-template-dismiss]',
+    );
+    expect(dismiss?.textContent).toContain('Dismiss template');
+    dismiss?.click();
+    fixture.detectChanges();
+
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
+  });
+
+  it('can replace template content with title content through a nullable patch', () => {
+    const fixture = TestBed.createComponent(ToastTemplateHost);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+
+    host.querySelector<HTMLButtonElement>('[data-test-show-template]')?.click();
+    fixture.detectChanges();
+    expect(host.querySelector('[data-test-template-dismiss]')).not.toBeNull();
+
+    host.querySelector<HTMLButtonElement>('[data-test-complete-template]')?.click();
+    fixture.detectChanges();
+
+    expect(renderedToasts(fixture)).toHaveLength(1);
+    expect(renderedToasts(fixture)[0].getAttribute('data-variant')).toBe('success');
+    expect(renderedToasts(fixture)[0].textContent).toContain('Template complete');
+    expect(host.querySelector('[data-test-template-dismiss]')).toBeNull();
   });
 });
 
@@ -331,6 +494,32 @@ describe('HellToaster', () => {
 
     expect(fixture.nativeElement.getAttribute('data-expanded')).toBe('true');
     expect(dismissAll.getAttribute('tabindex')).toBeNull();
+  });
+
+  it('passes a toast-scoped dismiss callback to actions', () => {
+    const fixture = TestBed.createComponent(HellToaster);
+    const svc = TestBed.inject(HellToastService);
+    const acted = vi.fn();
+    fixture.detectChanges();
+
+    svc.message('Moved to trash', {
+      duration: 0,
+      action: {
+        label: 'Undo',
+        onClick: (dismiss) => {
+          acted();
+          dismiss();
+        },
+      },
+    });
+    fixture.detectChanges();
+
+    const action = fixture.nativeElement.querySelector('[data-slot="action"]') as HTMLButtonElement;
+    action.click();
+    fixture.detectChanges();
+
+    expect(acted).toHaveBeenCalledOnce();
+    expect(renderedToasts(fixture)[0].getAttribute('data-state')).toBe('closed');
   });
 
   it('applies Part Style Map shorthand and object classes to owned stack parts', () => {

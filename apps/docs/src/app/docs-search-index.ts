@@ -1924,7 +1924,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toast',
  detail:'components/toast/examples/template.example.ts',
  terms:
-'hellButton hellToastTemplate HellToastService TemplateRef viewChild announcement duration persistent body let-ctx dismiss id context comment avatar',
+'hellButton HellToastService HellToastRef TemplateRef viewChild announcement duration persistent body let-toast dismiss update reference context comment avatar',
  },
  {
  title:'Toast: Variants',
@@ -1938,7 +1938,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toast',
  detail:'components/toast/examples/with-upload-progress.example.ts',
  terms:
-'with-upload-progress hellButton hellProgress hellProgressBar HellToastService hellToastTemplate TemplateRef viewChild signal id update in place async upload bar disabled success dismissible announcement composite',
+'with-upload-progress hellButton hellProgress hellProgressBar HellToastService HellToastRef TemplateRef viewChild signal reference update patch in place duration reschedule async upload bar disabled success dismissible announcement composite',
  },
  {
  title:'Toggle: Basic',
