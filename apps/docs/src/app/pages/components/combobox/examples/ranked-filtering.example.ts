@@ -1,60 +1,89 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
 import {
   hellRankLocalSearch,
-  provideHellLabels,
+  hellSearchResource,
   provideHellSearchRanker,
-  type HellOption,
   type HellSearchRanker,
 } from '@hell-ui/angular/core';
-import { HELL_COMBOBOX_LABELS, HellCombobox } from '@hell-ui/angular/combobox';
 
-const STATIONS: readonly HellOption<string>[] = [
-  { value: 'nord-1', label: 'Nordhafen Terminal' },
-  { value: 'hann-2', label: 'Hannover Süd' },
-  { value: 'born-3', label: 'Bornheim Depot' },
-  { value: 'neuk-4', label: 'Neukölln Ost' },
-  { value: 'ober-5', label: 'Oberhausen Nord' },
+interface Station {
+  readonly id: string;
+  readonly name: string;
+}
+
+const STATIONS: readonly Station[] = [
+  { id: 'nord-1', name: 'Nordhafen Terminal' },
+  { id: 'hann-2', name: 'Hannover Süd' },
+  { id: 'born-3', name: 'Bornheim Depot' },
+  { id: 'neuk-4', name: 'Neukölln Ost' },
+  { id: 'ober-5', name: 'Oberhausen Nord' },
 ];
 
 /** Most recent first — in a real app this comes from dispatch history. */
 const RECENTLY_DISPATCHED: readonly string[] = ['hann-2'];
 
-/**
- * Recently dispatched stations outrank better text matches; everything else
- * keeps its relevance order from the default ranker. Type "no": the substring
- * hit "Hannover Süd" jumps above the word-prefix matches because the
- * dispatcher just used it.
- */
 const recencyRanker: HellSearchRanker = (items, request) => {
   const recency = (item: unknown): number => {
-    const index = RECENTLY_DISPATCHED.indexOf((item as HellOption<string>).value);
+    const index = RECENTLY_DISPATCHED.indexOf((item as Station).id);
     return index === -1 ? -1 : RECENTLY_DISPATCHED.length - index;
   };
   return [...hellRankLocalSearch(items, request)].sort(
-    (a, b) => recency(b.item) - recency(a.item) || b.score - a.score,
+    (left, right) => recency(right.item) - recency(left.item) || right.score - left.score,
   );
 };
 
 @Component({
   selector: 'app-combobox-ranked-filtering-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    provideHellSearchRanker(recencyRanker),
-    provideHellLabels(HELL_COMBOBOX_LABELS, { empty: 'No matching station' }),
-  ],
-  imports: [HellCombobox],
+  providers: [provideHellSearchRanker(recencyRanker)],
+  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CONTROL_GROUP_DIRECTIVES],
   template: `
-    <hell-combobox
-      class="block max-w-72"
-      aria-label="Dispatch station"
-      placeholder="Type “no”…"
-      [options]="stations"
-      [value]="value()"
-      (valueChange)="value.set($any($event))"
-    />
+    <div hellControlGroup class="max-w-72">
+      <div
+        hellCombobox
+        ui="h-auto min-h-hell-control-md flex-1 rounded-none border-0 bg-transparent ps-hell-4 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+        [options]="stationOptions()"
+        [value]="value()"
+        [compareWith]="compareStation"
+        (valueChange)="select($any($event))"
+      >
+        <input
+          hellComboboxInput
+          aria-label="Dispatch station"
+          placeholder="Type “no”…"
+          [value]="stationSearch.query()"
+          (input)="stationSearch.query.set($any($event.target).value ?? '')"
+        />
+        <button hellComboboxButton type="button" aria-label="Toggle stations"></button>
+        <div *hellComboboxPortal hellComboboxDropdown>
+          @for (station of stationOptions(); track station.id) {
+            <div hellComboboxOption [value]="station">{{ station.name }}</div>
+          } @empty {
+            <div hellComboboxEmpty>No matching station</div>
+          }
+        </div>
+      </div>
+    </div>
   `,
 })
 export class ComboboxRankedFilteringExample {
-  protected readonly stations = STATIONS;
-  protected readonly value = signal<string | null>(null);
+  protected readonly value = signal<Station | null>(null);
+  protected readonly query = signal('');
+  protected readonly stationSearch = hellSearchResource({
+    query: this.query,
+    items: STATIONS,
+    fields: [{ get: (station) => station.name }],
+  });
+  protected readonly stationOptions = computed(() => [...this.stationSearch.items()]);
+  protected readonly compareStation = (
+    left: Station | null,
+    right: Station | null,
+  ): boolean => left?.id === right?.id;
+
+  protected select(station: Station | null): void {
+    this.value.set(station);
+    this.query.set(station?.name ?? '');
+  }
 }

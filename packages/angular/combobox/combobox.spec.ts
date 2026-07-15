@@ -1,13 +1,27 @@
-import { Component, signal } from '@angular/core';
-import { provideHellLabels, provideHellSearchRanker, type HellOption, type HellSearchRanker, type HellSearchSource } from '@hell-ui/angular/core';
+import { Component, computed, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-
+import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
+import { HellControlGroup } from '@hell-ui/angular/control-group';
+import type { HellPickValue } from '@hell-ui/angular/core';
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellComboboxRoot, HellCombobox, HELL_COMBOBOX_DIRECTIVES, HELL_COMBOBOX_LABELS, type HellComboboxUi } from './combobox';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import { HellCombobox, HELL_COMBOBOX_DIRECTIVES } from './combobox';
+
+interface Person {
+  readonly id: string;
+  readonly name: string;
+  readonly role: string;
+  readonly disabled?: boolean;
+}
+
+const PEOPLE: readonly Person[] = [
+  { id: 'ada', name: 'Ada Lovelace', role: 'Platform' },
+  { id: 'grace', name: 'Grace Hopper', role: 'Compiler' },
+  { id: 'margaret', name: 'Margaret Hamilton', role: 'Flight', disabled: true },
+];
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -16,10 +30,11 @@ import type { HellPickValue } from '@hell-ui/angular/core';
       hellCombobox
       [wrapNavigation]="false"
       [formControl]="control"
+      (openChange)="openStates.push($event)"
       (valueChange)="values.push($any($event))"
     >
       <input hellComboboxInput aria-label="Assignee" />
-      <button hellComboboxButton type="button">Toggle</button>
+      <button hellComboboxButton type="button" aria-label="Toggle assignees"></button>
       <div *hellComboboxPortal hellComboboxDropdown>
         <div hellComboboxOption id="atlas-single" value="atlas">Atlas</div>
         <div hellComboboxOption id="nova-single" value="nova">Nova</div>
@@ -30,6 +45,7 @@ import type { HellPickValue } from '@hell-ui/angular/core';
 class ComboboxFormHost {
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
+  readonly openStates: boolean[] = [];
 }
 
 @Component({
@@ -43,10 +59,10 @@ class ComboboxFormHost {
       (valueChange)="values.push($any($event))"
     >
       <input hellComboboxInput aria-label="Assignees" />
-      <button hellComboboxButton type="button">Toggle</button>
+      <button hellComboboxButton type="button" aria-label="Toggle assignees"></button>
       <div *hellComboboxPortal hellComboboxDropdown>
-        <div hellComboboxOption id="atlas-multiple" value="atlas">Atlas</div>
-        <div hellComboboxOption id="nova-multiple" value="nova">Nova</div>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
       </div>
     </div>
   `,
@@ -57,149 +73,139 @@ class ComboboxMultipleFormHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
+  imports: [HellControlGroup, ...HELL_COMBOBOX_DIRECTIVES],
   template: `
-    <div
-      id="chips-combobox"
-      hellCombobox
-      multiple
-      [formControl]="control"
-      (valueChange)="values.push($any($event))"
-    >
-      <div hellComboboxChips [displayWith]="displayWith"></div>
-      <input hellComboboxInput aria-label="Assignees" />
-      <button hellComboboxButton type="button">Toggle</button>
-      <div *hellComboboxPortal hellComboboxDropdown>
-        <div hellComboboxOption id="atlas-chips" value="atlas">Atlas</div>
-        <div hellComboboxOption id="nova-chips" value="nova">Nova</div>
-        <div hellComboboxOption id="orion-chips" value="orion">Orion</div>
+    <div hellControlGroup aria-label="Reviewer control">
+      <span hellControlGroupPrefix>{{ selected()?.name ?? 'Unassigned' }}</span>
+      <div
+        hellCombobox
+        [value]="selected()"
+        [compareWith]="compareById"
+        [options]="filtered()"
+        ui="h-auto min-h-0 flex-1 rounded-none border-0 bg-transparent ps-0 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+        (valueChange)="onValueChange($event)"
+      >
+        <input
+          hellComboboxInput
+          aria-label="Reviewer"
+          placeholder="Search reviewers…"
+          [value]="query()"
+          (input)="query.set($any($event.target).value)"
+        />
+        <button hellComboboxButton type="button" aria-label="Toggle reviewers"></button>
+        <div *hellComboboxPortal hellComboboxDropdown>
+          @for (person of filtered(); track person.id) {
+            <div
+              hellComboboxOption
+              [value]="person"
+              [disabled]="person.disabled ?? false"
+            >
+              <strong>{{ person.name }}</strong>
+              <span> — {{ person.role }}</span>
+            </div>
+          } @empty {
+            <div hellComboboxEmpty>No reviewers match</div>
+          }
+        </div>
       </div>
     </div>
   `,
 })
-class ComboboxChipsHost {
-  readonly control = new FormControl<string[]>(['atlas', 'nova'], { nonNullable: true });
-  readonly values: Array<HellPickValue<string>> = [];
-  readonly displayWith = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+class ComboboxProjectedHost {
+  readonly query = signal('');
+  readonly selected = signal<Person | null>({
+    id: 'grace',
+    name: 'Current Grace',
+    role: 'Compiler',
+  });
+  readonly values: Array<Person | null> = [];
+  readonly compareById = (a: Person, b: Person): boolean => a.id === b.id;
+  readonly filtered = computed(() => {
+    const query = this.query().trim().toLocaleLowerCase();
+    if (!query) return [...PEOPLE];
+    return PEOPLE.filter((person) =>
+      `${person.name} ${person.role}`.toLocaleLowerCase().includes(query),
+    );
+  });
+
+  onValueChange(value: HellPickValue<Person>): void {
+    if (value === null || Array.isArray(value)) return;
+    const person = value as Person;
+    this.selected.set(person);
+    this.values.push(person);
+  }
 }
 
 @Component({
-  imports: [ReactiveFormsModule, HellCombobox],
-  template: `
-    <hell-combobox
-      aria-label="Choose a planet"
-      [options]="options"
-      [formControl]="control"
-      (valueChange)="values.push($any($event))"
-    />
-  `,
-})
-class ComboboxBasicFormHost {
-  readonly options: readonly HellOption<string>[] = [
-    { value: 'atlas', label: 'Atlas' },
-    { value: 'nova', label: 'Nova' },
-  ];
-  readonly control = new FormControl<string | null>(null);
-  readonly values: Array<string | null> = [];
-}
-
-@Component({
-  imports: [HellCombobox],
-  template: `<hell-combobox
-    aria-label="Choose a planet"
-    [options]="options"
-    [value]="value()"
-  />`,
-})
-class ComboboxBasicValueHost {
-  readonly options: readonly HellOption<string>[] = [
-    { value: 'atlas', label: 'Atlas' },
-    { value: 'nova', label: 'Nova' },
-  ];
-  readonly value = signal<string | null>('atlas');
-}
-
-@Component({
-  imports: [HellCombobox],
-  providers: [
-    provideHellLabels(HELL_COMBOBOX_LABELS, {
-      toggle: 'Open planet list',
-      empty: 'No planets found',
-    }),
+  imports: [
+    ReactiveFormsModule,
+    HellControlGroup,
+    ...HELL_CHIP_DIRECTIVES,
+    ...HELL_COMBOBOX_DIRECTIVES,
   ],
-  template: `<hell-combobox aria-label="Choose a planet" [options]="[]" />`,
-})
-class ComboboxBasicLabelsHost {}
-
-@Component({
-  imports: [HellCombobox],
   template: `
-    <hell-combobox
-      aria-label="Search stations"
-      [source]="source"
-      [sourceDebounce]="0"
-      [displayWith]="displayWith"
-      [value]="value()"
-      (valueChange)="value.set($any($event))"
-    />
+    <div hellControlGroup [disabled]="control.disabled" aria-label="Team control">
+      <div
+        hellCombobox
+        multiple
+        [formControl]="control"
+        [compareWith]="compareById"
+        [options]="filtered()"
+        ui="h-auto min-h-hell-control-md flex-1 flex-wrap gap-hell-1 rounded-none border-0 bg-transparent py-hell-1 ps-hell-2 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+        (valueChange)="values.push($any($event))"
+      >
+        <div hellChipSet ui="contents" aria-label="Selected teammates">
+          @for (person of selected(); track person.id) {
+            <span
+              hellChip
+              size="sm"
+              [disabled]="control.disabled"
+              (remove)="remove(person)"
+            >
+              {{ person.name }}<button hellChipRemove></button>
+            </span>
+          }
+          <input
+            hellComboboxInput
+            hellChipInput
+            aria-label="Teammates"
+            placeholder="Add teammate…"
+            [value]="query()"
+            (input)="query.set($any($event.target).value)"
+          />
+          <button hellComboboxButton type="button" aria-label="Toggle teammates"></button>
+          <div *hellComboboxPortal hellComboboxDropdown>
+            @for (person of filtered(); track person.id) {
+              <div hellComboboxOption [value]="person">{{ person.name }}</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
   `,
 })
-class ComboboxSourceHost {
-  readonly requests: string[] = [];
-  readonly gates: Array<{
-    resolve(options: readonly HellOption<string>[]): void;
-    reject(reason?: unknown): void;
-  }> = [];
-  readonly value = signal<string | null>(null);
-  readonly displayWith = (value: string): string => `#${value}`;
+class ComboboxChipInputHost {
+  readonly control = new FormControl<Person[]>([PEOPLE[0]!, PEOPLE[1]!], {
+    nonNullable: true,
+  });
+  readonly selected = toSignal(this.control.valueChanges, {
+    initialValue: this.control.value,
+  });
+  readonly query = signal('');
+  readonly values: Array<HellPickValue<Person>> = [];
+  readonly compareById = (a: Person, b: Person): boolean => a.id === b.id;
+  readonly filtered = computed(() => {
+    const query = this.query().trim().toLocaleLowerCase();
+    return query
+      ? PEOPLE.filter((person) => person.name.toLocaleLowerCase().includes(query))
+      : [...PEOPLE];
+  });
 
-  readonly source: HellSearchSource<HellOption<string>> = (request) => {
-    this.requests.push(request.query);
-    return new Promise<readonly HellOption<string>[]>((resolve, reject) => {
-      this.gates.push({ resolve, reject });
-    });
-  };
-}
-
-@Component({
-  imports: [HellCombobox],
-  template: `
-    <hell-combobox
-      aria-label="Broken"
-      [options]="[{ value: 'a', label: 'A' }]"
-      [source]="source"
-    />
-  `,
-})
-class ComboboxSourceConflictHost {
-  readonly source: HellSearchSource<HellOption<string>> = () => Promise.resolve([]);
-}
-
-@Component({
-  imports: [HellCombobox],
-  template: `<hell-combobox aria-label="Choose an instrument" [options]="options" />`,
-})
-class ComboboxRankingHost {
-  readonly options: readonly HellOption<string>[] = [
-    { value: 'piano', label: 'Piano' },
-    { value: 'banjo', label: 'Banjo', disabled: true },
-    { value: 'nova', label: 'Nova Synth' },
-  ];
-}
-
-@Component({
-  imports: [HellCombobox],
-  template: `<hell-combobox [ui]="comboboxUi" [options]="[{ value: 'atlas', label: 'Atlas' }]" />`,
-})
-class ComboboxBasicUiHost {
-  protected readonly comboboxUi = {
-    root: 'block p-hell-8',
-    control: 'rounded-hell-pill bg-hell-primary-soft',
-    input: 'text-hell-danger',
-    button: 'text-hell-success-strong',
-    dropdown: 'rounded-hell-pill',
-    option: 'px-hell-8 bg-hell-primary-soft',
-  } satisfies HellComboboxUi;
+  remove(person: Person): void {
+    this.control.setValue(
+      this.control.value.filter((candidate) => !this.compareById(candidate, person)),
+    );
+  }
 }
 
 @Component({
@@ -207,9 +213,18 @@ class ComboboxBasicUiHost {
   template: `
     <div hellCombobox ui="rounded-hell-pill bg-hell-primary-soft">
       <input hellComboboxInput aria-label="Assignee" ui="text-hell-danger" />
-      <button hellComboboxButton type="button" ui="text-hell-success-strong">Toggle</button>
+      <button
+        hellComboboxButton
+        type="button"
+        aria-label="Toggle assignees"
+        ui="text-hell-success-strong"
+      ></button>
       <div *hellComboboxPortal hellComboboxDropdown ui="rounded-hell-pill">
-        <div hellComboboxOption value="atlas" [ui]="{ root: 'px-hell-8 bg-hell-primary-soft' }">
+        <div
+          hellComboboxOption
+          value="atlas"
+          [ui]="{ root: 'px-hell-8 bg-hell-primary-soft' }"
+        >
           Atlas
         </div>
         <div hellComboboxEmpty ui="text-hell-danger">No matches</div>
@@ -234,16 +249,14 @@ afterAll(() => {
   if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
 });
 
-describe('HellComboboxRoot', () => {
+describe('HellCombobox', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         ComboboxFormHost,
         ComboboxMultipleFormHost,
-        ComboboxBasicFormHost,
-        ComboboxBasicValueHost,
-        ComboboxBasicLabelsHost,
-        ComboboxBasicUiHost,
+        ComboboxProjectedHost,
+        ComboboxChipInputHost,
         ComboboxUiHost,
       ],
     }).compileComponents();
@@ -291,7 +304,44 @@ describe('HellComboboxRoot', () => {
     expect(combobox.getAttribute('data-disabled')).toBe('');
   });
 
-  it('merges root, input, button, dropdown, option and empty part styles through the portal', async () => {
+  it('integrates with reactive forms in multiple mode without echoing array writes', async () => {
+    const fixture = TestBed.createComponent(ComboboxMultipleFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    host.control.setValue(['nova']);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.values).toEqual([]);
+    expect(host.control.value).toEqual(['nova']);
+
+    query<HTMLElement>(fixture.nativeElement, '#multi-combobox').dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: null }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+    expect(Array.isArray(host.control.value)).toBe(true);
+  });
+
+  it('preserves array-valued domain options in single mode', () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const debug = fixture.debugElement.query(By.directive(HellCombobox));
+    const combobox = debug.injector.get(HellCombobox<readonly string[]>);
+    const ngpCombobox = debug.injector.get(NgpCombobox);
+    const arrayValue = ['north', 'south'] as const;
+    let emitted: HellPickValue<readonly string[]> | undefined;
+
+    combobox.registerOnChange((value) => (emitted = value));
+    ngpCombobox.valueChange.emit(arrayValue);
+
+    expect(emitted).toBe(arrayValue);
+  });
+
+  it('merges each directive root Part Style Map through the portal', async () => {
     const fixture = TestBed.createComponent(ComboboxUiHost);
     fixture.detectChanges();
 
@@ -306,26 +356,75 @@ describe('HellComboboxRoot', () => {
     expect(root.className).toContain('rounded-hell-pill');
     expect(root.className).not.toContain('rounded-hell-md');
     expect(root.className).toContain('bg-hell-primary-soft');
-
     expect(input.getAttribute('data-slot')).toBe('root');
     expect(input.className).toContain('text-hell-danger');
-
     expect(button.getAttribute('data-slot')).toBe('root');
     expect(button.className).toContain('text-hell-success-strong');
-
     expect(dropdown.getAttribute('data-slot')).toBe('root');
     expect(dropdown.className).toContain('rounded-hell-pill');
-    expect(dropdown.className).not.toContain('rounded-hell-md');
-
     expect(option.getAttribute('data-slot')).toBe('root');
     expect(option.className).toContain('px-hell-8');
     expect(option.className).toContain('bg-hell-primary-soft');
-
     expect(empty.getAttribute('data-slot')).toBe('root');
     expect(empty.className).toContain('text-hell-danger');
   });
 
-  it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
+  it('keeps the input as the active-descendant owner and links the opened listbox', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    expect(input.getAttribute('role')).toBe('combobox');
+    expect(input.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(input.getAttribute('aria-autocomplete')).toBe('list');
+    expect(input.getAttribute('aria-expanded')).toBe('false');
+    expect(button.tabIndex).toBe(-1);
+
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+
+    expect(host.openStates).toEqual([true]);
+    expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(input.getAttribute('aria-controls')).toBe(dropdown.id);
+    expect(button.getAttribute('aria-controls')).toBe(dropdown.id);
+    expect(input.getAttribute('aria-activedescendant')).not.toBeNull();
+    expect(dropdown.getAttribute('role')).toBe('listbox');
+    expect(document.activeElement).toBe(input);
+
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.openStates[0]).toBe(true);
+    expect(host.openStates.at(-1)).toBe(false);
+    expect(input.getAttribute('aria-expanded')).toBe('false');
+    expect(input.hasAttribute('aria-controls')).toBe(false);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('opens from the projected toggle button and restores focus to the input', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    button.click();
+    const dropdown = await waitForDropdown(fixture);
+
+    expect(host.openStates).toEqual([true]);
+    expect(dropdown.getAttribute('role')).toBe('listbox');
+    expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('keeps the form untouched through a live portal and unregisters a stale dropdown', async () => {
     const fixture = TestBed.createComponent(ComboboxFormHost);
     fixture.detectChanges();
 
@@ -338,128 +437,35 @@ describe('HellComboboxRoot', () => {
 
     input.focus();
     const dropdown = await openComboboxDropdown(fixture, input, button);
-    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
-
-    option.focus();
-    input.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: option,
-      }),
-    );
-    fixture.detectChanges();
-
-    expect(host.control.touched).toBe(false);
-
-    outside.focus();
-    option.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: outside,
-      }),
-    );
-    fixture.detectChanges();
-
-    expect(host.control.touched).toBe(true);
-  });
-
-  it('treats a stale portaled dropdown as outside after reopening', async () => {
-    const fixture = TestBed.createComponent(ComboboxFormHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
-    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
-
-    input.focus();
-    const dropdown = await openComboboxDropdown(fixture, input, button);
     const staleOption = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+
+    input.dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: staleOption }),
+    );
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(false);
 
     input.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
     );
     await waitForDropdownRemoval(fixture);
 
-    const reopenedDropdown = await openComboboxDropdown(fixture, input, button);
-    const liveOption = query<HTMLElement>(reopenedDropdown, '[hellComboboxOption]');
-
+    const reopened = await openComboboxDropdown(fixture, input, button);
+    const liveOption = query<HTMLElement>(reopened, '[hellComboboxOption]');
     input.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: liveOption,
-      }),
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: liveOption }),
     );
     fixture.detectChanges();
-
     expect(host.control.touched).toBe(false);
 
     input.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: staleOption,
-      }),
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: staleOption }),
     );
     fixture.detectChanges();
-
     expect(host.control.touched).toBe(true);
   });
 
-  it('exposes APG combobox input semantics while closed', () => {
-    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
-    fixture.detectChanges();
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-
-    expect(input.getAttribute('role')).toBe('combobox');
-    expect(input.getAttribute('aria-haspopup')).toBe('listbox');
-    expect(input.getAttribute('aria-autocomplete')).toBe('list');
-    expect(input.getAttribute('aria-label')).toBe('Choose a planet');
-    expect(input.getAttribute('aria-expanded')).toBe('false');
-    expect(input.hasAttribute('aria-controls')).toBe(false);
-  });
-
-  it('keeps the visible toggle button out of the tab order while preserving clickability', () => {
-    const fixture = TestBed.createComponent(ComboboxFormHost);
-    fixture.detectChanges();
-
-    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
-    expect(button.tabIndex).toBe(-1);
-    expect(button.getAttribute('aria-haspopup')).toBe('listbox');
-    expect(button.getAttribute('aria-expanded')).toBe('false');
-    expect(button.disabled).toBe(false);
-  });
-
-  it('links the input and button to the opened listbox popup', async () => {
-    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
-    fixture.detectChanges();
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    const button = query<HTMLButtonElement>(
-      fixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    const dropdown = await waitForDropdown(fixture);
-    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
-
-    expect(input.getAttribute('aria-expanded')).toBe('true');
-    expect(dropdown.id).not.toBe('');
-    expect(input.getAttribute('aria-controls')).toBe(dropdown.id);
-    expect(button.getAttribute('aria-expanded')).toBe('true');
-    expect(button.getAttribute('aria-controls')).toBe(dropdown.id);
-    expect(dropdown.getAttribute('role')).toBe('listbox');
-    expect(options.map((option) => option.textContent?.trim())).toEqual(['Atlas', 'Nova']);
-    expect(options.every((option) => option.tabIndex === -1)).toBe(true);
-  });
-
-  it('can clamp delegated Arrow navigation at the first and last enabled options', async () => {
+  it('clamps delegated Arrow navigation only at enabled option boundaries', async () => {
     const fixture = TestBed.createComponent(ComboboxFormHost);
     fixture.detectChanges();
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
@@ -479,592 +485,119 @@ describe('HellComboboxRoot', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
+
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
   });
 
-  it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {
-    const fixture = TestBed.createComponent(ComboboxMultipleFormHost);
+  it('projects domain objects with comparison, disabled state, and one user commit', async () => {
+    const fixture = TestBed.createComponent(ComboboxProjectedHost);
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
-    const combobox = query<HTMLElement>(fixture.nativeElement, '#multi-combobox');
-
-    host.control.setValue(['nova']);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(host.values).toEqual([]);
-    expect(host.control.value).toEqual(['nova']);
-
-    combobox.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(host.control.touched).toBe(true);
-    expect(Array.isArray(host.control.value)).toBe(true);
-  });
-
-  it('preserves array-valued options in single mode', () => {
-    const fixture = TestBed.createComponent(ComboboxFormHost);
-    fixture.detectChanges();
-
-    const debug = fixture.debugElement.query(By.directive(HellComboboxRoot));
-    const combobox = debug.injector.get(HellComboboxRoot<readonly string[]>);
-    const ngpCombobox = debug.injector.get(NgpCombobox);
-    const arrayValue = ['north', 'south'] as const;
-    let emitted: HellPickValue<readonly string[]> | undefined;
-
-    combobox.registerOnChange((value) => (emitted = value));
-    ngpCombobox.valueChange.emit(arrayValue);
-
-    expect(emitted).toBe(arrayValue);
-  });
-
-  it('provides a basic combobox preset with form value display and disabled state', () => {
-    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox');
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox [hellCombobox]');
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-
-    expect(preset.getAttribute('data-slot')).toBe('root');
-
-    expect(input.placeholder).toBe('Search');
-
-    host.control.setValue('nova');
-    fixture.detectChanges();
-
-    expect(input.value).toBe('Nova');
-    expect(host.values).toEqual([]);
-
-    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: root }));
-    fixture.detectChanges();
-    expect(host.control.touched).toBe(false);
-
-    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
-    fixture.detectChanges();
-    expect(host.control.touched).toBe(true);
-
-    host.control.disable();
-    fixture.detectChanges();
-
-    expect(root.getAttribute('data-disabled')).toBe('');
-  });
-
-  it('updates the basic combobox reactive form and output once for a user selection', async () => {
-    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox [hellCombobox]');
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-
-    host.control.setValue(null);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(input.value).toBe('');
-    expect(host.values).toEqual([]);
-
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    const dropdown = await waitForDropdown(fixture);
-    query<HTMLElement>(dropdown, '[hellComboboxOption]:last-child').click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(host.control.value).toBe('nova');
-    expect(host.values).toEqual(['nova']);
-
-    host.control.disable();
-    fixture.detectChanges();
-
-    expect(root.getAttribute('data-disabled')).toBe('');
-  });
-
-  it('lets basic combobox callers override helper labels without changing defaults', async () => {
-    const defaultFixture = TestBed.createComponent(ComboboxBasicFormHost);
-    defaultFixture.detectChanges();
-
-    const defaultButton = query<HTMLButtonElement>(
-      defaultFixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-    expect(defaultButton.textContent?.trim()).toBe('');
-    expect(defaultButton.getAttribute('aria-label')).toBe('Toggle options');
-
-    const fixture = TestBed.createComponent(ComboboxBasicLabelsHost);
-    fixture.detectChanges();
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    const button = query<HTMLButtonElement>(
-      fixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-
-    expect(button.textContent?.trim()).toBe('');
-    expect(button.getAttribute('aria-label')).toBe('Open planet list');
-
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    const dropdown = await waitForDropdown(fixture);
-    expect(query<HTMLElement>(dropdown, '[hellComboboxEmpty]').textContent?.trim()).toBe(
-      'No planets found',
-    );
-  });
-
-  it('syncs basic combobox external value changes into the filter input', async () => {
-    const fixture = TestBed.createComponent(ComboboxBasicValueHost);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const host = fixture.componentInstance;
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-
-    expect(input.value).toBe('Atlas');
-
-    host.value.set('nova');
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(input.value).toBe('Nova');
-  });
-
-  it('exposes flat owned parts on the basic combobox host and its portaled dropdown', async () => {
-    const fixture = TestBed.createComponent(ComboboxBasicUiHost);
-    fixture.detectChanges();
-
-    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox');
-    const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
     const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
-
-    expect(preset.getAttribute('data-slot')).toBe('root');
-    expect(preset.className).toContain('block');
-    expect(preset.className).toContain('p-hell-8');
-    expect(root.getAttribute('data-slot')).toBe('control');
-    expect(root.className).toContain('rounded-hell-pill');
-    expect(root.className).toContain('bg-hell-primary-soft');
-    expect(input.getAttribute('data-slot')).toBe('input');
-    expect(input.className).toContain('text-hell-danger');
-    expect(button.getAttribute('data-slot')).toBe('button');
-    expect(button.className).toContain('text-hell-success-strong');
-
     const dropdown = await openComboboxDropdown(fixture, input, button);
-    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]'));
 
-    expect(dropdown.getAttribute('data-slot')).toBe('dropdown');
-    expect(dropdown.className).toContain('rounded-hell-pill');
-    expect(option.getAttribute('data-slot')).toBe('option');
-    expect(option.className).toContain('px-hell-8');
-    expect(option.className).toContain('bg-hell-primary-soft');
-  });
-});
-
-describe('HellCombobox filtering', () => {
-  afterEach(() => {
-    cleanupPortaledTestElements('[hellComboboxDropdown]');
-  });
-
-  async function openAndFilter(
-    fixture: {
-      detectChanges: () => void;
-      whenStable: () => Promise<unknown>;
-      nativeElement: HTMLElement;
-    },
-    filter: string,
-  ): Promise<HTMLElement> {
-    fixture.detectChanges();
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    const button = query<HTMLButtonElement>(
-      fixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-    const dropdown = await openComboboxDropdown(fixture, input, button);
-    input.value = filter;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    return dropdown;
-  }
-
-  function optionLabels(dropdown: HTMLElement): readonly string[] {
-    return Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]')).map(
-      (option) => option.textContent?.trim() ?? '',
-    );
-  }
-
-  it('shows every option for an empty query', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxRankingHost);
-
-    const dropdown = await openAndFilter(fixture, '');
-
-    expect(optionLabels(dropdown)).toEqual(['Piano', 'Banjo', 'Nova Synth']);
-  });
-
-  it('ranks prefix matches above substring matches through the default ranker', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxRankingHost);
-
-    const dropdown = await openAndFilter(fixture, 'no');
-
-    expect(optionLabels(dropdown)).toEqual(['Nova Synth', 'Piano']);
-  });
-
-  it('keeps matching disabled options listed but disabled', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxRankingHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxRankingHost);
-
-    const dropdown = await openAndFilter(fixture, 'banjo');
-
-    expect(optionLabels(dropdown)).toEqual(['Banjo']);
-    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
-    expect(option.hasAttribute('data-disabled')).toBe(true);
-  });
-
-  it('honors a ranker override provided through provideHellSearchRanker', async () => {
-    const reversingRanker: HellSearchRanker = <T>(items: readonly T[]) =>
-      items.map((item, index) => ({ item, score: items.length - index })).reverse();
-    await TestBed.configureTestingModule({
-      imports: [ComboboxRankingHost],
-      providers: [provideHellSearchRanker(reversingRanker)],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxRankingHost);
-
-    const dropdown = await openAndFilter(fixture, 'no');
-
-    expect(optionLabels(dropdown)).toEqual(['Nova Synth', 'Banjo', 'Piano']);
-  });
-});
-
-describe('HellCombobox async source', () => {
-  afterEach(() => {
-    cleanupPortaledTestElements('[hellComboboxDropdown]');
-  });
-
-  async function settle(fixture: {
-    detectChanges: () => void;
-    whenStable: () => Promise<unknown>;
-  }): Promise<void> {
-    fixture.detectChanges();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-  }
-
-  it('renders loading, then results, and re-queries as the user types', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxSourceHost);
-    fixture.detectChanges();
-    const host = fixture.componentInstance;
-    await settle(fixture);
-
-    expect(host.requests).toEqual(['']);
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    const button = query<HTMLButtonElement>(
-      fixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-    const dropdown = await openComboboxDropdown(fixture, input, button);
-
-    expect(query<HTMLElement>(dropdown, '[data-slot="loading"]').textContent?.trim()).toBe(
-      'Loading options…',
-    );
-
-    host.gates[0]?.resolve([
-      { value: 'nord', label: 'Nordhafen' },
-      { value: 'hann', label: 'Hannover' },
+    expect(options.map((option) => option.textContent?.trim().replace(/\s+/g, ' '))).toEqual([
+      'Ada Lovelace — Platform',
+      'Grace Hopper — Compiler',
+      'Margaret Hamilton — Flight',
     ]);
-    await settle(fixture);
+    expect(options[0]?.getAttribute('aria-selected')).not.toBe('true');
+    expect(options[1]?.getAttribute('aria-selected')).toBe('true');
+    expect(options[2]?.getAttribute('aria-disabled')).toBe('true');
 
-    const labels = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]')).map(
-      (option) => option.textContent?.trim(),
-    );
-    expect(labels).toEqual(['#nord', '#hann']);
-    expect(dropdown.querySelector('[data-slot="loading"]')).toBeNull();
-
-    input.value = 'han';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    await settle(fixture);
-
-    expect(host.requests).toEqual(['', 'han']);
-  });
-
-  it('renders the error label when the source rejects', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxSourceHost);
-    fixture.detectChanges();
-    const host = fixture.componentInstance;
-    await settle(fixture);
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    const button = query<HTMLButtonElement>(
-      fixture.nativeElement,
-      'hell-combobox button[hellComboboxButton]',
-    );
-    const dropdown = await openComboboxDropdown(fixture, input, button);
-
-    host.gates[0]?.reject(new Error('backend down'));
-    await settle(fixture);
-
-    expect(query<HTMLElement>(dropdown, '[data-slot="error"]').textContent?.trim()).toBe(
-      "Couldn't load options",
-    );
-    expect(dropdown.querySelector('[hellComboboxOption]')).toBeNull();
-  });
-
-  it('labels picked values through displayWith while their option is absent', async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxSourceHost] }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxSourceHost);
-    fixture.detectChanges();
-    const host = fixture.componentInstance;
-    await settle(fixture);
-    host.gates[0]?.resolve([]);
-
-    host.value.set('nord');
-    await settle(fixture);
-
-    const input = query<HTMLInputElement>(
-      fixture.nativeElement,
-      'hell-combobox input[hellComboboxInput]',
-    );
-    expect(input.value).toBe('#nord');
-  });
-
-  it('rejects options and source together with a clear error', async () => {
-    await TestBed.configureTestingModule({
-      imports: [ComboboxSourceConflictHost],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(ComboboxSourceConflictHost);
-
-    expect(() => fixture.detectChanges()).toThrowError(/mutually exclusive/);
-  });
-});
-
-describe('HellComboboxChips', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxChipsHost] }).compileComponents();
-  });
-
-  afterEach(() => {
-    cleanupPortaledTestElements('[hellComboboxDropdown], [data-hell-combobox-test-outside]');
-  });
-
-  async function createChipsHost(): Promise<{
-    fixture: ReturnType<typeof TestBed.createComponent<ComboboxChipsHost>>;
-    host: ComboboxChipsHost;
-    root: HTMLElement;
-  }> {
-    const fixture = TestBed.createComponent(ComboboxChipsHost);
-    fixture.detectChanges();
+    options[0]?.click();
     await fixture.whenStable();
     fixture.detectChanges();
-    // Each chip derives its remove button's accessible name from its rendered
-    // text through a MutationObserver, which delivers on a microtask; let it run
-    // and reflect the derived `Remove {label}` names before assertions read them.
-    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(host.selected()).toBe(PEOPLE[0]);
+    expect(host.values).toEqual([PEOPLE[0]]);
+  });
+
+  it('composes public Chip Set and Chip Input without a second selection state machine', async () => {
+    const fixture = TestBed.createComponent(ComboboxChipInputHost);
     fixture.detectChanges();
-    return {
-      fixture,
-      host: fixture.componentInstance,
-      root: fixture.nativeElement as HTMLElement,
-    };
-  }
+    await settleChipLabels(fixture);
 
-  it('renders a removable, display-labelled chip per selected value', async () => {
-    const { root } = await createChipsHost();
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const input = query<HTMLInputElement>(root, 'input[hellChipInput][hellComboboxInput]');
+    let chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
 
-    const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
-    expect(chips.map((chip) => chip.getAttribute('data-slot'))).toEqual(['chip', 'chip']);
-    // The remove button is empty: its × is the chip primitive's built-in CSS
-    // glyph (a ::before pseudo-element), so it never leaks into text content.
-    expect(chips.map((chip) => chip.textContent?.trim().replace(/\s+/g, ' '))).toEqual([
-      'Atlas',
-      'Nova',
+    expect(chips.map((chip) => chip.textContent?.trim())).toEqual([
+      'Ada Lovelace',
+      'Grace Hopper',
     ]);
+    expect(chips.map((chip) => chip.getAttribute('tabindex'))).toEqual(['0', '-1']);
+    expect(root.querySelector('[hellComboboxChips]')).toBeNull();
 
-    const removeAtlas = query<HTMLButtonElement>(
-      root,
-      'button[hellChipRemove][aria-label="Remove Atlas"]',
-    );
-    // No projected content and no data-slot override: the button stays the chip
-    // primitive's `root` slot so its built-in :empty × glyph renders, and its
-    // "Remove Atlas" name is derived from the chip's text — never restated here.
-    expect(removeAtlas.getAttribute('data-slot')).toBe('root');
-    expect(removeAtlas.childElementCount).toBe(0);
-    expect(removeAtlas.textContent?.trim()).toBe('');
-    expect(query(root, 'button[hellChipRemove][aria-label="Remove Nova"]')).toBeTruthy();
-  });
-
-  it('routes a chip remove-button click through selection state, form value, and output', async () => {
-    const { fixture, host, root } = await createChipsHost();
-
-    query<HTMLButtonElement>(root, 'button[hellChipRemove][aria-label="Remove Atlas"]').click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(host.control.value).toEqual(['nova']);
-    expect(host.values).toEqual([['nova']]);
-
-    const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
-    expect(chips.map((chip) => chip.textContent?.trim().replace(/\s+/g, ' '))).toEqual(['Nova']);
-  });
-
-  it('makes chips one roving tab stop and removes the focused chip from the keyboard', async () => {
-    const { fixture, host, root } = await createChipsHost();
-    const document = root.ownerDocument;
-    const chipsRoot = query<HTMLElement>(root, '[hellComboboxChips]');
-    const [atlas, nova] = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
-    const removeButtons = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('button[hellChipRemove]'),
-    );
-
-    expect(chipsRoot.getAttribute('role')).toBe('group');
-    expect(chipsRoot.getAttribute('tabindex')).toBe('-1');
-    expect([atlas.getAttribute('tabindex'), nova.getAttribute('tabindex')]).toEqual(['0', '-1']);
-    expect(removeButtons.map((button) => button.getAttribute('tabindex'))).toEqual(['-1', '-1']);
-
-    atlas.focus();
-    atlas.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    input.focus();
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
     );
     fixture.detectChanges();
-    expect(document.activeElement).toBe(nova);
-    expect([atlas.getAttribute('tabindex'), nova.getAttribute('tabindex')]).toEqual(['-1', '0']);
 
-    nova.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    expect(document.activeElement).toBe(atlas);
+    expect(document.activeElement).toBe(chips[1]);
+    expect(host.control.value).toEqual([PEOPLE[0], PEOPLE[1]]);
 
-    atlas.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Delete', bubbles: true, cancelable: true }),
+    chips[1]?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
     );
     await fixture.whenStable();
     fixture.detectChanges();
     await new Promise<void>((resolve) => queueMicrotask(resolve));
 
-    expect(host.control.value).toEqual(['nova']);
-    expect(host.values).toEqual([['nova']]);
-    const survivor = query<HTMLElement>(root, '[hellChip]');
-    expect(survivor.textContent?.trim().replace(/\s+/g, ' ')).toBe('Nova');
-    expect(survivor.getAttribute('tabindex')).toBe('0');
-    expect(document.activeElement).toBe(survivor);
-  });
+    chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
+    expect(chips.map((chip) => chip.textContent?.trim())).toEqual(['Ada Lovelace']);
+    expect(host.control.value).toEqual([PEOPLE[0]]);
+    expect(host.values).toEqual([]);
+    expect(document.activeElement).toBe(input);
 
-  it('keeps option selection-state attributes coherent after chip removal', async () => {
-    const { fixture, root } = await createChipsHost();
-
-    query<HTMLButtonElement>(root, 'button[hellChipRemove][aria-label="Remove Atlas"]').click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    // Open the listbox and assert options reflect the post-removal selection:
-    // the removed value drops its screen-reader selection state, the survivor keeps it.
-    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
     const button = query<HTMLButtonElement>(root, 'button[hellComboboxButton]');
     const dropdown = await openComboboxDropdown(fixture, input, button);
-    const optionByText = (text: string): HTMLElement => {
-      const option = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]')).find(
-        (candidate) => candidate.textContent?.trim() === text,
-      );
-      if (!option) throw new Error(`Expected option "${text}".`);
-      return option;
-    };
-    const atlasOption = optionByText('Atlas');
-    const novaOption = optionByText('Nova');
-
-    expect(atlasOption.hasAttribute('aria-selected')).toBe(false);
-    expect(atlasOption.hasAttribute('data-selected')).toBe(false);
-    expect(novaOption.getAttribute('aria-selected')).toBe('true');
-    expect(novaOption.hasAttribute('data-selected')).toBe(true);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]'));
+    expect(options[0]?.getAttribute('aria-selected')).toBe('true');
+    expect(options[1]?.getAttribute('aria-selected')).not.toBe('true');
   });
 
-  it('removes the last selection on Backspace in the empty input', async () => {
-    const { fixture, host, root } = await createChipsHost();
-
-    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
-    input.value = '';
-    input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
-    );
-    await fixture.whenStable();
+  it('keeps composed chips and their remove actions disabled with the form control', async () => {
+    const fixture = TestBed.createComponent(ComboboxChipInputHost);
     fixture.detectChanges();
+    await settleChipLabels(fixture);
 
-    expect(host.control.value).toEqual(['atlas']);
-    expect(host.values).toEqual([['atlas']]);
-  });
-
-  it('does not remove a selection on Backspace when the input has text', async () => {
-    const { fixture, host, root } = await createChipsHost();
-
-    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
-    input.value = 'orio';
-    input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
-    );
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(host.control.value).toEqual(['atlas', 'nova']);
-    expect(host.values).toEqual([]);
-  });
-
-  it('disables every chip remove button and blocks removal when the combobox is disabled', async () => {
-    const { fixture, host, root } = await createChipsHost();
-
+    const host = fixture.componentInstance;
     host.control.disable();
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
+    const root = fixture.nativeElement as HTMLElement;
     const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
-    expect(chips).toHaveLength(2);
-    for (const chip of chips) {
-      expect(chip.getAttribute('data-disabled')).toBe('');
-    }
+    const remove = query<HTMLButtonElement>(root, 'button[hellChipRemove]');
+    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
 
-    const removeAtlas = query<HTMLButtonElement>(
-      root,
-      'button[hellChipRemove][aria-label="Remove Atlas"]',
-    );
-    expect(removeAtlas.hasAttribute('disabled')).toBe(true);
+    expect(chips.every((chip) => chip.hasAttribute('data-disabled'))).toBe(true);
+    expect(remove.disabled).toBe(true);
+    expect(input.disabled).toBe(true);
 
-    removeAtlas.click();
-    await fixture.whenStable();
+    remove.click();
     fixture.detectChanges();
-
-    expect(root.querySelectorAll('[hellChip]')).toHaveLength(2);
-    expect(host.values).toEqual([]);
+    expect(host.control.value).toEqual([PEOPLE[0], PEOPLE[1]]);
   });
 });
+
+async function settleChipLabels(fixture: {
+  detectChanges: () => void;
+  whenStable: () => Promise<unknown>;
+}): Promise<void> {
+  await fixture.whenStable();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  fixture.detectChanges();
+}
 
 async function waitForDropdown(fixture: {
   detectChanges: () => void;
@@ -1072,7 +605,6 @@ async function waitForDropdown(fixture: {
 }): Promise<HTMLElement> {
   const dropdown = await findDropdown(fixture, 3000);
   if (dropdown) return dropdown;
-
   throw new Error('Expected combobox dropdown.');
 }
 
@@ -1089,10 +621,6 @@ async function openComboboxDropdown(
     () =>
       input.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
-      ),
-    () =>
-      input.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
       ),
   ];
 
@@ -1150,7 +678,5 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
 }
 
 function cleanupPortaledTestElements(selector: string): void {
-  for (const element of document.querySelectorAll(selector)) {
-    element.remove();
-  }
+  for (const element of document.querySelectorAll(selector)) element.remove();
 }

@@ -1,9 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
 import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import type { HellPickValue } from '@hell-ui/angular/core';
-import { HellChip } from '@hell-ui/angular/chip';
+import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
 
-const LABELS = [
+interface IssueLabel {
+  readonly id: string;
+  readonly name: string;
+}
+
+const LABELS: readonly IssueLabel[] = [
   'billing',
   'bug',
   'compliance',
@@ -14,34 +19,42 @@ const LABELS = [
   'performance',
   'security',
   'support',
-];
+].map((name) => ({ id: name, name }));
 
 @Component({
   selector: 'app-combobox-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES, HellChip],
+  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CHIP_DIRECTIVES],
   template: `
     <div class="flex max-w-80 flex-col gap-hell-2">
-      <div hellCombobox multiple [value]="selected()" (valueChange)="onValueChange($event)">
+      <div
+        hellCombobox
+        multiple
+        [options]="labelOptions()"
+        [value]="selected()"
+        [compareWith]="compareLabel"
+        (valueChange)="onValueChange($event)"
+      >
         <input
           hellComboboxInput
           aria-label="Issue labels"
           placeholder="Add labels…"
-          (input)="filter.set(($any($event.target).value ?? '').toLowerCase())"
+          [value]="labelSearch.query()"
+          (input)="labelSearch.query.set($any($event.target).value ?? '')"
         />
         <button hellComboboxButton type="button" aria-label="Toggle labels"></button>
         <div *hellComboboxPortal hellComboboxDropdown>
-          @for (option of filtered(); track option) {
-            <div hellComboboxOption [value]="option">{{ option }}</div>
+          @for (label of labelOptions(); track label.id) {
+            <div hellComboboxOption [value]="label">{{ label.name }}</div>
           } @empty {
             <div hellComboboxEmpty>No labels match</div>
           }
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-hell-1">
-        @for (label of selected(); track label) {
-          <span hellChip variant="primary">{{ label }}</span>
+      <div hellChipSet aria-label="Applied labels">
+        @for (label of selected(); track label.id) {
+          <span hellChip variant="primary">{{ label.name }}</span>
         } @empty {
           <span class="text-xs text-hell-foreground-subtle">No labels applied</span>
         }
@@ -50,14 +63,19 @@ const LABELS = [
   `,
 })
 export class ComboboxMultipleExample {
-  protected readonly selected = signal<readonly string[]>([]);
-  protected readonly filter = signal('');
-  protected readonly filtered = computed(() => {
-    const q = this.filter().trim();
-    return q ? LABELS.filter((l) => l.includes(q)) : LABELS;
+  protected readonly selected = signal<readonly IssueLabel[]>([]);
+  protected readonly query = signal('');
+  protected readonly labelSearch = hellSearchResource({
+    query: this.query,
+    items: LABELS,
+    fields: [{ get: (label) => label.name }],
   });
+  protected readonly labelOptions = computed(() => [...this.labelSearch.items()]);
+  protected readonly compareLabel = (left: IssueLabel, right: IssueLabel): boolean =>
+    left.id === right.id;
 
-  protected onValueChange(next: HellPickValue<string>): void {
+  protected onValueChange(next: HellPickValue<IssueLabel>): void {
     this.selected.set(Array.isArray(next) ? next : []);
+    this.query.set('');
   }
 }

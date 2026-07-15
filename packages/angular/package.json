@@ -142,6 +142,9 @@
     "./checkbox": {
       "@heinrich/source": "./checkbox/public-api.ts"
     },
+    "./combobox": {
+      "@heinrich/source": "./combobox/public-api.ts"
+    },
     "./control-group": {
       "@heinrich/source": "./control-group/public-api.ts"
     },
@@ -207,9 +210,6 @@
     },
     "./chip": {
       "@heinrich/source": "./chip/public-api.ts"
-    },
-    "./combobox": {
-      "@heinrich/source": "./combobox/public-api.ts"
     },
     "./empty-state": {
       "@heinrich/source": "./empty-state/public-api.ts"
@@ -324,6 +324,11 @@
       "style": "./checkbox/styles.css",
       "default": "./checkbox/styles.css"
     },
+    "./combobox/styles.css": {
+      "@heinrich/source": "./combobox/styles.css",
+      "style": "./combobox/styles.css",
+      "default": "./combobox/styles.css"
+    },
     "./control-group/styles.css": {
       "@heinrich/source": "./control-group/styles.css",
       "style": "./control-group/styles.css",
@@ -433,11 +438,6 @@
       "@heinrich/source": "./chip/styles.css",
       "style": "./chip/styles.css",
       "default": "./chip/styles.css"
-    },
-    "./combobox/styles.css": {
-      "@heinrich/source": "./combobox/styles.css",
-      "style": "./combobox/styles.css",
-      "default": "./combobox/styles.css"
     },
     "./empty-state/styles.css": {
       "@heinrich/source": "./empty-state/styles.css",

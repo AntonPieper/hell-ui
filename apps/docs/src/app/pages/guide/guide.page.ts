@@ -76,14 +76,15 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       </p>
       <ul>
         <li>
-          <strong>Styled Primitives</strong> (button, input, menu, dialog, select, …) are low-level
-          modules. Their value is behavior, accessibility, state attributes, default Tailwind part
-          recipes, and public CSS variables. You own the surrounding structure.
+          <strong>Styled Primitives</strong> (button, input, menu, dialog, select, combobox, …) are
+          low-level modules. Their value is behavior, accessibility, state attributes, default
+          Tailwind part recipes, and public CSS variables. You own the surrounding structure and
+          project domain markup into interaction state machines such as Select and Combobox.
         </li>
         <li>
-          <strong>Mixed Entry Points</strong> (combobox, pagination) export primitive directives
-          plus a small convenience component, such as <code>hell-combobox</code> or
-          <code>hell-pagination</code>, when assembling the primitive is boilerplate.
+          <strong>Mixed Entry Points</strong> (pagination) export primitive directives plus a small
+          convenience component such as <code>hell-pagination</code> when assembling the primitive
+          is boilerplate.
         </li>
         <li>
           <strong>Composites</strong> (app shell, omnibar, date picker, toast, …) combine

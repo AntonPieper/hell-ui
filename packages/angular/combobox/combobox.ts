@@ -1,64 +1,45 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, Injectable, booleanAttribute, OnDestroy, computed, effect, forwardRef, inject, input, isDevMode, output, signal, viewChild, type InjectionToken, type Signal } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { HellControlledValueState } from '@hell-ui/angular/internal/core';
-import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
-import { HELL_SEARCH_RANKER, HellSearchService, hellCreateLabels, hellPartStyler, type HellOption, type HellOptionCompareWith, type HellOptionDisplayWith, type HellPickValue, type HellRecipe, type HellSearchRanker, type HellSearchResult, type HellSearchSource, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-import { hellContainsFloatingTarget, hellNormalizePickValue, hellRegisterFloatingHost, HellPickerControl } from '@hell-ui/angular/internal/core';
-import { HellSearchOrchestrator } from '@hell-ui/angular/internal/search';
-import { NgpCombobox, NgpComboboxButton, NgpComboboxDropdown, NgpComboboxInput, NgpComboboxOption, NgpComboboxPortal, injectComboboxState } from 'ng-primitives/combobox';
 import {
-  hellOptionRowLabel,
-  hellOptionSurfaceRecipe,
-  hellPickedValueLabel,
-} from '@hell-ui/angular/internal/option';
-import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from '@hell-ui/angular/internal/floating';
+  DestroyRef,
+  Directive,
+  ElementRef,
+  Injectable,
+  booleanAttribute,
+  computed,
+  forwardRef,
+  inject,
+  input,
+} from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  hellPartStyler,
+  type HellPickValue,
+  type HellRecipe,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
+import {
+  hellRegisterFloatingHost,
+  HellPickerControl,
+} from '@hell-ui/angular/internal/core';
+import {
+  HELL_FLOATING_POP_IN,
+  HELL_FLOATING_SURFACE,
+} from '@hell-ui/angular/internal/floating';
 import {
   writeComboboxStateDisabled,
   writeComboboxStateValue,
 } from '@hell-ui/angular/internal/ng-primitives';
+import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
+import {
+  NgpCombobox,
+  NgpComboboxButton,
+  NgpComboboxDropdown,
+  NgpComboboxInput,
+  NgpComboboxOption,
+  NgpComboboxPortal,
+  injectComboboxState,
+} from 'ng-primitives/combobox';
 
-/** Public parts of the HellComboboxChips module, styleable through its Part Style Map. */
-export type HellComboboxChipsPart = 'root' | 'chip';
-/** Part Style Map accepted by the HellComboboxChips `ui` input. */
-export type HellComboboxChipsUi = HellUi<HellComboboxChipsPart>;
-
-/** Public parts of the HellCombobox module, styleable through its Part Style Map. */
-export type HellComboboxPart =
-  | 'root'
-  | 'control'
-  | 'input'
-  | 'button'
-  | 'dropdown'
-  | 'option'
-  | 'empty'
-  | 'loading'
-  | 'error';
-/** Part Style Map accepted by the HellCombobox `ui` input. */
-export type HellComboboxUi = HellUi<HellComboboxPart>;
-
-/** Built-in copy owned by the combobox entry point. */
-export interface HellComboboxLabels {
-  /** Accessible label for the dropdown toggle button. */
-  readonly toggle: string;
-  /** Message shown when no option matches the current query. */
-  readonly empty: string;
-  /** Message shown while an async source is loading options. */
-  readonly loading: string;
-  /** Message shown when an async source fails to load options. */
-  readonly error: string;
-}
-
-/** Injection token resolving to the effective combobox labels. */
-export const HELL_COMBOBOX_LABELS: InjectionToken<HellComboboxLabels> =
-  hellCreateLabels<HellComboboxLabels>('HELL_COMBOBOX_LABELS', {
-    toggle: 'Toggle options',
-    empty: 'No matches',
-    loading: 'Loading options…',
-    error: "Couldn't load options",
-  });
-
-const HELL_COMBOBOX_ROOT_RECIPE = {
+const HELL_COMBOBOX_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
@@ -80,99 +61,108 @@ const HELL_COMBOBOX_EMPTY_RECIPE = {
   root: 'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*2)] text-xs text-hell-foreground-subtle',
 } satisfies HellRecipe<'root'>;
 
-const HELL_COMBOBOX_CHIPS_RECIPE = {
-  // `display: contents` lets each chip flow as a direct flex child of the
-  // combobox control, so selected tokens wrap and share the wrapper's gap
-  // alongside the input instead of nesting in an extra layout box.
-  root: 'contents',
-  chip: 'max-w-full',
-} satisfies HellRecipe<HellComboboxChipsPart>;
-
-const HELL_COMBOBOX_STATUS_RECIPE =
-  'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*2)] text-xs text-hell-foreground-subtle';
-
-const HELL_COMBOBOX_RECIPE = {
-  root: '',
-  control: '',
-  input: '',
-  button: '',
-  dropdown: '',
-  option: '',
-  empty: '',
-  loading: HELL_COMBOBOX_STATUS_RECIPE,
-  error: `${HELL_COMBOBOX_STATUS_RECIPE} text-hell-danger`,
-} satisfies HellRecipe<HellComboboxPart>;
-
 /**
- * Combobox-owned coordination seam between `HellComboboxRoot` and its chips
- * presentation. Provided by the combobox host so the chips directive and the
- * input can read the live selection, register a chips presentation, and route
- * removals without those members appearing on the combobox's public API (the
- * same registry seam the chip set uses for its items). Not exported from the
- * entry point.
- *
- * Removals write the selection state and emit `valueChange` in one step — the
- * net effect of toggling an option — so the emitted form value, the options'
- * `aria-selected` state, and the rendered chips never diverge, even for values
- * whose option has been filtered out of the dropdown.
+ * Combobox-local coordination for forms, boundary clamping, and portaled
+ * dropdown containment. Projected directives coordinate through DI so none of
+ * the registration or containment machinery becomes a public extension API.
  */
 @Injectable()
-class HellComboboxSelectionController {
+class HellComboboxController<T = unknown> {
   private readonly combobox = inject(NgpCombobox);
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
-  private readonly chipsPresenterCount = signal(0);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly control = new HellPickerControl<T>({
+    host: () => this.host.nativeElement,
+    multiple: () => this.combobox.multiple(),
+    valueChanges: this.combobox.valueChange,
+    openChanges: this.combobox.openChange,
+    writeValue: (value) => writeComboboxStateValue(this.comboboxState(), value),
+    setDisabled: (disabled) => writeComboboxStateDisabled(this.comboboxState(), disabled),
+  });
+  private readWrapNavigation: () => boolean = () => true;
+  private readonly onFocusOut = (event: FocusEvent): void => {
+    this.control.markControlTouched(event);
+  };
 
-  /** Whether a chips presentation is mounted (enables Backspace-on-empty removal). */
-  readonly chipsActive = computed(() => this.chipsPresenterCount() > 0);
-  /** Effective disabled state, reflecting both the `disabled` input and CVA writes. */
-  readonly disabled = computed(() => this.comboboxState().disabled());
-  /** Current selection normalized to an array for chip rendering. */
-  readonly selectedValues = computed<readonly unknown[]>(() => this.readSelectedValues());
-
-  /** Registers a chips presentation so the input enables Backspace-on-empty removal. */
-  registerChipsPresenter(): void {
-    this.chipsPresenterCount.update((count) => count + 1);
+  constructor() {
+    this.control.connect(this.destroyRef);
+    this.host.nativeElement.addEventListener('focusout', this.onFocusOut);
+    this.host.nativeElement.addEventListener('keydown', this.clampNavigation, {
+      capture: true,
+    });
+    this.destroyRef.onDestroy(() => {
+      this.host.nativeElement.removeEventListener('focusout', this.onFocusOut);
+      this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, {
+        capture: true,
+      });
+    });
   }
 
-  /** Unregisters a chips presentation when it leaves the DOM. */
-  unregisterChipsPresenter(): void {
-    this.chipsPresenterCount.update((count) => Math.max(count - 1, 0));
+  configureWrapNavigation(readWrapNavigation: () => boolean): void {
+    this.readWrapNavigation = readWrapNavigation;
   }
 
-  /** Removes one value, routing the change through combobox selection state. */
-  removeValue(value: unknown): void {
-    if (this.comboboxState().disabled()) return;
-    const compare = this.combobox.compareWith();
-    const next = this.readSelectedValues().filter((candidate) => !compare(candidate, value));
-    this.commitSelection(next);
+  writeValue(value: HellPickValue<T>): void {
+    this.control.writeValue(value);
   }
 
-  /** Removes the last selected value (Backspace in the empty input). */
-  removeLastValue(): void {
-    const values = this.readSelectedValues();
-    if (!values.length) return;
-    this.removeValue(values[values.length - 1]);
+  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
+    this.control.registerOnChange(fn);
   }
 
-  private commitSelection(next: readonly unknown[]): void {
-    writeComboboxStateValue(this.comboboxState(), next);
-    this.combobox.valueChange.emit(next);
+  registerOnTouched(fn: () => void): void {
+    this.control.registerOnTouched(fn);
   }
 
-  private readSelectedValues(): readonly unknown[] {
-    const value = this.comboboxState().value();
-    if (Array.isArray(value)) return value;
-    return value == null ? [] : [value];
+  setDisabledState(isDisabled: boolean): void {
+    this.control.setDisabledState(isDisabled);
   }
+
+  registerDropdown(dropdown: HTMLElement, destroyRef: DestroyRef): void {
+    const onFocusOut = (event: FocusEvent): void => {
+      this.control.markControlTouched(event);
+    };
+    this.control.registerDropdown(dropdown);
+    dropdown.addEventListener('focusout', onFocusOut);
+    destroyRef.onDestroy(() => {
+      dropdown.removeEventListener('focusout', onFocusOut);
+      this.control.unregisterDropdown(dropdown);
+    });
+  }
+
+  private readonly clampNavigation = (event: KeyboardEvent): void => {
+    if (
+      this.readWrapNavigation() ||
+      (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')
+    ) {
+      return;
+    }
+    if (!(event.target instanceof HTMLInputElement)) return;
+    const activeId = event.target.getAttribute('aria-activedescendant');
+    const activeOption = activeId ? event.target.ownerDocument.getElementById(activeId) : null;
+    const listbox = activeOption?.closest('[role="listbox"]');
+    if (!activeOption || !listbox) return;
+    const enabled = Array.from(listbox.querySelectorAll<HTMLElement>('[role="option"]')).filter(
+      (option) =>
+        option.getAttribute('aria-disabled') !== 'true' &&
+        !option.hasAttribute('data-disabled'),
+    );
+    const first = enabled[0];
+    const last = enabled.at(-1);
+    const atBoundary =
+      (event.key === 'ArrowUp' && activeOption === first) ||
+      (event.key === 'ArrowDown' && activeOption === last);
+    if (!atBoundary) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
 }
 
 /**
- * Headless combobox shell around `NgpCombobox`. Pair with
- * `hellComboboxInput`, `hellComboboxButton`, `hellComboboxOption`, and a
- * dropdown rendered through `*hellComboboxPortal`. Bind `[value]` /
- * `(valueChange)` for selection, `[options]` for the option registry, and
- * `[compareWith]` when option identity is not reference-based. In multiple
- * mode the value follows ng-primitives' array contract.
+ * Rich, projection-first combobox. The consumer owns the editable input,
+ * domain option markup, search state, status chrome, and selected-value
+ * presentation while ng-primitives owns the combobox interaction semantics.
  */
 @Directive({
   selector: '[hellCombobox]',
@@ -195,101 +185,50 @@ class HellComboboxSelectionController {
     },
   ],
   providers: [
-    HellComboboxSelectionController,
+    HellComboboxController,
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellComboboxRoot),
+      useExisting: forwardRef(() => HellCombobox),
       multi: true,
     },
   ],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
-  /** Tailwind class refinements for public parts. */
+export class HellCombobox<T = unknown> implements ControlValueAccessor {
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
   /** Whether Arrow Up/Down wrap between the first and last enabled option. */
   readonly wrapNavigation = input(true, { transform: booleanAttribute });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => HELL_COMBOBOX_ROOT_RECIPE,
+    recipe: () => HELL_COMBOBOX_RECIPE,
   });
 
-  private readonly combobox = inject(NgpCombobox);
-  private readonly comboboxState = injectComboboxState<NgpCombobox>();
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly control = new HellPickerControl<T>({
-    host: () => this.host.nativeElement,
-    multiple: () => this.combobox.multiple(),
-    valueChanges: this.combobox.valueChange,
-    openChanges: this.combobox.openChange,
-    writeValue: (value) => writeComboboxStateValue(this.comboboxState(), value),
-    setDisabled: (disabled) => writeComboboxStateDisabled(this.comboboxState(), disabled),
-  });
+  private readonly controller = inject(HellComboboxController) as HellComboboxController<T>;
 
   constructor() {
-    this.host.nativeElement.addEventListener('keydown', this.clampNavigation, { capture: true });
-    this.destroyRef.onDestroy(() => {
-      this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, { capture: true });
-    });
-    this.control.connect(this.destroyRef);
+    this.controller.configureWrapNavigation(() => this.wrapNavigation());
   }
 
   writeValue(value: HellPickValue<T>): void {
-    this.control.writeValue(value);
+    this.controller.writeValue(value);
   }
 
   registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.control.registerOnChange(fn);
+    this.controller.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.control.registerOnTouched(fn);
+    this.controller.registerOnTouched(fn);
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.control.setDisabledState(isDisabled);
-  }
-
-  isOutsideControl(next: EventTarget | Node | null): boolean {
-    return this.control.isOutsideControl(next);
-  }
-
-  markControlTouched(event: FocusEvent): void {
-    this.control.markControlTouched(event);
-  }
-
-  private readonly clampNavigation = (event: KeyboardEvent): void => {
-    if (this.wrapNavigation() || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
-    if (!(event.target instanceof HTMLInputElement)) return;
-    const activeId = event.target.getAttribute('aria-activedescendant');
-    const activeOption = activeId ? event.target.ownerDocument.getElementById(activeId) : null;
-    const listbox = activeOption?.closest('[role="listbox"]');
-    if (!activeOption || !listbox) return;
-    const enabled = Array.from(listbox.querySelectorAll<HTMLElement>('[role="option"]'))
-      .filter((option) => option.getAttribute('aria-disabled') !== 'true' && !option.hasAttribute('data-disabled'));
-    const first = enabled[0];
-    const last = enabled.at(-1);
-    const atBoundary =
-      (event.key === 'ArrowUp' && activeOption === first) ||
-      (event.key === 'ArrowDown' && activeOption === last);
-    if (!atBoundary) return;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  registerDropdown(dropdown: HTMLElement): void {
-    this.control.registerDropdown(dropdown);
-  }
-
-  unregisterDropdown(dropdown: HTMLElement): void {
-    this.control.unregisterDropdown(dropdown);
+    this.controller.setDisabledState(isDisabled);
   }
 }
 
@@ -300,33 +239,17 @@ export class HellComboboxRoot<T = unknown> implements ControlValueAccessor {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '(keydown)': 'onKeydown($event)',
   },
 })
 export class HellComboboxInput {
-  /** Tailwind class refinements for public parts. */
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_INPUT_RECIPE,
   });
-
-  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef);
-  private readonly selection = inject(HellComboboxSelectionController, { optional: true });
-
-  /**
-   * Removes the last selection when Backspace is pressed in the empty input and
-   * a chips presentation is mounted, mirroring the chip set's Backspace removal.
-   * Without a chips presentation the input keeps its native Backspace behavior.
-   */
-  protected onKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Backspace' || event.defaultPrevented) return;
-    if (!this.selection?.chipsActive()) return;
-    if (this.host.nativeElement.value !== '') return;
-    this.selection.removeLastValue();
-  }
 }
 
 /** Toggle button for opening and closing the combobox dropdown. */
@@ -339,84 +262,53 @@ export class HellComboboxInput {
   },
 })
 export class HellComboboxButton {
-  /** Tailwind class refinements for public parts. */
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_BUTTON_RECIPE,
   });
 }
 
-/**
- * Floating dropdown surface for combobox options. Registers with any active
- * Hell Floating Scope so parent floating controls do not treat option clicks as
- * outside interactions.
- */
+/** Floating listbox surface for projected combobox options. */
 @Directive({
   selector: '[hellComboboxDropdown]',
   hostDirectives: [NgpComboboxDropdown],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellComboboxDropdown implements OnDestroy {
-  /** Tailwind class refinements for public parts. */
+export class HellComboboxDropdown {
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_DROPDOWN_RECIPE,
   });
 
-  private readonly dropdown = inject(NgpComboboxDropdown);
-  private readonly combobox = inject(HellComboboxRoot, { optional: true });
-  private readonly basicCombobox = inject(HellCombobox, { optional: true });
+  private readonly dropdownElement = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly controller = inject(HellComboboxController);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     hellRegisterFloatingHost();
-    if (this.combobox) {
-      this.combobox.registerDropdown(this.dropdown.elementRef.nativeElement);
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.combobox) {
-      this.combobox.unregisterDropdown(this.dropdown.elementRef.nativeElement);
-    }
-  }
-
-  markControlTouched(event: FocusEvent): void {
-    this.combobox?.markControlTouched(event);
-    this.basicCombobox?.markControlTouched(event);
+    this.controller.registerDropdown(this.dropdownElement.nativeElement, this.destroyRef);
   }
 }
 
-/**
- * Structural directive: renders the dropdown only while the combobox is
- * open and positions it as a floating overlay anchored to the trigger.
- *
- *  Usage: place on the `<div hellComboboxDropdown>` with a leading `*`:
- *    <div *hellComboboxPortal hellComboboxDropdown>...</div>
- *
- *  This wraps `NgpComboboxPortal`, which needs a `TemplateRef`; the star
- *  syntax desugars the host into an `ng-template` so DI resolves. Without
- *  this, the dropdown markup renders inline and stays visible.
- */
+/** Structural directive that portals the dropdown while the combobox is open. */
 @Directive({
   selector: '[hellComboboxPortal]',
   hostDirectives: [NgpComboboxPortal],
 })
 export class HellComboboxPortal {}
 
-/**
- * Selectable combobox option. `[value]` is the payload emitted by the parent
- * combobox; `[index]` is available for virtualized or manually ordered lists.
- */
+/** Selectable, consumer-rendered domain option. */
 @Directive({
   selector: '[hellComboboxOption]',
   hostDirectives: [
@@ -437,10 +329,10 @@ export class HellComboboxPortal {}
   },
 })
 export class HellComboboxOption {
-  /** Tailwind class refinements for public parts. */
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_OPTION_RECIPE,
@@ -450,6 +342,7 @@ export class HellComboboxOption {
   protected readonly disabled = computed(() => this.option.disabled());
 }
 
+/** Consumer-owned no-results or empty-state surface. */
 @Directive({
   selector: '[hellComboboxEmpty]',
   host: {
@@ -458,404 +351,23 @@ export class HellComboboxOption {
   },
 })
 export class HellComboboxEmpty {
-  /** Tailwind class refinements for public parts. */
+  /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
-  /** Merged Part-Class Pipeline classes for one public part. */
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_EMPTY_RECIPE,
   });
 }
 
-/**
- * Chips presentation for a multiple-mode `hellCombobox`. Place it inside the
- * combobox control, before the `hellComboboxInput`, to render each selected
- * value as a removable chip composed from the `@hell-ui/angular/chip` primitive
- * (`hellChip` / `hellChipRemove`).
- *
- * Removal — via a chip's remove button or Backspace in the empty input — routes
- * through the combobox's selection state, so the emitted form value, the
- * options' `aria-selected` state, and the rendered chips never diverge. A
- * disabled combobox disables every chip's remove button.
- *
- * The presentation host composes `HellChipSet`, making the chips one roving
- * tab stop with Arrow Left/Right and Home/End navigation. Delete/Backspace on
- * the focused chip requests its removal and moves focus to a surviving chip
- * (or back to this host when none remain).
- *
- * Each remove button is a bare `hellChipRemove` with no projected content, so
- * it renders the chip primitive's built-in `×` glyph and derives its accessible
- * name (`Remove {label}`) from the chip's rendered label — the label is written
- * once, as the chip's content, and never restated. Pass `[displayWith]` to
- * label chips when a value's string form is not the label you want; refine the
- * `root` and `chip` parts through the Part Style Map. The remove button is the
- * chip primitive's own `hellChipRemove` part — style it through the chip entry
- * point rather than here, so its built-in `:empty` glyph keeps rendering.
- */
-@Component({
-  selector: '[hellComboboxChips]',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [HellChipSet],
-  imports: [HellChip, HellChipRemove],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-  },
-  template: `
-    @for (chip of chips(); track chip.value) {
-      <span
-        hellChip
-        data-slot="chip"
-        [ui]="part('chip')"
-        [size]="size()"
-        [disabled]="disabled()"
-        (remove)="removeChip(chip.value)"
-      >
-        {{ chip.label }}<button hellChipRemove></button>
-      </span>
-    }
-  `,
-})
-export class HellComboboxChips<T = unknown> {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellComboboxChipsPart>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellComboboxChipsPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_COMBOBOX_CHIPS_RECIPE,
-  });
-
-  /**
-   * Maps a selected value to its chip label — the chip's visible text, which
-   * the chip Label Contract also reuses as the remove button's accessible name
-   * (`Remove {label}`). Defaults to `String`.
-   */
-  readonly displayWith = input<HellOptionDisplayWith<T>>((value) => String(value));
-  /** Size of the rendered chips. Defaults to `sm`. */
-  readonly size = input<HellSize>('sm');
-
-  private readonly selection = inject(HellComboboxSelectionController, { optional: true });
-  private readonly destroyRef = inject(DestroyRef);
-
-  /** Whether the owning combobox is disabled, which also disables chip removal. */
-  protected readonly disabled = computed(() => this.selection?.disabled() ?? false);
-
-  /** Selected values paired with their display labels. */
-  protected readonly chips = computed(() =>
-    (this.selection?.selectedValues() ?? []).map((value) => ({
-      value,
-      label: this.displayWith()(value as T),
-    })),
-  );
-
-  constructor() {
-    this.selection?.registerChipsPresenter();
-    this.destroyRef.onDestroy(() => this.selection?.unregisterChipsPresenter());
-  }
-
-  /** Routes a chip removal through the combobox selection state. */
-  protected removeChip(value: unknown): void {
-    this.selection?.removeValue(value);
-  }
-}
-
-/**
- * Convenience combobox that composes `hellCombobox`, `hellComboboxInput`,
- * `hellComboboxButton`, and portal/dropdown patterns into a simple list
- * component.
- */
-@Component({
-  selector: 'hell-combobox',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellCombobox),
-      multi: true,
-    },
-  ],
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-  },
-  imports: [
-    HellComboboxRoot,
-    HellComboboxButton,
-    HellComboboxDropdown,
-    HellComboboxEmpty,
-    HellComboboxInput,
-    HellComboboxOption,
-    HellComboboxPortal,
-  ],
-  template: `
-    <div
-      hellCombobox
-      [value]="effectiveValue()"
-      [multiple]="multiple()"
-      [allowDeselect]="allowDeselect()"
-      [compareWith]="compareWith()"
-      [disabled]="effectiveDisabled()"
-      data-slot="control"
-      [ui]="part('control')"
-      (focusout)="markControlTouched($event)"
-      (openChange)="onOpenChange($event)"
-      (valueChange)="onValueChange($event)"
-    >
-      <input
-        hellComboboxInput
-        data-slot="input"
-        [ui]="part('input')"
-        [value]="filter()"
-        [placeholder]="placeholder()"
-        [attr.aria-label]="ariaLabel()"
-        (input)="onFilterInput($any($event.target).value)"
-      />
-      <button
-        hellComboboxButton
-        type="button"
-        data-slot="button"
-        [ui]="part('button')"
-        [attr.aria-label]="labels.toggle"
-      ></button>
-      <div
-        *hellComboboxPortal
-        hellComboboxDropdown
-        data-slot="dropdown"
-        [ui]="part('dropdown')"
-      >
-        @if (sourceLoading()) {
-          <div data-slot="loading" [class]="part('loading')" role="status">
-            {{ labels.loading }}
-          </div>
-        } @else if (sourceFailed()) {
-          <div data-slot="error" [class]="part('error')" role="status">
-            {{ labels.error }}
-          </div>
-        } @else {
-          @for (option of filteredOptions(); track option.value) {
-            <div
-              hellComboboxOption
-              data-slot="option"
-              [ui]="part('option')"
-              [value]="option.value"
-              [disabled]="option.disabled ?? false"
-            >
-              {{ optionLabel(option) }}
-            </div>
-          } @empty {
-            <div hellComboboxEmpty data-slot="empty" [ui]="part('empty')">
-              {{ labels.empty }}
-            </div>
-          }
-        }
-      </div>
-    </div>
-  `,
-})
-export class HellCombobox<T = unknown> implements ControlValueAccessor {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellComboboxPart>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellComboboxPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_COMBOBOX_RECIPE,
-  });
-
-  /** Options rendered by the preset; labels come from each option unless `displayWith` overrides. */
-  readonly options = input<readonly HellOption<T>[]>([]);
-  /**
-   * Async option source, mutually exclusive with `options`. Queries are
-   * debounced, newer searches abort older ones, and loading/empty/error
-   * chrome renders inside the dropdown. Supply `displayWith` so picked
-   * values stay labelled while their option is not in the loaded results.
-   */
-  readonly source = input<HellSearchSource<HellOption<T>> | null>(null);
-  /** Debounce in milliseconds between typing and dispatching to `source`. */
-  readonly sourceDebounce = input<number>(120);
-  readonly multiple = input(false, { transform: booleanAttribute });
-  readonly allowDeselect = input(false, { transform: booleanAttribute });
-  readonly disabled = input(false, { transform: booleanAttribute });
-  readonly placeholder = input('Search');
-  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
-  readonly compareWith = input<HellOptionCompareWith<T>>((a, b) => a === b);
-  /** Overrides option labels; also labels selected values missing from `options`. */
-  readonly displayWith = input<HellOptionDisplayWith<T> | null>(null);
-  readonly value = input<HellPickValue<T> | null>(null);
-
-  readonly valueChange = output<HellPickValue<T>>();
-  readonly openChange = output<boolean>();
-
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly destroyRef = inject(DestroyRef);
-  protected readonly labels = inject(HELL_COMBOBOX_LABELS);
-  // Annotated: when ng-packagr compiles this entry point against core's
-  // flattened d.ts, inference for the injected ranker collapses to `unknown`
-  // and the lib build fails without the explicit type.
-  private readonly ranker: HellSearchRanker = inject(HELL_SEARCH_RANKER);
-  private readonly orchestrator = new HellSearchOrchestrator<HellOption<T>>(
-    inject(HellSearchService),
-  );
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
-  private readonly controlledValue = new HellControlledValueState<HellPickValue<T>>({
-    externalValue: this.value,
-    externalDisabled: this.disabled,
-    initialValue: null,
-  });
-  private readonly filterOverride = signal<string | null>(null);
-  private readonly combobox = viewChild(HellComboboxRoot);
-
-  // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
-  // types inferred through internal entry points, shipping unbound `Signal`.
-  protected readonly effectiveValue: Signal<HellPickValue<T>> = this.controlledValue.value;
-  protected readonly effectiveDisabled: Signal<boolean> = this.controlledValue.disabled;
-
-  protected readonly selectedLabel = computed(() => {
-    const value = this.effectiveValue();
-    if (this.multiple()) {
-      const selectedValues = Array.isArray(value) ? value : value == null ? [] : [value as T];
-      if (!selectedValues.length) return '';
-      return selectedValues.map((item) => this.labelFor(item)).join(', ');
-    }
-
-    if (value == null) return '';
-    return this.labelFor(value as T);
-  });
-
-  protected readonly filterValue = computed(() => this.filterOverride() ?? this.selectedLabel());
-
-  // Annotated: when ng-packagr compiles this entry point against the internal
-  // search module's flattened d.ts, the result generic collapses to `unknown`.
-  private readonly sourceOptions = computed(() =>
-    this.orchestrator.results().map((result: HellSearchResult<HellOption<T>>) => result.item),
-  );
-  /** Options behind the dropdown: loaded results in source mode, else `options`. */
-  private readonly effectiveOptions = computed(() =>
-    this.source() ? this.sourceOptions() : this.options(),
-  );
-  /** Whether source-mode loading chrome should render. */
-  protected readonly sourceLoading: Signal<boolean> = computed(
-    () => !!this.source() && this.orchestrator.loading(),
-  );
-  /** Whether source-mode error chrome should render. */
-  protected readonly sourceFailed: Signal<boolean> = computed(
-    () => !!this.source() && this.orchestrator.error() !== null,
-  );
-
-  protected readonly filteredOptions: Signal<readonly HellOption<T>[]> = computed(() => {
-    if (this.source()) return this.sourceOptions();
-    const query = this.filterValue().trim();
-    if (!query) return this.options();
-    return this.ranker<HellOption<T>>(this.options(), {
-      query,
-      fields: [{ name: 'label', get: (option: HellOption<T>) => this.optionLabel(option) }],
-    }).map(({ item }) => item);
-  });
-
-  constructor() {
-    this.orchestrator.connect(this.destroyRef);
-    effect(() => {
-      const source = this.source();
-      if (!source) {
-        this.orchestrator.cancel();
-        this.orchestrator.clearResults();
-        return;
-      }
-      if (isDevMode() && this.options().length) {
-        throw new Error(
-          'hell-combobox: `options` and `source` are mutually exclusive — supply local options or an async source, not both.',
-        );
-      }
-      // Queries use only what the user typed (`filterOverride`), never the
-      // picked value's display label that `filterValue` falls back to —
-      // otherwise every selection would immediately re-query the source
-      // narrowed to its own label.
-      this.orchestrator.scheduleSearch(
-        this.filterOverride()?.trim() ?? '',
-        {
-          source,
-          fields: [{ name: 'label', get: (option: HellOption<T>) => this.optionLabel(option) }],
-        },
-        this.sourceDebounce(),
-      );
-    });
-  }
-
-  /** Display text for one option row. */
-  protected optionLabel(option: HellOption<T>): string {
-    return hellOptionRowLabel(option, this.displayWith());
-  }
-
-  /** Display text for a picked value: `displayWith`, else its option's label. */
-  private labelFor(value: T): string {
-    return hellPickedValueLabel(
-      value,
-      this.effectiveOptions(),
-      this.displayWith(),
-      this.compareWith(),
-    );
-  }
-
-  protected onValueChange(next: HellPickValue<T>): void {
-    this.controlledValue.acceptUserValue(next);
-    this.valueChange.emit(next);
-    this.valueAccessor.emitValue(next);
-    this.filterOverride.set(null);
-  }
-
-  protected onFilterInput(value: string): void {
-    this.filterOverride.set(value);
-  }
-
-  protected onOpenChange(next: boolean): void {
-    this.openChange.emit(next);
-
-    if (!next) {
-      this.filterOverride.set(null);
-    }
-  }
-
-  markControlTouched(event: FocusEvent): void {
-    const combobox = this.combobox();
-    const outside = combobox
-      ? combobox.isOutsideControl(event.relatedTarget)
-      : !hellContainsFloatingTarget({ root: () => this.host.nativeElement }, event.relatedTarget);
-
-    if (outside) this.valueAccessor.markTouched();
-  }
-
-  writeValue(value: HellPickValue<T>): void {
-    this.controlledValue.writeValue(hellNormalizePickValue<T>(value, this.multiple()));
-    this.filterOverride.set(null);
-  }
-
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.controlledValue.setDisabledState(isDisabled);
-  }
-
-  protected filter(): string {
-    return this.filterValue();
-  }
-}
-
+/** All projection-first Combobox directives, for bulk imports. */
 export const HELL_COMBOBOX_DIRECTIVES = [
-  HellComboboxRoot,
+  HellCombobox,
   HellComboboxInput,
   HellComboboxButton,
   HellComboboxDropdown,
   HellComboboxPortal,
   HellComboboxOption,
   HellComboboxEmpty,
-  HellComboboxChips,
 ] as const;
-
