@@ -6,14 +6,14 @@
 
 import * as _angular_core from '@angular/core';
 import { OnDestroy } from '@angular/core';
-import { Row } from '@tanstack/angular-table';
 import { RowData } from '@tanstack/angular-table';
+import { ɵHellDomWriter } from '@hell-ui/angular/table-tanstack';
+import { ɵHellTanStackBodyItem } from '@hell-ui/angular/table-tanstack';
+import { ɵHellTanStackBodyStrategy } from '@hell-ui/angular/table-tanstack';
 
 // @public (undocumented)
 export const HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES: readonly [typeof HellTanStackVirtualRows];
 
-// Warning: (ae-forgotten-export) The symbol "ɵHellTanStackBodyStrategy" needs to be exported by the entry point hell-ui-angular-table-tanstack-virtual.d.ts
-//
 // @public
 export class HellTanStackVirtualRows<TData extends RowData = RowData> implements ɵHellTanStackBodyStrategy<TData>, OnDestroy {
     constructor();
@@ -21,8 +21,6 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData> implements
     connectBody(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction;
     // (undocumented)
     connectRow(el: HTMLElement, item: ɵHellTanStackBodyItem<TData>, writer: ɵHellDomWriter): VoidFunction;
-    // Warning: (ae-forgotten-export) The symbol "ɵHellDomWriter" needs to be exported by the entry point hell-ui-angular-table-tanstack-virtual.d.ts
-    //
     // (undocumented)
     connectScrollport(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction;
     // (undocumented)
@@ -33,8 +31,6 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData> implements
     ngOnDestroy(): void;
     // (undocumented)
     readonly overscan: _angular_core.InputSignalWithTransform<number, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "ɵHellTanStackBodyItem" needs to be exported by the entry point hell-ui-angular-table-tanstack-virtual.d.ts
-    //
     // (undocumented)
     rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[];
     // (undocumented)

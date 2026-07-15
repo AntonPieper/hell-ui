@@ -4,13 +4,11 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/breadcrumbs';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_BREADCRUMBS_DIRECTIVES: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];
@@ -23,9 +21,7 @@ export class HellBreadcrumbEllipsis {
     readonly ariaLabel: i0.InputSignal<string | null>;
     protected readonly labels: HellBreadcrumbLabels;
     protected nativeButtonType(): 'button' | null;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-breadcrumbs.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-breadcrumbs.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbEllipsis, "[hellBreadcrumbEllipsis]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbEllipsis; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbEllipsis, never>;

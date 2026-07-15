@@ -4,13 +4,13 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OutputEmitterRef } from '@angular/core';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_SAVE_BAR_LABELS: InjectionToken<HellSaveBarLabels>;
@@ -28,13 +28,10 @@ export class HellSaveBar {
     readonly mode: _angular_core.InputSignal<HellSaveBarMode>;
     protected onDiscard(): void;
     protected onSave(): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-save-bar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSaveBarPart>;
     readonly saved: OutputEmitterRef<void>;
     readonly saveType: _angular_core.InputSignal<HellSaveBarSaveType>;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-save-bar.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-save-bar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSaveBarPart>>;
     protected readonly visible: _angular_core.Signal<boolean>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSaveBar, "hell-save-bar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "mode": { "alias": "mode"; "required": false; "isSignal": true; }; "dirty": { "alias": "dirty"; "required": false; "isSignal": true; }; "busy": { "alias": "busy"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "message": { "alias": "message"; "required": false; "isSignal": true; }; "saveType": { "alias": "saveType"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, { "saved": "saved"; "discarded": "discarded"; }, never, ["*"], true, never>;
@@ -57,8 +54,6 @@ export type HellSaveBarPart = 'root' | 'message' | 'actions' | 'save' | 'discard
 // @public
 export type HellSaveBarSaveType = 'button' | 'submit';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-save-bar.d.ts
-//
 // @public
 export type HellSaveBarUi = HellUi<HellSaveBarPart>;
 

@@ -5,13 +5,14 @@
 ```ts
 
 import { AbstractControl } from '@angular/forms';
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellTypedInputAdapter } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
@@ -56,7 +57,6 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     protected onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void;
     // Warning: (ae-forgotten-export) The symbol "pad" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
     protected readonly pad: typeof pad;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellTimeInputPart>;
     protected readonly pickerShift: {
         readonly padding: 8;
@@ -73,7 +73,6 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     protected stepUnit(unit: HellTimeUnit, delta: number): void;
     protected readonly triggerAriaLabel: () => string;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellTimeInputPart>>;
     protected unitLabel(unit: HellTimeUnit): string;
     protected unitLabelId(unit: HellTimeUnit): string;
@@ -89,8 +88,6 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellTypedInputAdapter" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-//
 // @public
 export type HellTimeInputAdapter = HellTypedInputAdapter<HellTimeValue, HellTimeInputAdapterContext>;
 
@@ -118,8 +115,6 @@ export interface HellTimeInputLabels {
 // @public
 export type HellTimeInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel' | 'pickerHeader' | 'pickerReadout' | 'pickerUnits' | 'pickerUnit' | 'pickerUnitLabel' | 'pickerUnitControl' | 'pickerUnitValue' | 'pickerUnitStep' | 'minutePresets' | 'minutePreset';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-//
 // @public
 export type HellTimeInputUi = HellUi<HellTimeInputPart>;
 

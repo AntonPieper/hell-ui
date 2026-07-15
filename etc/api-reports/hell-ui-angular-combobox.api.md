@@ -4,16 +4,22 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOption } from '@hell-ui/angular/core';
+import { HellOptionCompareWith } from '@hell-ui/angular/core';
+import { HellOptionDisplayWith } from '@hell-ui/angular/core';
+import { HellPickValue } from '@hell-ui/angular/core';
+import { HellSearchSource } from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/combobox';
+import * as i2 from '@hell-ui/angular/chip';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public (undocumented)
 export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellComboboxRoot, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty, typeof HellComboboxChips];
@@ -28,13 +34,10 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     readonly allowDeselect: _angular_core.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "HellOptionCompareWith" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-    //
     // (undocumented)
     readonly compareWith: _angular_core.InputSignal<HellOptionCompareWith<T>>;
     // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellOptionDisplayWith" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly displayWith: _angular_core.InputSignal<HellOptionDisplayWith<T> | null>;
     // (undocumented)
     protected readonly effectiveDisabled: Signal<boolean>;
@@ -61,9 +64,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     // (undocumented)
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
     protected optionLabel(option: HellOption<T>): string;
-    // Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly options: _angular_core.InputSignal<readonly HellOption<T>[]>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellComboboxPart>;
     // (undocumented)
     readonly placeholder: _angular_core.InputSignal<string>;
@@ -75,15 +76,11 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     protected readonly selectedLabel: Signal<string>;
     // (undocumented)
     setDisabledState(isDisabled: boolean): void;
-    // Warning: (ae-forgotten-export) The symbol "HellSearchSource" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly source: _angular_core.InputSignal<HellSearchSource<HellOption<T>> | null>;
     readonly sourceDebounce: _angular_core.InputSignal<number>;
     protected readonly sourceFailed: Signal<boolean>;
     protected readonly sourceLoading: Signal<boolean>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellComboboxPart>>;
-    // Warning: (ae-forgotten-export) The symbol "HellPickValue" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-    //
     // (undocumented)
     readonly value: _angular_core.InputSignal<HellPickValue<T>>;
     // (undocumented)
@@ -113,7 +110,6 @@ export class HellComboboxChips<T = unknown> {
     readonly displayWith: _angular_core.InputSignal<HellOptionDisplayWith<T>>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellComboboxChipsPart>;
     protected removeChip(value: unknown): void;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellComboboxChipsPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellComboboxChips<any>, "[hellComboboxChips]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "displayWith": { "alias": "displayWith"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.HellChipSet; inputs: {}; outputs: {}; }]>;
@@ -123,8 +119,6 @@ export class HellComboboxChips<T = unknown> {
 // @public
 export type HellComboboxChipsPart = 'root' | 'chip';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
-//
 // @public
 export type HellComboboxChipsUi = HellUi<HellComboboxChipsPart>;
 
@@ -228,7 +222,6 @@ export type HellComboboxUi = HellUi<HellComboboxPart>;
 // types/hell-ui-angular-combobox.d.ts:110:5 - (ae-undocumented) Missing documentation for "markControlTouched".
 // types/hell-ui-angular-combobox.d.ts:143:5 - (ae-undocumented) Missing documentation for "disabled".
 // types/hell-ui-angular-combobox.d.ts:149:1 - (ae-undocumented) Missing documentation for "HellComboboxEmpty".
-// types/hell-ui-angular-combobox.d.ts:212:352 - (ae-forgotten-export) The symbol "i2" needs to be exported by the entry point hell-ui-angular-combobox.d.ts
 // types/hell-ui-angular-combobox.d.ts:235:5 - (ae-undocumented) Missing documentation for "multiple".
 // types/hell-ui-angular-combobox.d.ts:236:5 - (ae-undocumented) Missing documentation for "allowDeselect".
 // types/hell-ui-angular-combobox.d.ts:237:5 - (ae-undocumented) Missing documentation for "disabled".

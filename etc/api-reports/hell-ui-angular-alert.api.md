@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OutputEmitterRef } from '@angular/core';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_ALERT_DIRECTIVES: readonly [typeof HellAlert, typeof HellAlertTitle, typeof HellAlertDescription, typeof HellAlertActions, typeof HellAlertDismiss, typeof HellAlertIcon];
@@ -23,10 +22,8 @@ export class HellAlert {
     dismiss(): void;
     readonly dismissed: OutputEmitterRef<void>;
     protected readonly hasCustomIcon: i0.Signal<boolean>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-alert.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellAlertPart>;
     readonly showIcon: i0.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-alert.d.ts
     readonly ui: i0.InputSignal<HellUiInput<HellAlertPart>>;
     readonly variant: i0.InputSignal<HellAlertVariant>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellAlert, "hell-alert", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "showIcon": { "alias": "showIcon"; "required": false; "isSignal": true; }; }, { "dismissed": "dismissed"; }, ["projectedIcon"], ["[hellAlertIcon]", "*", "[hellAlertDismiss]"], true, never>;
@@ -82,8 +79,6 @@ export class HellAlertTitle {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertTitle, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-alert.d.ts
-//
 // @public
 export type HellAlertUi = HellUi<HellAlertPart>;
 

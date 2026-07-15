@@ -4,14 +4,13 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import { InjectionToken } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as ng_primitives_slider from 'ng-primitives/slider';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellSlider implements ControlValueAccessor {
@@ -25,9 +24,7 @@ export class HellSlider implements ControlValueAccessor {
     protected markControlTouched(): void;
     readonly max: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly min: _angular_core.InputSignalWithTransform<number, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-slider.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-slider.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSliderPart>;
     registerOnChange(fn: (value: number) => void): void;
     registerOnTouched(fn: () => void): void;
@@ -36,7 +33,6 @@ export class HellSlider implements ControlValueAccessor {
     protected readonly sliderState: ng_primitives_slider.NgpSliderState;
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly thumb: _angular_core.InputSignal<"always" | "hover">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-slider.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSliderPart>>;
     readonly value: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly valueChange: _angular_core.OutputEmitterRef<number>;
@@ -48,8 +44,6 @@ export class HellSlider implements ControlValueAccessor {
 // @public
 export type HellSliderPart = 'root' | 'track' | 'range' | 'thumb';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-slider.d.ts
-//
 // @public
 export type HellSliderUi = HellUi<HellSliderPart>;
 

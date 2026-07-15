@@ -4,20 +4,15 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 
 // @public
 export class HellSkeleton {
     readonly height: _angular_core.InputSignal<string>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly shape: _angular_core.InputSignal<"text" | "circle" | "rect">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly width: _angular_core.InputSignal<string>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSkeleton, "[hellSkeleton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "width": { "alias": "width"; "required": false; "isSignal": true; }; "height": { "alias": "height"; "required": false; "isSignal": true; }; "shape": { "alias": "shape"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

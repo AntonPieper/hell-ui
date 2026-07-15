@@ -4,17 +4,19 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOption } from '@hell-ui/angular/core';
+import { HellOptionCompareWith } from '@hell-ui/angular/core';
+import { HellOptionDisplayWith } from '@hell-ui/angular/core';
+import { HellPickValue } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/select';
 import * as i2 from 'ng-primitives/input';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public (undocumented)
 export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelectTrigger, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
@@ -22,10 +24,8 @@ export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelectTrigger, typeof 
 // @public
 export class HellNativeSelect {
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-select.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-select.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
@@ -40,13 +40,10 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
     // (undocumented)
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "HellOptionCompareWith" needs to be exported by the entry point hell-ui-angular-select.d.ts
-    //
     // (undocumented)
     readonly compareWith: _angular_core.InputSignal<HellOptionCompareWith<T>>;
     // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellOptionDisplayWith" needs to be exported by the entry point hell-ui-angular-select.d.ts
     readonly displayWith: _angular_core.InputSignal<HellOptionDisplayWith<T> | null>;
     // (undocumented)
     protected readonly effectiveDisabled: Signal<boolean>;
@@ -61,7 +58,6 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     // (undocumented)
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
     protected optionLabel(option: HellOption<T>): string;
-    // Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-select.d.ts
     readonly options: _angular_core.InputSignal<readonly HellOption<T>[]>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSelectPart>;
     // (undocumented)
@@ -77,8 +73,6 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     // (undocumented)
     protected readonly triggerAriaLabel: () => string | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSelectPart>>;
-    // Warning: (ae-forgotten-export) The symbol "HellPickValue" needs to be exported by the entry point hell-ui-angular-select.d.ts
-    //
     // (undocumented)
     readonly value: _angular_core.InputSignal<HellPickValue<T>>;
     // (undocumented)
@@ -154,8 +148,6 @@ export class HellSelectTrigger<T = unknown> implements ControlValueAccessor {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSelectTrigger<any>, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-select.d.ts
-//
 // @public
 export type HellSelectUi = HellUi<HellSelectPart>;
 

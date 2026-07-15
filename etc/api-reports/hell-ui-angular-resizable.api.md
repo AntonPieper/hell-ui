@@ -7,11 +7,12 @@
 import { AfterContentInit } from '@angular/core';
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_RESIZABLE_DIRECTIVES: readonly [typeof HellResizable, typeof HellResizablePane, typeof HellResizableHandle];
@@ -29,13 +30,10 @@ export class HellResizable implements AfterContentInit {
     isConstrained(): boolean;
     markUserSized(): void;
     ngAfterContentInit(): void;
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     registerPane(p: HellResizablePane): void;
     readonly rescaleOnResize: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     unregisterPane(p: HellResizablePane): void;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizable, "[hellResizable]", ["hellResizable"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "rescaleOnResize": { "alias": "rescaleOnResize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -65,8 +63,6 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
 // @public
 export type HellResizableHandlePart = 'root' | 'grip';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
-//
 // @public
 export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;
 

@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/avatar';
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
@@ -20,12 +19,9 @@ export class HellAvatar {
     readonly alt: _angular_core.InputSignal<string | null>;
     readonly fallback: _angular_core.InputSignal<string>;
     readonly image: _angular_core.InputSignal<string | null>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellAvatarPart>;
     readonly shape: _angular_core.InputSignal<"round" | "square">;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellAvatarPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellAvatar, "hell-avatar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "image": { "alias": "image"; "required": false; "isSignal": true; }; "fallback": { "alias": "fallback"; "required": false; "isSignal": true; }; "alt": { "alias": "alt"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "shape": { "alias": "shape"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAvatar; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAvatar, never>;
@@ -60,8 +56,6 @@ export class HellAvatarGroupOverflow {
 // @public
 export type HellAvatarPart = 'root' | 'image' | 'fallback';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
-//
 // @public
 export type HellAvatarUi = HellUi<HellAvatarPart>;
 

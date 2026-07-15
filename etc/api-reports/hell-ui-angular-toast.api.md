@@ -4,12 +4,11 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
 // @public
@@ -52,7 +51,6 @@ export class HellToaster {
     protected onLeave(): void;
     protected onViewportScroll(event: Event): void;
     protected overflow(t: ToastInternal): number;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-toast.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellToasterPart>;
     readonly position: _angular_core.InputSignal<HellToastPosition>;
     protected readonly showDismissAll: _angular_core.Signal<boolean>;
@@ -60,7 +58,6 @@ export class HellToaster {
     protected readonly stackHeightValue: _angular_core.Signal<number>;
     readonly svc: HellToastService;
     protected toastControlTabIndex(t: ToastInternal): -1 | null;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-toast.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellToasterPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellToaster, "hell-toaster", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "position": { "alias": "position"; "required": false; "isSignal": true; }; "maxVisible": { "alias": "maxVisible"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToaster, never>;
@@ -69,8 +66,6 @@ export class HellToaster {
 // @public
 export type HellToasterPart = 'root' | 'region' | 'viewport' | 'list' | 'toast' | 'glyph' | 'body' | 'title' | 'description' | 'action' | 'close' | 'toolbar' | 'dismissAll';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-toast.d.ts
-//
 // @public
 export type HellToasterUi = HellUi<HellToasterPart>;
 

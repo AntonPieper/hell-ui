@@ -4,12 +4,14 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellButtonVariant } from '@hell-ui/angular/core';
+import { HellOrientation } from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
 // @public
@@ -32,17 +34,13 @@ export class HellToolbar {
     protected readonly measureViews: _angular_core.Signal<readonly HellToolbarItemModel[]>;
     protected onFocusIn(event: FocusEvent): void;
     protected onKeydown(event: KeyboardEvent): void;
-    // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     readonly overflowLabel: _angular_core.InputSignal<string>;
     protected readonly overflowViews: _angular_core.Signal<readonly HellToolbarItemModel[]>;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellToolbarPart>;
     protected readonly separatorOrientation: _angular_core.Signal<HellOrientation>;
     protected readonly showOverflow: _angular_core.Signal<boolean>;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellToolbarPart>>;
     protected widgetOf(view: HellToolbarItemModel): HellToolbarWidget;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellToolbar, "hell-toolbar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "overflowLabel": { "alias": "overflowLabel"; "required": false; "isSignal": true; }; }, {}, ["declaredItems"], never, true, never>;
@@ -60,7 +58,6 @@ export class HellToolbarAction extends HellToolbarItem {
     readonly kind: "action";
     readonly label: _angular_core.InputSignal<string>;
     readonly priority: _angular_core.InputSignal<HellToolbarActionPriority>;
-    // Warning: (ae-forgotten-export) The symbol "HellButtonVariant" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
     readonly variant: _angular_core.InputSignal<HellButtonVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarAction, "ng-template[hellToolbarAction]", never, { "label": { "alias": "label"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "priority": { "alias": "priority"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "iconOnly": { "alias": "iconOnly"; "required": false; "isSignal": true; }; }, { "activated": "activated"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarAction, never>;
@@ -80,8 +77,6 @@ export interface HellToolbarLabels {
 // @public
 export type HellToolbarPart = 'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator';
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "@hell-ui/angular" does not have an export "hellResolveToolbarOverflow"
-//
 // @public
 export class HellToolbarSeparator extends HellToolbarItem {
     readonly kind: "separator";
@@ -89,8 +84,6 @@ export class HellToolbarSeparator extends HellToolbarItem {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarSeparator, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-toolbar.d.ts
-//
 // @public
 export type HellToolbarUi = HellUi<HellToolbarPart>;
 

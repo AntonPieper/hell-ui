@@ -4,13 +4,12 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
 import { OutputEmitterRef } from '@angular/core';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_FILE_UPLOAD_LABELS: InjectionToken<HellFileUploadLabels>;
@@ -30,7 +29,6 @@ export class HellFileUpload {
     protected readonly multiple: _angular_core.Signal<boolean>;
     protected onFiles(files: readonly File[]): void;
     protected openPicker(input: HTMLInputElement): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-file-upload.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellFileUploadPart>;
     protected progressValue(item: HellFileUploadItem): number;
     readonly rejected: OutputEmitterRef<HellFileUploadRejection>;
@@ -42,7 +40,6 @@ export class HellFileUpload {
     readonly removed: OutputEmitterRef<string>;
     readonly retried: OutputEmitterRef<string>;
     protected statusSuffix(status: HellFileUploadStatus): string;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-file-upload.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellFileUploadPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellFileUpload, "hell-file-upload", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "items": { "alias": "items"; "required": false; "isSignal": true; }; "accept": { "alias": "accept"; "required": false; "isSignal": true; }; "maxBytes": { "alias": "maxBytes"; "required": false; "isSignal": true; }; "maxFiles": { "alias": "maxFiles"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "filesAdded": "filesAdded"; "rejected": "rejected"; "removed": "removed"; "retried": "retried"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellFileUpload, never>;
@@ -94,8 +91,6 @@ export type HellFileUploadRejectionReason = 'type' | 'size' | 'count';
 // @public
 export type HellFileUploadStatus = 'pending' | 'uploading' | 'done' | 'error';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-file-upload.d.ts
-//
 // @public
 export type HellFileUploadUi = HellUi<HellFileUploadPart>;
 

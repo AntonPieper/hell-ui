@@ -4,17 +4,18 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import { HellOption } from '@hell-ui/angular/core';
+import { HellOptionCompareWith } from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/menu';
-import { InjectionToken } from '@angular/core';
 import { NgpMenuItemCheckbox } from 'ng-primitives/menu';
 import { NgpMenuItemRadio } from 'ng-primitives/menu';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public (undocumented)
 export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuOptions, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];
@@ -22,10 +23,8 @@ export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof Hell
 // @public
 export class HellMenu {
     constructor();
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-menu.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected readonly submenuTrigger: Signal<unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-menu.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenu, "[hellMenu]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenu; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenu, never>;
@@ -100,11 +99,9 @@ export class HellMenuLabel {
 
 // @public
 export class HellMenuOptions<T = string> {
-    // Warning: (ae-forgotten-export) The symbol "HellOptionCompareWith" needs to be exported by the entry point hell-ui-angular-menu.d.ts
     readonly compareWith: i0.InputSignal<HellOptionCompareWith<T>>;
     // (undocumented)
     protected isSelected(option: HellOption<T>): boolean;
-    // Warning: (ae-forgotten-export) The symbol "HellOption" needs to be exported by the entry point hell-ui-angular-menu.d.ts
     readonly options: i0.InputSignal<readonly HellOption<T>[]>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellMenuOptionsPart>;
     readonly selected: i0.InputSignal<readonly T[]>;
@@ -119,8 +116,6 @@ export class HellMenuOptions<T = string> {
 // @public
 export type HellMenuOptionsPart = 'root' | 'item' | 'indicator';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-menu.d.ts
-//
 // @public
 export type HellMenuOptionsUi = HellUi<HellMenuOptionsPart>;
 
@@ -140,8 +135,6 @@ export class HellMenuSeparator {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuSeparator, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-menu.d.ts
-//
 // @public
 export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
     constructor();

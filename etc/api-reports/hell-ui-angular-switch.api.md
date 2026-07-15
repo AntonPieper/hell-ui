@@ -4,23 +4,19 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import { InjectionToken } from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellUi } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import * as ng_primitives_switch from 'ng-primitives/switch';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellNativeSwitch {
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-switch.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-switch.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSwitch, "input[type=\"checkbox\"][hellNativeSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSwitch, never>;
@@ -46,8 +42,6 @@ export class HellSwitch implements ControlValueAccessor {
 // @public
 export type HellSwitchPart = 'root' | 'thumb';
 
-// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-switch.d.ts
-//
 // @public
 export type HellSwitchUi = HellUi<HellSwitchPart>;
 

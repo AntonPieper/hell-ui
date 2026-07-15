@@ -4,12 +4,11 @@
 
 ```ts
 
-import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
+import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellSize } from '@hell-ui/angular/core';
+import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Provider } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_SPINNER_LABELS: InjectionToken<HellSpinnerLabels>;
@@ -18,11 +17,8 @@ export const HELL_SPINNER_LABELS: InjectionToken<HellSpinnerLabels>;
 export class HellSpinner {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
     protected readonly labels: HellSpinnerLabels;
-    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-spinner.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-spinner.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
-    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-spinner.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly variant: _angular_core.InputSignal<HellSpinnerVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSpinner, "[hellSpinner]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
