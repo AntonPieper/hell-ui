@@ -11,13 +11,17 @@ A directive-first module whose Interface is behavior, accessibility, and state a
 A low-level UI module whose public value is behavior, accessibility, state attributes, optional default Tailwind part classes, and public CSS variables. It may be directive-first or own a small template when that template is still primitive infrastructure rather than a higher-level workflow. Consumers can use a Part Style Map to refine named public parts while preserving behavior.
 
 **Mixed Entry Point**
-A Package Entry Point whose public surface contains both primitive behavior and small convenience structure, but does not rise to a Composite workflow. Mixed Entry Points keep their import-path identity and are classified through manifest metadata rather than filesystem category folders.
+A Package Entry Point whose public surface contains both primitive behavior and small convenience structure, but does not rise to a Composite workflow. Its convenience structure must not introduce a second Interaction State Machine for behavior already exposed by the primitive. Mixed Entry Points keep their import-path identity and are classified through manifest metadata rather than filesystem category folders.
 
 **Composite**
-A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
+A module that combines multiple primitives into a higher-level experience. A Composite may own DOM when difficult coordination such as focus restoration, responsive transitions, measurement, timing, or announcements is part of its leverage; it must not duplicate a primitive's Interaction State Machine merely to render fixed markup.
+
+**Interaction State Machine**
+The single consumer-facing value, open, focus, keyboard, and accessibility model for one semantic interaction. Projection may change its presentation, but a convenience renderer must not introduce a parallel model.
+_Avoid_: Renderer-owned twin, convenience state machine.
 
 **Multi-Select Menu Button**
-A documented recipe (formerly a Composite entry point) that opens a menu of checkable options from a button and reflects the selected count through consumer-owned markup: `hellButton` + `[hellMenu]` + `hell-menu-options`. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
+A documented recipe (formerly a Composite entry point) that opens a menu of consumer-rendered checkbox items from a button and reflects the selected count through consumer-owned markup. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
 _Avoid_: Column visibility selector, table column picker.
 
 **Feature**
@@ -30,7 +34,7 @@ Entrypoint-owned metadata describing a Package Entry Point's architectural role,
 The shared Interface expected from public Hell modules: behavior directives, stable public parts for owned structure, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual values, and a Part Style Map for visual customization.
 
 **Selector Convention**
-Attribute selectors mark headless behavior suites: the consumer owns the element and its DOM (`[hellSelectTrigger]`, `[hellCombobox]`, `[hellMenu]`). Element selectors mark owned-anatomy components: the library owns the DOM and exposes named Public Parts (`hell-select`, `hell-combobox`, `hell-toolbar`). The selector itself documents who owns the markup.
+Attribute selectors mark headless behavior suites: the consumer owns the element and its DOM (`[hellCombobox]`, `[hellMenu]`, `[hellResizable]`). Element selectors mark owned-anatomy modules: the library owns the DOM and exposes named Public Parts (`hell-toaster`, `hell-date-picker`, `hell-save-bar`). The selector documents DOM ownership; it does not justify a second Interaction State Machine for the same behavior.
 _Avoid_: "Basic" suffixes, wrapper component, preset (as a public name).
 
 **Style Opt-Out**
@@ -195,14 +199,17 @@ _Avoid_: Experimental table adapter, compatibility table route, grid mode.
 The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts table primitive header cells to Resize Behavior. Initial column sizing, persisted sizing state, and table-engine sizing policy belong to the app or TanStack. The runtime may measure rendered columns and emit primitive resize events, but it must not become a table sizing model. Resize Behavior remains layout-agnostic.
 
 **Omnibar Runtime**
-The query state, open state, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Async searching delegates to the shared Search Orchestration module. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+The query state, open state, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Search results arrive through a consumer-owned Search Resource. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+
+**Search Resource**
+The consumer-facing query, result, status, error, refresh, cancellation, and clearing Interface shared by search-driven experiences. It may rank local items or dispatch asynchronous searches without coupling the data lifecycle to a renderer.
 
 **Search Orchestration**
-The shared async search lifecycle behind search-driven composites (omnibar, combobox): debounced dispatch to core's search service, newer-aborts-older cancellation, stale-result protection, and loading/error state. It lives in one internal module; composites own their chrome and item rendering, not the lifecycle.
+The shared async lifecycle behind a Search Resource: debounced dispatch, newer-aborts-older cancellation, stale-result protection, and loading/error state. Renderers consume the resource and own only their interaction-specific behavior and projected chrome.
 _Avoid_: Per-composite debounce/abort re-implementations.
 
 **Typed Value Input**
-The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.
+The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, and external-value synchronization shared by text-backed Date, Time, and Number Input behavior. Picker triggers, picker panels, steppers, and adornments compose around that behavior instead of becoming a second field model.
 
 **Pick Value**
 The value shape shared by Hell's option-driven pickers: `T | null` in single mode, `readonly T[]` in multiple mode, and their union, exported once from core as `HellPickSingleValue`, `HellPickMultipleValue`, and `HellPickValue`. Pickers such as select and combobox retype onto this family instead of exporting per-module value types.

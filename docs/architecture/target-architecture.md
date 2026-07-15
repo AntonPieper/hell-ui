@@ -12,7 +12,7 @@ The ideal shape is:
 1. **Core contracts** — stable utilities, labels, Part Style Maps, shared types, and tiny interaction adapters.
 2. **Headless behavior primitives** — directives/components that own semantics, keyboard behavior, ARIA, focus, and state, preferably by delegating to Angular CDK, Angular Aria, or Angular Primitives/ng-primitives where those libraries already own the hard behavior.
 3. **Styled primitives** — default Hell classes, data attributes, CSS variables, tokens, and Part Style Maps layered over headless behavior.
-4. **Composites** — opinionated business-app compositions that should remain optional and narrow-entrypointed.
+4. **Composites** — opinionated business-app compositions that should remain optional and narrow-entrypointed, and that earn owned anatomy through difficult runtime coordination rather than a duplicate renderer model.
 5. **Features** — heavy integrations such as PDF viewer, CodeMirror editor, the TanStack table shell, and audio/transcript features. These must be optional, isolated, and consumer-tested as feature entrypoints. If their peer-dependency cost or lifecycle complexity dominates the package, split them into separate packages.
 
 ## Industry standards used as yardstick
@@ -46,6 +46,23 @@ The ideal shape is:
 - Stable exports need an API report/baseline.
 - Experimental features must be explicitly marked and not accidentally promoted by aggregate exports.
 - Breaking changes require a recorded semver/changelog decision.
+
+### Interaction boundary
+
+`docs/adr/projection-first-interactions.md` defines the interaction model:
+
+- expose one public Interaction State Machine per semantic interaction;
+- let consumers project presentation and domain objects onto behavior
+  primitives instead of mapping into renderer-owned schemas;
+- put reusable asynchronous state in a Search Resource and fixed assemblies in
+  recipes;
+- keep owned Composites only for difficult coordination such as focus,
+  responsive transitions, measurement, timing, hotkeys, dismissal, and
+  announcements;
+- keep renderer registration, stores, and template helpers internal;
+- preserve distinct Menu, Listbox, Select, Combobox, native-control, floating,
+  picker, Omnibar, and typed-input semantics instead of merging them behind
+  mode switches.
 
 ### Table platform boundary
 

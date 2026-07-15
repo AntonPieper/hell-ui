@@ -14,6 +14,10 @@
   that point at shipped recipe source files. Consumers import Tailwind once and
   the narrow entrypoint stylesheet; they do not maintain a separate
   `node_modules` scan list.
+- Amended: 2026-07-15 — selector examples no longer imply that a headless
+  behavior suite also needs an owned renderer with a parallel Interaction State
+  Machine. The Selector Convention still describes DOM ownership; the
+  projection-first interaction decision governs behavioral ownership.
 
 ## Context
 
@@ -64,9 +68,10 @@ because those parts are rendered by the root component itself.
 
 The selector convention makes DOM ownership legible: attribute selectors are
 headless behavior suites on consumer-owned elements, element selectors are
-owned-anatomy components with named Public Parts (e.g. `hell-select` owns its
-trigger/value/dropdown anatomy while `[hellSelectTrigger]` styles a consumer's
-button).
+owned-anatomy components with named Public Parts (e.g. `[hellCombobox]` styles
+a consumer-owned root while `hell-toaster` owns its rendered stack anatomy).
+The convention does not justify exposing both forms for one Interaction State
+Machine.
 
 Single-host public directives use `root` as their sole Public Part. Semantic
 identity belongs to the directive name, while the local part remains `root`.

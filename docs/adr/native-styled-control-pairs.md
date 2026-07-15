@@ -2,6 +2,8 @@
 
 - Status: Accepted
 - Date: 2026-07-14
+- Clarified: 2026-07-15 — this decision preserves native versus rich products;
+  it does not require a second owned renderer for a rich directive suite.
 
 ## Context
 
@@ -31,6 +33,11 @@ native inputs (the shadcn approach).
   is the right trade — the TanStack pagination control's rows-per-page
   `<select>` is a `hellNativeSelect`; table row selection uses
   `hellNativeCheckbox`/`hellNativeRadio` hooks.
+
+The projection-first interaction decision narrows the rich Select to one
+consumer-rendered state machine. That contraction does not collapse it into
+Native Select: the rich dropdown and the platform-owned `<select>` remain the
+two products protected by this ADR.
 
 Rebuilding the rich controls on visually-hidden native inputs was
 rejected:
