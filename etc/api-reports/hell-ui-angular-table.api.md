@@ -10,7 +10,9 @@ import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { OnDestroy } from '@angular/core';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_TABLE_UTILITIES_DIRECTIVES: readonly [typeof HellTableContainer, typeof HellTable, typeof HellTableHead, typeof HellTableBody, typeof HellTableRow, typeof HellTableRowIgnore, typeof HellTableRowAction, typeof HellTableSelectionCell, typeof HellTableRowCheckbox, typeof HellTableRowRadio, typeof HellTableHeaderCell, typeof HellTableSortTrigger, typeof HellTableCell, typeof HellTableResizeHandle];

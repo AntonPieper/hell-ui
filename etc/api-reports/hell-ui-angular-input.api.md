@@ -12,7 +12,9 @@ import * as i3 from 'ng-primitives/search';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSearchClear];

@@ -9,7 +9,9 @@ import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_PAGE_HEADER_DIRECTIVES: readonly [typeof HellPageHeader, typeof HellPageHeaderBack, typeof HellPageHeaderLeading, typeof HellPageHeaderTitle, typeof HellPageHeaderMeta, typeof HellPageHeaderDescription, typeof HellPageHeaderToolbar];

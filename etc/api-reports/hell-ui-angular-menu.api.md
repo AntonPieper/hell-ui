@@ -15,6 +15,7 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public (undocumented)
 export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuOptions, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];

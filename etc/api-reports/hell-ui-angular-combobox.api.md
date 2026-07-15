@@ -14,6 +14,7 @@ import { OnDestroy } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public (undocumented)
 export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellComboboxRoot, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty, typeof HellComboboxChips];

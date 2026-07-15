@@ -15,6 +15,7 @@ import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_DEFAULT_NUMBER_INPUT_ADAPTER: HellNumberInputAdapter;

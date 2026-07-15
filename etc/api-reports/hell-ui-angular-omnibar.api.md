@@ -11,8 +11,10 @@ import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_OMNIBAR_DIRECTIVES: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarChip, typeof HellOmnibarChipRemove, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];

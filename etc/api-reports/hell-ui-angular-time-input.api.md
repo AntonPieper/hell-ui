@@ -11,9 +11,11 @@ import { ControlValueAccessor } from '@angular/forms';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter;

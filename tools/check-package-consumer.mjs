@@ -1283,9 +1283,13 @@ function exactInstalledVersion(name) {
 }
 
 function rootConsumerMainTs() {
-  return `import { Component } from '@angular/core';
+  return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
+import { hellPartStyler, hellSearchResource, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSearchResource, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
+
+interface SearchItem {
+  readonly label: string;
+}
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
@@ -1305,18 +1309,28 @@ void styledRoot;
 @Component({
   selector: 'app-root',
   standalone: true,
-  template: \`<p>Root core contract</p>\`,
+  template: \`<p>Root core contract: {{ search.items().length }} result</p>\`,
 })
-class App {}
+class App {
+  protected readonly query = signal('core');
+  protected readonly search: HellSearchResource<SearchItem> = hellSearchResource({
+    query: this.query,
+    items: [{ label: 'Core contracts' }, { label: 'Visual primitive' }],
+  });
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
 function coreConsumerMainTs() {
-  return `import { Component } from '@angular/core';
+  return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
+import { hellPartStyler, hellSearchResource, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSearchResource, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
+
+interface SearchItem {
+  readonly label: string;
+}
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
@@ -1336,9 +1350,22 @@ void styledRoot;
 @Component({
   selector: 'app-root',
   standalone: true,
-  template: \`<p>Core contract</p>\`,
+  template: \`<p>Core contract: {{ search.status() }}</p>\`,
 })
-class App {}
+class App {
+  protected readonly query = signal('remote');
+  protected readonly search: HellSearchResource<SearchItem> = hellSearchResource<
+    SearchItem,
+    { readonly tenant: string }
+  >({
+    query: this.query,
+    params: { tenant: 'package-consumer' },
+    source: ({ query, signal: abortSignal }) => {
+      abortSignal?.throwIfAborted();
+      return [{ label: \`\${query} result\` }];
+    },
+  });
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;

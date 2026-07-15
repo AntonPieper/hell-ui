@@ -9,8 +9,10 @@ import * as _angular_core from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellToolbarAction, typeof HellToolbarSeparator, typeof HellToolbarWidget];

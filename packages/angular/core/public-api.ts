@@ -3,6 +3,7 @@ export * from './pick-value';
 export * from './styleable';
 export * from './part-style-merge';
 export * from './search';
+export * from './search-resource';
 export * from './labels';
 export * from './floating-element';
 export * from './typed-value';

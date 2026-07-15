@@ -15,6 +15,7 @@ import { OnDestroy } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public (undocumented)
 export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelectTrigger, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];

@@ -11,7 +11,9 @@ import { InjectionToken } from '@angular/core';
 import { NgpListboxOption } from 'ng-primitives/listbox';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_LISTBOX_DIRECTIVES: readonly [typeof HellListbox, typeof HellListboxTrigger, typeof HellListboxOption, typeof HellListboxSection, typeof HellListboxHeader];

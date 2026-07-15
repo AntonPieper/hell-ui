@@ -10,7 +10,9 @@ import * as i1 from 'ng-primitives/breadcrumbs';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_BREADCRUMBS_DIRECTIVES: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];

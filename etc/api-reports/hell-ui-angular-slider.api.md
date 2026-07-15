@@ -11,7 +11,9 @@ import { InjectionToken } from '@angular/core';
 import * as ng_primitives_slider from 'ng-primitives/slider';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export class HellSlider implements ControlValueAccessor {

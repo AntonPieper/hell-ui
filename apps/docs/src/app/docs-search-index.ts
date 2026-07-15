@@ -2138,6 +2138,13 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  terms:'HELL_SEARCH_DIRECTIVES hellSearch hellSearchClear search primitive clear input',
  },
  {
+ title:'Search Resource',
+ path:'/components/search',
+ detail:'hellSearchResource',
+ terms:
+'hellSearchResource HellSearchResource HellSearchStatus query items status error refresh cancel clear local ranking async source AbortSignal debounce stale results core',
+ },
+ {
  title:'Select portal pattern',
  path:'/components/select',
  detail:'hellSelectTrigger with hellSelectPortal and hellSelectDropdown',

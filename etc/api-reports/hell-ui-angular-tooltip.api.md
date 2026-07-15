@@ -11,7 +11,9 @@ import { InjectionToken } from '@angular/core';
 import { NgpTooltipTrigger } from 'ng-primitives/tooltip';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export class HellTooltip {

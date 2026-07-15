@@ -9,7 +9,9 @@ import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
@@ -111,6 +113,39 @@ export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceReque
 }
 
 // @public
+export interface HellSearchResource<T> {
+    cancel(): void;
+    clear(): void;
+    readonly error: Signal<unknown>;
+    readonly items: Signal<readonly T[]>;
+    readonly query: WritableSignal<string>;
+    refresh(): void;
+    readonly status: Signal<HellSearchStatus>;
+}
+
+// @public
+export function hellSearchResource<T, P = unknown>(options: HellSearchResourceOptions<T, P>): HellSearchResource<T>;
+
+// @public
+export type HellSearchResourceOptions<T, P = unknown> = {
+    readonly query: WritableSignal<string>;
+    readonly items: readonly T[] | Signal<readonly T[]>;
+    readonly source?: never;
+    readonly fields?: readonly HellSearchField<T>[];
+    readonly limit?: number;
+    readonly params?: never;
+    readonly debounce?: never;
+} | {
+    readonly query: WritableSignal<string>;
+    readonly source: HellSearchSource<T, P>;
+    readonly items?: never;
+    readonly fields?: readonly HellSearchField<T>[];
+    readonly limit?: number;
+    readonly params?: P;
+    readonly debounce?: number;
+};
+
+// @public
 export interface HellSearchResponse<T> {
     readonly items?: readonly T[];
     readonly results?: readonly HellSearchResult<T>[];
@@ -125,7 +160,7 @@ export interface HellSearchResult<T> {
 // @public
 export class HellSearchService {
     rank<T>(items: readonly T[], request: Pick<HellSearchRequest<T>, 'query' | 'fields' | 'limit'>): readonly HellSearchResult<T>[];
-    search<T>(request: HellSearchRequest<T>): Promise<readonly HellSearchResult<T>[]>;
+    search<T, P = unknown>(request: HellSearchRequest<T, P>): Promise<readonly HellSearchResult<T>[]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearchService, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<HellSearchService>;
 }
@@ -140,6 +175,9 @@ export interface HellSearchSourceRequest<P = unknown> {
     readonly query: string;
     readonly signal?: AbortSignal;
 }
+
+// @public
+export type HellSearchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 // @public
 export function hellSearchWords(value: string): readonly string[];
@@ -193,9 +231,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-internal-core.d.ts:551:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-angular-internal-core.d.ts:552:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:556:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:588:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:589:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:593:5 - (ae-undocumented) Missing documentation for "valid".
 
 // (No @packageDocumentation comment for this package)
 

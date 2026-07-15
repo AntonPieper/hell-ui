@@ -13,8 +13,10 @@ import { NgpDismissGuard } from 'ng-primitives/portal';
 import { NgpDismissGuardInput } from 'ng-primitives/portal';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_DIALOG_DIRECTIVES: readonly [typeof HellDialogTrigger, typeof HellDialogOverlay, typeof HellDialogTitle, typeof HellDialogDescription, typeof HellDialog, typeof HellDialogScope];

@@ -10,7 +10,9 @@ import * as i1 from 'ng-primitives/avatar';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
+import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
