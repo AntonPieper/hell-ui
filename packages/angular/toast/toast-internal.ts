@@ -282,6 +282,7 @@ export class ɵHellToastStackRenderer {
   private readonly exitSnapshot = signal(new Map<number, HellToastStackSnapshot>());
   private ro: ResizeObserver | null = null;
   private observed = new WeakSet<Element>();
+  private readonly observedToastIds = new WeakMap<Element, number>();
   private destroyed = false;
   private readonly viewportHeight = signal(0);
   private readonly scrollTop = signal(0);
@@ -575,8 +576,8 @@ export class ɵHellToastStackRenderer {
             this.syncViewportState(viewport);
             continue;
           }
-          const id = Number((entry.target as HTMLElement).dataset['toastId']);
-          if (!Number.isFinite(id)) continue;
+          const id = this.observedToastIds.get(entry.target);
+          if (id == null) continue;
           const height = this.measureToastHeight(entry.target as HTMLElement);
           if (next.get(id) !== height) {
             next.set(id, height);
@@ -593,7 +594,7 @@ export class ɵHellToastStackRenderer {
     items.forEach((element, index) => {
       const id = this.toasts()[index]?.id;
       if (id == null) return;
-      element.dataset['toastId'] = String(id);
+      this.observedToastIds.set(element, id);
       seen.add(id);
       if (!this.observed.has(element)) {
         this.ro!.observe(element);

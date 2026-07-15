@@ -466,6 +466,44 @@ describe('HellToaster', () => {
     expect(list.getAttribute('style')).toBeNull();
   });
 
+  it('keeps renderer ids out of DOM while tracking toast heights with ResizeObserver', async () => {
+    const originalResizeObserver = globalThis.ResizeObserver;
+    TestToastResizeObserver.instances = [];
+    globalThis.ResizeObserver = TestToastResizeObserver as unknown as typeof ResizeObserver;
+
+    const fixture = TestBed.createComponent(HellToaster);
+    try {
+      const svc = TestBed.inject(HellToastService);
+      fixture.detectChanges();
+
+      svc.success('Measured', { duration: 0 });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const toast = renderedToasts(fixture)[0];
+      expect(toast.hasAttribute('data-toast-id')).toBe(false);
+
+      Object.defineProperty(toast, 'offsetHeight', {
+        configurable: true,
+        value: 91,
+      });
+      const observer = TestToastResizeObserver.instances.find((instance) =>
+        instance.observed.has(toast),
+      );
+      if (!observer) throw new Error('Expected ResizeObserver to track the toast.');
+
+      observer.trigger(toast);
+      fixture.detectChanges();
+
+      expect(toast.style.getPropertyValue('--hell-toast-h')).toBe('91px');
+      expect(toast.hasAttribute('data-toast-id')).toBe(false);
+    } finally {
+      fixture.destroy();
+      globalThis.ResizeObserver = originalResizeObserver;
+    }
+  });
+
   it('renders a toaster-owned dismiss-all control and focusable scroll viewport for stacks', () => {
     const fixture = TestBed.createComponent(HellToaster);
     const svc = TestBed.inject(HellToastService);
@@ -697,3 +735,25 @@ describe('HellToaster', () => {
     expect(scrollTop).toBe(0);
   });
 });
+
+class TestToastResizeObserver {
+  static instances: TestToastResizeObserver[] = [];
+  readonly observed = new Set<Element>();
+
+  constructor(private readonly callback: ResizeObserverCallback) {
+    TestToastResizeObserver.instances.push(this);
+  }
+
+  observe(element: Element): void {
+    this.observed.add(element);
+  }
+
+  disconnect(): void {
+    this.observed.clear();
+  }
+
+  trigger(element: Element): void {
+    const entry = { target: element } as ResizeObserverEntry;
+    this.callback([entry], this as unknown as ResizeObserver);
+  }
+}
