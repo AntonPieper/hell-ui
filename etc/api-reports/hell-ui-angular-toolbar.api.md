@@ -14,9 +14,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/toolbar';
 import * as i2 from 'ng-primitives/roving-focus';
 import { InjectionToken } from '@angular/core';
-import { Provider } from '@angular/core';
-import { Signal } from '@angular/core';
-import { TemplateRef } from '@angular/core';
 
 // @public
 export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellOverflowToolbarLabels>;
@@ -26,39 +23,13 @@ export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellT
 
 // @public
 export class HellOverflowToolbar {
-    constructor();
-    // @internal
-    protected actionOf(view: unknown): HellToolbarAction;
-    // @internal
-    protected activate(action: HellToolbarAction): void;
-    // @internal
-    protected readonly effectiveOverflowLabel: Signal<string>;
-    // @internal
-    protected iconOf(view: unknown): TemplateRef<unknown> | null;
-    // @internal
-    protected readonly inlineViews: Signal<readonly unknown[]>;
     readonly label: _angular_core.InputSignal<string>;
     readonly labelledBy: _angular_core.InputSignal<string>;
-    // @internal
-    protected readonly measureViews: Signal<readonly unknown[]>;
-    // @internal
-    protected onFocusIn(event: FocusEvent): void;
-    // @internal
-    protected onKeydown(event: KeyboardEvent): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     readonly overflowLabel: _angular_core.InputSignal<string>;
-    // @internal
-    protected readonly overflowViews: Signal<readonly unknown[]>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellOverflowToolbarPart>;
-    // @internal
-    protected readonly separatorOrientation: Signal<HellOrientation>;
-    // @internal
-    protected readonly showOverflow: Signal<boolean>;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOverflowToolbarPart>>;
-    // @internal
-    protected widgetContentOf(view: unknown): TemplateRef<unknown>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOverflowToolbar, "hell-overflow-toolbar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "overflowLabel": { "alias": "overflowLabel"; "required": false; "isSignal": true; }; }, {}, ["declaredItems"], never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOverflowToolbar, "hell-overflow-toolbar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "overflowLabel": { "alias": "overflowLabel"; "required": false; "isSignal": true; }; }, {}, ["declarations"], ["*"], true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOverflowToolbar, never>;
 }
 
@@ -116,9 +87,6 @@ export class HellToolbarWidget {
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbarWidget, "ng-template[hellToolbarWidget]", never, {}, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbarWidget, never>;
 }
-
-// @public
-export function provideHellOverflowToolbarLabels(overrides: Partial<HellOverflowToolbarLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

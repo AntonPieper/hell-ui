@@ -231,8 +231,9 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             </li>
             <li>
               <code>HELL_OVERFLOW_TOOLBAR_LABELS</code>,
-              <code>HellOverflowToolbarLabels</code>, and
-              <code>provideHellOverflowToolbarLabels</code> own the overflow-trigger label.
+              <code>HellOverflowToolbarLabels</code>, and core's
+              <code>provideHellLabels</code> own the overflow-trigger label contract and scoped
+              overrides.
             </li>
             <li>
               <code>HellToolbarActionOverflow</code>, <code>HellOverflowToolbarPart</code>, and

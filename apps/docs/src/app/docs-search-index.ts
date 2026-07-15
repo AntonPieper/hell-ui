@@ -2232,7 +2232,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/toolbar',
  detail:'hellToolbar, hellToolbarItem, hell-overflow-toolbar, hellToolbarAction',
  terms:
-'HELL_TOOLBAR_DIRECTIVES hellToolbar hellToolbarItem HellToolbar HellToolbarItem hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellOverflowToolbarPart HellOverflowToolbarUi HellOverflowToolbarLabels provideHellOverflowToolbarLabels',
+'HELL_TOOLBAR_DIRECTIVES hellToolbar hellToolbarItem HellToolbar HellToolbarItem hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellOverflowToolbarPart HellOverflowToolbarUi HellOverflowToolbarLabels HELL_OVERFLOW_TOOLBAR_LABELS provideHellLabels',
  },
  {
  title:'Time input adapter',

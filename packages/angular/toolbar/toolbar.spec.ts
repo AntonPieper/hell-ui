@@ -2,11 +2,14 @@ import { Component, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { HellButton } from '@hell-ui/angular/button';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 import {
+  HELL_OVERFLOW_TOOLBAR_LABELS,
   HELL_TOOLBAR_DIRECTIVES,
-  provideHellOverflowToolbarLabels,
+  HellOverflowToolbarRenderer,
+  type HellOverflowToolbarRendererPart,
   type HellOverflowToolbarUi,
 } from './toolbar';
 import { hellResolveToolbarOverflow, type HellToolbarOverflowItem } from './toolbar-overflow';
@@ -428,7 +431,11 @@ class CapabilitiesHost {
 
 @Component({
   imports: [...HELL_TOOLBAR_DIRECTIVES],
-  providers: [provideHellOverflowToolbarLabels({ overflowTrigger: 'Weitere Aktionen' })],
+  providers: [
+    provideHellLabels(HELL_OVERFLOW_TOOLBAR_LABELS, {
+      overflowTrigger: 'Weitere Aktionen',
+    }),
+  ],
   template: `
     <hell-overflow-toolbar label="Localized">
       <ng-template hellToolbarAction label="One" overflow="never"></ng-template>
@@ -478,6 +485,20 @@ describe('HellOverflowToolbar', () => {
     expect(fixture.nativeElement.querySelector('[data-slot="overflowTrigger"]')).toBeInstanceOf(
       HTMLElement,
     );
+  });
+
+  it('keeps measured runtime coordination in its package-local renderer seam', () => {
+    const fixture = TestBed.createComponent(ToolbarHost);
+    mount(fixture);
+    fixture.detectChanges();
+
+    const root = query(fixture.nativeElement, 'hell-overflow-toolbar');
+    const renderer = fixture.debugElement.query(By.directive(HellOverflowToolbarRenderer));
+    expect(renderer).not.toBeNull();
+    expect(renderer.nativeElement.parentElement).toBe(root);
+    expect(renderer.nativeElement.getAttribute('role')).toBeNull();
+    expect(root.getAttribute('role')).toBe('toolbar');
+    expect(rendererPart(renderer.nativeElement, 'action')).toBeInstanceOf(HTMLElement);
   });
 
   it('renders never/auto inline and keeps always actions out of the inline row', () => {
@@ -818,6 +839,13 @@ function query<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: 
   const element = root.querySelector<T>(selector);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
   return element as T;
+}
+
+function rendererPart(
+  root: ParentNode,
+  part: HellOverflowToolbarRendererPart,
+): HTMLElement | null {
+  return root.querySelector<HTMLElement>(`[data-slot="${part}"]`);
 }
 
 function cleanupPortaledTestElements(selector: string): void {

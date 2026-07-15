@@ -1,3 +1,6 @@
+@import '../button/styles.css';
+@import '../menu/styles.css';
+
 /* Toolbar defaults are Tailwind utility recipes in the component. */
 @source "./toolbar.ts";
 
