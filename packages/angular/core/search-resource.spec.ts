@@ -288,6 +288,78 @@ describe('hellSearchResource', () => {
     expect(resource.status()).toBe('success');
   });
 
+  it('cancels an async query change before its reactive effect flushes', async () => {
+    vi.useFakeTimers();
+    const query = signal('initial');
+    const calls: HellSearchSourceRequest[] = [];
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({
+        query,
+        debounce: 0,
+        source: (request) => {
+          calls.push(request);
+          return [request.query];
+        },
+      }),
+    );
+
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+    await settleResource();
+    expect(calls.map((request) => request.query)).toEqual(['initial']);
+
+    query.set('cancelled');
+    resource.cancel();
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+    await settleResource();
+
+    expect(calls.map((request) => request.query)).toEqual(['initial']);
+
+    query.set('later');
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+    await settleResource();
+
+    expect(calls.map((request) => request.query)).toEqual(['initial', 'later']);
+    expect(resource.items()).toEqual(['later']);
+  });
+
+  it('cancels a local item change before its reactive effect flushes', async () => {
+    const query = signal('');
+    const sourceItems = signal<readonly string[]>(['initial']);
+    const rankedCollections: Array<readonly string[]> = [];
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHellSearchRanker((items) => {
+          rankedCollections.push(items.map((item) => String(item)));
+          return items.map((item, index) => ({ item, score: items.length - index }));
+        }),
+      ],
+    });
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({ query, items: sourceItems }),
+    );
+
+    await settleResource();
+    expect(rankedCollections).toEqual([['initial']]);
+
+    sourceItems.set(['cancelled']);
+    resource.cancel();
+    await settleResource();
+
+    expect(rankedCollections).toEqual([['initial']]);
+
+    sourceItems.set(['later']);
+    await settleResource();
+
+    expect(rankedCollections).toEqual([['initial'], ['later']]);
+    expect(resource.items()).toEqual(['later']);
+  });
+
   it('keeps async state cleared until a later query change or explicit refresh', async () => {
     vi.useFakeTimers();
     const query = signal('one');

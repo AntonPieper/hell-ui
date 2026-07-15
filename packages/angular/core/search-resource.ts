@@ -187,7 +187,10 @@ export function hellSearchResource<T, P = unknown>(
       lastObservedSnapshot = snapshot;
       void lifecycle.run(dispatch(snapshot));
     },
-    cancel: () => lifecycle.cancel(),
+    cancel: () => {
+      lifecycle.cancel();
+      lastObservedSnapshot = readSearchSnapshot(options);
+    },
     clear: () => {
       lifecycle.cancel();
       settledStatus = 'idle';
