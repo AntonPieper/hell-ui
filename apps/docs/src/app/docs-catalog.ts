@@ -523,6 +523,15 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
       {
+        routePath: 'components/filter-builder',
+        label: 'Filter Builder',
+        icon: 'faSolidFilter',
+        loadComponent: () =>
+          import('./pages/components/filter-builder/filter-builder.page').then(
+            (m) => m.FilterBuilderPage,
+          ),
+      },
+      {
         routePath: 'components/pdf-viewer',
         label: 'PDF viewer',
         icon: 'faSolidFilePdf',

@@ -1095,6 +1095,27 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'filter bar filter-bar server dispatch entity date range dateRange async HellSearchSource abort signal HellFilterEntityOption debounceMs limit searchError loading empty error owner work orders controlled serializable JSON ISO open ended request',
  },
  {
+ title:'Filter Builder: Text, options, and custom operator',
+ path:'/components/filter-builder',
+ detail:'components/filter-builder/examples/recipes.example.ts',
+ terms:
+'filter builder filter-builder recipes projected editor HellFilter HellFilterFieldDescriptor HellFilterBuilderEditorContext controlled value valueChange identify stable identity text options custom operator atLeast display validate commit cancel chip input control group combobox popover',
+ },
+ {
+ title:'Filter Builder: External async entity Search Resource',
+ path:'/components/filter-builder',
+ detail:'components/filter-builder/examples/async-entity.example.ts',
+ terms:
+'filter builder filter-builder async entity owner external hellSearchResource Search Resource query source debounce abort signal status loading error empty projected combobox application owned',
+ },
+ {
+ title:'Filter Builder: Structured date range',
+ path:'/components/filter-builder',
+ detail:'components/filter-builder/examples/date-range.example.ts',
+ terms:
+'filter builder filter-builder date range structured value projected editor HellDateInput calendar nested portal floating scope layered Escape focus restoration local date from to',
+ },
+ {
  title:'Multi-Select Menu Button: Basic',
  path:'/components/multi-select-menu-button',
  detail:'components/multi-select-menu-button/examples/basic.example.ts',

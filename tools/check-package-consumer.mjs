@@ -57,7 +57,7 @@ const packageConsumerCiGroups = [
     ],
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
-  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
+  { name: 'features', scenarios: ['code-editor', 'filter-builder', 'pdf-viewer'] },
   { name: 'table-core', scenarios: ['table'] },
   { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
 ];
@@ -120,6 +120,7 @@ const requiredScenarioCoverageAreas = new Set([
   'tanstack-table',
   'tanstack-virtual',
   'code-editor',
+  'filter-builder',
   'pdf-viewer-feature',
 ]);
 
@@ -447,6 +448,19 @@ const packageConsumerScenarioCatalog = [
       '.min-h-\\[inherit\\]{min-height:inherit}',
       '.data-\\[readonly\\=true\\]\\:bg-hell-surface-subtle[data-readonly=true]',
     ],
+  },
+  {
+    name: 'filter-builder',
+    description:
+      'projected-editor Filter Builder feature with generic expressions and normal composite peers',
+    coverage: ['filter-builder'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: heavyFeaturePeerGroup,
+    mainTs: filterBuilderConsumerMainTs,
+    stylesCss: filterBuilderConsumerStylesCss,
+    cssIncludes: ['min-width:180px', 'z-index:var(--hell-z-popover,60)'],
   },
   {
     name: 'table',
@@ -786,6 +800,7 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'table',
     'audio-player',
     'audio-transcript',
+    'filter-builder',
   ]);
   for (const scenario of allScenarios) {
     if (!lightScenarioNames.has(scenario.name)) continue;
@@ -2432,6 +2447,149 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function filterBuilderConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { hellSearchResource } from '${packageName}/core';
+import {
+  HELL_FILTER_BUILDER_IMPORTS,
+  type HellFilter,
+  type HellFilterBuilderEditorContext,
+  type HellFilterBuilderUi,
+  type HellFilterFieldDescriptor,
+} from '${packageName}/features/filter-builder';
+
+interface IdentifiedFilter<TField extends string, TOperator extends string, TValue>
+  extends HellFilter<TField, TOperator, TValue> {
+  readonly id: string;
+}
+
+interface Owner {
+  readonly id: string;
+  readonly name: string;
+}
+
+type NameFilter = IdentifiedFilter<'name', 'contains' | 'startsWith', string>;
+type OwnerFilter = IdentifiedFilter<'owner', 'is', Owner>;
+type ScoreFilter = IdentifiedFilter<'score', 'atLeast', { readonly threshold: number }>;
+type PackageFilter = NameFilter | OwnerFilter | ScoreFilter;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_FILTER_BUILDER_IMPORTS],
+  template: \`
+    <hell-filter-builder
+      aria-label="Package filters"
+      [fields]="fields"
+      [value]="value()"
+      [identify]="identifyFilter"
+      [ui]="filterUi"
+      (valueChange)="value.set($event)"
+    >
+      <ng-template [hellFilterBuilderEditor]="nameField" let-editor>
+        <input #nameValue aria-label="Name value" [value]="editor.filter?.value ?? ''" />
+        <button type="button" (click)="commitName(editor, nameValue.value)">Apply name</button>
+        <button type="button" (click)="editor.cancel()">Cancel</button>
+      </ng-template>
+
+      <ng-template [hellFilterBuilderEditor]="ownerField" let-editor>
+        @for (owner of ownerSearch.items(); track owner.id) {
+          <button type="button" (click)="commitOwner(editor, owner)">{{ owner.name }}</button>
+        }
+      </ng-template>
+
+      <ng-template [hellFilterBuilderEditor]="scoreField" let-editor>
+        <button type="button" (click)="commitScore(editor, 80)">At least 80</button>
+      </ng-template>
+    </hell-filter-builder>
+  \`,
+})
+class App {
+  protected readonly nameField: HellFilterFieldDescriptor<NameFilter> = {
+    field: 'name',
+    label: 'Name',
+    multiple: true,
+    display: (filter) => \`Name \${filter.operator} \${filter.value}\`,
+    validate: (filter) => filter.value.trim().length > 0,
+  };
+  protected readonly ownerField: HellFilterFieldDescriptor<OwnerFilter> = {
+    field: 'owner',
+    label: 'Owner',
+    display: (filter) => \`Owner is \${filter.value.name}\`,
+    validate: (filter) => Boolean(filter.value.id && filter.value.name),
+  };
+  protected readonly scoreField: HellFilterFieldDescriptor<ScoreFilter> = {
+    field: 'score',
+    label: 'Score',
+    display: (filter) => \`Score ≥ \${filter.value.threshold}\`,
+    validate: (filter) => filter.value.threshold >= 0 && filter.value.threshold <= 100,
+  };
+  protected readonly fields = [this.nameField, this.ownerField, this.scoreField] as const;
+  protected readonly value = signal<readonly PackageFilter[]>([]);
+  protected readonly identifyFilter = (filter: PackageFilter) => filter.id;
+  protected readonly filterUi = {
+    root: 'max-w-[720px]',
+    editor: 'min-w-[320px]',
+  } satisfies HellFilterBuilderUi;
+  protected readonly ownerQuery = signal('');
+  protected readonly ownerSearch = hellSearchResource<Owner>({
+    query: this.ownerQuery,
+    source: async ({ query, signal: abortSignal }) => {
+      if (abortSignal.aborted) return [];
+      return [{ id: 'grace', name: query ? 'Grace Hopper' : 'Suggested owner' }];
+    },
+  });
+  private nextIdentity = 0;
+
+  protected commitName(
+    editor: HellFilterBuilderEditorContext<NameFilter>,
+    value: string,
+  ): void {
+    const candidate: NameFilter = {
+      id: editor.filter?.id ?? this.createIdentity('name'),
+      field: 'name',
+      operator: editor.filter?.operator ?? 'contains',
+      value: value.trim(),
+    };
+    editor.display(candidate);
+    if (editor.validate(candidate)) editor.commit(candidate);
+  }
+
+  protected commitOwner(
+    editor: HellFilterBuilderEditorContext<OwnerFilter>,
+    owner: Owner,
+  ): void {
+    editor.commit({
+      id: editor.filter?.id ?? this.createIdentity('owner'),
+      field: 'owner',
+      operator: 'is',
+      value: owner,
+    });
+  }
+
+  protected commitScore(
+    editor: HellFilterBuilderEditorContext<ScoreFilter>,
+    threshold: number,
+  ): void {
+    editor.commit({
+      id: editor.filter?.id ?? this.createIdentity('score'),
+      field: 'score',
+      operator: 'atLeast',
+      value: { threshold },
+    });
+  }
+
+  private createIdentity(field: string): string {
+    this.nextIdentity += 1;
+    return \`\${field}-\${this.nextIdentity}\`;
+  }
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function appShellConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -3002,6 +3160,13 @@ function filterBarConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/filter-bar/styles.css";
+`;
+}
+
+function filterBuilderConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/features/filter-builder/styles.css";
 `;
 }
 
