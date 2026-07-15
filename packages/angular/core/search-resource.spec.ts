@@ -71,6 +71,44 @@ describe('hellSearchResource', () => {
     expect(requests).toEqual(['alpha', 'alpha', 'gamma']);
   });
 
+  it('keeps local items cleared until a later query change or explicit refresh', async () => {
+    const query = signal('alpha');
+    const sourceItems = signal<readonly string[]>(['alpha-one', 'beta-one']);
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({ query, items: sourceItems }),
+    );
+
+    await settleResource();
+    expect(resource.items()).toEqual(['alpha-one']);
+
+    resource.clear();
+    sourceItems.set(['alpha-two', 'beta-two']);
+    await settleResource();
+
+    expect(resource.items()).toEqual([]);
+    expect(resource.status()).toBe('idle');
+
+    query.set('beta');
+    await settleResource();
+
+    expect(resource.items()).toEqual(['beta-two']);
+    expect(resource.status()).toBe('success');
+
+    resource.clear();
+    sourceItems.set(['gamma']);
+    await settleResource();
+
+    expect(resource.items()).toEqual([]);
+    expect(resource.status()).toBe('idle');
+
+    resource.refresh();
+    await settleResource();
+
+    expect(resource.items()).toEqual(['gamma']);
+    expect(resource.status()).toBe('success');
+  });
+
   it('debounces async dispatch and forwards query, params, limit, and AbortSignal', async () => {
     vi.useFakeTimers();
     const query = signal('ada');
@@ -250,7 +288,7 @@ describe('hellSearchResource', () => {
     expect(resource.status()).toBe('success');
   });
 
-  it('clears query, items, error, and status without scheduling an empty-query search', async () => {
+  it('keeps async state cleared until a later query change or explicit refresh', async () => {
     vi.useFakeTimers();
     const query = signal('one');
     const calls: HellSearchSourceRequest[] = [];
@@ -261,7 +299,9 @@ describe('hellSearchResource', () => {
         debounce: 0,
         source: (request) => {
           calls.push(request);
-          return Promise.reject(new Error('boom'));
+          return calls.length === 1
+            ? Promise.reject(new Error('boom'))
+            : [request.query || 'refreshed'];
         },
       }),
     );
@@ -280,6 +320,32 @@ describe('hellSearchResource', () => {
     expect(resource.error()).toBeNull();
     expect(resource.status()).toBe('idle');
     expect(calls).toHaveLength(1);
+
+    query.set('two');
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+    await settleResource();
+
+    expect(calls).toHaveLength(2);
+    expect(resource.items()).toEqual(['two']);
+    expect(resource.status()).toBe('success');
+
+    resource.clear();
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(resource.items()).toEqual([]);
+    expect(resource.status()).toBe('idle');
+    expect(calls).toHaveLength(2);
+
+    resource.refresh();
+    expect(calls).toHaveLength(3);
+    expect(calls[2]?.query).toBe('');
+    expect(calls[2]?.signal).toBeInstanceOf(AbortSignal);
+    await settleResource();
+
+    expect(resource.items()).toEqual(['refreshed']);
+    expect(resource.status()).toBe('success');
   });
 
   it('cancels active work when its injection context is destroyed', async () => {

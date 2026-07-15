@@ -16,7 +16,6 @@ import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
-import { WritableSignal } from '@angular/core';
 
 // @public
 export const HELL_DEFAULT_NUMBER_INPUT_ADAPTER: HellNumberInputAdapter;

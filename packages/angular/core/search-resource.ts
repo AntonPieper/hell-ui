@@ -106,7 +106,8 @@ export function hellSearchResource<T, P = unknown>(
   const errorState = signal<unknown>(null);
   let settledStatus: Exclude<HellSearchStatus, 'loading'> = 'idle';
   let settledError: unknown = null;
-  let suppressClearQueryRun = false;
+  let cleared = false;
+  let lastObservedSnapshot: HellSearchSnapshot<T, P> | undefined;
 
   const lifecycle = new HellAsyncResourceLifecycle<readonly T[]>({
     onStart: () => {
@@ -153,9 +154,16 @@ export function hellSearchResource<T, P = unknown>(
 
   effect(() => {
     const snapshot = readSearchSnapshot(options);
-    if (suppressClearQueryRun) {
-      suppressClearQueryRun = false;
-      if (snapshot.query === '') return;
+    const previousSnapshot = lastObservedSnapshot;
+    if (previousSnapshot && hasSameReactiveInputs(previousSnapshot, snapshot)) return;
+
+    const queryChanged =
+      previousSnapshot !== undefined && previousSnapshot.query !== snapshot.query;
+    lastObservedSnapshot = snapshot;
+
+    if (cleared) {
+      if (!queryChanged) return;
+      cleared = false;
     }
 
     if (isAsyncOptions(options)) {
@@ -174,8 +182,10 @@ export function hellSearchResource<T, P = unknown>(
     status: statusState.asReadonly(),
     error: errorState.asReadonly(),
     refresh: () => {
-      suppressClearQueryRun = false;
-      void lifecycle.run(dispatch(readSearchSnapshot(options)));
+      const snapshot = readSearchSnapshot(options);
+      cleared = false;
+      lastObservedSnapshot = snapshot;
+      void lifecycle.run(dispatch(snapshot));
     },
     cancel: () => lifecycle.cancel(),
     clear: () => {
@@ -185,8 +195,9 @@ export function hellSearchResource<T, P = unknown>(
       itemState.set([]);
       errorState.set(null);
       statusState.set('idle');
-      suppressClearQueryRun = true;
+      cleared = true;
       options.query.set('');
+      lastObservedSnapshot = readSearchSnapshot(options);
     },
   };
 }
@@ -196,6 +207,13 @@ interface HellSearchSnapshot<T, P> {
   readonly items?: readonly T[];
   readonly source?: HellSearchResourceSource<T, P>;
   readonly params?: P;
+}
+
+function hasSameReactiveInputs<T, P>(
+  previous: HellSearchSnapshot<T, P>,
+  current: HellSearchSnapshot<T, P>,
+): boolean {
+  return previous.query === current.query && previous.items === current.items;
 }
 
 function readSearchSnapshot<T, P>(

@@ -102,7 +102,8 @@ readonly peopleSearch = hellSearchResource<Person>({
         </li>
         <li>
           <code>clear()</code> cancels work and resets the query, items, status, and error without
-          dispatching an empty-query request.
+          dispatching an empty-query request. Local collection updates keep the resource cleared;
+          a later query change or explicit <code>refresh()</code> reactivates either resource mode.
         </li>
       </ul>
       <p>

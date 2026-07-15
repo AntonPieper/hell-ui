@@ -1378,7 +1378,7 @@ class App {
     query: this.query,
     params: { tenant: 'package-consumer' },
     source: ({ query, signal: abortSignal }) => {
-      abortSignal?.throwIfAborted();
+      abortSignal.throwIfAborted();
       return [{ label: \`\${query} result\` }];
     },
   });

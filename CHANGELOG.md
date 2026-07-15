@@ -22,9 +22,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   sources, forwards an `AbortSignal`, and prevents superseded successes or
   failures from replacing current state. `refresh()` bypasses debounce,
   `cancel()` preserves settled results, and `clear()` resets the complete
-  resource without dispatching an empty query. The existing internal search
-  orchestrator delegates to the same generic lifecycle until its consumers
-  migrate. Closes #184.
+  resource without dispatching an empty query. A cleared resource stays idle
+  across local collection updates until a later query change or explicit
+  refresh. The existing internal search orchestrator delegates to the same
+  generic lifecycle until its consumers migrate. Closes #184.
 - The native/styled control pairs (checkbox, switch, radio, select) are a
   written contract: `docs/adr/native-styled-control-pairs.md` decides the
   pairs stay two products — delegated rich controls for owned anatomy,

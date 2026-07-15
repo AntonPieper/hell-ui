@@ -1,7 +1,6 @@
 {
   "category": "internal",
   "exports": [
-    "./async-resource-lifecycle",
     "./control-value-accessor",
     "./controlled-value-state",
     "./dom",
@@ -13,7 +12,8 @@
     "./pick-value",
     "./picker-control",
     "./resize-behavior",
-    "./typed-value-input"
+    "./typed-value-input",
+    "./async-resource-lifecycle"
   ],
   "header": [
     "/**",
