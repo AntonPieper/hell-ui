@@ -570,6 +570,27 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChip hellButton hell-icon iconOnly HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
  },
  {
+ title:'Control Group: Basic composition',
+ path:'/components/control-group',
+ detail:'components/control-group/examples/basic.example.ts',
+ terms:
+'control-group basic composition hellControlGroup hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction HELL_CONTROL_GROUP_DIRECTIVES hellInput hellField prefix suffix action copy workspace url projection consumer-owned',
+ },
+ {
+ title:'Control Group: Sizes and states',
+ path:'/components/control-group',
+ detail:'components/control-group/examples/states.example.ts',
+ terms:
+'control-group states size sm md lg invalid disabled aria-invalid aria-disabled data-size data-invalid data-disabled focus-within native input action prefix suffix',
+ },
+ {
+ title:'Control Group: Styling',
+ path:'/components/control-group',
+ detail:'components/control-group/examples/styling.example.ts',
+ terms:
+'control-group styling ui Part Style Map root data-slot hellControlGroup hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction rounded-hell-pill bg-hell-primary local parts recipe',
+ },
+ {
  title:'Confirm: Basic',
  path:'/components/confirm',
  detail:'components/confirm/examples/basic.example.ts',
@@ -987,7 +1008,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/input',
  detail:'components/input/examples/with-search-icon.example.ts',
  terms:
-'field composite components/input/examples/with-search-icon.example components/input hellInput hellField hellFieldLabel hellFieldDescription hell-icon HellIcon prefix clear button provideIcons faSolidMagnifyingGlass faSolidXmark',
+'field composite control-group components/input/examples/with-search-icon.example components/input hellInput hellControlGroup hellControlGroupPrefix hellControlGroupAction HELL_CONTROL_GROUP_DIRECTIVES hellField hellFieldLabel hellFieldDescription hell-icon HellIcon prefix clear button provideIcons faSolidMagnifyingGlass faSolidXmark focus-within',
  },
  {
  title:'Listbox: With search and card',

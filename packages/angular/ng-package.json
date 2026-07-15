@@ -196,6 +196,11 @@
       "output": "checkbox"
     },
     {
+      "glob": "control-group.ts",
+      "input": "control-group",
+      "output": "control-group"
+    },
+    {
       "glob": "chip.ts",
       "input": "chip",
       "output": "chip"
