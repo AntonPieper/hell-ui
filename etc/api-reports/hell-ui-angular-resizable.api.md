@@ -12,7 +12,6 @@ import { HellOrientation } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
-import { OnDestroy } from '@angular/core';
 
 // @public
 export const HELL_RESIZABLE_DIRECTIVES: readonly [typeof HellResizable, typeof HellResizablePane, typeof HellResizableHandle];
@@ -23,25 +22,18 @@ export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels>;
 // @public
 export class HellResizable implements AfterContentInit {
     constructor();
-    fitPanesToAvailableSize(): void;
-    getAvailableSize(): number;
-    getPanes(): readonly HellResizablePane[];
-    indexOf(p: HellResizablePane | null): number;
-    isConstrained(): boolean;
-    markUserSized(): void;
     ngAfterContentInit(): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    registerPane(p: HellResizablePane): void;
     readonly rescaleOnResize: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    unregisterPane(p: HellResizablePane): void;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizable, "[hellResizable]", ["hellResizable"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "rescaleOnResize": { "alias": "rescaleOnResize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizable, never>;
 }
 
 // @public
-export class HellResizableHandle implements AfterViewInit, OnDestroy {
+export class HellResizableHandle implements AfterViewInit {
+    constructor();
     readonly appearance: _angular_core.InputSignal<"grip" | "line">;
     readonly ariaControls: _angular_core.InputSignal<string | readonly string[] | null>;
     protected readonly ariaControlsValue: _angular_core.Signal<string | null>;
@@ -50,11 +42,9 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
     protected readonly labels: HellResizableLabels;
     ngAfterViewInit(): void;
-    ngOnDestroy(): void;
     protected onKey(e: KeyboardEvent): void;
     protected onPointerDown(e: PointerEvent): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellResizableHandlePart>;
-    protected readonly resizable: HellResizable;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellResizableHandlePart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellResizableHandle, "[hellResizableHandle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "appearance": { "alias": "appearance"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaControls": { "alias": "aria-controls"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizableHandle, never>;
@@ -72,25 +62,11 @@ export interface HellResizableLabels {
 }
 
 // @public
-export class HellResizablePane implements OnDestroy {
+export class HellResizablePane {
     constructor();
-    currentMinSize(): number;
-    currentSize(): number | null;
-    protected readonly flexValue: _angular_core.Signal<string>;
-    hasSize(): boolean;
-    readonly host: HTMLElement;
     readonly initialFlex: _angular_core.InputSignalWithTransform<number, unknown>;
-    measure(): number;
     readonly minSize: _angular_core.InputSignalWithTransform<number, unknown>;
-    protected readonly minSizeValue: _angular_core.Signal<number>;
-    ngOnDestroy(): void;
-    protected readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    resetSize(): void;
-    readonly resizable: HellResizable;
-    setEffectiveMinSize(px: number | null): void;
-    setSize(px: number): void;
-    readonly _size: _angular_core.WritableSignal<number | null>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizablePane, "[hellResizablePane]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "initialFlex": { "alias": "initialFlex"; "required": false; "isSignal": true; }; "minSize": { "alias": "minSize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizablePane, never>;

@@ -6,7 +6,7 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
-  OnDestroy,
+  Injectable,
   booleanAttribute,
   computed,
   effect,
@@ -73,46 +73,34 @@ function hellAriaControlsValue(
   return ids.length ? ids.join(' ') : null;
 }
 
+interface HellResizablePaneRegistration {
+  readonly host: HTMLElement;
+  readonly minSize: () => number;
+  readonly hasSize: () => boolean;
+  readonly currentSize: () => number | null;
+  readonly currentMinSize: () => number;
+  readonly measure: () => number;
+  readonly setSize: (px: number) => void;
+  readonly resetSize: () => void;
+  readonly setEffectiveMinSize: (px: number | null) => void;
+}
+
 /**
- * Resizable group. Wrap two or more `[hellResizablePane]` elements with
- * explicit `[hellResizableHandle]` siblings between them inside a
- * `[hellResizable]` host. The container splits its main-axis size between
- * panes proportionally; dragging a handle redistributes size between the
- * two adjacent panes only — other panes are unaffected. Works with mouse,
- * touch, pen, and keyboard (arrow keys; Home/End jump to the pane min/max).
+ * Resizable-local pane coordination. Panes and handles communicate through
+ * this provider so registry, measurement, constraints, and direct sizing stay
+ * out of the public directive declarations.
  */
-@Directive({
-  selector: '[hellResizable]',
-  host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-orientation]': 'orientation()',
-  },
-  exportAs: 'hellResizable',
-})
-export class HellResizable implements AfterContentInit {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_RESIZABLE_RECIPE,
-  });
-
-  /** Main axis along which panes are laid out and resized. Defaults to `horizontal`. */
-  readonly orientation = input<HellOrientation>('horizontal');
-  /** When false, container resizes do not rebalance panes after user sizing. */
-  readonly rescaleOnResize = input(true, { transform: booleanAttribute });
-
+@Injectable()
+class HellResizableController {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly constrained = signal(false);
+  private readonly panes: HellResizablePaneRegistration[] = [];
   private userSized = false;
   private resizeFrame = 0;
 
-  // Populated by panes during ngOnInit. Order corresponds to DOM order.
-  private readonly panes: HellResizablePane[] = [];
+  orientation: () => HellOrientation = () => 'horizontal';
+  rescaleOnResize: () => boolean = () => true;
 
   constructor() {
     const ResizeObserverCtor = this.host.ownerDocument.defaultView?.ResizeObserver;
@@ -126,21 +114,18 @@ export class HellResizable implements AfterContentInit {
     });
   }
 
-  /** Child/advanced integration hook; panes register themselves on init. */
-  registerPane(p: HellResizablePane) {
-    if (!this.panes.includes(p)) this.panes.push(p);
-    queueMicrotask(() => this.fitPanesToAvailableSize());
-  }
-  /** Child/advanced integration hook; removes a pane from resize accounting. */
-  unregisterPane(p: HellResizablePane) {
-    const i = this.panes.indexOf(p);
-    if (i >= 0) this.panes.splice(i, 1);
+  registerPane(pane: HellResizablePaneRegistration): void {
+    if (!this.panes.includes(pane)) this.panes.push(pane);
     queueMicrotask(() => this.fitPanesToAvailableSize());
   }
 
-  /** Orders registered panes by DOM position and performs the initial fit. */
-  ngAfterContentInit() {
-    // Sort by DOM order to be safe (initial registration order can vary).
+  unregisterPane(pane: HellResizablePaneRegistration): void {
+    const index = this.panes.indexOf(pane);
+    if (index >= 0) this.panes.splice(index, 1);
+    queueMicrotask(() => this.fitPanesToAvailableSize());
+  }
+
+  afterContentInit(): void {
     this.panes.sort((a, b) => {
       if (isDocumentPositionFollowing(a.host, b.host, a.host.ownerDocument.defaultView)) {
         return -1;
@@ -153,84 +138,144 @@ export class HellResizable implements AfterContentInit {
     this.fitPanesToAvailableSize();
   }
 
-  /** All panes in DOM order. */
-  getPanes(): readonly HellResizablePane[] {
-    return this.panes;
-  }
-
-  /** Find the index of a pane (or -1). */
-  indexOf(p: HellResizablePane | null) {
-    return p ? this.panes.indexOf(p) : -1;
-  }
-
-  /** Total available size on the main axis, minus handles. */
-  getAvailableSize(): number {
-    const horizontal = this.orientation() === 'horizontal';
-    const total = horizontal ? this.host.clientWidth : this.host.clientHeight;
-    let handlesSize = 0;
-    const handles = this.host.querySelectorAll<HTMLElement>(
-      ':scope > [hellResizableHandle][data-slot="root"]',
-    );
-    handles.forEach((h: HTMLElement) => {
-      handlesSize += horizontal ? h.offsetWidth : h.offsetHeight;
-    });
-    return Math.max(0, total - handlesSize);
-  }
-
-  /** Whether the available size is smaller than the panes' combined minimum size. */
   isConstrained(): boolean {
     return this.constrained();
   }
 
-  /** Marks that explicit pixel sizes should be preserved across future fits. */
-  markUserSized(): void {
-    this.userSized = true;
+  createResizeInteraction(
+    handle: HTMLElement,
+    onActiveChange: (active: boolean) => void,
+    onValueChange: (ariaValueNow: number) => void,
+  ): HellResizePairInteractionController<HellResizablePaneRegistration> {
+    return new HellResizePairInteractionController<HellResizablePaneRegistration>({
+      handle,
+      ownerWindow: () => handle.ownerDocument.defaultView,
+      onActiveChange,
+      onValueChange: (result) => onValueChange(result.ariaValueNow),
+      orientation: () => (this.orientation() === 'horizontal' ? 'horizontal' : 'vertical'),
+      direction: () => hellElementDirection(handle),
+      beforeStart: () => {
+        this.fitPanesToAvailableSize();
+        return !this.isConstrained();
+      },
+      afterStart: () => {
+        this.userSized = true;
+      },
+      pair: () => this.adjacentPair(handle),
+      itemAdapter: () => {
+        const sizes = this.lockPanes();
+        return {
+          measure: (pane) => sizes.get(pane) ?? pane.measure(),
+          minSize: (pane) => pane.currentMinSize(),
+          setSize: (pane, size) => pane.setSize(size),
+        };
+      },
+    });
   }
 
-  /** Recomputes and applies pane sizes to fill the container's available size. */
-  fitPanesToAvailableSize(): void {
+  ariaValueFor(handle: HTMLElement): number | null {
+    const pair = this.adjacentPair(handle);
+    if (!pair) return null;
+
+    const beforePx = pair.before.currentSize() ?? pair.before.measure();
+    const afterPx = pair.after.currentSize() ?? pair.after.measure();
+    return hellResizePairAriaValue(
+      beforePx,
+      afterPx,
+      pair.before.currentMinSize(),
+      pair.after.currentMinSize(),
+    );
+  }
+
+  private fitPanesToAvailableSize(): void {
     if (!this.rescaleOnResize()) return;
+    if (!this.panes.length) return;
 
-    const panes = this.getPanes();
-    if (!panes.length) return;
-
-    const available = this.getAvailableSize();
+    const available = this.availableSize();
     if (available <= 0) return;
 
-    const minSizes = panes.map((pane) => pane.minSize());
+    const minSizes = this.panes.map((pane) => pane.minSize());
     const minTotal = minSizes.reduce((sum, value) => sum + value, 0);
     const isConstrained = available < minTotal;
     this.constrained.set(isConstrained);
 
     if (!this.userSized && !isConstrained) {
-      for (const pane of panes) {
+      for (const pane of this.panes) {
         pane.setEffectiveMinSize(null);
         if (pane.hasSize()) pane.resetSize();
       }
       return;
     }
 
-    const hasExplicitSize = panes.some((pane) => pane.hasSize());
+    const hasExplicitSize = this.panes.some((pane) => pane.hasSize());
     if (!hasExplicitSize && !isConstrained) {
-      for (const pane of panes) pane.setEffectiveMinSize(null);
+      for (const pane of this.panes) pane.setEffectiveMinSize(null);
       return;
     }
 
-    const sourceSizes = panes.map(
+    const sourceSizes = this.panes.map(
       (pane, index) => (pane.currentSize() ?? pane.measure()) || minSizes[index],
     );
     const sourceTotal = sourceSizes.reduce((sum, value) => sum + value, 0);
     if (!isConstrained && Math.abs(sourceTotal - available) < 1) {
-      for (const pane of panes) pane.setEffectiveMinSize(null);
+      for (const pane of this.panes) pane.setEffectiveMinSize(null);
       return;
     }
 
     const fitted = hellFitResizeSizesToTotal(sourceSizes, minSizes, available);
-    for (let i = 0; i < panes.length; i++) {
+    for (let i = 0; i < this.panes.length; i++) {
       const effectiveMin = isConstrained ? Math.min(minSizes[i], fitted[i]) : null;
-      panes[i].setEffectiveMinSize(effectiveMin);
+      this.panes[i].setEffectiveMinSize(effectiveMin);
     }
-    for (let i = 0; i < panes.length; i++) panes[i].setSize(fitted[i]);
+    for (let i = 0; i < this.panes.length; i++) this.panes[i].setSize(fitted[i]);
+  }
+
+  private availableSize(): number {
+    const horizontal = this.orientation() === 'horizontal';
+    const total = horizontal ? this.host.clientWidth : this.host.clientHeight;
+    let handlesSize = 0;
+    const handles = this.host.querySelectorAll<HTMLElement>(
+      ':scope > [hellResizableHandle][data-slot="root"]',
+    );
+    handles.forEach((handle) => {
+      handlesSize += horizontal ? handle.offsetWidth : handle.offsetHeight;
+    });
+    return Math.max(0, total - handlesSize);
+  }
+
+  private adjacentPair(
+    handle: HTMLElement,
+  ): { before: HellResizablePaneRegistration; after: HellResizablePaneRegistration } | null {
+    const parent = handle.parentElement;
+    if (!parent) return null;
+
+    const children = Array.from(parent.querySelectorAll<HTMLElement>(':scope > *'));
+    const handleIndex = children.indexOf(handle);
+    if (handleIndex < 0) return null;
+
+    const paneFor = (element: HTMLElement): HellResizablePaneRegistration | null =>
+      this.panes.find((pane) => pane.host === element) ?? null;
+    const findPane = (
+      start: number,
+      step: 1 | -1,
+    ): HellResizablePaneRegistration | null => {
+      for (let i = start; i >= 0 && i < children.length; i += step) {
+        const pane = paneFor(children[i]);
+        if (pane) return pane;
+      }
+      return null;
+    };
+
+    const before = findPane(handleIndex - 1, -1);
+    const after = findPane(handleIndex + 1, 1);
+    return before && after ? { before, after } : null;
+  }
+
+  private lockPanes(): Map<HellResizablePaneRegistration, number> {
+    const sizes = new Map<HellResizablePaneRegistration, number>();
+    for (const pane of this.panes) sizes.set(pane, pane.measure());
+    for (const pane of this.panes) pane.setSize(sizes.get(pane) ?? pane.measure());
+    return sizes;
   }
 
   private scheduleFitPanesToAvailableSize(): void {
@@ -255,16 +300,61 @@ export class HellResizable implements AfterContentInit {
   }
 }
 
+/**
+ * Resizable group. Wrap two or more `[hellResizablePane]` elements with
+ * explicit `[hellResizableHandle]` siblings between them inside a
+ * `[hellResizable]` host. The container splits its main-axis size between
+ * panes proportionally; dragging a handle redistributes size between the
+ * two adjacent panes only — other panes are unaffected. Works with mouse,
+ * touch, pen, and keyboard (arrow keys; Home/End jump to the pane min/max).
+ */
+@Directive({
+  selector: '[hellResizable]',
+  providers: [HellResizableController],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.data-orientation]': 'orientation()',
+  },
+  exportAs: 'hellResizable',
+})
+export class HellResizable implements AfterContentInit {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_RESIZABLE_RECIPE,
+  });
+
+  /** Main axis along which panes are laid out and resized. Defaults to `horizontal`. */
+  readonly orientation = input<HellOrientation>('horizontal');
+  /** When false, container resizes do not rebalance panes after user sizing. */
+  readonly rescaleOnResize = input(true, { transform: booleanAttribute });
+
+  private readonly controller = inject(HellResizableController, { self: true });
+
+  constructor() {
+    this.controller.orientation = () => this.orientation();
+    this.controller.rescaleOnResize = () => this.rescaleOnResize();
+  }
+
+  /** Orders registered panes by DOM position and performs the initial fit. */
+  ngAfterContentInit(): void {
+    this.controller.afterContentInit();
+  }
+}
+
 /** A single resizable region within a `[hellResizable]` group. */
 @Directive({
   selector: '[hellResizablePane]',
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellResizablePane implements OnDestroy {
+export class HellResizablePane {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
@@ -279,75 +369,48 @@ export class HellResizablePane implements OnDestroy {
   /** Minimum pane size in pixels. */
   readonly minSize = input(80, { transform: numberAttribute });
 
-  /** Current absolute size in pixels — set by the handle once dragging
-   *  starts. While `null`, the pane uses its initial flex grow factor. */
-  readonly _size = signal<number | null>(null);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly controller = inject(HellResizableController);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly size = signal<number | null>(null);
   private readonly effectiveMinSize = signal<number | null>(null);
-
-  /** CSS `flex` shorthand for the pane's current size or initial flex factor. */
-  protected readonly flexValue = computed(() => {
-    const px = this._size();
+  private readonly flexValue = computed(() => {
+    const px = this.size();
     return px == null ? `${this.initialFlex()} 1 0` : `0 0 ${px}px`;
   });
-  /** Effective minimum size in pixels, honoring any constrained-fit override. */
-  protected readonly minSizeValue = computed(() => this.effectiveMinSize() ?? this.minSize());
-
-  /** The parent resizable group this pane belongs to. */
-  readonly resizable = inject(HellResizable);
-  /** The pane's host element. */
-  readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  /** Main axis inherited from the parent resizable group. */
-  protected readonly orientation = this.resizable.orientation;
+  private readonly minSizeValue = computed(() => this.effectiveMinSize() ?? this.minSize());
+  private readonly registration: HellResizablePaneRegistration = {
+    host: this.host,
+    minSize: () => this.minSize(),
+    hasSize: () => this.size() != null,
+    currentSize: () => this.size(),
+    currentMinSize: () => this.minSizeValue(),
+    measure: () =>
+      this.controller.orientation() === 'horizontal'
+        ? this.host.offsetWidth
+        : this.host.offsetHeight,
+    setSize: (px) => {
+      this.size.set(px);
+      this.writeFlexValue(this.flexValue());
+    },
+    resetSize: () => {
+      this.size.set(null);
+      this.writeFlexValue(this.flexValue());
+    },
+    setEffectiveMinSize: (px) => {
+      this.effectiveMinSize.set(px);
+      this.writeMinSizeValue(this.minSizeValue());
+    },
+  };
 
   constructor() {
-    this.resizable.registerPane(this);
+    this.controller.registerPane(this.registration);
+    this.destroyRef.onDestroy(() => this.controller.unregisterPane(this.registration));
     effect(() => {
+      this.host.setAttribute('data-orientation', this.controller.orientation());
       this.writeFlexValue(this.flexValue());
       this.writeMinSizeValue(this.minSizeValue());
     });
-  }
-
-  /** Unregisters this pane from the parent resizable group. */
-  ngOnDestroy() {
-    this.resizable.unregisterPane(this);
-  }
-
-  /** Sets an explicit pixel size for the pane, overriding its flex factor. */
-  setSize(px: number) {
-    this._size.set(px);
-    this.writeFlexValue(this.flexValue());
-  }
-
-  /** Clears any explicit pixel size, reverting to the initial flex factor. */
-  resetSize() {
-    this._size.set(null);
-    this.writeFlexValue(this.flexValue());
-  }
-
-  /** Whether the pane currently has an explicit pixel size set. */
-  hasSize(): boolean {
-    return this._size() != null;
-  }
-
-  /** The pane's current explicit pixel size, or `null` if unset. */
-  currentSize(): number | null {
-    return this._size();
-  }
-
-  /** Overrides the minimum size used while the container is constrained. */
-  setEffectiveMinSize(px: number | null): void {
-    this.effectiveMinSize.set(px);
-    this.writeMinSizeValue(this.minSizeValue());
-  }
-
-  /** The minimum size currently enforced, in pixels. */
-  currentMinSize(): number {
-    return this.minSizeValue();
-  }
-
-  /** Measures the pane's current rendered size along the main axis, in pixels. */
-  measure(): number {
-    return this.orientation() === 'horizontal' ? this.host.offsetWidth : this.host.offsetHeight;
   }
 
   private writeFlexValue(value: string): void {
@@ -368,13 +431,9 @@ export class HellResizablePane implements OnDestroy {
     'data-slot': 'root',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.data-appearance]': 'appearance()',
-    '[attr.aria-orientation]':
-      'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
-    '[attr.aria-disabled]': 'resizable.isConstrained() ? "true" : null',
     role: 'separator',
     '[attr.aria-label]': 'ariaLabel() ?? labels.resizePanels',
     '[attr.aria-controls]': 'ariaControlsValue()',
-    '[attr.tabindex]': 'resizable.isConstrained() ? "-1" : "0"',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
@@ -383,7 +442,7 @@ export class HellResizablePane implements OnDestroy {
   },
   template: '<span data-slot="grip" [class]="part(\'grip\')" aria-hidden="true"></span>',
 })
-export class HellResizableHandle implements AfterViewInit, OnDestroy {
+export class HellResizableHandle implements AfterViewInit {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellResizableHandlePart>>(undefined, { alias: 'ui' });
 
@@ -417,61 +476,29 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
   protected readonly ariaValueNow = signal<number | null>(null);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  /** The parent resizable group this handle belongs to. */
-  protected readonly resizable = inject(HellResizable);
-  private readonly resizeInteraction = new HellResizePairInteractionController<HellResizablePane>({
-    handle: this.host,
-    ownerWindow: () => this.host.ownerDocument.defaultView,
-    onActiveChange: (active) => this.dragging.set(active),
-    onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
-    orientation: () => (this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical'),
-    direction: () => hellElementDirection(this.host),
-    beforeStart: () => {
-      this.resizable.fitPanesToAvailableSize();
-      return !this.resizable.isConstrained();
-    },
-    afterStart: () => this.resizable.markUserSized(),
-    pair: () => this.adjacentPair(),
-    itemAdapter: () => {
-      const sizes = this.lockPanes();
-      return {
-        measure: (pane) => sizes.get(pane) ?? pane.measure(),
-        minSize: (pane) => pane.currentMinSize(),
-        setSize: (pane, size) => pane.setSize(size),
-      };
-    },
-  });
+  private readonly controller = inject(HellResizableController);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly resizeInteraction = this.controller.createResizeInteraction(
+    this.host,
+    (active) => this.dragging.set(active),
+    (ariaValueNow) => this.ariaValueNow.set(ariaValueNow),
+  );
 
-  /** Lookup the panes immediately preceding and following this handle. */
-  private adjacentPair(): { before: HellResizablePane; after: HellResizablePane } | null {
-    const parent = this.host.parentElement;
-    if (!parent) return null;
-
-    const panes = this.resizable.getPanes();
-    const children = Array.from(parent.querySelectorAll<HTMLElement>(':scope > *'));
-    const handleIndex = children.indexOf(this.host);
-    if (handleIndex < 0) return null;
-
-    const paneFor = (element: HTMLElement) => panes.find((pane) => pane.host === element) ?? null;
-    const findPane = (start: number, step: 1 | -1): HellResizablePane | null => {
-      for (let i = start; i >= 0 && i < children.length; i += step) {
-        const pane = paneFor(children[i]);
-        if (pane) return pane;
+  constructor() {
+    effect(() => {
+      this.host.setAttribute(
+        'aria-orientation',
+        this.controller.orientation() === 'horizontal' ? 'vertical' : 'horizontal',
+      );
+      if (this.controller.isConstrained()) {
+        this.host.setAttribute('aria-disabled', 'true');
+        this.host.setAttribute('tabindex', '-1');
+      } else {
+        this.host.removeAttribute('aria-disabled');
+        this.host.setAttribute('tabindex', '0');
       }
-      return null;
-    };
-
-    const before = findPane(handleIndex - 1, -1);
-    const after = findPane(handleIndex + 1, 1);
-    return before && after ? { before, after } : null;
-  }
-
-  private lockPanes(): Map<HellResizablePane, number> {
-    const panes = this.resizable.getPanes();
-    const sizes = new Map<HellResizablePane, number>();
-    for (const pane of panes) sizes.set(pane, pane.measure());
-    for (const pane of panes) pane.setSize(sizes.get(pane) ?? pane.measure());
-    return sizes;
+    });
+    this.destroyRef.onDestroy(() => this.resizeInteraction.destroy());
   }
 
   /** Initializes `aria-valuenow` once the adjacent panes are available. */
@@ -492,27 +519,7 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
   }
 
   private refreshAriaValueNow(): void {
-    const pair = this.adjacentPair();
-    if (!pair) {
-      this.ariaValueNow.set(null);
-      return;
-    }
-
-    const beforePx = pair.before.currentSize() ?? pair.before.measure();
-    const afterPx = pair.after.currentSize() ?? pair.after.measure();
-    this.ariaValueNow.set(
-      hellResizePairAriaValue(
-        beforePx,
-        afterPx,
-        pair.before.currentMinSize(),
-        pair.after.currentMinSize(),
-      ),
-    );
-  }
-
-  /** Tears down the resize interaction controller. */
-  ngOnDestroy(): void {
-    this.resizeInteraction.destroy();
+    this.ariaValueNow.set(this.controller.ariaValueFor(this.host));
   }
 }
 

@@ -805,6 +805,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `@hell-ui/angular/resizable` no longer exposes the root registry,
+  measurement, constraint, and sizing methods (`registerPane()`,
+  `unregisterPane()`, `getPanes()`, `indexOf()`, `getAvailableSize()`,
+  `isConstrained()`, `fitPanesToAvailableSize()`, and `markUserSized()`) or the
+  pane measurement and direct sizing methods. That coordination now stays
+  behind an internal controller. Consumers should compose the public
+  `[hellResizablePane]` and `[hellResizableHandle]` directives through their
+  documented inputs and native pointer/keyboard interaction instead of calling
+  controller methods. Resize behavior is unchanged. Closes #190.
 - BREAKING: Toast creation now returns a small immutable `HellToastRef` instead
   of a numeric id. Retain the result of `show()`, `message()`, `success()`,
   `info()`, `warning()`, or `error()` and call `ref.update(patch)` or
