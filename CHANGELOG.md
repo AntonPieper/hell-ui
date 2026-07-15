@@ -7,6 +7,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the directive-first `@hell-ui/angular/control-group` Package Entry Point.
+  `[hellControlGroup]` composes a consumer-owned input or trigger with local
+  prefix, suffix, and native button-action surfaces while the shared frame
+  reflects `data-focus-within`, size, invalid, and disabled state. Every
+  directive owns a single-root Part Style Map; the action inherits group
+  disabled state without introducing a second value or form model. The narrow
+  stylesheet, docs catalog/search page, existing Input search recipe, focused
+  behavior tests, and packed consumer scenario cover the complete contract.
+  Closes #185.
 - The native/styled control pairs (checkbox, switch, radio, select) are a
   written contract: `docs/adr/native-styled-control-pairs.md` decides the
   pairs stay two products — delegated rich controls for owned anatomy,

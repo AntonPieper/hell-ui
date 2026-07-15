@@ -53,6 +53,7 @@
     "avatar/avatar-group.ts",
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
+    "control-group/control-group.ts",
     "chip/chip.ts",
     "internal/chip/chip-presentation.ts",
     "internal/option/option-presentation.ts",
@@ -140,6 +141,9 @@
     },
     "./checkbox": {
       "@heinrich/source": "./checkbox/public-api.ts"
+    },
+    "./control-group": {
+      "@heinrich/source": "./control-group/public-api.ts"
     },
     "./dialog": {
       "@heinrich/source": "./dialog/public-api.ts"
@@ -319,6 +323,11 @@
       "@heinrich/source": "./checkbox/styles.css",
       "style": "./checkbox/styles.css",
       "default": "./checkbox/styles.css"
+    },
+    "./control-group/styles.css": {
+      "@heinrich/source": "./control-group/styles.css",
+      "style": "./control-group/styles.css",
+      "default": "./control-group/styles.css"
     },
     "./dialog/styles.css": {
       "@heinrich/source": "./dialog/styles.css",

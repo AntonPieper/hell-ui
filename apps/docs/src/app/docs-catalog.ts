@@ -170,6 +170,15 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/field/field.page').then((m) => m.FieldPage),
       },
       {
+        routePath: 'components/control-group',
+        label: 'Control group',
+        icon: 'faSolidLayerGroup',
+        loadComponent: () =>
+          import('./pages/components/control-group/control-group.page').then(
+            (m) => m.ControlGroupPage,
+          ),
+      },
+      {
         routePath: 'components/input',
         label: 'Input & select',
         icon: 'faSolidICursor',

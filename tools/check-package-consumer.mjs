@@ -34,7 +34,7 @@ const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
   {
     name: 'primitive-foundations',
-    scenarios: ['primitive-icons-css', 'button-ui', 'pagination', 'combobox-chips'],
+    scenarios: ['primitive-icons-css', 'button-ui', 'control-group', 'pagination', 'combobox-chips'],
   },
   { name: 'button', scenarios: ['button'] },
   {
@@ -195,6 +195,23 @@ const packageConsumerScenarioCatalog = [
         property: 'color',
         expected: 'rgb(52, 82, 255)',
       },
+    ],
+  },
+  {
+    name: 'control-group',
+    description: 'narrow Control Group entry with local Part Style Maps and entrypoint CSS',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: controlGroupConsumerMainTs,
+    stylesCss: controlGroupConsumerStylesCss,
+    cssIncludes: [
+      'min-height:var(--spacing-hell-control-md)',
+      'transition-property:background-color,border-color,box-shadow',
+      '[data-focus-within=true]{border-color:var(--color-hell-border-focus)',
+      'border-inline-start-width:1px',
     ],
   },
   {
@@ -1390,6 +1407,44 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function controlGroupConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_CONTROL_GROUP_DIRECTIVES } from '${packageName}/control-group';
+import { HellInput } from '${packageName}/input';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellInput, ...HELL_CONTROL_GROUP_DIRECTIVES],
+  template: \`
+    <div
+      hellControlGroup
+      size="lg"
+      invalid
+      aria-label="Release tag"
+      ui="max-w-lg rounded-hell-pill border-hell-primary"
+    >
+      <span hellControlGroupPrefix ui="font-semibold">release/</span>
+      <input
+        hellInput
+        size="lg"
+        invalid
+        aria-label="Release tag name"
+        ui="h-auto min-h-0 min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none"
+        value="control-group"
+      />
+      <span hellControlGroupSuffix ui="font-mono">v2</span>
+      <button hellControlGroupAction ui="text-hell-primary">Apply</button>
+    </div>
+  \`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function paginationConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2498,6 +2553,14 @@ function buttonConsumerStylesCss() {
 @import "${packageName}/tokens.css";
 @import "${packageName}/button/styles.css";
 :root { --color-hell-primary:#3452ff; }
+`;
+}
+
+function controlGroupConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/control-group/styles.css";
+@import "${packageName}/input/styles.css";
 `;
 }
 

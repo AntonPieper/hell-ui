@@ -141,9 +141,10 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
       <h2>With field and icon</h2>
       <p>
         A search box pairs <code>hellField</code> for label wiring, <code>hell-icon</code> for a
-        leading glyph positioned over the control, and <code>ui</code> to make room for it. The
-        icon and the clear button live in a plain <code>relative</code> wrapper — Hell doesn't own
-        that structure, so you're free to lay it out however the surrounding UI needs.
+        leading glyph, and the Control Group primitive for one focus-aware frame with a clear
+        action. The real <code>hellInput</code> still owns the search value and native input
+        behavior; the group contributes only the prefix/action composition and shared visual
+        state.
       </p>
       <hd-example-tabs [code]="inputWithSearchIconExampleCode" previewClass="grid max-w-sm gap-2">
         <app-input-with-search-icon-example />
