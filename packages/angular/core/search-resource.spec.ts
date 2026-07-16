@@ -144,6 +144,84 @@ describe('hellSearchResource', () => {
     expect(resource.items()).toEqual([{ id: 'ada' }]);
   });
 
+  it('restarts a pending async debounce when the query changes', async () => {
+    vi.useFakeTimers();
+    const query = signal('on');
+    const calls: HellSearchSourceRequest[] = [];
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({
+        query,
+        debounce: 100,
+        source: (request) => {
+          calls.push(request);
+          return [request.query];
+        },
+      }),
+    );
+
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(50);
+    query.set('one');
+    TestBed.tick();
+
+    await vi.advanceTimersByTimeAsync(99);
+    expect(calls).toHaveLength(0);
+
+    await vi.advanceTimersByTimeAsync(1);
+    await settleResource();
+
+    expect(calls.map((request) => request.query)).toEqual(['one']);
+    expect(resource.items()).toEqual(['one']);
+  });
+
+  it('aborts active work as soon as a newer debounced query is scheduled', async () => {
+    vi.useFakeTimers();
+    const query = signal('old');
+    const calls: HellSearchSourceRequest[] = [];
+    const pending: Array<Deferred<readonly string[]>> = [];
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({
+        query,
+        debounce: 100,
+        source: (request) => {
+          calls.push(request);
+          const gate = deferred<readonly string[]>();
+          pending.push(gate);
+          return gate.promise;
+        },
+      }),
+    );
+
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(calls.map((request) => request.query)).toEqual(['old']);
+    expect(resource.status()).toBe('loading');
+
+    query.set('new');
+    TestBed.tick();
+
+    expect(calls[0]?.signal?.aborted).toBe(true);
+    expect(resource.status()).toBe('idle');
+
+    pending[0]?.resolve(['old stale']);
+    await settleResource();
+    expect(resource.items()).toEqual([]);
+    expect(resource.status()).toBe('idle');
+
+    await vi.advanceTimersByTimeAsync(99);
+    expect(calls).toHaveLength(1);
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(calls.map((request) => request.query)).toEqual(['old', 'new']);
+
+    pending[1]?.resolve(['new fresh']);
+    await settleResource();
+    expect(resource.items()).toEqual(['new fresh']);
+    expect(resource.status()).toBe('success');
+  });
+
   it('aborts older work and never lets a stale success replace current items', async () => {
     vi.useFakeTimers();
     const query = signal('one');

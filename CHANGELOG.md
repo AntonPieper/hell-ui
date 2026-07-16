@@ -73,8 +73,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `cancel()` preserves settled results, and `clear()` resets the complete
   resource without dispatching an empty query. A cleared resource stays idle
   across local collection updates until a later query change or explicit
-  refresh. The existing internal search orchestrator delegates to the same
-  generic lifecycle until its consumers migrate. Closes #184.
+  refresh. See Breaking changes for removal of the temporary internal entry
+  point. Closes #184.
 - The native/styled control pairs (checkbox, switch, radio, select) are a
   written contract: `docs/adr/native-styled-control-pairs.md` decides the
   pairs stay two products — delegated rich controls for owned anatomy,
@@ -843,6 +843,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Removed the temporary `@hell-ui/angular/internal/search` Package
+  Entry Point. First carried by the next `@hell-ui/angular` release after
+  `0.2.0` (currently Unreleased). Migrate `HellSearchOrchestrator` to
+  `hellSearchResource` from `@hell-ui/angular/core`: replace construction plus
+  `connect()` with resource creation in an Angular injection context and pass a
+  caller-owned writable `query` signal; configure its options and `debounce`
+  once, then set `query` instead of calling `scheduleSearch()`; call
+  `refresh()` to dispatch the current query immediately instead of
+  `searchNow()`, and observe reactive state rather than a boolean promise.
+  Replace `results()` with `items()` (domain items), `loading()` with
+  `status() === 'loading'`, `error()` with `error()`, `clearResults()` with
+  `clear()`, and `cancel()` with `cancel()`. Lifecycle teardown is automatic
+  when the resource's Angular injection context is destroyed. No compatibility
+  path or duplicate Search Orchestration remains. Closes #203.
 - BREAKING: Removed the closed `@hell-ui/angular/filter-bar` Composite Package
   Entry Point and its stylesheet. First carried by the next
   `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Migrate
