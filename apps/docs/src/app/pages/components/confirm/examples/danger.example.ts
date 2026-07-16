@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import {
-  hellDestructiveAction,
-  hellSecondaryAction,
-  injectHellConfirm,
-} from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 
 @Component({
   selector: 'app-confirm-danger-example',
@@ -18,17 +14,19 @@ import {
   `,
 })
 export class ConfirmDangerExample {
-  private readonly confirm = injectHellConfirm();
+  private readonly prompt = injectHellPrompt();
   protected readonly status = signal('The project is safe.');
 
   protected async remove(): Promise<void> {
-    const confirmed = await this.confirm(
+    const confirmed = await this.prompt.confirm(
       {
         title: 'Delete this project?',
         description: 'This permanently deletes the project and everything inside it.',
       },
-      hellDestructiveAction('Delete project'),
-      hellSecondaryAction('Keep project'),
+      {
+        action: { label: 'Delete project', variant: 'danger' },
+        cancelAction: { label: 'Keep project', variant: 'default' },
+      },
     );
     this.status.set(confirmed ? 'Project deleted.' : 'The project is safe.');
   }

@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import {
-  hellCountdownAction,
-  hellDestructiveAction,
-  injectHellConfirm,
-} from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 
 @Component({
   selector: 'app-confirm-countdown-example',
@@ -18,16 +14,18 @@ import {
   `,
 })
 export class ConfirmCountdownExample {
-  private readonly confirm = injectHellConfirm();
+  private readonly prompt = injectHellPrompt();
   protected readonly status = signal('Database untouched.');
 
   protected async reset(): Promise<void> {
-    const confirmed = await this.confirm(
+    const confirmed = await this.prompt.confirm(
       {
         title: 'Reset the production database?',
         description: 'Every table is truncated. The confirm button unlocks after a short pause.',
       },
-      hellCountdownAction(5, hellDestructiveAction('Reset now')),
+      {
+        action: { label: 'Reset now', variant: 'danger', countdownSeconds: 5 },
+      },
     );
     this.status.set(confirmed ? 'Database reset.' : 'Database untouched.');
   }

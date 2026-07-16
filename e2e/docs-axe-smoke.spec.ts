@@ -106,13 +106,13 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
-    name: 'popconfirm',
+    name: 'anchored prompt',
     path: '/components/confirm',
     heading: 'Confirm',
-    include: ['hell-popconfirm-panel[data-slot="root"]'],
+    include: ['[role="dialog"][data-slot="root"]'],
     prepare: async (page) => {
       await page
-        .locator('app-popconfirm-row-delete-example')
+        .locator('app-confirm-anchored-row-delete-example')
         .getByRole('button', { name: 'Delete staging-eu-west' })
         .click();
       const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });

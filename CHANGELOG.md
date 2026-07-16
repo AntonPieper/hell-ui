@@ -870,6 +870,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   coordination remain private. Closes #189. Evidence: focused Toast unit and
   Chromium behavior/axe contracts, packed composite consumer compilation,
   live docs QA, and the contracted Toast API report.
+- BREAKING: `@hell-ui/angular/confirm` now exposes one Prompt Interface through
+  `injectHellPrompt()`. First carried by the next `@hell-ui/angular` release
+  after `0.2.0` (currently Unreleased). Migrate `injectHellConfirm()` to
+  `injectHellPrompt().confirm()`, `injectHellChoice()` to
+  `injectHellPrompt().choose<TValue>()`, and `injectHellPopconfirm()` to
+  `injectHellPrompt().confirm(..., { anchor, placement })`. Replace
+  `HellConfirmFn` / `HellChoiceFn` / `HellPopconfirmFn` with `HellPrompt`,
+  `HellConfirmPrompt` with inline prompt content, and `HellConfirmAction` /
+  `HellChoiceAction<K>` plus every `hell*Action` combinator with plain
+  `HellPromptAction<TValue>` objects. No compatibility aliases remain. Modal
+  queueing, anchored singleton behavior, scoped labels and Floating Scope,
+  countdown gating, dismissal resolution, safe initial focus, and focus
+  restoration are unchanged. Closes #188. Evidence: focused modal and anchored
+  unit/browser/axe contracts, unified docs and examples, the Confirm API report,
+  and an isolated packed minimal-dependency consumer.
 - The combobox joins the Label Contract: the `toggleLabel` and `emptyLabel`
   string inputs on `hell-combobox` are gone. Built-in copy (toggle button
   aria-label, empty, loading, and error messages) now comes from

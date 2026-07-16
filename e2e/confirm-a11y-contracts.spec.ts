@@ -53,7 +53,7 @@ test.describe('confirm browser accessibility contract', () => {
     // Escape resolves false and restores focus to the opener.
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
-    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expectFocused(page, trigger, 'modal dismissal restores focus to its opener');
     await expect(example.getByText('Publishing cancelled.')).toBeVisible();
   });
 
@@ -72,8 +72,8 @@ test.describe('confirm browser accessibility contract', () => {
     const confirm = dialog.getByRole('button', { name: 'Delete project' });
     const cancel = dialog.getByRole('button', { name: 'Keep project' });
 
-    // hellDestructiveAction ⇒ danger variant; the hellSecondaryAction cancel
-    // override renders with the default variant and takes initial focus.
+    // A danger action uses the danger variant; the custom safe cancel action
+    // renders with the default variant and takes initial focus.
     await expect(confirm).toHaveAttribute('data-variant', 'danger');
     await expect(cancel).toHaveAttribute('data-variant', 'default');
     await expectFocused(page, cancel, 'a destructive action focuses the cancel button');
@@ -108,7 +108,7 @@ test.describe('confirm browser accessibility contract', () => {
   });
 });
 
-test.describe('popconfirm browser accessibility contract', () => {
+test.describe('anchored prompt browser accessibility contract', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/components/confirm');
     await expect(page.getByRole('heading', { name: 'Confirm', level: 1 })).toBeVisible();
@@ -117,7 +117,7 @@ test.describe('popconfirm browser accessibility contract', () => {
   test('anchors a named panel, focuses cancel for destructive actions, and Escape resolves false', async ({
     page,
   }) => {
-    const example = page.locator('app-popconfirm-row-delete-example');
+    const example = page.locator('app-confirm-anchored-row-delete-example');
     const anchor = example.getByRole('button', { name: 'Delete staging-eu-west' });
 
     await ensurePageIsActive(page);
@@ -130,7 +130,7 @@ test.describe('popconfirm browser accessibility contract', () => {
     const confirm = panel.getByRole('button', { name: 'Delete', exact: true });
     const cancel = panel.getByRole('button', { name: 'Cancel' });
 
-    // hellDestructiveAction ⇒ danger variant and initial focus on cancel.
+    // A danger action opts into the safe initial-focus policy.
     await expect(confirm).toHaveAttribute('data-variant', 'danger');
     await expectFocused(page, cancel, 'a destructive action focuses the cancel button');
 
@@ -138,12 +138,12 @@ test.describe('popconfirm browser accessibility contract', () => {
     // the promise false, and restores focus to the anchor.
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
-    await expect(anchor).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expectFocused(page, anchor, 'anchored dismissal restores focus to its anchor');
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
   });
 
   test('confirm runs the delete; an outside click dismisses without deleting', async ({ page }) => {
-    const example = page.locator('app-popconfirm-row-delete-example');
+    const example = page.locator('app-confirm-anchored-row-delete-example');
 
     await ensurePageIsActive(page);
 
@@ -167,8 +167,8 @@ test.describe('popconfirm browser accessibility contract', () => {
     await expect(example.getByRole('button', { name: 'Delete staging-eu-west' })).toHaveCount(0);
   });
 
-  test('only one popconfirm is open at a time', async ({ page }) => {
-    const example = page.locator('app-popconfirm-row-delete-example');
+  test('only one anchored prompt is open at a time', async ({ page }) => {
+    const example = page.locator('app-confirm-anchored-row-delete-example');
 
     await ensurePageIsActive(page);
     await example.getByRole('button', { name: 'Delete staging-eu-west' }).click();
@@ -179,7 +179,7 @@ test.describe('popconfirm browser accessibility contract', () => {
     const second = page.getByRole('dialog', { name: 'Delete staging-us-east?' });
     await expect(second).toBeVisible();
 
-    // Arming the second popconfirm closes the first (its promise resolves
+    // Arming the second anchored prompt closes the first (its promise resolves
     // false) — armed deletes never accumulate.
     await expect(first).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(page.getByRole('dialog')).toHaveCount(1);
@@ -222,7 +222,7 @@ test.describe('choice browser accessibility contract', () => {
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Still editing.')).toBeVisible();
-    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expectFocused(page, trigger, 'choice dismissal restores focus to its opener');
 
     // Reopen and pick the destructive action: its key resolves, the draft
     // resets, and focus returns to the trigger.
@@ -236,7 +236,7 @@ test.describe('choice browser accessibility contract', () => {
     await expect(example.getByRole('textbox', { name: 'Release note' })).toHaveValue(
       'Ship dark mode',
     );
-    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expectFocused(page, trigger, 'choice activation restores focus to its opener');
   });
 });
 
@@ -276,12 +276,15 @@ async function expectFocused(page: Page, locator: Locator, message: string): Pro
         await page.bringToFront();
         return locator.evaluate((element) => {
           window.focus();
-          return element === document.activeElement;
+          const active = document.activeElement;
+          if (element === active) return 'expected';
+          if (!(active instanceof HTMLElement)) return String(active);
+          return `${active.tagName.toLowerCase()}#${active.id || '(no-id)'}`;
         });
       },
       { message, timeout: FOCUS_SETTLE_TIMEOUT },
     )
-    .toBe(true);
+    .toBe('expected');
 }
 
 /**

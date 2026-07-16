@@ -1,16 +1,33 @@
 import { ApplicationRef, Component } from '@angular/core';
-import { provideHellLabels } from '@hell-ui/angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHellLabels } from '@hell-ui/angular/core';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
-import { HELL_CONFIRM_LABELS, hellChoiceAction, hellCountdownAction, hellDestructiveAction, hellPrimaryAction, hellSecondaryAction, injectHellChoice, injectHellConfirm, type HellConfirmAction } from './confirm';
+import {
+  HELL_CONFIRM_LABELS,
+  injectHellPrompt,
+  type HellPromptAction,
+} from './confirm';
 
 @Component({
   template: `<button id="opener" type="button">Opener</button>`,
 })
-class ConfirmHost {
-  readonly confirm = injectHellConfirm();
-  readonly choice = injectHellChoice();
+class PromptHost {
+  readonly prompt = injectHellPrompt();
+}
+
+@Component({
+  template: `<button id="scoped-opener" type="button">Scoped opener</button>`,
+  providers: [
+    provideHellLabels(HELL_CONFIRM_LABELS, {
+      confirm: 'Scoped confirm',
+      cancel: 'Scoped cancel',
+      countdown: (remainingSeconds) => ` [${remainingSeconds}]`,
+    }),
+  ],
+})
+class ScopedPromptHost {
+  readonly prompt = injectHellPrompt();
 }
 
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
@@ -28,7 +45,7 @@ afterAll(() => {
   if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
 });
 
-describe('injectHellConfirm', () => {
+describe('HellPrompt modal presentation', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
   });
@@ -43,7 +60,9 @@ describe('injectHellConfirm', () => {
 
   it('resolves true when the confirm action is clicked', async () => {
     const { fixture, host } = setup();
-    const promise = host.confirm('Publish article?', hellPrimaryAction('Publish'));
+    const promise = host.prompt.confirm('Publish article?', {
+      action: { label: 'Publish', variant: 'primary' },
+    });
     await settle(fixture);
 
     expect(dialogTitleText()).toBe('Publish article?');
@@ -54,9 +73,11 @@ describe('injectHellConfirm', () => {
     await expect(promise).resolves.toBe(true);
   });
 
-  it('resolves false when the cancel button is clicked', async () => {
+  it('resolves false when the cancel action is clicked', async () => {
     const { fixture, host } = setup();
-    const promise = host.confirm('Delete record?', hellDestructiveAction('Delete'));
+    const promise = host.prompt.confirm('Delete record?', {
+      action: { label: 'Delete', variant: 'danger' },
+    });
     await settle(fixture);
 
     cancelButton().click();
@@ -65,9 +86,9 @@ describe('injectHellConfirm', () => {
     await expect(promise).resolves.toBe(false);
   });
 
-  it('resolves false on backdrop dismissal', async () => {
+  it('resolves false on backdrop and Escape dismissal', async () => {
     const { fixture, host } = setup();
-    const promise = host.confirm('Discard changes?');
+    const backdropPromise = host.prompt.confirm('Discard changes?');
     await settle(fixture);
 
     const overlay = query(document.body, '[hellDialogOverlay]');
@@ -77,28 +98,24 @@ describe('injectHellConfirm', () => {
     await macrotask();
     await settle(fixture);
 
-    await expect(promise).resolves.toBe(false);
-  });
+    await expect(backdropPromise).resolves.toBe(false);
 
-  it('resolves false when Escape dismisses the dialog', async () => {
-    const { fixture, host } = setup();
-    const promise = host.confirm('Discard changes?');
+    const escapePromise = host.prompt.confirm('Discard again?');
     await settle(fixture);
-
-    const dialog = query(document.body, '[role="dialog"]');
-    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    query(document.body, '[role="dialog"]').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
     await settle(fixture);
     await macrotask();
     await settle(fixture);
 
-    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
-    await expect(promise).resolves.toBe(false);
+    await expect(escapePromise).resolves.toBe(false);
   });
 
-  it('queues calls and never shows two confirm surfaces at once', async () => {
+  it('queues confirm and generic choices on one modal queue', async () => {
     const { fixture, host } = setup();
-    const first = host.confirm('First');
-    const second = host.confirm('Second');
+    const first = host.prompt.confirm('First');
+    const second = host.prompt.choose('Second', [{ value: 'ok', label: 'OK' }]);
     await settle(fixture);
 
     expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
@@ -113,14 +130,105 @@ describe('injectHellConfirm', () => {
     expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
     expect(dialogTitleText()).toBe('Second');
 
-    cancelButton().click();
+    dialogButtons()[0].click();
     await settle(fixture);
-    await expect(second).resolves.toBe(false);
+    await expect(second).resolves.toBe('ok');
+  });
+
+  it('dismisses a destroyed queued caller without blocking later prompts', async () => {
+    const first = setup();
+    const destroyed = setup();
+    const later = setup();
+
+    const firstPromise = first.host.prompt.confirm('First');
+    const destroyedPromise = destroyed.host.prompt.confirm('Destroyed before presentation');
+    await settle(first.fixture);
+
+    expect(dialogTitleText()).toBe('First');
+    destroyed.fixture.destroy();
+    await expect(destroyedPromise).resolves.toBe(false);
+
+    const laterPromise = later.host.prompt.confirm('Later');
+    expect(dialogTitleText()).toBe('First');
+
+    confirmButton().click();
+    await settle(first.fixture);
+    await macrotask();
+    await settle(later.fixture);
+
+    await expect(firstPromise).resolves.toBe(true);
+    expect(dialogTitleText()).toBe('Later');
+
+    confirmButton().click();
+    await settle(later.fixture);
+    await expect(laterPromise).resolves.toBe(true);
+  });
+
+  it('dismisses an active caller on destroy and advances the modal queue', async () => {
+    const active = setup();
+    const later = setup();
+    const activePromise = active.host.prompt.confirm('Active');
+    const laterPromise = later.host.prompt.confirm('After active destroy');
+    await settle(active.fixture);
+
+    active.fixture.destroy();
+    await expect(activePromise).resolves.toBe(false);
+    await macrotask();
+    await settle(later.fixture);
+
+    expect(dialogTitleText()).toBe('After active destroy');
+    confirmButton().click();
+    await settle(later.fixture);
+    await expect(laterPromise).resolves.toBe(true);
+  });
+
+  it('preserves a selected result when its caller is destroyed during delayed close', async () => {
+    const exit = deferred();
+    vi.spyOn(HTMLElement.prototype, 'getAnimations').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (!this.matches('[hellDialogOverlay], [hellDialog]')) return [];
+      return [{ finished: exit.promise } as unknown as Animation];
+    });
+
+    const active = setup();
+    const later = setup();
+    const selectedPromise = active.host.prompt.choose<'selected' | 'dismissed'>(
+      'Select before destroy',
+      [
+        { value: 'selected', label: 'Select' },
+        { value: 'dismissed', label: 'Dismiss', dismissEquivalent: true },
+      ],
+    );
+    const laterPromise = later.host.prompt.confirm('After delayed close');
+    let selectedResult: 'selected' | 'dismissed' | 'unresolved' | null = 'unresolved';
+    void selectedPromise.then((value) => (selectedResult = value));
+    await settle(active.fixture);
+
+    dialogButtons()[0].click();
+    active.fixture.destroy();
+    await macrotask();
+
+    expect.soft(selectedResult).toBe('unresolved');
+    expect.soft(document.body.textContent).not.toContain('After delayed close');
+
+    exit.resolve();
+    await macrotask();
+    await settle(later.fixture);
+
+    await expect(selectedPromise).resolves.toBe('selected');
+    expect(dialogTitleText()).toBe('After delayed close');
+    confirmButton().click();
+    await settle(later.fixture);
+    await expect(laterPromise).resolves.toBe(true);
   });
 
   it('names the dialog from the prompt title and links the description', async () => {
     const { fixture, host } = setup();
-    void host.confirm({ title: 'Publish this article?', description: 'Everyone will see it.' });
+    void host.prompt.confirm({
+      title: 'Publish this article?',
+      description: 'Everyone will see it.',
+    });
     await settle(fixture);
 
     const dialog = query(document.body, '[role="dialog"]');
@@ -135,14 +243,13 @@ describe('injectHellConfirm', () => {
     );
   });
 
-  it('gates a countdown action with a visible countdown that never auto-confirms', async () => {
+  it('gates a countdown action and never auto-confirms', async () => {
     vi.useRealTimers();
     const { fixture, host } = setup();
     let resolved = false;
-    const promise = host.confirm(
-      'Delete everything?',
-      hellCountdownAction(1, hellDestructiveAction('Delete everything')),
-    );
+    const promise = host.prompt.confirm('Delete everything?', {
+      action: { label: 'Delete everything', variant: 'danger', countdownSeconds: 1 },
+    });
     void promise.then(() => (resolved = true));
     await settle(fixture);
 
@@ -156,55 +263,80 @@ describe('injectHellConfirm', () => {
 
     expect(confirm.disabled).toBe(false);
     await macrotask();
-    expect(resolved).toBe(false); // countdown enables only — it never auto-confirms
+    expect(resolved).toBe(false);
 
     confirm.click();
     await settle(fixture);
     await expect(promise).resolves.toBe(true);
   });
 
-  it('uses the destructive variant and focuses cancel for destructive actions', async () => {
+  it('focuses a safe action instead of a danger or countdown-gated action', async () => {
     const { fixture, host } = setup();
-    void host.confirm('Delete record?', hellDestructiveAction('Delete record'));
+    void host.prompt.confirm('Delete record?', {
+      action: { label: 'Delete record', variant: 'danger' },
+      cancelAction: { label: 'Keep record', variant: 'default' },
+    });
     await settle(fixture);
     await animationFrame();
 
     expect(confirmButton().getAttribute('data-variant')).toBe('danger');
     expect(document.activeElement).toBe(cancelButton());
-  });
 
-  it('focuses the confirm button for non-destructive actions', async () => {
-    const { fixture, host } = setup();
-    void host.confirm('Publish?', hellPrimaryAction('Publish'));
+    cancelButton().click();
+    await settle(fixture);
+    await macrotask();
+    await settle(fixture);
+
+    void host.prompt.confirm('Publish?', {
+      action: { label: 'Publish', variant: 'primary' },
+    });
     await settle(fixture);
     await animationFrame();
 
-    expect(confirmButton().getAttribute('data-variant')).toBe('primary');
     expect(document.activeElement).toBe(confirmButton());
   });
 
-  it('falls back to the Label Contract default primary action without an action', async () => {
-    TestBed.configureTestingModule({
-      providers: [provideHellLabels(HELL_CONFIRM_LABELS, { confirm: 'Ja', cancel: 'Nein' })],
-    });
-    const { fixture, host } = setup();
+  it('uses Label Contract defaults from the factory caller injector', async () => {
+    const fixture = TestBed.createComponent(ScopedPromptHost);
+    fixture.detectChanges();
 
-    void host.confirm('Default labels');
+    void fixture.componentInstance.prompt.confirm('Scoped labels');
     await settle(fixture);
-    expect(confirmButton().textContent?.trim()).toBe('Ja');
-    expect(confirmButton().getAttribute('data-variant')).toBe('primary');
-    expect(cancelButton().textContent?.trim()).toBe('Nein');
 
-    expect(TestBed.inject(HELL_CONFIRM_LABELS).confirm).toBe('Ja');
+    expect(confirmButton().textContent?.trim()).toBe('Scoped confirm');
+    expect(cancelButton().textContent?.trim()).toBe('Scoped cancel');
   });
 
-  it('lets a cancelAction override the cancel button', async () => {
+  it('keeps each queued request in its caller label scope', async () => {
+    const root = setup();
+    const scopedFixture = TestBed.createComponent(ScopedPromptHost);
+    scopedFixture.detectChanges();
+
+    const first = root.host.prompt.confirm('Root request');
+    const second = scopedFixture.componentInstance.prompt.confirm('Scoped request');
+    await settle(root.fixture);
+
+    expect(confirmButton().textContent?.trim()).toBe('Confirm');
+    confirmButton().click();
+    await settle(root.fixture);
+    await macrotask();
+    await settle(scopedFixture);
+
+    await expect(first).resolves.toBe(true);
+    expect(dialogTitleText()).toBe('Scoped request');
+    expect(confirmButton().textContent?.trim()).toBe('Scoped confirm');
+
+    cancelButton().click();
+    await settle(scopedFixture);
+    await expect(second).resolves.toBe(false);
+  });
+
+  it('lets a custom cancel action replace the default action', async () => {
     const { fixture, host } = setup();
-    const promise = host.confirm(
-      'Delete this project?',
-      hellDestructiveAction('Delete project'),
-      hellSecondaryAction('Keep project'),
-    );
+    const promise = host.prompt.confirm('Delete this project?', {
+      action: { label: 'Delete project', variant: 'danger' },
+      cancelAction: { label: 'Keep project', variant: 'default' },
+    });
     await settle(fixture);
 
     const cancel = cancelButton();
@@ -216,17 +348,20 @@ describe('injectHellConfirm', () => {
     await expect(promise).resolves.toBe(false);
   });
 
-  it('rejects actions that were not built with the combinators', () => {
-    const { host } = setup();
-    expect(() => host.confirm('Nope', {} as HellConfirmAction)).toThrowError(/combinators/);
-  });
-
-  it('restores focus to the opener after the dialog closes', async () => {
+  it('restores focus to the opener after the modal closes', async () => {
     const { fixture, host } = setup();
     const opener = query<HTMLButtonElement>(fixture.nativeElement, '#opener');
-    opener.focus();
+    let promise: Promise<boolean> | undefined;
+    opener.addEventListener(
+      'click',
+      () => {
+        promise = host.prompt.confirm('Confirm?');
+      },
+      { once: true },
+    );
 
-    const promise = host.confirm('Confirm?');
+    // Safari-style pointer activation does not necessarily focus a button.
+    opener.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await settle(fixture);
     confirmButton().click();
     await settle(fixture);
@@ -235,28 +370,24 @@ describe('injectHellConfirm', () => {
 
     expect(document.activeElement).toBe(opener);
   });
-});
 
-describe('injectHellChoice', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-  });
-
-  afterEach(async () => {
-    await Promise.all(
-      TestBed.inject(NgpDialogManager).openDialogs.map((dialog) => dialog.hideImmediate()),
-    );
-    document.body.replaceChildren();
-    vi.restoreAllMocks();
-  });
-
-  it('renders one button per action in order and resolves the clicked key', async () => {
+  it('renders plain generic action objects in order and resolves their values', async () => {
     const { fixture, host } = setup();
-    const promise = host.choice({ title: 'You have unsaved changes' }, [
-      hellChoiceAction('save', hellPrimaryAction('Save and leave')),
-      hellChoiceAction('discard', hellDestructiveAction('Discard changes')),
-      hellChoiceAction('stay', hellSecondaryAction('Keep editing'), { dismissEquivalent: true }),
-    ]);
+    const actions = [
+      { value: 'save', label: 'Save and leave', variant: 'primary' },
+      { value: 'discard', label: 'Discard changes', variant: 'danger' },
+      {
+        value: 'stay',
+        label: 'Keep editing',
+        variant: 'default',
+        dismissEquivalent: true,
+      },
+    ] as const satisfies readonly HellPromptAction<'save' | 'discard' | 'stay'>[];
+
+    const promise = host.prompt.choose<'save' | 'discard' | 'stay'>(
+      { title: 'You have unsaved changes' },
+      actions,
+    );
     await settle(fixture);
 
     const buttons = dialogButtons();
@@ -276,16 +407,19 @@ describe('injectHellChoice', () => {
     await expect(promise).resolves.toBe('discard');
   });
 
-  it('resolves the dismissEquivalent key on Escape', async () => {
+  it('uses the dismiss-equivalent value and safe-focus policy for a generic choice', async () => {
     const { fixture, host } = setup();
-    const promise = host.choice('Leave this page?', [
-      hellChoiceAction('leave', hellPrimaryAction('Leave')),
-      hellChoiceAction('stay', hellSecondaryAction('Stay'), { dismissEquivalent: true }),
+    const promise = host.prompt.choose<'leave' | 'stay'>('Leave this page?', [
+      { value: 'leave', label: 'Leave', variant: 'danger' },
+      { value: 'stay', label: 'Stay', dismissEquivalent: true },
     ]);
     await settle(fixture);
+    await animationFrame();
 
-    const dialog = query(document.body, '[role="dialog"]');
-    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(document.activeElement).toBe(dialogButtons()[1]);
+    query(document.body, '[role="dialog"]').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
     await settle(fixture);
     await macrotask();
     await settle(fixture);
@@ -293,11 +427,11 @@ describe('injectHellChoice', () => {
     await expect(promise).resolves.toBe('stay');
   });
 
-  it('resolves null on dismissal when no action is dismissEquivalent', async () => {
+  it('resolves null on dismissal without a dismiss-equivalent action', async () => {
     const { fixture, host } = setup();
-    const promise = host.choice('Pick one', [
-      hellChoiceAction('a', hellPrimaryAction('A')),
-      hellChoiceAction('b', hellSecondaryAction('B')),
+    const promise = host.prompt.choose('Pick one', [
+      { value: 'a', label: 'A', variant: 'primary' },
+      { value: 'b', label: 'B' },
     ]);
     await settle(fixture);
 
@@ -311,70 +445,54 @@ describe('injectHellChoice', () => {
     await expect(promise).resolves.toBeNull();
   });
 
-  it('focuses the safe dismiss-equivalent action when a destructive action is present', async () => {
+  it('accepts undefined as an action value without treating it as dismissal', async () => {
     const { fixture, host } = setup();
-    void host.choice('You have unsaved changes', [
-      hellChoiceAction('save', hellPrimaryAction('Save and leave')),
-      hellChoiceAction('discard', hellDestructiveAction('Discard changes')),
-      hellChoiceAction('stay', hellSecondaryAction('Keep editing'), { dismissEquivalent: true }),
+    const promise = host.prompt.choose<undefined | 'dismissed'>('Choose undefined', [
+      { value: undefined, label: 'Undefined' },
+      { value: 'dismissed', label: 'Dismiss', dismissEquivalent: true },
     ]);
     await settle(fixture);
-    await animationFrame();
 
-    expect(document.activeElement).toBe(dialogButtons()[2]);
+    dialogButtons()[0].click();
+    await settle(fixture);
+    await expect(promise).resolves.toBeUndefined();
   });
 
-  it('focuses the first action when every action is safe', async () => {
+  it('preserves undefined when it is the dismiss-equivalent value', async () => {
     const { fixture, host } = setup();
-    void host.choice('Pick one', [
-      hellChoiceAction('a', hellPrimaryAction('A')),
-      hellChoiceAction('b', hellSecondaryAction('B')),
+    const promise = host.prompt.choose<undefined | 'save'>('Choose undefined', [
+      { value: undefined, label: 'Dismiss', dismissEquivalent: true },
+      { value: 'save', label: 'Save', variant: 'primary' },
     ]);
     await settle(fixture);
-    await animationFrame();
 
-    expect(document.activeElement).toBe(dialogButtons()[0]);
-  });
-
-  it('queues behind confirm calls on the shared modal queue', async () => {
-    const { fixture, host } = setup();
-    const first = host.confirm('First');
-    const second = host.choice('Second', [hellChoiceAction('ok', hellPrimaryAction('OK'))]);
-    await settle(fixture);
-
-    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(dialogTitleText()).toBe('First');
-
-    confirmButton().click();
+    query(document.body, '[role="dialog"]').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
     await settle(fixture);
     await macrotask();
     await settle(fixture);
 
-    await expect(first).resolves.toBe(true);
-    expect(dialogTitleText()).toBe('Second');
-
-    dialogButtons()[0].click();
-    await settle(fixture);
-    await expect(second).resolves.toBe('ok');
+    await expect(promise).resolves.toBeUndefined();
   });
 
   it('rejects an empty action list and duplicate dismiss equivalents', () => {
     const { host } = setup();
-    expect(() => host.choice('Empty', [])).toThrowError(/at least one/);
+    expect(() => host.prompt.choose('Empty', [])).toThrowError(/at least one/);
     expect(() =>
-      host.choice('Twice', [
-        hellChoiceAction('a', hellPrimaryAction('A'), { dismissEquivalent: true }),
-        hellChoiceAction('b', hellSecondaryAction('B'), { dismissEquivalent: true }),
+      host.prompt.choose('Twice', [
+        { value: 'a', label: 'A', dismissEquivalent: true },
+        { value: 'b', label: 'B', dismissEquivalent: true },
       ]),
     ).toThrowError(/at most one/);
   });
 });
 
 function setup(): {
-  fixture: ReturnType<typeof TestBed.createComponent<ConfirmHost>>;
-  host: ConfirmHost;
+  fixture: ReturnType<typeof TestBed.createComponent<PromptHost>>;
+  host: PromptHost;
 } {
-  const fixture = TestBed.createComponent(ConfirmHost);
+  const fixture = TestBed.createComponent(PromptHost);
   fixture.detectChanges();
   return { fixture, host: fixture.componentInstance };
 }
@@ -433,4 +551,10 @@ function macrotask(): Promise<void> {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function deferred(): { readonly promise: Promise<void>; resolve(): void } {
+  let resolve!: () => void;
+  const promise = new Promise<void>((next) => (resolve = next));
+  return { promise, resolve };
 }

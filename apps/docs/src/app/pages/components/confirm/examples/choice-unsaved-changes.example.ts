@@ -1,12 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import {
-  hellChoiceAction,
-  hellDestructiveAction,
-  hellPrimaryAction,
-  hellSecondaryAction,
-  injectHellChoice,
-} from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
@@ -30,7 +24,7 @@ import { HellInput } from '@hell-ui/angular/input';
   `,
 })
 export class ConfirmChoiceUnsavedChangesExample {
-  private readonly choice = injectHellChoice();
+  private readonly prompt = injectHellPrompt();
 
   private savedValue = 'Ship dark mode';
   protected readonly draft = signal(this.savedValue);
@@ -42,15 +36,15 @@ export class ConfirmChoiceUnsavedChangesExample {
       return;
     }
 
-    const decision = await this.choice(
+    const decision = await this.prompt.choose<'save' | 'discard' | 'stay'>(
       {
         title: 'You have unsaved changes',
         description: 'Save them, discard them, or keep editing.',
       },
       [
-        hellChoiceAction('save', hellPrimaryAction('Save and close')),
-        hellChoiceAction('discard', hellDestructiveAction('Discard changes')),
-        hellChoiceAction('stay', hellSecondaryAction('Keep editing'), { dismissEquivalent: true }),
+        { value: 'save', label: 'Save and close', variant: 'primary' },
+        { value: 'discard', label: 'Discard changes', variant: 'danger' },
+        { value: 'stay', label: 'Keep editing', dismissEquivalent: true },
       ],
     );
 

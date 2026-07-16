@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { hellPrimaryAction, injectHellConfirm } from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 
 @Component({
   selector: 'app-confirm-basic-example',
@@ -14,16 +14,16 @@ import { hellPrimaryAction, injectHellConfirm } from '@hell-ui/angular/confirm';
   `,
 })
 export class ConfirmBasicExample {
-  private readonly confirm = injectHellConfirm();
+  private readonly prompt = injectHellPrompt();
   protected readonly status = signal('No decision yet.');
 
   protected async publish(): Promise<void> {
-    const confirmed = await this.confirm(
+    const confirmed = await this.prompt.confirm(
       {
         title: 'Publish this article?',
         description: 'Once published, the article is visible to everyone.',
       },
-      hellPrimaryAction('Publish'),
+      { action: { label: 'Publish', variant: 'primary' } },
     );
     this.status.set(confirmed ? 'Article published.' : 'Publishing cancelled.');
   }

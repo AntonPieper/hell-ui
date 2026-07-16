@@ -1,13 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import {
-  hellDestructiveAction,
-  hellSecondaryAction,
-  injectHellConfirm,
-} from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
+import { HellSaveBar } from '@hell-ui/angular/save-bar';
 
 @Component({
   selector: 'app-save-bar-confirm-discard-example',
@@ -24,7 +20,7 @@ import { HellInput } from '@hell-ui/angular/input';
           [formControl]="form.controls.announcement"
         />
         <div hellFieldDescription>
-          Edit the text, then press Discard — the confirm function guards the reset.
+          Edit the text, then press Discard — the Prompt Interface guards the reset.
         </div>
       </div>
 
@@ -38,7 +34,7 @@ import { HellInput } from '@hell-ui/angular/input';
   `,
 })
 export class SaveBarConfirmDiscardExample {
-  private readonly confirm = injectHellConfirm();
+  private readonly prompt = injectHellPrompt();
   private readonly initialValue = { announcement: 'Maintenance window on Friday 22:00' };
 
   protected readonly form = new FormGroup({
@@ -56,13 +52,15 @@ export class SaveBarConfirmDiscardExample {
   }
 
   protected async confirmDiscard(): Promise<void> {
-    const confirmed = await this.confirm(
+    const confirmed = await this.prompt.confirm(
       {
         title: 'Discard unsaved changes?',
         description: 'Your edits to this announcement will be lost.',
       },
-      hellDestructiveAction('Discard changes'),
-      hellSecondaryAction('Keep editing'),
+      {
+        action: { label: 'Discard changes', variant: 'danger' },
+        cancelAction: { label: 'Keep editing', variant: 'default' },
+      },
     );
     if (confirmed) this.form.reset(this.initialValue);
   }
