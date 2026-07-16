@@ -588,35 +588,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/confirm',
  detail:'components/confirm/examples/basic.example.ts',
  terms:
-'confirm injectHellConfirm hellPrimaryAction prompt action promise await dialog modal boolean publish smallest usage title description accessible focus trap composite',
+'confirm injectHellPrompt HellPrompt HellPromptAction prompt action promise await dialog modal boolean publish smallest usage title description accessible focus trap composite',
  },
  {
  title:'Confirm: Destructive',
  path:'/components/confirm',
  detail:'components/confirm/examples/danger.example.ts',
  terms:
-'confirm injectHellConfirm hellDestructiveAction hellSecondaryAction cancelAction destructive delete keep project initial focus cancel button variant danger irreversible',
+'confirm injectHellPrompt HellPrompt action cancelAction destructive delete keep project safe initial focus cancel button variant danger irreversible',
  },
  {
  title:'Confirm: Countdown',
  path:'/components/confirm',
  detail:'components/confirm/examples/countdown.example.ts',
  terms:
-'confirm injectHellConfirm hellCountdownAction decorator countdown gate disabled remaining seconds reset database never auto-confirm irreversible Label Contract',
+'confirm injectHellPrompt HellPrompt HellPromptAction countdownSeconds countdown gate disabled remaining seconds reset database never auto-confirm irreversible Label Contract',
  },
  {
- title:'Confirm: Popconfirm row delete',
+ title:'Confirm: Anchored row delete',
  path:'/components/confirm',
- detail:'components/confirm/examples/popconfirm-row-delete.example.ts',
+ detail:'components/confirm/examples/anchored-row-delete.example.ts',
  terms:
-'popconfirm injectHellPopconfirm hellDestructiveAction anchor row delete destructive danger anchored popover imperative promise boolean single open one at a time floating dismissal escape outside click focus restore in-context inline',
+'confirm injectHellPrompt HellPrompt anchor placement row delete destructive danger anchored popover promise boolean single open one at a time floating dismissal escape outside click focus restore Floating Scope in-context inline',
  },
  {
  title:'Confirm: Choice for unsaved changes',
  path:'/components/confirm',
  detail:'components/confirm/examples/choice-unsaved-changes.example.ts',
  terms:
-'choice injectHellChoice hellChoiceAction dismissEquivalent typed key n-way decision save discard keep editing unsaved changes close editor escape resolves stay null modal',
+'choice injectHellPrompt HellPrompt choose HellPromptAction dismissEquivalent typed value generic n-way decision save discard keep editing unsaved changes close editor escape resolves stay null modal anchored',
  },
  {
  title:'Date Input: Basic',
@@ -1445,11 +1445,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'save-bar sticky-scroll components/save-bar/examples/sticky-scroll.example components/save-bar hell-save-bar sticky bottom scroll container normal flow no portal no fixed overflow dock last field visible',
  },
  {
- title:'Save Bar: Discard through the confirm function',
+ title:'Save Bar: Discard through HellPrompt',
  path:'/components/save-bar',
  detail:'components/save-bar/examples/confirm-discard.example.ts',
  terms:
-'save-bar confirm-discard components/save-bar/examples/confirm-discard.example components/save-bar hell-save-bar injectHellConfirm hellDestructiveAction hellSecondaryAction discarded confirm dialog danger discard changes keep editing route guard unsaved changes recoverable',
+'save-bar confirm-discard components/save-bar/examples/confirm-discard.example components/save-bar hell-save-bar injectHellPrompt HellPrompt discarded confirm dialog danger discard changes keep editing route guard unsaved changes recoverable',
  },
  {
  title:'Search: Basic',

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { hellDestructiveAction, injectHellPopconfirm } from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from '@hell-ui/angular/confirm';
 
 interface Row {
   readonly id: number;
@@ -8,7 +8,7 @@ interface Row {
 }
 
 @Component({
-  selector: 'app-popconfirm-row-delete-example',
+  selector: 'app-confirm-anchored-row-delete-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton],
   template: `
@@ -48,8 +48,8 @@ interface Row {
     </div>
   `,
 })
-export class PopconfirmRowDeleteExample {
-  private readonly popconfirm = injectHellPopconfirm();
+export class ConfirmAnchoredRowDeleteExample {
+  private readonly prompt = injectHellPrompt();
 
   protected readonly rows = signal<Row[]>([
     { id: 1, name: 'staging-eu-west' },
@@ -59,11 +59,11 @@ export class PopconfirmRowDeleteExample {
   protected readonly status = signal('Nothing deleted yet.');
 
   protected async remove(row: Row, anchor: HTMLElement): Promise<void> {
-    const confirmed = await this.popconfirm(
+    const confirmed = await this.prompt.confirm(`Delete ${row.name}?`, {
       anchor,
-      `Delete ${row.name}?`,
-      hellDestructiveAction('Delete'),
-    );
+      placement: 'bottom-end',
+      action: { label: 'Delete', variant: 'danger' },
+    });
     if (!confirmed) return;
 
     this.rows.update((rows) => rows.filter((candidate) => candidate.id !== row.id));

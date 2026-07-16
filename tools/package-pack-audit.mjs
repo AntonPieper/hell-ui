@@ -92,6 +92,14 @@ export const peerGroupContracts = Object.freeze({
       ...packagePeerGroups.fontAwesome,
     ],
   },
+  'composite-router': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.router,
+    ],
+  },
   'composite-icons-router': {
     tier: 'composite',
     peers: [

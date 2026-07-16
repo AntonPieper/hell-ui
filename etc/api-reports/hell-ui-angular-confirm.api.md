@@ -4,33 +4,12 @@
 
 ```ts
 
+import { HellButtonVariant } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
+import { Placement } from '@floating-ui/dom';
 
 // @public
 export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels>;
-
-// @public
-export interface HellChoiceAction<K extends string> {
-    // @internal
-    readonly ɵchoiceAction: K;
-}
-
-// @public
-export function hellChoiceAction<K extends string>(key: K, action: HellConfirmAction, options?: {
-    readonly dismissEquivalent?: boolean;
-}): HellChoiceAction<K>;
-
-// @public
-export type HellChoiceFn = <K extends string>(prompt: HellConfirmPrompt, actions: ReadonlyArray<HellChoiceAction<K>>) => Promise<K | null>;
-
-// @public
-export interface HellConfirmAction {
-    // @internal
-    readonly ɵconfirmAction: true;
-}
-
-// @public
-export type HellConfirmFn = (prompt: HellConfirmPrompt, action?: HellConfirmAction, cancelAction?: HellConfirmAction) => Promise<boolean>;
 
 // @public
 export interface HellConfirmLabels {
@@ -40,34 +19,36 @@ export interface HellConfirmLabels {
 }
 
 // @public
-export type HellConfirmPrompt = string | Readonly<{
-    title: string;
-    description?: string;
-}>;
+export interface HellPrompt {
+    choose<TValue>(prompt: string | Readonly<{
+        title: string;
+        description?: string;
+    }>, actions: ReadonlyArray<HellPromptAction<TValue>>, options?: Readonly<{
+        anchor?: HTMLElement;
+        placement?: Placement;
+    }>): Promise<TValue | null>;
+    confirm(prompt: string | Readonly<{
+        title: string;
+        description?: string;
+    }>, options?: Readonly<{
+        action?: Omit<HellPromptAction<boolean>, 'value' | 'dismissEquivalent'>;
+        cancelAction?: Omit<HellPromptAction<boolean>, 'value' | 'dismissEquivalent'>;
+        anchor?: HTMLElement;
+        placement?: Placement;
+    }>): Promise<boolean>;
+}
 
 // @public
-export function hellCountdownAction(seconds: number, action: HellConfirmAction): HellConfirmAction;
+export interface HellPromptAction<TValue> {
+    readonly countdownSeconds?: number;
+    readonly dismissEquivalent?: boolean;
+    readonly label: string;
+    readonly value: TValue;
+    readonly variant?: HellButtonVariant;
+}
 
 // @public
-export function hellDestructiveAction(label: string): HellConfirmAction;
-
-// @public
-export type HellPopconfirmFn = (anchor: HTMLElement, prompt: HellConfirmPrompt, action?: HellConfirmAction) => Promise<boolean>;
-
-// @public
-export function hellPrimaryAction(label: string): HellConfirmAction;
-
-// @public
-export function hellSecondaryAction(label: string): HellConfirmAction;
-
-// @public
-export function injectHellChoice(): HellChoiceFn;
-
-// @public
-export function injectHellConfirm(): HellConfirmFn;
-
-// @public
-export function injectHellPopconfirm(): HellPopconfirmFn;
+export function injectHellPrompt(): HellPrompt;
 
 // (No @packageDocumentation comment for this package)
 

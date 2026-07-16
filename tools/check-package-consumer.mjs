@@ -48,6 +48,7 @@ const packageConsumerCiGroups = [
     name: 'composite-foundations',
     scenarios: [
       'composite-css',
+      'confirm',
       'time-picker',
       'toolbar',
       'app-shell',
@@ -90,6 +91,7 @@ const behaviorUiWithoutFontAwesomeDeps = [
 const styledUiWithoutFontAwesomeDeps = [...behaviorUiWithoutFontAwesomeDeps, 'tailwindcss'];
 const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/core', '@ng-icons/font-awesome'];
 const styledUiRouterDeps = [...styledUiDeps, '@angular/router'];
+const compositeRouterDeps = [...styledUiWithoutFontAwesomeDeps, '@angular/router'];
 const coreDeps = behaviorUiWithoutFontAwesomeDeps;
 const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
@@ -319,6 +321,18 @@ const packageConsumerScenarioCatalog = [
       'font-size:22px',
       'border-radius:var(--radius-hell-pill)',
     ],
+  },
+  {
+    name: 'confirm',
+    description: 'isolated Confirm entry with unified modal and anchored HellPrompt flows',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite-router',
+    dependencies: compositeRouterDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: confirmConsumerMainTs,
+    stylesCss: confirmConsumerStylesCss,
+    cssIncludes: ['padding:var(--spacing-hell-5)', 'font-size:13px'],
   },
   {
     name: 'toolbar',
@@ -2370,6 +2384,75 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function confirmConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHellLabels } from '${packageName}/core';
+import {
+  HELL_CONFIRM_LABELS,
+  injectHellPrompt,
+  type HellConfirmLabels,
+  type HellPrompt,
+  type HellPromptAction,
+} from '${packageName}/confirm';
+
+type Decision = 'save' | 'discard' | 'stay';
+
+const actions = [
+  { value: 'save', label: 'Save', variant: 'primary' },
+  { value: 'discard', label: 'Discard', variant: 'danger', countdownSeconds: 1 },
+  { value: 'stay', label: 'Keep editing', dismissEquivalent: true },
+] as const satisfies readonly HellPromptAction<Decision>[];
+
+const labels = {
+  confirm: 'Continue',
+  cancel: 'Go back',
+  countdown: (remainingSeconds: number) => ' (' + remainingSeconds + ')',
+} satisfies Partial<HellConfirmLabels>;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  providers: [provideHellLabels(HELL_CONFIRM_LABELS, labels)],
+  template: \`
+    <button type="button" (click)="openModal()">Open modal prompt</button>
+    <button #anchor type="button" (click)="openAnchored(anchor)">Open anchored prompt</button>
+    <button type="button" (click)="openChoice()">Open choice prompt</button>
+    <p>{{ result() }}</p>
+  \`,
+})
+class App {
+  private readonly prompt: HellPrompt = injectHellPrompt();
+  protected readonly result = signal<boolean | Decision | null>(null);
+
+  protected async openModal(): Promise<void> {
+    this.result.set(
+      await this.prompt.confirm(
+        { title: 'Publish?', description: 'This is the packed modal flow.' },
+        { action: { label: 'Publish', variant: 'primary' } },
+      ),
+    );
+  }
+
+  protected async openAnchored(anchor: HTMLElement): Promise<void> {
+    this.result.set(
+      await this.prompt.confirm('Delete this row?', {
+        anchor,
+        placement: 'bottom-end',
+        action: { label: 'Delete', variant: 'danger' },
+      }),
+    );
+  }
+
+  protected async openChoice(): Promise<void> {
+    this.result.set(await this.prompt.choose<Decision>('Unsaved changes', actions));
+  }
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function toolbarConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -3225,6 +3308,13 @@ function timePickerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/time-picker/styles.css";
+`;
+}
+
+function confirmConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/confirm/styles.css";
 `;
 }
 
