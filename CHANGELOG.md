@@ -7,6 +7,18 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the directive-first `@hell-ui/angular/file-picker` Styled Primitive.
+  `[hellFilePicker]` acquires files through drop or one internal native browse
+  action, then emits one `HellFileSelection` with accepted files and structured
+  `type`, `size`, `count`, or `custom` rejections. Extension, exact MIME,
+  wildcard MIME, `maxBytes`, synchronous custom validation, and deterministic
+  `maxFiles` validation share one path; `maxFiles` applies only to the acquired
+  batch, while upload queues, total capacity, progress, retry, removal, and
+  server work remain application-owned. The root exposes `open()`, the Label
+  Contract, one local Part Style Map, stable drag/disabled attributes, and an
+  internal same-file-safe chooser. Focused unit/harness and cross-browser/axe
+  contracts, docs, API reports, pack auditing, and an isolated packed consumer
+  cover the boundary. Closes #191.
 - Added the narrow `@hell-ui/angular/time-picker` Composite Module Entry Point.
   `hell-time-picker` owns structured `HellTimeValue | null` selection, optional
   seconds, fixed clock bounds, segmented keyboard navigation, minute presets,

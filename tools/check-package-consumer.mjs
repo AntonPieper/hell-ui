@@ -39,6 +39,7 @@ const packageConsumerCiGroups = [
       'button-ui',
       'chip-input',
       'control-group',
+      'file-picker',
       'pagination',
       'combobox-projection',
     ],
@@ -242,6 +243,23 @@ const packageConsumerScenarioCatalog = [
       'transition-property:background-color,border-color,box-shadow',
       '[data-focus-within=true]{border-color:var(--color-hell-border-focus)',
       'border-inline-start-width:1px',
+    ],
+  },
+  {
+    name: 'file-picker',
+    description:
+      'narrow File Picker entry exposes acquisition, structured validation, and local styling',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: filePickerConsumerMainTs,
+    stylesCss: filePickerConsumerStylesCss,
+    cssIncludes: [
+      'min-height:140px',
+      'border-style:dashed',
+      'transition-property:background-color,border-color,color',
     ],
   },
   {
@@ -1595,6 +1613,49 @@ import { HellInput } from '${packageName}/input';
   \`,
 })
 class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function filePickerConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HellFilePicker,
+  type HellFileSelection,
+  type HellFileValidator,
+} from '${packageName}/file-picker';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellFilePicker],
+  template: \`
+    <div
+      hellFilePicker
+      #picker="hellFilePicker"
+      accept=".pdf,image/*"
+      [maxBytes]="5 * 1024 * 1024"
+      [maxFiles]="2"
+      [validate]="validate"
+      aria-label="Add review files"
+      ui="min-h-hell-20 border-hell-info"
+      (selection)="selection.set($event)"
+    >
+      Drop review files
+    </div>
+    <button type="button" (click)="picker.open()">Browse</button>
+    @if (selection(); as result) {
+      <p>{{ result.accepted.length }} accepted; {{ result.rejected.length }} rejected</p>
+    }
+  \`,
+})
+class App {
+  protected readonly selection = signal<HellFileSelection | null>(null);
+  protected readonly validate: HellFileValidator = (file) =>
+    file.name.toLowerCase().includes('draft') ? 'Draft files are not accepted' : null;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -3173,6 +3234,13 @@ function controlGroupConsumerStylesCss() {
 @import "${packageName}/tokens.css";
 @import "${packageName}/control-group/styles.css";
 @import "${packageName}/input/styles.css";
+`;
+}
+
+function filePickerConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/file-picker/styles.css";
 `;
 }
 

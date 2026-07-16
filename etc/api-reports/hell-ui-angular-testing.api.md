@@ -192,6 +192,24 @@ export class HellDropZoneHarness extends ComponentHarness {
 }
 
 // @public
+export class HellFilePickerHarness extends ComponentHarness {
+    getAriaDisabled(): Promise<string | null>;
+    getTabIndex(): Promise<string | null>;
+    getText(): Promise<string>;
+    static hostSelector: string;
+    isDisabled(): Promise<boolean>;
+    isDragging(): Promise<boolean>;
+    open(): Promise<void>;
+    static with(options?: HellFilePickerHarnessFilters): HarnessPredicate<HellFilePickerHarness>;
+}
+
+// @public
+export interface HellFilePickerHarnessFilters extends BaseHarnessFilters {
+    disabled?: boolean;
+    text?: string;
+}
+
+// @public
 export class HellMenuHarness extends ComponentHarness {
     getItems(): Promise<HellMenuItemHarness[]>;
     static hostSelector: string;

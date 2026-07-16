@@ -236,6 +236,11 @@
       "output": "empty-state"
     },
     {
+      "glob": "file-picker.ts",
+      "input": "file-picker",
+      "output": "file-picker"
+    },
+    {
       "glob": "file-upload.ts",
       "input": "file-upload",
       "output": "file-upload"
