@@ -120,8 +120,8 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
       <h2>Structured date-range recipe</h2>
       <p>
         A custom projected component edits a structured <code>{{ '{' }} from, to {{ '}' }}</code>
-        value with two Date Inputs. Their portalled calendars join the Filter Builder floating
-        scope, so Escape closes one nested layer at a time before cancelling the editor.
+        value with two native <code>input[hellDateInput]</code> controls. Each control owns its typed
+        date draft; Escape directly cancels the projected editor and restores Filter Builder focus.
       </p>
       <hd-example-tabs [code]="dateRangeCode" previewClass="min-h-[170px]">
         <app-filter-builder-date-range-example />
@@ -188,15 +188,16 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           edits, Delete/Backspace removes, and printable typing returns to the field picker.
         </li>
         <li>
-          Cancelling or committing an edit restores focus to the same stable token. A nested
-          calendar or application popover consumes Escape before the surrounding editor.
+          Cancelling or committing an edit restores focus to the same stable token. An
+          application-owned child popover consumes Escape first when present; otherwise Escape
+          directly cancels the projected editor.
         </li>
       </ul>
 
       <h2>Styling</h2>
       <p>
         Refine the owned anatomy through <code>ui</code>. Projected inputs, options, entity rows,
-        calendars, and custom editor controls keep their own component or application styling
+        and custom editor controls keep their own directive, component, or application styling
         contracts.
       </p>
       <table class="hd-doc-table">

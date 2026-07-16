@@ -69,12 +69,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'date input',
     path: '/components/date-input',
     heading: 'Date input',
-    include: ['main', '[data-slot="pickerPanel"]'],
+    include: ['main', '[data-date-input-calendar]'],
     prepare: async (page) => {
-      const example = page.locator('app-date-input-basic-example');
-      await expect(example.getByRole('textbox', { name: 'Invoice date' })).toBeVisible();
-      await example.getByRole('button', { name: 'Choose date for Invoice date' }).click();
-      await expect(page.getByRole('grid')).toBeVisible();
+      const example = page.locator('app-date-input-with-calendar-picker-example');
+      await expect(example.getByRole('textbox', { name: 'Ship date' })).toBeVisible();
+      await example.getByRole('button', { name: 'Choose ship date' }).click();
+      await expect(page.locator('[data-date-input-calendar]').getByRole('grid')).toBeVisible();
     },
   },
   {
@@ -285,15 +285,17 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'filter-builder date range',
     path: '/components/filter-builder',
     heading: 'Filter Builder',
-    include: ['main', '[data-slot="pickerPanel"]'],
+    include: ['main'],
     prepare: async (page) => {
       const example = page.locator('app-filter-builder-date-range-example');
       const picker = example.getByRole('combobox', { name: 'Created date filter builder' });
       await picker.fill('Created date');
       await picker.press('Enter');
       const editor = example.locator('[data-slot="editor"][data-field="created"]');
-      await editor.getByRole('button', { name: 'Choose date for Created from' }).click();
-      await expect(page.locator('[data-slot="pickerPanel"]').getByRole('grid')).toBeVisible();
+      const input = editor.getByRole('textbox', { name: 'Created from' });
+      await input.fill('2026-05-01');
+      await input.press('Enter');
+      await expect(input).toHaveValue('2026-05-01');
     },
   },
   {

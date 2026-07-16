@@ -108,7 +108,7 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
 
       <h2>With field and date input</h2>
       <p>
-        A shift-scheduling row: a <code>hell-date-input</code> for the day plus two
+        A shift-scheduling row: an <code>input[hellDateInput]</code> for the day plus two
         <code>hell-time-input</code> fields for start/end, each wrapped in its own labeled
         <code>hellField</code>. This is the shape most scheduling and booking forms end up in —
         one date control and a pair of time controls sharing a row.

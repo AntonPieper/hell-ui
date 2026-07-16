@@ -7,95 +7,54 @@
 import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellTypedInputAdapter } from '@hell-ui/angular/core';
-import { HellUi } from '@hell-ui/angular/core';
-import { HellUiInput } from '@hell-ui/angular/core';
+import * as i1 from '@hell-ui/angular/input';
 import { InjectionToken } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
-// @public (undocumented)
+// @public
 export const HELL_DATE_INPUT_ADAPTER: InjectionToken<HellDateInputAdapter>;
 
 // @public
-export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels>;
-
-// @public (undocumented)
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter;
 
 // @public
 export class HellDateInput implements ControlValueAccessor, Validator {
     constructor();
-    // (undocumented)
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
-    protected commit(text: string, event?: Event): void;
-    // (undocumented)
     protected readonly current: Signal<Date | null>;
-    // (undocumented)
-    readonly date: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    readonly dateChange: _angular_core.OutputEmitterRef<Date | null>;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected readonly display: _angular_core.Signal<string>;
-    // (undocumented)
     protected readonly fieldAriaDescribedby: Signal<string | null>;
-    // (undocumented)
     protected readonly fieldAriaLabelledby: Signal<string | null>;
-    // (undocumented)
-    readonly inputId: _angular_core.InputSignal<string>;
-    // (undocumented)
+    readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly isDisabled: () => boolean;
-    // (undocumented)
-    protected readonly isInvalid: () => any;
-    // (undocumented)
+    protected readonly isInvalid: () => boolean;
     readonly max: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
     readonly min: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    readonly name: _angular_core.InputSignal<string | null>;
-    // (undocumented)
+    protected readonly nativeMax: Signal<string | null>;
+    protected readonly nativeMin: Signal<string | null>;
     protected onBlur(): void;
-    // (undocumented)
-    protected onInput(value: string): void;
-    // (undocumented)
-    protected onPick(d: Date | undefined): Promise<void>;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDateInputPart>;
-    // (undocumented)
-    protected readonly pickerFocusedDate: _angular_core.WritableSignal<Date>;
-    // (undocumented)
-    readonly placeholder: _angular_core.InputSignal<string>;
-    // (undocumented)
+    protected onInput(): void;
+    protected onKeydown(event: KeyboardEvent): void;
+    protected readonly outOfRange: Signal<boolean>;
     registerOnChange(fn: (value: Date | null) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     registerOnValidatorChange(fn: () => void): void;
-    // (undocumented)
+    readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    protected readonly requiredMissing: Signal<boolean>;
     setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
-    protected readonly triggerAriaLabel: () => string;
-    readonly ui: _angular_core.InputSignal<HellUiInput<HellDateInputPart>>;
-    // (undocumented)
     validate(_control: AbstractControl | null): ValidationErrors | null;
-    // (undocumented)
+    readonly value: _angular_core.InputSignal<Date | null>;
+    readonly valueChange: _angular_core.OutputEmitterRef<Date | null>;
     writeValue(value: Date | null): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDateInput, "hell-date-input", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "date": { "alias": "date"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "inputId": { "alias": "inputId"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "dateChange": "dateChange"; }, never, never, true, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDateInput, "input[hellDateInput]", ["hellDateInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateInput, never>;
 }
 
@@ -103,61 +62,7 @@ export class HellDateInput implements ControlValueAccessor, Validator {
 export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
 
 // @public
-export interface HellDateInputLabels {
-    // (undocumented)
-    readonly chooseDate: string;
-    // (undocumented)
-    readonly chooseDateFor: (label: string) => string;
-}
-
-// @public
-export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
-
-// @public
-export type HellDateInputUi = HellUi<HellDateInputPart>;
-
-// @public (undocumented)
 export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-date-input.d.ts:9:5 - (ae-undocumented) Missing documentation for "chooseDate".
-// types/hell-ui-angular-date-input.d.ts:10:5 - (ae-undocumented) Missing documentation for "chooseDateFor".
-// types/hell-ui-angular-date-input.d.ts:24:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_DATE_INPUT_ADAPTER".
-// types/hell-ui-angular-date-input.d.ts:25:15 - (ae-undocumented) Missing documentation for "HELL_DATE_INPUT_ADAPTER".
-// types/hell-ui-angular-date-input.d.ts:26:1 - (ae-undocumented) Missing documentation for "provideHellDateInputAdapter".
-// types/hell-ui-angular-date-input.d.ts:40:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-date-input.d.ts:41:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-date-input.d.ts:42:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-date-input.d.ts:43:5 - (ae-undocumented) Missing documentation for "date".
-// types/hell-ui-angular-date-input.d.ts:44:5 - (ae-undocumented) Missing documentation for "min".
-// types/hell-ui-angular-date-input.d.ts:45:5 - (ae-undocumented) Missing documentation for "max".
-// types/hell-ui-angular-date-input.d.ts:46:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-date-input.d.ts:47:5 - (ae-undocumented) Missing documentation for "inputId".
-// types/hell-ui-angular-date-input.d.ts:48:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular-date-input.d.ts:49:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-date-input.d.ts:50:5 - (ae-undocumented) Missing documentation for "ariaDescribedby".
-// types/hell-ui-angular-date-input.d.ts:51:5 - (ae-undocumented) Missing documentation for "ariaLabelledby".
-// types/hell-ui-angular-date-input.d.ts:52:5 - (ae-undocumented) Missing documentation for "dateChange".
-// types/hell-ui-angular-date-input.d.ts:61:5 - (ae-undocumented) Missing documentation for "current".
-// types/hell-ui-angular-date-input.d.ts:62:5 - (ae-undocumented) Missing documentation for "display".
-// types/hell-ui-angular-date-input.d.ts:63:5 - (ae-undocumented) Missing documentation for "invalidDraft".
-// types/hell-ui-angular-date-input.d.ts:64:5 - (ae-undocumented) Missing documentation for "isInvalid".
-// types/hell-ui-angular-date-input.d.ts:65:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-date-input.d.ts:66:5 - (ae-undocumented) Missing documentation for "fieldAriaDescribedby".
-// types/hell-ui-angular-date-input.d.ts:67:5 - (ae-undocumented) Missing documentation for "fieldAriaLabelledby".
-// types/hell-ui-angular-date-input.d.ts:68:5 - (ae-undocumented) Missing documentation for "pickerFocusedDate".
-// types/hell-ui-angular-date-input.d.ts:69:5 - (ae-undocumented) Missing documentation for "triggerAriaLabel".
-// types/hell-ui-angular-date-input.d.ts:76:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-date-input.d.ts:77:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-date-input.d.ts:78:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-date-input.d.ts:79:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
-// types/hell-ui-angular-date-input.d.ts:80:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-date-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "onInput".
-// types/hell-ui-angular-date-input.d.ts:84:5 - (ae-undocumented) Missing documentation for "onBlur".
-// types/hell-ui-angular-date-input.d.ts:85:5 - (ae-undocumented) Missing documentation for "commit".
-// types/hell-ui-angular-date-input.d.ts:86:5 - (ae-undocumented) Missing documentation for "onPick".
-// types/hell-ui-angular-date-input.d.ts:91:5 - (ae-undocumented) Missing documentation for "validate".
 
 // (No @packageDocumentation comment for this package)
 

@@ -29,20 +29,22 @@ export interface CreatedFilter extends HellFilter<'created', 'between', DateRang
     <div class="flex min-w-72 flex-wrap items-end gap-hell-2" data-testid="date-range-editor">
       <div class="grid gap-hell-1 text-xs font-medium">
         <span>Created from</span>
-        <hell-date-input
+        <input
+          hellDateInput
           size="sm"
           aria-label="Created from"
-          [date]="from()"
-          (dateChange)="from.set($event)"
+          [value]="from()"
+          (valueChange)="from.set($event)"
         />
       </div>
       <div class="grid gap-hell-1 text-xs font-medium">
         <span>Created to</span>
-        <hell-date-input
+        <input
+          hellDateInput
           size="sm"
           aria-label="Created to"
-          [date]="to()"
-          (dateChange)="to.set($event)"
+          [value]="to()"
+          (valueChange)="to.set($event)"
         />
       </div>
       <div class="flex gap-hell-1">

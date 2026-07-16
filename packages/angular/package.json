@@ -146,6 +146,9 @@
     "./control-group": {
       "@heinrich/source": "./control-group/public-api.ts"
     },
+    "./date-input": {
+      "@heinrich/source": "./date-input/public-api.ts"
+    },
     "./dialog": {
       "@heinrich/source": "./dialog/public-api.ts"
     },
@@ -223,9 +226,6 @@
     },
     "./confirm": {
       "@heinrich/source": "./confirm/public-api.ts"
-    },
-    "./date-input": {
-      "@heinrich/source": "./date-input/public-api.ts"
     },
     "./date-picker": {
       "@heinrich/source": "./date-picker/public-api.ts"
@@ -331,6 +331,11 @@
       "@heinrich/source": "./control-group/styles.css",
       "style": "./control-group/styles.css",
       "default": "./control-group/styles.css"
+    },
+    "./date-input/styles.css": {
+      "@heinrich/source": "./date-input/styles.css",
+      "style": "./date-input/styles.css",
+      "default": "./date-input/styles.css"
     },
     "./dialog/styles.css": {
       "@heinrich/source": "./dialog/styles.css",
@@ -461,11 +466,6 @@
       "@heinrich/source": "./confirm/styles.css",
       "style": "./confirm/styles.css",
       "default": "./confirm/styles.css"
-    },
-    "./date-input/styles.css": {
-      "@heinrich/source": "./date-input/styles.css",
-      "style": "./date-input/styles.css",
-      "default": "./date-input/styles.css"
     },
     "./date-picker/styles.css": {
       "@heinrich/source": "./date-picker/styles.css",

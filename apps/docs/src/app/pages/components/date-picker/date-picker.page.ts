@@ -71,8 +71,9 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         report ranges, and scheduling. It renders inline, so in a dense form you usually drop it
         into a <code>hell-popover</code> behind a trigger button (see
         <a href="#with-popover">With popover</a>). When users would rather type a date than scan a
-        grid, use the <code>date-input</code> entry point instead — it wraps this picker in a typed
-        text field for you.
+        grid, apply <code>hellDateInput</code> from the <code>date-input</code> entry point to a real
+        input. A calendar action remains explicit: compose the input and trigger in a Control Group,
+        then open this Date Picker in a Popover.
       </p>
 
       <h2>Basic</h2>

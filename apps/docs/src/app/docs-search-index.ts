@@ -623,42 +623,49 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/date-input',
  detail:'components/date-input/examples/basic.example.ts',
  terms:
-'date-input hell-date-input smallest usage aria-label dateChange minimal simple',
+'date-input input hellDateInput smallest usage aria-label value valueChange native controlled minimal simple',
  },
  {
  title:'Date Input: Bounds and Validation',
  path:'/components/date-input',
  detail:'components/date-input/examples/bounds-and-validation.example.ts',
  terms:
-'date-input hell-date-input min max invalid disabled outOfRangeDate invalidDateInputDraft',
+'date-input input hellDateInput required min max invalid disabled native attributes bounds invalid draft',
  },
  {
  title:'Date Input: Reactive Forms',
  path:'/components/date-input',
  detail:'components/date-input/examples/reactive-forms.example.ts',
  terms:
-'date-input reactive-forms hell-date-input FormControl ReactiveFormsModule hellField hellFieldLabel hellFieldDescription ControlValueAccessor',
+'date-input reactive-forms input hellDateInput FormControl ReactiveFormsModule hellField hellFieldLabel hellFieldDescription ControlValueAccessor Validator touched disabled clear',
  },
  {
  title:'Date Input: Sizes',
  path:'/components/date-input',
  detail:'components/date-input/examples/sizes.example.ts',
  terms:
-'date-input hell-date-input size sm md lg',
+'date-input input hellDateInput size sm md lg HellInput native',
  },
  {
  title:'Date Input: Styling',
  path:'/components/date-input',
  detail:'components/date-input/examples/styling.example.ts',
  terms:
-'date-input hell-date-input ui HellDateInputUi HellDateInputPart root trigger triggerIcon pickerPanel part style map tailwind tokens',
+'date-input input hellDateInput ui HellUiInput root single host style map tailwind tokens HellInput',
+ },
+ {
+ title:'Date Input: Calendar Picker Composition',
+ path:'/components/date-input',
+ detail:'components/date-input/examples/with-calendar-picker.example.ts',
+ terms:
+'date-input calendar picker composition input hellDateInput hellControlGroup hellControlGroupAction hellPopover hellPopoverTrigger hell-date-picker focus restore Escape select close recipe',
  },
  {
  title:'Date Input: With Field and Button',
  path:'/components/date-input',
  detail:'components/date-input/examples/with-field-filter-row.example.ts',
  terms:
-'date-input with-field-filter-row hell-date-input hellField hellFieldLabel hellButton hell-icon composite filter row from to range clear',
+'date-input with-field-filter-row input hellDateInput hellField hellFieldLabel hellButton composite filter row from to range clear valueChange',
  },
  {
  title:'Date Picker: Basic',
@@ -1085,7 +1092,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/filter-builder',
  detail:'components/filter-builder/examples/date-range.example.ts',
  terms:
-'filter builder filter-builder date range structured value projected editor HellDateInput calendar nested portal floating scope layered Escape focus restoration local date from to',
+'filter builder filter-builder date range structured value projected editor HellDateInput input hellDateInput native keyboard Escape focus restoration local date from to',
  },
  {
  title:'Multi-Select Menu Button: Basic',
@@ -1848,7 +1855,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/time-input',
  detail:'components/time-input/examples/with-field-schedule-row.example.ts',
  terms:
-'time-input hell-time-input hell-date-input hellField composite scheduling shift start end date',
+'time-input hell-time-input input hellDateInput hellField composite scheduling shift start end date',
  },
  {
  title:'Time Picker: Basic',
@@ -2204,14 +2211,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/date-input',
  detail:'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
  terms:
-'date-input adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format locale temporal strict ISO YYYY-MM-DD ui HellDateInputUi',
+'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal strict ISO YYYY-MM-DD',
  },
  {
  title:'Date input forms value',
  path:'/components/date-input',
  detail:'ControlValueAccessor, formControl, Date | null',
  terms:
-'date-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms Date null native form submission validation ui HellDateInputUi',
+'date-input input hellDateInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms Date null native form submission validation drafts clear external synchronization',
  },
  {
  title:'Omnibar directives',

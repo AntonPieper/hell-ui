@@ -10,7 +10,7 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-date">Invoice date</label>
-      <hell-date-input inputId="reactive-date" [formControl]="control" />
+      <input id="reactive-date" hellDateInput [formControl]="control" />
       <div hellFieldDescription>
         Reactive forms receive <code>Date | null</code>; empty text writes <code>null</code>.
       </div>
@@ -20,7 +20,7 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
     <div hellField>
       <label hellFieldLabel for="invalid-date">Invalid</label>
-      <hell-date-input inputId="invalid-date" [formControl]="invalidControl" />
+      <input id="invalid-date" hellDateInput [formControl]="invalidControl" />
       <div hellFieldError id="invalid-date-error" ngpErrorValidator="futureDate">
         Pick a date in the future.
       </div>

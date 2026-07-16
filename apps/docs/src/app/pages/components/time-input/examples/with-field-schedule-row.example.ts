@@ -11,7 +11,13 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
     <div class="flex flex-wrap items-end gap-3">
       <div hellField>
         <label hellFieldLabel for="shift-date">Shift date</label>
-        <hell-date-input inputId="shift-date" size="sm" [date]="date()" (dateChange)="date.set($event)" />
+        <input
+          id="shift-date"
+          hellDateInput
+          size="sm"
+          [value]="date()"
+          (valueChange)="date.set($event)"
+        />
       </div>
 
       <div hellField>

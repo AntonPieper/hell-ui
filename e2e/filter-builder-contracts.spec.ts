@@ -357,7 +357,7 @@ test.describe('Filter Builder browser contract', () => {
     await expect(request).toContainText('"to": "2026-06-30"');
   });
 
-  test('nested date calendar Escape is layered before editor cancellation and focus restoration', async ({
+  test('native date input Escape cancels the editor and restores focus', async ({
     page,
   }) => {
     await gotoFilterBuilder(page);
@@ -371,13 +371,6 @@ test.describe('Filter Builder browser contract', () => {
     let from = editor.getByRole('textbox', { name: 'Created from' });
     await expect(from).toBeFocused();
 
-    const calendarTrigger = editor.getByRole('button', { name: 'Choose date for Created from' });
-    await calendarTrigger.click();
-    const calendar = page.locator('[data-slot="pickerPanel"]:visible');
-    await expect(calendar.getByRole('grid')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(calendar).toBeHidden();
-    await expect(editor).toBeVisible();
     await from.press('Escape');
     await expect(editor).toBeHidden();
     await expect(picker).toBeFocused();

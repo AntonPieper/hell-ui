@@ -819,6 +819,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Date Input is now date parsing, formatting, validation, and forms
+  behavior on the authored native `input[hellDateInput]` instead of the owned
+  `<hell-date-input>` component. First carried by the next `@hell-ui/angular`
+  release after `0.2.0` (currently Unreleased). Replace `[date]` /
+  `(dateChange)` with the controlled `[value]` / `(valueChange)` pair; keep
+  `Date | null`, CVA, required and inclusive `min` / `max` validation, adapter
+  overrides, invalid drafts, external synchronization, and nullable clears.
+  Move `inputId`, `name`, `placeholder`, input mode, autocomplete, and other
+  native attributes onto the real input. The former Date Input Label Contract
+  and the `root`, `input`, `trigger`, `triggerIcon`, and `pickerPanel` anatomy
+  and Part Style Map are removed with no compatibility aliases; `ui` now
+  refines the reused single-root Input contract. Compose an accessible Control
+  Group action or Button, Popover, and Date Picker explicitly when a calendar
+  is useful, keeping one controlled/form value and intentional close and focus
+  restoration behavior. `HellDateInputHarness` now targets
+  `input[hellDateInput]`; migrate `getInputValue()` / `setInputValue()` to
+  `getValue()` / `setValue()`, commit through `blur()` when required, and
+  remove `openPicker()` calls in favor of harnessing the consumer-owned
+  composition. Closes #198.
 - BREAKING: Removed the `@hell-ui/angular/drop-zone` and
   `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
   First carried by the next `@hell-ui/angular` release after `0.2.0` (currently
