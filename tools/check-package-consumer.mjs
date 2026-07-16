@@ -52,7 +52,6 @@ const packageConsumerCiGroups = [
       'time-picker',
       'toolbar',
       'app-shell',
-      'filter-bar',
       'page-header',
       'resizable',
       'split-view',
@@ -396,22 +395,6 @@ const packageConsumerScenarioCatalog = [
       'overflow:hidden',
       'border-radius:var(--radius-hell-md)',
       'transform:rotate(180deg)',
-    ],
-  },
-  {
-    name: 'filter-bar',
-    description: 'narrow controlled Filter Bar composite with composed entrypoint styles',
-    coverage: ['composites'],
-    peerTier: 'composite',
-    peerGroup: 'composite-icons',
-    dependencies: styledUiDeps,
-    mainTs: filterBarConsumerMainTs,
-    stylesCss: filterBarConsumerStylesCss,
-    cssIncludes: [
-      'min-width:180px',
-      'max-width:calc(var(--spacing) * 56)',
-      'pointer-events:none',
-      'z-index:var(--hell-z-popover,60)',
     ],
   },
   {
@@ -2541,74 +2524,6 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function filterBarConsumerMainTs() {
-  return `import { Component, signal } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import {
-  HellFilterBar,
-  type HellFilterBarUi,
-  type HellFilterField,
-  type HellFilterToken,
-} from '${packageName}/filter-bar';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [HellFilterBar],
-  template: \`
-    <hell-filter-bar
-      aria-label="Package filters"
-      [fields]="fields"
-      [value]="value()"
-      [ui]="filterUi"
-      (valueChange)="value.set($event)"
-    />
-  \`,
-})
-class App {
-  protected readonly fields: readonly HellFilterField[] = [
-    { key: 'name', label: 'Name', kind: 'text' },
-    {
-      key: 'status',
-      label: 'Status',
-      kind: 'options',
-      options: [{ value: 'active', label: 'Active' }],
-    },
-    {
-      key: 'owner',
-      label: 'Owner',
-      kind: 'entity',
-      search: async ({ query }) => [
-        { id: 'grace', label: query ? 'Grace Hopper' : 'Suggested owner' },
-      ],
-    },
-    {
-      key: 'created',
-      label: 'Created',
-      kind: 'dateRange',
-      min: '2026-01-01',
-      max: '2026-12-31',
-    },
-  ];
-  protected readonly value = signal<readonly HellFilterToken[]>([
-    {
-      key: 'owner',
-      operator: 'eq',
-      value: { kind: 'entity', id: 'grace', label: 'Grace Hopper' },
-    },
-    {
-      key: 'created',
-      operator: 'eq',
-      value: { kind: 'dateRange', from: '2026-01-01', to: null },
-    },
-  ]);
-  protected readonly filterUi = { root: 'max-w-[640px]' } satisfies HellFilterBarUi;
-}
-
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
-`;
-}
-
 function filterBuilderConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -3329,13 +3244,6 @@ function pageHeaderConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/page-header/styles.css";
-`;
-}
-
-function filterBarConsumerStylesCss() {
-  return `@import "tailwindcss";
-@import "${packageName}/tokens.css";
-@import "${packageName}/filter-bar/styles.css";
 `;
 }
 

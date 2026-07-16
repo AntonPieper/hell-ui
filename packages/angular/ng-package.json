@@ -301,11 +301,6 @@
       "output": "page-header"
     },
     {
-      "glob": "filter-bar.ts",
-      "input": "filter-bar",
-      "output": "filter-bar"
-    },
-    {
       "glob": "toast.ts",
       "input": "toast",
       "output": "toast"

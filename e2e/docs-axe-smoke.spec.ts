@@ -246,49 +246,50 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
-    name: 'filter-bar',
-    path: '/components/filter-bar',
-    heading: 'Filter Bar',
+    name: 'filter-builder',
+    path: '/components/filter-builder',
+    heading: 'Filter Builder',
     include: [
       'main',
       '[hellPopover][data-slot="root"]',
       '[hellComboboxDropdown][data-slot="panel"]',
     ],
     prepare: async (page) => {
-      const example = page.locator('app-filter-bar-tanstack-example');
-      const picker = example.getByRole('combobox', { name: 'People filters' });
-      await picker.fill('status:inv');
+      const example = page.locator('app-filter-builder-recipes-example');
+      const picker = example.getByRole('combobox', { name: 'People filter builder' });
+      await picker.fill('Status');
+      await picker.press('Enter');
       const editor = example.locator('[data-slot="editor"][data-mode="create"]');
-      await editor.getByRole('combobox', { name: 'Status' }).press('Enter');
-      await example.getByRole('button', { name: 'Edit Status: Invited' }).click();
-      await expect(page.getByRole('dialog', { name: 'Edit Status: Invited' })).toBeVisible();
-      await expect(page.getByRole('option', { name: 'Invited' })).toBeVisible();
+      await editor.getByRole('combobox', { name: 'Status option' }).fill('pau');
+      await editor.getByRole('combobox', { name: 'Status option' }).press('ArrowDown');
+      await expect(page.getByRole('option', { name: 'Paused' })).toBeVisible();
     },
   },
   {
-    name: 'filter-bar entity status',
-    path: '/components/filter-bar',
-    heading: 'Filter Bar',
+    name: 'filter-builder entity status',
+    path: '/components/filter-builder',
+    heading: 'Filter Builder',
     include: ['main', '[hellComboboxDropdown][data-slot="panel"]'],
     prepare: async (page) => {
-      const example = page.locator('app-filter-bar-server-dispatch-example');
-      const picker = example.getByRole('combobox', { name: 'Work order filters' });
-      await picker.fill('owner');
+      const example = page.locator('app-filter-builder-server-dispatch-example');
+      const picker = example.getByRole('combobox', { name: 'Work order filter builder' });
+      await picker.fill('Owner');
       await picker.press('Enter');
       const editor = example.locator('[data-slot="editor"][data-field="owner"]');
-      await editor.getByRole('combobox', { name: 'Owner' }).fill('not in the directory');
-      await expect(page.locator('[data-slot="status"][data-state="empty"]')).toBeVisible();
+      await editor.getByRole('combobox', { name: 'Owner directory' }).fill('not in the directory');
+      await editor.getByRole('combobox', { name: 'Owner directory' }).press('ArrowDown');
+      await expect(page.getByText('No owners match')).toBeVisible();
     },
   },
   {
-    name: 'filter-bar date range',
-    path: '/components/filter-bar',
-    heading: 'Filter Bar',
+    name: 'filter-builder date range',
+    path: '/components/filter-builder',
+    heading: 'Filter Builder',
     include: ['main', '[data-slot="pickerPanel"]'],
     prepare: async (page) => {
-      const example = page.locator('app-filter-bar-server-dispatch-example');
-      const picker = example.getByRole('combobox', { name: 'Work order filters' });
-      await picker.fill('created');
+      const example = page.locator('app-filter-builder-date-range-example');
+      const picker = example.getByRole('combobox', { name: 'Created date filter builder' });
+      await picker.fill('Created date');
       await picker.press('Enter');
       const editor = example.locator('[data-slot="editor"][data-field="created"]');
       await editor.getByRole('button', { name: 'Choose date for Created from' }).click();
