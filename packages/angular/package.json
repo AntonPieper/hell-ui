@@ -59,10 +59,8 @@
     "internal/chip/chip-presentation.ts",
     "internal/option/option-presentation.ts",
     "internal/floating/floating-presentation.ts",
-    "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
     "file-picker/file-picker.ts",
-    "file-upload/file-upload.ts",
     "icon/icon.ts",
     "progress/progress.ts",
     "radio/radio.ts",
@@ -151,9 +149,6 @@
     "./dialog": {
       "@heinrich/source": "./dialog/public-api.ts"
     },
-    "./drop-zone": {
-      "@heinrich/source": "./drop-zone/public-api.ts"
-    },
     "./field": {
       "@heinrich/source": "./field/public-api.ts"
     },
@@ -234,9 +229,6 @@
     },
     "./date-picker": {
       "@heinrich/source": "./date-picker/public-api.ts"
-    },
-    "./file-upload": {
-      "@heinrich/source": "./file-upload/public-api.ts"
     },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
@@ -344,11 +336,6 @@
       "@heinrich/source": "./dialog/styles.css",
       "style": "./dialog/styles.css",
       "default": "./dialog/styles.css"
-    },
-    "./drop-zone/styles.css": {
-      "@heinrich/source": "./drop-zone/styles.css",
-      "style": "./drop-zone/styles.css",
-      "default": "./drop-zone/styles.css"
     },
     "./field/styles.css": {
       "@heinrich/source": "./field/styles.css",
@@ -484,11 +471,6 @@
       "@heinrich/source": "./date-picker/styles.css",
       "style": "./date-picker/styles.css",
       "default": "./date-picker/styles.css"
-    },
-    "./file-upload/styles.css": {
-      "@heinrich/source": "./file-upload/styles.css",
-      "style": "./file-upload/styles.css",
-      "default": "./file-upload/styles.css"
     },
     "./omnibar/styles.css": {
       "@heinrich/source": "./omnibar/styles.css",

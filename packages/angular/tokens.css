@@ -172,8 +172,6 @@
   --hell-icon-chevron-up-down: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='black' d='M4.5 6L8 2.5 11.5 6h-7zm0 4L8 13.5 11.5 10h-7z'/></svg>");
   --hell-icon-bars: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='black' d='M2 4h12v1.5H2zM2 7.25h12v1.5H2zM2 10.5h12V12H2z'/></svg>");
   --hell-icon-close: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='black' d='M4.28 3.22a.75.75 0 0 0-1.06 1.06L6.94 8l-3.72 3.72a.75.75 0 1 0 1.06 1.06L8 9.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L9.06 8l3.72-3.72a.75.75 0 0 0-1.06-1.06L8 6.94 4.28 3.22z'/></svg>");
-  --hell-icon-refresh: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='black' d='M8 2.5a5.5 5.5 0 1 0 5.404 6.514.75.75 0 0 1 1.476.264A7 7 0 1 1 8 1a6.98 6.98 0 0 1 4.5 1.641V1.75a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1 0-1.5h1.36A5.48 5.48 0 0 0 8 2.5z'/></svg>");
-
   /* Map ng-primitives default tokens to hell */
   --ngp-background: var(--color-hell-surface-elevated);
   --ngp-background-active: var(--color-hell-surface-muted);

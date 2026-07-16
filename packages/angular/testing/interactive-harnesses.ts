@@ -497,32 +497,6 @@ export class HellToasterHarness extends ComponentHarness {
   }
 }
 
-/** Test harness driving `[hellDropzone]`. */
-export class HellDropZoneHarness extends ComponentHarness {
-  /** CSS selector that matches this harness’s host element. */
-  static hostSelector = '[hellDropzone]';
-  /** Whether the host reports the active state. */
-  async isActive(): Promise<boolean> {
-    return (await (await this.host()).getAttribute('data-active')) === 'true';
-  }
-  /** Whether the host reports a disabled state. */
-  async isDisabled(): Promise<boolean> {
-    return (await (await this.host()).getAttribute('data-disabled')) === 'true';
-  }
-  /** Value of the host `aria-disabled` attribute. */
-  async getAriaDisabled(): Promise<string | null> {
-    return (await this.host()).getAttribute('aria-disabled');
-  }
-  /** Click the host element. */
-  async click(): Promise<void> {
-    await (await this.host()).click();
-  }
-  /** Trimmed-source text content of the host element. */
-  async getText(): Promise<string> {
-    return (await this.host()).text();
-  }
-}
-
 /** Test harness driving `hell-omnibar`. */
 export class HellOmnibarHarness extends ComponentHarness {
   /** CSS selector that matches this harness’s host element. */

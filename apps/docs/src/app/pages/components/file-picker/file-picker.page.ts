@@ -14,6 +14,10 @@ import { FilePickerStylingExample } from './examples/styling.example';
 import filePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
+import { FilePickerUploadRecipeExample } from './examples/upload-recipe.example';
+import filePickerUploadRecipeExampleCodeRaw from './examples/upload-recipe.example.ts?raw' with {
+  loader: 'text',
+};
 import { FilePickerValidationExample } from './examples/validation.example';
 import filePickerValidationExampleCodeRaw from './examples/validation.example.ts?raw' with {
   loader: 'text',
@@ -27,6 +31,7 @@ import filePickerValidationExampleCodeRaw from './examples/validation.example.ts
     FilePickerBasicExample,
     FilePickerDisabledExample,
     FilePickerStylingExample,
+    FilePickerUploadRecipeExample,
     FilePickerValidationExample,
     PageHeader,
   ],
@@ -104,6 +109,27 @@ interface HellFileRejection &#123;
         which emits empty <code>accepted</code> and <code>rejected</code> arrays. A platform chooser
         cancel normally does not fire <code>change</code>, so cancel itself produces no event.
       </p>
+
+      <h2>Application-owned upload recipe</h2>
+      <p>
+        The recipe below composes File Picker with Button, Progress, Alert, ordinary list markup,
+        and a native status region. Its local <code>UploadItem</code> retains each accepted
+        <code>File</code>; queue capacity issues, progress timers, retry/removal actions,
+        completion state, server errors, and lifecycle announcements all belong to the example
+        application. None of that workflow is exported by
+        <code>@hell-ui/angular/file-picker</code>.
+      </p>
+      <p>
+        Replace the mock timer with the application's transport and cancellation mechanism. Keep
+        File Picker's <code>(selection)</code> result as the acquisition boundary, keep each queued
+        file payload for transport and retry, and enforce total queue capacity after acquisition.
+        Files left out by application capacity are application outcomes, not File Picker
+        rejections. Validate file content and authorization again on the server. The recipe moves
+        focus to a surviving control when Retry or Remove changes the rendered actions.
+      </p>
+      <hd-example-tabs [code]="uploadRecipeExampleCode" previewClass="grid max-w-2xl gap-hell-3">
+        <app-file-picker-upload-recipe-example />
+      </hd-example-tabs>
 
       <h2>Disabled</h2>
       <p>
@@ -237,6 +263,7 @@ interface HellFileRejection &#123;
 export class FilePickerPage {
   protected readonly basicExampleCode = filePickerBasicExampleCodeRaw;
   protected readonly validationExampleCode = filePickerValidationExampleCodeRaw;
+  protected readonly uploadRecipeExampleCode = filePickerUploadRecipeExampleCodeRaw;
   protected readonly disabledExampleCode = filePickerDisabledExampleCodeRaw;
   protected readonly stylingExampleCode = filePickerStylingExampleCodeRaw;
 }

@@ -163,7 +163,6 @@ const packageConsumerScenarioCatalog = [
     cssIncludes: [
       'background-color:var(--color-hell-surface-muted)',
       'background-color:var(--color-hell-primary-soft)',
-      'border-style:dashed',
       'animation:hell-shimmer 1.6s linear infinite',
       'border-radius:var(--radius-hell-lg)',
       'flex-basis:100%',
@@ -248,7 +247,7 @@ const packageConsumerScenarioCatalog = [
   {
     name: 'file-picker',
     description:
-      'narrow File Picker entry exposes acquisition, structured validation, and local styling',
+      'narrow File Picker acquisition plus an application-owned upload queue recipe from shipped entries',
     coverage: ['styled-primitives'],
     peerTier: 'primitive',
     peerGroup: 'primitive',
@@ -319,7 +318,6 @@ const packageConsumerScenarioCatalog = [
       '.me-\\[-4px\\]{margin-inline-end:-4px}',
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
-      'mask:var(--hell-icon-refresh) center/contain no-repeat',
       'hell-overflow-toolbar[data-slot=root]',
     ],
   },
@@ -1621,16 +1619,35 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function filePickerConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_ALERT_DIRECTIVES } from '${packageName}/alert';
+import { HellButton } from '${packageName}/button';
 import {
   HellFilePicker,
+  type HellFileRejection,
   type HellFileSelection,
   type HellFileValidator,
 } from '${packageName}/file-picker';
+import { HellProgress, HellProgressBar } from '${packageName}/progress';
+
+interface UploadItem {
+  readonly id: string;
+  readonly file: File;
+  readonly progress: number;
+  readonly status: 'uploading' | 'done' | 'error';
+  readonly error?: string;
+}
+
+interface UploadCapacityIssue {
+  readonly file: File;
+  readonly message: string;
+}
+
+const MAX_QUEUE_ITEMS = 3;
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellFilePicker],
+  imports: [...HELL_ALERT_DIRECTIVES, HellButton, HellFilePicker, HellProgress, HellProgressBar],
   template: \`
     <div
       hellFilePicker
@@ -1641,20 +1658,120 @@ import {
       [validate]="validate"
       aria-label="Add review files"
       ui="min-h-hell-20 border-hell-info"
-      (selection)="selection.set($event)"
+      (selection)="enqueue($event)"
     >
       Drop review files
     </div>
-    <button type="button" (click)="picker.open()">Browse</button>
-    @if (selection(); as result) {
-      <p>{{ result.accepted.length }} accepted; {{ result.rejected.length }} rejected</p>
+    <button hellButton type="button" (click)="picker.open()">Browse</button>
+    @if (rejections().length) {
+      <hell-alert variant="danger">
+        <h2 hellAlertTitle>File Picker rejected some files</h2>
+        <ul hellAlertDescription>
+          @for (rejection of rejections(); track rejection.file) {
+            <li>{{ rejection.file.name }}: {{ rejection.reason }}</li>
+          }
+        </ul>
+      </hell-alert>
     }
+    @if (capacityIssues().length) {
+      <hell-alert variant="warning" role="status" aria-live="polite">
+        <h2 hellAlertTitle>Some accepted files were not queued</h2>
+        <ul hellAlertDescription>
+          @for (issue of capacityIssues(); track issue.file) {
+            <li>{{ issue.file.name }}: {{ issue.message }}</li>
+          }
+        </ul>
+      </hell-alert>
+    }
+    <ul aria-label="Application upload queue">
+      @for (item of items(); track item.id) {
+        <li>
+          <span>{{ item.file.name }} — {{ item.status }}</span>
+          @if (item.status === 'uploading') {
+            <div
+              hellProgress
+              [value]="item.progress"
+              [attr.aria-label]="item.file.name + ' progress'"
+            >
+              <div hellProgressBar></div>
+            </div>
+          }
+          @if (item.error) {
+            <p>{{ item.error }}</p>
+          }
+          @if (item.status === 'error') {
+            <button
+              hellButton
+              type="button"
+              [attr.aria-label]="'Retry ' + item.file.name"
+              (click)="retry(item.id)"
+            >
+              Retry
+            </button>
+          }
+          <button
+            hellButton
+            type="button"
+            variant="ghost"
+            [attr.aria-label]="'Remove ' + item.file.name"
+            (click)="remove(item.id)"
+          >
+            Remove
+          </button>
+        </li>
+      }
+    </ul>
+    <p role="status" aria-live="polite">{{ announcement() }}</p>
   \`,
 })
 class App {
-  protected readonly selection = signal<HellFileSelection | null>(null);
+  protected readonly items = signal<readonly UploadItem[]>([]);
+  protected readonly rejections = signal<readonly HellFileRejection[]>([]);
+  protected readonly capacityIssues = signal<readonly UploadCapacityIssue[]>([]);
+  protected readonly announcement = signal('');
   protected readonly validate: HellFileValidator = (file) =>
     file.name.toLowerCase().includes('draft') ? 'Draft files are not accepted' : null;
+
+  protected enqueue(selection: HellFileSelection): void {
+    const available = Math.max(0, MAX_QUEUE_ITEMS - this.items().length);
+    const queuedFiles = selection.accepted.slice(0, available);
+    this.rejections.set(selection.rejected);
+    this.capacityIssues.set(
+      selection.accepted.slice(available).map<UploadCapacityIssue>((file) => ({
+        file,
+        message: \`The application upload queue is limited to \${MAX_QUEUE_ITEMS} files\`,
+      })),
+    );
+    const additions = queuedFiles.map<UploadItem>((file) => ({
+      id: \`upload-\${this.sequence++}-\${file.name}\`,
+      file,
+      progress: 0,
+      status: 'uploading',
+    }));
+    this.items.update((current) => [...current, ...additions]);
+  }
+
+  protected retry(id: string): void {
+    const item = this.items().find((candidate) => candidate.id === id);
+    if (!item) return;
+    this.patch(id, { status: 'uploading', progress: 0, error: undefined });
+    this.announcement.set(\`\${item.file.name} retry started\`);
+  }
+
+  protected remove(id: string): void {
+    const item = this.items().find((candidate) => candidate.id === id);
+    if (!item) return;
+    this.items.update((current) => current.filter((item) => item.id !== id));
+    this.announcement.set(\`\${item.file.name} removed\`);
+  }
+
+  private sequence = 0;
+
+  private patch(id: string, changes: Partial<UploadItem>): void {
+    this.items.update((current) =>
+      current.map((item) => (item.id === id ? { ...item, ...changes } : item)),
+    );
+  }
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1793,7 +1910,6 @@ import { HELL_BREADCRUMBS_DIRECTIVES } from '${packageName}/breadcrumbs';
 import { HellButton } from '${packageName}/button';
 import { HELL_CARD_DIRECTIVES } from '${packageName}/card';
 import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '${packageName}/checkbox';
-import { HellDropZone } from '${packageName}/drop-zone';
 import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
 import { HellIcon } from '${packageName}/icon';
 import { HellInput } from '${packageName}/input';
@@ -1847,7 +1963,6 @@ interface MenuChannel {
     ...HELL_CARD_DIRECTIVES,
     HellCheckbox,
     HellNativeCheckbox,
-    HellDropZone,
     ...HELL_FIELD_DIRECTIVES,
     HellIcon,
     HellInput,
@@ -1936,8 +2051,6 @@ interface MenuChannel {
       <input hellInput type="search" aria-label="Search" />
       <button hellSearchClear [ui]="searchClearUi">Clear</button>
     </div>
-
-    <div hellDropzone [ui]="dropZoneUi">Drop files</div>
 
     <button type="button" [hellMenuTrigger]="menu">Actions</button>
     <ng-template #menu>
@@ -2078,7 +2191,6 @@ class App {
   protected readonly buttonUi = { root: 'bg-hell-info' };
   protected readonly cardHeaderUi = { root: 'items-start' };
   protected readonly checkboxUi = { root: 'border-hell-info' } satisfies HellCheckboxUi;
-  protected readonly dropZoneUi = { root: 'border-hell-info' };
   protected readonly iconUi = { root: 'text-hell-info' };
   protected readonly inputUi = { root: 'border-hell-info' };
   protected readonly kbdUi = { root: 'border-hell-info' };
@@ -2164,7 +2276,6 @@ import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
 import { HELL_DIALOG_DIRECTIVES } from '${packageName}/dialog';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/features/dialpad';
-import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '${packageName}/file-upload';
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import {
@@ -2201,7 +2312,6 @@ interface SearchItem {
     HellDatePicker,
     HellDateRangePicker,
     HellDialpad,
-    HellFileUpload,
     HellTimeInput,
     ...HELL_TOOLBAR_DIRECTIVES,
     ...HELL_TOAST_DIRECTIVES,
@@ -2258,8 +2368,6 @@ interface SearchItem {
         <hell-date-picker [date]="date" />
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
-        <hell-file-upload [items]="uploadItems" [ui]="fileUploadUi" />
-
         <div hellToolbar label="Formatting" ui="w-fit">
           <button hellToolbarItem type="button" (click)="toolbarActivations += 1">Bold</button>
           <button hellToolbarItem type="button" disabled>Locked</button>
@@ -2303,16 +2411,6 @@ class App {
   protected readonly rangeEnd = new Date(2026, 3, 12);
   protected readonly time: HellTimeValue = { hour: 9, minute: 30, second: 0 };
   protected readonly dialpadUi = dialpadUi;
-  protected readonly fileUploadUi = { item: 'p-hell-2' } satisfies HellFileUploadUi;
-  protected readonly uploadItems: readonly HellFileUploadItem[] = [
-    {
-      id: 'package-consumer-upload',
-      name: 'package-consumer.pdf',
-      size: 2048,
-      status: 'uploading',
-      progress: 0.5,
-    },
-  ];
   protected readonly dialogOverlayUi = { root: 'p-hell-4' };
   protected readonly dialogUi = { root: 'max-w-[520px]' };
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
@@ -3202,7 +3300,6 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/breadcrumbs/styles.css";
 @import "${packageName}/checkbox/styles.css";
 @import "${packageName}/combobox/styles.css";
-@import "${packageName}/drop-zone/styles.css";
 @import "${packageName}/listbox/styles.css";
 @import "${packageName}/menu/styles.css";
 @import "${packageName}/popover/styles.css";
@@ -3240,7 +3337,10 @@ function controlGroupConsumerStylesCss() {
 function filePickerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
+@import "${packageName}/alert/styles.css";
+@import "${packageName}/button/styles.css";
 @import "${packageName}/file-picker/styles.css";
+@import "${packageName}/progress/styles.css";
 `;
 }
 
@@ -3279,7 +3379,6 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/date-input/styles.css";
 @import "${packageName}/date-picker/styles.css";
 @import "${packageName}/dialog/styles.css";
-@import "${packageName}/file-upload/styles.css";
 @import "${packageName}/omnibar/styles.css";
 @import "${packageName}/time-input/styles.css";
 @import "${packageName}/toolbar/styles.css";

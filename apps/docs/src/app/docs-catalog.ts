@@ -288,20 +288,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           ),
       },
       {
-        routePath: 'components/drop-zone',
-        label: 'Drop zone',
-        icon: 'faSolidUpload',
-        loadComponent: () =>
-          import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
-      },
-      {
-        routePath: 'components/file-upload',
-        label: 'File upload',
-        icon: 'faSolidFileArrowUp',
-        loadComponent: () =>
-          import('./pages/components/file-upload/file-upload.page').then((m) => m.FileUploadPage),
-      },
-      {
         routePath: 'components/save-bar',
         label: 'Save bar',
         icon: 'faSolidFloppyDisk',

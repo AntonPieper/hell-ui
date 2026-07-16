@@ -151,10 +151,10 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
-    name: 'file-upload',
-    path: '/components/file-upload',
-    heading: 'File upload',
-    include: ['main'],
+    name: 'File Picker upload recipe',
+    path: '/components/file-picker',
+    heading: 'File Picker',
+    include: ['app-file-picker-upload-recipe-example'],
   },
   {
     name: 'input, select & textarea',

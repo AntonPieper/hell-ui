@@ -230,30 +230,6 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/multi-select-menu-button-contracts.spec.ts`, the docs page at
   `/components/multi-select-menu-button`, and its axe WCAG A/AA smoke coverage.
   Closes #109 (spec #98).
-- Added the `@hell-ui/angular/file-upload` Package Entry Point (Composite): a
-  drop-zone composite with a managed, fully controlled file list. It performs no
-  HTTP — the consumer holds `items: HellFileUploadItem[]` and feeds per-file
-  `status`/`progress`/`error` in, while `filesAdded` (validated files),
-  `rejected` (file + machine-readable `'type' | 'size' | 'count'` reason),
-  `removed`, and `retried` are the whole seam (Hell owns the chrome, the app owns
-  the engine). Validation (accept extensions and MIME, `maxBytes`, `maxFiles`)
-  runs identically for the drag-drop and Browse paths; violations emit `rejected`
-  and render a transient inline rejection row with the Label Contract reason (not
-  a toast), and the hidden input's `multiple` is derived from `maxFiles`. Browse
-  is a real `HellButton`, per-file progress uses the progress primitive's
-  progressbar semantics, and additions/rejections/completion or failure
-  transitions are announced politely through the CDK LiveAnnouncer. Remove and
-  Retry render built-in CSS-mask glyphs (`--hell-icon-close` and a new
-  `--hell-icon-refresh` token) on empty buttons, following the chip/alert glyph
-  mechanism. Refine the `root`, `dropzone`, `browse`, `list`, `item`,
-  `itemIcon`, `itemName`, `itemMeta`, `itemProgress`, `itemError`, `itemRemove`,
-  and `itemRetry` parts through the Part Style Map, override built-in strings with
-  `provideHellFileUploadLabels`, and import
-  `@hell-ui/angular/file-upload/styles.css` for the default visuals. Evidence:
-  `packages/angular/file-upload/file-upload.spec.ts`,
-  `e2e/file-upload-a11y-contracts.spec.ts`, the docs page at
-  `/components/file-upload` (including a mock-HTTP upload adapter reference
-  integration), and its axe WCAG A/AA smoke coverage. Closes #110 (spec #99).
 - Added `HELL_CHIP_DIRECTIVES` to `@hell-ui/angular/chip` (array of
   `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and
@@ -843,6 +819,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Removed the `@hell-ui/angular/drop-zone` and
+  `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
+  First carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+  Unreleased). Migrate `HellDropZone` / `[hellDropzone]` to `HellFilePicker` /
+  `[hellFilePicker]` from `@hell-ui/angular/file-picker`: replace `(files)` with
+  `(selection)` and consume its accepted files plus structured `type`, `size`,
+  `count`, and `custom` rejections; use `open()` for a separate browse action
+  instead of binding `nativeInput`, and replace the Drop Zone `data-active`
+  drag-state hook with File Picker's `data-dragging`. Migrate `HellFileUpload`,
+  its workflow models, labels, Part Style Map, and `(filesAdded)` / `(rejected)` /
+  `(removed)` / `(retried)` outputs to File Picker acquisition plus ordinary
+  application-owned queue, total-capacity, progress, retry, removal,
+  completion, server-error, focus, and announcement state composed with Button,
+  Progress, Alert, lists, and status regions. Replace the removed Drop Zone and
+  File Upload CSS imports with `@hell-ui/angular/file-picker/styles.css` plus
+  the narrow stylesheets for primitives the application recipe uses.
+  `HellDropZoneHarness` is removed; `HellFilePickerHarness` covers the retained
+  acquisition contract. No compatibility aliases or replacement upload
+  workflow are exported. Closes #204.
 - BREAKING: Removed the temporary `@hell-ui/angular/internal/search` Package
   Entry Point. First carried by the next `@hell-ui/angular` release after
   `0.2.0` (currently Unreleased). Migrate `HellSearchOrchestrator` to
