@@ -226,11 +226,6 @@
       "output": "internal/floating"
     },
     {
-      "glob": "drop-zone.ts",
-      "input": "drop-zone",
-      "output": "drop-zone"
-    },
-    {
       "glob": "empty-state.ts",
       "input": "empty-state",
       "output": "empty-state"
@@ -239,11 +234,6 @@
       "glob": "file-picker.ts",
       "input": "file-picker",
       "output": "file-picker"
-    },
-    {
-      "glob": "file-upload.ts",
-      "input": "file-upload",
-      "output": "file-upload"
     },
     {
       "glob": "icon.ts",

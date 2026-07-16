@@ -780,48 +780,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hell-dialpad disabled readOnly invalid showCallButton hellToggleGroup hellToggleGroupItem toggle multiple',
  },
  {
- title:'Drop Zone: Basic',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/basic.example.ts',
- terms:
-'drop-zone components/drop-zone/examples/basic.example components/drop-zone hellDropzone files upload smallest usage',
- },
- {
- title:'Drop Zone: Disabled',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/disabled.example.ts',
- terms:
-'drop-zone components/drop-zone/examples/disabled.example components/drop-zone hellDropzone state',
- },
- {
- title:'Drop Zone: Native Input',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/native-input.example.ts',
- terms:
-'drop-zone native-input components/drop-zone/examples/native-input.example components/drop-zone hellDropzone nativeInput HTMLInputElement consumer-owned seam',
- },
- {
- title:'Drop Zone: Restricted',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/restricted.example.ts',
- terms:
-'drop-zone single-file images-only components/drop-zone/examples/restricted.example components/drop-zone hellDropzone multiple accept image pdf avatar id-scan',
- },
- {
- title:'Drop Zone: Styling',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/styling.example.ts',
- terms:
-'drop-zone all-parts components/drop-zone/examples/styling.example components/drop-zone hellDropzone ui Part Style Map data-slot root tokens',
- },
- {
- title:'Drop Zone: Upload Queue',
- path:'/components/drop-zone',
- detail:'components/drop-zone/examples/upload-queue.example.ts',
- terms:
-'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/chip hellDropzone hellProgress hellProgressBar hellChip hellButton hellIcon invoices progress status',
- },
- {
  title:'File Picker: Basic',
  path:'/components/file-picker',
  detail:'components/file-picker/examples/basic.example.ts',
@@ -850,25 +808,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'file-picker validation components/file-picker/examples/validation.example components/file-picker hellFilePicker accept maxBytes maxFiles multiple validate type size count custom rejection batch',
  },
  {
- title:'File Upload: Reference integration with a mock upload adapter',
- path:'/components/file-upload',
- detail:'components/file-upload/examples/upload-adapter.example.ts',
+ title:'File Picker: Application-owned upload recipe',
+ path:'/components/file-picker',
+ detail:'components/file-picker/examples/upload-recipe.example.ts',
  terms:
-'file-upload upload-adapter components/file-upload/examples/upload-adapter.example components/file-upload hell-file-upload controlled items HellFileUploadItem filesAdded rejected removed retried status progress uploading done error mock XMLHttpRequest onprogress adapter transport accept maxBytes maxFiles progressbar drag drop browse announce LiveAnnouncer',
- },
- {
- title:'File Upload: Single-file mode',
- path:'/components/file-upload',
- detail:'components/file-upload/examples/single-file.example.ts',
- terms:
-'file-upload single-file components/file-upload/examples/single-file.example components/file-upload hell-file-upload maxFiles 1 single multiple avatar fax pdf count rejection one file',
- },
- {
- title:'File Upload: Styling with the Part Style Map',
- path:'/components/file-upload',
- detail:'components/file-upload/examples/styling.example.ts',
- terms:
-'file-upload styling all-parts components/file-upload/examples/styling.example components/file-upload hell-file-upload ui Part Style Map HellFileUploadUi data-slot root dropzone browse list item itemIcon itemName itemMeta itemProgress itemError itemRemove itemRetry compact',
+'file-picker upload-recipe components/file-picker/examples/upload-recipe.example components/file-picker hellFilePicker HellFileSelection application-owned queue progress retry removal completion server error status announcement focus keyboard HellButton hellProgress hellProgressBar hell-alert',
  },
  {
  title:'Empty State: No data',

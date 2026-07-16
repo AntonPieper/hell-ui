@@ -626,24 +626,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(source).toBeFocused();
   });
 
-  test('drop zone keeps nested drag state stable and accepts files', async ({ page }) => {
-    await page.goto('/components/drop-zone');
-
-    const dropzone = page.getByRole('button', { name: /Drop files here/ });
-    await expect(dropzone).toHaveAttribute('role', 'button');
-
-    const chooserPromise = page.waitForEvent('filechooser');
-    await dropzone.click();
-    const chooser = await chooserPromise;
-    await chooser.setFiles({
-      name: 'browser-smoke.txt',
-      mimeType: 'text/plain',
-      buffer: Buffer.from('hell ui'),
-    });
-
-    await expect(page.getByText('browser-smoke.txt')).toBeVisible();
-  });
-
   test('pdf viewer keyboard controls and overview thumbnail smoke path remain stable', async ({
     page,
   }) => {

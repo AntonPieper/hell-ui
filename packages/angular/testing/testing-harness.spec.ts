@@ -13,13 +13,12 @@ import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HellSlider } from '@hell-ui/angular/slider';
 import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HellDropZone } from '@hell-ui/angular/drop-zone';
 import { HellFilePicker } from '@hell-ui/angular/file-picker';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { HellTimeInput } from '@hell-ui/angular/time-input';
 import { HellToaster, HellToastService } from '@hell-ui/angular/toast';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellButtonHarness, HellDialogDescriptionHarness, HellDialogHarness, HellDialogOverlayHarness, HellDialogTitleHarness, HellDialogTriggerHarness, HellAccordionHarness, HellComboboxHarness, HellDateInputHarness, HellDatePickerHarness, HellDropZoneHarness, HellFilePickerHarness, HellMenuHarness, HellMenuTriggerHarness, HellOmnibarHarness, HellOmnibarPanelHarness, HellSelectHarness, HellSliderHarness, HellTabsetHarness, HellTableContainerHarness, HellTableRowActionHarness, HellTableRowCheckboxHarness, HellTableRowRadioHarness, HellTimeInputHarness, HellToasterHarness } from './public-api';
+import { HellButtonHarness, HellDialogDescriptionHarness, HellDialogHarness, HellDialogOverlayHarness, HellDialogTitleHarness, HellDialogTriggerHarness, HellAccordionHarness, HellComboboxHarness, HellDateInputHarness, HellDatePickerHarness, HellFilePickerHarness, HellMenuHarness, HellMenuTriggerHarness, HellOmnibarHarness, HellOmnibarPanelHarness, HellSelectHarness, HellSliderHarness, HellTabsetHarness, HellTableContainerHarness, HellTableRowActionHarness, HellTableRowCheckboxHarness, HellTableRowRadioHarness, HellTimeInputHarness, HellToasterHarness } from './public-api';
 
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
@@ -271,15 +270,6 @@ class ToastHarnessHost {
 }
 
 @Component({
-  imports: [HellDropZone],
-  template: `<div hellDropzone [disabled]="disabled()" (files)="files = $event">Drop files</div>`,
-})
-class DropZoneHarnessHost {
-  readonly disabled = signal(false);
-  files: File[] = [];
-}
-
-@Component({
   imports: [HellFilePicker],
   template: `<div hellFilePicker [disabled]="disabled()">Pick files</div>`,
 })
@@ -318,7 +308,6 @@ describe('hell testing harness entrypoint', () => {
         DateInputHarnessHost,
         TimeInputHarnessHost,
         ToastHarnessHost,
-        DropZoneHarnessHost,
         FilePickerHarnessHost,
         OmnibarHarnessHost,
       ],
@@ -532,7 +521,7 @@ describe('hell testing harness entrypoint', () => {
     expect(await timeInput.getInputValue()).toBe('09:30');
   });
 
-  it('interacts with toast and drop zone harnesses', async () => {
+  it('interacts with toast harnesses', async () => {
     const toastFixture = TestBed.createComponent(ToastHarnessHost);
     toastFixture.detectChanges();
     toastFixture.componentInstance.toast.success('Saved', { description: 'Profile updated', duration: 0 });
@@ -546,15 +535,6 @@ describe('hell testing harness entrypoint', () => {
     await toast.close();
     toastFixture.detectChanges();
     expect(await toast.getState()).toBe('closed');
-
-    const dropFixture = TestBed.createComponent(DropZoneHarnessHost);
-    dropFixture.detectChanges();
-    const dropzone = await TestbedHarnessEnvironment.loader(dropFixture).getHarness(HellDropZoneHarness);
-    expect(await dropzone.getText()).toContain('Drop files');
-    expect(await dropzone.isDisabled()).toBe(false);
-    dropFixture.componentInstance.disabled.set(true);
-    dropFixture.detectChanges();
-    expect(await dropzone.getAriaDisabled()).toBe('true');
   });
 
   it('filters and activates File Picker harnesses', async () => {

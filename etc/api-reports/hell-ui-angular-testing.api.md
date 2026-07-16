@@ -182,16 +182,6 @@ export interface HellDisabledHarnessFilters extends HellTextHarnessFilters {
 }
 
 // @public
-export class HellDropZoneHarness extends ComponentHarness {
-    click(): Promise<void>;
-    getAriaDisabled(): Promise<string | null>;
-    getText(): Promise<string>;
-    static hostSelector: string;
-    isActive(): Promise<boolean>;
-    isDisabled(): Promise<boolean>;
-}
-
-// @public
 export class HellFilePickerHarness extends ComponentHarness {
     getAriaDisabled(): Promise<string | null>;
     getTabIndex(): Promise<string | null>;
