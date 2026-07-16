@@ -822,6 +822,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/chip hellDropzone hellProgress hellProgressBar hellChip hellButton hellIcon invoices progress status',
  },
  {
+ title:'File Picker: Basic',
+ path:'/components/file-picker',
+ detail:'components/file-picker/examples/basic.example.ts',
+ terms:
+'file-picker basic components/file-picker/examples/basic.example components/file-picker hellFilePicker selection open drop browse native chooser accepted rejected',
+ },
+ {
+ title:'File Picker: Disabled',
+ path:'/components/file-picker',
+ detail:'components/file-picker/examples/disabled.example.ts',
+ terms:
+'file-picker disabled components/file-picker/examples/disabled.example components/file-picker hellFilePicker aria-disabled data-disabled tabindex acquisition',
+ },
+ {
+ title:'File Picker: Styling',
+ path:'/components/file-picker',
+ detail:'components/file-picker/examples/styling.example.ts',
+ terms:
+'file-picker styling components/file-picker/examples/styling.example components/file-picker hellFilePicker ui Part Style Map data-slot root data-dragging data-disabled',
+ },
+ {
+ title:'File Picker: Validation',
+ path:'/components/file-picker',
+ detail:'components/file-picker/examples/validation.example.ts',
+ terms:
+'file-picker validation components/file-picker/examples/validation.example components/file-picker hellFilePicker accept maxBytes maxFiles multiple validate type size count custom rejection batch',
+ },
+ {
  title:'File Upload: Reference integration with a mock upload adapter',
  path:'/components/file-upload',
  detail:'components/file-upload/examples/upload-adapter.example.ts',

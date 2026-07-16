@@ -61,6 +61,7 @@
     "internal/floating/floating-presentation.ts",
     "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
+    "file-picker/file-picker.ts",
     "file-upload/file-upload.ts",
     "icon/icon.ts",
     "progress/progress.ts",
@@ -158,6 +159,9 @@
     },
     "./field": {
       "@heinrich/source": "./field/public-api.ts"
+    },
+    "./file-picker": {
+      "@heinrich/source": "./file-picker/public-api.ts"
     },
     "./icon": {
       "@heinrich/source": "./icon/public-api.ts"
@@ -353,6 +357,11 @@
       "@heinrich/source": "./field/styles.css",
       "style": "./field/styles.css",
       "default": "./field/styles.css"
+    },
+    "./file-picker/styles.css": {
+      "@heinrich/source": "./file-picker/styles.css",
+      "style": "./file-picker/styles.css",
+      "default": "./file-picker/styles.css"
     },
     "./icon/styles.css": {
       "@heinrich/source": "./icon/styles.css",

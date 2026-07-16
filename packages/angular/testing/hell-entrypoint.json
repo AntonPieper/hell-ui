@@ -3,6 +3,7 @@
   "exports": [
     "./button-harness",
     "./dialog-harness",
+    "./file-picker-harness",
     "./interactive-harnesses",
     "./table-harness"
   ]

@@ -279,6 +279,15 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/date-picker/date-picker.page').then((m) => m.DatePickerPage),
       },
       {
+        routePath: 'components/file-picker',
+        label: 'File picker',
+        icon: 'faSolidUpload',
+        loadComponent: () =>
+          import('./pages/components/file-picker/file-picker.page').then(
+            (m) => m.FilePickerPage,
+          ),
+      },
+      {
         routePath: 'components/drop-zone',
         label: 'Drop zone',
         icon: 'faSolidUpload',
