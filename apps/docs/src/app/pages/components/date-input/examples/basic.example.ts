@@ -6,7 +6,15 @@ import { HellDateInput } from '@hell-ui/angular/date-input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellDateInput],
   template: `
-    <hell-date-input aria-label="Invoice date" [date]="value()" (dateChange)="value.set($event)" />
+    <input
+      id="invoice-date"
+      hellDateInput
+      aria-label="Invoice date"
+      placeholder="YYYY-MM-DD"
+      [value]="value()"
+      (valueChange)="value.set($event)"
+    />
+    <p class="hd-note">Committed value: {{ value()?.toDateString() ?? 'not set' }}</p>
   `,
 })
 export class DateInputBasicExample {

@@ -1,3 +1,2 @@
-/* Date input default visuals are Tailwind utility recipes in the component. */
-@source "./date-input.ts";
-@source "../date-picker/date-picker.ts";
+/* Date input reuses the single-host Input recipe; picker recipes compose separately. */
+@source "../input/input.ts";

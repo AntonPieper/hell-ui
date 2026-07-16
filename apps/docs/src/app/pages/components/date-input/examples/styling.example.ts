@@ -6,18 +6,12 @@ import { HellDateInput } from '@hell-ui/angular/date-input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellDateInput],
   template: `
-    <!-- HellDateInputPart: root | input | trigger | triggerIcon | pickerPanel. -->
-    <hell-date-input
+    <input
+      hellDateInput
       aria-label="Styled date"
-      [date]="value()"
-      [ui]="{
-        root: 'rounded-hell-lg border-hell-primary bg-hell-surface-subtle',
-        input: 'font-mono text-hell-primary',
-        trigger: 'rounded-hell-sm bg-hell-primary/10 text-hell-primary hover:bg-hell-primary/20',
-        triggerIcon: 'text-hell-primary',
-        pickerPanel: 'rounded-hell-lg border border-hell-primary',
-      }"
-      (dateChange)="value.set($event)"
+      [value]="value()"
+      ui="max-w-64 rounded-hell-lg border-hell-primary bg-hell-surface-subtle font-mono text-hell-primary"
+      (valueChange)="value.set($event)"
     />
   `,
 })

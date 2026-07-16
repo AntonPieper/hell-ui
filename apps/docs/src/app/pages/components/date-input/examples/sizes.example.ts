@@ -6,9 +6,27 @@ import { HellDateInput } from '@hell-ui/angular/date-input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellDateInput],
   template: `
-    <hell-date-input size="sm" [date]="small()" (dateChange)="small.set($event)" />
-    <hell-date-input size="md" [date]="value()" (dateChange)="value.set($event)" />
-    <hell-date-input size="lg" [date]="large()" (dateChange)="large.set($event)" />
+    <input
+      hellDateInput
+      size="sm"
+      aria-label="Small date input"
+      [value]="small()"
+      (valueChange)="small.set($event)"
+    />
+    <input
+      hellDateInput
+      size="md"
+      aria-label="Medium date input"
+      [value]="value()"
+      (valueChange)="value.set($event)"
+    />
+    <input
+      hellDateInput
+      size="lg"
+      aria-label="Large date input"
+      [value]="large()"
+      (valueChange)="large.set($event)"
+    />
   `,
 })
 export class DateInputSizesExample {

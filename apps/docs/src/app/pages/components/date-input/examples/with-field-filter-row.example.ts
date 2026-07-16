@@ -15,23 +15,25 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
     <div class="flex flex-wrap items-end gap-3">
       <div hellField>
         <label hellFieldLabel for="report-from">From</label>
-        <hell-date-input
-          inputId="report-from"
+        <input
+          id="report-from"
+          hellDateInput
           size="sm"
-          [date]="from()"
+          [value]="from()"
           [max]="to() ?? null"
-          (dateChange)="from.set($event)"
+          (valueChange)="from.set($event)"
         />
       </div>
 
       <div hellField>
         <label hellFieldLabel for="report-to">To</label>
-        <hell-date-input
-          inputId="report-to"
+        <input
+          id="report-to"
+          hellDateInput
           size="sm"
-          [date]="to()"
+          [value]="to()"
           [min]="from() ?? null"
-          (dateChange)="to.set($event)"
+          (valueChange)="to.set($event)"
         />
       </div>
 

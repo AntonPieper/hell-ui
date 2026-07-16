@@ -247,10 +247,24 @@ class DatePickerHarnessHost {
 @Component({
   host: { 'data-harness-host': 'date-input' },
   imports: [HellDateInput],
-  template: `<hell-date-input [date]="date()" (dateChange)="date.set($event)" />`,
+  template: `
+    <input
+      hellDateInput
+      aria-label="Harness date"
+      required
+      [disabled]="disabled()"
+      [value]="value()"
+      [min]="min"
+      [max]="max"
+      (valueChange)="value.set($event)"
+    />
+  `,
 })
 class DateInputHarnessHost {
-  readonly date = signal<Date | null>(null);
+  readonly value = signal<Date | null>(null);
+  readonly disabled = signal(false);
+  readonly min = new Date(2024, 0, 1);
+  readonly max = new Date(2024, 11, 31);
 }
 
 @Component({
@@ -510,8 +524,24 @@ describe('hell testing harness entrypoint', () => {
     dateFixture.detectChanges();
     const dateInput = await TestbedHarnessEnvironment.loader(dateFixture).getHarness(HellDateInputHarness);
 
-    await dateInput.setInputValue('2024-02-03');
-    expect(await dateInput.getInputValue()).toBe('2024-02-03');
+    expect(await dateInput.getValue()).toBe('');
+    expect(await dateInput.isRequired()).toBe(true);
+
+    await dateInput.focus();
+    expect(await dateInput.isFocused()).toBe(true);
+    await dateInput.setValue('2024-02');
+    expect(await dateInput.getValue()).toBe('2024-02');
+    expect(await dateInput.isInvalid()).toBe(true);
+
+    await dateInput.setValue('2024-02-03');
+    await dateInput.blur();
+    expect(await dateInput.getValue()).toBe('2024-02-03');
+    expect(dateFixture.componentInstance.value()?.getDate()).toBe(3);
+    expect(await dateInput.isInvalid()).toBe(false);
+
+    dateFixture.componentInstance.disabled.set(true);
+    dateFixture.detectChanges();
+    expect(await dateInput.isDisabled()).toBe(true);
 
     const timeFixture = TestBed.createComponent(TimeInputHarnessHost);
     timeFixture.detectChanges();

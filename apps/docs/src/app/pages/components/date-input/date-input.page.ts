@@ -1,13 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { DateInputBasicExample } from './examples/basic.example';
 import dateInputBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
-  loader: 'text',
-};
-import { DateInputSizesExample } from './examples/sizes.example';
-import dateInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
   loader: 'text',
 };
 import { DateInputBoundsAndValidationExample } from './examples/bounds-and-validation.example';
@@ -18,12 +15,20 @@ import { DateInputReactiveFormsExample } from './examples/reactive-forms.example
 import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
 };
-import { DateInputWithFieldFilterRowExample } from './examples/with-field-filter-row.example';
-import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-filter-row.example.ts?raw' with {
+import { DateInputSizesExample } from './examples/sizes.example';
+import dateInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
   loader: 'text',
 };
 import { DateInputStylingExample } from './examples/styling.example';
 import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
+import { DateInputWithCalendarPickerExample } from './examples/with-calendar-picker.example';
+import dateInputWithCalendarPickerExampleCodeRaw from './examples/with-calendar-picker.example.ts?raw' with {
+  loader: 'text',
+};
+import { DateInputWithFieldFilterRowExample } from './examples/with-field-filter-row.example';
+import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-filter-row.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -34,11 +39,12 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
     ExampleTabs,
     RouterLink,
     DateInputBasicExample,
-    DateInputSizesExample,
     DateInputBoundsAndValidationExample,
     DateInputReactiveFormsExample,
-    DateInputWithFieldFilterRowExample,
+    DateInputSizesExample,
     DateInputStylingExample,
+    DateInputWithCalendarPickerExample,
+    DateInputWithFieldFilterRowExample,
     PageHeader,
   ],
   template: `
@@ -46,230 +52,234 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
       <hd-page-header
         title="Date input"
         icon="faSolidCalendarDay"
-        category="Composite"
+        category="Styled primitive"
         importPath="@hell-ui/angular/date-input"
         stylesPath="@hell-ui/angular/date-input/styles.css"
       >
-        A type-or-pick date field: strict ISO text entry with an inline calendar fallback, one
-        component, one form value.
+        Date parsing, formatting, validation, and forms behavior on a real native input.
       </hd-page-header>
+
       <p>
-        <code>hell-date-input</code> is a Typed Value Input: a text field that parses and formats a
-        stable <code>YYYY-MM-DD</code> string, plus a calendar-trigger button that opens a
-        <a routerLink="/components/date-picker">Date picker</a> popover for the same value. Both
-        paths — typing and picking — commit through the same parse/validate/emit pipeline, so
-        callers only ever see a <code>Date | null</code>.
+        Apply <code>hellDateInput</code> to an <code>&lt;input&gt;</code>. The native element keeps
+        its focus, keyboard, event, attribute, Field, and form semantics while the directive owns
+        the Typed Value Input state machine: drafts, strict parsing, stable formatting, validation,
+        nullable clears, and external synchronization. Bind <code>[value]</code> and listen to
+        <code>(valueChange)</code>; both use <code>Date | null</code>.
       </p>
       <p>
-        It implements <code>ControlValueAccessor</code> and <code>Validator</code>, so it drops
-        into reactive or template-driven forms like any native control. Use it for business dates
-        that need explicit, unambiguous entry — invoice dates, due dates, report ranges — anywhere
-        a locale-guessing native <code>&lt;input type="date"&gt;</code> is too unpredictable for a
-        dense business app.
+        The directive reuses the single-host <a routerLink="/components/input">Input</a> styling
+        contract. Its <code>size</code> and <code>ui</code> bindings therefore refine only the real
+        input root. Calendar buttons, popovers, and
+        <a routerLink="/components/date-picker">Date Picker</a> are separate composition concerns,
+        not hidden Date Input anatomy.
       </p>
 
-      <h2>Basic</h2>
-      <hd-example-tabs [code]="dateInputBasicExampleCode">
+      <h2>Controlled value</h2>
+      <p>
+        The default adapter accepts only <code>YYYY-MM-DD</code>. A valid blur or Enter commits a
+        local-calendar date; empty text commits <code>null</code>. Partial or malformed text remains
+        visible as an invalid draft without emitting a replacement value.
+      </p>
+      <hd-example-tabs [code]="dateInputBasicExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-basic-example />
       </hd-example-tabs>
 
+      <h2>Calendar composition recipe</h2>
+      <p>
+        When picking is useful, compose the real Date Input inside
+        <a routerLink="/components/control-group">Control Group</a>, add a consumer-owned action,
+        and open Date Picker through Popover. The recipe below keeps one value model in the form
+        control. Selecting a day updates that model, closes the popover, and focuses the input;
+        Escape closes and restores focus to the trigger through the Popover contract.
+      </p>
+      <hd-example-tabs
+        [code]="dateInputWithCalendarPickerExampleCode"
+        previewClass="grid gap-2"
+      >
+        <app-date-input-with-calendar-picker-example />
+      </hd-example-tabs>
+
       <h2>Sizes</h2>
-      <hd-example-tabs [code]="dateInputSizesExampleCode" previewClass="grid gap-3 max-w-md">
+      <p>
+        <code>sm</code>, <code>md</code>, and <code>lg</code> come directly from the reused Input
+        root contract; they do not imply picker or trigger geometry.
+      </p>
+      <hd-example-tabs [code]="dateInputSizesExampleCode" previewClass="grid max-w-sm gap-3">
         <app-date-input-sizes-example />
       </hd-example-tabs>
 
-      <h2>Bounds and validation</h2>
+      <h2>Required, bounds, invalid, and disabled</h2>
       <p>
-        <code>min</code> / <code>max</code> constrain both typed input and the calendar; dates
-        outside the range fail validation with <code>outOfRangeDate</code>. Unparseable typed text
-        fails with <code>invalidDateInputDraft</code> and marks the field invalid automatically —
-        you can also force the invalid look directly.
+        <code>required</code>, <code>disabled</code>, <code>min</code>, and <code>max</code> are
+        reflected on the native input and participate in Date Input validation. Bounds are
+        inclusive. The <code>invalid</code> input remains an explicit presentation override;
+        malformed drafts, missing required values, and out-of-range committed values become
+        invalid automatically.
       </p>
       <hd-example-tabs
         [code]="dateInputBoundsAndValidationExampleCode"
-        previewClass="grid gap-3 max-w-md"
+        previewClass="grid max-w-sm gap-3"
       >
         <app-date-input-bounds-and-validation-example />
       </hd-example-tabs>
 
-      <h2>Reactive forms</h2>
+      <h2>Reactive forms and Field</h2>
+      <p>
+        Date Input implements <code>ControlValueAccessor</code> and <code>Validator</code>. Programmatic
+        writes never emit <code>valueChange</code>; user commits update the form before blur marks it
+        touched. Equivalent external writes preserve active typing, while genuinely changed values
+        replace stale drafts. An enclosing <a routerLink="/components/field">Field</a> associates its
+        label, descriptions, and errors with this same native input.
+      </p>
       <hd-example-tabs
         [code]="dateInputReactiveFormsExampleCode"
-        previewClass="grid gap-3 max-w-md"
+        previewClass="grid max-w-md gap-4"
       >
         <app-date-input-reactive-forms-example />
       </hd-example-tabs>
 
-      <h2>With field and button</h2>
+      <h2>Filter-row recipe</h2>
       <p>
-        A report filter row: two labeled <code>hell-date-input</code> fields cross-constrain each
-        other's <code>min</code> / <code>max</code>, and a ghost <code>hellButton</code> clears both
-        in one action. This is the shape most business filter bars end up in.
+        Date ranges remain application composition: use two Date Inputs, cross-bind their bounds,
+        and clear the two controlled values with a normal Button.
       </p>
-      <hd-example-tabs [code]="dateInputWithFieldFilterRowExampleCode">
+      <hd-example-tabs
+        [code]="dateInputWithFieldFilterRowExampleCode"
+        previewClass="grid gap-2"
+      >
         <app-date-input-with-field-filter-row-example />
       </hd-example-tabs>
 
+      <h2>Adapter</h2>
+      <p>
+        Override parsing and display policy per injector with
+        <code>provideHellDateInputAdapter</code>. A <code>HellDateInputAdapter</code> supplies
+        <code>parseText</code>, <code>format</code>, and optional <code>normalize</code>,
+        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks. Return
+        <code>hellTypedValue(value)</code> for a commit, <code>hellTypedValue(null)</code> for a
+        clear, or <code>hellInvalidTypedValue()</code> to retain an invalid draft.
+      </p>
+
       <h2>Styling</h2>
       <p>
-        <code>ui</code> accepts either a shorthand class string, which refines the default
-        <code>root</code> part, or a <code>HellDateInputUi</code> map keyed by part name. Refinement
-        classes merge deterministically on top of the recipe through Hell's Tailwind merge, so they
-        win over conflicting recipe utilities.
+        Date Input has no owned multi-part anatomy. Its <code>ui</code> binding is the reused Input
+        root map, so a string or <code>{{ '{ root: "…" }' }}</code> refines the native input only.
+        Style a composed Control Group, action, Popover, and Date Picker at each primitive's own
+        local Part Style Map.
       </p>
-      <table class="hd-doc-table">
-        <thead>
-          <tr>
-            <th>Part</th>
-            <th>Styles</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>root</code></td>
-            <td>The host element — border, background, focus ring, invalid/disabled state.</td>
-          </tr>
-          <tr>
-            <td><code>input</code></td>
-            <td>The text field — typography, padding, size variants.</td>
-          </tr>
-          <tr>
-            <td><code>trigger</code></td>
-            <td>The calendar icon button — shape, hover/focus, disabled state.</td>
-          </tr>
-          <tr>
-            <td><code>triggerIcon</code></td>
-            <td>The calendar glyph inside the trigger button.</td>
-          </tr>
-          <tr>
-            <td><code>pickerPanel</code></td>
-            <td>
-              The popover surface wrapping the calendar. Keeps its part identity even though it
-              renders in an overlay outside the host.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <hd-example-tabs [code]="dateInputStylingExampleCode">
+      <hd-example-tabs [code]="dateInputStylingExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
+      <table class="hd-doc-table">
+        <thead>
+          <tr><th>Interface</th><th>Type</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>input[hellDateInput]</code></td>
+            <td>directive</td>
+            <td>Typed date drafts, commits, validation, and forms behavior on the native host.</td>
+          </tr>
+          <tr>
+            <td><code>value</code> / <code>valueChange</code></td>
+            <td><code>Date | null</code></td>
+            <td>Controlled committed value and nullable clear output.</td>
+          </tr>
+          <tr>
+            <td><code>required</code>, <code>disabled</code>, <code>invalid</code></td>
+            <td><code>boolean</code></td>
+            <td>Native required/disabled state and explicit invalid override.</td>
+          </tr>
+          <tr>
+            <td><code>min</code>, <code>max</code></td>
+            <td><code>Date | null</code></td>
+            <td>Inclusive typed bounds, also reflected in stable adapter format.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Native id; generated when omitted and used for Field label association.</td>
+          </tr>
+          <tr>
+            <td><code>size</code>, <code>ui</code></td>
+            <td>Input root contract</td>
+            <td>Single-host visual refinement delegated to HellInput.</td>
+          </tr>
+          <tr>
+            <td><code>aria-describedby</code>, <code>aria-labelledby</code></td>
+            <td><code>string | null</code></td>
+            <td>Native id references merged with an enclosing Field.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Migration from the owned component</h2>
       <ul>
-        <li><code>date</code>: <code>Date | null</code>. Current value. Default <code>null</code>.</li>
         <li>
-          <code>(dateChange)</code>: <code>EventEmitter&lt;Date | null&gt;</code>. Emits a valid
-          <code>Date</code> after typing (blur or Enter) or picking, or <code>null</code> when
-          cleared.
+          Replace <code>&lt;hell-date-input [date]="date" (dateChange)="…" /&gt;</code> with
+          <code>&lt;input hellDateInput [value]="date" (valueChange)="…" /&gt;</code>. There is no
+          old-selector or <code>date</code>/<code>dateChange</code> alias.
         </li>
         <li>
-          Implements <code>ControlValueAccessor</code> and <code>Validator</code>. Reactive and
-          template-driven forms read/write <code>Date | null</code>; native HTML form submission is
-          not provided.
+          Move <code>inputId</code>, <code>name</code>, <code>placeholder</code>, input mode,
+          autocomplete, and other element attributes directly onto the native input.
         </li>
         <li>
-          Validator errors: <code>invalidDateInputDraft</code> for typed text that can't be parsed,
-          and <code>outOfRangeDate</code> for a committed value outside <code>min</code> /
-          <code>max</code>.
-        </li>
-        <li><code>min</code>, <code>max</code>: <code>Date | null</code>. Bounds enforced on typed input, picker selection, and validation. Default <code>null</code>.</li>
-        <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
-        <li><code>invalid</code>: <code>boolean</code>. Forces the invalid visual/ARIA state on top of any draft/validator-driven invalidity. Default <code>false</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Disables the text field and the calendar trigger. Default <code>false</code>.</li>
-        <li><code>placeholder</code>: <code>string</code>. Text shown while empty. Default <code>'YYYY-MM-DD'</code>.</li>
-        <li>
-          <code>inputId</code>: <code>string</code>. Id applied to the internal text field for
-          visible label <code>for</code> wiring. Defaults to an auto-generated
-          <code>hell-date-input-&lt;n&gt;-field</code>.
-        </li>
-        <li><code>name</code>: <code>string | null</code>. Native <code>name</code> attribute on the text field. Default <code>null</code>.</li>
-        <li><code>aria-label</code>: <code>string | null</code>. Accessible name for standalone usage; also names the calendar trigger button. Default <code>null</code>.</li>
-        <li><code>aria-describedby</code>, <code>aria-labelledby</code>: <code>string | null</code>. Merge with descriptions/labels supplied by an ancestor <code>hellField</code>.</li>
-        <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellDateInputPart&gt;</code> — a shorthand class
-          string refining <code>root</code>, or a <code>HellDateInputUi</code> map covering
-          <code>root</code>, <code>input</code>, <code>trigger</code>, <code>triggerIcon</code>, and
-          <code>pickerPanel</code>.
+          Replace the old <code>root</code>, <code>input</code>, <code>trigger</code>,
+          <code>triggerIcon</code>, and <code>pickerPanel</code> Date Input parts with local
+          <code>ui</code> maps on Input, Control Group/action or Button, Popover, Icon, and Date
+          Picker as shown in the composition recipe.
         </li>
         <li>
-          Exported types: <code>HellDateInputPart</code>
-          (<code>'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel'</code>),
-          <code>HellDateInputUi</code> (<code>HellUi&lt;HellDateInputPart&gt;</code>).
-        </li>
-        <li>
-          <code>provideHellDateInputAdapter</code>: replace the default strict ISO
-          parse/format/normalize/compare/bounds policy — see below.
-        </li>
-        <li>
-          <code>HELL_DATE_INPUT_LABELS</code>: override the <code>chooseDate</code> /
-          <code>chooseDateFor</code> Label Contract strings for the calendar trigger's accessible
-          name.
+          Author the calendar trigger and its accessible label in consumer markup. The former
+          Date Input trigger Label Contract is removed with the owned trigger.
         </li>
       </ul>
 
-      <h2>Adapter contract</h2>
-      <p>
-        The built-in <code>HELL_DATE_INPUT_ADAPTER</code> accepts only strict ISO date-only
-        <code>YYYY-MM-DD</code> typed input (four-digit year, two-digit month, two-digit day) and
-        treats it as a local-midnight date without locale parsing. Empty text commits a clear to
-        <code>null</code>; anything else that doesn't match commits nothing and marks the draft
-        invalid. If your product needs locale-aware parsing, a masked input, or a Temporal-backed
-        model, implement the <code>HellDateInputAdapter</code> shape — the core <code>HellTypedInputAdapter</code> instantiated for <code>Date</code> — with explicit
-        <code>parseText</code>, <code>format</code>, and optional <code>normalize</code> /
-        <code>isSameValue</code> / <code>isWithinBounds</code> functions and register it with
-        <code>provideHellDateInputAdapter</code>. In <code>parseText</code>, return
-        <code>hellTypedValue(value)</code> for a committable value (<code>null</code> clears the
-        field) or <code>hellInvalidTypedValue()</code> to keep the typed text as a visible invalid
-        draft — both imported from <code>&#64;hell-ui/angular/core</code>.
-      </p>
-
       <h2>Accessibility</h2>
       <ul>
+        <li>The host is the focusable native input; no wrapper or hidden field intercepts events.</li>
         <li>
-          The text field is a plain labeled <code>&lt;input type="text"&gt;</code>:
-          <code>aria-invalid</code> reflects invalid/out-of-range state, and
-          <code>aria-describedby</code> / <code>aria-labelledby</code> merge with an ancestor
-          <code>hellField</code>'s description and label ids automatically.
+          <code>aria-invalid</code>, native <code>required</code>/<code>disabled</code>, and Field
+          label/description ids reflect on that same host.
         </li>
         <li>
-          The calendar trigger is a <code>&lt;button type="button"&gt;</code> with its own
-          accessible name from the Label Contract (<code>"Choose date"</code>, or
-          <code>"Choose date for &lt;label&gt;"</code> when <code>aria-label</code> is set) — it
-          never depends on the text field's label alone.
+          Enter commits typed text without cancelling native form submission; blur commits and marks
+          the control touched.
         </li>
         <li>
-          Pressing Enter in the text field commits the typed value and prevents the default form
-          submit; blurring the field also commits.
+          A composed icon trigger needs its own accessible name. Popover owns open, Escape, and
+          dismissal behavior; the recipe deliberately returns focus to the input after selection.
         </li>
-        <li>
-          The calendar popover follows the shared Floating Dismissal rules (outside click, Escape,
-          focus-out) and returns focus to the text field after a date is picked.
-        </li>
-        <li>Disabled state disables both the text field and the calendar trigger together.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Pair with <code>hellFieldLabel</code> for visible naming, or set <code>aria-label</code> for standalone fields.</li>
-        <li>Use <code>min</code> and <code>max</code> to encode real business constraints, not just picker cosmetics.</li>
-        <li>Treat typed dates and picker selection as equally valid input paths.</li>
+        <li>Use a visible Field label or a native <code>aria-label</code> on standalone inputs.</li>
+        <li>Use the strict default ISO format for stable business dates, or replace the adapter coherently.</li>
+        <li>Add a picker only when calendar navigation materially helps the workflow.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't block keyboard entry by hiding or disabling the text field — the calendar is a shortcut, not the only path.</li>
-        <li>Don't change the visible placeholder format without also relaxing or replacing the parse adapter to match.</li>
+        <li>Don't create a second picker-owned value model; update the same controlled value or form control.</li>
+        <li>Don't hide the input when a calendar exists; typing and native focus remain first-class.</li>
+        <li>Don't target removed Date Input anatomy; style each composed primitive locally.</li>
       </ul>
     </article>
   `,
 })
 export class DateInputPage {
   protected readonly dateInputBasicExampleCode = dateInputBasicExampleCodeRaw;
-  protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;
   protected readonly dateInputBoundsAndValidationExampleCode =
     dateInputBoundsAndValidationExampleCodeRaw;
   protected readonly dateInputReactiveFormsExampleCode = dateInputReactiveFormsExampleCodeRaw;
+  protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;
+  protected readonly dateInputStylingExampleCode = dateInputStylingExampleCodeRaw;
+  protected readonly dateInputWithCalendarPickerExampleCode =
+    dateInputWithCalendarPickerExampleCodeRaw;
   protected readonly dateInputWithFieldFilterRowExampleCode =
     dateInputWithFieldFilterRowExampleCodeRaw;
-  protected readonly dateInputStylingExampleCode = dateInputStylingExampleCodeRaw;
 }

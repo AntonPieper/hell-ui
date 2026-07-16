@@ -39,6 +39,7 @@ const packageConsumerCiGroups = [
       'button-ui',
       'chip-input',
       'control-group',
+      'date-input',
       'file-picker',
       'pagination',
       'combobox-projection',
@@ -242,6 +243,23 @@ const packageConsumerScenarioCatalog = [
       'transition-property:background-color,border-color,box-shadow',
       '[data-focus-within=true]{border-color:var(--color-hell-border-focus)',
       'border-inline-start-width:1px',
+    ],
+  },
+  {
+    name: 'date-input',
+    description:
+      'native Date Input behavior and Input-root styles without Date Picker or icon peers',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: dateInputConsumerMainTs,
+    stylesCss: dateInputConsumerStylesCss,
+    cssIncludes: [
+      'height:var(--spacing-hell-control-md)',
+      'border-radius:var(--radius-hell-md)',
+      'transition-property:border-color,box-shadow',
     ],
   },
   {
@@ -1616,6 +1634,52 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function dateInputConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HELL_DEFAULT_DATE_INPUT_ADAPTER,
+  HellDateInput,
+  provideHellDateInputAdapter,
+} from '${packageName}/date-input';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [ReactiveFormsModule, HellDateInput],
+  providers: [provideHellDateInputAdapter(HELL_DEFAULT_DATE_INPUT_ADAPTER)],
+  template: \`
+    <input
+      id="controlled-date"
+      hellDateInput
+      name="controlledDate"
+      aria-label="Controlled date"
+      placeholder="YYYY-MM-DD"
+      required
+      [value]="value()"
+      [min]="min"
+      [max]="max"
+      (valueChange)="value.set($event)"
+    />
+    <input
+      hellDateInput
+      aria-label="Forms date"
+      [formControl]="control"
+    />
+  \`,
+})
+class App {
+  protected readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  protected readonly min = new Date(2026, 3, 1);
+  protected readonly max = new Date(2026, 3, 30);
+  protected readonly control = new FormControl<Date | null>(null);
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function filePickerConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2363,7 +2427,7 @@ interface SearchItem {
         </ng-template>
         <hell-toaster [ui]="toasterUi" />
 
-        <hell-date-input aria-label="Ship date" [date]="date" />
+        <input hellDateInput aria-label="Ship date" [value]="date" />
         <hell-time-input aria-label="Ship time" [value]="time" />
         <hell-date-picker [date]="date" />
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
@@ -2967,6 +3031,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import {
   HellButtonHarness,
   HellComboboxHarness,
+  HellDateInputHarness,
   HellDialogHarness,
   HellDialogOverlayHarness,
   HellMenuTriggerHarness,
@@ -2983,6 +3048,7 @@ class App {
   protected readonly harnessTypes = [
     HellButtonHarness,
     HellComboboxHarness,
+    HellDateInputHarness,
     HellDialogHarness,
     HellDialogOverlayHarness,
     HellMenuTriggerHarness,
@@ -3331,6 +3397,13 @@ function controlGroupConsumerStylesCss() {
 @import "${packageName}/tokens.css";
 @import "${packageName}/control-group/styles.css";
 @import "${packageName}/input/styles.css";
+`;
+}
+
+function dateInputConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/date-input/styles.css";
 `;
 }
 

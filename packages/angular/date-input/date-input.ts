@@ -1,100 +1,53 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  NO_ERRORS_SCHEMA,
-  type ElementRef,
+  Directive,
+  ElementRef,
+  InjectionToken,
+  booleanAttribute,
   computed,
   effect,
-  InjectionToken,
-  type Provider,
-  booleanAttribute,
-  inject,
   forwardRef,
+  inject,
   input,
   output,
   signal,
-  viewChild,
+  type Provider,
   type Signal,
 } from '@angular/core';
 import {
-  ControlValueAccessor,
   NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
   type AbstractControl,
+  type ControlValueAccessor,
   type NgControl,
   type ValidationErrors,
   type Validator,
-  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { provideIcons } from '@ng-icons/core';
-import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
 import {
-  NgpFormControl,
   injectFormFieldState,
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellDatePicker } from '@hell-ui/angular/date-picker';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+
 import {
-  hellSyncFormFieldDescriptions,
-  hellSyncFormFieldLabels,
-} from '@hell-ui/angular/internal/core';
-import type { HellSize } from '@hell-ui/angular/core';
-import {
-  hellPartStyler,
   hellInvalidTypedValue,
   hellTypedValue,
-  type HellRecipe,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
-  type HellUi,
-  type HellUiInput,
 } from '@hell-ui/angular/core';
-import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
-
-/** Built-in accessibility labels owned by the date input entry point. */
-export interface HellDateInputLabels {
-  readonly chooseDate: string;
-  readonly chooseDateFor: (label: string) => string;
-}
-
-/** Injection token resolving to the effective date input labels. */
-export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels> = hellCreateLabels<HellDateInputLabels>('HELL_DATE_INPUT_LABELS', {
-  chooseDate: 'Choose date',
-  chooseDateFor: (label) => `Choose date for ${label}`,
-});
-
-const HELL_DATE_INPUT_ICONS = {
-  faSolidCalendar,
-};
-
-let nextDateInputId = 0;
-
-/** Public parts of the HellDateInput module, styleable through its Part Style Map. */
-export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
-
-/** Part Style Map accepted by the HellDateInput `ui` input. */
-export type HellDateInputUi = HellUi<HellDateInputPart>;
-
-const HELL_DATE_INPUT_RECIPE = {
-  root: 'relative inline-flex w-full max-w-56 min-w-40 items-stretch rounded-hell-md border border-hell-border bg-hell-surface-elevated transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:border-hell-border-strong focus-within:border-hell-border-focus focus-within:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle',
-  input:
-    'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
-  trigger:
-    'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-subtle transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  triggerIcon: 'size-hell-4 text-[length:var(--spacing-hell-4)]',
-  pickerPanel: 'block rounded-hell-md border-0 bg-transparent p-0 shadow-none',
-} satisfies HellRecipe<HellDateInputPart>;
+import { HellInput } from '@hell-ui/angular/input';
+import {
+  HellTypedValueInputState,
+  hellSyncFormFieldDescriptions,
+  hellSyncFormFieldLabels,
+  hellUniqueIdRefs,
+} from '@hell-ui/angular/internal/core';
 
 /**
- * Strategy for parsing, formatting, normalizing, and bounds-checking dates —
- * the core `HellTypedInputAdapter` instantiated for `Date` values with no
- * extra context.
+ * Strategy for parsing, formatting, normalizing, and bounds-checking dates.
  */
 export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
 
+/** Default ISO `YYYY-MM-DD` date adapter. */
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
   parseText: hellParseDateInputText,
   format: hellFormatDateInputValue,
@@ -103,47 +56,49 @@ export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
   isWithinBounds: hellIsDateInputValueWithinBounds,
 };
 
+/** Injection token resolving to the effective date input adapter. */
 export const HELL_DATE_INPUT_ADAPTER = new InjectionToken<HellDateInputAdapter>(
   'HELL_DATE_INPUT_ADAPTER',
   { factory: () => HELL_DEFAULT_DATE_INPUT_ADAPTER },
 );
 
+/** Override the date input adapter for an injector scope. */
 export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Provider {
   return { provide: HELL_DATE_INPUT_ADAPTER, useValue: adapter };
 }
 
 /**
- * Try to parse a user-typed string into a `Date`. Accepts ISO `YYYY-MM-DD`
- * and the stable business format we render back into the input. Empty text
- * commits a nullable clear; unparseable text stays as an invalid draft.
+ * Parse the business-default ISO `YYYY-MM-DD` format. Empty text commits a
+ * nullable clear; unparseable text remains an invalid draft.
  */
 function hellParseDateInputText(text: string): HellTypedValueParseResult<Date> {
-  const t = text.trim();
-  if (!t) return hellTypedValue<Date>(null);
-  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
-  if (iso) {
-    const year = +iso[1];
-    const month = +iso[2];
-    const day = +iso[3];
-    const d = new Date(year, month - 1, day);
-    if (Number.isNaN(d.getTime())) return hellInvalidTypedValue();
-    return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
-      ? hellTypedValue(d)
-      : hellInvalidTypedValue();
-  }
-  return hellInvalidTypedValue();
+  const value = text.trim();
+  if (!value) return hellTypedValue<Date>(null);
+
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!iso) return hellInvalidTypedValue();
+
+  const year = Number(iso[1]);
+  const month = Number(iso[2]);
+  const day = Number(iso[3]);
+  const date = new Date(year, month - 1, day);
+
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+    ? hellTypedValue(date)
+    : hellInvalidTypedValue();
 }
 
-function hellFormatDateInputValue(d: Date | null): string {
-  if (!d) return '';
-  const year = d.getFullYear().toString().padStart(4, '0');
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const day = d.getDate().toString().padStart(2, '0');
+/** Format a date as a stable local-calendar `YYYY-MM-DD` string. */
+function hellFormatDateInputValue(date: Date | null): string {
+  if (!date) return '';
+  const year = date.getFullYear().toString().padStart(4, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function dateDayTime(d: Date): number {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+function dateDayTime(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
 function dateDayValue(value: Date | null | undefined): Date | null {
@@ -153,40 +108,37 @@ function dateDayValue(value: Date | null | undefined): Date | null {
 }
 
 function hellIsDateInputValueWithinBounds(
-  d: Date | null,
+  date: Date | null,
   min: Date | null,
   max: Date | null,
 ): boolean {
-  if (!d) return true;
-  const day = dateDayTime(d);
+  if (!date) return true;
+  const day = dateDayTime(date);
   return (!min || day >= dateDayTime(min)) && (!max || day <= dateDayTime(max));
 }
 
-function hellSameDateInputValue(a: Date | null, b: Date | null): boolean {
-  if (!a || !b) return a === b;
-  return dateDayTime(a) === dateDayTime(b);
+function hellSameDateInputValue(left: Date | null, right: Date | null): boolean {
+  if (!left || !right) return left === right;
+  return dateDayTime(left) === dateDayTime(right);
 }
 
 function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
   return dateDayValue(value);
 }
 
+let nextDateInputId = 0;
+
 /**
- * Date input — a text field paired with a calendar icon trigger that opens
- * an inline date picker popover. Users can type or paste an explicit
- * `YYYY-MM-DD` date or pick from the calendar.
- *
- * Bind to `[date]` and listen to `(dateChange)`. Pair with `hellField` for
- * label / description / error wiring.
+ * Typed date behavior for a real text input. The directive owns draft parsing,
+ * validation, controlled state, and forms integration; calendar triggers and
+ * Date Picker panels compose separately around the input.
  */
-@Component({
-  selector: 'hell-date-input',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger, HellDatePicker],
-  schemas: [NO_ERRORS_SCHEMA],
-  viewProviders: [provideFormFieldState()],
+@Directive({
+  selector: 'input[hellDateInput]',
+  exportAs: 'hellDateInput',
+  hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
   providers: [
-    provideIcons(HELL_DATE_INPUT_ICONS),
+    provideFormFieldState({ inherit: false }),
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => HellDateInput),
@@ -199,92 +151,55 @@ function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
     },
   ],
   host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-size]': 'size()',
+    '[attr.id]': 'id()',
+    '[value]': 'display()',
+    '[disabled]': 'isDisabled()',
+    '[required]': 'required()',
+    '[attr.min]': 'nativeMin()',
+    '[attr.max]': 'nativeMax()',
+    '[attr.aria-invalid]': 'isInvalid() ? "true" : null',
+    '[attr.aria-describedby]': 'fieldAriaDescribedby()',
+    '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '(input)': 'onInput()',
+    '(blur)': 'onBlur()',
+    '(keydown)': 'onKeydown($event)',
   },
-  template: `
-    <input
-      #field
-      ngpFormControl
-      data-slot="input"
-      [class]="part('input')"
-      type="text"
-      [attr.data-size]="size()"
-      [attr.data-invalid]="isInvalid() ? 'true' : null"
-      [id]="inputId()"
-      [attr.name]="name()"
-      [attr.aria-invalid]="isInvalid() ? 'true' : null"
-      [attr.aria-label]="ariaLabel()"
-      [attr.aria-describedby]="fieldAriaDescribedby()"
-      [attr.aria-labelledby]="fieldAriaLabelledby()"
-      [disabled]="isDisabled()"
-      [placeholder]="placeholder()"
-      [value]="display()"
-      (input)="onInput(field.value)"
-      (blur)="onBlur()"
-      (keydown.enter)="commit(field.value, $event)"
-    />
-    <button
-      #calendarTrigger="hellPopoverTrigger"
-      type="button"
-      data-slot="trigger"
-      [class]="part('trigger')"
-      [hellPopoverTrigger]="cal"
-      placement="bottom-end"
-      [disabled]="isDisabled()"
-      [attr.data-size]="size()"
-      [attr.data-disabled]="isDisabled() ? 'true' : null"
-      [attr.aria-label]="triggerAriaLabel()"
-    >
-      <hell-icon data-slot="triggerIcon" [class]="part('triggerIcon')" name="faSolidCalendar" />
-    </button>
-
-    <ng-template #cal>
-      <!-- Panel overrides flow through the popover's Part Style Map so they
-           merge deterministically with the popover recipe. -->
-      <div hellPopover data-slot="pickerPanel" [ui]="part('pickerPanel')">
-        <hell-date-picker
-          [date]="current() ?? undefined"
-          [focusedDate]="pickerFocusedDate()"
-          [min]="min() ?? undefined"
-          [max]="max() ?? undefined"
-          [disabled]="isDisabled()"
-          (dateChange)="onPick($any($event))"
-          (focusedDateChange)="pickerFocusedDate.set($any($event))"
-        />
-      </div>
-    </ng-template>
-  `,
 })
 export class HellDateInput implements ControlValueAccessor, Validator {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellDateInputPart>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellDateInputPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_DATE_INPUT_RECIPE,
-  });
-
-  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Native input id, generated when the consumer does not author one. */
+  readonly id = input(`hell-date-input-${++nextDateInputId}`);
+  /** Forces the invalid presentation and accessibility state. */
   readonly invalid = input(false, { transform: booleanAttribute });
+  /** Disables native input interaction outside forms use. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  readonly date = input<Date | null>(null);
+  /** Marks null as a required-value validation error. */
+  readonly required = input(false, { transform: booleanAttribute });
+  /** Current controlled date value. */
+  readonly value = input<Date | null>(null);
+  /** Inclusive lower date bound. */
   readonly min = input<Date | null>(null);
+  /** Inclusive upper date bound. */
   readonly max = input<Date | null>(null);
-  readonly placeholder = input<string>('YYYY-MM-DD');
-  readonly inputId = input<string>(`hell-date-input-${++nextDateInputId}-field`);
-  readonly name = input<string | null>(null);
-  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** Additional `aria-describedby` ids merged with an enclosing Field. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
+  /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  readonly dateChange = output<Date | null>();
+  /** Emits each successfully committed date or nullable clear. */
+  readonly valueChange = output<Date | null>();
 
-  private readonly dateAdapter = inject(HELL_DATE_INPUT_ADAPTER);
+  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
+  private readonly adapter = inject(HELL_DATE_INPUT_ADAPTER);
+  private readonly inheritedFormField = injectFormFieldState({
+    optional: true,
+    skipSelf: true,
+  });
+  private readonly formField = ngpFormField({
+    ngControl: signal<NgControl | undefined>(undefined),
+  });
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<Date | null>(null);
@@ -292,163 +207,213 @@ export class HellDateInput implements ControlValueAccessor, Validator {
   private onControlChange: (value: Date | null) => void = () => {};
   private onControlTouched: () => void = () => {};
   private onValidatorChange: () => void = () => {};
+  private hasExternalSnapshot = false;
+  private externalSnapshot: Date | null = null;
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
-    external: () => this.effectiveDate(),
-    parseExternal: (date) => this.coerceDate(date),
+    external: () => this.effectiveValue(),
+    parseExternal: (value) => this.normalizeValue(value),
     parseText: (text) => this.parseText(text),
-    format: (date) => this.dateAdapter.format(date),
-    externalChanged: (base, current) => !this.sameDate(base, current),
+    format: (value) => this.adapter.format(value),
+    externalChanged: (base, current) => !this.sameValue(base, current),
   });
-  // Annotated like number-input's `current`: ng-packagr's d.ts flattener would
-  // otherwise ship the internal state's detached `TValue` type parameter.
-  protected readonly current: Signal<Date | null> = this.valueState.current;
-  protected readonly display = this.valueState.display;
-  protected readonly invalidDraft = this.valueState.invalidDraft;
-  protected readonly isInvalid = () =>
-    this.invalid() || this.invalidDraft() || this.formField.invalid() === true;
-  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
-  protected readonly fieldAriaDescribedby = computed(
-    () => this.formField.descriptions().join(' ') || null,
-  );
-  protected readonly fieldAriaLabelledby = computed(
-    () => this.formField.labels().join(' ') || null,
-  );
-  protected readonly pickerFocusedDate = signal<Date>(dateDayValue(new Date()) ?? new Date());
-  protected readonly triggerAriaLabel = () => {
-    const label = this.ariaLabel();
-    return label ? this.labels.chooseDateFor(label) : this.labels.chooseDate;
-  };
 
-  private readonly labels = inject(HELL_DATE_INPUT_LABELS);
-  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
-  private readonly formField =
-    this.inheritedFormField() ??
-    ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
-  private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
-  private readonly calendarTrigger = viewChild.required<HellPopoverTrigger>('calendarTrigger');
+  /** Current committed date, normalized to the adapter's value policy. */
+  protected readonly current: Signal<Date | null> = this.valueState.current;
+  /** Native input text for either the current draft or committed value. */
+  protected readonly display = this.valueState.display;
+  /** Whether the active draft cannot be parsed or falls outside the bounds. */
+  protected readonly invalidDraft = this.valueState.invalidDraft;
+  /** Whether the committed external value falls outside the current bounds. */
+  protected readonly outOfRange = computed(
+    () => this.current() !== null && !this.isWithinBounds(this.current()),
+  );
+  /** Whether a required date is missing. */
+  protected readonly requiredMissing = computed(
+    () => this.required() && this.current() === null && !this.invalidDraft(),
+  );
+  /** Effective invalid state from behavior, Field, or an explicit override. */
+  protected readonly isInvalid = (): boolean =>
+    this.invalid() ||
+    this.invalidDraft() ||
+    this.outOfRange() ||
+    this.requiredMissing() ||
+    this.inheritedFormField()?.invalid() === true;
+  /** Effective disabled state from the public input or forms API. */
+  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  /** Native lower-bound attribute using the adapter's stable format. */
+  protected readonly nativeMin = computed(() => this.formatBound(this.min()));
+  /** Native upper-bound attribute using the adapter's stable format. */
+  protected readonly nativeMax = computed(() => this.formatBound(this.max()));
+  /** Effective description ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaDescribedby = computed(() =>
+    this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
+  );
+  /** Effective label ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaLabelledby = computed(() =>
+    this.mergeIdRefs(this.ariaLabelledby(), this.inheritedFormField()?.labels()),
+  );
 
   constructor() {
-    hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
-    hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
+    hellSyncFormFieldDescriptions(this.formField, this.fieldAriaDescribedby);
+    hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
+
+    const inheritedFormField = this.inheritedFormField();
+    effect((onCleanup) => {
+      const id = this.id();
+      this.formField.setFormControl(id);
+      inheritedFormField?.setFormControl(id);
+      onCleanup(() => {
+        if (this.formField.formControl() === id) this.formField.removeFormControl();
+        if (inheritedFormField?.formControl() === id) inheritedFormField.removeFormControl();
+      });
+    });
+
+    if (inheritedFormField) {
+      hellSyncFormFieldDescriptions(
+        this.formField,
+        computed(() => inheritedFormField.descriptions().join(' ') || null),
+      );
+      hellSyncFormFieldLabels(
+        this.formField,
+        computed(() => inheritedFormField.labels().join(' ') || null),
+      );
+    }
+
+    effect(() => {
+      const external = this.normalizeValue(this.effectiveValue());
+      if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
+        this.valueState.clearDraft();
+        this.valueState.clearLocal();
+      }
+      this.externalSnapshot = external;
+      this.hasExternalSnapshot = true;
+    });
+
     effect(() => {
       this.invalidDraft();
       this.current();
       this.min();
       this.max();
+      this.required();
       this.onValidatorChange();
     });
-    effect(() => this.pickerFocusedDate.set(this.resolvePickerFocusedDate()));
   }
 
+  /** Writes a date from an Angular form without emitting it back. */
   writeValue(value: Date | null): void {
+    const normalized = this.normalizeValue(value);
+    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
+
     this.controlMode.set(true);
-    this.controlValue.set(this.coerceDate(value));
-    this.valueState.clearDraft();
-    this.valueState.clearLocal();
+    this.controlValue.set(normalized);
+    if (changed) {
+      this.valueState.clearDraft();
+      this.valueState.clearLocal();
+    }
     this.onValidatorChange();
   }
 
+  /** Registers the Angular forms change callback. */
   registerOnChange(fn: (value: Date | null) => void): void {
     this.onControlChange = fn;
   }
 
+  /** Registers the Angular forms touched callback. */
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
   }
 
+  /** Registers the Angular forms validator-change callback. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
+  /** Applies disabled state supplied by Angular forms to the native input. */
   setDisabledState(isDisabled: boolean): void {
     this.controlDisabled.set(isDisabled);
   }
 
-  private effectiveDate(): Date | null {
-    return this.controlMode() ? this.controlValue() : this.date();
-  }
-
-  private parseText(text: string) {
-    const parsed = this.dateAdapter.parseText(text);
-    if (!parsed.valid || !parsed.value) return parsed;
-    return this.isWithinBounds(parsed.value) ? parsed : hellInvalidTypedValue();
-  }
-
-  protected onInput(value: string) {
-    this.valueState.writeDraft(value);
-    this.onValidatorChange();
-  }
-
-  protected onBlur() {
-    const parsed = this.valueState.commitDraft();
-    if (parsed.committed) this.emitValue(parsed.value);
-    this.onControlTouched();
-    this.onValidatorChange();
-  }
-
-  protected commit(text: string, event?: Event) {
-    event?.preventDefault();
-    const parsed = this.valueState.commitText(text);
-    if (parsed.committed) this.emitValue(parsed.value);
-    this.onValidatorChange();
-  }
-
-  protected async onPick(d: Date | undefined) {
-    if (!d || !this.isWithinBounds(d)) return;
-    const picked = this.valueState.setValue(d);
-    if (picked.committed) this.emitValue(picked.value);
-    this.onControlTouched();
-    await this.calendarTrigger().hide();
-    const field = this.field().nativeElement;
-    setTimeout(() => field.focus());
-    this.onValidatorChange();
-  }
-
-  private coerceDate(value: Date | null | undefined): Date | null {
-    return this.dateAdapter.normalize
-      ? this.dateAdapter.normalize(value)
-      : hellCoerceDateInputValue(value);
-  }
-
-  private sameDate(a: Date | null, b: Date | null): boolean {
-    return this.dateAdapter.isSameValue?.(a, b) ?? hellSameDateInputValue(a, b);
-  }
-
-  private isWithinBounds(value: Date | null): boolean {
-    return (
-      this.dateAdapter.isWithinBounds?.(value, this.min(), this.max()) ??
-      hellIsDateInputValueWithinBounds(value, this.min(), this.max())
-    );
-  }
-
-  private resolvePickerFocusedDate(): Date {
-    const candidate = this.current() ?? dateDayValue(new Date()) ?? new Date();
-    const min = this.min();
-    const max = this.max();
-
-    if (min && dateDayTime(candidate) < dateDayTime(min)) return min;
-    if (max && dateDayTime(candidate) > dateDayTime(max)) return max;
-    return candidate;
-  }
-
+  /** Reports malformed drafts, missing required values, and bound violations. */
   validate(_control: AbstractControl | null): ValidationErrors | null {
     const errors: ValidationErrors = {};
 
     if (this.invalidDraft()) {
       errors['invalidDateInputDraft'] = true;
+    } else if (this.requiredMissing()) {
+      errors['required'] = true;
     }
-    const current = this.current();
-    if (current && !this.isWithinBounds(current)) {
+    if (this.outOfRange()) {
       errors['outOfRangeDate'] = true;
     }
 
     return Object.keys(errors).length > 0 ? errors : null;
   }
 
+  /** Records the native field value as a draft while preserving the input event. */
+  protected onInput(): void {
+    this.valueState.writeDraft(this.host.value);
+    this.onValidatorChange();
+  }
+
+  /** Commits a draft and marks the native field touched on blur. */
+  protected onBlur(): void {
+    const result = this.valueState.commitDraft();
+    if (result.committed) this.emitValue(result.value);
+    this.onControlTouched();
+    this.onValidatorChange();
+  }
+
+  /** Commits on Enter while preserving the native keyboard event and form behavior. */
+  protected onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter') return;
+    const result = this.valueState.commitText(this.host.value);
+    if (result.committed) this.emitValue(result.value);
+    this.onValidatorChange();
+  }
+
+  private effectiveValue(): Date | null {
+    return this.controlMode() ? this.controlValue() : this.value();
+  }
+
+  private parseText(text: string): HellTypedValueParseResult<Date> {
+    const parsed = this.adapter.parseText(text);
+    if (!parsed.valid || parsed.value === null) return parsed;
+    return this.isWithinBounds(parsed.value) ? parsed : hellInvalidTypedValue();
+  }
+
+  private normalizeValue(value: Date | null | undefined): Date | null {
+    return this.adapter.normalize
+      ? this.adapter.normalize(value)
+      : hellCoerceDateInputValue(value);
+  }
+
+  private sameValue(left: Date | null, right: Date | null): boolean {
+    return this.adapter.isSameValue?.(left, right) ?? hellSameDateInputValue(left, right);
+  }
+
+  private isWithinBounds(value: Date | null): boolean {
+    return (
+      this.adapter.isWithinBounds?.(value, this.min(), this.max()) ??
+      hellIsDateInputValueWithinBounds(value, this.min(), this.max())
+    );
+  }
+
+  private formatBound(value: Date | null): string | null {
+    const normalized = this.normalizeValue(value);
+    return normalized ? this.adapter.format(normalized) : null;
+  }
+
+  private mergeIdRefs(explicit: string | null, fieldIds: readonly string[] | undefined): string | null {
+    const ids = hellUniqueIdRefs([explicit, ...(fieldIds ?? [])].filter(Boolean).join(' '));
+    return ids.join(' ') || null;
+  }
+
   private emitValue(value: Date | null): void {
+    // Native submission can run before Angular renders the committed display.
+    this.host.value = this.adapter.format(value);
     if (this.controlMode()) this.controlValue.set(value);
-    this.dateChange.emit(value);
+    this.valueChange.emit(value);
     this.onControlChange(value);
     this.onValidatorChange();
   }

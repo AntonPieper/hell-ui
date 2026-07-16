@@ -413,25 +413,43 @@ export class HellDatePickerDateButtonHarness extends ComponentHarness {
   }
 }
 
-/** Test harness driving `hell-date-input`. */
+/** Test harness driving `input[hellDateInput]`. */
 export class HellDateInputHarness extends ComponentHarness {
   /** CSS selector that matches this harness’s host element. */
-  static hostSelector = 'hell-date-input';
-  /** Current value of the inner input element. */
-  async getInputValue(): Promise<string> {
-    return (await this.locatorFor('input[data-slot="input"]')()).getProperty<string>('value');
+  static hostSelector = 'input[hellDateInput]';
+  /** Current native input text, including an invalid draft. */
+  async getValue(): Promise<string> {
+    return (await this.host()).getProperty<string>('value');
   }
-  /** Type a new value into the inner input element. */
-  async setInputValue(value: string): Promise<void> {
-    await (await this.locatorFor('input[data-slot="input"]')()).setInputValue(value);
+  /** Replace the native input text without implicitly committing the draft. */
+  async setValue(value: string): Promise<void> {
+    const host = await this.host();
+    await host.setInputValue(value);
+    await host.dispatchEvent('input');
   }
-  /** Open the associated picker popover. */
-  async openPicker(): Promise<void> {
-    await (await this.locatorFor('button[data-slot="trigger"]')()).click();
+  /** Focus the native input. */
+  async focus(): Promise<void> {
+    await (await this.host()).focus();
+  }
+  /** Blur the native input, committing a valid or empty draft. */
+  async blur(): Promise<void> {
+    await (await this.host()).blur();
+  }
+  /** Whether the native input currently owns focus. */
+  async isFocused(): Promise<boolean> {
+    return (await this.host()).isFocused();
+  }
+  /** Whether the native input is disabled. */
+  async isDisabled(): Promise<boolean> {
+    return (await this.host()).getProperty<boolean>('disabled');
+  }
+  /** Whether the native input is required. */
+  async isRequired(): Promise<boolean> {
+    return (await this.host()).getProperty<boolean>('required');
   }
   /** Whether the host reports an invalid state. */
   async isInvalid(): Promise<boolean> {
-    return (await (await this.host()).getAttribute('data-invalid')) === 'true';
+    return (await (await this.host()).getAttribute('aria-invalid')) === 'true';
   }
 }
 /** Test harness driving `hell-time-input`. */

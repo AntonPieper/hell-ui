@@ -42,7 +42,7 @@ Angular 22 / TypeScript 6 strict-pnpm consumers also need the current transitive
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Root/core only                | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs` plus Angular app peers                                       | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required                                                                                                                                     | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs)                |
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
-| Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`, `pagination`](../../tools/check-package-consumer.mjs)                        |
+| Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`, `date-input`, `pagination`](../../tools/check-package-consumer.mjs)          |
 | Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`                                                                  | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
 | Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported | Narrow composite entry points such as `@hell-ui/angular/time-picker`, `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`time-picker`, `app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
@@ -62,7 +62,7 @@ Examples:
 # Button Part Style Map. Proved by the button-ui scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs
 
-# Styled primitives. Proved by the button/pagination scenarios.
+# Styled primitives. Proved by the button/date-input/pagination scenarios.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss
 pnpm add -D @tailwindcss/postcss postcss
 
@@ -94,9 +94,9 @@ pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,pagination,composite-css,time-picker,app-shell,resizable,split-view,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,date-input,pagination,composite-css,time-picker,app-shell,resizable,split-view,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css,pagination pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css,date-input,pagination pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,time-picker,app-shell,resizable,split-view,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run test:package-consumer -- --minimal-deps
@@ -111,6 +111,7 @@ Prefer:
 
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
+import { HellDateInput } from '@hell-ui/angular/date-input';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
@@ -143,6 +144,7 @@ Preferred primitive imports:
 @import 'tailwindcss';
 @import '@hell-ui/angular/tokens.css';
 @import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/date-input/styles.css';
 @import '@hell-ui/angular/input/styles.css';
 ```
 
@@ -177,6 +179,49 @@ shipped CSS files without adding `node_modules/@hell-ui/angular` to their own
 Tailwind `@source` scanning. If an app invents its own Tailwind classes in
 `ui`, those classes still belong to the app's own Tailwind content/source
 pipeline.
+
+## Date Input is native-input behavior
+
+The owned `<hell-date-input>` component and its embedded calendar are removed.
+Apply `hellDateInput` to the real input, rename `date` / `dateChange` to the
+controlled `value` / `valueChange` pair, and author native element attributes
+directly:
+
+```html
+<!-- Before -->
+<hell-date-input
+  inputId="ship-date"
+  name="shipDate"
+  placeholder="YYYY-MM-DD"
+  [date]="shipDate"
+  (dateChange)="shipDate = $event"
+/>
+
+<!-- After -->
+<input
+  id="ship-date"
+  hellDateInput
+  name="shipDate"
+  placeholder="YYYY-MM-DD"
+  [value]="shipDate"
+  (valueChange)="shipDate = $event"
+/>
+```
+
+The directive keeps CVA, required and inclusive `min` / `max` validation,
+adapter overrides, invalid drafts, external synchronization, and nullable clear
+commits. Its `ui` refines the reused Input root only. The removed `root`,
+`input`, `trigger`, `triggerIcon`, and `pickerPanel` Date Input parts do not have
+aliases.
+
+When a calendar is useful, compose a Control Group containing the Date Input
+and an accessible action, then open Date Picker in Popover. Keep one controlled
+date or form control; on selection update it, close the popover, and focus the
+input. Popover restores focus to the trigger when Escape dismisses the panel.
+Import and style Control Group, Popover, Date Picker, Icon, and any Button/action
+surface from their own narrow entry points. `HellDateInputHarness` now targets
+`input[hellDateInput]`; use `getValue()`, `setValue()`, `focus()`, and `blur()`
+instead of inner-input or embedded-picker harness methods.
 
 ## Part Style Maps replace Style Opt-Out
 
@@ -227,7 +272,7 @@ tokens.
 <hell-audio-player [ui]="{ controls: 'gap-hell-3', time: 'tabular-nums' }" src="/audio.ogg" />
 <hell-toaster [ui]="{ toast: 'shadow-hell-lg', toolbar: 'gap-hell-2' }" />
 <hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />
-<hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
+<input hellDateInput ui="tabular-nums" aria-label="Ship date" />
 <hell-time-picker [ui]="{ readout: 'text-hell-primary', minutePreset: 'rounded-hell-md' }" />
 <button hellCheckbox ui="rounded-hell-pill" aria-label="Accepted"></button>
 <button hellSwitch [ui]="{ root: 'bg-hell-info-soft', thumb: 'shadow-none' }" aria-label="Alerts"></button>
@@ -248,7 +293,7 @@ Rules for migration:
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
   RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
-  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Select, Combobox,
+  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Select, Combobox, Date Input,
   Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
@@ -265,7 +310,10 @@ Rules for migration:
 The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer
 scenario proves the typed Button `ui` path without Tailwind or Hell CSS. The
 styled [`button`](../../tools/check-package-consumer.mjs) scenario proves
-compiled Button recipe CSS and semantic token runtime theming. The
+compiled Button recipe CSS and semantic token runtime theming. The dedicated
+[`date-input`](../../tools/check-package-consumer.mjs) scenario proves the
+native directive, forms and controlled contracts, adapter provider, and reused
+Input-root CSS without Date Picker or icon peers. The
 [`primitive-icons-css`](../../tools/check-package-consumer.mjs),
 [`pagination`](../../tools/check-package-consumer.mjs),
 [`table`](../../tools/check-package-consumer.mjs), and composite scenarios widen
