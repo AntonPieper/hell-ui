@@ -111,8 +111,8 @@ import { PageHeader } from '../../../shared/page-header';
       <p>
         The bar renders in normal flow and sticks to the bottom of its nearest scroll container —
         no fixed-position portal, no overlap: scroll to the end and the last field sits above the
-        bar, never behind it. Master-detail screens compose the same bar inside the split-view
-        detail pane.
+        bar, never behind it. Master-detail screens compose the same bar inside a consumer-owned
+        <code>hellMasterPane="detail"</code> pane.
       </p>
       <hd-example-tabs [code]="saveBarStickyScrollExampleCode">
         <app-save-bar-sticky-scroll-example />

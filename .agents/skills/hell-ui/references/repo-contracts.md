@@ -24,9 +24,9 @@ work.
 ## Component Patterns
 
 - Prefer directives when consumers should own markup: buttons, tabs, menus,
-  fields, Date Input, and native-table primitives.
+  fields, Date Input, native-table primitives, and master-detail controllers.
 - Use components when intrinsic structure matters: Date Picker, time input,
-  split view, app shell, toaster, audio player, and other owned anatomy.
+  app shell, toaster, audio player, and other owned anatomy.
 - Use Angular standalone APIs: `input()`, `output()`, `signal()`, `computed()`,
   `booleanAttribute`, and `numberAttribute`.
 - Wrap ng-primitives with `hostDirectives`; alias ngp inputs/outputs to Hell

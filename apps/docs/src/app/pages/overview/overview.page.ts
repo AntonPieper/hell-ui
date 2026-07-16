@@ -101,7 +101,7 @@ const HD_OVERVIEW_SECTIONS: readonly OverviewSectionLink[] = [
       { label: 'App shell', path: '/components/app-shell' },
       { label: 'Tabs', path: '/components/tabs' },
       { label: 'Resizable', path: '/components/resizable' },
-      { label: 'Split view', path: '/components/split-view' },
+      { label: 'Master detail', path: '/components/master-detail' },
     ],
   },
   {

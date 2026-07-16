@@ -819,6 +819,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Replaced the owned `@hell-ui/angular/split-view` Composite and
+  stylesheet with the projection-first `@hell-ui/angular/master-detail`
+  controller. First carried by the next `@hell-ui/angular` release after
+  `0.2.0` (currently Unreleased). Replace `HELL_SPLIT_VIEW_DIRECTIVES` and
+  `<hell-split-view>` plus `ng-template[hellSplitPrimary]` /
+  `ng-template[hellSplitDetail]` with `HELL_MASTER_DETAIL_IMPORTS`, a
+  consumer-owned `[hellMasterDetail]` root, live `[hellMasterPane]` elements
+  with `primary` and `detail` values, and a projected native
+  `button[hellMasterDetailBack]`. The controlled `detailOpen` /
+  `detailOpenChange` pair and `compactBelow` breakpoint remain; the exported
+  controller adds a readonly `compact()` signal for consumer composition.
+  Replace `backLabel` with the Back button's authored text or accessible name.
+  Move `primaryFlex`, `detailFlex`, `primaryMinSize`, and `detailMinSize` to
+  external Resizable panes and handles. Replace `framed`, `height`, and the
+  removed owned `HellSplitViewPart` / `HellSplitViewUi` anatomy with consumer
+  markup and each projected directive's local `root` Part Style Map. Replace
+  `itemNavigation`, its label and disabled inputs, and `previousItem` /
+  `nextItem` outputs with ordinary Toolbar or Pagination controls bound to
+  application-owned selection state. Import
+  `@hell-ui/angular/master-detail/styles.css` plus only the stylesheets for
+  composed primitives; the old entry point, stylesheet, selectors, exports,
+  parts, inputs, and outputs have no compatibility aliases. Closes #207.
 - BREAKING: Date Input is now date parsing, formatting, validation, and forms
   behavior on the authored native `input[hellDateInput]` instead of the owned
   `<hell-date-input>` component. First carried by the next `@hell-ui/angular`

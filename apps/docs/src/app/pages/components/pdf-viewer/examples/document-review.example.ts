@@ -5,7 +5,7 @@ import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
+import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 import { HellChip } from '@hell-ui/angular/chip';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
@@ -25,11 +25,27 @@ const DOCS: readonly ReviewDoc[] = [
 @Component({
   selector: 'app-pdf-viewer-document-review-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellPdfViewer, HellButton, HellIcon, HellChip, ...HELL_CARD_DIRECTIVES, ...HELL_SPLIT_VIEW_DIRECTIVES],
+  imports: [
+    HellPdfViewer,
+    HellButton,
+    HellIcon,
+    HellChip,
+    ...HELL_CARD_DIRECTIVES,
+    ...HELL_MASTER_DETAIL_IMPORTS,
+  ],
   providers: [provideIcons({ faSolidCircleCheck, faSolidFilePdf })],
   template: `
-    <hell-split-view framed [height]="520" [detailOpen]="detailOpen()" (detailOpenChange)="detailOpen.set($event)">
-      <ng-template hellSplitPrimary>
+    <div
+      hellMasterDetail
+      data-testid="pdf-master-detail"
+      [detailOpen]="detailOpen()"
+      (detailOpenChange)="detailOpen.set($event)"
+      ui="grid h-[520px] min-w-0 grid-cols-[minmax(16rem,2fr)_minmax(0,3fr)] overflow-hidden rounded-hell-md border border-hell-border bg-hell-surface data-[compact=true]:grid-cols-1"
+    >
+      <section
+        hellMasterPane="primary"
+        ui="min-h-0 min-w-0 overflow-auto border-e border-hell-border"
+      >
         <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-2 p-3">
           <div class="flex items-center justify-between">
             <strong class="text-sm font-semibold text-hell-foreground">Review queue</strong>
@@ -57,12 +73,22 @@ const DOCS: readonly ReviewDoc[] = [
             }
           </div>
         </div>
-      </ng-template>
+      </section>
 
-      <ng-template hellSplitDetail>
+      <section hellMasterPane="detail" ui="min-h-0 min-w-0 overflow-auto">
         @if (selected(); as doc) {
           <div hellCard class="m-3 flex min-h-0 flex-1" [ui]="{ root: 'flex-1' }">
-            <div hellCardHeader>
+            <div hellCardHeader ui="flex-wrap gap-2">
+              <button
+                hellMasterDetailBack
+                hellButton
+                variant="ghost"
+                size="sm"
+                type="button"
+                class="basis-full justify-self-start"
+              >
+                Back to review queue
+              </button>
               <div class="grid gap-0.5">
                 <strong class="text-sm font-semibold text-hell-foreground">{{ doc.title }}</strong>
                 <span class="text-xs font-normal text-hell-foreground-muted">
@@ -97,8 +123,8 @@ const DOCS: readonly ReviewDoc[] = [
             </div>
           </div>
         }
-      </ng-template>
-    </hell-split-view>
+      </section>
+    </div>
   `,
 })
 export class PdfViewerDocumentReviewExample {

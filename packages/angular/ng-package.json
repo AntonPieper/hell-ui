@@ -151,9 +151,9 @@
       "output": "resizable"
     },
     {
-      "glob": "split-view.ts",
-      "input": "split-view",
-      "output": "split-view"
+      "glob": "master-detail.ts",
+      "input": "master-detail",
+      "output": "master-detail"
     },
     {
       "glob": "toolbar.ts",

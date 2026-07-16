@@ -125,15 +125,15 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <app-pdf-viewer-lazy-route-example />
       </hd-example-tabs>
 
-      <h2>With split view and card</h2>
+      <h2>With Master Detail and Card</h2>
       <p>
         A document-review workflow built from narrow Hell entry points: a
-        <code>hell-split-view</code> master-detail layout lists the review queue on the left and
-        renders the selected document in a <code>hellCard</code> on the right, with document metadata
-        in the card header and approve / request-changes actions in the footer. The viewer's
-        <code>root</code> part is refined to drop its own border and radius so it sits flush inside
-        the card body. On narrow containers the split view collapses to one pane at a time with a
-        back button.
+        <code>hellMasterDetail</code> controller coordinates consumer-owned review and document
+        panes, while <code>hellCard</code> owns the selected document's visual frame, metadata, and
+        approve / request-changes actions. The viewer's <code>root</code> part is refined to drop its
+        own border and radius so it sits flush inside the card body. On narrow containers the
+        controller exposes one live pane at a time and the consumer-rendered Back action restores
+        focus to the selected queue item.
       </p>
       <hd-example-tabs [code]="documentReviewCode" flush>
         <app-pdf-viewer-document-review-example />

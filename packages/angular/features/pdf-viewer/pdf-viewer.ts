@@ -166,7 +166,7 @@ const HELL_PDF_VIEWER_ICONS = {
   providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   // Sibling-entrypoint directives (pagination, icon, input) are not matched by
   // ng-packagr's per-entrypoint template checker; the docs app full-program
-  // build restores real template checking (same pattern as split-view).
+  // build restores real template checking across narrow entry points.
   schemas: [NO_ERRORS_SCHEMA],
   host: {
     '[class]': "part('root')",
