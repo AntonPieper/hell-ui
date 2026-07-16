@@ -14,6 +14,14 @@ import { FilterBuilderRecipesExample } from './examples/recipes.example';
 import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?raw' with {
   loader: 'text',
 };
+import { FilterBuilderServerDispatchExample } from './examples/server-dispatch.example';
+import filterBuilderServerDispatchExampleCodeRaw from './examples/server-dispatch.example.ts?raw' with {
+  loader: 'text',
+};
+import { FilterBuilderTanStackExample } from './examples/tanstack.example';
+import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-filter-builder',
@@ -22,6 +30,13 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
   styles: [
     `
       @import '@hell-ui/angular/features/filter-builder/styles.css';
+
+      @media (max-width: 639px) {
+        hd-filter-builder .hd-prose li code {
+          overflow-wrap: anywhere;
+          white-space: normal;
+        }
+      }
     `,
   ],
   imports: [
@@ -31,6 +46,8 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
     FilterBuilderRecipesExample,
     FilterBuilderAsyncEntityExample,
     FilterBuilderDateRangeExample,
+    FilterBuilderServerDispatchExample,
+    FilterBuilderTanStackExample,
   ],
   template: `
     <article class="hd-prose">
@@ -51,8 +68,8 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
         navigation, immutable create/edit/remove/clear changes, stable edit targeting, layered
         floating dismissal, focus restoration, and announcements. Your application owns the field
         schema, expression unions, editor rendering, display copy, validation, and any async data.
-        It is an additive optional Feature beside Filter Bar, not a wrapper around or re-export of
-        Filter Bar contracts.
+        This projected Feature replaces the retired Filter Bar contract without carrying its fixed
+        field kinds, equality-only operator, value union, or built-in search policy forward.
       </p>
 
       <h2>Text, options, and a custom operator</h2>
@@ -66,6 +83,18 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
         <app-filter-builder-recipes-example />
       </hd-example-tabs>
 
+      <h2>TanStack Filter Controls recipe</h2>
+      <p>
+        A Filter Builder can live in a Table Shell toolbar without owning table state. The
+        application maps its own global-search expression to TanStack's
+        <code>globalFilter</code> and groups its own name, status, role, and team expressions into
+        <code>columnFilters</code>. Multiple team expressions use application-defined OR semantics;
+        TanStack remains the only table engine.
+      </p>
+      <hd-example-tabs [code]="tanStackCode" previewClass="min-h-[360px]">
+        <app-filter-builder-tanstack-example />
+      </hd-example-tabs>
+
       <h2>External async entity Search Resource</h2>
       <p>
         The application creates the public <code>hellSearchResource</code> and projects its query,
@@ -75,6 +104,17 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
       </p>
       <hd-example-tabs [code]="asyncEntityCode" previewClass="min-h-[190px]">
         <app-filter-builder-async-entity-example />
+      </hd-example-tabs>
+
+      <h2>Server-dispatch recipe</h2>
+      <p>
+        The complete application expression array can be sent directly to a server adapter. This
+        example keeps the Owner Search Resource separate from request dispatch and combines its
+        domain entity expression with the same projected date-range editor. Type
+        <code>error</code> in Owner search to exercise application-owned error presentation.
+      </p>
+      <hd-example-tabs [code]="serverDispatchCode" previewClass="min-h-[480px]">
+        <app-filter-builder-server-dispatch-example />
       </hd-example-tabs>
 
       <h2>Structured date-range recipe</h2>
@@ -113,6 +153,27 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
           <code>[identify]</code> is required. Return a stable <code>string</code> or
           <code>number</code> that survives controlled object recreation and array reordering; the
           feature never fingerprints generic values.
+        </li>
+      </ul>
+
+      <h2>Migrate from Filter Bar</h2>
+      <ul>
+        <li>
+          Replace each built-in field <code>kind</code> with an application-owned typed descriptor
+          and projected editor template. Text, options, entity, and date range remain recipes.
+        </li>
+        <li>
+          Replace <code>{{ '{' }} key, operator: 'eq', value {{ '}' }}</code> tokens with your domain
+          expression type extending <code>HellFilter</code>, including a stable application id.
+        </li>
+        <li>
+          Move entity query, debounce, cancellation, loading, empty, and error policy into a public
+          <code>Search Resource</code> consumed by the projected editor.
+        </li>
+        <li>
+          Import the feature and its stylesheet from
+          <code>@hell-ui/angular/features/filter-builder</code>; the removed
+          <code>@hell-ui/angular/filter-bar</code> entry point has no compatibility alias.
         </li>
       </ul>
 
@@ -185,7 +246,9 @@ import filterBuilderRecipesExampleCodeRaw from './examples/recipes.example.ts?ra
 })
 export class FilterBuilderPage {
   protected readonly recipesCode = filterBuilderRecipesExampleCodeRaw;
+  protected readonly tanStackCode = filterBuilderTanStackExampleCodeRaw;
   protected readonly asyncEntityCode = filterBuilderAsyncEntityExampleCodeRaw;
+  protected readonly serverDispatchCode = filterBuilderServerDispatchExampleCodeRaw;
   protected readonly dateRangeCode = filterBuilderDateRangeExampleCodeRaw;
   protected readonly contractCode = `interface PeopleFilter
   extends HellFilter<'status', 'is' | 'isNot', 'active' | 'paused'> {

@@ -1081,18 +1081,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hell-icon hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItem hellMenuItemIcon hellMenuItemTrailing hellMenuItemCheckbox hellMenuItemIndicator hellMenuItemRadioGroup hellMenuItemRadio hellMenuSeparator hellSubmenuTrigger ui part style map data-hover data-focus-visible bg-hell-primary-soft rounded-hell-lg refine',
  },
  {
- title:'Filter Bar: TanStack Filter Controls',
- path:'/components/filter-bar',
- detail:'components/filter-bar/examples/tanstack.example.ts',
+ title:'Filter Builder: TanStack Filter Controls',
+ path:'/components/filter-builder',
+ detail:'components/filter-builder/examples/tanstack.example.ts',
  terms:
-'filter bar filter-bar tanstack examples hell-filter-bar HellFilterField HellFilterToken controlled value valueChange text options free text $text columnFilters globalFilter Table Shell toolbar Filter Controls tokens chips combobox listbox popover',
+'filter builder filter-builder TanStack Table Shell toolbar Filter Controls HellFilter HellFilterFieldDescriptor projected editor application owned globalFilter columnFilters text options multiple team OR controlled value valueChange identify',
  },
  {
- title:'Filter Bar: Server dispatch',
- path:'/components/filter-bar',
- detail:'components/filter-bar/examples/server-dispatch.example.ts',
+ title:'Filter Builder: Server dispatch',
+ path:'/components/filter-builder',
+ detail:'components/filter-builder/examples/server-dispatch.example.ts',
  terms:
-'filter bar filter-bar server dispatch entity date range dateRange async HellSearchSource abort signal HellFilterEntityOption debounceMs limit searchError loading empty error owner work orders controlled serializable JSON ISO open ended request',
+'filter builder filter-builder server dispatch entity date range async external hellSearchResource Search Resource debounce abort signal cancellation loading empty error owner work orders controlled expressions JSON ISO open ended request projected editor',
  },
  {
  title:'Filter Builder: Text, options, and custom operator',
@@ -2146,11 +2146,11 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  terms:'i18n labels localization aria-label accessibility provideHellLabels HELL_PAGINATION_LABELS HELL_SPINNER_LABELS labels',
  },
  {
- title:'Filter Bar controlled tokens',
- path:'/components/filter-bar',
- detail:'HellFilterBar, HellFilterField, HellFilterToken, valueChange',
+ title:'Filter Builder controlled expressions',
+ path:'/components/filter-builder',
+ detail:'HellFilterBuilder, HellFilter, HellFilterFieldDescriptor, HellFilterBuilderEditorContext',
  terms:
-'filter-bar HellFilterBar HellFilterField HellFilterTextField HellFilterOptionsField HellFilterEntityField HellFilterDateRangeField HellFilterOption HellFilterEntityOption HellFilterEntityValue HellFilterDateRangeValue HellFilterTokenValue HellFilterToken HellFilterEntitySearchError HELL_FILTER_TEXT_KEY controlled serializable operator eq multiple freeTextDebounceMs entityDebounceMs debounceMs limit searchError loading empty error ui HellFilterBarPart HellFilterBarUi Label Contract',
+'filter-builder HellFilterBuilder HellFilter HellFilterFieldDescriptor HellFilterBuilderEditorContext HELL_FILTER_BUILDER_IMPORTS controlled expressions valueChange identify projected editor display validate commit cancel application owned Search Resource ui HellFilterBuilderPart HellFilterBuilderUi Label Contract',
  },
  {
  title:'Combobox slots',

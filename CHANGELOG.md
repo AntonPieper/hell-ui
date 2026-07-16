@@ -27,9 +27,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   restoration, and polite announcements. Applications own field/operator/value
   unions, drafts, rendering, display, validation, and external Search Resources;
   text, options, entity, date-range, and custom operators remain recipes rather
-  than built-in kinds. This addition does not change or re-export the existing
-  Filter Bar contract; consumers can adopt the projected feature deliberately
-  by supplying stable expression ids, descriptors, and editor templates.
+  than built-in kinds. The feature is the migration target for the retired Filter
+  Bar contract;
+  consumers adopt it deliberately by supplying stable expression ids,
+  descriptors, and editor templates.
   Docs, cross-browser/axe contracts, the API report, and an isolated packed
   minimal-dependency consumer cover the new boundary. Closes #201.
 - The Chip entry point now exports the behavior-only `input[hellChipInput]`
@@ -830,6 +831,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Removed the closed `@hell-ui/angular/filter-bar` Composite Package
+  Entry Point and its stylesheet. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Migrate
+  `HellFilterField` kind declarations and `HellFilterToken` values to
+  application-owned `HellFilter` unions, typed `HellFilterFieldDescriptor`
+  declarations, stable `[identify]` ids, and projected
+  `hellFilterBuilderEditor` templates from
+  `@hell-ui/angular/features/filter-builder`. Text, fixed options, entities,
+  and date ranges are recipes rather than built-in kinds; replace the
+  equality-only operator with domain operators. Move entity source, debounce,
+  cancellation, loading, empty, and error policy into an application-owned
+  public Search Resource. There are no compatibility exports, renderer seams,
+  or generic mode flags. The migrated docs retain TanStack filter controls and
+  server dispatch without moving table or request policy into the Feature.
+  Closes #202.
 - BREAKING: `@hell-ui/angular/toolbar` now separates ordinary roving-focus
   toolbars from measured overflow. The former `hell-toolbar` / `HellToolbar`
   composite is `hell-overflow-toolbar` / `HellOverflowToolbar`; its

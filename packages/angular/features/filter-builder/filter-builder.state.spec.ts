@@ -21,7 +21,12 @@ type DateRangeFilter = IdentifiedFilter<
   'between',
   { readonly from: string | null; readonly to: string | null }
 >;
-type ExampleFilter = NameFilter | StatusFilter | DateRangeFilter;
+type OwnerFilter = IdentifiedFilter<
+  'owner',
+  'is',
+  { readonly id: string; readonly name: string }
+>;
+type ExampleFilter = NameFilter | StatusFilter | DateRangeFilter | OwnerFilter;
 
 const identify = (filter: ExampleFilter) => filter.id;
 
@@ -45,6 +50,13 @@ const createdField: HellFilterFieldDescriptor<DateRangeFilter> = {
   label: 'Created',
   display: (filter) => `${filter.value.from ?? 'Any'}–${filter.value.to ?? 'Any'}`,
   validate: (filter) => Boolean(filter.value.from || filter.value.to),
+};
+
+const ownerField: HellFilterFieldDescriptor<OwnerFilter> = {
+  field: 'owner',
+  label: 'Owner',
+  display: (filter) => `Owner is ${filter.value.name}`,
+  validate: (filter) => Boolean(filter.value.id && filter.value.name),
 };
 
 describe('Filter Builder controlled state', () => {
@@ -198,5 +210,22 @@ describe('Filter Builder controlled state', () => {
 
     expect(result?.value).toEqual([filter]);
     expect(createdField.display(filter)).toBe('Any–2026-07-15');
+  });
+
+  it('keeps application-owned entity identity and display metadata inside the recipe', () => {
+    const filter: OwnerFilter = {
+      id: 'owner-filter-1',
+      field: 'owner',
+      operator: 'is',
+      value: { id: 'owner-42', name: 'Grace Hopper' },
+    };
+    const result = commitHellFilterBuilderValue<ExampleFilter>([], {
+      mode: 'create',
+      descriptor: ownerField,
+      filter,
+    }, identify);
+
+    expect(result?.value).toEqual([filter]);
+    expect(ownerField.display(filter)).toBe('Owner is Grace Hopper');
   });
 });
