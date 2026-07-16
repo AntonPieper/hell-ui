@@ -126,6 +126,11 @@
       "output": "time-input"
     },
     {
+      "glob": "time-picker.ts",
+      "input": "time-picker",
+      "output": "time-picker"
+    },
+    {
       "glob": "number-input.ts",
       "input": "number-input",
       "output": "number-input"

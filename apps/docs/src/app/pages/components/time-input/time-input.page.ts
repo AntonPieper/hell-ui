@@ -55,9 +55,9 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <code>hell-time-input</code> is a Typed Value Input: with the default adapter it renders a
         native <code>&lt;input type="time"&gt;</code> so the browser rejects illegal strings and
         exposes its own platform time UI, paired with a clock-trigger button that opens a compact
-        popover picker for the same value. The picker uses segmented spinbuttons for hour, minute,
-        and optional second, plus quick minute presets — a second, discoverable path to the same
-        commit pipeline as typing.
+        popover containing <code>hell-time-picker</code> for the same value. The composed picker
+        uses segmented spinbuttons for hour, minute, and optional second, plus quick minute
+        presets — a second, discoverable path to the same commit pipeline as typing.
       </p>
       <p>
         It implements <code>ControlValueAccessor</code> and <code>Validator</code>, so it drops
@@ -65,6 +65,12 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         a structured <code>HellTimeValue</code>. Reach for it for business time entry — shift
         starts, reminder times, appointment slots — anywhere a locale-guessing free-text field would
         make illegal times too easy to type.
+      </p>
+      <p>
+        Reach for the narrower <code>&#64;hell-ui/angular/time-picker</code> entry point when the
+        segmented selection surface is the whole interaction. Time Picker intentionally omits
+        text parsing, forms, field association, triggers, and Popover; Time Input keeps owning
+        those contracts and composes the picker internally.
       </p>
 
       <h2>Basic</h2>
@@ -118,6 +124,12 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         Refinement classes merge deterministically on top of the recipe through Hell's Tailwind
         merge, so they win over conflicting recipe utilities. The picker panel and its contents
         stay part of the same Part Style Map even though they render in a popover outside the host.
+        Legacy keys remain stable: <code>pickerPanel</code> continues to style the real Popover
+        panel, while <code>pickerHeader</code>, <code>pickerReadout</code>, and the remaining
+        <code>picker*</code> keys adapt to the composed picker's matching unprefixed anatomy.
+        <code>minutePresets</code> and <code>minutePreset</code> remain unchanged. Importing
+        <code>&#64;hell-ui/angular/time-input/styles.css</code> also imports the Time Picker recipe,
+        so existing consumers do not add a stylesheet.
       </p>
       <table class="hd-doc-table">
         <thead>
@@ -251,7 +263,8 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <li>
           <code>HELL_TIME_INPUT_LABELS</code>: override the Label Contract strings for the
           clock trigger, unit spinbuttons, step buttons, and minute presets
-          (<code>HellTimeInputLabels</code>).
+          (<code>HellTimeInputLabels</code>). Existing picker-label overrides are adapted into the
+          composed Time Picker, so this contract remains source-compatible.
         </li>
       </ul>
 

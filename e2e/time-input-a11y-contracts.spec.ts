@@ -10,9 +10,12 @@ async function openReminderPicker(page: Page) {
     .locator('hell-time-input:has(#reminder-time)')
     .getByRole('button', { name: 'Choose time' });
   await trigger.click();
-  const hours = page.getByRole('spinbutton', { name: 'Hours' });
+  const panel = page.locator('div[hellPopover][data-slot="pickerPanel"]');
+  const picker = panel.locator('hell-time-picker');
+  await expect(picker).toBeVisible();
+  const hours = picker.getByRole('spinbutton', { name: 'Hours' });
   await expect(hours).toBeVisible();
-  return { trigger, hours };
+  return { trigger, panel, picker, hours };
 }
 
 test.describe('time input accessibility contract', () => {
@@ -53,8 +56,8 @@ test.describe('time input accessibility contract', () => {
     await gotoTimeInput(page);
 
     const input = page.locator('#reminder-time');
-    const { hours } = await openReminderPicker(page);
-    const minutes = page.getByRole('spinbutton', { name: 'Minutes' });
+    const { picker, hours } = await openReminderPicker(page);
+    const minutes = picker.getByRole('spinbutton', { name: 'Minutes' });
 
     await expect(hours).toBeFocused();
 
@@ -74,5 +77,49 @@ test.describe('time input accessibility contract', () => {
     await page.getByRole('button', { name: 'Set minutes to 45' }).click();
     await expect(input).toHaveValue('00:45');
     await expect(minutes).toHaveAttribute('aria-valuenow', '45');
+  });
+
+  test('retains the original panel ownership and exact legacy picker slots', async ({ page }) => {
+    await gotoTimeInput(page);
+
+    const { panel, picker } = await openReminderPicker(page);
+    await expect(panel).toHaveAttribute('data-slot', 'pickerPanel');
+    await expect(panel).toHaveClass(/\bgrid\b/);
+    await expect(panel).toHaveClass(/\bp-hell-3\b/);
+    await expect(picker).not.toHaveAttribute('data-slot', /.+/);
+    await expect.poll(() => picker.evaluate((element) => getComputedStyle(element).display)).toBe(
+      'contents',
+    );
+
+    const renderedSlots = await panel.locator('[data-slot]').evaluateAll((elements) => [
+      ...new Set(elements.map((element) => element.getAttribute('data-slot'))),
+    ]);
+    expect(new Set(renderedSlots)).toEqual(
+      new Set([
+        'pickerHeader',
+        'pickerReadout',
+        'pickerUnits',
+        'pickerUnit',
+        'pickerUnitLabel',
+        'pickerUnitControl',
+        'pickerUnitValue',
+        'pickerUnitStep',
+        'minutePresets',
+        'minutePreset',
+      ]),
+    );
+    for (const canonicalSlot of [
+      'root',
+      'header',
+      'readout',
+      'units',
+      'unit',
+      'unitLabel',
+      'unitControl',
+      'unitValue',
+      'unitStep',
+    ]) {
+      await expect(panel.locator(`[data-slot="${canonicalSlot}"]`)).toHaveCount(0);
+    }
   });
 });

@@ -7,6 +7,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the narrow `@hell-ui/angular/time-picker` Composite Module Entry Point.
+  `hell-time-picker` owns structured `HellTimeValue | null` selection, optional
+  seconds, fixed clock bounds, segmented keyboard navigation, minute presets,
+  accessibility labels, and an eleven-part Part Style Map without taking on
+  parsing, forms, field, trigger, or Popover APIs. Time Input now composes the
+  same picker renderer and Interaction State Machine while retaining its
+  existing CVA, parsing, dismissal, focus, label, styling, and legacy
+  `data-slot` contracts. Focused unit, cross-browser/axe, docs, API-report, and
+  isolated packed-consumer coverage protect both entry points. Closes #197.
 - Added the optional `@hell-ui/angular/features/filter-builder` Feature Package
   Entry Point. `hell-filter-builder` accepts generic readonly
   `HellFilter<TField, TOperator, TValue>` expressions and application-owned

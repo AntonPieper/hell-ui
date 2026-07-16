@@ -2,16 +2,28 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { provideHellLabels } from '@hell-ui/angular/core';
 
 import {
   HellTimeInput,
   HELL_DEFAULT_TIME_INPUT_ADAPTER,
+  HELL_TIME_INPUT_LABELS,
   provideHellTimeInputAdapter,
+  type HellTimeInputAdapter,
   type HellTimeInputPart,
   type HellTimeInputUi,
   type HellTimeValue,
 } from './time-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+
+{
+  const elementPrototype = HTMLElement.prototype as HTMLElement & {
+    getAnimations?: () => readonly Animation[];
+  };
+  if (typeof elementPrototype.getAnimations !== 'function') {
+    elementPrototype.getAnimations = () => [];
+  }
+}
 
 @Component({
   imports: [HellTimeInput],
@@ -114,6 +126,54 @@ class TimeInputCustomAdapterHost {
   values: Array<HellTimeValue | null> = [];
 }
 
+const TRANSFORMING_TIME_INPUT_ADAPTER = {
+  parseText: () => ({ valid: false }) as const,
+  format: (value) =>
+    value ? `${value.hour}h${value.minute.toString().padStart(2, '0')}` : '',
+  normalize: (value) => {
+    if (!value) return null;
+    if (value.minute === 15) return { ...value, minute: 20 };
+    if (value.minute === 20) return { ...value, minute: 25 };
+    return value;
+  },
+  isSameValue: (a, b) =>
+    a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
+} satisfies HellTimeInputAdapter;
+
+@Component({
+  imports: [ReactiveFormsModule, HellTimeInput],
+  providers: [provideHellTimeInputAdapter(TRANSFORMING_TIME_INPUT_ADAPTER)],
+  template: `<hell-time-input
+    [formControl]="control"
+    aria-label="Transforming time"
+    (valueChange)="values.push($event)"
+  />`,
+})
+class TimeInputTransformingAdapterHost {
+  readonly control = new FormControl<HellTimeValue | null>({ hour: 12, minute: 0, second: 0 });
+  values: Array<HellTimeValue | null> = [];
+}
+
+@Component({
+  imports: [HellTimeInput],
+  providers: [provideHellTimeInputAdapter(TRANSFORMING_TIME_INPUT_ADAPTER)],
+  template: `<hell-time-input
+    [value]="value()"
+    aria-label="Signal transforming time"
+    (valueChange)="onValueChange($event)"
+  />`,
+})
+class TimeInputSignalTransformingAdapterHost {
+  readonly value = signal<HellTimeValue | null>({ hour: 12, minute: 0, second: 0 });
+  substituteWith: HellTimeValue | undefined;
+  values: Array<HellTimeValue | null> = [];
+
+  onValueChange(value: HellTimeValue | null): void {
+    this.values.push(value);
+    this.value.set(this.substituteWith ?? value);
+  }
+}
+
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
   template: `<hell-time-input
@@ -149,6 +209,26 @@ class TimeInputCustomValidationHost {
   readonly control = new FormControl<HellTimeValue | null>({ hour: 9, minute: 15, second: 0 });
 }
 
+@Component({
+  imports: [HellTimeInput],
+  providers: [
+    provideHellLabels(HELL_TIME_INPUT_LABELS, {
+      hours: 'Stunden',
+      minutes: 'Minuten',
+      seconds: 'Sekunden',
+      selectedTime: (time) => `Gewählte Zeit ${time}`,
+      decreaseUnit: (unit) => `${unit} verringern`,
+      increaseUnit: (unit) => `${unit} erhöhen`,
+      minutePresets: 'Minutenvorgaben',
+      minutePreset: (minute) => `Minute ${minute}`,
+    }),
+  ],
+  template: `<hell-time-input aria-label="Lokalisierte Zeit" seconds [value]="value" />`,
+})
+class LocalizedTimeInputHost {
+  readonly value: HellTimeValue = { hour: 8, minute: 15, second: 30 };
+}
+
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -159,13 +239,22 @@ describe('HellTimeInput', () => {
         TimeInputFormHost,
         TimeInputBlurFormHost,
         TimeInputCustomAdapterHost,
+        TimeInputTransformingAdapterHost,
+        TimeInputSignalTransformingAdapterHost,
         TimeInputValidationHost,
         TimeInputCustomValidationHost,
+        LocalizedTimeInputHost,
       ],
     }).compileComponents();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    if (document.body.querySelector('[data-slot="pickerPanel"]')) {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
     const active = document.activeElement;
     if (active instanceof HTMLElement && active !== document.body) {
       active.blur();
@@ -228,7 +317,7 @@ describe('HellTimeInput', () => {
     expect(trigger.classList.contains('text-hell-danger')).toBe(true);
   });
 
-  it('merges ui object classes into portaled picker and repeated preset parts', () => {
+  it('maps legacy ui object classes into the composed portaled picker parts', async () => {
     const fixture = TestBed.createComponent(TimeInputPartStyleHost);
     fixture.componentInstance.ui.set({
       pickerPanel: 'border-hell-danger p-hell-6',
@@ -236,16 +325,26 @@ describe('HellTimeInput', () => {
     });
     fixture.detectChanges();
 
-    const component = timeInputComponent(fixture);
-    const panelClass = timeInputPartClass(component, 'pickerPanel');
-    const presetClass = timeInputPartClass(component, 'minutePreset');
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForElement<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="pickerPanel"]',
+    );
+    const picker = panel.querySelector('hell-time-picker');
+    const preset = panel.querySelector('[data-slot="minutePreset"]');
+    if (!(picker instanceof HTMLElement)) throw new Error('Expected composed time picker.');
+    if (!(preset instanceof HTMLElement)) throw new Error('Expected minute preset.');
 
-    expect(panelClass).toContain('border-hell-danger');
-    expect(panelClass).toContain('p-hell-6');
-    expect(panelClass).not.toContain('p-hell-3');
-    expect(presetClass).toContain('rounded-hell-md');
-    expect(presetClass).toContain('text-lg');
-    expect(presetClass).not.toContain('text-xs');
+    expect(panel.className).toContain('border-hell-danger');
+    expect(panel.className).toContain('p-hell-6');
+    expect(panel.className).not.toContain('p-hell-3');
+    expect(picker.className).toContain('contents');
+    expect(picker.className).not.toContain('border-hell-danger');
+    expect(picker.className).not.toContain('p-hell-6');
+    expect(preset.className).toContain('rounded-hell-md');
+    expect(preset.className).toContain('text-lg');
+    expect(preset.className).not.toContain('text-xs');
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {
@@ -359,19 +458,19 @@ describe('HellTimeInput', () => {
     expect(textInput(fixture.nativeElement).placeholder).toBe('HH:mm:ss');
   });
 
-  it('syncs picker unit values with parsed minutes/seconds', () => {
+  it('syncs the composed picker with parsed minutes and seconds', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    const picker = timeInputProbe(timeInputComponent(fixture));
     input.value = '10:07';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(picker.unitValue('hour')).toBe(10);
-    expect(picker.unitValue('minute')).toBe(7);
+    const panel = await openTimePicker(fixture);
+    expect(spinbutton(panel, 'Hours').getAttribute('aria-valuenow')).toBe('10');
+    expect(spinbutton(panel, 'Minutes').getAttribute('aria-valuenow')).toBe('7');
 
     fixture.componentInstance.seconds.set(true);
     fixture.detectChanges();
@@ -381,7 +480,9 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(picker.unitValue('second')).toBe(13);
+    expect(spinbutton(panel, 'Seconds').getAttribute('aria-valuenow')).toBe('13');
+    expect(panel.querySelector('[data-slot="pickerUnit"][data-unit="second"]')).not.toBeNull();
+    expect(panel.querySelector('[data-slot="unit"]')).toBeNull();
   });
 
   it('keeps invalid custom-adapter text visible without emitting', () => {
@@ -430,71 +531,137 @@ describe('HellTimeInput', () => {
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
   });
 
-  it('derives compact segmented picker labels, ranges, and parts', () => {
+  it('keeps the outer panel and exact legacy slots while suppressing canonical picker slots', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.componentInstance.seconds.set(true);
     fixture.detectChanges();
 
     const component = timeInputComponent(fixture);
-    const picker = timeInputProbe(component);
+    const panel = await openTimePicker(fixture);
+    const picker = panel.querySelector('hell-time-picker');
+    if (!(picker instanceof HTMLElement)) throw new Error('Expected composed time picker.');
+    const hours = spinbutton(panel, 'Hours');
+    const labelId = hours.getAttribute('aria-labelledby');
 
-    expect(picker.visibleUnits()).toEqual(['hour', 'minute', 'second']);
-    expect(picker.unitMax('hour')).toBe(23);
-    expect(picker.unitValue('hour')).toBe(8);
-    expect(picker.unitValue('minute')).toBe(30);
-    expect(picker.unitValue('second')).toBe(0);
-    expect(picker.unitValueText('hour')).toBe('08 hours');
-    expect(picker.unitLabelId('hour')).toBe('start-time-input-hour-label');
-    expect(picker.selectedTimeLabel()).toBe('Selected time 08:30:00');
-    expect(picker.minutePresetLabel(30)).toBe('Set minutes to 30');
+    expect(panel.getAttribute('data-slot')).toBe('pickerPanel');
+    expect(picker.getAttribute('data-slot')).toBeNull();
+    expect(picker.className).toContain('contents');
+    expect(hours.getAttribute('aria-valuemax')).toBe('23');
+    expect(hours.getAttribute('aria-valuenow')).toBe('8');
+    expect(spinbutton(panel, 'Minutes').getAttribute('aria-valuenow')).toBe('30');
+    expect(spinbutton(panel, 'Seconds').getAttribute('aria-valuenow')).toBe('0');
+    expect(hours.getAttribute('aria-valuetext')).toBe('08 hours');
+    expect(labelId).not.toBeNull();
+    expect(document.getElementById(labelId ?? '')?.textContent?.trim()).toBe('Hours');
+    expect(panel.querySelector('[data-slot="pickerReadout"]')?.getAttribute('aria-label')).toBe(
+      'Selected time 08:30:00',
+    );
+    expect(button(panel, 'Set minutes to 30')).not.toBeNull();
+    expect(panel.className).toContain('grid');
+    expect(panel.querySelector('[data-slot="minutePresets"]')?.className).toContain('grid-cols-4');
     expect(timeInputPartClass(component, 'pickerPanel')).toContain('grid');
     expect(timeInputPartClass(component, 'minutePresets')).toContain('grid-cols-4');
+
+    const legacySlots = new Set(
+      Array.from(panel.querySelectorAll<HTMLElement>('[data-slot]')).map((element) =>
+        element.getAttribute('data-slot'),
+      ),
+    );
+    expect(legacySlots).toEqual(
+      new Set([
+        'pickerHeader',
+        'pickerReadout',
+        'pickerUnits',
+        'pickerUnit',
+        'pickerUnitLabel',
+        'pickerUnitControl',
+        'pickerUnitValue',
+        'pickerUnitStep',
+        'minutePresets',
+        'minutePreset',
+      ]),
+    );
+    for (const canonicalSlot of [
+      'root',
+      'header',
+      'readout',
+      'units',
+      'unit',
+      'unitLabel',
+      'unitControl',
+      'unitValue',
+      'unitStep',
+    ]) {
+      expect(panel.querySelector(`[data-slot="${canonicalSlot}"]`), canonicalSlot).toBeNull();
+    }
   });
 
-  it('supports picker keyboard changes and quick minute commits', () => {
+  it('supports composed picker keyboard changes and quick minute commits', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
-    const picker = timeInputProbe(timeInputComponent(fixture));
+    const panel = await openTimePicker(fixture);
+    const hours = spinbutton(panel, 'Hours');
+    const minutes = spinbutton(panel, 'Minutes');
 
-    expect(dispatchPickerKey(picker, 'hour', 'ArrowUp').defaultPrevented).toBe(true);
+    expect(dispatchKey(hours, 'ArrowUp').defaultPrevented).toBe(true);
     fixture.detectChanges();
     expect(textInput(fixture.nativeElement).value).toBe('09:30');
-    expect(picker.unitValue('hour')).toBe(9);
+    expect(hours.getAttribute('aria-valuenow')).toBe('9');
 
-    dispatchPickerKey(picker, 'hour', 'Home');
+    dispatchKey(hours, 'Home');
     fixture.detectChanges();
     expect(textInput(fixture.nativeElement).value).toBe('00:30');
 
-    dispatchPickerKey(picker, 'hour', 'End');
+    dispatchKey(hours, 'End');
     fixture.detectChanges();
     expect(textInput(fixture.nativeElement).value).toBe('23:30');
 
-    dispatchPickerKey(picker, 'minute', 'PageDown');
+    dispatchKey(minutes, 'PageDown');
     fixture.detectChanges();
     expect(textInput(fixture.nativeElement).value).toBe('23:25');
 
-    picker.setUnit('minute', 45);
+    button(panel, 'Set minutes to 45').click();
     fixture.detectChanges();
     expect(textInput(fixture.nativeElement).value).toBe('23:45');
     expect(fixture.componentInstance.values.at(-1)).toEqual({ hour: 23, minute: 45, second: 0 });
   });
 
-  it('keeps unsupported picker keys from changing the value', () => {
+  it('keeps unsupported composed picker keys from changing the value', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
-    const picker = timeInputProbe(timeInputComponent(fixture));
+    const panel = await openTimePicker(fixture);
+    const hours = spinbutton(panel, 'Hours');
 
-    const event = dispatchPickerKey(picker, 'hour', 'x');
+    const event = dispatchKey(hours, 'x');
     fixture.detectChanges();
 
     expect(event.defaultPrevented).toBe(false);
     expect(textInput(fixture.nativeElement).value).toBe('08:30');
-    expect(picker.unitValue('hour')).toBe(8);
+    expect(hours.getAttribute('aria-valuenow')).toBe('8');
+  });
+
+  it('adapts legacy Time Input label overrides into the composed picker', async () => {
+    const fixture = TestBed.createComponent(LocalizedTimeInputHost);
+    fixture.detectChanges();
+
+    const panel = await openTimePicker(fixture);
+    expect(spinbutton(panel, 'Stunden').getAttribute('aria-valuetext')).toBe('08 stunden');
+    expect(spinbutton(panel, 'Minuten')).not.toBeNull();
+    expect(spinbutton(panel, 'Sekunden')).not.toBeNull();
+    expect(panel.querySelector('[data-slot="pickerReadout"]')?.getAttribute('aria-label')).toBe(
+      'Gewählte Zeit 08:15:30',
+    );
+    expect(button(panel, 'Stunden verringern')).not.toBeNull();
+    expect(button(panel, 'Stunden erhöhen')).not.toBeNull();
+    expect(panel.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe(
+      'Minutenvorgaben',
+    );
+    expect(button(panel, 'Minute 30')).not.toBeNull();
   });
 
   it('drops in-progress typing when the bound value changes externally', async () => {
@@ -530,6 +697,119 @@ describe('HellTimeInput', () => {
 
     expect(fixture.componentInstance.values).toEqual([{ hour: 12, minute: 0, second: 0 }]);
     expect(input.value).toBe('12h00');
+  });
+
+  it('uses custom adapter formatting in the composed picker readout and announcement', async () => {
+    const fixture = TestBed.createComponent(TimeInputCustomAdapterHost);
+    fixture.componentInstance.value.set({ hour: 12, minute: 0, second: 0 });
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const panel = await openTimePicker(fixture);
+    const readout = panel.querySelector('[data-slot="pickerReadout"]');
+    if (!(readout instanceof HTMLElement)) throw new Error('Expected picker readout.');
+
+    expect(input.value).toBe('12h00');
+    expect(readout.textContent?.trim()).toBe('12h00');
+    expect(readout.getAttribute('aria-label')).toBe('Selected time 12h00');
+    expect(fixture.componentInstance.values).toEqual([]);
+  });
+
+  it('restores the composed picker when a custom adapter rejects its candidate', async () => {
+    const fixture = TestBed.createComponent(TimeInputCustomAdapterHost);
+    const accepted = { hour: 12, minute: 0, second: 0 } as const;
+    fixture.componentInstance.value.set(accepted);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const panel = await openTimePicker(fixture);
+    const hours = spinbutton(panel, 'Hours');
+    const minutes = spinbutton(panel, 'Minutes');
+    const readout = panel.querySelector('[data-slot="pickerReadout"]');
+    if (!(readout instanceof HTMLElement)) throw new Error('Expected picker readout.');
+
+    expect(dispatchKey(hours, 'ArrowDown').defaultPrevented).toBe(true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(hours.getAttribute('aria-valuenow')).toBe('12');
+    expect(minutes.getAttribute('aria-valuenow')).toBe('0');
+    expect(readout.textContent?.trim()).toBe('12h00');
+    expect(readout.getAttribute('aria-label')).toBe('Selected time 12h00');
+    expect(input.value).toBe('12h00');
+    expect(fixture.componentInstance.value()).toEqual(accepted);
+    expect(fixture.componentInstance.values).toEqual([]);
+  });
+
+  it('commits a transformed custom-adapter picker candidate exactly once', async () => {
+    const fixture = TestBed.createComponent(TimeInputTransformingAdapterHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const panel = await openTimePicker(fixture);
+    const minutes = spinbutton(panel, 'Minutes');
+    const readout = panel.querySelector('[data-slot="pickerReadout"]');
+    if (!(readout instanceof HTMLElement)) throw new Error('Expected picker readout.');
+
+    button(panel, 'Set minutes to 15').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const accepted = { hour: 12, minute: 20, second: 0 } as const;
+    expect(minutes.getAttribute('aria-valuenow')).toBe('20');
+    expect(readout.textContent?.trim()).toBe('12h20');
+    expect(readout.getAttribute('aria-label')).toBe('Selected time 12h20');
+    expect(input.value).toBe('12h20');
+    expect(fixture.componentInstance.control.value).toEqual(accepted);
+    expect(fixture.componentInstance.values).toEqual([accepted]);
+  });
+
+  it('recognizes a deferred signal-bound echo of an accepted picker candidate', async () => {
+    const fixture = TestBed.createComponent(TimeInputSignalTransformingAdapterHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const panel = await openTimePicker(fixture);
+    const minutes = spinbutton(panel, 'Minutes');
+    const readout = panel.querySelector('[data-slot="pickerReadout"]');
+    if (!(readout instanceof HTMLElement)) throw new Error('Expected picker readout.');
+
+    button(panel, 'Set minutes to 15').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const accepted = { hour: 12, minute: 20, second: 0 } as const;
+    expect(fixture.componentInstance.value()).toEqual(accepted);
+    expect(minutes.getAttribute('aria-valuenow')).toBe('20');
+    expect(readout.textContent?.trim()).toBe('12h20');
+    expect(readout.getAttribute('aria-label')).toBe('Selected time 12h20');
+    expect(input.value).toBe('12h20');
+    expect(fixture.componentInstance.values).toEqual([accepted]);
+  });
+
+  it('lets a signal-bound parent substitute a genuinely different picker value', async () => {
+    const fixture = TestBed.createComponent(TimeInputSignalTransformingAdapterHost);
+    const substituted = { hour: 18, minute: 40, second: 0 } as const;
+    fixture.componentInstance.substituteWith = substituted;
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const panel = await openTimePicker(fixture);
+    const minutes = spinbutton(panel, 'Minutes');
+    const readout = panel.querySelector('[data-slot="pickerReadout"]');
+    if (!(readout instanceof HTMLElement)) throw new Error('Expected picker readout.');
+
+    button(panel, 'Set minutes to 15').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const emitted = { hour: 12, minute: 20, second: 0 } as const;
+    expect(fixture.componentInstance.value()).toEqual(substituted);
+    expect(minutes.getAttribute('aria-valuenow')).toBe('40');
+    expect(readout.textContent?.trim()).toBe('18h40');
+    expect(readout.getAttribute('aria-label')).toBe('Selected time 18h40');
+    expect(input.value).toBe('18h40');
+    expect(fixture.componentInstance.values).toEqual([emitted]);
   });
 
   it('exposes validator errors for invalid custom-adapter drafts', () => {
@@ -649,25 +929,29 @@ function textInput(root: HTMLElement): HTMLInputElement {
   return input;
 }
 
-type HellTimeUnit = 'hour' | 'minute' | 'second';
-
-type TimeInputProbe = {
-  part(part: HellTimeInputPart): string;
-  visibleUnits(): readonly HellTimeUnit[];
-  unitLabelId(unit: HellTimeUnit): string;
-  unitValue(unit: HellTimeUnit): number;
-  unitMax(unit: HellTimeUnit): number;
-  unitValueText(unit: HellTimeUnit): string;
-  selectedTimeLabel(): string;
-  minutePresetLabel(minute: number): string;
-  onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void;
-  setUnit(unit: HellTimeUnit, n: number): void;
-};
-
-function dispatchPickerKey(picker: TimeInputProbe, unit: HellTimeUnit, key: string): KeyboardEvent {
+function dispatchKey(target: HTMLElement, key: string): KeyboardEvent {
   const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
-  picker.onPickerSpinKeydown(event, unit);
+  target.dispatchEvent(event);
   return event;
+}
+
+function spinbutton(root: ParentNode, name: string): HTMLElement {
+  const element = Array.from(root.querySelectorAll<HTMLElement>('[role="spinbutton"]')).find(
+    (candidate) => {
+      const labelledby = candidate.getAttribute('aria-labelledby');
+      return labelledby ? document.getElementById(labelledby)?.textContent?.trim() === name : false;
+    },
+  );
+  if (!element) throw new Error(`Expected ${name} spinbutton.`);
+  return element;
+}
+
+function button(root: ParentNode, name: string): HTMLButtonElement {
+  const element = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+    (candidate) => candidate.getAttribute('aria-label') === name,
+  );
+  if (!element) throw new Error(`Expected ${name} button.`);
+  return element;
 }
 
 function triggerButton(root: HTMLElement): HTMLButtonElement {
@@ -682,10 +966,6 @@ function timeInputComponent(fixture: ComponentFixture<unknown>): HellTimeInput {
   return debugElement.componentInstance as HellTimeInput;
 }
 
-function timeInputProbe(component: HellTimeInput): TimeInputProbe {
-  return component as unknown as TimeInputProbe;
-}
-
 function timeInputHost(root: HTMLElement): HTMLElement {
   const host = root.querySelector('hell-time-input');
   if (!(host instanceof HTMLElement)) throw new Error('Expected time input host.');
@@ -693,5 +973,27 @@ function timeInputHost(root: HTMLElement): HTMLElement {
 }
 
 function timeInputPartClass(component: HellTimeInput, part: HellTimeInputPart): string {
-  return timeInputProbe(component).part(part);
+  return (component as unknown as { part(part: HellTimeInputPart): string }).part(part);
+}
+
+async function openTimePicker(fixture: ComponentFixture<unknown>): Promise<HTMLElement> {
+  triggerButton(fixture.nativeElement).click();
+  return waitForElement(fixture, document.body, '[data-slot="pickerPanel"]');
+}
+
+async function waitForElement<T extends HTMLElement>(
+  fixture: ComponentFixture<unknown>,
+  root: ParentNode,
+  selector: string,
+): Promise<T> {
+  const timeout = Date.now() + 10_000;
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    const element = root.querySelector<T>(selector);
+    if (element) return element;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+  }
+
+  throw new Error(`Expected ${selector}.`);
 }

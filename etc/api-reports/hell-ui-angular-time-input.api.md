@@ -8,11 +8,14 @@ import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import * as _hell_ui_angular_time_picker from '@hell-ui/angular/time-picker';
+import { HellTimeValue } from '@hell-ui/angular/time-picker';
 import { HellTypedInputAdapter } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { Provider } from '@angular/core';
+import { Signal } from '@angular/core';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
@@ -32,57 +35,41 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
     protected commit(text: string, event?: Event): void;
-    protected readonly current: _angular_core.Signal<HellTimeValue>;
-    protected decreaseUnitLabel(unit: HellTimeUnit): string;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly display: _angular_core.Signal<string>;
-    protected readonly fieldAriaDescribedby: _angular_core.Signal<string | null>;
-    protected readonly fieldAriaLabelledby: _angular_core.Signal<string | null>;
+    protected readonly fieldAriaDescribedby: Signal<string | null>;
+    protected readonly fieldAriaLabelledby: Signal<string | null>;
     protected readonly format: (value: HellTimeValue | null, seconds: boolean) => string;
-    protected increaseUnitLabel(unit: HellTimeUnit): string;
     readonly inputId: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
     protected readonly isDisabled: () => boolean;
     protected readonly isInvalid: () => any;
     protected readonly labels: HellTimeInputLabels;
-    protected minutePresetLabel(minute: number): string;
-    protected readonly minutePresets: readonly [0, 15, 30, 45];
-    protected minutePresetsLabel(): string;
     readonly name: _angular_core.InputSignal<string | null>;
     protected readonly nativeTimeInput: boolean;
     protected onBlur(): void;
     protected onFieldFocus(field: HTMLInputElement): void;
     protected onInput(value: string): void;
-    protected onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void;
-    // Warning: (ae-forgotten-export) The symbol "pad" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-    protected readonly pad: typeof pad;
+    protected onPickerValueChange(pickerValue: HellTimeValue | null): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellTimeInputPart>;
     protected readonly pickerShift: {
         readonly padding: 8;
     };
+    protected readonly pickerUi: Signal<Partial<Record<_hell_ui_angular_time_picker.HellTimePickerPart, string>>>;
+    protected readonly pickerValue: Signal<HellTimeValue | null>;
     readonly placeholder: _angular_core.InputSignal<string | null>;
     registerOnChange(fn: (value: HellTimeValue | null) => void): void;
     registerOnTouched(fn: () => void): void;
     registerOnValidatorChange(fn: () => void): void;
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    protected selectedTimeLabel(): string;
     setDisabledState(isDisabled: boolean): void;
-    // Warning: (ae-forgotten-export) The symbol "HellTimeUnit" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-    protected setUnit(unit: HellTimeUnit, n: number): void;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    protected stepUnit(unit: HellTimeUnit, delta: number): void;
     protected readonly triggerAriaLabel: () => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellTimeInputPart>>;
-    protected unitLabel(unit: HellTimeUnit): string;
-    protected unitLabelId(unit: HellTimeUnit): string;
-    protected unitMax(unit: HellTimeUnit): number;
-    protected unitValue(unit: HellTimeUnit): number;
-    protected unitValueText(unit: HellTimeUnit): string;
     validate(_control: AbstractControl | null): ValidationErrors | null;
     readonly value: _angular_core.InputSignal<HellTimeValue | null>;
     readonly valueChange: _angular_core.OutputEmitterRef<HellTimeValue | null>;
-    protected visibleUnits(): readonly HellTimeUnit[];
     writeValue(value: HellTimeValue | null): void;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellTimeInput, "hell-time-input", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "inputId": { "alias": "inputId"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
@@ -118,12 +105,7 @@ export type HellTimeInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | '
 // @public
 export type HellTimeInputUi = HellUi<HellTimeInputPart>;
 
-// @public
-export interface HellTimeValue {
-    readonly hour: number;
-    readonly minute: number;
-    readonly second: number;
-}
+export { HellTimeValue }
 
 // @public
 export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider;

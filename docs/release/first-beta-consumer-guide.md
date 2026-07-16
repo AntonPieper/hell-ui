@@ -44,7 +44,7 @@ Angular 22 / TypeScript 6 strict-pnpm consumers also need the current transitive
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
 | Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`, `pagination`](../../tools/check-package-consumer.mjs)                        |
 | Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`                                                                  | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
-| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported | Narrow composite entry points such as `@hell-ui/angular/time-picker`, `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`time-picker`, `app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
 | Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/table/styles.css`                                                                                                                                                            | [`table`](../../tools/check-package-consumer.mjs)                                       |
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
@@ -69,6 +69,9 @@ pnpm add -D @tailwindcss/postcss postcss
 # Icon-backed primitives. Proved by the primitive-icons-css scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
+# Standalone Time Picker. Proved by the time-picker scenario.
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss
+
 # Audio transcript feature. Proved by the audio-transcript scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
@@ -91,10 +94,10 @@ pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,pagination,composite-css,app-shell,resizable,split-view,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,pagination,composite-css,time-picker,app-shell,resizable,split-view,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css,pagination pnpm run test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,resizable,split-view,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,time-picker,app-shell,resizable,split-view,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run test:package-consumer -- --minimal-deps
@@ -112,6 +115,7 @@ import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
+import { HellTimePicker } from '@hell-ui/angular/time-picker';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
@@ -148,6 +152,7 @@ Add only the extra entrypoint CSS needed by the entry points the app imports:
 @import '@hell-ui/angular/app-shell/styles.css';
 @import '@hell-ui/angular/resizable/styles.css';
 @import '@hell-ui/angular/split-view/styles.css';
+@import '@hell-ui/angular/time-picker/styles.css';
 @import '@hell-ui/angular/table/styles.css';
 @import '@hell-ui/angular/features/code-editor/styles.css';
 @import '@hell-ui/angular/features/pdf-viewer/styles.css';
@@ -176,7 +181,7 @@ pipeline.
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
-`HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`,
+`HellDateInput`, `HellTimeInput`, `HellTimePicker`, `HellDatePicker`, `HellDateRangePicker`,
 Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
 Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
 directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
@@ -223,6 +228,7 @@ tokens.
 <hell-toaster [ui]="{ toast: 'shadow-hell-lg', toolbar: 'gap-hell-2' }" />
 <hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />
 <hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
+<hell-time-picker [ui]="{ readout: 'text-hell-primary', minutePreset: 'rounded-hell-md' }" />
 <button hellCheckbox ui="rounded-hell-pill" aria-label="Accepted"></button>
 <button hellSwitch [ui]="{ root: 'bg-hell-info-soft', thumb: 'shadow-none' }" aria-label="Alerts"></button>
 <hell-slider [ui]="{ range: 'bg-hell-info', thumb: 'border-hell-info' }" aria-label="Volume" />
@@ -247,8 +253,8 @@ Rules for migration:
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
-  such as Dialpad, PaginationStrip, Split View, Slider, Switch, Dialog, Toast,
-  AudioPlayer, Omnibar, and CodeEditor. Omnibar keeps owned interaction anatomy
+  such as Dialpad, PaginationStrip, Split View, Slider, Switch, Time Picker,
+  Dialog, Toast, AudioPlayer, Omnibar, and CodeEditor. Omnibar keeps owned interaction anatomy
   but composes projected Search Resource state and public Chip primitives.
   Combobox is projection-first: refine each projected directive's single
   `root` part and compose Search Resource, Control Group, Chip Set, or Chip

@@ -256,6 +256,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/time-input/time-input.page').then((m) => m.TimeInputPage),
       },
       {
+        routePath: 'components/time-picker',
+        label: 'Time picker',
+        icon: 'faSolidClock',
+        loadComponent: () =>
+          import('./pages/components/time-picker/time-picker.page').then((m) => m.TimePickerPage),
+      },
+      {
         routePath: 'components/number-input',
         label: 'Number input',
         icon: 'faSolidHashtag',
