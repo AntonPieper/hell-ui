@@ -1,14 +1,14 @@
 import {
-  hellTimeInputNextPickerValue,
-  hellTimeInputPickerMaxValue,
-  type HellTimeInputPickerUnit,
-} from './time-input-picker';
+  hellTimePickerMaxValue,
+  hellTimePickerNextValue,
+  type HellTimePickerUnit,
+} from './time-picker-navigation';
 
-describe('time input picker navigation', () => {
+describe('time picker navigation', () => {
   it('uses bounded hour/minute/second spinbutton ranges', () => {
-    expect(hellTimeInputPickerMaxValue('hour')).toBe(23);
-    expect(hellTimeInputPickerMaxValue('minute')).toBe(59);
-    expect(hellTimeInputPickerMaxValue('second')).toBe(59);
+    expect(hellTimePickerMaxValue('hour')).toBe(23);
+    expect(hellTimePickerMaxValue('minute')).toBe(59);
+    expect(hellTimePickerMaxValue('second')).toBe(59);
   });
 
   it('maps arrow, PageUp/PageDown, and Home/End keys without wrapping', () => {
@@ -41,6 +41,6 @@ describe('time input picker navigation', () => {
   });
 });
 
-function next(unit: HellTimeInputPickerUnit, key: string, value: number): number | null {
-  return hellTimeInputNextPickerValue(key, value, unit);
+function next(unit: HellTimePickerUnit, key: string, value: number): number | null {
+  return hellTimePickerNextValue(key, value, unit);
 }

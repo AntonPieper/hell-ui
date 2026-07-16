@@ -48,6 +48,7 @@ const packageConsumerCiGroups = [
     name: 'composite-foundations',
     scenarios: [
       'composite-css',
+      'time-picker',
       'toolbar',
       'app-shell',
       'filter-bar',
@@ -301,6 +302,22 @@ const packageConsumerScenarioCatalog = [
       '.text-\\[10px\\]{font-size:10px}',
       'mask:var(--hell-icon-refresh) center/contain no-repeat',
       'hell-overflow-toolbar[data-slot=root]',
+    ],
+  },
+  {
+    name: 'time-picker',
+    description: 'isolated Time Picker entry with its complete public contract and CSS',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: timePickerConsumerMainTs,
+    stylesCss: timePickerConsumerStylesCss,
+    cssIncludes: [
+      'grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr))',
+      'font-size:22px',
+      'border-radius:var(--radius-hell-pill)',
     ],
   },
   {
@@ -2291,6 +2308,68 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function timePickerConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHellLabels } from '${packageName}/core';
+import {
+  HellTimePicker,
+  HELL_TIME_PICKER_LABELS,
+  type HellTimePickerLabels,
+  type HellTimePickerPart,
+  type HellTimePickerUi,
+  type HellTimeValue,
+} from '${packageName}/time-picker';
+
+const publicParts = [
+  'root',
+  'header',
+  'readout',
+  'units',
+  'unit',
+  'unitLabel',
+  'unitControl',
+  'unitValue',
+  'unitStep',
+  'minutePresets',
+  'minutePreset',
+] as const satisfies readonly HellTimePickerPart[];
+
+const ui = {
+  root: 'border-hell-primary',
+  readout: 'text-hell-primary',
+  minutePreset: 'rounded-hell-md',
+} satisfies HellTimePickerUi;
+
+const labelOverrides = {
+  selectedTime: (time: string) => 'Package consumer selected ' + time,
+  minutePresets: 'Package consumer minute presets',
+} satisfies Partial<HellTimePickerLabels>;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellTimePicker],
+  providers: [provideHellLabels(HELL_TIME_PICKER_LABELS, labelOverrides)],
+  template: \`
+    <hell-time-picker seconds [(value)]="value" [ui]="ui" />
+    <p>{{ publicParts.length }} public parts</p>
+  \`,
+})
+class App {
+  protected readonly value = signal<HellTimeValue | null>({
+    hour: 14,
+    minute: 30,
+    second: 45,
+  });
+  protected readonly ui = ui;
+  protected readonly publicParts = publicParts;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function toolbarConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -3139,6 +3218,13 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/time-input/styles.css";
 @import "${packageName}/toolbar/styles.css";
 @import "${packageName}/toast/styles.css";
+`;
+}
+
+function timePickerConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/time-picker/styles.css";
 `;
 }
 

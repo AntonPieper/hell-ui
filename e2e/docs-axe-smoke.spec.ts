@@ -398,6 +398,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['app-table-tanstack-virtual-example'],
   },
   {
+    name: 'time picker docs example',
+    path: '/components/time-picker',
+    heading: 'Time picker',
+    include: ['main'],
+  },
+  {
     name: 'time input docs example',
     path: '/components/time-input',
     heading: 'Time input',

@@ -11,6 +11,7 @@ import {
   input,
   output,
   signal,
+  type Signal,
   type Provider,
 } from '@angular/core';
 import {
@@ -32,6 +33,13 @@ import {
 } from 'ng-primitives/form-field';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import {
+  HellTimePicker,
+  HELL_TIME_PICKER_LABELS,
+  type HellTimePickerLabels,
+  type HellTimePickerUi,
+  type HellTimeValue,
+} from '@hell-ui/angular/time-picker';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import {
   hellSyncFormFieldDescriptions,
@@ -49,11 +57,8 @@ import {
   type HellUiInput,
 } from '@hell-ui/angular/core';
 import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
-import {
-  hellTimeInputNextPickerValue,
-  hellTimeInputPickerMaxValue,
-  type HellTimeInputPickerUnit,
-} from './time-input-picker';
+
+export type { HellTimeValue } from '@hell-ui/angular/time-picker';
 
 /** Built-in accessibility labels owned by the time input entry point. */
 export interface HellTimeInputLabels {
@@ -98,16 +103,6 @@ export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels> = hellC
   minutePresets: 'Minute presets',
   minutePreset: (minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`,
 });
-
-/** Structured time value exchanged by the time input. */
-export interface HellTimeValue {
-  /** Hour of day, from 0 to 23. */
-  readonly hour: number;
-  /** Minute of hour, from 0 to 59. */
-  readonly minute: number;
-  /** Second of minute, from 0 to 59. */
-  readonly second: number;
-}
 
 const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
@@ -167,8 +162,6 @@ export interface HellTimeInputAdapterContext {
   readonly seconds: boolean;
 }
 
-type HellTimeUnit = HellTimeInputPickerUnit;
-
 /**
  * Strategy for parsing, formatting, normalizing, and comparing time values —
  * the core `HellTypedInputAdapter` instantiated for `HellTimeValue` with the
@@ -196,6 +189,58 @@ export const HELL_TIME_INPUT_ADAPTER = new InjectionToken<HellTimeInputAdapter>(
 /** Override the time input adapter for an injector scope. */
 export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider {
   return { provide: HELL_TIME_INPUT_ADAPTER, useValue: adapter };
+}
+
+interface HellTimePickerComposition {
+  readonly format: (value: HellTimeValue, seconds: boolean) => string;
+  readonly normalize: (
+    value: HellTimeValue,
+    seconds: boolean,
+  ) => HellTimeValue | null;
+}
+
+const HELL_TIME_PICKER_COMPOSITION = Symbol.for('@hell-ui/angular/time-picker/composition');
+
+interface TimeInputPickerEcho {
+  readonly value: HellTimeValue;
+  readonly seconds: boolean;
+}
+
+const timeInputPickerEchoes = new WeakMap<object, TimeInputPickerEcho>();
+
+function hellTimePickerLabelsFromTimeInput(): HellTimePickerLabels {
+  const labels = inject(HELL_TIME_INPUT_LABELS);
+  const timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
+  const pickerLabels: HellTimePickerLabels = {
+    hours: labels.hours,
+    minutes: labels.minutes,
+    seconds: labels.seconds,
+    selectedTime: labels.selectedTime ?? ((time) => `Selected time ${time}`),
+    decreaseUnit:
+      labels.decreaseUnit ?? ((unitLabel) => `Decrease ${unitLabel.toLowerCase()}`),
+    increaseUnit:
+      labels.increaseUnit ?? ((unitLabel) => `Increase ${unitLabel.toLowerCase()}`),
+    minutePresets: labels.minutePresets ?? 'Minute presets',
+    minutePreset:
+      labels.minutePreset ??
+      ((minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`),
+  };
+  const composition = {
+    format: (value: HellTimeValue, seconds: boolean) =>
+      timeAdapter.format(value, { seconds }),
+    normalize: (value: HellTimeValue, seconds: boolean) =>
+      timeAdapter.normalize
+        ? timeAdapter.normalize(value, { seconds })
+        : hellNormalizeTimeInputValue(value, { seconds }),
+  } satisfies HellTimePickerComposition;
+
+  Object.defineProperty(pickerLabels, HELL_TIME_PICKER_COMPOSITION, {
+    value: composition,
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  });
+  return pickerLabels;
 }
 
 function pad(n: number) {
@@ -301,11 +346,15 @@ function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null
 @Component({
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger],
+  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger, HellTimePicker],
   schemas: [NO_ERRORS_SCHEMA],
   viewProviders: [provideFormFieldState()],
   providers: [
     provideIcons(HELL_TIME_INPUT_ICONS),
+    {
+      provide: HELL_TIME_PICKER_LABELS,
+      useFactory: hellTimePickerLabelsFromTimeInput,
+    },
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => HellTimeInput),
@@ -369,87 +418,18 @@ function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null
     </button>
 
     <ng-template #picker>
-      <!-- Panel overrides flow through the popover's Part Style Map so they
-           merge deterministically with the popover recipe. -->
+      <!-- The popover remains the real legacy pickerPanel and retains its
+           original Part-Class Pipeline. The private literal ownership map
+           adapts only the child renderer's slot names. -->
       <div hellPopover data-slot="pickerPanel" [ui]="part('pickerPanel')">
-        <div data-slot="pickerHeader" [class]="part('pickerHeader')">
-          <span
-            data-slot="pickerReadout"
-            [class]="part('pickerReadout')"
-            [attr.aria-label]="selectedTimeLabel()"
-          >
-            {{ format(current(), seconds()) }}
-          </span>
-        </div>
-
-        <div data-slot="pickerUnits" [class]="part('pickerUnits')">
-          @for (unit of visibleUnits(); track unit) {
-            <div data-slot="pickerUnit" [class]="part('pickerUnit')" [attr.data-unit]="unit">
-              <span
-                [id]="unitLabelId(unit)"
-                data-slot="pickerUnitLabel"
-                [class]="part('pickerUnitLabel')"
-              >
-                {{ unitLabel(unit) }}
-              </span>
-              <div data-slot="pickerUnitControl" [class]="part('pickerUnitControl')">
-                <div
-                  data-slot="pickerUnitValue"
-                  [class]="part('pickerUnitValue')"
-                  role="spinbutton"
-                  tabindex="0"
-                  [attr.aria-labelledby]="unitLabelId(unit)"
-                  [attr.aria-valuemin]="0"
-                  [attr.aria-valuemax]="unitMax(unit)"
-                  [attr.aria-valuenow]="unitValue(unit)"
-                  [attr.aria-valuetext]="unitValueText(unit)"
-                  (keydown)="onPickerSpinKeydown($event, unit)"
-                >
-                  {{ pad(unitValue(unit)) }}
-                </div>
-                <button
-                  type="button"
-                  data-slot="pickerUnitStep"
-                  [class]="part('pickerUnitStep')"
-                  (click)="stepUnit(unit, -1)"
-                  [attr.aria-label]="decreaseUnitLabel(unit)"
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  data-slot="pickerUnitStep"
-                  [class]="part('pickerUnitStep')"
-                  (click)="stepUnit(unit, 1)"
-                  [attr.aria-label]="increaseUnitLabel(unit)"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-
-        <div
-          data-slot="minutePresets"
-          [class]="part('minutePresets')"
-          role="group"
-          [attr.aria-label]="minutePresetsLabel()"
-        >
-          @for (minute of minutePresets; track minute) {
-            <button
-              type="button"
-              data-slot="minutePreset"
-              [class]="part('minutePreset')"
-              [attr.data-selected]="current().minute === minute ? 'true' : null"
-              [attr.aria-pressed]="current().minute === minute ? 'true' : 'false'"
-              [attr.aria-label]="minutePresetLabel(minute)"
-              (click)="setUnit('minute', minute)"
-            >
-              {{ pad(minute) }}
-            </button>
-          }
-        </div>
+        <hell-time-picker
+          data-hell-owned-part-adapter="source=HellTimePickerPart;target=HellTimeInputPart;map=root:null,header:pickerHeader,readout:pickerReadout,units:pickerUnits,unit:pickerUnit,unitLabel:pickerUnitLabel,unitControl:pickerUnitControl,unitValue:pickerUnitValue,unitStep:pickerUnitStep,minutePresets:minutePresets,minutePreset:minutePreset"
+          [value]="pickerValue()"
+          [seconds]="seconds()"
+          [disabled]="isDisabled()"
+          [ui]="pickerUi()"
+          (valueChange)="onPickerValueChange($event)"
+        />
       </div>
     </ng-template>
   `,
@@ -463,6 +443,21 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     defaultPart: 'root',
     recipe: () => HELL_TIME_INPUT_RECIPE,
   });
+
+  /** Legacy picker Part keys adapted to the extracted Time Picker anatomy. */
+  protected readonly pickerUi = computed<HellTimePickerUi>(() => ({
+    root: 'contents',
+    header: this.part('pickerHeader'),
+    readout: this.part('pickerReadout'),
+    units: this.part('pickerUnits'),
+    unit: this.part('pickerUnit'),
+    unitLabel: this.part('pickerUnitLabel'),
+    unitControl: this.part('pickerUnitControl'),
+    unitValue: this.part('pickerUnitValue'),
+    unitStep: this.part('pickerUnitStep'),
+    minutePresets: this.part('minutePresets'),
+    minutePreset: this.part('minutePreset'),
+  }));
 
   /** Control height. Defaults to `md`. */
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
@@ -490,12 +485,8 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   /** Emits when the committed time value changes. */
   readonly valueChange = output<HellTimeValue | null>();
 
-  /** Minute values offered as quick presets in the picker. */
-  protected readonly minutePresets = [0, 15, 30, 45] as const;
   /** Popover shift padding keeping the picker panel off the viewport edge. */
   protected readonly pickerShift = { padding: 8 } as const;
-  /** Zero-pads a number to two digits for display. */
-  protected readonly pad = pad;
   private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
 
   /** Formats a time value through the adapter, or empty string when null. */
@@ -511,21 +502,23 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   private onControlTouched: () => void = () => {};
   private onValidatorChange: () => void = () => {};
 
-  private readonly hourMinuteUnits = ['hour', 'minute'] as const;
-  private readonly hourMinuteSecondUnits = ['hour', 'minute', 'second'] as const;
-
   private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
     external: () => this.effectiveValue(),
-    parseExternal: (value) => this.normalizeValue(value),
+    parseExternal: (value) =>
+      resolveTimeInputPickerEcho(
+        this,
+        value,
+        this.seconds(),
+        (left, right) => this.sameValue(left, right),
+        () => this.normalizeValue(value),
+      ),
     parseText: (text) => this.timeAdapter.parseText(text, { seconds: this.seconds() }),
     format: (value) => this.format(value, this.seconds()),
     externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
-  /** Current committed time value, defaulting to midnight when none is set. */
-  protected readonly current = computed<HellTimeValue>(
-    () => this.valueState.current() ?? { hour: 0, minute: 0, second: 0 },
-  );
+  /** Current committed value passed into the composed Time Picker. */
+  protected readonly pickerValue: Signal<HellTimeValue | null> = this.valueState.current;
   /** Text shown in the field for the current value or draft. */
   protected readonly display = this.valueState.display;
   /** Whether the current draft text is unparseable. */
@@ -553,8 +546,9 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
     hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
     effect(() => {
+      discardTimeInputPickerEchoAtOtherPrecision(this, this.seconds());
       this.invalidDraft();
-      this.current();
+      this.pickerValue();
       this.onValidatorChange();
     });
   }
@@ -567,6 +561,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
 
   /** Writes a value from the form model into the control. */
   writeValue(value: HellTimeValue | null): void {
+    timeInputPickerEchoes.delete(this);
     this.controlMode.set(true);
     this.controlValue.set(this.normalizeValue(value));
     this.valueState.clearDraft();
@@ -600,6 +595,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
 
   /** Records field text as a draft as the user types. */
   protected onInput(value: string) {
+    timeInputPickerEchoes.delete(this);
     this.valueState.writeDraft(value);
     this.onValidatorChange();
   }
@@ -632,93 +628,17 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
-  /** Sets a single time unit to a value and commits the result. */
-  protected setUnit(unit: HellTimeUnit, n: number) {
-    const value = this.normalizeValue({ ...this.current(), [unit]: n });
-    if (!value) return;
-    const next = this.valueState.setValue(value);
+  /** Commits a structured value emitted by the composed Time Picker. */
+  protected onPickerValueChange(pickerValue: HellTimeValue | null): void {
+    if (!pickerValue) return;
+    timeInputPickerEchoes.set(this, {
+      value: { ...pickerValue },
+      seconds: this.seconds(),
+    });
+    const next = this.valueState.setValue(pickerValue);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
     this.onValidatorChange();
-  }
-
-  /** Units shown in the picker, including seconds when enabled. */
-  protected visibleUnits(): readonly HellTimeUnit[] {
-    return this.seconds() ? this.hourMinuteSecondUnits : this.hourMinuteUnits;
-  }
-
-  /** Localized label for a time unit. */
-  protected unitLabel(unit: HellTimeUnit): string {
-    if (unit === 'hour') return this.labels.hours;
-    if (unit === 'minute') return this.labels.minutes;
-    return this.labels.seconds;
-  }
-
-  /** DOM id of a unit's label element, for `aria-labelledby`. */
-  protected unitLabelId(unit: HellTimeUnit): string {
-    return `${this.inputId()}-${unit}-label`;
-  }
-
-  /** Current numeric value of a time unit. */
-  protected unitValue(unit: HellTimeUnit): number {
-    return this.current()[unit];
-  }
-
-  /** Maximum value a time unit accepts. */
-  protected unitMax(unit: HellTimeUnit): number {
-    return hellTimeInputPickerMaxValue(unit);
-  }
-
-  /** Accessible `aria-valuetext` for a unit's spinbutton. */
-  protected unitValueText(unit: HellTimeUnit): string {
-    return `${pad(this.unitValue(unit))} ${this.unitLabel(unit).toLowerCase()}`;
-  }
-
-  /** Accessible label announcing the currently selected time. */
-  protected selectedTimeLabel(): string {
-    return (
-      this.labels.selectedTime?.(this.format(this.current(), this.seconds())) ??
-      `Selected time ${this.format(this.current(), this.seconds())}`
-    );
-  }
-
-  /** Accessible label for a unit's decrement button. */
-  protected decreaseUnitLabel(unit: HellTimeUnit): string {
-    const label = this.unitLabel(unit);
-    return this.labels.decreaseUnit?.(label) ?? `Decrease ${label.toLowerCase()}`;
-  }
-
-  /** Accessible label for a unit's increment button. */
-  protected increaseUnitLabel(unit: HellTimeUnit): string {
-    const label = this.unitLabel(unit);
-    return this.labels.increaseUnit?.(label) ?? `Increase ${label.toLowerCase()}`;
-  }
-
-  /** Accessible label for the minute presets group. */
-  protected minutePresetsLabel(): string {
-    return this.labels.minutePresets ?? 'Minute presets';
-  }
-
-  /** Accessible label for a single minute preset button. */
-  protected minutePresetLabel(minute: number): string {
-    return this.labels.minutePreset?.(minute) ?? `Set minutes to ${pad(minute)}`;
-  }
-
-  /** Steps a time unit by a delta, clamped to its range. */
-  protected stepUnit(unit: HellTimeUnit, delta: number): void {
-    const value = this.unitValue(unit);
-    const next = Math.min(Math.max(value + delta, 0), this.unitMax(unit));
-    if (next === value) return;
-    this.setUnit(unit, next);
-  }
-
-  /** Handles keyboard navigation on a unit's spinbutton. */
-  protected onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void {
-    const next = hellTimeInputNextPickerValue(event.key, this.unitValue(unit), unit);
-    if (next === null) return;
-
-    event.preventDefault();
-    this.setUnit(unit, next);
   }
 
   private normalizeValue(value: HellTimeValue | null | undefined): HellTimeValue | null {
@@ -749,4 +669,25 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onControlChange(value);
     this.onValidatorChange();
   }
+}
+
+function resolveTimeInputPickerEcho(
+  owner: object,
+  external: HellTimeValue | null | undefined,
+  seconds: boolean,
+  sameValue: (left: HellTimeValue | null, right: HellTimeValue | null) => boolean,
+  normalize: () => HellTimeValue | null,
+): HellTimeValue | null {
+  const echo = timeInputPickerEchoes.get(owner);
+  if (!echo) return normalize();
+
+  timeInputPickerEchoes.delete(owner);
+  return echo.seconds === seconds && sameValue(external ?? null, echo.value)
+    ? echo.value
+    : normalize();
+}
+
+function discardTimeInputPickerEchoAtOtherPrecision(owner: object, seconds: boolean): void {
+  const echo = timeInputPickerEchoes.get(owner);
+  if (echo && echo.seconds !== seconds) timeInputPickerEchoes.delete(owner);
 }

@@ -1,15 +1,15 @@
-export type HellTimeInputPickerUnit = 'hour' | 'minute' | 'second';
+export type HellTimePickerUnit = 'hour' | 'minute' | 'second';
 
-export function hellTimeInputPickerMaxValue(unit: HellTimeInputPickerUnit): 23 | 59 {
+export function hellTimePickerMaxValue(unit: HellTimePickerUnit): 23 | 59 {
   return unit === 'hour' ? 23 : 59;
 }
 
-export function hellTimeInputNextPickerValue(
+export function hellTimePickerNextValue(
   key: string,
   currentValue: number,
-  unit: HellTimeInputPickerUnit,
+  unit: HellTimePickerUnit,
 ): number | null {
-  const max = hellTimeInputPickerMaxValue(unit);
+  const max = hellTimePickerMaxValue(unit);
   const value = clamp(Math.trunc(currentValue), 0, max);
   const largeStep = 5;
 

@@ -1879,6 +1879,27 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'time-input hell-time-input hell-date-input hellField composite scheduling shift start end date',
  },
  {
+ title:'Time Picker: Basic',
+ path:'/components/time-picker',
+ detail:'components/time-picker/examples/basic.example.ts',
+ terms:
+'time-picker hell-time-picker HellTimePicker HellTimeValue structured time valueChange midnight spinbutton minute presets smallest usage',
+ },
+ {
+ title:'Time Picker: Seconds And Disabled',
+ path:'/components/time-picker',
+ detail:'components/time-picker/examples/seconds-and-disabled.example.ts',
+ terms:
+'time-picker hell-time-picker HellTimePicker HellTimeValue seconds disabled fixed bounds precision locked schedule',
+ },
+ {
+ title:'Time Picker: Styling',
+ path:'/components/time-picker',
+ detail:'components/time-picker/examples/styling.example.ts',
+ terms:
+'time-picker hell-time-picker ui HellTimePickerUi part style map root header readout units unit unitLabel unitControl unitValue unitStep minutePresets minutePreset tailwind tokens',
+ },
+ {
  title:'Number Input: Basic',
  path:'/components/number-input',
  detail:'components/number-input/examples/basic.example.ts',

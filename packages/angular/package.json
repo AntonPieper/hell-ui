@@ -39,6 +39,7 @@
     "dialog/dialog.ts",
     "confirm/confirm.ts",
     "time-input/time-input.ts",
+    "time-picker/time-picker.ts",
     "number-input/number-input.ts",
     "app-shell/app-shell.ts",
     "audio-player/audio-player.ts",
@@ -257,6 +258,9 @@
     },
     "./time-input": {
       "@heinrich/source": "./time-input/public-api.ts"
+    },
+    "./time-picker": {
+      "@heinrich/source": "./time-picker/public-api.ts"
     },
     "./toast": {
       "@heinrich/source": "./toast/public-api.ts"
@@ -518,6 +522,11 @@
       "@heinrich/source": "./time-input/styles.css",
       "style": "./time-input/styles.css",
       "default": "./time-input/styles.css"
+    },
+    "./time-picker/styles.css": {
+      "@heinrich/source": "./time-picker/styles.css",
+      "style": "./time-picker/styles.css",
+      "default": "./time-picker/styles.css"
     },
     "./toast/styles.css": {
       "@heinrich/source": "./toast/styles.css",
