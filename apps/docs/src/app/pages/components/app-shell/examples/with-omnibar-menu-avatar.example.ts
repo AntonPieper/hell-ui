@@ -53,7 +53,7 @@ const HD_APP_SHELL_FRAME_ICONS = {
   template: `
     <div hellAppShell class="h-[30rem] overflow-hidden rounded-hell-lg border border-hell-border">
       <header hellAppTopbar>
-        <button hellSidenavToggle appearance="shell" type="button"></button>
+        <button hellSidenavToggle type="button"></button>
         <strong class="me-hell-2">Acme Console</strong>
 
         <!-- Global search lives in the topbar and spans the free space. -->
@@ -104,6 +104,7 @@ const HD_APP_SHELL_FRAME_ICONS = {
           <a
             hellNavItem
             href="#"
+            [attr.aria-label]="page.label"
             [attr.aria-current]="active() === page.id ? 'page' : null"
             (click)="select($event, page.id)"
           >
@@ -113,7 +114,7 @@ const HD_APP_SHELL_FRAME_ICONS = {
         }
       </nav>
 
-      <main hellAppContent [maxWidth]="960">
+      <main hellAppContent ui="[--hell-app-content-max-width:960px]">
         <h3 class="m-0 text-base font-semibold">{{ activeLabel() }}</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           A realistic frame: the omnibar drives navigation from the topbar, the avatar opens an

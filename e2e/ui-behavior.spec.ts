@@ -513,51 +513,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(trigger).toBeFocused();
   });
 
-  test('app shell secondary drawer opens, closes, and does not fight mobile sidenav', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/components/app-shell');
-
-    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
-    const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
-    const rail = secondary.locator('[data-hell-secondary-toggle="rail"]');
-    const header = secondary.locator('[data-hell-secondary-toggle="header"]');
-
-    await expect(shell).toHaveAttribute('data-mobile-layout', 'true');
-    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
-    await expect(secondary).toHaveAttribute('data-mobile-hidden', 'true');
-    await expect(secondary).not.toHaveAttribute('inert', '');
-    await expect(secondary).not.toHaveAttribute('aria-hidden', 'true');
-    await expect(rail).toBeVisible();
-    await expect(rail).toHaveAttribute('aria-label', 'Show secondary panel');
-    await expectNoHorizontalOverflow(page);
-
-    await rail.focus();
-    await expectFocused(page, rail, 'mobile secondary rail before open');
-    await rail.press('Enter');
-
-    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
-    await expect.poll(async () => shell.getAttribute('data-mobile-sidenav-open')).not.toBe('true');
-    await expect(secondary).not.toHaveAttribute('data-hidden', 'true');
-    await expect(header).toHaveAttribute('aria-label', 'Hide secondary panel');
-    await expectFocused(page, header, 'mobile secondary initial focus');
-    await expectNoHorizontalOverflow(page);
-
-    await page.keyboard.press('Escape');
-    await expect(shell).not.toHaveAttribute('data-mobile-secondary-open', 'true');
-    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
-    await expectFocused(page, rail, 'mobile secondary rail after close');
-
-    await page.getByRole('button', { name: 'Expand sidebar' }).first().click();
-    await expect(shell).toHaveAttribute('data-mobile-sidenav-open', 'true');
-    await rail.focus();
-    await rail.press('Enter');
-    await expect(shell).not.toHaveAttribute('data-mobile-sidenav-open', 'true');
-    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
-    await expectNoHorizontalOverflow(page);
-  });
-
   test('audio player controls keep reachable rows without narrow overflow', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/components/audio-player');

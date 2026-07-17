@@ -21,6 +21,30 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'app shell',
+    path: '/components/app-shell',
+    heading: 'App shell',
+    include: [
+      'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
+    ],
+    prepare: async (page) => {
+      const shell = page.locator(
+        'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
+      );
+      const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
+      await expect(shell).toBeVisible();
+      await expect(
+        secondary.locator(
+          '> [hellAppSecondaryBody][data-slot="root"] > button[hellSecondaryToggle]',
+        ),
+      ).toBeVisible();
+      await shell
+        .locator('> [hellAppTopbar][data-slot="root"] > button[hellSidenavToggle]')
+        .click();
+      await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
+    },
+  },
+  {
     name: 'alert',
     path: '/components/alert',
     heading: 'Alert',

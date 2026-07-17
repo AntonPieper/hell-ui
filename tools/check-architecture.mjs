@@ -91,6 +91,7 @@ function main() {
   checkStyleEntryPoints();
   checkComponentContract();
   checkNativeNumberInputContract();
+  checkSlimAppShellContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableAdapterBoundaryContract();
@@ -144,6 +145,98 @@ function checkNativeNumberInputContract() {
   for (const fragment of retiredInputFragments) {
     if (inputModule.includes(fragment)) {
       failures.push(`${rel} native Number Input still forwards ${fragment}; author it natively`);
+    }
+  }
+}
+
+function checkSlimAppShellContract() {
+  const rel = 'packages/angular/app-shell/app-shell.ts';
+  const styleRel = 'packages/angular/app-shell/styles.css';
+  const apiRel = 'etc/api-reports/hell-ui-angular-app-shell.api.md';
+  const source = readFile(join(root, rel));
+  const styles = readFile(join(root, styleRel));
+  const apiReport = readFile(join(root, apiRel));
+  const modules = new Map(
+    decoratedClassModules(source).map((module) => [module.className, module.moduleSource]),
+  );
+  const retiredByClass = new Map([
+    [
+      'HellAppShell',
+      [
+        'readonly isMobileLayout',
+        'readonly mobileOpenPanel',
+        'readonly isSidenavCollapsed',
+        'readonly isSecondaryHidden',
+      ],
+    ],
+    ['HellAppContent', ['readonly maxWidth = input', 'maxWidthValue']],
+    [
+      'HellAppSidenav',
+      ['readonly collapsed = input', 'readonly id = input', 'readonly isCollapsed'],
+    ],
+    [
+      'HellAppSecondary',
+      ['readonly hidden = input', 'readonly id = input', 'readonly isHidden'],
+    ],
+    ['HellAppSecondaryBody', ['readonly secondary = inject']],
+    ['HellSidenavToggle', ['readonly appearance = input']],
+    ['HellSecondaryToggle', ['readonly appearance = input']],
+  ]);
+
+  for (const [className, fragments] of retiredByClass) {
+    const moduleSource = modules.get(className);
+    if (!moduleSource) {
+      failures.push(`${rel} slim App Shell contract is missing ${className}`);
+      continue;
+    }
+    for (const fragment of fragments) {
+      if (moduleSource.includes(fragment)) {
+        failures.push(`${rel} slim App Shell contract still exposes ${className}.${fragment}`);
+      }
+    }
+  }
+
+  for (const fragment of [
+    'sidenavPanelId',
+    'secondaryPanelId',
+    'data-hell-app-shell-panel',
+    'data-hell-app-shell-toggle',
+    'data-hell-sidenav-toggle',
+    'data-hell-secondary-toggle',
+  ]) {
+    if (source.includes(fragment)) {
+      failures.push(`${rel} slim App Shell contract still exposes renderer coordination ${fragment}`);
+    }
+  }
+
+  for (const method of [
+    'dismissMobilePanels',
+    'completeMobilePanelDismissal',
+    'dismissMobilePanelsOnEscape',
+  ]) {
+    if (apiReport.includes(`${method}(`)) {
+      failures.push(`${apiRel} slim App Shell contract exposes private event coordination ${method}`);
+    }
+  }
+
+  for (const fragment of [
+    "[hellAppTopbar][data-slot='root'] > [hellSidenavToggle][data-slot='root']",
+    "[hellAppSecondary][data-slot='root'] > [hellSecondaryToggle][data-slot='root']",
+    "[hellAppSecondaryBody][data-slot='root'] > [hellSecondaryToggle][data-slot='root']",
+    "[data-mobile-sidenav-open='true']::before",
+    "[data-mobile-secondary-open='true']::before",
+  ]) {
+    if (!styles.includes(fragment)) {
+      failures.push(`${styleRel} slim App Shell placement recipe is missing ${fragment}`);
+    }
+  }
+
+  for (const fragment of [
+    ":not([data-sidenav-collapsed='true'])::before",
+    ":not([data-secondary-hidden='true'])::before",
+  ]) {
+    if (styles.includes(fragment)) {
+      failures.push(`${styleRel} backdrop still follows unregistered panel state ${fragment}`);
     }
   }
 }

@@ -65,13 +65,13 @@
   }
 
   /*
-   * Sidenav toggle button — opt-in styled appearance for `[hellSidenavToggle]`.
-   * Sits in the topbar's leading slot. Outer width matches
+   * Sidenav toggle placement recipe. A direct toggle child sits in the
+   * topbar's leading slot. Outer width matches
    * `--hell-app-sidenav-collapsed-width` so the visible 32×32 affordance
    * lines up dead-centre with the collapsed nav-item icons beneath it.
    */
 
-  [hellSidenavToggle][data-slot='root'][data-hell-sidenav-toggle='shell'] {
+  [hellAppTopbar][data-slot='root'] > [hellSidenavToggle][data-slot='root'] {
     position: relative;
     display: inline-flex;
     flex: 0 0 var(--hell-app-sidenav-collapsed-width);
@@ -224,12 +224,14 @@
   /*
    * Header-row toggle — the full secondary-panel header row acts as the
    * collapse affordance. Render as
-   *   <button hellSecondaryToggle appearance="header">Title</button>
+   *   <div hellAppSecondaryBody>
+   *     <button hellSecondaryToggle>Title</button>
+   *   </div>
    * The whole row is clickable; a chevron is drawn on the leading edge so it
    * reads as a panel collapse affordance, not a nav/link affordance.
    */
 
-  [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='header'] {
+  [hellAppSecondaryBody][data-slot='root'] > [hellSecondaryToggle][data-slot='root'] {
     display: flex;
     width: 100%;
     align-items: center;
@@ -241,7 +243,7 @@
     margin: 0;
     padding-inline: var(--spacing-hell-4);
     padding-block: var(--spacing-hell-3);
-    color: var(--color-hell-foreground-subtle);
+    color: var(--color-hell-foreground-muted);
     font: inherit;
     font-size: 11px;
     font-weight: 700;
@@ -289,50 +291,58 @@
    *               └─┘
    */
 
-  [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='rail'] {
+  [hellAppSecondary][data-slot='root'] > [hellSecondaryToggle][data-slot='root'] {
     display: none;
-    [data-hidden='true'] > & {
-      pointer-events: auto;
-      visibility: visible;
-      position: absolute;
-      inset: calc(var(--spacing) * 0);
-      z-index: 15;
-      margin: calc(var(--spacing) * 0);
-      display: inline-flex;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      border-style: solid;
-      border-width: 0px;
-      background-color: transparent;
-      padding: calc(var(--spacing) * 0);
-      color: var(--color-hell-foreground-subtle);
-      opacity: 1;
-      font: inherit;
-      transition:
-        background var(--hell-duration-fast) var(--ease-hell-out),
-        color var(--hell-duration-fast) var(--ease-hell-out);
-      &::before {
-        height: calc(var(--spacing) * 3);
-        width: calc(var(--spacing) * 3);
-        background-color: currentcolor;
-        content: '';
-        -webkit-mask: var(--hell-icon-chevron-left) center/contain no-repeat;
-        mask: var(--hell-icon-chevron-left) center/contain no-repeat;
-        transition: transform var(--hell-duration-fast) var(--ease-hell-out);
-      }
+  }
+
+  [hellAppSecondary][data-slot='root'][data-hidden='true']
+    > [hellSecondaryToggle][data-slot='root'] {
+    pointer-events: auto;
+    visibility: visible;
+    position: absolute;
+    inset: calc(var(--spacing) * 0);
+    z-index: 15;
+    margin: calc(var(--spacing) * 0);
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-style: solid;
+    border-width: 0px;
+    background-color: transparent;
+    padding: calc(var(--spacing) * 0);
+    color: var(--color-hell-foreground-subtle);
+    opacity: 1;
+    font: inherit;
+    transition:
+      background var(--hell-duration-fast) var(--ease-hell-out),
+      color var(--hell-duration-fast) var(--ease-hell-out);
+    &::before {
+      height: calc(var(--spacing) * 3);
+      width: calc(var(--spacing) * 3);
+      background-color: currentcolor;
+      content: '';
+      -webkit-mask: var(--hell-icon-chevron-left) center/contain no-repeat;
+      mask: var(--hell-icon-chevron-left) center/contain no-repeat;
+      transition: transform var(--hell-duration-fast) var(--ease-hell-out);
     }
-    [data-hidden='true'] > &:hover {
-      background-color: var(--color-hell-surface-subtle);
-      color: var(--color-hell-primary);
-    }
-    [data-hidden='true'] > &:hover::before {
-      transform: translateX(-1px);
-    }
-    [data-hidden='true'] > &:focus-visible {
-      outline: 2px solid var(--color-hell-focus-ring);
-      outline-offset: calc(2px * -1);
-    }
+  }
+
+  [hellAppSecondary][data-slot='root'][data-hidden='true']
+    > [hellSecondaryToggle][data-slot='root']:hover {
+    background-color: var(--color-hell-surface-subtle);
+    color: var(--color-hell-primary);
+  }
+
+  [hellAppSecondary][data-slot='root'][data-hidden='true']
+    > [hellSecondaryToggle][data-slot='root']:hover::before {
+    transform: translateX(-1px);
+  }
+
+  [hellAppSecondary][data-slot='root'][data-hidden='true']
+    > [hellSecondaryToggle][data-slot='root']:focus-visible {
+    outline: 2px solid var(--color-hell-focus-ring);
+    outline-offset: calc(2px * -1);
   }
 
   /* Reusable nav-item styling used outside sidenav (e.g. composite menus). */
@@ -493,8 +503,8 @@
           visibility var(--hell-duration-base) var(--ease-hell-out);
       }
 
-      &:not([data-sidenav-collapsed='true'])::before,
-      &:not([data-secondary-hidden='true'])::before {
+      &[data-mobile-sidenav-open='true']::before,
+      &[data-mobile-secondary-open='true']::before {
         visibility: visible;
         pointer-events: auto;
         opacity: 1;
@@ -509,7 +519,7 @@
       padding-inline-end: var(--spacing-hell-2);
     }
 
-    [hellSidenavToggle][data-slot='root'][data-hell-sidenav-toggle='shell'] {
+    [hellAppTopbar][data-slot='root'] > [hellSidenavToggle][data-slot='root'] {
       flex-basis: var(--hell-app-topbar-height);
     }
 
@@ -558,7 +568,7 @@
     }
 
     [hellAppSecondary][data-slot='root'][data-hidden='true']
-      > [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='rail'] {
+      > [hellSecondaryToggle][data-slot='root'] {
       inset: 0;
     }
 

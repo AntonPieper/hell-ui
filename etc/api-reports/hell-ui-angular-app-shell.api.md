@@ -4,9 +4,9 @@
 
 ```ts
 
-import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
+import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 
@@ -27,64 +27,44 @@ export const HELL_APP_SHELL_MOBILE_MEDIA = "(max-width: 767px)";
 
 // @public
 export class HellAppContent {
-    readonly maxWidth: _angular_core.InputSignal<string | number | null>;
-    protected readonly maxWidthValue: _angular_core.Signal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppContent, "[hellAppContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "maxWidth": { "alias": "maxWidth"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppContent, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppContent, "[hellAppContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppContent, never>;
 }
 
 // @public
 export class HellAppSecondary {
     constructor();
-    readonly hidden: _angular_core.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
-    readonly id: _angular_core.InputSignal<string | null>;
-    readonly isHidden: () => boolean;
-    protected readonly isMobileHidden: () => boolean;
-    protected readonly panelId: _angular_core.Signal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected readonly shell: HellAppShell | null;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppSecondary, "[hellAppSecondary]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "hidden": { "alias": "hidden"; "required": false; "isSignal": true; }; "id": { "alias": "id"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppSecondary, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSecondary, "[hellAppSecondary]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSecondary, never>;
 }
 
 // @public
 export class HellAppSecondaryBody {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly secondary: HellAppSecondary;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppSecondaryBody, "[hellAppSecondaryBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppSecondaryBody, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSecondaryBody, "[hellAppSecondaryBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSecondaryBody, never>;
 }
 
 // @public
 export class HellAppShell implements OnDestroy {
     constructor();
     closeMobilePanels(): void;
-    protected dismissMobilePanels(event: PointerEvent): void;
-    protected dismissMobilePanelsOnEscape(): void;
-    readonly isMobileLayout: () => boolean;
-    readonly isSecondaryHidden: () => boolean;
-    readonly isSidenavCollapsed: () => boolean;
-    readonly mobileOpenPanel: () => "sidenav" | "secondary" | null;
     ngOnDestroy(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly secondaryHidden: _angular_core.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
-    protected readonly _secondaryHidden: _angular_core.WritableSignal<boolean>;
-    readonly secondaryHiddenChange: _angular_core.OutputEmitterRef<boolean>;
-    secondaryPanelId: string;
-    readonly shellId: number;
-    readonly sidenavCollapsed: _angular_core.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
-    protected readonly _sidenavCollapsed: _angular_core.WritableSignal<boolean>;
-    readonly sidenavCollapsedChange: _angular_core.OutputEmitterRef<boolean>;
-    sidenavPanelId: string;
+    readonly secondaryHidden: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
+    readonly secondaryHiddenChange: i0.OutputEmitterRef<boolean>;
+    readonly sidenavCollapsed: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
+    readonly sidenavCollapsedChange: i0.OutputEmitterRef<boolean>;
     toggleSecondary(): void;
     toggleSidenav(): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellAppShell, "[hellAppShell]", ["hellAppShell"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "sidenavCollapsed": { "alias": "sidenavCollapsed"; "required": false; "isSignal": true; }; "secondaryHidden": { "alias": "secondaryHidden"; "required": false; "isSignal": true; }; }, { "sidenavCollapsedChange": "sidenavCollapsedChange"; "secondaryHiddenChange": "secondaryHiddenChange"; }, never, ["*"], true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppShell, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellAppShell, "[hellAppShell]", ["hellAppShell"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "sidenavCollapsed": { "alias": "sidenavCollapsed"; "required": false; "isSignal": true; }; "secondaryHidden": { "alias": "secondaryHidden"; "required": false; "isSignal": true; }; }, { "sidenavCollapsedChange": "sidenavCollapsedChange"; "secondaryHiddenChange": "secondaryHiddenChange"; }, never, ["*"], true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppShell, never>;
 }
 
 // @public
@@ -98,69 +78,63 @@ export interface HellAppShellLabels {
 // @public
 export class HellAppSidenav {
     constructor();
-    readonly collapsed: _angular_core.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
-    readonly id: _angular_core.InputSignal<string | null>;
-    readonly isCollapsed: () => boolean;
-    protected readonly isMobileHidden: () => boolean;
-    protected readonly panelId: _angular_core.Signal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected readonly shell: HellAppShell | null;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppSidenav, "[hellAppSidenav]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "collapsed": { "alias": "collapsed"; "required": false; "isSignal": true; }; "id": { "alias": "id"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppSidenav, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSidenav, "[hellAppSidenav]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSidenav, never>;
 }
 
 // @public
 export class HellAppTopbar {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAppTopbar, "[hellAppTopbar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAppTopbar, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppTopbar, "[hellAppTopbar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellAppTopbar, never>;
 }
 
 // @public
 export class HellNavItem {
-    readonly active: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly active: i0.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavItem, "[hellNavItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "active": { "alias": "active"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavItem, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavItem, "[hellNavItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "active": { "alias": "active"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavItem, never>;
 }
 
 // @public
 export class HellNavItemIcon {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavItemIcon, "[hellNavItemIcon]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavItemIcon, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavItemIcon, "[hellNavItemIcon]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavItemIcon, never>;
 }
 
 // @public
 export class HellNavItemLabel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavItemLabel, "[hellNavItemLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavItemLabel, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavItemLabel, "[hellNavItemLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavItemLabel, never>;
 }
 
 // @public
 export class HellNavItemTrailing {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavItemTrailing, "[hellNavItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavItemTrailing, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavItemTrailing, "[hellNavItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavItemTrailing, never>;
 }
 
 // @public
 export class HellNavSection {
-    readonly collapsed: _angular_core.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
-    readonly collapsedChange: _angular_core.OutputEmitterRef<boolean>;
+    readonly collapsed: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
+    readonly collapsedChange: i0.OutputEmitterRef<boolean>;
     readonly isCollapsed: () => boolean;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     toggle(): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavSection, "[hellNavSection]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "collapsed": { "alias": "collapsed"; "required": false; "isSignal": true; }; }, { "collapsedChange": "collapsedChange"; }, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavSection, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavSection, "[hellNavSection]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "collapsed": { "alias": "collapsed"; "required": false; "isSignal": true; }; }, { "collapsedChange": "collapsedChange"; }, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavSection, never>;
 }
 
 // @public
@@ -168,9 +142,9 @@ export class HellNavSectionItems {
     protected readonly isHidden: () => boolean;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected readonly section: HellNavSection;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavSectionItems, "[hellNavSectionItems]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavSectionItems, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavSectionItems, "[hellNavSectionItems]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavSectionItems, never>;
 }
 
 // @public
@@ -178,35 +152,29 @@ export class HellNavSectionToggle {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected readonly section: HellNavSection;
     protected toggle(): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNavSectionToggle, "button[hellNavSectionToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNavSectionToggle, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNavSectionToggle, "button[hellNavSectionToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellNavSectionToggle, never>;
 }
 
 // @public
 export class HellSecondaryToggle {
-    readonly appearance: _angular_core.InputSignal<"header" | "plain" | "rail">;
-    protected readonly hidden: () => boolean;
-    protected readonly labels: HellAppShellLabels;
+    constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected readonly shell: HellAppShell;
     protected toggle(): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSecondaryToggle, "button[hellSecondaryToggle]", never, { "appearance": { "alias": "appearance"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSecondaryToggle, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSecondaryToggle, "button[hellSecondaryToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSecondaryToggle, never>;
 }
 
 // @public
 export class HellSidenavToggle {
-    readonly appearance: _angular_core.InputSignal<"plain" | "shell">;
-    protected readonly collapsed: () => boolean;
-    protected readonly labels: HellAppShellLabels;
+    constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected readonly shell: HellAppShell;
     protected toggle(): void;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSidenavToggle, "button[hellSidenavToggle]", never, { "appearance": { "alias": "appearance"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSidenavToggle, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellSidenavToggle, "button[hellSidenavToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellSidenavToggle, never>;
 }
 
 // (No @packageDocumentation comment for this package)
