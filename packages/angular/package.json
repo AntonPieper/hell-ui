@@ -203,6 +203,9 @@
     "./tabs": {
       "@heinrich/source": "./tabs/public-api.ts"
     },
+    "./time-input": {
+      "@heinrich/source": "./time-input/public-api.ts"
+    },
     "./toggle": {
       "@heinrich/source": "./toggle/public-api.ts"
     },
@@ -244,9 +247,6 @@
     },
     "./save-bar": {
       "@heinrich/source": "./save-bar/public-api.ts"
-    },
-    "./time-input": {
-      "@heinrich/source": "./time-input/public-api.ts"
     },
     "./time-picker": {
       "@heinrich/source": "./time-picker/public-api.ts"
@@ -427,6 +427,11 @@
       "style": "./tabs/styles.css",
       "default": "./tabs/styles.css"
     },
+    "./time-input/styles.css": {
+      "@heinrich/source": "./time-input/styles.css",
+      "style": "./time-input/styles.css",
+      "default": "./time-input/styles.css"
+    },
     "./toggle/styles.css": {
       "@heinrich/source": "./toggle/styles.css",
       "style": "./toggle/styles.css",
@@ -496,11 +501,6 @@
       "@heinrich/source": "./save-bar/styles.css",
       "style": "./save-bar/styles.css",
       "default": "./save-bar/styles.css"
-    },
-    "./time-input/styles.css": {
-      "@heinrich/source": "./time-input/styles.css",
-      "style": "./time-input/styles.css",
-      "default": "./time-input/styles.css"
     },
     "./time-picker/styles.css": {
       "@heinrich/source": "./time-picker/styles.css",

@@ -40,6 +40,7 @@ const packageConsumerCiGroups = [
       'chip-input',
       'control-group',
       'date-input',
+      'time-input',
       'file-picker',
       'pagination',
       'combobox-projection',
@@ -256,6 +257,23 @@ const packageConsumerScenarioCatalog = [
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: dateInputConsumerMainTs,
     stylesCss: dateInputConsumerStylesCss,
+    cssIncludes: [
+      'height:var(--spacing-hell-control-md)',
+      'border-radius:var(--radius-hell-md)',
+      'transition-property:border-color,box-shadow',
+    ],
+  },
+  {
+    name: 'time-input',
+    description:
+      'native Time Input behavior and Input-root styles without Time Picker, popover, or icon peers',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: timeInputConsumerMainTs,
+    stylesCss: timeInputConsumerStylesCss,
     cssIncludes: [
       'height:var(--spacing-hell-control-md)',
       'border-radius:var(--radius-hell-md)',
@@ -1680,6 +1698,67 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function timeInputConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HELL_DEFAULT_TIME_INPUT_ADAPTER,
+  HellTimeInput,
+  provideHellTimeInputAdapter,
+  type HellTimeInputAdapter,
+  type HellTimeValue,
+} from '${packageName}/time-input';
+
+const consumerTimeAdapter: HellTimeInputAdapter = {
+  ...HELL_DEFAULT_TIME_INPUT_ADAPTER,
+  parseText: (text, context) =>
+    text.trim().toLowerCase() === 'noon'
+      ? { valid: true, value: { hour: 12, minute: 0, second: 0 } }
+      : HELL_DEFAULT_TIME_INPUT_ADAPTER.parseText(text, context),
+};
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [ReactiveFormsModule, HellTimeInput],
+  providers: [provideHellTimeInputAdapter(consumerTimeAdapter)],
+  template: \`
+    <input
+      id="controlled-time"
+      hellTimeInput
+      name="controlledTime"
+      aria-label="Controlled time"
+      placeholder="HH:mm:ss"
+      required
+      seconds
+      [value]="value()"
+      [min]="min"
+      [max]="max"
+      (valueChange)="value.set($event)"
+    />
+    <input
+      hellTimeInput
+      aria-label="Forms time"
+      [formControl]="control"
+    />
+  \`,
+})
+class App {
+  protected readonly value = signal<HellTimeValue | null>({
+    hour: 9,
+    minute: 30,
+    second: 15,
+  });
+  protected readonly min: HellTimeValue = { hour: 8, minute: 0, second: 0 };
+  protected readonly max: HellTimeValue = { hour: 18, minute: 0, second: 0 };
+  protected readonly control = new FormControl<HellTimeValue | null>(null);
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function filePickerConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2428,7 +2507,7 @@ interface SearchItem {
         <hell-toaster [ui]="toasterUi" />
 
         <input hellDateInput aria-label="Ship date" [value]="date" />
-        <hell-time-input aria-label="Ship time" [value]="time" />
+        <input hellTimeInput aria-label="Ship time" [value]="time" />
         <hell-date-picker [date]="date" />
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
@@ -3063,6 +3142,7 @@ import {
   HellMenuTriggerHarness,
   HellSelectHarness,
   HellTableHarness,
+  HellTimeInputHarness,
 } from '${packageName}/testing';
 
 @Component({
@@ -3080,6 +3160,7 @@ class App {
     HellMenuTriggerHarness,
     HellSelectHarness,
     HellTableHarness,
+    HellTimeInputHarness,
   ];
 }
 
@@ -3430,6 +3511,13 @@ function dateInputConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/date-input/styles.css";
+`;
+}
+
+function timeInputConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/time-input/styles.css";
 `;
 }
 

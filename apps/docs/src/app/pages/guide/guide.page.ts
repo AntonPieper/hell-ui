@@ -174,7 +174,8 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
         <li>
           <strong>Adapters:</strong> date/time parsing, search ranking, and resize policy expose
           adapter seams (<code>provideHellDateInputAdapter</code>,
-          <code>provideHellSearchRanker</code>) instead of mode booleans.
+          <code>provideHellTimeInputAdapter</code>, <code>provideHellSearchRanker</code>) instead of
+          mode booleans.
         </li>
         <li>
           <strong>Behavior stays intact:</strong> required accessibility, geometry, and lifecycle

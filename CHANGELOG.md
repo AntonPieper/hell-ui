@@ -29,11 +29,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `hell-time-picker` owns structured `HellTimeValue | null` selection, optional
   seconds, fixed clock bounds, segmented keyboard navigation, minute presets,
   accessibility labels, and an eleven-part Part Style Map without taking on
-  parsing, forms, field, trigger, or Popover APIs. Time Input now composes the
-  same picker renderer and Interaction State Machine while retaining its
-  existing CVA, parsing, dismissal, focus, label, styling, and legacy
-  `data-slot` contracts. Focused unit, cross-browser/axe, docs, API-report, and
-  isolated packed-consumer coverage protect both entry points. Closes #197.
+  parsing, forms, field, trigger, or Popover APIs. Consumers compose it with a
+  native Time Input, Control Group action, and Popover when segmented selection
+  is useful. Focused unit, cross-browser/axe, docs, API-report, and isolated
+  packed-consumer coverage protect the standalone entry point. Closes #197.
 - Added the optional `@hell-ui/angular/features/filter-builder` Feature Package
   Entry Point. `hell-filter-builder` accepts generic readonly
   `HellFilter<TField, TOperator, TValue>` expressions and application-owned
@@ -886,6 +885,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `getValue()` / `setValue()`, commit through `blur()` when required, and
   remove `openPicker()` calls in favor of harnessing the consumer-owned
   composition. Closes #198.
+- BREAKING: Time Input is now time parsing, formatting, validation, and forms
+  behavior on the authored native `input[hellTimeInput]` instead of the owned
+  `<hell-time-input>` component. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Keep the
+  controlled `value` / `valueChange` pair, `HellTimeValue | null`, CVA,
+  required and inclusive same-day `min` / `max` validation, optional seconds,
+  adapter overrides, invalid drafts, external synchronization, and nullable
+  clears. Move `inputId`, `name`, `placeholder`, type, input mode,
+  autocomplete, `aria-label`, and other native attributes onto the real input.
+  The former Time Input Label Contract, embedded trigger and picker, and the
+  15-part `HellTimeInputPart` / `HellTimeInputUi` anatomy are removed with no
+  compatibility aliases; `ui` now refines the reused single-root Input
+  contract. Compose an accessible Control Group action or Button, Popover, and
+  standalone Time Picker explicitly when segmented selection is useful,
+  keeping one controlled/form value and intentional close and focus restoration
+  behavior. `HellTimeInputHarness` now targets `input[hellTimeInput]`; migrate
+  `getInputValue()` / `setInputValue()` to `getValue()` / `setValue()`, commit
+  through `blur()` when required, and replace `openPicker()` with harnesses for
+  the consumer-owned composition. Closes #199.
 - BREAKING: Removed the `@hell-ui/angular/drop-zone` and
   `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
   First carried by the next `@hell-ui/angular` release after `0.2.0` (currently

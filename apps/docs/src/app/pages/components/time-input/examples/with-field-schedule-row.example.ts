@@ -22,8 +22,9 @@ import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
       <div hellField>
         <label hellFieldLabel for="shift-start">Starts</label>
-        <hell-time-input
-          inputId="shift-start"
+        <input
+          id="shift-start"
+          hellTimeInput
           size="sm"
           [value]="start()"
           (valueChange)="start.set($event)"
@@ -32,8 +33,9 @@ import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
       <div hellField>
         <label hellFieldLabel for="shift-end">Ends</label>
-        <hell-time-input
-          inputId="shift-end"
+        <input
+          id="shift-end"
+          hellTimeInput
           size="sm"
           [value]="end()"
           (valueChange)="end.set($event)"
@@ -53,7 +55,7 @@ export class TimeInputWithFieldScheduleRowExample {
 
   protected format(value: HellTimeValue | null): string {
     if (!value) return '…';
-    const pad = (n: number) => n.toString().padStart(2, '0');
+    const pad = (part: number) => part.toString().padStart(2, '0');
     return `${pad(value.hour)}:${pad(value.minute)}`;
   }
 }

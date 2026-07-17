@@ -410,13 +410,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'time input docs example',
     path: '/components/time-input',
     heading: 'Time input',
-    include: ['main', '[data-slot="pickerPanel"]'],
+    include: ['main', '[data-testid="time-picker-panel"]'],
     prepare: async (page) => {
-      await page
-        .locator('app-time-input-basic-example')
-        .getByRole('button', { name: 'Choose time' })
-        .click();
-      await expect(page.getByRole('spinbutton', { name: 'Hours' })).toBeVisible();
+      const example = page.locator('app-time-input-with-time-picker-example');
+      await expect(example.locator('#picker-time')).toBeVisible();
+      await example.getByRole('button', { name: 'Choose time' }).click();
+      await expect(
+        page.locator('[data-testid="time-picker-panel"]').getByRole('spinbutton', {
+          name: 'Hours',
+        }),
+      ).toBeVisible();
     },
   },
   {

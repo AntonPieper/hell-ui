@@ -10,7 +10,7 @@ import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-time">Meeting time</label>
-      <hell-time-input inputId="reactive-time" [formControl]="control" />
+      <input id="reactive-time" hellTimeInput [formControl]="control" />
       <div hellFieldDescription>
         Reactive forms read/write <code>HellTimeValue | null</code>; transport formatting stays
         your responsibility.
@@ -29,7 +29,7 @@ export class TimeInputReactiveFormsExample {
 
   protected format(value: HellTimeValue | null): string {
     if (!value) return 'not set';
-    const pad = (n: number) => n.toString().padStart(2, '0');
+    const pad = (part: number) => part.toString().padStart(2, '0');
     return `${pad(value.hour)}:${pad(value.minute)}`;
   }
 }

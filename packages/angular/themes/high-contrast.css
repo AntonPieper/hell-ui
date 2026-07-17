@@ -24,8 +24,8 @@
       [hellBadge],
       [hellKbd],
       [hellListbox],
-      hell-time-input,
-      input[hellDateInput]
+      input[hellDateInput],
+      input[hellTimeInput]
     )[data-slot='root'],
   [data-hell-skin="high-contrast"] hell-omnibar[data-slot='root'] > [data-slot='control'],
   [data-hell-skin="high-contrast"] hell-toaster[data-slot='root'] [data-slot='toast'] {

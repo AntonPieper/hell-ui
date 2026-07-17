@@ -1806,42 +1806,49 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/time-input',
  detail:'components/time-input/examples/basic.example.ts',
  terms:
-'time-input hell-time-input hellField hellFieldLabel hellFieldDescription HellTimeInput smallest realistic usage reminder',
+'time-input input hellTimeInput hellField hellFieldLabel hellFieldDescription HellTimeInput controlled value native reminder',
+ },
+ {
+ title:'Time Input: With Time Picker',
+ path:'/components/time-input',
+ detail:'components/time-input/examples/with-time-picker.example.ts',
+ terms:
+'time-input input hellTimeInput Control Group hellControlGroup Popover hellPopover Time Picker hell-time-picker explicit Done focus restoration trigger shared FormControl composition recipe',
  },
  {
  title:'Time Input: Reactive Forms',
  path:'/components/time-input',
  detail:'components/time-input/examples/reactive-forms.example.ts',
  terms:
-'time-input hell-time-input hellField FormControl ReactiveFormsModule ControlValueAccessor HellTimeValue meeting',
+'time-input input hellTimeInput native hellField FormControl ReactiveFormsModule ControlValueAccessor Validator HellTimeValue meeting Field CVA',
  },
  {
- title:'Time Input: Seconds And Validation',
+ title:'Time Input: Seconds, Bounds, And Validation',
  path:'/components/time-input',
  detail:'components/time-input/examples/seconds-and-validation.example.ts',
  terms:
-'time-input hell-time-input hellField hellFieldError hellFieldDescription invalid disabled HellTimeInput HH:mm:ss log timestamp departure locked slot',
+'time-input input hellTimeInput hellField hellFieldError hellFieldDescription seconds min max inclusive bounds required invalid invalid draft disabled HellTimeInput HH:mm:ss outOfRangeTime invalidTimeInputDraft',
  },
  {
  title:'Time Input: Sizes',
  path:'/components/time-input',
  detail:'components/time-input/examples/sizes.example.ts',
  terms:
-'time-input hell-time-input size sm md lg HellTimeInput control height',
+'time-input input hellTimeInput size sm md lg HellTimeInput HellInput root control height',
  },
  {
  title:'Time Input: Styling',
  path:'/components/time-input',
  detail:'components/time-input/examples/styling.example.ts',
  terms:
-'time-input hell-time-input ui HellTimeInputUi part style map root trigger triggerIcon pickerPanel pickerHeader pickerReadout pickerUnits pickerUnit pickerUnitLabel pickerUnitControl pickerUnitValue pickerUnitStep minutePresets minutePreset all-parts tailwind hell design tokens',
+'time-input input hellTimeInput ui HellUiInput root single host native input Part Style Map Tailwind HellInput design tokens',
  },
  {
  title:'Time Input: With Field Schedule Row',
  path:'/components/time-input',
  detail:'components/time-input/examples/with-field-schedule-row.example.ts',
  terms:
-'time-input hell-time-input input hellDateInput hellField composite scheduling shift start end date',
+'time-input input hellTimeInput hellDateInput hellField native composition scheduling shift start end date timezone',
  },
  {
  title:'Time Picker: Basic',
@@ -2246,14 +2253,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/time-input',
  detail:'provideHellTimeInputAdapter, HELL_TIME_INPUT_ADAPTER',
  terms:
-'time-input adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format locale shortcuts HellTimeValue ui HellTimeInputUi',
+'time-input input hellTimeInput adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format normalize isSameValue isWithinBounds HellTimeValue seconds',
  },
  {
  title:'Time input forms value',
  path:'/components/time-input',
  detail:'ControlValueAccessor, formControl, HellTimeValue | null',
  terms:
-'time-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation ui HellTimeInputUi',
+'time-input input hellTimeInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation Field',
  },
  {
  title:'Number input adapter',

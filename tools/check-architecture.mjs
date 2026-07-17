@@ -1289,15 +1289,8 @@ function checkTokenSubstrateDoesNotOwnComponentSkins() {
 function checkComponentContract() {
   const productionFiles = libraryProductionTsFiles();
   const classIndex = partStyleClassIndex(productionFiles);
-  const partUnionIndex = literalPartUnionIndex(productionFiles);
-  const canonicalOwnedPartTypes = checkOwnedPartAdapterDeclarations(
-    productionFiles,
-    partUnionIndex,
-  );
   const files = productionFiles.filter((file) => !file.includes('/core/'));
   const publicStyleableModules = new Map();
-
-  checkOwnedPartAdapterFixtures();
 
   for (const rel of files) {
     const file = join(root, rel);
@@ -1317,14 +1310,7 @@ function checkComponentContract() {
       publicStyleableModules.set(className, rel);
 
       checkPartStylePipeline(rel, module, styleInfo);
-      checkPartSlotUnionContract(
-        rel,
-        source,
-        module,
-        styleInfo,
-        partUnionIndex,
-        canonicalOwnedPartTypes,
-      );
+      checkPartSlotUnionContract(rel, source, module, styleInfo);
     }
   }
 }
@@ -1400,8 +1386,6 @@ function checkPartSlotUnionContract(
   source,
   module,
   styleInfo,
-  partUnionIndex,
-  canonicalOwnedPartTypes,
 ) {
   const partNames = literalUnionMembers(styleInfo.source, styleInfo.partType);
   if (!partNames.length) {
@@ -1416,49 +1400,8 @@ function checkPartSlotUnionContract(
     );
   }
 
-  if (hasDynamicOwnedPartAdapter(templateSource)) {
-    failures.push(
-      `${rel} ${module.className} must declare data-hell-owned-part-adapter as an explicit static literal`,
-    );
-  }
-
   const literalSlots = literalDataSlots(templateSource);
-  const adaptedSlots = [];
-  for (const serialized of literalOwnedPartAdapterAttributes(templateSource)) {
-    const parsed = parseOwnedPartAdapterSpec(serialized);
-    const sourceParts = parsed ? partUnionIndex.get(parsed.sourceType)?.parts : undefined;
-    const targetParts = parsed ? partUnionIndex.get(parsed.targetType)?.parts : undefined;
-    const errors = validateOwnedPartAdapterSpec({
-      literal: true,
-      serialized,
-      sourceParts,
-      targetParts,
-      ownerSlots: literalSlots,
-      requireIdentity: false,
-      requireTargetExhaustive: false,
-    });
-    for (const error of errors) {
-      failures.push(`${rel} ${module.className} owned-part adapter ${error.message}`);
-    }
-    if (!parsed || errors.length) continue;
-
-    if (parsed.targetType !== styleInfo.partType) {
-      failures.push(
-        `${rel} ${module.className} owned-part adapter target ${parsed.targetType} must match ${styleInfo.partType}`,
-      );
-      continue;
-    }
-    if (canonicalOwnedPartTypes.get(parsed.sourceType) !== 1) {
-      failures.push(
-        `${rel} ${module.className} owned-part adapter source ${parsed.sourceType} must have exactly one exhaustive canonical identity declaration`,
-      );
-    }
-    adaptedSlots.push(
-      ...parsed.entries.flatMap((entry) => (entry.targetPart === null ? [] : [entry.targetPart])),
-    );
-  }
-
-  const renderedSlots = [...new Set([...literalSlots, ...adaptedSlots])];
+  const renderedSlots = literalSlots;
   for (const slot of renderedSlots) {
     if (!partNames.includes(slot)) {
       failures.push(
@@ -1500,261 +1443,11 @@ function literalUnionMembers(source, typeName, depth = 0) {
   return [...match[1].matchAll(/['"]([^'"]+)['"]/g)].map((candidate) => candidate[1]);
 }
 
-function literalPartUnionIndex(relFiles) {
-  const declarations = new Map();
-  for (const rel of relFiles) {
-    const source = readFile(join(root, rel));
-    for (const match of source.matchAll(/export\s+type\s+([A-Za-z0-9_]+Part)\s*=([\s\S]*?);/g)) {
-      declarations.set(match[1], { rel, body: match[2] });
-    }
-  }
-
-  const index = new Map();
-  const resolveUnion = (typeName, seen = new Set()) => {
-    if (index.has(typeName)) return index.get(typeName);
-    if (seen.has(typeName)) return undefined;
-    seen.add(typeName);
-
-    const declaration = declarations.get(typeName);
-    if (!declaration) return undefined;
-    const parts = [...declaration.body.matchAll(/['"]([^'"]+)['"]/g)].map(
-      (candidate) => candidate[1],
-    );
-    const aliasTarget = /^\s*([A-Za-z0-9_]+)\s*$/.exec(declaration.body)?.[1];
-    const resolved = parts.length ? parts : aliasTarget ? resolveUnion(aliasTarget, seen)?.parts : [];
-    const info = { rel: declaration.rel, parts: resolved };
-    index.set(typeName, info);
-    return info;
-  };
-
-  for (const typeName of declarations.keys()) resolveUnion(typeName);
-  return index;
-}
-
-function checkOwnedPartAdapterDeclarations(relFiles, partUnionIndex) {
-  const canonicalOwnedPartTypes = new Map();
-
-  for (const rel of relFiles) {
-    const source = readFile(join(root, rel));
-    const sourceFile = ts.createSourceFile(rel, source, ts.ScriptTarget.Latest, true);
-    const visit = (node) => {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isIdentifier(node.expression) &&
-        node.expression.text === 'hellOwnedPartAdapter'
-      ) {
-        const argument = node.arguments[0];
-        const literal =
-          node.arguments.length === 1 &&
-          !!argument &&
-          (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument));
-        const serialized = literal ? argument.text : '';
-        const parsed = literal ? parseOwnedPartAdapterSpec(serialized) : null;
-        const errors = validateOwnedPartAdapterSpec({
-          literal,
-          serialized,
-          sourceParts: parsed ? partUnionIndex.get(parsed.sourceType)?.parts : undefined,
-          targetParts: parsed ? partUnionIndex.get(parsed.targetType)?.parts : undefined,
-          ownerSlots: [],
-          requireIdentity: true,
-          requireTargetExhaustive: true,
-        });
-        for (const error of errors) {
-          failures.push(`${rel} canonical owned-part adapter ${error.message}`);
-        }
-        if (parsed && errors.length === 0) {
-          canonicalOwnedPartTypes.set(
-            parsed.sourceType,
-            (canonicalOwnedPartTypes.get(parsed.sourceType) ?? 0) + 1,
-          );
-        }
-      }
-      ts.forEachChild(node, visit);
-    };
-    visit(sourceFile);
-  }
-
-  for (const [partType, count] of canonicalOwnedPartTypes) {
-    if (count > 1) {
-      failures.push(
-        `${partType} must have exactly one canonical owned-part identity declaration; found ${count}`,
-      );
-    }
-  }
-
-  return canonicalOwnedPartTypes;
-}
-
-function parseOwnedPartAdapterSpec(serialized) {
-  const match =
-    /^source=([A-Za-z_$][\w$]*);target=([A-Za-z_$][\w$]*);map=(.+)$/.exec(serialized);
-  if (!match) return null;
-
-  const entries = [];
-  for (const entry of match[3].split(',')) {
-    const pair = /^([A-Za-z_$][\w$]*):([A-Za-z_$][\w$]*|null)$/.exec(entry);
-    if (!pair) return null;
-    entries.push({ sourcePart: pair[1], targetPart: pair[2] === 'null' ? null : pair[2] });
-  }
-  return { sourceType: match[1], targetType: match[2], entries };
-}
-
-function validateOwnedPartAdapterSpec({
-  literal,
-  serialized,
-  sourceParts,
-  targetParts,
-  ownerSlots,
-  requireIdentity,
-  requireTargetExhaustive,
-}) {
-  const errors = [];
-  const errorCodes = new Set();
-  const addError = (code, message) => {
-    if (errorCodes.has(code)) return;
-    errorCodes.add(code);
-    errors.push({ code, message });
-  };
-
-  if (!literal) {
-    addError('nonliteral', 'must be an explicit string literal');
-    return errors;
-  }
-
-  const parsed = parseOwnedPartAdapterSpec(serialized);
-  if (!parsed) {
-    addError('invalid-syntax', 'has invalid source/target/map syntax');
-    return errors;
-  }
-  if (!sourceParts?.length) {
-    addError('unknown-source-union', `references unknown source union ${parsed.sourceType}`);
-    return errors;
-  }
-  if (!targetParts?.length) {
-    addError('unknown-target-union', `references unknown target union ${parsed.targetType}`);
-    return errors;
-  }
-
-  const sourceSet = new Set(sourceParts);
-  const targetSet = new Set(targetParts);
-  const seenSources = new Set();
-  const seenTargets = new Set(ownerSlots);
-  for (const entry of parsed.entries) {
-    if (seenSources.has(entry.sourcePart)) {
-      addError('duplicate-source', `maps source part ${entry.sourcePart} more than once`);
-    }
-    seenSources.add(entry.sourcePart);
-    if (!sourceSet.has(entry.sourcePart)) {
-      addError(
-        'unknown-source',
-        `maps unknown ${parsed.sourceType} source part ${entry.sourcePart}`,
-      );
-    }
-
-    if (entry.targetPart === null) {
-      if (entry.sourcePart !== 'root') {
-        addError('invalid-null', `may suppress only the source root, not ${entry.sourcePart}`);
-      }
-      continue;
-    }
-    if (!targetSet.has(entry.targetPart)) {
-      addError(
-        'unknown-target',
-        `maps to unknown ${parsed.targetType} target part ${entry.targetPart}`,
-      );
-    }
-    if (seenTargets.has(entry.targetPart)) {
-      addError('duplicate-target', `maps target part ${entry.targetPart} more than once`);
-    }
-    seenTargets.add(entry.targetPart);
-  }
-
-  for (const sourcePart of sourceParts) {
-    if (!seenSources.has(sourcePart)) {
-      addError('missing-source', `does not map source part ${sourcePart}`);
-    }
-  }
-
-  if (requireIdentity) {
-    if (parsed.sourceType !== parsed.targetType) {
-      addError(
-        'identity-type-mismatch',
-        `canonical identity must target ${parsed.sourceType}, not ${parsed.targetType}`,
-      );
-    }
-    if (
-      parsed.entries.some(
-        (entry) => entry.targetPart === null || entry.targetPart !== entry.sourcePart,
-      )
-    ) {
-      addError('nonidentity-canonical', 'canonical declaration must map every part to itself');
-    }
-  }
-
-  if (requireTargetExhaustive) {
-    const renderedTargets = new Set([...ownerSlots, ...seenTargets]);
-    for (const targetPart of targetParts) {
-      if (!renderedTargets.has(targetPart)) {
-        addError('missing-target', `does not render target part ${targetPart}`);
-      }
-    }
-  }
-
-  return errors;
-}
-
-function checkOwnedPartAdapterFixtures() {
-  const fixturePath = join(root, 'tools/fixtures/architecture/owned-part-adapters.json');
-  if (!existsSync(fixturePath)) {
-    failures.push('Owned-part adapter architecture fixtures are missing');
-    return;
-  }
-
-  const fixtures = JSON.parse(readFile(fixturePath));
-  for (const fixture of fixtures.cases ?? []) {
-    const actual = validateOwnedPartAdapterSpec({
-      literal: fixture.literal,
-      serialized: fixture.serialized,
-      sourceParts: fixture.sourceParts,
-      targetParts: fixture.targetParts,
-      ownerSlots: fixture.ownerSlots ?? [],
-      requireIdentity: fixture.requireIdentity ?? false,
-      requireTargetExhaustive: true,
-    })
-      .map((error) => error.code)
-      .sort();
-    const expected = [...fixture.expectedCodes].sort();
-    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-      failures.push(
-        `Owned-part adapter fixture ${fixture.name} expected [${expected.join(', ')}] but received [${actual.join(', ')}]`,
-      );
-    }
-  }
-}
-
 function hasDynamicDataSlot(source) {
   return (
     /\[\s*(?:attr\.)?data-slot\s*\]\s*(?:=|['"]\s*:)/.test(source) ||
     /\bbind-(?:attr\.)?data-slot\s*=/.test(source) ||
     /\bdata-slot\s*=\s*['"][^'"]*\{\{/.test(source)
-  );
-}
-
-function hasDynamicOwnedPartAdapter(source) {
-  return (
-    /\[\s*(?:attr\.)?data-hell-owned-part-adapter\s*\]\s*(?:=|['"]\s*:)/.test(source) ||
-    /\bbind-(?:attr\.)?data-hell-owned-part-adapter\s*=/.test(source) ||
-    /\bdata-hell-owned-part-adapter\s*=\s*['"][^'"]*\{\{/.test(source)
-  );
-}
-
-function literalOwnedPartAdapterAttributes(source) {
-  const patterns = [
-    /\bdata-hell-owned-part-adapter\s*=\s*"([^"]+)"/g,
-    /\bdata-hell-owned-part-adapter\s*=\s*'([^']+)'/g,
-  ];
-  return patterns.flatMap((pattern) =>
-    [...source.matchAll(pattern)].map((candidate) => candidate[1]),
   );
 }
 

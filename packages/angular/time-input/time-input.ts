@@ -1,183 +1,71 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  NO_ERRORS_SCHEMA,
+  Directive,
+  ElementRef,
+  InjectionToken,
+  Renderer2,
+  afterRenderEffect,
   booleanAttribute,
   computed,
   effect,
   forwardRef,
   inject,
-  InjectionToken,
   input,
   output,
   signal,
-  type Signal,
   type Provider,
+  type Signal,
 } from '@angular/core';
 import {
-  ControlValueAccessor,
   NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
   type AbstractControl,
+  type ControlValueAccessor,
   type NgControl,
   type ValidationErrors,
   type Validator,
-  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { provideIcons } from '@ng-icons/core';
-import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import {
-  NgpFormControl,
   injectFormFieldState,
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { injectInputState } from 'ng-primitives/input';
+
 import {
-  HellTimePicker,
-  HELL_TIME_PICKER_LABELS,
-  type HellTimePickerLabels,
-  type HellTimePickerUi,
-  type HellTimeValue,
-} from '@hell-ui/angular/time-picker';
-import { hellCreateLabels } from '@hell-ui/angular/core';
-import {
-  hellSyncFormFieldDescriptions,
-  hellSyncFormFieldLabels,
-} from '@hell-ui/angular/internal/core';
-import type { HellSize } from '@hell-ui/angular/core';
-import {
-  hellPartStyler,
   hellInvalidTypedValue,
   hellTypedValue,
-  type HellRecipe,
+  type HellTimeValue,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
-  type HellUi,
-  type HellUiInput,
 } from '@hell-ui/angular/core';
-import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
+import { HellInput } from '@hell-ui/angular/input';
+import {
+  HellTypedValueInputState,
+  hellSyncFormFieldDescriptions,
+  hellSyncFormFieldLabels,
+  hellUniqueIdRefs,
+} from '@hell-ui/angular/internal/core';
+export type { HellTimeValue } from '@hell-ui/angular/core';
 
-export type { HellTimeValue } from '@hell-ui/angular/time-picker';
-
-/** Built-in accessibility labels owned by the time input entry point. */
-export interface HellTimeInputLabels {
-  /** Accessible label for the clock trigger button when no field label is set. */
-  readonly chooseTime: string;
-  /** Accessible label for the clock trigger button, incorporating the field label. */
-  readonly chooseTimeFor: (label: string) => string;
-  /** Label for the control that steps the picker back by five minutes. */
-  readonly subtractFiveMinutes: string;
-  /** Label for the control that steps the picker forward by five minutes. */
-  readonly addFiveMinutes: string;
-  /** Label for the hours spinbutton. */
-  readonly hours: string;
-  /** Label for the minutes spinbutton. */
-  readonly minutes: string;
-  /** Label for the seconds spinbutton. */
-  readonly seconds: string;
-  /** Accessible label announcing the currently selected time in the picker readout. */
-  readonly selectedTime?: (time: string) => string;
-  /** Accessible label for a unit's decrement step button. */
-  readonly decreaseUnit?: (unitLabel: string) => string;
-  /** Accessible label for a unit's increment step button. */
-  readonly increaseUnit?: (unitLabel: string) => string;
-  /** Accessible label for the minute presets group. */
-  readonly minutePresets?: string;
-  /** Accessible label for a single minute preset button. */
-  readonly minutePreset?: (minute: number) => string;
-}
-
-/** Injection token resolving to the effective time input labels. */
-export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels> = hellCreateLabels<HellTimeInputLabels>('HELL_TIME_INPUT_LABELS', {
-  chooseTime: 'Choose time',
-  chooseTimeFor: (label) => `Choose time for ${label}`,
-  subtractFiveMinutes: 'Subtract 5 minutes',
-  addFiveMinutes: 'Add 5 minutes',
-  hours: 'Hours',
-  minutes: 'Minutes',
-  seconds: 'Seconds',
-  selectedTime: (time) => `Selected time ${time}`,
-  decreaseUnit: (unitLabel) => `Decrease ${unitLabel.toLowerCase()}`,
-  increaseUnit: (unitLabel) => `Increase ${unitLabel.toLowerCase()}`,
-  minutePresets: 'Minute presets',
-  minutePreset: (minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`,
-});
-
-const HELL_TIME_INPUT_ICONS = {
-  faSolidClock,
-};
-
-let nextTimeInputId = 0;
-
-/** Public parts of the HellTimeInput module, styleable through its Part Style Map. */
-export type HellTimeInputPart =
-  | 'root'
-  | 'input'
-  | 'trigger'
-  | 'triggerIcon'
-  | 'pickerPanel'
-  | 'pickerHeader'
-  | 'pickerReadout'
-  | 'pickerUnits'
-  | 'pickerUnit'
-  | 'pickerUnitLabel'
-  | 'pickerUnitControl'
-  | 'pickerUnitValue'
-  | 'pickerUnitStep'
-  | 'minutePresets'
-  | 'minutePreset';
-
-/** Part Style Map accepted by the HellTimeInput `ui` input. */
-export type HellTimeInputUi = HellUi<HellTimeInputPart>;
-
-const HELL_TIME_INPUT_RECIPE = {
-  root: 'relative inline-flex w-full max-w-48 min-w-36 items-stretch rounded-hell-md border border-hell-border bg-hell-surface-elevated transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:border-hell-border-strong focus-within:border-hell-border-focus focus-within:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle',
-  input:
-    'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] tracking-normal text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
-  trigger:
-    'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-muted transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  triggerIcon: 'size-hell-4 text-[length:var(--spacing-hell-4)]',
-  pickerPanel:
-    'grid w-[min(20rem,calc(100vw-2rem))] gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated p-hell-3 text-[13px] text-hell-foreground shadow-hell-lg outline-none',
-  pickerHeader: 'flex min-h-hell-control-sm items-center justify-start',
-  pickerReadout: 'text-[22px] font-semibold leading-none tracking-normal text-hell-foreground tabular-nums',
-  pickerUnits: 'grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-hell-2',
-  pickerUnit: 'grid min-w-0 gap-hell-1',
-  pickerUnitLabel: 'text-[10px] font-semibold uppercase tracking-normal text-hell-foreground-muted',
-  pickerUnitControl:
-    'grid min-w-0 grid-cols-[minmax(0,1fr)_var(--spacing-hell-control-sm)_var(--spacing-hell-control-sm)] items-stretch overflow-hidden rounded-hell-sm border border-hell-border bg-hell-surface-elevated',
-  pickerUnitValue:
-    'inline-flex h-hell-control-sm min-w-0 cursor-pointer items-center justify-center border-0 border-e border-solid border-hell-border bg-transparent px-hell-2 font-[inherit] text-lg font-semibold text-hell-foreground tabular-nums focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-primary-foreground),0_0_0_3px_var(--color-hell-focus-ring)]',
-  pickerUnitStep:
-    'h-hell-control-sm cursor-pointer border-0 bg-transparent font-[inherit] text-[13px] font-medium text-hell-foreground-muted transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-subtle focus-visible:relative focus-visible:z-[1] focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-border-focus),0_0_0_2px_var(--color-hell-focus-ring)]',
-  minutePresets: 'grid grid-cols-4 gap-hell-1',
-  minutePreset:
-    'h-hell-control-sm cursor-pointer rounded-hell-pill border border-hell-border bg-hell-surface-elevated font-[inherit] text-xs font-medium text-hell-foreground tabular-nums transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-subtle focus-visible:relative focus-visible:z-[1] focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-border-focus),0_0_0_2px_var(--color-hell-focus-ring)] data-[selected=true]:border-hell-primary data-[selected=true]:bg-hell-primary data-[selected=true]:text-hell-primary-foreground',
-} satisfies HellRecipe<HellTimeInputPart>;
-
-/** Contextual flags passed to adapter parse, format, and normalize hooks. */
+/** Contextual precision passed to time adapter hooks. */
 export interface HellTimeInputAdapterContext {
-  /** Whether seconds are part of the value being parsed, formatted, or normalized. */
+  /** Whether seconds are part of the visible and committed value. */
   readonly seconds: boolean;
 }
 
-/**
- * Strategy for parsing, formatting, normalizing, and comparing time values —
- * the core `HellTypedInputAdapter` instantiated for `HellTimeValue` with the
- * seconds-awareness context.
- */
+/** Strategy for parsing, formatting, normalizing, comparing, and bounding times. */
 export type HellTimeInputAdapter = HellTypedInputAdapter<
   HellTimeValue,
   HellTimeInputAdapterContext
 >;
 
-/** Default time input adapter parsing and formatting the built-in `HH:mm`/`HH:mm:ss` formats. */
+/** Default adapter for `HH:mm`, optional `HH:mm:ss`, compact, and 12-hour text. */
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter = {
   parseText: hellParseTimeInputText,
   format: hellFormatTimeInputValue,
   normalize: hellNormalizeTimeInputValue,
   isSameValue: hellSameTimeInputValue,
+  isWithinBounds: hellIsTimeInputValueWithinBounds,
 };
 
 /** Injection token resolving to the effective time input adapter. */
@@ -191,80 +79,20 @@ export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Prov
   return { provide: HELL_TIME_INPUT_ADAPTER, useValue: adapter };
 }
 
-interface HellTimePickerComposition {
-  readonly format: (value: HellTimeValue, seconds: boolean) => string;
-  readonly normalize: (
-    value: HellTimeValue,
-    seconds: boolean,
-  ) => HellTimeValue | null;
+function pad(value: number): string {
+  return value.toString().padStart(2, '0');
 }
 
-const HELL_TIME_PICKER_COMPOSITION = Symbol.for('@hell-ui/angular/time-picker/composition');
-
-interface TimeInputPickerEcho {
-  readonly value: HellTimeValue;
-  readonly seconds: boolean;
-}
-
-const timeInputPickerEchoes = new WeakMap<object, TimeInputPickerEcho>();
-
-function hellTimePickerLabelsFromTimeInput(): HellTimePickerLabels {
-  const labels = inject(HELL_TIME_INPUT_LABELS);
-  const timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
-  const pickerLabels: HellTimePickerLabels = {
-    hours: labels.hours,
-    minutes: labels.minutes,
-    seconds: labels.seconds,
-    selectedTime: labels.selectedTime ?? ((time) => `Selected time ${time}`),
-    decreaseUnit:
-      labels.decreaseUnit ?? ((unitLabel) => `Decrease ${unitLabel.toLowerCase()}`),
-    increaseUnit:
-      labels.increaseUnit ?? ((unitLabel) => `Increase ${unitLabel.toLowerCase()}`),
-    minutePresets: labels.minutePresets ?? 'Minute presets',
-    minutePreset:
-      labels.minutePreset ??
-      ((minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`),
-  };
-  const composition = {
-    format: (value: HellTimeValue, seconds: boolean) =>
-      timeAdapter.format(value, { seconds }),
-    normalize: (value: HellTimeValue, seconds: boolean) =>
-      timeAdapter.normalize
-        ? timeAdapter.normalize(value, { seconds })
-        : hellNormalizeTimeInputValue(value, { seconds }),
-  } satisfies HellTimePickerComposition;
-
-  Object.defineProperty(pickerLabels, HELL_TIME_PICKER_COMPOSITION, {
-    value: composition,
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  });
-  return pickerLabels;
-}
-
-function pad(n: number) {
-  return n.toString().padStart(2, '0');
-}
-
-/** Format a time value as `HH:mm`, or `HH:mm:ss` when seconds are enabled. */
 function hellFormatTimeInputValue(
-  t: HellTimeValue | null,
+  value: HellTimeValue | null,
   context: HellTimeInputAdapterContext,
 ): string {
-  if (!t) return '';
+  if (!value) return '';
   return context.seconds
-    ? `${pad(t.hour)}:${pad(t.minute)}:${pad(t.second)}`
-    : `${pad(t.hour)}:${pad(t.minute)}`;
+    ? `${pad(value.hour)}:${pad(value.minute)}:${pad(value.second)}`
+    : `${pad(value.hour)}:${pad(value.minute)}`;
 }
 
-/**
- * Parse the business-default text formats: `HH:mm`, and `HH:mm:ss` when
- * `seconds` is enabled, plus a couple of common 12-hour spellings
- * (`9:00 am`, `1:30PM`). Locale parsing is intentionally off by default.
- * Empty text commits a nullable clear; unparseable text stays as an invalid
- * draft.
- */
 function hellNormalizeTimeInputValue(
   value: HellTimeValue | null | undefined,
   context: HellTimeInputAdapterContext,
@@ -273,46 +101,63 @@ function hellNormalizeTimeInputValue(
   return context.seconds ? value : { ...value, second: 0 };
 }
 
-/** Parse time input text into a value or an invalid draft, per the default formats. */
 function hellParseTimeInputText(
   text: string,
   context: HellTimeInputAdapterContext,
 ): HellTypedValueParseResult<HellTimeValue> {
-  const t = text.trim().toLowerCase();
-  if (!t) return hellTypedValue<HellTimeValue>(null);
+  const source = text.trim().toLowerCase();
+  if (!source) return hellTypedValue<HellTimeValue>(null);
 
-  const compact = /^(\d{1,4})$/.exec(t);
+  const compact = /^(\d{1,4})$/.exec(source);
   if (compact) {
     const digits = compact[1];
     const hourText = digits.length <= 2 ? digits : digits.slice(0, -2);
     const minuteText = digits.length <= 2 ? '0' : digits.slice(-2);
-    const value = { hour: +hourText, minute: +minuteText, second: 0 };
-    return isValidTime(value)
-      ? hellTypedValue(hellNormalizeTimeInputValue(value, context))
-      : hellInvalidTypedValue();
+    return parsedTimeValue(
+      { hour: Number(hourText), minute: Number(minuteText), second: 0 },
+      context,
+    );
   }
 
-  const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(a|am|p|pm)$/.exec(t);
-  if (ampm) {
-    if (!context.seconds && ampm[3] !== undefined) return hellInvalidTypedValue();
-    let hour = +ampm[1];
-    const minute = +(ampm[2] ?? '0');
-    const second = +(ampm[3] ?? '0');
+  const meridiem = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(a|am|p|pm)$/.exec(
+    source,
+  );
+  if (meridiem) {
+    if (!context.seconds && meridiem[3] !== undefined) return hellInvalidTypedValue();
+    let hour = Number(meridiem[1]);
+    if (hour < 1 || hour > 12) return hellInvalidTypedValue();
     if (hour === 12) hour = 0;
-    if (ampm[4].startsWith('p')) hour += 12;
-    const value = { hour, minute, second };
-    if (!isValidTime(value)) return hellInvalidTypedValue();
-    return hellTypedValue(hellNormalizeTimeInputValue(value, context));
+    if (meridiem[4].startsWith('p')) hour += 12;
+    return parsedTimeValue(
+      {
+        hour,
+        minute: Number(meridiem[2] ?? '0'),
+        second: Number(meridiem[3] ?? '0'),
+      },
+      context,
+    );
   }
-  const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
-  if (!m || (!context.seconds && m[3] !== undefined)) return hellInvalidTypedValue();
-  const hour = +m[1];
-  const minute = +m[2];
-  const second = +(m[3] ?? '0');
-  const value = { hour, minute, second };
-  return isValidTime(value)
-    ? hellTypedValue(hellNormalizeTimeInputValue(value, context))
-    : hellInvalidTypedValue();
+
+  const separated = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(source);
+  if (!separated || (!context.seconds && separated[3] !== undefined)) {
+    return hellInvalidTypedValue();
+  }
+  return parsedTimeValue(
+    {
+      hour: Number(separated[1]),
+      minute: Number(separated[2]),
+      second: Number(separated[3] ?? '0'),
+    },
+    context,
+  );
+}
+
+function parsedTimeValue(
+  value: HellTimeValue,
+  context: HellTimeInputAdapterContext,
+): HellTypedValueParseResult<HellTimeValue> {
+  const normalized = hellNormalizeTimeInputValue(value, context);
+  return normalized ? hellTypedValue(normalized) : hellInvalidTypedValue();
 }
 
 function isValidTime(value: HellTimeValue | null | undefined): value is HellTimeValue {
@@ -330,31 +175,50 @@ function isValidTime(value: HellTimeValue | null | undefined): value is HellTime
   );
 }
 
-/** Compare two time values by their hour, minute, and second fields. */
-function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
-  return a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second;
+function timeValueSeconds(value: HellTimeValue): number {
+  return value.hour * 3600 + value.minute * 60 + value.second;
 }
 
+function hellIsTimeInputValueWithinBounds(
+  value: HellTimeValue | null,
+  min: HellTimeValue | null,
+  max: HellTimeValue | null,
+  context: HellTimeInputAdapterContext,
+): boolean {
+  const normalized = hellNormalizeTimeInputValue(value, context);
+  if (!normalized) return true;
+  const normalizedMin = hellNormalizeTimeInputValue(min, context);
+  const normalizedMax = hellNormalizeTimeInputValue(max, context);
+  const seconds = timeValueSeconds(normalized);
+  return (
+    (!normalizedMin || seconds >= timeValueSeconds(normalizedMin)) &&
+    (!normalizedMax || seconds <= timeValueSeconds(normalizedMax))
+  );
+}
+
+function hellSameTimeInputValue(
+  left: HellTimeValue | null,
+  right: HellTimeValue | null,
+): boolean {
+  return (
+    left?.hour === right?.hour &&
+    left?.minute === right?.minute &&
+    left?.second === right?.second
+  );
+}
+
+let nextTimeInputId = 0;
+
 /**
- * Time input — text field paired with a clock icon trigger that opens a
- * segmented spinbutton picker. Bind `[value]` as a structured
- * `HellTimeValue | null` and listen to `(valueChange)`.
- *
- * The picker uses segmented hour, minute, and optional second spinbuttons with
- * Arrow/Home/End/PageUp/PageDown navigation and quick minute presets.
+ * Typed time behavior for a real input. Parsing, validation, and forms live on
+ * the native field; picker triggers and Time Picker panels compose separately.
  */
-@Component({
-  selector: 'hell-time-input',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger, HellTimePicker],
-  schemas: [NO_ERRORS_SCHEMA],
-  viewProviders: [provideFormFieldState()],
+@Directive({
+  selector: 'input[hellTimeInput]',
+  exportAs: 'hellTimeInput',
+  hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
   providers: [
-    provideIcons(HELL_TIME_INPUT_ICONS),
-    {
-      provide: HELL_TIME_PICKER_LABELS,
-      useFactory: hellTimePickerLabelsFromTimeInput,
-    },
+    provideFormFieldState({ inherit: false }),
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => HellTimeInput),
@@ -367,133 +231,60 @@ function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null
     },
   ],
   host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-size]': 'size()',
+    '[attr.id]': 'id()',
+    '[value]': 'display()',
+    '[disabled]': 'isDisabled()',
+    '[required]': 'required()',
+    '[attr.step]': 'nativeStep()',
+    '[attr.min]': 'nativeMin()',
+    '[attr.max]': 'nativeMax()',
+    '[attr.aria-invalid]': 'isInvalid() ? "true" : null',
+    '[attr.aria-describedby]': 'fieldAriaDescribedby()',
+    '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '(input)': 'onInput()',
+    '(blur)': 'onBlur()',
+    '(keydown)': 'onKeydown($event)',
   },
-  template: `
-    <input
-      #field
-      ngpFormControl
-      data-slot="input"
-      [class]="part('input')"
-      [type]="nativeTimeInput ? 'time' : 'text'"
-      [attr.data-size]="size()"
-      [attr.data-invalid]="isInvalid() ? 'true' : null"
-      [attr.inputmode]="nativeTimeInput ? null : 'text'"
-      [attr.min]="nativeTimeInput ? '00:00' : null"
-      [attr.max]="nativeTimeInput ? (seconds() ? '23:59:59' : '23:59') : null"
-      [attr.step]="nativeTimeInput ? (seconds() ? '1' : '60') : null"
-      autocomplete="off"
-      [invalid]="isInvalid()"
-      [id]="inputId()"
-      [attr.name]="name()"
-      [attr.aria-invalid]="isInvalid() ? 'true' : null"
-      [attr.aria-label]="ariaLabel()"
-      [attr.aria-describedby]="fieldAriaDescribedby()"
-      [attr.aria-labelledby]="fieldAriaLabelledby()"
-      [disabled]="isDisabled()"
-      [placeholder]="placeholder() ?? (seconds() ? 'HH:mm:ss' : 'HH:mm')"
-      [value]="display()"
-      (focus)="onFieldFocus(field)"
-      (input)="onInput(field.value)"
-      (blur)="onBlur()"
-      (keydown.enter)="commit(field.value, $event)"
-    />
-    <button
-      type="button"
-      data-slot="trigger"
-      [class]="part('trigger')"
-      [hellPopoverTrigger]="picker"
-      placement="bottom-end"
-      [shift]="pickerShift"
-      [disabled]="isDisabled()"
-      [attr.data-size]="size()"
-      [attr.data-disabled]="isDisabled() ? 'true' : null"
-      [attr.aria-label]="triggerAriaLabel()"
-    >
-      <hell-icon data-slot="triggerIcon" [class]="part('triggerIcon')" name="faSolidClock" />
-    </button>
-
-    <ng-template #picker>
-      <!-- The popover remains the real legacy pickerPanel and retains its
-           original Part-Class Pipeline. The private literal ownership map
-           adapts only the child renderer's slot names. -->
-      <div hellPopover data-slot="pickerPanel" [ui]="part('pickerPanel')">
-        <hell-time-picker
-          data-hell-owned-part-adapter="source=HellTimePickerPart;target=HellTimeInputPart;map=root:null,header:pickerHeader,readout:pickerReadout,units:pickerUnits,unit:pickerUnit,unitLabel:pickerUnitLabel,unitControl:pickerUnitControl,unitValue:pickerUnitValue,unitStep:pickerUnitStep,minutePresets:minutePresets,minutePreset:minutePreset"
-          [value]="pickerValue()"
-          [seconds]="seconds()"
-          [disabled]="isDisabled()"
-          [ui]="pickerUi()"
-          (valueChange)="onPickerValueChange($event)"
-        />
-      </div>
-    </ng-template>
-  `,
 })
 export class HellTimeInput implements ControlValueAccessor, Validator {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellTimeInputPart>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellTimeInputPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_TIME_INPUT_RECIPE,
-  });
-
-  /** Legacy picker Part keys adapted to the extracted Time Picker anatomy. */
-  protected readonly pickerUi = computed<HellTimePickerUi>(() => ({
-    root: 'contents',
-    header: this.part('pickerHeader'),
-    readout: this.part('pickerReadout'),
-    units: this.part('pickerUnits'),
-    unit: this.part('pickerUnit'),
-    unitLabel: this.part('pickerUnitLabel'),
-    unitControl: this.part('pickerUnitControl'),
-    unitValue: this.part('pickerUnitValue'),
-    unitStep: this.part('pickerUnitStep'),
-    minutePresets: this.part('minutePresets'),
-    minutePreset: this.part('minutePreset'),
-  }));
-
-  /** Control height. Defaults to `md`. */
-  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  /** Forces the invalid visual state. Defaults to `false`. */
+  /** Native input id, generated when the consumer does not author one. */
+  readonly id = input(`hell-time-input-${++nextTimeInputId}`);
+  /** Forces invalid presentation and accessibility state. */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /** Disables the field and trigger. Defaults to `false`. */
+  /** Disables native interaction outside forms use. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Current time value in uncontrolled use. Defaults to `null`. */
+  /** Marks a nullable clear as a required-value validation error. */
+  readonly required = input(false, { transform: booleanAttribute });
+  /** Current controlled time value. */
   readonly value = input<HellTimeValue | null>(null);
-  /** Includes seconds in the field and picker. Defaults to `false`. */
+  /** Inclusive lower same-day time bound. */
+  readonly min = input<HellTimeValue | null>(null);
+  /** Inclusive upper same-day time bound. */
+  readonly max = input<HellTimeValue | null>(null);
+  /** Includes seconds in parsing, formatting, bounds, and native step metadata. */
   readonly seconds = input(false, { transform: booleanAttribute });
-  /** Placeholder text for the field. Defaults to a format hint. */
-  readonly placeholder = input<string | null>(null);
-  /** `id` of the text field. Defaults to a generated unique id. */
-  readonly inputId = input<string>(`hell-time-input-${++nextTimeInputId}-field`);
-  /** `name` attribute of the text field. Defaults to `null`. */
-  readonly name = input<string | null>(null);
-  /** Accessible label for the field. Defaults to `null`. */
-  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
-  /** `aria-describedby` reference for the field. Defaults to `null`. */
+  /** Additional `aria-describedby` ids merged with an enclosing Field. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
-  /** `aria-labelledby` reference for the field. Defaults to `null`. */
+  /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  /** Emits when the committed time value changes. */
+  /** Emits each successfully committed time or nullable clear. */
   readonly valueChange = output<HellTimeValue | null>();
 
-  /** Popover shift padding keeping the picker panel off the viewport edge. */
-  protected readonly pickerShift = { padding: 8 } as const;
-  private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
-
-  /** Formats a time value through the adapter, or empty string when null. */
-  protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
-    value ? this.timeAdapter.format(value, { seconds }) : '';
-  /** Whether to render a native `<input type="time">`, used only with the default adapter. */
-  protected readonly nativeTimeInput = this.timeAdapter === HELL_DEFAULT_TIME_INPUT_ADAPTER;
+  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
+  private readonly renderer = inject(Renderer2);
+  private readonly adapter = inject(HELL_TIME_INPUT_ADAPTER);
+  private readonly inputState = injectInputState();
+  private readonly inheritedFormField = injectFormFieldState({
+    optional: true,
+    skipSelf: true,
+  });
+  private readonly formField = ngpFormField({
+    ngControl: signal<NgControl | undefined>(undefined),
+  });
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<HellTimeValue | null>(null);
@@ -501,193 +292,235 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   private onControlChange: (value: HellTimeValue | null) => void = () => {};
   private onControlTouched: () => void = () => {};
   private onValidatorChange: () => void = () => {};
+  private hasExternalSnapshot = false;
+  private externalSnapshot: HellTimeValue | null = null;
 
-  private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
+  private readonly valueState = new HellTypedValueInputState<
+    HellTimeValue,
+    HellTimeValue | null
+  >({
     external: () => this.effectiveValue(),
-    parseExternal: (value) =>
-      resolveTimeInputPickerEcho(
-        this,
-        value,
-        this.seconds(),
-        (left, right) => this.sameValue(left, right),
-        () => this.normalizeValue(value),
-      ),
-    parseText: (text) => this.timeAdapter.parseText(text, { seconds: this.seconds() }),
-    format: (value) => this.format(value, this.seconds()),
+    parseExternal: (value) => this.normalizeValue(value),
+    parseText: (text) => this.parseText(text),
+    format: (value) => this.adapter.format(value, this.context()),
     externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
-  /** Current committed value passed into the composed Time Picker. */
-  protected readonly pickerValue: Signal<HellTimeValue | null> = this.valueState.current;
-  /** Text shown in the field for the current value or draft. */
+  /** Current committed time normalized to visible precision. */
+  protected readonly current: Signal<HellTimeValue | null> = this.valueState.current;
+  /** Native text for either the active draft or committed value. */
   protected readonly display = this.valueState.display;
-  /** Whether the current draft text is unparseable. */
+  /** Whether the active draft is malformed or outside current bounds. */
   protected readonly invalidDraft = this.valueState.invalidDraft;
-  /** Whether the control is in an invalid state. */
-  protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
-  /** Whether the control is disabled by input or form state. */
+  /** Whether the committed external value falls outside current bounds. */
+  protected readonly outOfRange = computed(
+    () => this.current() !== null && !this.isWithinBounds(this.current()),
+  );
+  /** Whether a required time is missing. */
+  protected readonly requiredMissing = computed(
+    () => this.required() && this.current() === null && !this.invalidDraft(),
+  );
+  /** Effective invalid state from behavior, Field, or an explicit override. */
+  protected readonly isInvalid = (): boolean =>
+    this.invalid() ||
+    this.invalidDraft() ||
+    this.outOfRange() ||
+    this.requiredMissing() ||
+    this.inheritedFormField()?.invalid() === true;
+  /** Effective disabled state from the public input or forms API. */
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
-  /** `aria-describedby` value combining the field input and form field descriptions. */
-  protected readonly fieldAriaDescribedby = computed(
-    () => this.formField.descriptions().join(' ') || null,
+  /** Native step metadata matching visible precision. */
+  protected readonly nativeStep = computed(() => (this.seconds() ? '1' : '60'));
+  /** Native lower-bound metadata using the active adapter. */
+  protected readonly nativeMin = computed(() => this.formatBound(this.min()));
+  /** Native upper-bound metadata using the active adapter. */
+  protected readonly nativeMax = computed(() => this.formatBound(this.max()));
+  /** Effective description ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaDescribedby = computed(() =>
+    this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
   );
-  /** `aria-labelledby` value combining the field input and form field labels. */
-  protected readonly fieldAriaLabelledby = computed(
-    () => this.formField.labels().join(' ') || null,
+  /** Effective label ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaLabelledby = computed(() =>
+    this.mergeIdRefs(this.ariaLabelledby(), this.inheritedFormField()?.labels()),
   );
-  /** Resolved accessibility labels for the control. */
-  protected readonly labels = inject(HELL_TIME_INPUT_LABELS);
-  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
-  private readonly formField =
-    this.inheritedFormField() ??
-    ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
 
   constructor() {
-    hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
-    hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
+    hellSyncFormFieldDescriptions(this.formField, this.fieldAriaDescribedby);
+    hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
+
     effect(() => {
-      discardTimeInputPickerEchoAtOtherPrecision(this, this.seconds());
+      const disabled = this.isDisabled();
+      const inputState = this.inputState();
+      if (inputState.disabled() !== disabled) inputState.setDisabled(disabled);
+      this.formField.disabled.set(disabled);
+    });
+
+    effect(() => {
+      this.formField.invalid.set(this.isInvalid());
+    });
+
+    const inheritedFormField = this.inheritedFormField();
+    effect((onCleanup) => {
+      const id = this.id();
+      this.formField.setFormControl(id);
+      inheritedFormField?.setFormControl(id);
+      onCleanup(() => {
+        if (this.formField.formControl() === id) this.formField.removeFormControl();
+        if (inheritedFormField?.formControl() === id) inheritedFormField.removeFormControl();
+      });
+    });
+
+    if (inheritedFormField) {
+      hellSyncFormFieldDescriptions(
+        this.formField,
+        computed(() => inheritedFormField.descriptions().join(' ') || null),
+      );
+      hellSyncFormFieldLabels(
+        this.formField,
+        computed(() => inheritedFormField.labels().join(' ') || null),
+      );
+    }
+
+    effect(() => {
+      const external = this.normalizeValue(this.effectiveValue());
+      if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
+        this.valueState.clearDraft();
+        this.valueState.clearLocal();
+      }
+      this.externalSnapshot = external;
+      this.hasExternalSnapshot = true;
+    });
+
+    effect(() => {
       this.invalidDraft();
-      this.pickerValue();
+      this.current();
+      this.min();
+      this.max();
+      this.required();
+      this.seconds();
       this.onValidatorChange();
+    });
+
+    afterRenderEffect(() => {
+      // The composed Input primitive also reflects an id after render. Time
+      // Input owns the public id and Field registration, so it settles last.
+      const id = this.id();
+      if (this.host.id !== id) this.renderer.setAttribute(this.host, 'id', id);
     });
   }
 
-  /** Accessible label for the clock trigger button. */
-  protected readonly triggerAriaLabel = () => {
-    const label = this.ariaLabel();
-    return label ? this.labels.chooseTimeFor(label) : this.labels.chooseTime;
-  };
-
-  /** Writes a value from the form model into the control. */
+  /** Writes a time from Angular forms without emitting it back. */
   writeValue(value: HellTimeValue | null): void {
-    timeInputPickerEchoes.delete(this);
+    const normalized = this.normalizeValue(value);
+    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
+
     this.controlMode.set(true);
-    this.controlValue.set(this.normalizeValue(value));
-    this.valueState.clearDraft();
-    this.valueState.clearLocal();
+    this.controlValue.set(normalized);
+    if (changed) {
+      this.valueState.clearDraft();
+      this.valueState.clearLocal();
+    }
     this.onValidatorChange();
   }
 
-  /** Registers the form model's change callback. */
+  /** Registers the Angular forms change callback. */
   registerOnChange(fn: (value: HellTimeValue | null) => void): void {
     this.onControlChange = fn;
   }
 
-  /** Registers the form model's touched callback. */
+  /** Registers the Angular forms touched callback. */
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
   }
 
-  /** Registers the callback invoked when validation state changes. */
+  /** Registers the Angular forms validator-change callback. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
-  /** Sets the disabled state from the form model. */
+  /** Applies disabled state supplied by Angular forms. */
   setDisabledState(isDisabled: boolean): void {
     this.controlDisabled.set(isDisabled);
+  }
+
+  /** Reports malformed drafts, missing required values, and bound violations. */
+  validate(_control: AbstractControl | null): ValidationErrors | null {
+    const errors: ValidationErrors = {};
+    if (this.invalidDraft()) errors['invalidTimeInputDraft'] = true;
+    else if (this.requiredMissing()) errors['required'] = true;
+    if (this.outOfRange()) errors['outOfRangeTime'] = true;
+    return Object.keys(errors).length > 0 ? errors : null;
+  }
+
+  /** Records the native field value as a draft. */
+  protected onInput(): void {
+    this.valueState.writeDraft(this.host.value);
+    this.onValidatorChange();
+  }
+
+  /** Commits a draft and marks the native field touched on blur. */
+  protected onBlur(): void {
+    const result = this.valueState.commitDraft();
+    if (result.committed) this.emitValue(result.value);
+    this.onControlTouched();
+    this.onValidatorChange();
+  }
+
+  /** Commits on Enter without cancelling native form submission. */
+  protected onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter') return;
+    const result = this.valueState.commitText(this.host.value);
+    if (result.committed) this.emitValue(result.value);
+    this.onValidatorChange();
+  }
+
+  private context(): HellTimeInputAdapterContext {
+    return { seconds: this.seconds() };
   }
 
   private effectiveValue(): HellTimeValue | null {
     return this.controlMode() ? this.controlValue() : this.value();
   }
 
-  /** Records field text as a draft as the user types. */
-  protected onInput(value: string) {
-    timeInputPickerEchoes.delete(this);
-    this.valueState.writeDraft(value);
-    this.onValidatorChange();
-  }
-
-  /** Selects the field contents on focus for quick overwriting. */
-  protected onFieldFocus(field: HTMLInputElement) {
-    if (!field.value || this.isDisabled()) return;
-    queueMicrotask(() => {
-      try {
-        field.select();
-      } catch {
-        // Some native time controls expose segmented selection instead of text ranges.
-      }
-    });
-  }
-
-  /** Commits the pending draft when the field loses focus. */
-  protected onBlur() {
-    const next = this.valueState.commitDraft();
-    if (next.committed) this.emitValue(next.value);
-    this.onControlTouched();
-    this.onValidatorChange();
-  }
-
-  /** Commits the given field text, e.g. on Enter. */
-  protected commit(text: string, event?: Event) {
-    event?.preventDefault();
-    const next = this.valueState.commitText(text);
-    if (next.committed) this.emitValue(next.value);
-    this.onValidatorChange();
-  }
-
-  /** Commits a structured value emitted by the composed Time Picker. */
-  protected onPickerValueChange(pickerValue: HellTimeValue | null): void {
-    if (!pickerValue) return;
-    timeInputPickerEchoes.set(this, {
-      value: { ...pickerValue },
-      seconds: this.seconds(),
-    });
-    const next = this.valueState.setValue(pickerValue);
-    if (next.committed) this.emitValue(next.value);
-    this.onControlTouched();
-    this.onValidatorChange();
+  private parseText(text: string): HellTypedValueParseResult<HellTimeValue> {
+    const parsed = this.adapter.parseText(text, this.context());
+    if (!parsed.valid || parsed.value === null) return parsed;
+    return this.isWithinBounds(parsed.value) ? parsed : hellInvalidTypedValue();
   }
 
   private normalizeValue(value: HellTimeValue | null | undefined): HellTimeValue | null {
-    const context = { seconds: this.seconds() };
-    return this.timeAdapter.normalize
-      ? this.timeAdapter.normalize(value, context)
-      : hellNormalizeTimeInputValue(value, context);
+    return this.adapter.normalize
+      ? this.adapter.normalize(value, this.context())
+      : hellNormalizeTimeInputValue(value, this.context());
   }
 
-  private sameValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
-    return this.timeAdapter.isSameValue?.(a, b) ?? hellSameTimeInputValue(a, b);
+  private sameValue(left: HellTimeValue | null, right: HellTimeValue | null): boolean {
+    return this.adapter.isSameValue?.(left, right) ?? hellSameTimeInputValue(left, right);
   }
 
-  /** Reports a validation error while the draft text is unparseable. */
-  validate(_control: AbstractControl | null): ValidationErrors | null {
-    const errors: ValidationErrors = {};
+  private isWithinBounds(value: HellTimeValue | null): boolean {
+    return (
+      this.adapter.isWithinBounds?.(value, this.min(), this.max(), this.context()) ??
+      hellIsTimeInputValueWithinBounds(value, this.min(), this.max(), this.context())
+    );
+  }
 
-    if (this.invalidDraft()) {
-      errors['invalidTimeInputDraft'] = true;
-    }
+  private formatBound(value: HellTimeValue | null): string | null {
+    const normalized = this.normalizeValue(value);
+    return normalized ? this.adapter.format(normalized, this.context()) : null;
+  }
 
-    return Object.keys(errors).length > 0 ? errors : null;
+  private mergeIdRefs(explicit: string | null, fieldIds: readonly string[] | undefined): string | null {
+    const ids = hellUniqueIdRefs([explicit, ...(fieldIds ?? [])].filter(Boolean).join(' '));
+    return ids.join(' ') || null;
   }
 
   private emitValue(value: HellTimeValue | null): void {
+    // Native submission may run before Angular renders the committed display.
+    this.host.value = this.adapter.format(value, this.context());
     if (this.controlMode()) this.controlValue.set(value);
     this.valueChange.emit(value);
     this.onControlChange(value);
     this.onValidatorChange();
   }
-}
-
-function resolveTimeInputPickerEcho(
-  owner: object,
-  external: HellTimeValue | null | undefined,
-  seconds: boolean,
-  sameValue: (left: HellTimeValue | null, right: HellTimeValue | null) => boolean,
-  normalize: () => HellTimeValue | null,
-): HellTimeValue | null {
-  const echo = timeInputPickerEchoes.get(owner);
-  if (!echo) return normalize();
-
-  timeInputPickerEchoes.delete(owner);
-  return echo.seconds === seconds && sameValue(external ?? null, echo.value)
-    ? echo.value
-    : normalize();
-}
-
-function discardTimeInputPickerEchoAtOtherPrecision(owner: object, seconds: boolean): void {
-  const echo = timeInputPickerEchoes.get(owner);
-  if (echo && echo.seconds !== seconds) timeInputPickerEchoes.delete(owner);
 }

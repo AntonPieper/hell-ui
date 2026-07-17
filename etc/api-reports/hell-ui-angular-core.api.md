@@ -180,6 +180,13 @@ export function hellSearchWords(value: string): readonly string[];
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // @public
+export interface HellTimeValue {
+    readonly hour: number;
+    readonly minute: number;
+    readonly second: number;
+}
+
+// @public
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public

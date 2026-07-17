@@ -29,8 +29,8 @@
       input[hellInput],
       select[hellNativeSelect],
       textarea[hellTextarea],
-      hell-time-input,
-      input[hellDateInput]
+      input[hellDateInput],
+      input[hellTimeInput]
     )[data-slot='root'],
   [data-hell-skin="newspaper"] hell-omnibar[data-slot='root'] > [data-slot='control'] {
     border-width: 2px;
