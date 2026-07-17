@@ -272,9 +272,12 @@ test.describe('Filter Builder browser contract', () => {
     let input = editor.getByRole('combobox', { name: 'Owner directory' });
     await expect(input).toBeFocused();
 
-    await input.fill('fail');
     await input.press('ArrowDown');
     let dropdown = page.locator('[hellComboboxDropdown]:visible');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(dropdown).toBeVisible();
+
+    await input.fill('fail');
     await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
@@ -294,9 +297,12 @@ test.describe('Filter Builder browser contract', () => {
       '[hellPopover] [data-slot="editor"][data-mode="edit"][data-field="owner"]',
     );
     input = editor.getByRole('combobox', { name: 'Owner directory' });
-    await input.fill('linus');
     await input.press('ArrowDown');
     dropdown = page.locator('[hellComboboxDropdown]:visible');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(dropdown).toBeVisible();
+
+    await input.fill('linus');
     await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
     await expect(page.getByRole('option', { name: /Linus Torvalds/ })).toBeVisible();
     await input.press('ArrowDown');
@@ -317,9 +323,12 @@ test.describe('Filter Builder browser contract', () => {
     const input = editor.getByRole('combobox', { name: 'Owner directory' });
     await expect(input).toBeFocused();
 
-    await input.fill('error');
     await input.press('ArrowDown');
     const dropdown = page.locator('[hellComboboxDropdown]:visible');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(dropdown).toBeVisible();
+
+    await input.fill('error');
     await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
