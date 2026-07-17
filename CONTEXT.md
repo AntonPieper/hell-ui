@@ -86,8 +86,15 @@ _Avoid_: Central `HellLabels` bag, per-module label string inputs, `provideHell<
 **Floating Interaction**
 Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, selects, comboboxes, and omnibar child overlays.
 
+**Tooltip**
+A supplementary, non-interactive Floating Interaction that reveals a short hint from a trigger. It never supplies required content or the trigger's accessible name.
+
+**Tooltip Surface**
+The displayed hint region of a Tooltip. Plain text uses the library's default surface; custom markup or styling uses a consumer-authored surface with its own Part Style Map.
+_Avoid_: Tooltip content (when referring to the surface), tooltip panel.
+
 **Anchored Surface Contract**
-The shared trigger Interface for Hell's anchored floating surfaces. Positioned triggers expose `placement`, `offset`, `flip`, `shift`, `container`, and `disabled` under those exact names; dismissable surfaces expose `closeOnEscape` and `closeOnOutsideClick` (guard functions where the engine supports them — there is no other outside-dismiss input name); stateful triggers expose a reactive `open` signal, an `(openChange)` boolean output, `show()`/`hide()` methods, and an `exportAs` matching the directive name. Each surface implements the applicable subset: tooltip omits dismissal inputs by design, menu closing stays engine-owned (item select, outside click, Escape — the menu trigger exposes `show()` but no `hide()`), and dialog replaces `openChange` with its result-carrying `(closed)` output.
+The shared trigger Interface for Hell's anchored floating surfaces. Positioned triggers expose `placement`, `offset`, `flip`, `shift`, `container`, and `disabled` under those exact names; Tooltip is the explicit `disabled` exception because absent content disables and closes that supplementary interaction without coupling the host control's state. Dismissable surfaces expose `closeOnEscape` and `closeOnOutsideClick` (guard functions where the engine supports them — there is no other outside-dismiss input name); stateful triggers expose a reactive `open` signal, an `(openChange)` boolean output, `show()`/`hide()` methods, and an `exportAs` matching the directive name. Each surface implements the applicable subset: Tooltip omits dismissal inputs by design, is always hoverable, and always closes on Escape; menu closing stays engine-owned (item select, outside click, Escape — the menu trigger exposes `show()` but no `hide()`), and dialog replaces `openChange` with its result-carrying `(closed)` output.
 _Avoid_: closeOnOutsideInteraction, per-surface trigger input dialects.
 
 **Floating Scope**
