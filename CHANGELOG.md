@@ -924,6 +924,26 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   Group, and suffix own separate local `root` Part Style Maps. Focused
   unit/browser/axe coverage, docs, API reports, architecture checks, and an
   isolated packed consumer protect the replacement. Closes #200.
+- BREAKING: App Shell keeps its four-region layout, responsive overlay
+  transitions, focus trapping and restoration, dismissal, controlled root
+  state, and the deliberate `toggleSidenav()`, `toggleSecondary()`, and
+  `closeMobilePanels()` actions while removing presentation and renderer
+  coordination from the public Interface. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Remove
+  `HellSidenavToggle.appearance` and `HellSecondaryToggle.appearance`; the
+  shipped stylesheet now derives the leading, secondary-header, and collapsed
+  rail treatments from direct placement in `hellAppTopbar`,
+  `hellAppSecondaryBody`, and `hellAppSecondary`, while each toggle's local
+  `root` Part Style Map remains the customization surface. Replace
+  `HellAppContent.maxWidth` with `--hell-app-content-max-width` through its
+  local `ui` (the default remains `1760px`). Remove duplicate child
+  `HellAppSidenav.collapsed` and `HellAppSecondary.hidden` state, public panel
+  id coordination, shell-derived id properties, and the root's resolved state
+  getters; bind `sidenavCollapsed` / `sidenavCollapsedChange` and
+  `secondaryHidden` / `secondaryHiddenChange` when application code needs to
+  read or persist state. Panel registration and ARIA ids are internal. Docs,
+  API reports, package-consumer, mobile/desktop browser, and visual contracts
+  cover the slimmer Composite. Closes #205.
 - BREAKING: Removed the `@hell-ui/angular/drop-zone` and
   `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
   First carried by the next `@hell-ui/angular` release after `0.2.0` (currently

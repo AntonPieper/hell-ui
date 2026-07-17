@@ -374,6 +374,10 @@ const packageConsumerScenarioCatalog = [
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
       'hell-overflow-toolbar[data-slot=root]',
+      '--hell-app-content-max-width:960px',
+      '[hellAppTopbar][data-slot=root]>[hellSidenavToggle][data-slot=root]',
+      '[hellAppSecondaryBody][data-slot=root]>[hellSecondaryToggle][data-slot=root]',
+      '[hellAppSecondary][data-slot=root][data-hidden=true]>[hellSecondaryToggle][data-slot=root]',
     ],
   },
   {
@@ -434,6 +438,18 @@ const packageConsumerScenarioCatalog = [
       'grid-template-rows:var(--hell-app-topbar-height) 1fr',
       'background-color:var(--color-hell-surface)',
       'width:min(var(--hell-app-secondary-width),calc(100vw - var(--spacing-hell-8)))',
+      '--hell-app-content-max-width:960px',
+      '[hellAppTopbar][data-slot=root]>[hellSidenavToggle][data-slot=root]',
+      '[hellAppSecondaryBody][data-slot=root]>[hellSecondaryToggle][data-slot=root]',
+      '[hellAppSecondary][data-slot=root][data-hidden=true]>[hellSecondaryToggle][data-slot=root]',
+    ],
+    runtimeStyleAssertions: [
+      {
+        label: 'App Shell content Part Style Map max-width replacement',
+        selector: '[data-test-id="app-shell-content"]',
+        property: '--hell-app-content-max-width',
+        expected: '960px',
+      },
     ],
   },
   {
@@ -2540,10 +2556,14 @@ interface SearchItem {
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
+        <button hellSidenavToggle type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
-      <main hellAppContent>
+      <main
+        hellAppContent
+        data-test-id="app-shell-content"
+        ui="[--hell-app-content-max-width:960px]"
+      >
         <button type="button" [hellDialogTrigger]="dialog">Open dialog</button>
         <ng-template #dialog>
           <div hellDialogOverlay scoped [ui]="dialogOverlayUi">
@@ -2617,8 +2637,11 @@ interface SearchItem {
         </hell-overflow-toolbar>
       </main>
       <aside hellAppSecondary>
-        <button hellSecondaryToggle type="button">Details</button>
-        <div hellAppSecondaryBody>Secondary</div>
+        <button hellSecondaryToggle type="button"></button>
+        <div hellAppSecondaryBody>
+          <button hellSecondaryToggle type="button">Details</button>
+          <p>Secondary</p>
+        </div>
       </aside>
     </div>
   \`,
@@ -3059,13 +3082,20 @@ import { HELL_APP_SHELL_IMPORTS } from '${packageName}/app-shell';
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
+        <button hellSidenavToggle type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
-      <main hellAppContent>Content</main>
+      <main
+        hellAppContent
+        data-test-id="app-shell-content"
+        ui="[--hell-app-content-max-width:960px]"
+      >Content</main>
       <aside hellAppSecondary>
-        <button hellSecondaryToggle type="button">Details</button>
-        <div hellAppSecondaryBody>Secondary</div>
+        <button hellSecondaryToggle type="button"></button>
+        <div hellAppSecondaryBody>
+          <button hellSecondaryToggle type="button">Details</button>
+          <p>Secondary</p>
+        </div>
       </aside>
     </div>
   \`,

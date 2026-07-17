@@ -29,7 +29,7 @@ const HD_APP_SHELL_STYLING_ICONS = {
       class="h-[28rem] overflow-hidden"
     >
       <header hellAppTopbar ui="bg-hell-primary-soft border-b-hell-primary">
-        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
+        <button hellSidenavToggle type="button" ui="text-hell-primary"></button>
         <strong class="text-hell-primary">Aurora</strong>
       </header>
 
@@ -37,6 +37,7 @@ const HD_APP_SHELL_STYLING_ICONS = {
         <a
           hellNavItem
           href="#"
+          aria-label="Dashboard"
           aria-current="page"
           ui="rounded-hell-lg aria-[current=page]:bg-hell-primary aria-[current=page]:text-white"
           (click)="$event.preventDefault()"
@@ -47,6 +48,7 @@ const HD_APP_SHELL_STYLING_ICONS = {
         <a
           hellNavItem
           href="#"
+          aria-label="Team"
           ui="rounded-hell-lg"
           (click)="$event.preventDefault()"
         >
@@ -60,11 +62,23 @@ const HD_APP_SHELL_STYLING_ICONS = {
             Admin
           </button>
           <div hellNavSectionItems ui="gap-hell-1">
-            <a hellNavItem href="#" ui="rounded-hell-lg" (click)="$event.preventDefault()">
+            <a
+              hellNavItem
+              href="#"
+              aria-label="Preferences"
+              ui="rounded-hell-lg"
+              (click)="$event.preventDefault()"
+            >
               <hell-icon hellNavItemIcon name="faSolidGear" size="14px" ui="text-hell-primary" />
               <span hellNavItemLabel ui="font-semibold">Preferences</span>
             </a>
-            <a hellNavItem href="#" ui="rounded-hell-lg" (click)="$event.preventDefault()">
+            <a
+              hellNavItem
+              href="#"
+              aria-label="API keys"
+              ui="rounded-hell-lg"
+              (click)="$event.preventDefault()"
+            >
               <hell-icon hellNavItemIcon name="faSolidKey" size="14px" ui="text-hell-primary" />
               <span hellNavItemLabel ui="font-semibold">API keys</span>
             </a>
@@ -82,14 +96,9 @@ const HD_APP_SHELL_STYLING_ICONS = {
       </main>
 
       <aside hellAppSecondary ui="bg-hell-surface-subtle border-l-hell-primary">
-        <button hellSecondaryToggle appearance="rail" type="button" ui="text-hell-primary"></button>
+        <button hellSecondaryToggle type="button" ui="text-hell-primary"></button>
         <div hellAppSecondaryBody ui="opacity-100">
-          <button
-            hellSecondaryToggle
-            appearance="header"
-            type="button"
-            ui="text-hell-primary"
-          >
+          <button hellSecondaryToggle type="button" ui="text-hell-primary">
             Activity
           </button>
           <ul class="m-0 list-none space-y-2 p-hell-4 text-sm text-hell-foreground-muted">

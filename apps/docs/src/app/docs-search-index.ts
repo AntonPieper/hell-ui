@@ -122,11 +122,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'app-shell hellAppShell hellAppTopbar hellSidenavToggle hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellAppContent hell-icon smallest usage topbar sidenav content collapse rail',
  },
  {
- title:'App Shell: Secondary panel and toggle appearances',
+ title:'App Shell: Secondary panel placement recipe',
  path:'/components/app-shell',
  detail:'components/app-shell/examples/secondary-panel.example.ts',
  terms:
-'app-shell hellAppSecondary hellAppSecondaryBody hellSecondaryToggle hellSidenavToggle appearance header rail activity feed collapse inert',
+'app-shell hellAppSecondary hellAppSecondaryBody hellSecondaryToggle hellSidenavToggle placement recipe direct child header rail activity feed collapse inert',
  },
  {
  title:'App Shell: Sidenav navigation',
@@ -147,7 +147,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/app-shell',
  detail:'components/app-shell/examples/with-omnibar-menu-avatar.example.ts',
  terms:
-'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent maxWidth search account aria-current',
+'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent --hell-app-content-max-width ui search account aria-current',
  },
  {
  title:'Audio Player: Basic',
@@ -2197,7 +2197,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/app-shell',
  detail:'hellAppShell, hellAppTopbar, hellAppSidenav, hellAppContent',
  terms:
-'HELL_APP_SHELL_IMPORTS hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellAppSecondary hellSidenavToggle hellSecondaryToggle',
+'HELL_APP_SHELL_IMPORTS hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellAppSecondary hellSidenavToggle hellSecondaryToggle sidenavCollapsed sidenavCollapsedChange secondaryHidden secondaryHiddenChange toggleSidenav toggleSecondary closeMobilePanels placement recipe',
  },
  {
  title:'Date input adapter',

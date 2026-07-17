@@ -1,6 +1,6 @@
 <div hellAppShell #shell="hellAppShell">
   <header hellAppTopbar>
-    <button hellSidenavToggle appearance="shell" type="button"></button>
+    <button hellSidenavToggle type="button"></button>
     <a class="hd-brand" routerLink="/" aria-label="Hell UI docs home">
       <span class="hd-brand-mark" aria-hidden="true"></span>
       <strong class="hd-brand-name">hell</strong>
@@ -266,8 +266,8 @@
                 [routerLink]="item.path"
                 routerLinkActive="active"
                 ariaCurrentWhenActive="page"
+                [attr.aria-label]="item.label"
                 [routerLinkActiveOptions]="{ exact: !!item.exact }"
-                [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
                 (click)="shell.closeMobilePanels()"
               >
                 <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
@@ -283,8 +283,8 @@
             [routerLink]="item.path"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
+            [attr.aria-label]="item.label"
             [routerLinkActiveOptions]="{ exact: !!item.exact }"
-            [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
             (click)="shell.closeMobilePanels()"
           >
             <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
@@ -295,14 +295,14 @@
     }
   </nav>
 
-  <main hellAppContent maxWidth="1760px">
+  <main hellAppContent>
     <router-outlet />
   </main>
 
   <aside hellAppSecondary class="hd-docs-secondary">
-    <button hellSecondaryToggle appearance="rail" type="button"></button>
+    <button hellSecondaryToggle type="button"></button>
     <div hellAppSecondaryBody>
-      <button hellSecondaryToggle appearance="header" type="button">About hell</button>
+      <button hellSecondaryToggle type="button">About hell</button>
       <div class="hd-secondary-inner">
         <p class="hd-secondary-body">
           A pragmatic Angular component library built on

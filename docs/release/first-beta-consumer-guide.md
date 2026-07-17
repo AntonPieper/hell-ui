@@ -382,6 +382,65 @@ stylesheet, plus the narrow stylesheets for any composed Resizable, Toolbar,
 Pagination, and Button entry points. There are no compatibility exports,
 selectors, inputs, outputs, Public Parts, or package paths.
 
+## App Shell keeps responsive coordination and slims presentation inputs
+
+`@hell-ui/angular/app-shell` remains the Composite for the four-region grid,
+responsive overlay transitions, focus trapping and restoration, and dismissal.
+The shell root is now the only source of sidenav and secondary-panel state.
+Keep its controlled `sidenavCollapsed` / `sidenavCollapsedChange` and
+`secondaryHidden` / `secondaryHiddenChange` pairs when application code must
+read, persist, or synchronize that state. Remove duplicate `collapsed`,
+`hidden`, and shell-coordination `id` bindings from `hellAppSidenav` and
+`hellAppSecondary`; the shell registers those projected panels and their ARIA
+relationships internally.
+
+Toggle chrome is now a placement recipe instead of an `appearance` mode:
+
+```html
+<div
+  hellAppShell
+  #shell="hellAppShell"
+  [sidenavCollapsed]="sidenavCollapsed"
+  (sidenavCollapsedChange)="sidenavCollapsed = $event"
+  [secondaryHidden]="secondaryHidden"
+  (secondaryHiddenChange)="secondaryHidden = $event"
+>
+  <header hellAppTopbar>
+    <!-- A direct topbar child receives the leading toggle treatment. -->
+    <button hellSidenavToggle type="button"></button>
+  </header>
+
+  <nav hellAppSidenav aria-label="Primary">…</nav>
+
+  <main hellAppContent ui="[--hell-app-content-max-width:960px]">…</main>
+
+  <aside hellAppSecondary>
+    <!-- A direct secondary child becomes the collapsed rail action. -->
+    <button hellSecondaryToggle type="button"></button>
+    <div hellAppSecondaryBody>
+      <!-- A direct body child becomes the full-width header action. -->
+      <button hellSecondaryToggle type="button">Activity</button>
+      …
+    </div>
+  </aside>
+</div>
+```
+
+Remove `appearance="shell"`, `appearance="header"`, and
+`appearance="rail"`; refine each toggle's local `root` Part Style Map through
+`ui` when the shipped placement treatment needs customization. Replace
+`hellAppContent[maxWidth]` with the public
+`--hell-app-content-max-width` variable through that directive's local `ui`, as
+shown above. The default remains `1760px`.
+
+The public shell controller intentionally keeps only three imperative actions:
+`toggleSidenav()`, `toggleSecondary()`, and `closeMobilePanels()`. Replace reads
+of the removed `isSidenavCollapsed()`, `isSecondaryHidden()`,
+`isMobileLayout()`, and `mobileOpenPanel()` getters (and shell-derived panel id
+properties) with the controlled input/output pairs when consumer logic needs
+state. Deliberate close actions such as routed-nav clicks may continue calling
+`shell.closeMobilePanels()`.
+
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,

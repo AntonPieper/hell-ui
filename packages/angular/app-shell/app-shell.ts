@@ -1,8 +1,8 @@
 import { hellCreateLabels } from '@hell-ui/angular/core';
-import { isElementLike } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
-import { DOCUMENT } from '@angular/common';
 import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
+// eslint-disable-next-line no-restricted-imports -- Private HostBindings keep renderer coordination out of public directive declarations.
+import { HostBinding } from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,13 +10,14 @@ import {
   Directive,
   ElementRef,
   OnDestroy,
+  Renderer2,
   booleanAttribute,
-  computed,
   effect,
   inject,
   input,
   output,
   signal,
+  type WritableSignal,
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -51,6 +52,120 @@ export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_
 let nextAppShellId = 0;
 
 type HellAppShellMobilePanel = 'sidenav' | 'secondary';
+
+interface HellAppShellPendingAction {
+  readonly panel: HellAppShellMobilePanel;
+  readonly element: HTMLElement;
+}
+
+const HELL_APP_SHELL_ACTION_SELECTOR = [
+  'a[href]',
+  'button:not(:disabled)',
+  'input:not(:disabled)',
+  'select:not(:disabled)',
+  'textarea:not(:disabled)',
+  '[contenteditable]:not([contenteditable="false"])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+interface HellAppShellCoordination {
+  readonly shellId: number;
+  readonly sidenav: WritableSignal<HTMLElement | null>;
+  readonly secondary: WritableSignal<HTMLElement | null>;
+  readonly toggles: Set<HTMLElement>;
+  readonly isMobileLayout: WritableSignal<boolean>;
+  readonly mobileSidenavOpen: WritableSignal<boolean>;
+  readonly mobileSecondaryOpen: WritableSignal<boolean>;
+  readonly uncontrolledSidenavCollapsed: WritableSignal<boolean>;
+  readonly uncontrolledSecondaryHidden: WritableSignal<boolean>;
+  pendingRestoreAction: HellAppShellPendingAction | null;
+  pendingCloseAction: HellAppShellPendingAction | null;
+  currentActionTarget: HTMLElement | null;
+  handledActionTarget: HTMLElement | null;
+  currentActionSequence: number;
+  sidenavCollapsedInput: () => boolean | null;
+  secondaryHiddenInput: () => boolean | null;
+}
+
+const appShellCoordination = new WeakMap<HellAppShell, HellAppShellCoordination>();
+
+function getAppShellCoordination(shell: HellAppShell): HellAppShellCoordination {
+  let coordination = appShellCoordination.get(shell);
+  if (!coordination) {
+    coordination = {
+      shellId: ++nextAppShellId,
+      sidenav: signal<HTMLElement | null>(null),
+      secondary: signal<HTMLElement | null>(null),
+      toggles: new Set<HTMLElement>(),
+      isMobileLayout: signal(false),
+      mobileSidenavOpen: signal(false),
+      mobileSecondaryOpen: signal(false),
+      uncontrolledSidenavCollapsed: signal(false),
+      uncontrolledSecondaryHidden: signal(false),
+      pendingRestoreAction: null,
+      pendingCloseAction: null,
+      currentActionTarget: null,
+      handledActionTarget: null,
+      currentActionSequence: 0,
+      sidenavCollapsedInput: () => null,
+      secondaryHiddenInput: () => null,
+    };
+    appShellCoordination.set(shell, coordination);
+  }
+  return coordination;
+}
+
+function isAppShellSidenavCollapsed(shell: HellAppShell): boolean {
+  const coordination = getAppShellCoordination(shell);
+  const controlled = coordination.sidenavCollapsedInput();
+  if (controlled !== null) return controlled;
+  return coordination.isMobileLayout()
+    ? !coordination.mobileSidenavOpen()
+    : coordination.uncontrolledSidenavCollapsed();
+}
+
+function isAppShellSecondaryHidden(shell: HellAppShell): boolean {
+  const coordination = getAppShellCoordination(shell);
+  const controlled = coordination.secondaryHiddenInput();
+  if (controlled !== null) return controlled;
+  return coordination.isMobileLayout()
+    ? !coordination.mobileSecondaryOpen()
+    : coordination.uncontrolledSecondaryHidden();
+}
+
+function appShellMobileOpenPanel(shell: HellAppShell): HellAppShellMobilePanel | null {
+  const coordination = getAppShellCoordination(shell);
+  if (!coordination.isMobileLayout()) return null;
+  if (!isAppShellSidenavCollapsed(shell)) return 'sidenav';
+  if (!isAppShellSecondaryHidden(shell)) return 'secondary';
+  return null;
+}
+
+function registerAppShellPanel(
+  shell: HellAppShell,
+  panel: HellAppShellMobilePanel,
+  element: HTMLElement,
+  destroyRef: DestroyRef,
+): void {
+  const coordination = getAppShellCoordination(shell);
+  if (!element.id) {
+    element.id = `hell-app-shell-${coordination.shellId}-${panel}`;
+  }
+  coordination[panel].set(element);
+  destroyRef.onDestroy(() => {
+    if (coordination[panel]() === element) coordination[panel].set(null);
+  });
+}
+
+function registerAppShellToggle(
+  shell: HellAppShell,
+  element: HTMLElement,
+  destroyRef: DestroyRef,
+): void {
+  const toggles = getAppShellCoordination(shell).toggles;
+  toggles.add(element);
+  destroyRef.onDestroy(() => toggles.delete(element));
+}
 
 const HELL_APP_SHELL_RECIPE = {
   root: 'bg-hell-surface text-hell-foreground',
@@ -96,16 +211,12 @@ const HELL_APP_CONTENT_RECIPE = {
   root: 'bg-hell-surface-subtle p-hell-6',
 } satisfies HellRecipe<'root'>;
 
-const HELL_SIDENAV_TOGGLE_SHELL_RECIPE = {
+const HELL_SIDENAV_TOGGLE_RECIPE = {
   root: 'text-hell-foreground-muted hover:text-hell-foreground',
 } satisfies HellRecipe<'root'>;
 
-const HELL_SECONDARY_TOGGLE_HEADER_RECIPE = {
-  root: 'gap-hell-2 border-hell-border px-hell-4 py-hell-3 text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:outline-hell-focus-ring',
-} satisfies HellRecipe<'root'>;
-
-const HELL_SECONDARY_TOGGLE_RAIL_RECIPE = {
-  root: 'text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-primary',
+const HELL_SECONDARY_TOGGLE_RECIPE = {
+  root: '',
 } satisfies HellRecipe<'root'>;
 
 const HELL_APP_SECONDARY_RECIPE = {
@@ -135,7 +246,7 @@ const HELL_APP_SECONDARY_BODY_RECIPE = {
  *     <aside hellAppSidenav>...</aside>
  *     <main hellAppContent>...</main>
  *     <aside hellAppSecondary>
- *       <button hellSecondaryToggle appearance="rail"></button>
+ *       <button hellSecondaryToggle></button>
  *       <div hellAppSecondaryBody>...</div>
  *     </aside>
  *   </div>
@@ -146,13 +257,6 @@ const HELL_APP_SECONDARY_BODY_RECIPE = {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.data-sidenav-collapsed]': 'isSidenavCollapsed() ? "true" : null',
-    '[attr.data-secondary-hidden]': 'isSecondaryHidden() ? "true" : null',
-    '[attr.data-mobile-layout]': 'isMobileLayout() ? "true" : null',
-    '[attr.data-mobile-sidenav-open]': 'isMobileLayout() && !isSidenavCollapsed() ? "true" : null',
-    '[attr.data-mobile-secondary-open]': 'isMobileLayout() && !isSecondaryHidden() ? "true" : null',
-    '(pointerdown)': 'dismissMobilePanels($event)',
-    '(keydown.escape)': 'dismissMobilePanelsOnEscape()',
   },
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
@@ -180,50 +284,95 @@ export class HellAppShell implements OnDestroy {
   /** Emits the requested secondary panel hidden state whenever a toggle occurs. */
   readonly secondaryHiddenChange = output<boolean>();
 
-  /** Internal sidenav toggle — written only while `sidenavCollapsed` is uncontrolled. */
-  protected readonly _sidenavCollapsed = signal(false);
-  /** Internal secondary toggle — written only while `secondaryHidden` is uncontrolled. */
-  protected readonly _secondaryHidden = signal(false);
-
-  /** Unique per-instance shell identifier used to derive panel ids. */
-  readonly shellId = ++nextAppShellId;
-  /** DOM id of the sidenav panel, referenced by toggles via `aria-controls`. */
-  sidenavPanelId = `hell-app-shell-${this.shellId}-sidenav`;
-  /** DOM id of the secondary panel, referenced by toggles via `aria-controls`. */
-  secondaryPanelId = `hell-app-shell-${this.shellId}-secondary`;
-
-  /** Mobile uses overlay panels instead of layout-shifting rails. */
-  private readonly _isMobileLayout = signal(false);
-  private readonly _mobileSidenavOpen = signal(false);
-  private readonly _mobileSecondaryOpen = signal(false);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly document = inject(DOCUMENT);
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly document = this.hostElement.ownerDocument;
+  private readonly renderer = inject(Renderer2);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly interactivityChecker = inject(InteractivityChecker);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private _activeMobilePanel: HellAppShellMobilePanel | null = null;
+  private _activeMobilePanelElement: HTMLElement | null = null;
   private _mobilePanelFocusTrap: FocusTrap | null = null;
+  private _removeMobilePanelTransitionListener: (() => void) | null = null;
   private _fallbackTabindexValue: string | null = null;
   private _fallbackTabindexElement: HTMLElement | null = null;
   private _mobilePanelRestoreTarget: HTMLElement | null = null;
+  private _mobileFocusRestoreGeneration = 0;
+  private _completedActionSequence = 0;
 
   constructor() {
+    const coordination = getAppShellCoordination(this);
+    const removePointerDismissal = this.renderer.listen(
+      this.hostElement,
+      'pointerdown',
+      this.dismissMobilePanels,
+    );
+    const removeClickDismissal = this.renderer.listen(
+      this.hostElement,
+      'click',
+      this.completeMobilePanelDismissal,
+    );
+    const removeEscapeDismissal = this.renderer.listen(
+      this.hostElement,
+      'keydown',
+      this.dismissMobilePanelsOnEscape,
+    );
+    coordination.sidenavCollapsedInput = () => this.sidenavCollapsed();
+    coordination.secondaryHiddenInput = () => this.secondaryHidden();
+    this.document.addEventListener('pointerdown', this.captureDocumentIntent, true);
+    this.document.addEventListener('keydown', this.captureDocumentIntent, true);
+    this.document.addEventListener('click', this.captureDocumentAction, true);
+    this.destroyRef.onDestroy(() => {
+      removePointerDismissal();
+      removeClickDismissal();
+      removeEscapeDismissal();
+      this.document.removeEventListener('pointerdown', this.captureDocumentIntent, true);
+      this.document.removeEventListener('keydown', this.captureDocumentIntent, true);
+      this.document.removeEventListener('click', this.captureDocumentAction, true);
+      coordination.pendingRestoreAction = null;
+      coordination.pendingCloseAction = null;
+      coordination.currentActionTarget = null;
+      coordination.handledActionTarget = null;
+      coordination.currentActionSequence += 1;
+    });
     this.breakpointObserver
       .observe(HELL_APP_SHELL_MOBILE_MEDIA)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((state) => {
         const mobile = state.matches;
-        this._isMobileLayout.set(mobile);
+        coordination.isMobileLayout.set(mobile);
         if (!mobile) {
-          this._mobileSidenavOpen.set(false);
-          this._mobileSecondaryOpen.set(false);
+          coordination.mobileSidenavOpen.set(false);
+          coordination.mobileSecondaryOpen.set(false);
+          coordination.pendingRestoreAction = null;
+          coordination.pendingCloseAction = null;
+          coordination.currentActionTarget = null;
+          coordination.handledActionTarget = null;
+          coordination.currentActionSequence += 1;
         }
       });
 
     effect(() => {
-      const nextPanel = this.mobileOpenPanel();
-      if (nextPanel === this._activeMobilePanel) {
+      const nextPanel = appShellMobileOpenPanel(this);
+      const currentCoordination = getAppShellCoordination(this);
+      if (
+        currentCoordination.pendingRestoreAction &&
+        currentCoordination.pendingRestoreAction.panel !== nextPanel
+      ) {
+        currentCoordination.pendingRestoreAction = null;
+      }
+      const nextPanelElement = nextPanel ? currentCoordination[nextPanel]() : null;
+      if (nextPanel && !nextPanelElement) {
+        if (this._activeMobilePanel !== null) this.teardownMobileFocusTrap();
+        if (nextPanel === 'sidenav') this.setSidenavCollapsed(true);
+        else this.setSecondaryHidden(true);
+        return;
+      }
+      if (
+        nextPanel === this._activeMobilePanel &&
+        nextPanelElement === this._activeMobilePanelElement
+      ) {
         return;
       }
 
@@ -232,98 +381,145 @@ export class HellAppShell implements OnDestroy {
         return;
       }
 
+      const replacesActivePanelElement = nextPanel === this._activeMobilePanel;
       if (this._activeMobilePanel !== null) {
-        this.teardownMobileFocusTrap(false);
+        this.teardownMobileFocusTrap(false, replacesActivePanelElement);
       }
 
-      this.enableMobileFocusTrap(nextPanel);
+      this.enableMobileFocusTrap(nextPanel, replacesActivePanelElement);
     });
   }
 
-  /** Whether the shell is currently rendering the mobile overlay layout. */
-  readonly isMobileLayout = () => this._isMobileLayout();
+  @HostBinding('attr.data-sidenav-collapsed')
+  private get sidenavCollapsedAttribute(): 'true' | null {
+    return isAppShellSidenavCollapsed(this) ? 'true' : null;
+  }
 
-  /** The panel currently open as a mobile overlay, or `null` when none is open. */
-  readonly mobileOpenPanel = () => {
-    if (!this._isMobileLayout()) return null;
-    if (!this.isSidenavCollapsed()) return 'sidenav';
-    if (!this.isSecondaryHidden()) return 'secondary';
-    return null;
-  };
+  @HostBinding('attr.data-secondary-hidden')
+  private get secondaryHiddenAttribute(): 'true' | null {
+    return isAppShellSecondaryHidden(this) ? 'true' : null;
+  }
+
+  @HostBinding('attr.data-mobile-layout')
+  private get mobileLayoutAttribute(): 'true' | null {
+    return getAppShellCoordination(this).isMobileLayout() ? 'true' : null;
+  }
+
+  @HostBinding('attr.data-mobile-sidenav-open')
+  private get mobileSidenavOpenAttribute(): 'true' | null {
+    const coordination = getAppShellCoordination(this);
+    return coordination.isMobileLayout() &&
+      coordination.sidenav() &&
+      !isAppShellSidenavCollapsed(this)
+      ? 'true'
+      : null;
+  }
+
+  @HostBinding('attr.data-mobile-secondary-open')
+  private get mobileSecondaryOpenAttribute(): 'true' | null {
+    const coordination = getAppShellCoordination(this);
+    return coordination.isMobileLayout() &&
+      coordination.secondary() &&
+      !isAppShellSecondaryHidden(this)
+      ? 'true'
+      : null;
+  }
 
   /** Tears down any active mobile focus trap when the shell is destroyed. */
   ngOnDestroy(): void {
-    this.teardownMobileFocusTrap();
+    const coordination = getAppShellCoordination(this);
+    coordination.pendingRestoreAction = null;
+    coordination.pendingCloseAction = null;
+    coordination.currentActionTarget = null;
+    coordination.handledActionTarget = null;
+    coordination.currentActionSequence += 1;
+    this.teardownMobileFocusTrap(false);
   }
-
-  /** Resolved sidenav collapsed state, honoring the controlled input, mobile overlay, or internal toggle. */
-  readonly isSidenavCollapsed = () => {
-    const controlled = this.sidenavCollapsed();
-    if (controlled !== null) return controlled;
-    return this.isMobileLayout() ? !this._mobileSidenavOpen() : this._sidenavCollapsed();
-  };
-
-  /** Resolved secondary panel hidden state, honoring the controlled input, mobile overlay, or internal toggle. */
-  readonly isSecondaryHidden = () => {
-    const controlled = this.secondaryHidden();
-    if (controlled !== null) return controlled;
-    return this.isMobileLayout() ? !this._mobileSecondaryOpen() : this._secondaryHidden();
-  };
 
   /** Toggles the sidenav collapsed state, opening the mobile overlay when applicable. */
   toggleSidenav() {
-    const next = !this.isSidenavCollapsed();
-    if (this.isMobileLayout() && !next) {
+    this.markCurrentActionHandled();
+    const coordination = getAppShellCoordination(this);
+    const next = !isAppShellSidenavCollapsed(this);
+    if (coordination.isMobileLayout() && !next) {
+      this.stagePendingRestoreAction('sidenav');
       this.openMobilePanel('sidenav');
       return;
+    }
+    if (coordination.isMobileLayout() && next) {
+      this.stagePendingCloseAction('sidenav');
     }
     this.setSidenavCollapsed(next);
   }
 
   /** Toggles the secondary panel hidden state, opening the mobile overlay when applicable. */
   toggleSecondary() {
-    const next = !this.isSecondaryHidden();
-    if (this.isMobileLayout() && !next) {
+    this.markCurrentActionHandled();
+    const coordination = getAppShellCoordination(this);
+    const next = !isAppShellSecondaryHidden(this);
+    if (coordination.isMobileLayout() && !next) {
+      this.stagePendingRestoreAction('secondary');
       this.openMobilePanel('secondary');
       return;
+    }
+    if (coordination.isMobileLayout() && next) {
+      this.stagePendingCloseAction('secondary');
     }
     this.setSecondaryHidden(next);
   }
 
   /** Closes any open mobile overlay panels; no-op outside the mobile layout. */
   closeMobilePanels() {
-    if (!this.isMobileLayout()) return;
-    if (!this.isSidenavCollapsed()) this.setSidenavCollapsed(true);
-    if (!this.isSecondaryHidden()) this.setSecondaryHidden(true);
+    this.closeMobilePanelsFromCurrentAction(true);
+  }
+
+  private closeMobilePanelsFromCurrentAction(stageCurrentAction: boolean): void {
+    this.markCurrentActionHandled();
+    const coordination = getAppShellCoordination(this);
+    coordination.pendingRestoreAction = null;
+    if (!coordination.isMobileLayout()) return;
+    const openPanel = appShellMobileOpenPanel(this);
+    if (stageCurrentAction && openPanel) this.stagePendingCloseAction(openPanel);
+    if (!isAppShellSidenavCollapsed(this)) this.setSidenavCollapsed(true);
+    if (!isAppShellSecondaryHidden(this)) this.setSecondaryHidden(true);
   }
 
   private setSidenavCollapsed(next: boolean): void {
+    const coordination = getAppShellCoordination(this);
+    if (next && coordination.pendingRestoreAction?.panel === 'sidenav') {
+      coordination.pendingRestoreAction = null;
+    }
     if (this.sidenavCollapsed() === null) {
-      if (this.isMobileLayout()) this._mobileSidenavOpen.set(!next);
-      else this._sidenavCollapsed.set(next);
+      if (coordination.isMobileLayout()) coordination.mobileSidenavOpen.set(!next);
+      else coordination.uncontrolledSidenavCollapsed.set(next);
     }
     this.sidenavCollapsedChange.emit(next);
   }
 
   private setSecondaryHidden(next: boolean): void {
+    const coordination = getAppShellCoordination(this);
+    if (next && coordination.pendingRestoreAction?.panel === 'secondary') {
+      coordination.pendingRestoreAction = null;
+    }
     if (this.secondaryHidden() === null) {
-      if (this.isMobileLayout()) this._mobileSecondaryOpen.set(!next);
-      else this._secondaryHidden.set(next);
+      if (coordination.isMobileLayout()) coordination.mobileSecondaryOpen.set(!next);
+      else coordination.uncontrolledSecondaryHidden.set(next);
     }
     this.secondaryHiddenChange.emit(next);
   }
 
   private openMobilePanel(panel: HellAppShellMobilePanel): void {
+    const coordination = getAppShellCoordination(this);
     const nextSidenavCollapsed = panel !== 'sidenav';
     const nextSecondaryHidden = panel !== 'secondary';
-    const previousSidenavCollapsed = this.isSidenavCollapsed();
-    const previousSecondaryHidden = this.isSecondaryHidden();
+    const previousSidenavCollapsed = isAppShellSidenavCollapsed(this);
+    const previousSecondaryHidden = isAppShellSecondaryHidden(this);
 
     if (this.sidenavCollapsed() === null) {
-      this._mobileSidenavOpen.set(!nextSidenavCollapsed);
+      coordination.mobileSidenavOpen.set(!nextSidenavCollapsed);
     }
     if (this.secondaryHidden() === null) {
-      this._mobileSecondaryOpen.set(!nextSecondaryHidden);
+      coordination.mobileSecondaryOpen.set(!nextSecondaryHidden);
     }
 
     if (previousSidenavCollapsed !== nextSidenavCollapsed) {
@@ -334,46 +530,253 @@ export class HellAppShell implements OnDestroy {
     }
   }
 
+  private readonly captureDocumentIntent = (event: Event): void => {
+    this.captureDocumentActionTarget(event, true);
+  };
+
+  private readonly captureDocumentAction = (event: Event): void => {
+    // `click` covers keyboard, assistive-technology, and programmatic activation.
+    // It must also cancel an older retry when no preceding pointer/key event exists.
+    const path = event.composedPath();
+    const actionTarget = this.actionTargetFromPath(path);
+    const actionSequence = this.captureDocumentActionTarget(event, true);
+    if (
+      !actionTarget ||
+      !path.includes(this.hostElement) ||
+      this.pathContainsPanelOrToggle(path)
+    ) {
+      return;
+    }
+
+    // A target handler may stop bubbling. Complete after every consumer handler
+    // unless the host listener already handled this same captured action.
+    queueMicrotask(() => {
+      const coordination = getAppShellCoordination(this);
+      if (
+        coordination.currentActionSequence !== actionSequence ||
+        this._completedActionSequence === actionSequence
+      ) {
+        return;
+      }
+      this.completeMobilePanelAction(actionTarget);
+    });
+  };
+
+  private captureDocumentActionTarget(event: Event, cancelRestore: boolean): number {
+    const coordination = getAppShellCoordination(this);
+    const actionTarget = this.actionTargetFromEvent(event);
+    const actionSequence = ++coordination.currentActionSequence;
+    coordination.currentActionTarget = actionTarget;
+    coordination.handledActionTarget = null;
+    coordination.pendingRestoreAction = null;
+    coordination.pendingCloseAction = null;
+
+    if (
+      cancelRestore &&
+      this._activeMobilePanel === null &&
+      this._mobilePanelRestoreTarget !== null
+    ) {
+      this.cancelMobileFocusRestore();
+    }
+
+    this.scheduleOwnerTask(() => {
+      if (coordination.currentActionSequence !== actionSequence) return;
+      coordination.currentActionTarget = null;
+      coordination.handledActionTarget = null;
+    });
+    return actionSequence;
+  }
+
+  private actionTargetFromEvent(event: Event): HTMLElement | null {
+    return this.actionTargetFromPath(event.composedPath());
+  }
+
+  private actionTargetFromPath(path: EventTarget[]): HTMLElement | null {
+    for (const target of path) {
+      const element = this.ownerDocumentElement(target);
+      if (element?.matches(HELL_APP_SHELL_ACTION_SELECTOR)) return element;
+    }
+    return null;
+  }
+
+  private stagePendingRestoreAction(panel: HellAppShellMobilePanel): void {
+    const coordination = getAppShellCoordination(this);
+    const activeElement = this.ownerDocumentElement(this.document.activeElement);
+    const target = coordination.currentActionTarget?.isConnected
+      ? coordination.currentActionTarget
+      : activeElement;
+    if (!target) {
+      coordination.pendingRestoreAction = null;
+      return;
+    }
+
+    const pendingAction: HellAppShellPendingAction = { panel, element: target };
+    coordination.pendingRestoreAction = pendingAction;
+    this.scheduleOwnerTask(() => {
+      if (coordination.pendingRestoreAction === pendingAction) {
+        coordination.pendingRestoreAction = null;
+      }
+    });
+  }
+
+  private stagePendingCloseAction(panel: HellAppShellMobilePanel): void {
+    const coordination = getAppShellCoordination(this);
+    const target = coordination.currentActionTarget;
+    const panelElement = this.getMobilePanelElement(panel);
+    if (!target?.isConnected || panelElement?.contains(target)) {
+      coordination.pendingCloseAction = null;
+      return;
+    }
+
+    const pendingAction: HellAppShellPendingAction = { panel, element: target };
+    coordination.pendingCloseAction = pendingAction;
+    this.scheduleOwnerTask(() => {
+      if (coordination.pendingCloseAction === pendingAction) {
+        coordination.pendingCloseAction = null;
+        const panelElement = this.getMobilePanelElement(panel);
+        if (
+          panelElement &&
+          this._activeMobilePanel === panel &&
+          this._activeMobilePanelElement === panelElement
+        ) {
+          this.ensureMobilePanelFocus(panel, panelElement);
+        }
+      }
+    });
+  }
+
+  private markCurrentActionHandled(): void {
+    const coordination = getAppShellCoordination(this);
+    coordination.handledActionTarget = coordination.currentActionTarget;
+  }
+
+  private ownerDocumentElement(target: EventTarget | null): HTMLElement | null {
+    const HTMLElementCtor = this.document.defaultView?.HTMLElement;
+    return HTMLElementCtor && target instanceof HTMLElementCtor
+      ? target
+      : null;
+  }
+
   /** Closes open mobile panels when a pointer press lands outside a panel or toggle. */
-  protected dismissMobilePanels(event: PointerEvent) {
-    if (!this.isMobileLayout() || (this.isSidenavCollapsed() && this.isSecondaryHidden())) {
+  private readonly dismissMobilePanels = (event: PointerEvent): void => {
+    const coordination = getAppShellCoordination(this);
+    if (
+      !coordination.isMobileLayout() ||
+      (isAppShellSidenavCollapsed(this) && isAppShellSecondaryHidden(this))
+    ) {
       return;
     }
 
     const path = event.composedPath();
-    const insidePanelOrToggle = this.pathContains(
-      path,
-      (element) =>
-        element.getAttribute('data-hell-app-shell-panel') === 'sidenav' ||
-        element.getAttribute('data-hell-app-shell-panel') === 'secondary' ||
-        element.getAttribute('data-hell-app-shell-toggle') === 'sidenav' ||
-        element.getAttribute('data-hell-app-shell-toggle') === 'secondary',
-    );
+    const insidePanelOrToggle = this.pathContainsPanelOrToggle(path);
 
-    if (!insidePanelOrToggle) this.closeMobilePanels();
-  }
+    if (insidePanelOrToggle || this.actionTargetFromEvent(event)) return;
+    this.closeMobilePanelsFromCurrentAction(false);
+  };
 
-  /** Closes open mobile panels when the Escape key is pressed. */
-  protected dismissMobilePanelsOnEscape() {
-    if (!this.isMobileLayout()) {
+  /** Completes deferred outside dismissal after consumer click handlers run. */
+  private readonly completeMobilePanelDismissal = (event: MouseEvent): void => {
+    const coordination = getAppShellCoordination(this);
+    this._completedActionSequence = coordination.currentActionSequence;
+    const actionTarget = this.actionTargetFromEvent(event);
+    if (!actionTarget || this.pathContainsPanelOrToggle(event.composedPath())) return;
+
+    this.completeMobilePanelAction(actionTarget);
+  };
+
+  private completeMobilePanelAction(actionTarget: HTMLElement): void {
+    const coordination = getAppShellCoordination(this);
+    const handledByShell = coordination.handledActionTarget === actionTarget;
+    const openPanel = appShellMobileOpenPanel(this);
+    if (handledByShell) {
+      if (openPanel === null) this.redirectMobileFocusRestore(actionTarget);
       return;
     }
 
-    this.closeMobilePanels();
+    if (openPanel === null) return;
+    const controlled =
+      openPanel === 'sidenav'
+        ? this.sidenavCollapsed() !== null
+        : this.secondaryHidden() !== null;
+    this.stagePendingCloseAction(openPanel);
+    this.closeMobilePanelsFromCurrentAction(false);
+    if (!controlled && appShellMobileOpenPanel(this) === null) {
+      this.redirectMobileFocusRestore(actionTarget);
+    }
   }
 
-  private enableMobileFocusTrap(panel: HellAppShellMobilePanel): void {
+  /** Closes open mobile panels when the Escape key is pressed. */
+  private readonly dismissMobilePanelsOnEscape = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape') return;
+    if (!getAppShellCoordination(this).isMobileLayout()) {
+      return;
+    }
+
+    this.closeMobilePanelsFromCurrentAction(false);
+  };
+
+  private pathContainsPanelOrToggle(path: EventTarget[]): boolean {
+    const coordination = getAppShellCoordination(this);
+    return path.some(
+      (target) =>
+        target === coordination.sidenav() ||
+        target === coordination.secondary() ||
+        coordination.toggles.has(target as HTMLElement),
+    );
+  }
+
+  private cancelMobileFocusRestore(): void {
+    this._mobileFocusRestoreGeneration += 1;
+    this._mobilePanelRestoreTarget = null;
+  }
+
+  private redirectMobileFocusRestore(target: HTMLElement): void {
+    if (
+      this._activeMobilePanel === null &&
+      this._mobilePanelRestoreTarget === null
+    ) {
+      return;
+    }
+
+    this._mobileFocusRestoreGeneration += 1;
+    this._mobilePanelRestoreTarget = target;
+    if (this._activeMobilePanel === null) {
+      this.restoreMobileFocusTarget(target);
+      this.scheduleMobileFocusRestore();
+    }
+  }
+
+  private enableMobileFocusTrap(
+    panel: HellAppShellMobilePanel,
+    preserveRestoreTarget = false,
+  ): void {
     const panelElement = this.getMobilePanelElement(panel);
     if (!panelElement) {
       this._activeMobilePanel = null;
       return;
     }
 
-    const focusedElement = this.document.activeElement;
-    this._mobilePanelRestoreTarget = focusedElement instanceof HTMLElement ? focusedElement : null;
+    this._mobileFocusRestoreGeneration += 1;
+    if (!preserveRestoreTarget) {
+      const coordination = getAppShellCoordination(this);
+      const pendingAction = coordination.pendingRestoreAction;
+      coordination.pendingRestoreAction = null;
+      const pendingRestoreTarget =
+        pendingAction?.panel === panel && pendingAction.element.isConnected
+          ? pendingAction.element
+          : null;
+      this._mobilePanelRestoreTarget =
+        pendingRestoreTarget ?? this.ownerDocumentElement(this.document.activeElement);
+    }
 
     this._activeMobilePanel = panel;
+    this._activeMobilePanelElement = panelElement;
     this._mobilePanelFocusTrap = this.focusTrapFactory.create(panelElement);
+    this._removeMobilePanelTransitionListener = this.renderer.listen(
+      panelElement,
+      'transitionend',
+      () => this.ensureMobilePanelFocus(panel, panelElement),
+    );
     this.scheduleMobilePanelFocusCheck(panel, panelElement);
     void this._mobilePanelFocusTrap
       .focusInitialElementWhenReady({ preventScroll: true })
@@ -450,47 +853,118 @@ export class HellAppShell implements OnDestroy {
     panelElement.focus({ preventScroll: true });
   }
 
-  private restoreMobileFocusTarget(): void {
-    const target = this._mobilePanelRestoreTarget;
-    if (!target || !target.isConnected) {
+  private restoreMobileFocusTarget(target = this._mobilePanelRestoreTarget): void {
+    if (!target || this._mobilePanelRestoreTarget !== target) return;
+    if (!target.isConnected || target.ownerDocument !== this.document) {
       this._mobilePanelRestoreTarget = null;
       return;
     }
+    if (!this.isMobileFocusRestoreCandidate(target)) return;
 
     target.focus({ preventScroll: true });
-    if (this.document.activeElement === target) {
-      this._mobilePanelRestoreTarget = null;
-    }
   }
 
-  private teardownMobileFocusTrap(restoreFocus = true): void {
+  private isMobileFocusRestoreCandidate(target: HTMLElement): boolean {
+    if (
+      target.matches(':disabled') ||
+      target.getAttribute('aria-disabled')?.trim().toLowerCase() === 'true' ||
+      target.tabIndex < 0 ||
+      !this.interactivityChecker.isFocusable(target, { ignoreVisibility: true })
+    ) {
+      return false;
+    }
+
+    for (let ancestor: HTMLElement | null = target; ancestor; ancestor = ancestor.parentElement) {
+      if (
+        ancestor.hidden ||
+        ancestor.hasAttribute('inert') ||
+        ancestor.getAttribute('aria-hidden')?.trim().toLowerCase() === 'true'
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private teardownMobileFocusTrap(
+    restoreFocus = true,
+    preserveRestoreTarget = false,
+  ): void {
+    const closingPanel = this._activeMobilePanel;
+    if (restoreFocus && closingPanel) {
+      const coordination = getAppShellCoordination(this);
+      const pendingAction = coordination.pendingCloseAction;
+      coordination.pendingCloseAction = null;
+      if (
+        pendingAction?.panel === closingPanel &&
+        pendingAction.element.isConnected
+      ) {
+        this._mobilePanelRestoreTarget = pendingAction.element;
+      }
+    }
+    this._removeMobilePanelTransitionListener?.();
+    this._removeMobilePanelTransitionListener = null;
     this._mobilePanelFocusTrap?.destroy();
     this._mobilePanelFocusTrap = null;
     this._activeMobilePanel = null;
+    this._activeMobilePanelElement = null;
 
     this.restoreMobilePanelTabindex();
     if (restoreFocus) {
-      this.restoreMobileFocusTarget();
-      if (this._mobilePanelRestoreTarget) {
-        this.scheduleMobileFocusRestore();
-      }
+      this.restoreMobileFocusTarget(this._mobilePanelRestoreTarget);
+      this.scheduleMobileFocusRestore();
     } else {
-      this._mobilePanelRestoreTarget = null;
+      this._mobileFocusRestoreGeneration += 1;
+      if (!preserveRestoreTarget) this._mobilePanelRestoreTarget = null;
     }
   }
 
   private scheduleMobileFocusRestore(): void {
-    this.scheduleMobilePanelTask(() => this.restoreMobileFocusTarget());
+    const target = this._mobilePanelRestoreTarget;
+    if (!target) return;
+    const generation = ++this._mobileFocusRestoreGeneration;
+    const restore = () => {
+      if (generation !== this._mobileFocusRestoreGeneration) return;
+      this.restoreMobileFocusTarget(target);
+    };
+    const restoreAndClear = () => {
+      if (generation !== this._mobileFocusRestoreGeneration) return;
+      this.restoreMobileFocusTarget(target);
+      if (
+        generation === this._mobileFocusRestoreGeneration &&
+        this._mobilePanelRestoreTarget === target
+      ) {
+        this._mobilePanelRestoreTarget = null;
+      }
+    };
+
+    this.scheduleOwnerTask(restore);
+    this.scheduleOwnerTask(restore, 50);
+    this.scheduleOwnerTask(restoreAndClear, 150);
+    const view = this.document.defaultView;
+    if (view?.requestAnimationFrame) {
+      view.requestAnimationFrame(restore);
+    }
   }
 
   private scheduleMobilePanelTask(task: () => void): void {
     const view = this.document.defaultView;
-    setTimeout(task, 0);
-    setTimeout(task, 50);
-    setTimeout(task, 150);
+    this.scheduleOwnerTask(task);
+    this.scheduleOwnerTask(task, 50);
+    this.scheduleOwnerTask(task, 150);
     if (view?.requestAnimationFrame) {
       view.requestAnimationFrame(task);
     }
+  }
+
+  private scheduleOwnerTask(task: () => void, delay = 0): void {
+    const view = this.document.defaultView;
+    if (view) {
+      view.setTimeout(task, delay);
+      return;
+    }
+    setTimeout(task, delay);
   }
 
   private restoreMobilePanelTabindex(): void {
@@ -510,13 +984,8 @@ export class HellAppShell implements OnDestroy {
   }
 
   private getMobilePanelElement(panel: HellAppShellMobilePanel): HTMLElement | null {
-    const root = this.elementRef.nativeElement;
-    const selector = `:scope > [data-hell-app-shell-panel="${panel}"]`;
-    return root.querySelector<HTMLElement>(selector);
-  }
-
-  private pathContains(path: EventTarget[], predicate: (element: Element) => boolean): boolean {
-    return path.some((target) => isElementLike(target) && predicate(target));
+    const element = getAppShellCoordination(this)[panel]();
+    return element?.isConnected ? element : null;
   }
 }
 
@@ -542,12 +1011,6 @@ export class HellAppTopbar {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.id]': 'panelId()',
-    '[attr.data-hell-app-shell-panel]': '"sidenav"',
-    '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
-    '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
 export class HellAppSidenav {
@@ -560,27 +1023,42 @@ export class HellAppSidenav {
     recipe: () => HELL_APP_SIDENAV_RECIPE,
   });
 
-  /** Optional override; if omitted, follows the parent shell. */
-  readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
-    transform: (v) => (v == null ? null : booleanAttribute(v)),
-  });
-  /** Optional DOM id override for the sidenav panel; defaults to the shell-derived id. */
-  readonly id = input<string | null>(null, { alias: 'id' });
+  private readonly shell = inject(HellAppShell);
 
-  /** Parent app shell, if the sidenav is rendered inside one. */
-  protected readonly shell = inject(HellAppShell, { optional: true });
-  /** Effective DOM id for the sidenav panel. */
-  protected readonly panelId = computed(() => this.id() ?? this.shell?.sidenavPanelId ?? null);
-  /** Resolved collapsed state, from the local override or the parent shell. */
-  readonly isCollapsed = () => this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
-  /** Whether the sidenav is hidden as a collapsed mobile overlay. */
-  protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isCollapsed();
+  @HostBinding('attr.data-collapsed')
+  private get collapsedAttribute(): 'true' | null {
+    return isAppShellSidenavCollapsed(this.shell) ? 'true' : null;
+  }
+
+  @HostBinding('attr.data-mobile-hidden')
+  private get mobileHiddenAttribute(): 'true' | null {
+    return this.isMobileHidden() ? 'true' : null;
+  }
+
+  @HostBinding('attr.aria-hidden')
+  private get ariaHiddenAttribute(): 'true' | null {
+    return this.isMobileHidden() ? 'true' : null;
+  }
+
+  @HostBinding('attr.inert')
+  private get inertAttribute(): '' | null {
+    return this.isMobileHidden() ? '' : null;
+  }
+
+  private isMobileHidden(): boolean {
+    return (
+      getAppShellCoordination(this.shell).isMobileLayout() &&
+      isAppShellSidenavCollapsed(this.shell)
+    );
+  }
 
   constructor() {
-    effect(() => {
-      const id = this.panelId();
-      if (id && this.shell) this.shell.sidenavPanelId = id;
-    });
+    registerAppShellPanel(
+      this.shell,
+      'sidenav',
+      inject<ElementRef<HTMLElement>>(ElementRef).nativeElement,
+      inject(DestroyRef),
+    );
   }
 }
 
@@ -754,19 +1232,20 @@ export class HellNavSectionItems {
   /** Parent nav section whose collapsed state gates these items. */
   protected readonly section = inject(HellNavSection);
   private readonly sidenav = inject(HellAppSidenav, { optional: true });
+  private readonly shell = inject(HellAppShell, { optional: true });
 
   /** Whether the items are hidden because the section is collapsed while the sidenav is expanded. */
   protected readonly isHidden = () =>
-    this.section.isCollapsed() && !(this.sidenav?.isCollapsed() ?? false);
+    this.section.isCollapsed() &&
+    !(this.sidenav && this.shell ? isAppShellSidenavCollapsed(this.shell) : false);
 }
 
-/** Main content slot of the app shell, with an optional constrained max width. */
+/** Main scrolling content slot of the app shell and scoped-dialog root. */
 @Directive({
   selector: '[hellAppContent]',
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[style.--hell-app-content-max-width]': 'maxWidthValue()',
     /** Dialogs scoped here render only over the content area. */
     '[attr.data-hell-dialog-scope-root]': '"true"',
   },
@@ -780,19 +1259,6 @@ export class HellAppContent {
     defaultPart: 'root',
     recipe: () => HELL_APP_CONTENT_RECIPE,
   });
-
-  /** Optional max content width; bare numbers are treated as pixels. Defaults to `null` (unconstrained). */
-  readonly maxWidth = input<string | number | null>(null);
-
-  /** Normalized `max-width` CSS value bound to the content area, or `null` when unconstrained. */
-  protected readonly maxWidthValue = computed(() => {
-    const value = this.maxWidth();
-    if (value == null || value === '') return null;
-    if (typeof value === 'number') return `${value}px`;
-
-    const trimmed = value.trim();
-    return /^\d+(\.\d+)?$/.test(trimmed) ? `${trimmed}px` : trimmed;
-  });
 }
 
 /** Click anywhere → toggles `sidenavCollapsed` on the parent shell. */
@@ -803,31 +1269,47 @@ export class HellAppContent {
     'data-slot': 'root',
     type: 'button',
     '(click)': 'toggle()',
-    '[attr.aria-expanded]': '!collapsed()',
-    '[attr.aria-controls]': 'shell.sidenavPanelId',
-    '[attr.aria-label]':
-      'collapsed() ? labels.expandSidebar : labels.collapseSidebar',
-    '[attr.data-hell-app-shell-toggle]': '"sidenav"',
-    '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSidenavToggle {
-  /** Visual variant of the toggle. Defaults to `plain`. */
-  readonly appearance = input<'plain' | 'shell'>('plain');
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => this.appearance() === 'shell' ? HELL_SIDENAV_TOGGLE_SHELL_RECIPE : { root: '' },
+    recipe: () => HELL_SIDENAV_TOGGLE_RECIPE,
   });
   /** Resolved accessibility labels for the toggle. */
-  protected readonly labels = inject(HELL_APP_SHELL_LABELS);
-  /** Parent app shell whose sidenav this toggle controls. */
-  protected readonly shell = inject(HellAppShell);
-  /** Whether the parent shell's sidenav is currently collapsed. */
-  protected readonly collapsed = () => this.shell.isSidenavCollapsed();
+  private readonly labels = inject(HELL_APP_SHELL_LABELS);
+  private readonly shell = inject(HellAppShell);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  @HostBinding('attr.aria-expanded')
+  private get ariaExpandedAttribute(): boolean {
+    return !isAppShellSidenavCollapsed(this.shell);
+  }
+
+  @HostBinding('attr.aria-controls')
+  private get ariaControlsAttribute(): string | null {
+    return getAppShellCoordination(this.shell).sidenav()?.id ?? null;
+  }
+
+  @HostBinding('attr.aria-label')
+  private get ariaLabelAttribute(): string {
+    return isAppShellSidenavCollapsed(this.shell)
+      ? this.labels.expandSidebar
+      : this.labels.collapseSidebar;
+  }
+
+  constructor() {
+    registerAppShellToggle(
+      this.shell,
+      this.element,
+      inject(DestroyRef),
+    );
+  }
+
   /** Toggles the parent shell's sidenav. */
   protected toggle() {
     this.shell.toggleSidenav();
@@ -842,35 +1324,47 @@ export class HellSidenavToggle {
     'data-slot': 'root',
     type: 'button',
     '(click)': 'toggle()',
-    '[attr.aria-expanded]': '!hidden()',
-    '[attr.aria-controls]': 'shell.secondaryPanelId',
-    '[attr.aria-label]':
-      'hidden() ? labels.showSecondaryPanel : labels.hideSecondaryPanel',
-    '[attr.data-hell-app-shell-toggle]': '"secondary"',
-    '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSecondaryToggle {
-  /** Visual variant of the toggle. Defaults to `plain`. */
-  readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
   /** Merged Part-Class Pipeline classes for one public part. */
   protected readonly part = hellPartStyler<'root'>(this.ui, {
     defaultPart: 'root',
-    recipe: () => {
-    if (this.appearance() === 'header') return HELL_SECONDARY_TOGGLE_HEADER_RECIPE;
-        if (this.appearance() === 'rail') return HELL_SECONDARY_TOGGLE_RAIL_RECIPE;
-        return { root: '' };
-  },
+    recipe: () => HELL_SECONDARY_TOGGLE_RECIPE,
   });
   /** Resolved accessibility labels for the toggle. */
-  protected readonly labels = inject(HELL_APP_SHELL_LABELS);
-  /** Parent app shell whose secondary panel this toggle controls. */
-  protected readonly shell = inject(HellAppShell);
-  /** Whether the parent shell's secondary panel is currently hidden. */
-  protected readonly hidden = () => this.shell.isSecondaryHidden();
+  private readonly labels = inject(HELL_APP_SHELL_LABELS);
+  private readonly shell = inject(HellAppShell);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  @HostBinding('attr.aria-expanded')
+  private get ariaExpandedAttribute(): boolean {
+    return !isAppShellSecondaryHidden(this.shell);
+  }
+
+  @HostBinding('attr.aria-controls')
+  private get ariaControlsAttribute(): string | null {
+    return getAppShellCoordination(this.shell).secondary()?.id ?? null;
+  }
+
+  @HostBinding('attr.aria-label')
+  private get ariaLabelAttribute(): string {
+    return isAppShellSecondaryHidden(this.shell)
+      ? this.labels.showSecondaryPanel
+      : this.labels.hideSecondaryPanel;
+  }
+
+  constructor() {
+    registerAppShellToggle(
+      this.shell,
+      this.element,
+      inject(DestroyRef),
+    );
+  }
+
   /** Toggles the parent shell's secondary panel. */
   protected toggle() {
     this.shell.toggleSecondary();
@@ -883,10 +1377,6 @@ export class HellSecondaryToggle {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.id]': 'panelId()',
-    '[attr.data-hell-app-shell-panel]': '"secondary"',
-    '[attr.data-hidden]': 'isHidden() ? "true" : null',
-    '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
   },
 })
 export class HellAppSecondary {
@@ -899,27 +1389,28 @@ export class HellAppSecondary {
     recipe: () => HELL_APP_SECONDARY_RECIPE,
   });
 
-  /** Optional override; if omitted, follows the parent shell. */
-  readonly hidden = input<boolean | null, boolean | string | null | undefined>(null, {
-    transform: (v) => (v == null ? null : booleanAttribute(v)),
-  });
-  /** Optional DOM id override for the secondary panel; defaults to the shell-derived id. */
-  readonly id = input<string | null>(null, { alias: 'id' });
+  private readonly shell = inject(HellAppShell);
 
-  /** Parent app shell, if the secondary panel is rendered inside one. */
-  protected readonly shell = inject(HellAppShell, { optional: true });
-  /** Effective DOM id for the secondary panel. */
-  protected readonly panelId = computed(() => this.id() ?? this.shell?.secondaryPanelId ?? null);
-  /** Resolved hidden state, from the local override or the parent shell. */
-  readonly isHidden = () => this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
-  /** Whether the panel is hidden as a mobile overlay. */
-  protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isHidden();
+  @HostBinding('attr.data-hidden')
+  private get hiddenAttribute(): 'true' | null {
+    return isAppShellSecondaryHidden(this.shell) ? 'true' : null;
+  }
+
+  @HostBinding('attr.data-mobile-hidden')
+  private get mobileHiddenAttribute(): 'true' | null {
+    return getAppShellCoordination(this.shell).isMobileLayout() &&
+      isAppShellSecondaryHidden(this.shell)
+      ? 'true'
+      : null;
+  }
 
   constructor() {
-    effect(() => {
-      const id = this.panelId();
-      if (id && this.shell) this.shell.secondaryPanelId = id;
-    });
+    registerAppShellPanel(
+      this.shell,
+      'secondary',
+      inject<ElementRef<HTMLElement>>(ElementRef).nativeElement,
+      inject(DestroyRef),
+    );
   }
 }
 
@@ -929,8 +1420,6 @@ export class HellAppSecondary {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.aria-hidden]': 'secondary.isHidden() ? "true" : null',
-    '[attr.inert]': 'secondary.isHidden() ? "" : null',
   },
 })
 export class HellAppSecondaryBody {
@@ -942,8 +1431,17 @@ export class HellAppSecondaryBody {
     defaultPart: 'root',
     recipe: () => HELL_APP_SECONDARY_BODY_RECIPE,
   });
-  /** Parent secondary panel whose hidden state gates this body. */
-  readonly secondary = inject(HellAppSecondary);
+  private readonly shell = inject(HellAppShell);
+
+  @HostBinding('attr.aria-hidden')
+  private get ariaHiddenAttribute(): 'true' | null {
+    return isAppShellSecondaryHidden(this.shell) ? 'true' : null;
+  }
+
+  @HostBinding('attr.inert')
+  private get inertAttribute(): '' | null {
+    return isAppShellSecondaryHidden(this.shell) ? '' : null;
+  }
 }
 
 function nullableBooleanAttribute(value: boolean | string | null | undefined): boolean | null {

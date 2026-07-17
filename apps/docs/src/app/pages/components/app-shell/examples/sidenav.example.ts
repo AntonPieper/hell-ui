@@ -27,21 +27,21 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
   template: `
     <div hellAppShell class="h-[28rem] overflow-hidden rounded-hell-lg border border-hell-border">
       <header hellAppTopbar>
-        <button hellSidenavToggle appearance="shell" type="button"></button>
+        <button hellSidenavToggle type="button"></button>
         <strong>Acme Console</strong>
       </header>
 
       <nav hellAppSidenav aria-label="Primary">
-        <a hellNavItem href="#" aria-current="page" (click)="$event.preventDefault()">
+        <a hellNavItem href="#" aria-label="Dashboard" aria-current="page" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidGauge" size="14px" />
           <span hellNavItemLabel>Dashboard</span>
         </a>
-        <a hellNavItem href="#" (click)="$event.preventDefault()">
+        <a hellNavItem href="#" aria-label="Inbox" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidInbox" size="14px" />
           <span hellNavItemLabel>Inbox</span>
           <span hellNavItemTrailing hellChip variant="primary">12</span>
         </a>
-        <a hellNavItem href="#" (click)="$event.preventDefault()">
+        <a hellNavItem href="#" aria-label="Team" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidUsers" size="14px" />
           <span hellNavItemLabel>Team</span>
         </a>
@@ -50,11 +50,11 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
         <div hellNavSection>
           <button type="button" hellNavSectionToggle>Settings</button>
           <div hellNavSectionItems>
-            <a hellNavItem href="#" (click)="$event.preventDefault()">
+            <a hellNavItem href="#" aria-label="Preferences" (click)="$event.preventDefault()">
               <hell-icon hellNavItemIcon name="faSolidGear" size="14px" />
               <span hellNavItemLabel>Preferences</span>
             </a>
-            <a hellNavItem href="#" (click)="$event.preventDefault()">
+            <a hellNavItem href="#" aria-label="API keys" (click)="$event.preventDefault()">
               <hell-icon hellNavItemIcon name="faSolidKey" size="14px" />
               <span hellNavItemLabel>API keys</span>
             </a>

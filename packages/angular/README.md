@@ -147,8 +147,12 @@ with a `root` class string to refine a single-host directive recipe while
 keeping behavior, accessibility, and state attributes. Directive-suite children,
 such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
 `root` `ui` contract. App Shell/nav directives follow the same local-root rule:
-style each directive through its own `ui`. Resizable and Master Detail directives follow that
-local-root rule as well: Master Detail owns responsive state, visibility, Back, and focus policy,
+style each directive through its own `ui`. App Shell toggle placement is structural:
+a direct topbar child receives the leading sidenav-toggle recipe, while direct
+secondary-panel and secondary-body children receive the rail and header recipes.
+Set the content cap through `--hell-app-content-max-width` in `hellAppContent`'s
+local `ui`. Resizable and Master Detail directives follow that local-root rule
+as well: Master Detail owns responsive state, visibility, Back, and focus policy,
 while consumer markup owns layout, presentation, and navigation. Toast,
 AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
 `HellToasterUi`, `HellAudioPlayerUi`, `HellOmnibarUi`, and
@@ -163,8 +167,9 @@ AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
 </div>
 <div hellAppShell ui="bg-hell-surface-muted">
   <header hellAppTopbar>
-    <button hellSidenavToggle appearance="shell" type="button"></button>
+    <button hellSidenavToggle type="button"></button>
   </header>
+  <main hellAppContent ui="[--hell-app-content-max-width:960px]">Content</main>
 </div>
 <div hellResizable orientation="horizontal" ui="h-[240px]">
   <section hellResizablePane ui="hd-surface-elevated p-4">Left</section>

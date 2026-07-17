@@ -107,24 +107,27 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <app-app-shell-sidenav-example />
       </hd-example-tabs>
 
-      <h2>Secondary panel and toggle appearances</h2>
+      <h2>Secondary panel placement recipe</h2>
       <p>
         The optional <code>hellAppSecondary</code> column suits an activity feed, inspector, or help
         panel. Wrap its collapsible content in <code>hellAppSecondaryBody</code> so it goes inert
-        while hidden. The toggle directives ship three opt-in <code>appearance</code> chrome styles:
+        while hidden. The shipped stylesheet derives three deliberate toggle treatments from
+        placement, without a visual mode input:
       </p>
       <ul>
         <li>
-          <code>appearance="shell"</code> (<code>hellSidenavToggle</code>) — the leading topbar slot,
-          sized to the collapsed sidenav width so the bars icon lines up over the collapsed rail.
+          A direct <code>hellSidenavToggle</code> child of <code>hellAppTopbar</code> becomes the
+          leading topbar action, sized to the collapsed sidenav width so its icon lines up over the
+          collapsed rail.
         </li>
         <li>
-          <code>appearance="header"</code> (<code>hellSecondaryToggle</code>) — a full-width header
-          row that is itself the collapse button, with a chevron on the leading edge.
+          A direct <code>hellSecondaryToggle</code> child of <code>hellAppSecondaryBody</code> becomes
+          a full-width header row that is itself the collapse button, with a chevron on the leading
+          edge.
         </li>
         <li>
-          <code>appearance="rail"</code> (<code>hellSecondaryToggle</code>) — auto-fills the
-          collapsed aside as one large click target and hides while the panel is open.
+          A direct <code>hellSecondaryToggle</code> child of <code>hellAppSecondary</code> auto-fills
+          the collapsed aside as one large click target and hides while the panel is open.
         </li>
       </ul>
       <p class="hd-note">
@@ -197,41 +200,40 @@ const HD_APP_SHELL_PAGE_ICONS = {
           <code>hellAppShell</code> — the grid host. Inputs: <code>[sidenavCollapsed]</code> and
           <code>[secondaryHidden]</code> (<code>boolean | null</code>, default <code>null</code> =
           uncontrolled) with paired outputs <code>(sidenavCollapsedChange)</code> /
-          <code>(secondaryHiddenChange)</code>, plus <code>[ui]</code>. Exposes signal getters
-          <code>isSidenavCollapsed()</code>, <code>isSecondaryHidden()</code>,
-          <code>isMobileLayout()</code>, and <code>mobileOpenPanel()</code>, and methods
-          <code>toggleSidenav()</code>, <code>toggleSecondary()</code>, and
-          <code>closeMobilePanels()</code>. Reference it as <code>#shell="hellAppShell"</code>.
+          <code>(secondaryHiddenChange)</code>, plus <code>[ui]</code>. Its three deliberate actions
+          are <code>toggleSidenav()</code>, <code>toggleSecondary()</code>, and
+          <code>closeMobilePanels()</code>. Reference it as <code>#shell="hellAppShell"</code> when
+          consumer actions need to invoke them; bind the controlled pairs when application code
+          needs to read or persist panel state.
         </li>
         <li>
           <code>hellAppTopbar</code> — top bar slot. Input: <code>[ui]</code>.
         </li>
         <li>
-          <code>hellAppSidenav</code> — sidenav slot. Inputs: <code>[collapsed]</code>
-          (<code>boolean | null</code>, default <code>null</code> = follow the shell),
-          <code>[id]</code> (DOM id override, default shell-derived), and <code>[ui]</code>.
+          <code>hellAppSidenav</code> — sidenav slot. Input: <code>[ui]</code>. Its collapsed and
+          mobile visibility state always follows the enclosing shell.
         </li>
         <li>
-          <code>hellAppContent</code> — content slot. Inputs: <code>[maxWidth]</code>
-          (<code>string | number | null</code>; bare numbers are pixels; the CSS default caps content
-          at <code>1760px</code>) and <code>[ui]</code>. Direct children are centered; it also acts
-          as a dialog scope root so scoped dialogs cover only the content area.
+          <code>hellAppContent</code> — content slot. Input: <code>[ui]</code>. Its public
+          <code>--hell-app-content-max-width</code> CSS variable defaults to <code>1760px</code>; set
+          it through the local Part Style Map, for example
+          <code>ui="[--hell-app-content-max-width:960px]"</code>. Direct children are centered; it
+          also acts as a dialog scope root so scoped dialogs cover only the content area.
         </li>
         <li>
-          <code>hellAppSecondary</code> — secondary slot. Inputs: <code>[hidden]</code>
-          (<code>boolean | null</code>, default <code>null</code> = follow the shell),
-          <code>[id]</code>, and <code>[ui]</code>. <code>hellAppSecondaryBody</code> wraps its
-          collapsible content (input: <code>[ui]</code>) and goes inert while hidden.
+          <code>hellAppSecondary</code> — secondary slot. Input: <code>[ui]</code>. Its hidden and
+          mobile visibility state always follows the enclosing shell.
+          <code>hellAppSecondaryBody</code> wraps its collapsible content (input:
+          <code>[ui]</code>) and goes inert while hidden.
         </li>
         <li>
-          <code>hellSidenavToggle</code> — sidenav toggle button. Inputs:
-          <code>[appearance]</code> (<code>plain | shell</code>, default <code>plain</code>) and
-          <code>[ui]</code>.
+          <code>hellSidenavToggle</code> — sidenav toggle button. Input: <code>[ui]</code>. Its direct
+          placement in <code>hellAppTopbar</code> supplies the shipped leading-action recipe.
         </li>
         <li>
-          <code>hellSecondaryToggle</code> — secondary toggle button. Inputs:
-          <code>[appearance]</code> (<code>plain | header | rail</code>, default <code>plain</code>)
-          and <code>[ui]</code>.
+          <code>hellSecondaryToggle</code> — secondary toggle button. Input: <code>[ui]</code>. Place
+          it directly in <code>hellAppSecondary</code> for the collapsed rail action or directly in
+          <code>hellAppSecondaryBody</code> for the header action.
         </li>
         <li>
           <code>hellNavItem</code> — nav entry. Inputs: <code>[active]</code> (boolean, default
@@ -262,8 +264,9 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>
           Toggle buttons must be native <code>&lt;button&gt;</code> elements. Each exposes
           <code>aria-expanded</code> (reflecting the panel's open state), <code>aria-controls</code>
-          pointing at the panel's DOM id, and an <code>aria-label</code> from the Label Contract
-          that flips between the expand/collapse strings.
+          pointing at the internally registered panel, and an <code>aria-label</code> from the Label
+          Contract that flips between the expand/collapse strings. The shell generates panel ids
+          for this relationship; consumers do not coordinate renderer ids.
         </li>
         <li>
           Give each navigation surface its own <code>aria-label</code> on the <code>nav</code>
@@ -287,13 +290,13 @@ const HD_APP_SHELL_PAGE_ICONS = {
       <h2>Do</h2>
       <ul class="hd-do">
         <li>
-          Use <code>appearance="shell"</code> as the first child of the topbar so the toggle lines up
-          over the collapsed sidenav rail.
+          Place <code>hellSidenavToggle</code> directly in the topbar so the shipped placement recipe
+          lines it up over the collapsed sidenav rail.
         </li>
         <li>
-          Use <code>appearance="header"</code> so the whole secondary-panel heading row is the
-          collapse target, and always include the <code>appearance="rail"</code> toggle so a hidden
-          panel can be reopened.
+          Place one <code>hellSecondaryToggle</code> directly in the secondary body so the whole
+          heading row is the collapse target, and one directly in the secondary panel so a hidden
+          panel can be reopened from its rail.
         </li>
         <li>
           Refine chrome with each slot's <code>ui</code> instead of conflicting <code>class</code>
