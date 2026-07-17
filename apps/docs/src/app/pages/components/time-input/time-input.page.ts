@@ -1,28 +1,34 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { TimeInputBasicExample } from './examples/basic.example';
 import timeInputBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import { TimeInputSizesExample } from './examples/sizes.example';
-import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
+import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example';
+import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
 };
 import { TimeInputSecondsAndValidationExample } from './examples/seconds-and-validation.example';
 import timeInputSecondsAndValidationExampleCodeRaw from './examples/seconds-and-validation.example.ts?raw' with {
   loader: 'text',
 };
-import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example';
-import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
+import { TimeInputSizesExample } from './examples/sizes.example';
+import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
+  loader: 'text',
+};
+import { TimeInputStylingExample } from './examples/styling.example';
+import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 import { TimeInputWithFieldScheduleRowExample } from './examples/with-field-schedule-row.example';
 import timeInputWithFieldScheduleRowExampleCodeRaw from './examples/with-field-schedule-row.example.ts?raw' with {
   loader: 'text',
 };
-import { TimeInputStylingExample } from './examples/styling.example';
-import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+import { TimeInputWithTimePickerExample } from './examples/with-time-picker.example';
+import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -31,12 +37,14 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
+    RouterLink,
     TimeInputBasicExample,
-    TimeInputSizesExample,
-    TimeInputSecondsAndValidationExample,
     TimeInputReactiveFormsExample,
-    TimeInputWithFieldScheduleRowExample,
+    TimeInputSecondsAndValidationExample,
+    TimeInputSizesExample,
     TimeInputStylingExample,
+    TimeInputWithFieldScheduleRowExample,
+    TimeInputWithTimePickerExample,
     PageHeader,
   ],
   template: `
@@ -44,302 +52,264 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
       <hd-page-header
         title="Time input"
         icon="faSolidClock"
-        category="Composite"
+        category="Styled primitive"
         importPath="@hell-ui/angular/time-input"
         stylesPath="@hell-ui/angular/time-input/styles.css"
       >
-        A type-or-pick time field: native <code>HH:mm</code> text entry with a segmented
-        hour/minute/second picker fallback, one component, one structured form value.
+        Time parsing, formatting, validation, and forms behavior on a real native input.
       </hd-page-header>
+
       <p>
-        <code>hell-time-input</code> is a Typed Value Input: with the default adapter it renders a
-        native <code>&lt;input type="time"&gt;</code> so the browser rejects illegal strings and
-        exposes its own platform time UI, paired with a clock-trigger button that opens a compact
-        popover containing <code>hell-time-picker</code> for the same value. The composed picker
-        uses segmented spinbuttons for hour, minute, and optional second, plus quick minute
-        presets — a second, discoverable path to the same commit pipeline as typing.
+        Apply <code>hellTimeInput</code> to an <code>&lt;input&gt;</code>. The native element keeps
+        its focus, keyboard, event, attribute, Field, and form-submission semantics while the
+        directive owns the Typed Value Input state machine: drafts, strict parsing, stable
+        formatting, validation, nullable clears, and external synchronization. Bind
+        <code>[value]</code> and listen to <code>(valueChange)</code>; both use
+        <code>HellTimeValue | null</code>.
       </p>
       <p>
-        It implements <code>ControlValueAccessor</code> and <code>Validator</code>, so it drops
-        into reactive or template-driven forms like any native control, always reading and writing
-        a structured <code>HellTimeValue</code>. Reach for it for business time entry — shift
-        starts, reminder times, appointment slots — anywhere a locale-guessing free-text field would
-        make illegal times too easy to type.
-      </p>
-      <p>
-        Reach for the narrower <code>&#64;hell-ui/angular/time-picker</code> entry point when the
-        segmented selection surface is the whole interaction. Time Picker intentionally omits
-        text parsing, forms, field association, triggers, and Popover; Time Input keeps owning
-        those contracts and composes the picker internally.
+        The directive reuses the single-host <a routerLink="/components/input">Input</a> styling
+        contract. Its <code>size</code> and <code>ui</code> bindings therefore refine only the real
+        input root. Clock actions, popovers, and
+        <a routerLink="/components/time-picker">Time Picker</a> are separate composition concerns,
+        not hidden Time Input anatomy.
       </p>
 
-      <h2>Basic</h2>
-      <hd-example-tabs [code]="timeInputBasicExampleCode">
+      <h2>Controlled value</h2>
+      <p>
+        The default adapter accepts <code>HH:mm</code>, compact digits such as <code>930</code>, and
+        common 12-hour forms such as <code>9:30 am</code>. A valid blur or Enter commits a structured
+        time; empty text commits <code>null</code>. Partial, malformed, or out-of-range text remains
+        visible as an invalid draft without replacing the committed value.
+      </p>
+      <p>
+        The directive does not force an input type. Keep the default text input for compact,
+        12-hour, or custom-adapter formats and visible invalid drafts. Author
+        <code>type="time"</code> only when browser-sanitized native time editing is the intended
+        policy.
+      </p>
+      <hd-example-tabs [code]="timeInputBasicExampleCode" previewClass="grid max-w-sm gap-2">
         <app-time-input-basic-example />
       </hd-example-tabs>
 
+      <h2>Time Picker composition recipe</h2>
+      <p>
+        When visual selection is useful, compose the real Time Input inside
+        <a routerLink="/components/control-group">Control Group</a>, add a consumer-owned action,
+        and open the standalone Time Picker through Popover. The recipe below keeps one
+        <code>FormControl</code> value model. Picker interactions update that model without closing
+        the surface; the explicit Done action closes and returns focus to the input. Escape closes
+        and restores focus to the trigger through the Popover contract.
+      </p>
+      <hd-example-tabs
+        [code]="timeInputWithTimePickerExampleCode"
+        previewClass="grid gap-2"
+      >
+        <app-time-input-with-time-picker-example />
+      </hd-example-tabs>
+
       <h2>Sizes</h2>
-      <hd-example-tabs [code]="timeInputSizesExampleCode" previewClass="flex flex-wrap items-end gap-3">
+      <p>
+        <code>sm</code>, <code>md</code>, and <code>lg</code> come directly from the reused Input root
+        contract; they do not imply picker or trigger geometry.
+      </p>
+      <hd-example-tabs [code]="timeInputSizesExampleCode" previewClass="grid max-w-sm gap-3">
         <app-time-input-sizes-example />
       </hd-example-tabs>
 
-      <h2>Seconds and validation states</h2>
+      <h2>Seconds, bounds, and validation</h2>
       <p>
-        Add <code>seconds</code> to widen the field and picker to hour/minute/second — the native
-        field switches its <code>step</code> to <code>1</code> and the picker gains a third
-        spinbutton. <code>invalid</code> forces the invalid look independent of draft parsing (pair
-        it with <code>hellFieldError</code>); <code>disabled</code> disables the field and the
-        clock trigger together.
+        Add <code>seconds</code> to parse and format <code>HH:mm:ss</code> and reflect a native
+        <code>step</code> of <code>1</code>; the default minute precision reflects
+        <code>60</code>. <code>min</code> and <code>max</code> are inclusive structured same-day
+        bounds. <code>required</code>, <code>disabled</code>, and the explicit
+        <code>invalid</code> presentation override all reflect on the native input. Malformed drafts,
+        missing required values, and out-of-range values become invalid automatically.
       </p>
       <hd-example-tabs
         [code]="timeInputSecondsAndValidationExampleCode"
-        previewClass="grid gap-3 max-w-md"
+        previewClass="grid max-w-md gap-3"
       >
         <app-time-input-seconds-and-validation-example />
       </hd-example-tabs>
 
-      <h2>Reactive forms</h2>
+      <h2>Reactive forms and Field</h2>
+      <p>
+        Time Input implements <code>ControlValueAccessor</code> and <code>Validator</code>.
+        Programmatic writes never emit <code>valueChange</code>; user commits update the form before
+        blur marks it touched. Equivalent external writes preserve active typing, while genuinely
+        changed values replace stale drafts. An enclosing
+        <a routerLink="/components/field">Field</a> associates its label, descriptions, and errors
+        with this same native input.
+      </p>
       <hd-example-tabs
         [code]="timeInputReactiveFormsExampleCode"
-        previewClass="grid gap-3 max-w-md"
+        previewClass="grid max-w-md gap-4"
       >
         <app-time-input-reactive-forms-example />
       </hd-example-tabs>
 
-      <h2>With field and date input</h2>
+      <h2>Schedule-row recipe</h2>
       <p>
-        A shift-scheduling row: an <code>input[hellDateInput]</code> for the day plus two
-        <code>hell-time-input</code> fields for start/end, each wrapped in its own labeled
-        <code>hellField</code>. This is the shape most scheduling and booking forms end up in —
-        one date control and a pair of time controls sharing a row.
+        Scheduling remains application composition: use a Date Input for the day and two Time
+        Inputs for start and end. Each native control keeps its own visible Field label while the
+        application owns range policy and timezone context.
       </p>
       <hd-example-tabs [code]="timeInputWithFieldScheduleRowExampleCode">
         <app-time-input-with-field-schedule-row-example />
       </hd-example-tabs>
 
+      <h2>Adapter</h2>
+      <p>
+        Override parsing and display policy per injector with
+        <code>provideHellTimeInputAdapter</code>. A <code>HellTimeInputAdapter</code> supplies
+        <code>parseText</code>, <code>format</code>, and optional <code>normalize</code>,
+        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks. Return
+        <code>hellTypedValue(value)</code> for a commit, <code>hellTypedValue(null)</code> for a
+        clear, or <code>hellInvalidTypedValue()</code> to retain an invalid draft.
+        <code>parseText</code>, <code>format</code>, <code>normalize</code>, and
+        <code>isWithinBounds</code> receive the active <code>seconds</code> precision through
+        <code>HellTimeInputAdapterContext</code>; <code>isSameValue</code> compares normalized values.
+      </p>
+
       <h2>Styling</h2>
       <p>
-        <code>ui</code> accepts either a shorthand class string, which refines the default
-        <code>root</code> part, or a <code>HellTimeInputUi</code> map keyed by part name.
-        Refinement classes merge deterministically on top of the recipe through Hell's Tailwind
-        merge, so they win over conflicting recipe utilities. The picker panel and its contents
-        stay part of the same Part Style Map even though they render in a popover outside the host.
-        Legacy keys remain stable: <code>pickerPanel</code> continues to style the real Popover
-        panel, while <code>pickerHeader</code>, <code>pickerReadout</code>, and the remaining
-        <code>picker*</code> keys adapt to the composed picker's matching unprefixed anatomy.
-        <code>minutePresets</code> and <code>minutePreset</code> remain unchanged. Importing
-        <code>&#64;hell-ui/angular/time-input/styles.css</code> also imports the Time Picker recipe,
-        so existing consumers do not add a stylesheet.
+        Time Input has no owned multi-part anatomy. Its <code>ui</code> binding is the reused Input
+        root map, so a string or <code>{{ '{ root: "…" }' }}</code> refines the native input only.
+        Style a composed Control Group, action, Popover, Icon, and Time Picker at each primitive's
+        own local Part Style Map. Import
+        <code>&#64;hell-ui/angular/time-picker/styles.css</code> separately when rendering the picker;
+        Time Input's stylesheet no longer includes it.
       </p>
-      <table class="hd-doc-table">
-        <thead>
-          <tr>
-            <th>Part</th>
-            <th>Styles</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>root</code></td>
-            <td>The host element — border, background, focus ring, invalid/disabled state.</td>
-          </tr>
-          <tr>
-            <td><code>input</code></td>
-            <td>The text/time field — typography, padding, size variants.</td>
-          </tr>
-          <tr>
-            <td><code>trigger</code></td>
-            <td>The clock icon button — shape, hover/focus, disabled state.</td>
-          </tr>
-          <tr>
-            <td><code>triggerIcon</code></td>
-            <td>The clock glyph inside the trigger button.</td>
-          </tr>
-          <tr>
-            <td><code>pickerPanel</code></td>
-            <td>The popover surface wrapping the picker.</td>
-          </tr>
-          <tr>
-            <td><code>pickerHeader</code></td>
-            <td>The row above the unit controls that holds the readout.</td>
-          </tr>
-          <tr>
-            <td><code>pickerReadout</code></td>
-            <td>The large formatted-time text at the top of the picker.</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnits</code></td>
-            <td>The grid laying out the hour/minute/second unit groups.</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnit</code></td>
-            <td>One unit group — label plus its value/step control.</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnitLabel</code></td>
-            <td>The small caption above a unit's control (Hours, Minutes, Seconds).</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnitControl</code></td>
-            <td>The bordered group wrapping a unit's value cell and its two step buttons.</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnitValue</code></td>
-            <td>The spinbutton cell showing a unit's current zero-padded value.</td>
-          </tr>
-          <tr>
-            <td><code>pickerUnitStep</code></td>
-            <td>Each of a unit's decrement (−) and increment (+) buttons.</td>
-          </tr>
-          <tr>
-            <td><code>minutePresets</code></td>
-            <td>The group wrapping the quick minute-preset buttons.</td>
-          </tr>
-          <tr>
-            <td><code>minutePreset</code></td>
-            <td>One quick-minute button (:00, :15, :30, :45), including its selected state.</td>
-          </tr>
-        </tbody>
-      </table>
-      <hd-example-tabs [code]="timeInputStylingExampleCode">
+      <hd-example-tabs [code]="timeInputStylingExampleCode" previewClass="grid max-w-sm gap-2">
         <app-time-input-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
+      <table class="hd-doc-table">
+        <thead>
+          <tr><th>Interface</th><th>Type</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>input[hellTimeInput]</code></td>
+            <td>directive</td>
+            <td>Typed time drafts, commits, validation, and forms behavior on the native host.</td>
+          </tr>
+          <tr>
+            <td><code>value</code> / <code>valueChange</code></td>
+            <td><code>HellTimeValue | null</code></td>
+            <td>Controlled committed value and nullable clear output.</td>
+          </tr>
+          <tr>
+            <td><code>required</code>, <code>disabled</code>, <code>invalid</code></td>
+            <td><code>boolean</code></td>
+            <td>Native required/disabled state and explicit invalid override.</td>
+          </tr>
+          <tr>
+            <td><code>min</code>, <code>max</code></td>
+            <td><code>HellTimeValue | null</code></td>
+            <td>Inclusive same-day bounds, also reflected in stable adapter format.</td>
+          </tr>
+          <tr>
+            <td><code>seconds</code></td>
+            <td><code>boolean</code></td>
+            <td>Includes seconds in parsing, formatting, bounds, and native step metadata.</td>
+          </tr>
+          <tr>
+            <td><code>id</code></td>
+            <td><code>string</code></td>
+            <td>Native id; generated when omitted and used for Field label association.</td>
+          </tr>
+          <tr>
+            <td><code>size</code>, <code>ui</code></td>
+            <td>Input root contract</td>
+            <td>Single-host visual refinement delegated to HellInput.</td>
+          </tr>
+          <tr>
+            <td><code>aria-describedby</code>, <code>aria-labelledby</code></td>
+            <td><code>string | null</code></td>
+            <td>Native id references merged with an enclosing Field.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The validator reports <code>invalidTimeInputDraft</code>, <code>required</code>, and
+        <code>outOfRangeTime</code> errors. Native attributes such as <code>name</code>,
+        <code>placeholder</code>, <code>autocomplete</code>, and <code>aria-label</code> stay
+        consumer-authored on the host; a named input participates in native form serialization.
+      </p>
+
+      <h2>Migration from the owned component</h2>
       <ul>
         <li>
-          <code>value</code>: <code>HellTimeValue | null</code> — a structured
-          <code>&#123; hour, minute, second &#125;</code> (0–23 / 0–59 / 0–59). Default
-          <code>null</code>.
+          Replace <code>&lt;hell-time-input inputId="start" … /&gt;</code> with
+          <code>&lt;input id="start" hellTimeInput … /&gt;</code>. There is no old-selector or
+          <code>inputId</code> alias.
         </li>
         <li>
-          <code>(valueChange)</code>: <code>EventEmitter&lt;HellTimeValue | null&gt;</code>. Emits a
-          valid value after typing (blur or Enter), a picker interaction, or <code>null</code> when
-          cleared.
+          Move <code>name</code>, <code>placeholder</code>, input type, autocomplete, and other
+          element attributes directly onto the native input.
         </li>
         <li>
-          Implements <code>ControlValueAccessor</code> and <code>Validator</code>. Reactive and
-          template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form
-          submission is not provided.
+          Replace the old <code>root</code>, <code>input</code>, <code>trigger</code>,
+          <code>triggerIcon</code>, <code>pickerPanel</code>, and <code>picker*</code> Time Input
+          parts with local <code>ui</code> maps on Input, Control Group/action or Button, Popover,
+          Icon, and Time Picker as shown in the composition recipe.
         </li>
         <li>
-          Validator error: <code>invalidTimeInputDraft</code> for typed text that can't be parsed
-          by the active adapter.
+          Author the picker trigger, its accessible label, the close action, and focus policy in
+          consumer markup. The former Time Input trigger and picker Label Contract is removed with
+          the owned anatomy.
         </li>
         <li>
-          <code>seconds</code>: <code>boolean</code>. Includes a seconds field/picker control and
-          switches the committed format to <code>HH:mm:ss</code>. Default <code>false</code>.
-        </li>
-        <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
-        <li><code>invalid</code>: <code>boolean</code>. Forces the invalid visual/ARIA state on top of any draft-driven invalidity. Default <code>false</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Disables the field and the clock trigger. Default <code>false</code>.</li>
-        <li>
-          <code>placeholder</code>: <code>string | null</code>. Text shown while empty. Defaults to
-          a format hint (<code>HH:mm</code>, or <code>HH:mm:ss</code> with <code>seconds</code>).
-        </li>
-        <li>
-          <code>inputId</code>: <code>string</code>. Id applied to the internal field for visible
-          label <code>for</code> wiring. Defaults to an auto-generated
-          <code>hell-time-input-&lt;n&gt;-field</code>.
-        </li>
-        <li><code>name</code>: <code>string | null</code>. Native <code>name</code> attribute on the field. Default <code>null</code>.</li>
-        <li><code>aria-label</code>: <code>string | null</code>. Accessible name for standalone usage; also names the clock trigger button. Default <code>null</code>.</li>
-        <li><code>aria-describedby</code>, <code>aria-labelledby</code>: <code>string | null</code>. Merge with descriptions/labels supplied by an ancestor <code>hellField</code>.</li>
-        <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellTimeInputPart&gt;</code> — a shorthand class
-          string refining <code>root</code>, or a <code>HellTimeInputUi</code> map covering every
-          part listed under Styling.
-        </li>
-        <li>
-          Exported types: <code>HellTimeInputPart</code> (the fifteen parts listed under Styling),
-          <code>HellTimeInputUi</code> (<code>HellUi&lt;HellTimeInputPart&gt;</code>),
-          <code>HellTimeValue</code>, <code>HellTimeInputAdapter</code>,
-          <code>HellTimeInputAdapterContext</code>.
-        </li>
-        <li>
-          <code>provideHellTimeInputAdapter</code>: replace the default native-compatible
-          parse/format/normalize/compare policy — see below.
-        </li>
-        <li>
-          <code>HELL_TIME_INPUT_LABELS</code>: override the Label Contract strings for the
-          clock trigger, unit spinbuttons, step buttons, and minute presets
-          (<code>HellTimeInputLabels</code>). Existing picker-label overrides are adapted into the
-          composed Time Picker, so this contract remains source-compatible.
+          Add <code>&#64;hell-ui/angular/time-picker/styles.css</code> when composing Time Picker;
+          <code>time-input/styles.css</code> now ships only the native input recipe source.
         </li>
       </ul>
 
-      <h2>Adapter contract</h2>
-      <p>
-        The built-in <code>HELL_DEFAULT_TIME_INPUT_ADAPTER</code> formats
-        <code>HH:mm</code> (or <code>HH:mm:ss</code> with <code>seconds</code>) and, because it is
-        the active adapter, the field renders as a native <code>&lt;input type="time"&gt;</code> —
-        the browser itself blocks illegal typed values. Its parser also accepts common 12-hour
-        text (<code>9:00 am</code>, <code>1:30pm</code>) and bare digit runs (<code>930</code>) for
-        adapter reuse, plus programmatic paths that go around the native control. Empty text
-        commits a clear to <code>null</code>. For localized formats or named shortcuts, implement the
-        <code>HellTimeInputAdapter</code> interface and register it with
-        <code>provideHellTimeInputAdapter</code>, which binds it to the
-        <code>HELL_TIME_INPUT_ADAPTER</code> injection token. In <code>parseText</code>, return
-        <code>hellTypedValue(value)</code> for a committable value (<code>null</code> clears the
-        field) or <code>hellInvalidTypedValue()</code> to keep the typed text as a visible invalid
-        draft — both imported from <code>&#64;hell-ui/angular/core</code>. Custom adapters switch the
-        field to plain text mode, since the native time control cannot display non-standard text.
-      </p>
-
       <h2>Accessibility</h2>
       <ul>
+        <li>The host is the focusable native input; no wrapper or hidden field intercepts events.</li>
         <li>
-          With the default adapter the field is a native <code>&lt;input type="time"&gt;</code>,
-          so it carries platform time-editing semantics for free; a custom adapter renders
-          <code>&lt;input type="text"&gt;</code> with <code>inputmode="text"</code> instead.
-          <code>aria-invalid</code> reflects invalid draft state in both modes.
+          <code>aria-invalid</code>, native <code>required</code>/<code>disabled</code>, and Field
+          label/description ids reflect on that same host.
         </li>
         <li>
-          The clock trigger is a <code>&lt;button type="button"&gt;</code> with its own accessible
-          name from the Label Contract (<code>"Choose time"</code>, or
-          <code>"Choose time for &lt;label&gt;"</code> when <code>aria-label</code> is set).
+          Enter commits typed text without cancelling native form submission; blur commits and marks
+          the control touched.
         </li>
         <li>
-          Each picker unit value is <code>role="spinbutton"</code> with
-          <code>aria-valuemin</code>/<code>aria-valuemax</code>/<code>aria-valuenow</code>/<code>aria-valuetext</code>
-          and its own <code>aria-labelledby</code>. Arrow Up/Right increments, Arrow Down/Left
-          decrements, Page Up/Down step by five, and Home/End jump to the unit's min/max.
+          A composed icon trigger needs its own accessible name. Popover owns open, Escape, and
+          dismissal behavior; the recipe deliberately returns focus to the input after Done.
         </li>
-        <li>
-          Minute preset buttons sit in a <code>role="group"</code> with a labeled group name, and
-          each button reflects the active preset with <code>aria-pressed</code> and
-          <code>data-selected</code>.
-        </li>
-        <li>
-          Focusing the field with existing text selects its contents, so typing immediately
-          overwrites the previous value.
-        </li>
-        <li>Disabled state disables the text field and the clock trigger together.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
+        <li>Use a visible Field label or a native <code>aria-label</code> on standalone inputs.</li>
         <li>Use <code>seconds</code> only when the workflow genuinely needs second precision.</li>
-        <li>Pair with <code>hellFieldLabel</code> for visible naming, or set <code>aria-label</code> for standalone fields.</li>
-        <li>Treat typed entry and picker selection as equally valid input paths.</li>
+        <li>Add a picker only when segmented visual selection materially helps the workflow.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't force time entry for broad periods like "morning" or "afternoon" — use a select instead.</li>
-        <li>Don't change the visible placeholder format without also relaxing or replacing the parse adapter to match.</li>
-        <li>Don't omit timezone context in scheduling flows — the value carries no timezone information.</li>
+        <li>Don't create a second picker-owned value model; update the same controlled value or form control.</li>
+        <li>Don't hide the input when a Time Picker exists; typing and native focus remain first-class.</li>
+        <li>Don't target removed Time Input anatomy; style each composed primitive locally.</li>
+        <li>Don't omit timezone context in scheduling flows; <code>HellTimeValue</code> carries none.</li>
       </ul>
     </article>
   `,
 })
 export class TimeInputPage {
   protected readonly timeInputBasicExampleCode = timeInputBasicExampleCodeRaw;
-  protected readonly timeInputSizesExampleCode = timeInputSizesExampleCodeRaw;
+  protected readonly timeInputReactiveFormsExampleCode = timeInputReactiveFormsExampleCodeRaw;
   protected readonly timeInputSecondsAndValidationExampleCode =
     timeInputSecondsAndValidationExampleCodeRaw;
-  protected readonly timeInputReactiveFormsExampleCode = timeInputReactiveFormsExampleCodeRaw;
+  protected readonly timeInputSizesExampleCode = timeInputSizesExampleCodeRaw;
+  protected readonly timeInputStylingExampleCode = timeInputStylingExampleCodeRaw;
   protected readonly timeInputWithFieldScheduleRowExampleCode =
     timeInputWithFieldScheduleRowExampleCodeRaw;
-  protected readonly timeInputStylingExampleCode = timeInputStylingExampleCodeRaw;
+  protected readonly timeInputWithTimePickerExampleCode = timeInputWithTimePickerExampleCodeRaw;
 }

@@ -44,9 +44,10 @@ import timePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <code>hell-popover</code> when the surrounding experience needs a floating picker.
       </p>
       <p>
-        Use <code>hell-time-input</code> when users should also type a time or bind the control to
-        Angular forms. Time Input composes this picker while keeping its field, adapter, CVA,
-        validation, dismissal, and focus-restoration contracts.
+        Apply <code>hellTimeInput</code> to a native <code>&lt;input&gt;</code> when users should also
+        type a time or bind the value to Angular forms. If the workflow needs both surfaces,
+        compose Time Input and Time Picker through Control Group and Popover. The consumer owns the
+        trigger, shared value, close action, and focus policy; neither entry point hides the other.
       </p>
 
       <h2>Basic</h2>
@@ -157,7 +158,8 @@ import timePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       <h2>Do</h2>
       <ul class="hd-do">
         <li>Use the picker when structured visual selection is the whole interaction.</li>
-        <li>Compose it with Popover when a separate trigger should own floating behavior.</li>
+        <li>Compose it with Popover and an explicit close action when selection should float.</li>
+        <li>Choose whether dismissal restores the trigger or a related input, then test that focus policy.</li>
       </ul>
 
       <h2>Don't</h2>

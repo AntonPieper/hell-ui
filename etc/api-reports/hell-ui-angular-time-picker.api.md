@@ -6,6 +6,7 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellTimeValue } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
@@ -15,7 +16,6 @@ export const HELL_TIME_PICKER_LABELS: InjectionToken<HellTimePickerLabels>;
 
 // @public
 export class HellTimePicker {
-    constructor();
     protected readonly current: _angular_core.Signal<HellTimeValue>;
     protected decreaseUnitLabel(unit: keyof HellTimeValue): string;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -60,12 +60,7 @@ export type HellTimePickerPart = 'root' | 'header' | 'readout' | 'units' | 'unit
 // @public
 export type HellTimePickerUi = HellUi<HellTimePickerPart>;
 
-// @public
-export interface HellTimeValue {
-    readonly hour: number;
-    readonly minute: number;
-    readonly second: number;
-}
+export { HellTimeValue }
 
 // (No @packageDocumentation comment for this package)
 

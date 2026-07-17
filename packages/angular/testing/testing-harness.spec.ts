@@ -269,10 +269,17 @@ class DateInputHarnessHost {
 
 @Component({
   imports: [HellTimeInput],
-  template: `<hell-time-input [value]="value()" (valueChange)="value.set($event)" />`,
+  template: `<input
+    hellTimeInput
+    required
+    [disabled]="disabled()"
+    [value]="value()"
+    (valueChange)="value.set($event)"
+  />`,
 })
 class TimeInputHarnessHost {
   readonly value = signal<{ hour: number; minute: number; second: number } | null>(null);
+  readonly disabled = signal(false);
 }
 
 @Component({
@@ -547,8 +554,24 @@ describe('hell testing harness entrypoint', () => {
     timeFixture.detectChanges();
     const timeInput = await TestbedHarnessEnvironment.loader(timeFixture).getHarness(HellTimeInputHarness);
 
-    await timeInput.setInputValue('09:30');
-    expect(await timeInput.getInputValue()).toBe('09:30');
+    expect(await timeInput.getValue()).toBe('');
+    expect(await timeInput.isRequired()).toBe(true);
+
+    await timeInput.focus();
+    expect(await timeInput.isFocused()).toBe(true);
+    await timeInput.setValue('09:');
+    expect(await timeInput.getValue()).toBe('09:');
+    expect(await timeInput.isInvalid()).toBe(true);
+
+    await timeInput.setValue('09:30');
+    await timeInput.blur();
+    expect(await timeInput.getValue()).toBe('09:30');
+    expect(timeFixture.componentInstance.value()).toEqual({ hour: 9, minute: 30, second: 0 });
+    expect(await timeInput.isInvalid()).toBe(false);
+
+    timeFixture.componentInstance.disabled.set(true);
+    timeFixture.detectChanges();
+    expect(await timeInput.isDisabled()).toBe(true);
   });
 
   it('interacts with toast harnesses', async () => {

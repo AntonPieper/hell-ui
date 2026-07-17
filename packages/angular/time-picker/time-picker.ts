@@ -1,11 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  HostAttributeToken,
   InjectionToken,
-  Renderer2,
-  afterRenderEffect,
   booleanAttribute,
   computed,
   inject,
@@ -16,6 +12,7 @@ import {
   hellCreateLabels,
   hellPartStyler,
   type HellRecipe,
+  type HellTimeValue,
   type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
@@ -24,15 +21,7 @@ import {
   hellTimePickerNextValue,
 } from './time-picker-navigation';
 
-/** Structured time value exchanged by Hell time controls. */
-export interface HellTimeValue {
-  /** Hour of day, from 0 to 23. */
-  readonly hour: number;
-  /** Minute of hour, from 0 to 59. */
-  readonly minute: number;
-  /** Second of minute, from 0 to 59. */
-  readonly second: number;
-}
+export type { HellTimeValue } from '@hell-ui/angular/core';
 
 /** Built-in accessibility labels owned by the time picker entry point. */
 export interface HellTimePickerLabels {
@@ -83,27 +72,6 @@ export type HellTimePickerPart =
 
 /** Part Style Map accepted by the HellTimePicker `ui` input. */
 export type HellTimePickerUi = HellUi<HellTimePickerPart>;
-
-interface HellOwnedPartAdapter {
-  readonly sourceType: string;
-  readonly targetType: string;
-  readonly parts: ReadonlyMap<string, string | null>;
-}
-
-interface HellTimePickerComposition {
-  readonly format: (value: HellTimeValue, seconds: boolean) => string;
-  readonly normalize: (
-    value: HellTimeValue,
-    seconds: boolean,
-  ) => HellTimeValue | null;
-}
-
-const HELL_OWNED_PART_ADAPTER_ATTRIBUTE = 'data-hell-owned-part-adapter';
-const HELL_TIME_PICKER_COMPOSITION = Symbol.for('@hell-ui/angular/time-picker/composition');
-
-const HELL_TIME_PICKER_OWNED_PARTS = hellOwnedPartAdapter(
-  'source=HellTimePickerPart;target=HellTimePickerPart;map=root:root,header:header,readout:readout,units:units,unit:unit,unitLabel:unitLabel,unitControl:unitControl,unitValue:unitValue,unitStep:unitStep,minutePresets:minutePresets,minutePreset:minutePreset',
-);
 
 const HELL_TIME_PICKER_RECIPE = {
   root: 'grid w-[min(20rem,calc(100vw-2rem))] gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated p-hell-3 text-[13px] text-hell-foreground shadow-hell-lg outline-none',
@@ -255,29 +223,8 @@ export class HellTimePicker {
   );
   /** Readout text for the current visible precision. */
   protected readonly formattedValue = computed(() =>
-    formatComposedTimeValue(this.labels, this.current(), this.seconds()),
+    formatTimeValue(this.current(), this.seconds()),
   );
-
-  constructor() {
-    const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-    const renderer = inject(Renderer2);
-    const authoredAdapter = inject(new HostAttributeToken(HELL_OWNED_PART_ADAPTER_ATTRIBUTE), {
-      optional: true,
-    });
-    const ownedParts = authoredAdapter
-      ? parseHellOwnedPartAdapter(authoredAdapter)
-      : HELL_TIME_PICKER_OWNED_PARTS;
-
-    assertHellOwnedPartAdapterSource(ownedParts, HELL_TIME_PICKER_OWNED_PARTS);
-    if (ownedParts.targetType === ownedParts.sourceType) return;
-
-    afterRenderEffect(() => {
-      // Track structural unit changes so newly rendered seconds receive the
-      // same owned-part naming before the browser paints the next frame.
-      this.seconds();
-      applyHellOwnedPartAdapter(host, renderer, ownedParts);
-    });
-  }
 
   /** Units shown by the picker. */
   protected visibleUnits(): readonly (keyof HellTimeValue)[] {
@@ -329,8 +276,7 @@ export class HellTimePicker {
   /** Sets one unit and commits a normalized structured value. */
   protected setUnit(unit: keyof HellTimeValue, nextUnitValue: number): void {
     if (this.disabled()) return;
-    const next = normalizeComposedTimeValue(
-      this.labels,
+    const next = normalizeTimeValue(
       { ...this.current(), [unit]: nextUnitValue },
       this.seconds(),
     );
@@ -367,100 +313,10 @@ function pad(value: number): string {
   return value.toString().padStart(2, '0');
 }
 
-function hellOwnedPartAdapter(serialized: string): HellOwnedPartAdapter {
-  return parseHellOwnedPartAdapter(serialized);
-}
-
-function parseHellOwnedPartAdapter(serialized: string): HellOwnedPartAdapter {
-  const match =
-    /^source=([A-Za-z_$][\w$]*);target=([A-Za-z_$][\w$]*);map=(.+)$/.exec(serialized);
-  if (!match) throw new Error('Invalid private owned-part adapter.');
-
-  const parts = new Map<string, string | null>();
-  for (const entry of match[3].split(',')) {
-    const pair = /^([A-Za-z_$][\w$]*):([A-Za-z_$][\w$]*|null)$/.exec(entry);
-    if (!pair || parts.has(pair[1])) throw new Error('Invalid private owned-part adapter.');
-    parts.set(pair[1], pair[2] === 'null' ? null : pair[2]);
-  }
-
-  return {
-    sourceType: match[1],
-    targetType: match[2],
-    parts,
-  };
-}
-
-function assertHellOwnedPartAdapterSource(
-  candidate: HellOwnedPartAdapter,
-  canonical: HellOwnedPartAdapter,
-): void {
-  if (
-    candidate.sourceType !== canonical.sourceType ||
-    candidate.parts.size !== canonical.parts.size ||
-    [...canonical.parts.keys()].some((part) => !candidate.parts.has(part))
-  ) {
-    throw new Error('Invalid private owned-part adapter source.');
-  }
-}
-
-function applyHellOwnedPartAdapter(
-  host: HTMLElement,
-  renderer: Renderer2,
-  adapter: HellOwnedPartAdapter,
-): void {
-  const ownedElements = [host, ...host.querySelectorAll<HTMLElement>('[data-slot]')];
-  for (const element of ownedElements) {
-    const sourcePart = element.getAttribute('data-slot');
-    if (!sourcePart || !adapter.parts.has(sourcePart)) continue;
-
-    const targetPart = adapter.parts.get(sourcePart);
-    if (targetPart === undefined) continue;
-    if (targetPart === null) renderer.removeAttribute(element, 'data-slot');
-    else if (targetPart !== sourcePart) renderer.setAttribute(element, 'data-slot', targetPart);
-  }
-}
-
 function formatTimeValue(value: HellTimeValue, seconds: boolean): string {
   return seconds
     ? `${pad(value.hour)}:${pad(value.minute)}:${pad(value.second)}`
     : `${pad(value.hour)}:${pad(value.minute)}`;
-}
-
-function formatComposedTimeValue(
-  labels: HellTimePickerLabels,
-  value: HellTimeValue,
-  seconds: boolean,
-): string {
-  return (
-    hellTimePickerComposition(labels)?.format(value, seconds) ??
-    formatTimeValue(value, seconds)
-  );
-}
-
-function normalizeComposedTimeValue(
-  labels: HellTimePickerLabels,
-  value: HellTimeValue,
-  seconds: boolean,
-): HellTimeValue | null {
-  const bounded = normalizeTimeValue(value, seconds);
-  if (!bounded) return null;
-
-  const composition = hellTimePickerComposition(labels);
-  return composition
-    ? normalizeTimeValue(composition.normalize(bounded, seconds), seconds)
-    : bounded;
-}
-
-function hellTimePickerComposition(
-  labels: HellTimePickerLabels,
-): HellTimePickerComposition | null {
-  const value = (labels as unknown as Record<PropertyKey, unknown>)[HELL_TIME_PICKER_COMPOSITION];
-  if (!value || typeof value !== 'object') return null;
-
-  const composition = value as Partial<HellTimePickerComposition>;
-  return typeof composition.format === 'function' && typeof composition.normalize === 'function'
-    ? (composition as HellTimePickerComposition)
-    : null;
 }
 
 function normalizeTimeValue(

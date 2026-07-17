@@ -7,12 +7,9 @@
 import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import * as _hell_ui_angular_core from '@hell-ui/angular/core';
-import * as _hell_ui_angular_time_picker from '@hell-ui/angular/time-picker';
-import { HellTimeValue } from '@hell-ui/angular/time-picker';
+import { HellTimeValue } from '@hell-ui/angular/core';
 import { HellTypedInputAdapter } from '@hell-ui/angular/core';
-import { HellUi } from '@hell-ui/angular/core';
-import { HellUiInput } from '@hell-ui/angular/core';
+import * as i1 from '@hell-ui/angular/input';
 import { InjectionToken } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
@@ -26,52 +23,41 @@ export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter;
 export const HELL_TIME_INPUT_ADAPTER: InjectionToken<HellTimeInputAdapter>;
 
 // @public
-export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels>;
-
-// @public
 export class HellTimeInput implements ControlValueAccessor, Validator {
     constructor();
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    protected commit(text: string, event?: Event): void;
+    protected readonly current: Signal<HellTimeValue | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly display: _angular_core.Signal<string>;
     protected readonly fieldAriaDescribedby: Signal<string | null>;
     protected readonly fieldAriaLabelledby: Signal<string | null>;
-    protected readonly format: (value: HellTimeValue | null, seconds: boolean) => string;
-    readonly inputId: _angular_core.InputSignal<string>;
+    readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
     protected readonly isDisabled: () => boolean;
-    protected readonly isInvalid: () => any;
-    protected readonly labels: HellTimeInputLabels;
-    readonly name: _angular_core.InputSignal<string | null>;
-    protected readonly nativeTimeInput: boolean;
+    protected readonly isInvalid: () => boolean;
+    readonly max: _angular_core.InputSignal<HellTimeValue | null>;
+    readonly min: _angular_core.InputSignal<HellTimeValue | null>;
+    protected readonly nativeMax: Signal<string | null>;
+    protected readonly nativeMin: Signal<string | null>;
+    protected readonly nativeStep: Signal<"1" | "60">;
     protected onBlur(): void;
-    protected onFieldFocus(field: HTMLInputElement): void;
-    protected onInput(value: string): void;
-    protected onPickerValueChange(pickerValue: HellTimeValue | null): void;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellTimeInputPart>;
-    protected readonly pickerShift: {
-        readonly padding: 8;
-    };
-    protected readonly pickerUi: Signal<Partial<Record<_hell_ui_angular_time_picker.HellTimePickerPart, string>>>;
-    protected readonly pickerValue: Signal<HellTimeValue | null>;
-    readonly placeholder: _angular_core.InputSignal<string | null>;
+    protected onInput(): void;
+    protected onKeydown(event: KeyboardEvent): void;
+    protected readonly outOfRange: Signal<boolean>;
     registerOnChange(fn: (value: HellTimeValue | null) => void): void;
     registerOnTouched(fn: () => void): void;
     registerOnValidatorChange(fn: () => void): void;
+    readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    protected readonly requiredMissing: Signal<boolean>;
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
     setDisabledState(isDisabled: boolean): void;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    protected readonly triggerAriaLabel: () => string;
-    readonly ui: _angular_core.InputSignal<HellUiInput<HellTimeInputPart>>;
     validate(_control: AbstractControl | null): ValidationErrors | null;
     readonly value: _angular_core.InputSignal<HellTimeValue | null>;
     readonly valueChange: _angular_core.OutputEmitterRef<HellTimeValue | null>;
     writeValue(value: HellTimeValue | null): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellTimeInput, "hell-time-input", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "inputId": { "alias": "inputId"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTimeInput, "input[hellTimeInput]", ["hellTimeInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
 }
 
@@ -82,28 +68,6 @@ export type HellTimeInputAdapter = HellTypedInputAdapter<HellTimeValue, HellTime
 export interface HellTimeInputAdapterContext {
     readonly seconds: boolean;
 }
-
-// @public
-export interface HellTimeInputLabels {
-    readonly addFiveMinutes: string;
-    readonly chooseTime: string;
-    readonly chooseTimeFor: (label: string) => string;
-    readonly decreaseUnit?: (unitLabel: string) => string;
-    readonly hours: string;
-    readonly increaseUnit?: (unitLabel: string) => string;
-    readonly minutePreset?: (minute: number) => string;
-    readonly minutePresets?: string;
-    readonly minutes: string;
-    readonly seconds: string;
-    readonly selectedTime?: (time: string) => string;
-    readonly subtractFiveMinutes: string;
-}
-
-// @public
-export type HellTimeInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel' | 'pickerHeader' | 'pickerReadout' | 'pickerUnits' | 'pickerUnit' | 'pickerUnitLabel' | 'pickerUnitControl' | 'pickerUnitValue' | 'pickerUnitStep' | 'minutePresets' | 'minutePreset';
-
-// @public
-export type HellTimeInputUi = HellUi<HellTimeInputPart>;
 
 export { HellTimeValue }
 

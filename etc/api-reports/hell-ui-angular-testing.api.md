@@ -507,11 +507,15 @@ export interface HellTextHarnessFilters extends BaseHarnessFilters {
 
 // @public
 export class HellTimeInputHarness extends ComponentHarness {
-    getInputValue(): Promise<string>;
+    blur(): Promise<void>;
+    focus(): Promise<void>;
+    getValue(): Promise<string>;
     static hostSelector: string;
+    isDisabled(): Promise<boolean>;
+    isFocused(): Promise<boolean>;
     isInvalid(): Promise<boolean>;
-    openPicker(): Promise<void>;
-    setInputValue(value: string): Promise<void>;
+    isRequired(): Promise<boolean>;
+    setValue(value: string): Promise<void>;
 }
 
 // @public

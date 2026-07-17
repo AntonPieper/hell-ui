@@ -6,9 +6,27 @@ import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellTimeInput],
   template: `
-    <hell-time-input size="sm" aria-label="Small" [value]="small()" (valueChange)="small.set($event)" />
-    <hell-time-input size="md" aria-label="Medium" [value]="medium()" (valueChange)="medium.set($event)" />
-    <hell-time-input size="lg" aria-label="Large" [value]="large()" (valueChange)="large.set($event)" />
+    <input
+      hellTimeInput
+      size="sm"
+      aria-label="Small time input"
+      [value]="small()"
+      (valueChange)="small.set($event)"
+    />
+    <input
+      hellTimeInput
+      size="md"
+      aria-label="Medium time input"
+      [value]="medium()"
+      (valueChange)="medium.set($event)"
+    />
+    <input
+      hellTimeInput
+      size="lg"
+      aria-label="Large time input"
+      [value]="large()"
+      (valueChange)="large.set($event)"
+    />
   `,
 })
 export class TimeInputSizesExample {
