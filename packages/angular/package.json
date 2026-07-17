@@ -44,7 +44,7 @@
     "app-shell/app-shell.ts",
     "audio-player/audio-player.ts",
     "resizable/resizable.ts",
-    "split-view/split-view.ts",
+    "master-detail/master-detail.ts",
     "toolbar/toolbar.ts",
     "pagination/pagination.ts",
     "table/table-utilities.ts",
@@ -230,6 +230,9 @@
     "./date-picker": {
       "@heinrich/source": "./date-picker/public-api.ts"
     },
+    "./master-detail": {
+      "@heinrich/source": "./master-detail/public-api.ts"
+    },
     "./omnibar": {
       "@heinrich/source": "./omnibar/public-api.ts"
     },
@@ -241,9 +244,6 @@
     },
     "./save-bar": {
       "@heinrich/source": "./save-bar/public-api.ts"
-    },
-    "./split-view": {
-      "@heinrich/source": "./split-view/public-api.ts"
     },
     "./time-input": {
       "@heinrich/source": "./time-input/public-api.ts"
@@ -472,6 +472,11 @@
       "style": "./date-picker/styles.css",
       "default": "./date-picker/styles.css"
     },
+    "./master-detail/styles.css": {
+      "@heinrich/source": "./master-detail/styles.css",
+      "style": "./master-detail/styles.css",
+      "default": "./master-detail/styles.css"
+    },
     "./omnibar/styles.css": {
       "@heinrich/source": "./omnibar/styles.css",
       "style": "./omnibar/styles.css",
@@ -491,11 +496,6 @@
       "@heinrich/source": "./save-bar/styles.css",
       "style": "./save-bar/styles.css",
       "default": "./save-bar/styles.css"
-    },
-    "./split-view/styles.css": {
-      "@heinrich/source": "./split-view/styles.css",
-      "style": "./split-view/styles.css",
-      "default": "./split-view/styles.css"
     },
     "./time-input/styles.css": {
       "@heinrich/source": "./time-input/styles.css",

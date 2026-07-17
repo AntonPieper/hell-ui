@@ -1200,11 +1200,11 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'pdf-viewer hell-pdf-viewer HellPdfViewer src worker fileName smallest usage lazy stylesheet loader document',
  },
  {
- title:'Pdf Viewer: With Split View And Card',
+ title:'Pdf Viewer: With Master Detail And Card',
  path:'/components/pdf-viewer',
  detail:'components/pdf-viewer/examples/document-review.example.ts',
  terms:
-'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellChip master detail review queue approve invoice',
+'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellChip master detail review queue approve invoice',
  },
  {
  title:'Pdf Viewer: Events And Error Handling',
@@ -1662,39 +1662,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'pending action hellSpinner hellButton hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES confirm renewal subscription signal composite',
  },
  {
- title:'Split View: All parts styling',
- path:'/components/split-view',
- detail:'components/split-view/examples/all-parts-styling.example.ts',
+ title:'Master Detail: Basic controller',
+ path:'/components/master-detail',
+ detail:'components/master-detail/examples/basic.example.ts',
  terms:
-'split-view all-parts-styling hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES ui HellSplitViewUi root resizable screen pane compactHeader backButton detailHeader itemNavigation part style map tokens',
+'master-detail hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS detailOpen detailOpenChange compactBelow compact focus restoration projected panes',
  },
  {
- title:'Split View: Basic',
- path:'/components/split-view',
- detail:'components/split-view/examples/basic.example.ts',
+ title:'Master Detail: External Resizable',
+ path:'/components/master-detail',
+ detail:'components/master-detail/examples/resizable.example.ts',
  terms:
-'split-view hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES detailOpen detailOpenChange framed height master detail resizable compact smallest usage',
+'master-detail resizable hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS hellResizable hellResizablePane hellResizableHandle external composition separator resize',
  },
  {
- title:'Split View: Item navigation',
- path:'/components/split-view',
- detail:'components/split-view/examples/item-navigation.example.ts',
+ title:'Master Detail: Toolbar and Pagination navigation',
+ path:'/components/master-detail',
+ detail:'components/master-detail/examples/navigation.example.ts',
  terms:
-'split-view item-navigation hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES itemNavigation previousItem nextItem previousItemDisabled nextItemDisabled previousItemLabel nextItemLabel itemNavigationLabel prev next detail',
- },
- {
- title:'Split View: With table and card',
- path:'/components/split-view',
- detail:'components/split-view/examples/master-detail.example.ts',
- terms:
-'split-view master-detail hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTableRowAction HELL_TABLE_UTILITIES_DIRECTIVES hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellChip itemNavigation active tickets composite master detail',
- },
- {
- title:'Split View: Sizing',
- path:'/components/split-view',
- detail:'components/split-view/examples/sizing.example.ts',
- terms:
-'split-view hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES compactBelow primaryFlex detailFlex primaryMinSize detailMinSize height framed pane ratio breakpoint',
+'master-detail navigation hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS hellToolbar hellToolbarItem hellPagination hellPageLink previous next consumer state',
  },
  {
  title:'Switch: Styling (all parts)',
@@ -1757,7 +1743,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'components/table/examples/tanstack-shell.example.ts',
  terms:
-'shell composite components/table/examples/tanstack-shell.example components/table hell-tanstack-table HellTanStackTable HellTableStatus hellTableShellCell hellTableShellToolbar hellTableShellFooter hellTableShellLoading hellTableShellEmpty hellTableShellError hell-tanstack-pagination HellTanStackPagination hellTableRowRadio hell-omnibar hellMenu hell-split-view omnibar menu split view master detail sorting server-side manual flexRender columnDef meta hell',
+'shell composite components/table/examples/tanstack-shell.example components/table hell-tanstack-table HellTanStackTable HellTableStatus hellTableShellCell hellTableShellToolbar hellTableShellFooter hellTableShellLoading hellTableShellEmpty hellTableShellError hell-tanstack-pagination HellTanStackPagination hellTableRowRadio hell-omnibar hellMenu hellMasterDetail hellMasterPane hellMasterDetailBack hellToolbar omnibar menu master detail sorting server-side manual flexRender columnDef meta hell',
  },
  {
  title:'Table: Virtual rows and expansion',
@@ -2230,16 +2216,16 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Resizable panes',
  path:'/components/resizable',
- detail:'hellResizablePane and hellResizableHandle compose split views',
+ detail:'hellResizablePane and hellResizableHandle compose adjustable panes',
  terms:
 'HELL_RESIZABLE_DIRECTIVES hellResizable hellResizablePane hellResizableHandle horizontal vertical minSize initialFlex',
  },
  {
- title:'Split view directives',
- path:'/components/split-view',
- detail:'hell-split-view, hellSplitPrimary, hellSplitDetail',
+ title:'Master Detail directives',
+ path:'/components/master-detail',
+ detail:'hellMasterDetail, hellMasterPane, hellMasterDetailBack',
  terms:
-'HELL_SPLIT_VIEW_DIRECTIVES hell-split-view hellSplitPrimary hellSplitDetail compactBelow detailOpen detailOpenChange itemNavigation previousItem nextItem responsive resizable panes',
+'HELL_MASTER_DETAIL_IMPORTS HellMasterDetail HellMasterPane HellMasterDetailBack hellMasterDetail hellMasterPane hellMasterDetailBack compactBelow compact detailOpen detailOpenChange responsive focus restoration projected panes',
  },
  {
  title:'Page header directives',
@@ -2288,7 +2274,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'hellTable, hell-tanstack-table, hellTanStackVirtualRows',
  terms:
-'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle HellTanStackTable hell-tanstack-table HellTableStatus hellTableShellCell hellTableShellHeader hellTableShellToolbar hellTableShellFooter hell-tanstack-pagination HellPaginationStrip hellTableShellExpandedRow hellTanStackVirtualRows TanStack Table TanStack Virtual omnibar menu split view',
+'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle HellTanStackTable hell-tanstack-table HellTableStatus hellTableShellCell hellTableShellHeader hellTableShellToolbar hellTableShellFooter hell-tanstack-pagination HellPaginationStrip hellTableShellExpandedRow hellTanStackVirtualRows TanStack Table TanStack Virtual omnibar menu master detail',
  },
 ];
 

@@ -56,7 +56,7 @@ const packageConsumerCiGroups = [
       'app-shell',
       'page-header',
       'resizable',
-      'split-view',
+      'master-detail',
     ],
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
@@ -416,19 +416,19 @@ const packageConsumerScenarioCatalog = [
     ],
   },
   {
-    name: 'split-view',
-    description: 'narrow split-view composite entry with owned Part Style Map anatomy',
+    name: 'master-detail',
+    description:
+      'projection-first Master Detail controller with external Resizable, Toolbar, and Pagination composition',
     coverage: ['composites'],
     peerTier: 'composite',
-    peerGroup: 'composite-icons',
-    dependencies: styledUiDeps,
-    mainTs: splitViewConsumerMainTs,
-    stylesCss: splitViewConsumerStylesCss,
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    mainTs: masterDetailConsumerMainTs,
+    stylesCss: masterDetailConsumerStylesCss,
     cssIncludes: [
-      'height:var(--hell-split-view-height,100%)',
-      'overflow:hidden',
-      'border-radius:var(--radius-hell-md)',
-      'transform:rotate(180deg)',
+      'flex:var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0)',
+      'transition-property:background-color,border-color,color,box-shadow',
+      'background-color:var(--color-hell-primary)',
     ],
   },
   {
@@ -2954,34 +2954,60 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function splitViewConsumerMainTs() {
-  return `import { Component } from '@angular/core';
+function masterDetailConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from '${packageName}/split-view';
-
-const splitViewUi = {
-  root: 'h-[320px]',
-  pane: 'overflow-auto',
-  itemNavigation: 'gap-hell-3',
-} satisfies HellSplitViewUi;
+import { HELL_MASTER_DETAIL_IMPORTS } from '${packageName}/master-detail';
+import { HellPageLink, HellPagination } from '${packageName}/pagination';
+import { HELL_RESIZABLE_DIRECTIVES } from '${packageName}/resizable';
+import { HellToolbar, HellToolbarItem } from '${packageName}/toolbar';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_SPLIT_VIEW_DIRECTIVES],
+  imports: [
+    HellPageLink,
+    HellPagination,
+    HellToolbar,
+    HellToolbarItem,
+    ...HELL_MASTER_DETAIL_IMPORTS,
+    ...HELL_RESIZABLE_DIRECTIVES,
+  ],
   template: \`
-    <hell-split-view [compactBelow]="0" itemNavigation [ui]="splitViewUi">
-      <ng-template hellSplitPrimary>
-        <section>Primary</section>
-      </ng-template>
-      <ng-template hellSplitDetail>
-        <section>Detail</section>
-      </ng-template>
-    </hell-split-view>
+    <div
+      hellMasterDetail
+      #masterDetail="hellMasterDetail"
+      [compactBelow]="0"
+      [detailOpen]="detailOpen()"
+      (detailOpenChange)="detailOpen.set($event)"
+      ui="h-[320px]"
+    >
+      <div hellResizable orientation="horizontal" ui="h-full">
+        <section hellResizablePane hellMasterPane="primary" [initialFlex]="2">
+          <button type="button" (click)="detailOpen.set(true)">Open detail</button>
+        </section>
+        <div hellResizableHandle [hidden]="masterDetail.compact()"></div>
+        <section hellResizablePane hellMasterPane="detail" [initialFlex]="3">
+          <button hellMasterDetailBack type="button">Back</button>
+          <div hellToolbar label="Detail actions">
+            <button hellToolbarItem type="button">Archive</button>
+          </div>
+          <nav
+            hellPagination
+            aria-label="Item navigation"
+            [page]="1"
+            [pageCount]="3"
+          >
+            <button hellPageLink="previous" type="button">Previous</button>
+            <button hellPageLink="next" type="button">Next</button>
+          </nav>
+        </section>
+      </div>
+    </div>
   \`,
 })
 class App {
-  protected readonly splitViewUi = splitViewUi;
+  protected readonly detailOpen = signal(false);
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -3501,14 +3527,13 @@ function resizableConsumerStylesCss() {
 `;
 }
 
-function splitViewConsumerStylesCss() {
+function masterDetailConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
-@import "${packageName}/button/styles.css";
-@import "${packageName}/icon/styles.css";
+@import "${packageName}/master-detail/styles.css";
 @import "${packageName}/pagination/styles.css";
 @import "${packageName}/resizable/styles.css";
-@import "${packageName}/split-view/styles.css";
+@import "${packageName}/toolbar/styles.css";
 `;
 }
 

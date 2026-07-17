@@ -42,7 +42,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed entries. |
-| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/core` and `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
+| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/master-detail`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `master-detail`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/core` and `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
@@ -103,7 +103,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
-import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
+import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
@@ -124,7 +124,7 @@ Add only the extra entrypoint styles the app imports:
 @import "@hell-ui/angular/tokens.css";
 @import "@hell-ui/angular/app-shell/styles.css";
 @import "@hell-ui/angular/resizable/styles.css";
-@import "@hell-ui/angular/split-view/styles.css";
+@import "@hell-ui/angular/master-detail/styles.css";
 @import "@hell-ui/angular/table/styles.css";
 @import "@hell-ui/angular/features/code-editor/styles.css";
 ```
@@ -147,9 +147,9 @@ with a `root` class string to refine a single-host directive recipe while
 keeping behavior, accessibility, and state attributes. Directive-suite children,
 such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
 `root` `ui` contract. App Shell/nav directives follow the same local-root rule:
-style each directive through its own `ui`. Resizable directives follow that
-local-root rule as well. Split View exposes a flat owned-anatomy map for parts
-such as `pane`, `compactHeader`, and `itemNavigation`. Toast,
+style each directive through its own `ui`. Resizable and Master Detail directives follow that
+local-root rule as well: Master Detail owns responsive state, visibility, Back, and focus policy,
+while consumer markup owns layout, presentation, and navigation. Toast,
 AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
 `HellToasterUi`, `HellAudioPlayerUi`, `HellOmnibarUi`, and
 `HellCodeEditorUi`. Primitives that have not migrated yet still document
@@ -171,10 +171,17 @@ AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
   <div hellResizableHandle appearance="grip" ui="bg-hell-surface-muted"></div>
   <section hellResizablePane ui="hd-surface-subtle p-4">Right</section>
 </div>
-<hell-split-view [ui]="{ pane: 'overflow-auto', itemNavigation: 'gap-hell-3' }">
-  <ng-template hellSplitPrimary>Primary</ng-template>
-  <ng-template hellSplitDetail>Detail</ng-template>
-</hell-split-view>
+<div
+  hellMasterDetail
+  [(detailOpen)]="detailOpen"
+  ui="grid grid-cols-2 data-[compact=true]:grid-cols-1"
+>
+  <section hellMasterPane="primary">Primary</section>
+  <section hellMasterPane="detail">
+    <button hellMasterDetailBack type="button">Back</button>
+    Detail
+  </section>
+</div>
 <hell-audio-player [ui]="{ controls: 'gap-hell-3', time: 'tabular-nums' }" src="/audio.ogg" />
 <hell-toaster [ui]="{ toast: 'shadow-hell-lg', toolbar: 'gap-hell-2' }" />
 <hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />

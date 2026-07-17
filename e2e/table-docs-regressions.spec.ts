@@ -345,7 +345,7 @@ test.describe('table docs regressions', () => {
       .toBeLessThanOrEqual(1);
   });
 
-  test('TanStack shell preserves pagination controls after compact split-view back', async ({
+  test('TanStack shell preserves pagination controls after compact Master Detail back', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 900 });
@@ -371,13 +371,15 @@ test.describe('table docs regressions', () => {
 
     await next.click();
     await expect(example.getByTestId('table-detail-pane')).toContainText('Dorothy Vaughan');
-    await example.getByRole('button', { name: 'Back' }).click();
+    await example.getByRole('button', { name: 'Back to people' }).click();
 
     await expect(pageSize).toHaveValue('5');
     await expect(shell.locator('tbody tr[data-hell-table-shell-row]')).toHaveCount(5);
   });
 
-  test('TanStack shell split navigation waits for async page-boundary rows', async ({ page }) => {
+  test('TanStack shell Master Detail navigation waits for async page-boundary rows', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     await gotoTableDocs(page);
 

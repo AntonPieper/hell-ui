@@ -19,8 +19,8 @@ import { HellButton } from '@hell-ui/angular/button';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
-import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
 import { HellTableRowRadio } from '@hell-ui/angular/table';
 import {
   HellTableShellCell,
@@ -34,6 +34,7 @@ import {
   HellTanStackPagination,
   HellTanStackTable,
 } from '@hell-ui/angular/table-tanstack';
+import { HellToolbar, HellToolbarItem } from '@hell-ui/angular/toolbar';
 import {
   createAngularTable,
   getCoreRowModel,
@@ -101,28 +102,27 @@ interface PeopleServerResult {
     HellTableShellToolbar,
     HellTanStackPagination,
     HellTableRowRadio,
+    HellToolbar,
+    HellToolbarItem,
     ...HELL_MENU_DIRECTIVES,
+    ...HELL_MASTER_DETAIL_IMPORTS,
     ...HELL_OMNIBAR_DIRECTIVES,
-    ...HELL_SPLIT_VIEW_DIRECTIVES,
   ],
   providers: [provideIcons(TABLE_EXAMPLE_ICONS)],
   template: `
-    <hell-split-view
-      framed
+    <div
+      hellMasterDetail
       data-testid="table-master-detail"
-      [height]="540"
-      itemNavigation
-      previousItemLabel="Previous person"
-      nextItemLabel="Next person"
-      [previousItemDisabled]="previousPersonDisabled()"
-      [nextItemDisabled]="nextPersonDisabled()"
       [detailOpen]="detailOpen()"
       (detailOpenChange)="detailOpen.set($event)"
-      (previousItem)="openAdjacentPerson(-1)"
-      (nextItem)="openAdjacentPerson(1)"
+      ui="grid h-[540px] min-w-0 grid-cols-[minmax(0,3fr)_minmax(16rem,2fr)] overflow-hidden rounded-hell-md border border-hell-border bg-hell-surface data-[compact=true]:grid-cols-1"
     >
-      <ng-template hellSplitPrimary>
+      <section
+        hellMasterPane="primary"
+        ui="min-h-0 min-w-0 overflow-auto border-e border-hell-border"
+      >
         <hell-tanstack-table
+          class="h-full"
           [table]="table"
           [status]="status()"
           [rowClass]="selectedRowClass"
@@ -317,10 +317,47 @@ interface PeopleServerResult {
             [pageSizeOptions]="[2, 5]"
           />
         </hell-tanstack-table>
-      </ng-template>
+      </section>
 
-      <ng-template hellSplitDetail>
+      <section hellMasterPane="detail" ui="min-h-0 min-w-0 overflow-auto">
         <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3" data-testid="table-detail-pane">
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              hellMasterDetailBack
+              hellButton
+              variant="ghost"
+              size="sm"
+              type="button"
+            >
+              Back to people
+            </button>
+            <div hellToolbar label="Person navigation" class="ms-auto">
+              <button
+                hellToolbarItem
+                hellButton
+                variant="ghost"
+                size="sm"
+                type="button"
+                aria-label="Previous person"
+                [disabled]="previousPersonDisabled()"
+                (click)="openAdjacentPerson(-1)"
+              >
+                Previous
+              </button>
+              <button
+                hellToolbarItem
+                hellButton
+                variant="ghost"
+                size="sm"
+                type="button"
+                aria-label="Next person"
+                [disabled]="nextPersonDisabled()"
+                (click)="openAdjacentPerson(1)"
+              >
+                Next
+              </button>
+            </div>
+          </div>
           @if (openedPerson(); as person) {
             <div class="grid gap-1">
               <strong class="text-sm font-semibold text-hell-foreground">{{ person.name }}</strong>
@@ -329,8 +366,9 @@ interface PeopleServerResult {
               </span>
             </div>
             <p class="m-0 text-sm text-hell-foreground-muted">
-              This pane is Hell Split View chrome. The selected row, filters, sorting, and
-              pagination stay in the caller-owned TanStack table state.
+              Master Detail coordinates only responsive visibility, Back, and focus. The selected
+              row, filters, sorting, pagination, and adjacent-person Toolbar actions stay in
+              caller-owned state.
             </p>
           } @else {
             <div
@@ -340,8 +378,8 @@ interface PeopleServerResult {
             </div>
           }
         </div>
-      </ng-template>
-    </hell-split-view>
+      </section>
+    </div>
   `,
 })
 export class TableTanStackShellExample implements OnDestroy {

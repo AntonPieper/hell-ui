@@ -412,11 +412,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/resizable/resizable.page').then((m) => m.ResizablePage),
       },
       {
-        routePath: 'components/split-view',
-        label: 'Split view',
+        routePath: 'components/master-detail',
+        label: 'Master detail',
         icon: 'faSolidTableColumns',
         loadComponent: () =>
-          import('./pages/components/split-view/split-view.page').then((m) => m.SplitViewPage),
+          import('./pages/components/master-detail/master-detail.page').then(
+            (m) => m.MasterDetailPage,
+          ),
       },
       {
         routePath: 'components/toolbar',

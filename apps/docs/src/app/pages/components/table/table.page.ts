@@ -123,9 +123,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             of checkable filters; the footer (<code>hellTableShellFooter</code>) hosts a selection
             summary and <code>hell-tanstack-pagination</code>, which adapts TanStack's pagination
             API to the Hell pagination strip and a rows-per-page select. Loading, error, and empty
-            states come from the shell's status templates. The whole table sits inside a Split View
-            master/detail layout — all of it normal app controls around the caller-owned table, not
-            a second table-state abstraction.
+            states come from the shell's status templates. The whole table sits inside a
+            projection-first Master Detail controller with ordinary Toolbar actions — all of it
+            normal app controls around the caller-owned table, not a second table-state abstraction.
           </p>
         </div>
 
