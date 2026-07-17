@@ -1,24 +1,53 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HellNumberInput } from '@hell-ui/angular/number-input';
+
+import { HellControlGroup } from '@hell-ui/angular/control-group';
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
 
 @Component({
   selector: 'app-number-input-reactive-forms-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellNumberInput],
+  imports: [
+    ReactiveFormsModule,
+    HellControlGroup,
+    ...HELL_FIELD_IMPORTS,
+    ...HELL_NUMBER_INPUT_IMPORTS,
+  ],
   template: `
     <div hellField>
-      <label hellFieldLabel for="reactive-port">Listen port</label>
-      <hell-number-input
-        inputId="reactive-port"
-        integer
-        steppers
-        [min]="1"
-        [max]="65535"
-        [formControl]="port"
-      />
+      <label id="reactive-port-label" hellFieldLabel for="reactive-port">Listen port</label>
+      <div
+        hellControlGroup
+        aria-labelledby="reactive-port-label"
+        [invalid]="port.invalid"
+        [disabled]="port.disabled"
+      >
+        <input
+          #portInput="hellNumberInput"
+          id="reactive-port"
+          hellNumberInput
+          integer
+          required
+          [min]="1"
+          [max]="65535"
+          [formControl]="port"
+          [invalid]="port.invalid"
+          [ui]="controlUi"
+        />
+        <button
+          hellNumberStep="decrement"
+          [hellNumberStepFor]="portInput"
+        >−</button>
+        <button
+          hellNumberStep="increment"
+          [hellNumberStepFor]="portInput"
+        >+</button>
+      </div>
       <div hellFieldDescription>Reactive forms receive a real <code>number | null</code>.</div>
+      <div hellFieldError id="reactive-port-required" ngpErrorValidator="required">
+        Choose a listen port.
+      </div>
       <div hellFieldError id="reactive-port-min" ngpErrorValidator="min">
         Ports start at 1.
       </div>
@@ -32,4 +61,6 @@ import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 })
 export class NumberInputReactiveFormsExample {
   protected readonly port = new FormControl<number | null>(8080);
+  protected readonly controlUi =
+    'h-auto min-h-0 min-w-0 max-w-none flex-1 rounded-none border-0 bg-transparent shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none disabled:bg-transparent data-disabled:bg-transparent';
 }

@@ -1876,34 +1876,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/number-input',
  detail:'components/number-input/examples/basic.example.ts',
  terms:
-'number-input hell-number-input HellNumberInput port integer min max step steppers spinbutton valueChange numeric keyboard arrow',
+'number-input input hellNumberInput HellNumberInput HellNumberStep hellNumberStep hellNumberStepFor Control Group port integer min max step spinbutton valueChange keyboard arrow hold repeat',
  },
  {
- title:'Number Input: Unit Suffix',
+ title:'Number Input: Projected Suffix',
  path:'/components/number-input',
  detail:'components/number-input/examples/duration-seconds.example.ts',
  terms:
-'number-input hell-number-input HellNumberInput suffix seconds duration unit interval ms percent rate self-describing',
+'number-input input hellNumberInput projected suffix hellControlGroupSuffix aria-valuetext seconds duration unit interval percent accessible value text',
  },
  {
  title:'Number Input: Sizes',
  path:'/components/number-input',
  detail:'components/number-input/examples/sizes.example.ts',
- terms:'number-input hell-number-input size sm md lg HellNumberInput control height steppers',
+ terms:'number-input input hellNumberInput size sm md lg Control Group HellNumberStep control height',
  },
  {
  title:'Number Input: Reactive Forms',
  path:'/components/number-input',
  detail:'components/number-input/examples/reactive-forms.example.ts',
  terms:
-'number-input hell-number-input hellField FormControl ReactiveFormsModule ControlValueAccessor Validator required min max numberInputMalformed number null port',
+'number-input input hellNumberInput hellNumberStep hellField FormControl ReactiveFormsModule ControlValueAccessor Validator required min max numberInputMalformed number null port',
  },
  {
  title:'Number Input: Styling',
  path:'/components/number-input',
  detail:'components/number-input/examples/styling.example.ts',
  terms:
-'number-input hell-number-input ui HellNumberInputUi HellNumberInputPart root input increment decrement suffix part style map tailwind tokens percent',
+'number-input input hellNumberInput hellNumberStep Control Group projected suffix ui HellUiInput root local part style map tailwind tokens percent',
  },
  {
  title:'Toast: Action',
@@ -2267,14 +2267,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/number-input',
  detail:'provideHellNumberInputAdapter, HELL_NUMBER_INPUT_ADAPTER',
  terms:
-'number-input adapter provideHellNumberInputAdapter HELL_NUMBER_INPUT_ADAPTER parse format locale comma decimal exponent integer HellNumberInputAdapter ui HellNumberInputUi',
+'number-input input hellNumberInput adapter provideHellNumberInputAdapter HELL_NUMBER_INPUT_ADAPTER parse format normalize equality locale comma decimal exponent integer HellNumberInputAdapter',
  },
  {
  title:'Number input forms value',
  path:'/components/number-input',
  detail:'ControlValueAccessor, formControl, number | null',
  terms:
-'number-input forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms number null required min max numberInputMalformed spinbutton ui HellNumberInputUi',
+'number-input input hellNumberInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms number null required min max numberInputMalformed spinbutton native FormData',
  },
  {
  title:'Table directives',

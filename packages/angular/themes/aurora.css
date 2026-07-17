@@ -1,7 +1,7 @@
 /* Theme adapter: Aurora
  *
  * Coverage: Cards, floating surfaces (incl. Listbox and Toast), common form
- * controls (incl. Date/Time input and the Omnibar control), menu/select/listbox
+ * controls (incl. Date/Time/Number input and the Omnibar control), menu/select/listbox
  * options, tags, and table headers. Unsupported components keep defaults.
  */
 
@@ -41,7 +41,8 @@
       select[hellNativeSelect],
       textarea[hellTextarea],
       input[hellDateInput],
-      input[hellTimeInput]
+      input[hellTimeInput],
+      input[hellNumberInput]
     )[data-slot='root'],
   [data-hell-skin="aurora"] hell-omnibar[data-slot='root'] > [data-slot='control'] {
     border-color: color-mix(in oklab, var(--color-hell-primary) 28%, var(--color-hell-border));

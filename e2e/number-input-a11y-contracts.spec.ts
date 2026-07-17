@@ -10,6 +10,8 @@ async function gotoNumberInput(page: Page): Promise<Locator> {
     .locator('app-number-input-basic-example')
     .getByRole('spinbutton', { name: 'Listen port' });
   await expect(port).toBeVisible();
+  await expect(port).toHaveAttribute('hellNumberInput', '');
+  await expect(page.locator('app-number-input-basic-example hell-number-input')).toHaveCount(0);
   return port;
 }
 
@@ -67,18 +69,40 @@ test.describe('number input accessibility contract', () => {
 
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    // The first step lands immediately on press.
-    await expect(port).toHaveValue('8081');
-    // Holding repeats the step several more times before release.
+    // The first step lands on press. A slow browser may already have crossed
+    // the hold delay before this read, so capture its post-press baseline.
+    const pressed = Number(await port.inputValue());
+    expect(pressed).toBeGreaterThan(8080);
+    // Holding repeats beyond that observed baseline before release.
     await expect
       .poll(async () => Number(await port.inputValue()), { timeout: 2000 })
-      .toBeGreaterThan(8083);
+      .toBeGreaterThan(pressed);
     await page.mouse.up();
 
     // Releasing stops the repetition; the value settles.
     const held = Number(await port.inputValue());
     await page.waitForTimeout(200);
     expect(Number(await port.inputValue())).toBe(held);
+  });
+
+  test('uses explicit directional targets and consumer-owned suffix semantics', async ({ page }) => {
+    await gotoNumberInput(page);
+    const basic = page.locator('app-number-input-basic-example');
+    const increment = basic.getByRole('button', { name: 'Increase Listen port' });
+    const decrement = basic.getByRole('button', { name: 'Decrease Listen port' });
+
+    await expect(increment).toHaveAttribute('data-direction', 'increment');
+    await expect(decrement).toHaveAttribute('data-direction', 'decrement');
+
+    const duration = page.locator('app-number-input-duration-seconds-example');
+    const interval = duration.getByRole('spinbutton', { name: 'Announce interval' });
+    await expect(duration.getByText('seconds', { exact: true })).toBeVisible();
+    await expect(interval).toHaveAttribute('aria-valuetext', '30 seconds');
+
+    await interval.focus();
+    await page.keyboard.press('ArrowUp');
+    await expect(interval).toHaveValue('35');
+    await expect(interval).toHaveAttribute('aria-valuetext', '35 seconds');
   });
 
   test('commits a pending typed draft before a stepper click', async ({ page }) => {

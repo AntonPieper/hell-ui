@@ -1,6 +1,6 @@
 /* Theme adapter: High contrast
  *
- * Coverage: Core controls (incl. Date/Time input and the Omnibar control),
+ * Coverage: Core controls (incl. Date/Time/Number input and the Omnibar control),
  * cards, floating surfaces (incl. Listbox and Toast), options, menus, dialog
  * overlay, tags, and tables. Unsupported components keep defaults.
  */
@@ -25,7 +25,8 @@
       [hellKbd],
       [hellListbox],
       input[hellDateInput],
-      input[hellTimeInput]
+      input[hellTimeInput],
+      input[hellNumberInput]
     )[data-slot='root'],
   [data-hell-skin="high-contrast"] hell-omnibar[data-slot='root'] > [data-slot='control'],
   [data-hell-skin="high-contrast"] hell-toaster[data-slot='root'] [data-slot='toast'] {

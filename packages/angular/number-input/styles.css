@@ -1,2 +1,3 @@
-/* Number input default visuals are Tailwind utility recipes in the component. */
+/* Number input reuses the single-host Input recipe and adds explicit step controls. */
+@source "../input/input.ts";
 @source "./number-input.ts";

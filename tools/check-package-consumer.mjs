@@ -41,6 +41,7 @@ const packageConsumerCiGroups = [
       'control-group',
       'date-input',
       'time-input',
+      'number-input',
       'file-picker',
       'pagination',
       'combobox-projection',
@@ -278,6 +279,24 @@ const packageConsumerScenarioCatalog = [
       'height:var(--spacing-hell-control-md)',
       'border-radius:var(--radius-hell-md)',
       'transition-property:border-color,box-shadow',
+    ],
+  },
+  {
+    name: 'number-input',
+    description:
+      'native Number Input behavior, explicit step controls, and Input-root styles without picker or icon peers',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: numberInputConsumerMainTs,
+    stylesCss: numberInputConsumerStylesCss,
+    cssIncludes: [
+      'height:var(--spacing-hell-control-md)',
+      'border-radius:var(--radius-hell-md)',
+      'transition-property:background-color,color',
+      'border-inline-start-width:1px',
     ],
   },
   {
@@ -1753,6 +1772,65 @@ class App {
   protected readonly min: HellTimeValue = { hour: 8, minute: 0, second: 0 };
   protected readonly max: HellTimeValue = { hour: 18, minute: 0, second: 0 };
   protected readonly control = new FormControl<HellTimeValue | null>(null);
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function numberInputConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HELL_DEFAULT_NUMBER_INPUT_ADAPTER,
+  HELL_NUMBER_INPUT_IMPORTS,
+  provideHellNumberInputAdapter,
+  type HellNumberInputAdapter,
+} from '${packageName}/number-input';
+
+const consumerNumberAdapter: HellNumberInputAdapter = {
+  ...HELL_DEFAULT_NUMBER_INPUT_ADAPTER,
+  parseText: (text, context) =>
+    text.trim().toLowerCase() === 'half'
+      ? { valid: true, value: 0.5 }
+      : HELL_DEFAULT_NUMBER_INPUT_ADAPTER.parseText(text, context),
+};
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [ReactiveFormsModule, ...HELL_NUMBER_INPUT_IMPORTS],
+  providers: [provideHellNumberInputAdapter(consumerNumberAdapter)],
+  template: \`
+    <input
+      #quantityInput="hellNumberInput"
+      id="controlled-quantity"
+      hellNumberInput
+      name="controlledQuantity"
+      aria-label="Controlled quantity"
+      [attr.aria-valuetext]="value() === null ? null : value() + ' items'"
+      required
+      [value]="value()"
+      [min]="0"
+      [max]="100"
+      [step]="0.5"
+      (valueChange)="value.set($event)"
+    />
+    <span aria-hidden="true">items</span>
+    <button hellNumberStep="decrement" [hellNumberStepFor]="quantityInput">−</button>
+    <button hellNumberStep="increment" [hellNumberStepFor]="quantityInput">+</button>
+    <input
+      hellNumberInput
+      aria-label="Forms quantity"
+      integer
+      [formControl]="control"
+    />
+  \`,
+})
+class App {
+  protected readonly value = signal<number | null>(2.5);
+  protected readonly control = new FormControl<number | null>(null);
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -3518,6 +3596,13 @@ function timeInputConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/time-input/styles.css";
+`;
+}
+
+function numberInputConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/number-input/styles.css";
 `;
 }
 
