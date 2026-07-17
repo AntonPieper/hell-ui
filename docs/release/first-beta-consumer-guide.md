@@ -112,12 +112,12 @@ Prefer:
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
 import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 import { HellTimePicker } from '@hell-ui/angular/time-picker';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
 
@@ -127,8 +127,8 @@ Avoid broad imports when a narrow path exists:
 // Removed aggregate paths. Import each surface from its import-path entry point instead.
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 ```
 
@@ -407,7 +407,7 @@ Removed pre-beta table compatibility surfaces:
 | Removed surface                                                                    | Replacement                                                                                                                          |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | old table feature entrypoints and unsupported adapter paths                        | `@hell-ui/angular/table` for primitives; `@hell-ui/angular/table-tanstack` for TanStack-owned table behavior                         |
-| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`                           | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table`                                                                      |
+| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`                           | `HELL_TABLE_UTILITIES_IMPORTS` from `@hell-ui/angular/table`                                                                         |
 | `HellTableRow.interactive` / `selectionSemantics` / `[selectable]` / `(rowSelect)` | `hellTableRowAction` for row actions; `hellTableRowCheckbox` / `hellTableRowRadio` inside `hellTableSelectionCell` for row selection |
 
 Experimental APIs may change or disappear between pre-1.0 releases.

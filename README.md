@@ -61,9 +61,9 @@ Prefer the narrowest entry point that contains the API you use:
 
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
 

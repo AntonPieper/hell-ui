@@ -83,6 +83,7 @@ function main() {
   checkDocsRootImportContract();
   checkDocsCategoryNavigationContract();
   checkImportTupleExpansionContract();
+  checkImportTupleConsumerMigrationContract();
   checkPackageEntryPoints();
   checkCodeMirrorEntrypointIsolationContract();
   checkAudioTranscriptEntrypointIsolationContract();
@@ -127,6 +128,53 @@ function checkImportTupleExpansionContract() {
           `Import Tuple Expansion ${relative(root, file)} must keep ${legacyName} as a deprecated alias of ${importsName}`,
         );
       }
+    }
+  }
+}
+
+function checkImportTupleConsumerMigrationContract() {
+  const packageRoot = join(root, libraryRoot);
+  const aliases = new Map();
+
+  for (const file of walk(packageRoot).filter((path) => path.endsWith('.ts'))) {
+    const source = readFile(file);
+    for (const match of source.matchAll(/export const (HELL_[A-Z0-9_]+)_DIRECTIVES\s*=\s*(HELL_[A-Z0-9_]+_IMPORTS)\s*;/g)) {
+      aliases.set(`${match[1]}_DIRECTIVES`, match[2]);
+    }
+  }
+
+  const legacyPattern = new RegExp(
+    `\\b(?:${[...aliases.keys()].map(escapeRegExp).join('|')})\\b`,
+    'g',
+  );
+  const files = [
+    ...walk(packageRoot).filter(
+      (path) =>
+        path.endsWith('.ts') &&
+        !path.endsWith('.spec.ts') &&
+        basename(path) !== 'public-api.ts',
+    ),
+    ...walk(join(root, 'tools')).filter((path) => /\.(?:mjs|ts)$/.test(path)),
+    join(root, 'README.md'),
+    join(packageRoot, 'README.md'),
+    ...walk(join(root, 'docs/release')).filter((path) => path.endsWith('.md')),
+  ];
+
+  for (const file of files) {
+    const source = readFile(file);
+    for (const match of source.matchAll(legacyPattern)) {
+      const legacyName = match[0];
+      const importsName = aliases.get(legacyName);
+      const lineStart = source.lastIndexOf('\n', match.index) + 1;
+      const nextLineBreak = source.indexOf('\n', match.index);
+      const lineEnd = nextLineBreak === -1 ? source.length : nextLineBreak;
+      const line = source.slice(lineStart, lineEnd).trim();
+      if (line === `export const ${legacyName} = ${importsName};`) continue;
+
+      const lineNumber = source.slice(0, match.index).split('\n').length;
+      failures.push(
+        `Import Tuple Consumer Migration ${relative(root, file)}:${lineNumber} uses ${legacyName}; use ${importsName}`,
+      );
     }
   }
 }

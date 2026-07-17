@@ -30,8 +30,8 @@ import {
 } from '@tanstack/angular-table';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_EMPTY_STATE_COPY, HellEmptyState } from '@hell-ui/angular/empty-state';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellInput, HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/input';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HellInput, HELL_SEARCH_IMPORTS } from '@hell-ui/angular/input';
 import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
@@ -385,7 +385,7 @@ interface HellColumnMeta {
   imports: [
     CommonModule,
     FlexRenderDirective,
-    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    ...HELL_TABLE_UTILITIES_IMPORTS,
     ɵHellTanStackBodyScrollportConnector,
     ɵHellTanStackBodyConnector,
     ɵHellTanStackBodyItemConnector,
@@ -1053,7 +1053,7 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
   selector: 'hell-tanstack-global-filter',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
     <div hellSearch class="hell-tanstack-filter-search">
       <input
@@ -1096,7 +1096,7 @@ export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
   selector: 'hell-tanstack-column-filter',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
     <div hellSearch class="hell-tanstack-filter-search">
       <input
