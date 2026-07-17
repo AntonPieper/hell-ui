@@ -1,7 +1,7 @@
 /* Theme adapter: Newspaper
  *
  * Coverage: Cards, floating surfaces (incl. Listbox and Toast), controls
- * (incl. Date/Time input and the Omnibar control), menus, tables, tabs, and
+ * (incl. Date/Time/Number input and the Omnibar control), menus, tables, tabs, and
  * component labels. Unsupported components keep defaults.
  */
 
@@ -30,7 +30,8 @@
       select[hellNativeSelect],
       textarea[hellTextarea],
       input[hellDateInput],
-      input[hellTimeInput]
+      input[hellTimeInput],
+      input[hellNumberInput]
     )[data-slot='root'],
   [data-hell-skin="newspaper"] hell-omnibar[data-slot='root'] > [data-slot='control'] {
     border-width: 2px;

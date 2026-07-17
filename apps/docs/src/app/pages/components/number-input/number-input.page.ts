@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { NumberInputBasicExample } from './examples/basic.example';
@@ -10,12 +11,12 @@ import { NumberInputDurationSecondsExample } from './examples/duration-seconds.e
 import numberInputDurationSecondsExampleCodeRaw from './examples/duration-seconds.example.ts?raw' with {
   loader: 'text',
 };
-import { NumberInputSizesExample } from './examples/sizes.example';
-import numberInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
-  loader: 'text',
-};
 import { NumberInputReactiveFormsExample } from './examples/reactive-forms.example';
 import numberInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
+  loader: 'text',
+};
+import { NumberInputSizesExample } from './examples/sizes.example';
+import numberInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
   loader: 'text',
 };
 import { NumberInputStylingExample } from './examples/styling.example';
@@ -31,8 +32,8 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
     RouterLink,
     NumberInputBasicExample,
     NumberInputDurationSecondsExample,
-    NumberInputSizesExample,
     NumberInputReactiveFormsExample,
+    NumberInputSizesExample,
     NumberInputStylingExample,
     PageHeader,
   ],
@@ -45,220 +46,245 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         importPath="@hell-ui/angular/number-input"
         stylesPath="@hell-ui/angular/number-input/styles.css"
       >
-        A numeric text field that binds a real <code>number | null</code>: min/max/step validation,
-        keyboard stepping, optional stepper buttons, and a unit suffix.
+        Numeric parsing, validation, stepping, and forms behavior on a real native input.
       </hd-page-header>
+
       <p>
-        <code>hell-number-input</code> is a Typed Value Input, the same draft/parse/commit model
-        behind <a routerLink="/components/date-input">Date input</a> and
-        <a routerLink="/components/time-input">Time input</a>. It renders a text field — not a native
-        <code>&lt;input type="number"&gt;</code> — so parsing, exponent rejection, and locale
-        behavior stay deterministic, then layers APG spinbutton semantics on top: the current value,
-        <code>min</code>, and <code>max</code> are reflected as ARIA attributes.
+        Apply <code>hellNumberInput</code> to an authored <code>&lt;input&gt;</code>. The directive
+        owns the Typed Value Input state machine—drafts, parsing, formatting, validation,
+        <code>number | null</code> forms values, and keyboard stepping—while the native element
+        keeps focus, events, attributes, Field association, and form-submission semantics.
       </p>
       <p>
-        It implements <code>ControlValueAccessor</code> and <code>Validator</code>, so it drops into
-        reactive or template-driven forms and yields a genuine number instead of a string you have
-        to cast and regex-check. Use it for ports, timeouts, priorities, counts, and rates.
+        The default adapter deliberately uses a text field with decimal or numeric
+        <code>inputmode</code>. It rejects exponent notation and preserves malformed drafts instead
+        of letting native <code>type="number"</code> sanitization erase them. Date, Time, and Number
+        Input remain separate semantic behaviors even though they share this draft/commit model.
       </p>
 
-      <h2>Basic</h2>
+      <h2>Basic composition</h2>
       <p>
-        A port field: integer-only, bounded to 1–65535, with stepper buttons. ArrowUp / ArrowDown
-        step by one (hold Shift for a larger jump); Home / End jump to the bounds. Typing is never
-        clamped — an out-of-range value commits but is flagged invalid.
+        The input is the only value controller. Export it as <code>hellNumberInput</code> and bind
+        each <code>hellNumberStep</code> button through <code>hellNumberStepFor</code>. The
+        directional buttons compose in a
+        <a routerLink="/components/control-group">Control Group</a>; there is no hidden stepper
+        flag or second value model.
       </p>
       <hd-example-tabs [code]="numberInputBasicExampleCode">
         <app-number-input-basic-example />
       </hd-example-tabs>
 
-      <h2>Unit suffix</h2>
+      <h2>Projected suffix and accessible value text</h2>
       <p>
-        A <code>suffix</code> renders a self-describing unit after the value without wrapper markup.
-        The suffix is presentational; the committed value stays a plain number and the unit is
-        announced through <code>aria-valuetext</code>.
+        Units are consumer-owned content through <code>hellControlGroupSuffix</code>. Keep the
+        model numeric and author <code>aria-valuetext</code> on the input when the unit changes how
+        assistive technology should announce the value. The behavior never reads visible suffix
+        text or turns it into a string API.
       </p>
-      <hd-example-tabs [code]="numberInputDurationSecondsExampleCode" previewClass="grid gap-3 max-w-xs">
+      <hd-example-tabs
+        [code]="numberInputDurationSecondsExampleCode"
+        previewClass="grid max-w-sm gap-3"
+      >
         <app-number-input-duration-seconds-example />
       </hd-example-tabs>
 
       <h2>Sizes</h2>
-      <hd-example-tabs [code]="numberInputSizesExampleCode" previewClass="grid gap-3 max-w-xs">
+      <p>
+        The input reuses the single-root Input <code>size</code> and <code>ui</code> contract.
+        When it sits in a Control Group, set the group and input size together and let each
+        projected directive own its local root styling.
+      </p>
+      <hd-example-tabs [code]="numberInputSizesExampleCode" previewClass="grid max-w-xs gap-3">
         <app-number-input-sizes-example />
       </hd-example-tabs>
 
-      <h2>Reactive forms</h2>
+      <h2>Reactive forms and validation</h2>
       <p>
-        Bound to a <code>FormControl&lt;number | null&gt;</code> inside a <code>hellField</code>.
-        <code>min</code> / <code>max</code> report the standard Angular <code>min</code> /
-        <code>max</code> validator errors; unparseable text reports
-        <code>numberInputMalformed</code>; a required-but-empty field reports <code>required</code>.
+        <code>input[hellNumberInput]</code> implements <code>ControlValueAccessor</code> and
+        <code>Validator</code>. Required clears report <code>required</code>, malformed drafts
+        report <code>numberInputMalformed</code>, and committed bound violations use Angular-style
+        <code>min</code> / <code>max</code> error payloads. Typing never clamps; arrows and step
+        buttons do.
       </p>
-      <hd-example-tabs [code]="numberInputReactiveFormsExampleCode" previewClass="grid gap-3 max-w-md">
+      <hd-example-tabs
+        [code]="numberInputReactiveFormsExampleCode"
+        previewClass="grid max-w-md gap-3"
+      >
         <app-number-input-reactive-forms-example />
       </hd-example-tabs>
 
       <h2>Styling</h2>
       <p>
-        <code>ui</code> accepts either a shorthand class string, which refines the default
-        <code>root</code> part, or a <code>HellNumberInputUi</code> map keyed by part name.
-        Refinement classes merge deterministically on top of the recipe through Hell's Tailwind
-        merge, so they win over conflicting recipe utilities.
+        Number Input no longer owns multi-part anatomy. The input and each Number Step expose one
+        local <code>root</code> Part through <code>ui: HellUiInput&lt;'root'&gt;</code>; Control
+        Group and its projected suffix expose their own root maps. Refine each directive where it
+        owns DOM instead of passing a remote object map into the value controller.
       </p>
-      <table class="hd-doc-table">
-        <thead>
-          <tr>
-            <th>Part</th>
-            <th>Styles</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>root</code></td>
-            <td>The host element — border, background, focus ring, invalid/disabled state.</td>
-          </tr>
-          <tr>
-            <td><code>input</code></td>
-            <td>The text field — typography, padding, size variants.</td>
-          </tr>
-          <tr>
-            <td><code>increment</code></td>
-            <td>The increment stepper button.</td>
-          </tr>
-          <tr>
-            <td><code>decrement</code></td>
-            <td>The decrement stepper button.</td>
-          </tr>
-          <tr>
-            <td><code>suffix</code></td>
-            <td>The unit suffix rendered after the value.</td>
-          </tr>
-        </tbody>
-      </table>
       <hd-example-tabs [code]="numberInputStylingExampleCode">
         <app-number-input-styling-example />
       </hd-example-tabs>
 
-      <h2>API</h2>
+      <h2>Input API</h2>
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Interface</th>
+            <th>Contract</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>input[hellNumberInput]</code></td>
+            <td>
+              Native directive and <code>exportAs="hellNumberInput"</code>. Keep native
+              <code>id</code>, <code>name</code>, <code>placeholder</code>, autocomplete, and
+              labeling attributes on this element.
+            </td>
+          </tr>
+          <tr>
+            <td><code>value</code> / <code>(valueChange)</code></td>
+            <td>Controlled <code>number | null</code>; successful blur or Enter commits emit.</td>
+          </tr>
+          <tr>
+            <td><code>min</code> / <code>max</code></td>
+            <td>Inclusive numeric bounds for validation, ARIA metadata, and stepping.</td>
+          </tr>
+          <tr>
+            <td><code>step</code> / <code>stepMultiplier</code></td>
+            <td>Default <code>1</code> and <code>10</code>; Shift and Page keys use the multiplier.</td>
+          </tr>
+          <tr>
+            <td><code>integer</code></td>
+            <td>Rejects fractional drafts and switches <code>inputmode</code> to numeric.</td>
+          </tr>
+          <tr>
+            <td><code>required</code>, <code>invalid</code>, <code>disabled</code></td>
+            <td>Native state plus stable ARIA and <code>data-*</code> reflection.</td>
+          </tr>
+          <tr>
+            <td><code>size</code> / <code>ui</code></td>
+            <td>The composed Input directive's single-root styling contract.</td>
+          </tr>
+          <tr>
+            <td><code>aria-describedby</code> / <code>aria-labelledby</code></td>
+            <td>Authored ids merge with any enclosing Field associations.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Number Step API</h2>
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Interface</th>
+            <th>Contract</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>button[hellNumberStep]</code></td>
+            <td>
+              Required <code>'increment' | 'decrement'</code> direction. Project any glyph or copy;
+              the directive defaults native type to <code>button</code> and stays out of tab order.
+            </td>
+          </tr>
+          <tr>
+            <td><code>hellNumberStepFor</code></td>
+            <td>
+              Required explicit controller reference, normally
+              <code>#quantity="hellNumberInput"</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td>Merges with target disabled state and directional bound disabling.</td>
+          </tr>
+          <tr>
+            <td><code>aria-label</code></td>
+            <td>
+              Optional override; otherwise the Label Contract uses the input's accessible name.
+            </td>
+          </tr>
+          <tr>
+            <td><code>ui</code></td>
+            <td>Single-root Number Step Part Style Map.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <code>HELL_NUMBER_INPUT_IMPORTS</code> contains <code>HellNumberInput</code> and
+        <code>HellNumberStep</code>. <code>HELL_NUMBER_INPUT_LABELS</code> owns the four default
+        increment/decrement strings. <code>provideHellNumberInputAdapter</code> replaces parsing,
+        formatting, normalization, and equality policy per injector scope.
+      </p>
+
+      <h2>Keyboard and pointer behavior</h2>
       <ul>
-        <li><code>value</code>: <code>number | null</code>. Current value. Default <code>null</code>.</li>
+        <li>ArrowUp / ArrowDown apply one step; Shift applies <code>stepMultiplier</code>.</li>
+        <li>PageUp / PageDown always apply the multiplied step.</li>
+        <li>Home / End jump to <code>min</code> / <code>max</code> only when that bound exists.</li>
+        <li>Enter commits without cancelling native form submission.</li>
+        <li>A focused wheel event is cancelled so scrolling never mutates the numeric value.</li>
         <li>
-          <code>(valueChange)</code>: <code>EventEmitter&lt;number | null&gt;</code>. Emits after
-          typing (blur or Enter), stepping, or clearing (which emits <code>null</code>).
-        </li>
-        <li>
-          Implements <code>ControlValueAccessor</code> and <code>Validator</code>. Reactive and
-          template-driven forms read/write <code>number | null</code>.
-        </li>
-        <li>
-          Validator errors: <code>required</code> (required and empty), <code>numberInputMalformed</code>
-          (unparseable draft), <code>min</code> / <code>max</code> (committed value outside bounds,
-          shaped like Angular's built-in <code>Validators.min</code> / <code>max</code>).
-        </li>
-        <li><code>min</code>, <code>max</code>: <code>number | null</code>. Bounds enforced by stepping and validation. Default <code>null</code>.</li>
-        <li><code>step</code>: <code>number</code>. Arrow / stepper increment. Default <code>1</code>.</li>
-        <li><code>stepMultiplier</code>: <code>number</code>. Multiplier for Shift+Arrow and PageUp/PageDown. Default <code>10</code>.</li>
-        <li><code>integer</code>: <code>boolean</code>. Rejects fractional typing and uses the numeric keypad. Default <code>false</code>.</li>
-        <li><code>steppers</code>: <code>boolean</code>. Renders increment/decrement buttons with hold-to-repeat. Default <code>false</code>.</li>
-        <li><code>suffix</code>: <code>string | null</code>. Unit label after the value. Default <code>null</code>.</li>
-        <li><code>required</code>: <code>boolean</code>. Reports a <code>required</code> error while empty. Default <code>false</code>.</li>
-        <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
-        <li><code>invalid</code>: <code>boolean</code>. Forces the invalid visual/ARIA state. Default <code>false</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Disables the field and steppers. Default <code>false</code>.</li>
-        <li><code>placeholder</code>: <code>string | null</code>. Text shown while empty. Default <code>null</code>.</li>
-        <li>
-          <code>inputId</code>: <code>string</code>. Id applied to the internal text field for
-          visible label <code>for</code> wiring. Defaults to an auto-generated
-          <code>hell-number-input-&lt;n&gt;-field</code>.
-        </li>
-        <li><code>name</code>: <code>string | null</code>. Native <code>name</code> attribute on the text field. Default <code>null</code>.</li>
-        <li><code>aria-label</code>: <code>string | null</code>. Accessible name for standalone usage; also names the stepper buttons. Default <code>null</code>.</li>
-        <li><code>aria-describedby</code>, <code>aria-labelledby</code>: <code>string | null</code>. Merge with descriptions/labels supplied by an ancestor <code>hellField</code>.</li>
-        <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellNumberInputPart&gt;</code> — a shorthand class
-          string refining <code>root</code>, or a <code>HellNumberInputUi</code> map covering
-          <code>root</code>, <code>input</code>, <code>increment</code>, <code>decrement</code>, and
-          <code>suffix</code>.
-        </li>
-        <li>
-          Exported types: <code>HellNumberInputPart</code>
-          (<code>'root' | 'input' | 'increment' | 'decrement' | 'suffix'</code>),
-          <code>HellNumberInputUi</code> (<code>HellUi&lt;HellNumberInputPart&gt;</code>).
-        </li>
-        <li>
-          <code>provideHellNumberInputAdapter</code>: replace the default parse/format policy —
-          see below.
-        </li>
-        <li>
-          <code>HELL_NUMBER_INPUT_LABELS</code>: override the <code>increment</code> /
-          <code>decrement</code> Label Contract strings for the stepper buttons' accessible names.
+          Number Step clicks commit a pending valid draft first, retain input focus, and repeat
+          after a hold delay until release or a bound disables that direction.
         </li>
       </ul>
 
-      <h2>Adapter contract</h2>
+      <h2>Migration from owned anatomy</h2>
       <p>
-        The built-in <code>HELL_NUMBER_INPUT_ADAPTER</code> parses a plain decimal string (optional
-        sign, digits, a single <code>.</code> decimal point) and rejects exponent notation; integer
-        mode additionally rejects fractional parts. Empty text commits a clear to <code>null</code>.
-        For comma-decimal locales, thousands separators, or a custom numeric model, implement the
-        <code>HellNumberInputAdapter</code> interface with explicit <code>parseText</code> and
-        <code>format</code> (plus optional <code>normalize</code> / <code>isSameValue</code>)
-        functions and register it with <code>provideHellNumberInputAdapter</code>. In
-        <code>parseText</code>, return <code>hellTypedValue(value)</code> for a committable value
-        (<code>null</code> clears the field) or <code>hellInvalidTypedValue()</code> to keep the
-        typed text as a visible invalid draft — both imported from
-        <code>&#64;hell-ui/angular/core</code>.
+        Replace the former <code>&lt;hell-number-input&gt;</code> host with a native
+        <code>&lt;input hellNumberInput&gt;</code>. Move <code>inputId</code>, <code>name</code>,
+        <code>placeholder</code>, autocomplete, and ARIA attributes directly onto it. Replace the
+        removed <code>steppers</code> flag with explicit directional buttons and replace the
+        removed <code>suffix</code> string with projected Control Group content plus authored
+        <code>aria-valuetext</code>. The old five-part
+        <code>HellNumberInputPart</code>/<code>HellNumberInputUi</code> map has no alias; style the
+        input, steps, group, and suffix through their local root maps.
       </p>
 
       <h2>Accessibility</h2>
       <ul>
         <li>
-          The field follows the APG spinbutton pattern: it always exposes
-          <code>role="spinbutton"</code>, with <code>aria-valuemin</code> / <code>aria-valuemax</code>
-          reflected whenever bounds exist and <code>aria-valuenow</code> added once it holds a value —
-          an empty field keeps the role and bounds and omits only <code>aria-valuenow</code>. A unit
-          suffix is announced through <code>aria-valuetext</code>.
+          The input always exposes <code>role="spinbutton"</code>. It reflects bounds whenever
+          present and omits only <code>aria-valuenow</code> while empty.
         </li>
         <li>
-          Keyboard stepping is the accessible path: ArrowUp / ArrowDown step (Shift or
-          PageUp / PageDown for a larger jump); Home / End jump to <code>min</code> / <code>max</code>
-          when bounds exist. Enter commits typed text.
+          Keep a visible Field label or native accessible name on the input. Step labels derive
+          from it and remain overrideable through the Label Contract or native
+          <code>aria-label</code>.
         </li>
         <li>
-          Stepper buttons are pointer affordances kept out of the tab order
-          (<code>tabindex="-1"</code>, following the APG spinbutton prior art). They keep Label
-          Contract names (<code>"Increase value"</code> / <code>"Decrease value"</code>, or a
-          label-specific variant when <code>aria-label</code> is set) and support press-and-hold
-          repetition, but keyboard stepping happens on the field itself — the accessible path — so
-          Tab never stops on a stepper.
+          Directional buttons stay <code>tabindex="-1"</code>; the input remains the one keyboard
+          tab stop and owns the APG spinbutton keys.
         </li>
-        <li>Scrolling the wheel over a focused field never changes the value.</li>
         <li>
-          <code>aria-invalid</code> reflects malformed, out-of-range, and required-empty state, and
-          <code>aria-describedby</code> / <code>aria-labelledby</code> merge with an ancestor
-          <code>hellField</code> automatically.
+          Bind visible unit meaning through <code>aria-valuetext</code>; projected suffix text is
+          presentational and never the input's only accessible unit description.
         </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Pair with <code>hellFieldLabel</code> for visible naming, or set <code>aria-label</code> for standalone fields.</li>
-        <li>Use <code>min</code> / <code>max</code> / <code>step</code> to encode real constraints, so a port field genuinely means 1–65535.</li>
-        <li>Use <code>integer</code> for count-like fields and a <code>suffix</code> for units.</li>
+        <li>Keep one controlled value or FormControl on the native Number Input.</li>
+        <li>Use explicit bounds and a visible label for business quantities.</li>
+        <li>Compose only the unit and directional actions the workflow needs.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't reach for a native <code>&lt;input type="number"&gt;</code> when you need deterministic parsing and a real numeric value.</li>
-        <li>Don't treat the stepper buttons as the only path — keyboard stepping on the field is the accessible one.</li>
+        <li>Don't use native <code>type="number"</code> when invalid drafts or adapters matter.</li>
+        <li>Don't query nearby inputs from a Number Step; bind its controller explicitly.</li>
+        <li>Don't store a second numeric model in Control Group or projected content.</li>
       </ul>
     </article>
   `,
 })
 export class NumberInputPage {
   protected readonly numberInputBasicExampleCode = numberInputBasicExampleCodeRaw;
-  protected readonly numberInputDurationSecondsExampleCode = numberInputDurationSecondsExampleCodeRaw;
-  protected readonly numberInputSizesExampleCode = numberInputSizesExampleCodeRaw;
+  protected readonly numberInputDurationSecondsExampleCode =
+    numberInputDurationSecondsExampleCodeRaw;
   protected readonly numberInputReactiveFormsExampleCode = numberInputReactiveFormsExampleCodeRaw;
+  protected readonly numberInputSizesExampleCode = numberInputSizesExampleCodeRaw;
   protected readonly numberInputStylingExampleCode = numberInputStylingExampleCodeRaw;
 }

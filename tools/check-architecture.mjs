@@ -90,6 +90,7 @@ function main() {
   checkPackageDependencyContract();
   checkStyleEntryPoints();
   checkComponentContract();
+  checkNativeNumberInputContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableAdapterBoundaryContract();
@@ -102,6 +103,49 @@ function main() {
   }
 
   console.log('Architecture checks passed.');
+}
+
+function checkNativeNumberInputContract() {
+  const rel = 'packages/angular/number-input/number-input.ts';
+  const source = readFile(join(root, rel));
+  const inputModule = decoratedClassModules(source).find(
+    (module) => module.className === 'HellNumberInput',
+  )?.moduleSource;
+  const requiredFragments = [
+    "selector: 'input[hellNumberInput]'",
+    "selector: 'button[hellNumberStep]'",
+    "exportAs: 'hellNumberInput'",
+    "alias: 'hellNumberStepFor'",
+    'export const HELL_NUMBER_INPUT_IMPORTS',
+  ];
+  const retiredInputFragments = [
+    'readonly steppers = input',
+    'readonly suffix = input',
+    'readonly inputId = input',
+    'readonly name = input',
+    'readonly placeholder = input',
+    'readonly ariaLabel = input',
+  ];
+
+  for (const fragment of requiredFragments) {
+    if (!source.includes(fragment)) {
+      failures.push(`${rel} native Number Input contract is missing ${fragment}`);
+    }
+  }
+  for (const fragment of ["selector: 'hell-number-input'", 'HellNumberInputPart', 'HellNumberInputUi']) {
+    if (source.includes(fragment)) {
+      failures.push(`${rel} native Number Input contract still exposes ${fragment}`);
+    }
+  }
+  if (!inputModule) {
+    failures.push(`${rel} native Number Input contract is missing HellNumberInput`);
+    return;
+  }
+  for (const fragment of retiredInputFragments) {
+    if (inputModule.includes(fragment)) {
+      failures.push(`${rel} native Number Input still forwards ${fragment}; author it natively`);
+    }
+  }
 }
 
 function checkImportTupleRetirementContract() {

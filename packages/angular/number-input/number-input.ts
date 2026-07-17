@@ -1,110 +1,84 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
   DestroyRef,
-  NO_ERRORS_SCHEMA,
-  type ElementRef,
+  Directive,
+  ElementRef,
+  InjectionToken,
+  Renderer2,
+  afterEveryRender,
   booleanAttribute,
   computed,
   effect,
   forwardRef,
   inject,
-  InjectionToken,
   input,
   numberAttribute,
   output,
   signal,
-  viewChild,
   type Provider,
   type Signal,
 } from '@angular/core';
 import {
-  ControlValueAccessor,
   NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
   type AbstractControl,
+  type ControlValueAccessor,
   type NgControl,
   type ValidationErrors,
   type Validator,
-  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import {
-  NgpFormControl,
   injectFormFieldState,
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { injectInputState } from 'ng-primitives/input';
+
 import {
-  hellSyncFormFieldDescriptions,
-  hellSyncFormFieldLabels,
-} from '@hell-ui/angular/internal/core';
-import type { HellSize } from '@hell-ui/angular/core';
-import {
-  hellPartStyler,
+  hellCreateLabels,
   hellInvalidTypedValue,
+  hellPartStyler,
   hellTypedValue,
   type HellRecipe,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
-  type HellUi,
   type HellUiInput,
 } from '@hell-ui/angular/core';
-import { HellTypedValueInputState } from '@hell-ui/angular/internal/core';
+import { HellInput } from '@hell-ui/angular/input';
+import {
+  HellTypedValueInputState,
+  hellSyncFormFieldDescriptions,
+  hellSyncFormFieldLabels,
+  hellUniqueIdRefs,
+} from '@hell-ui/angular/internal/core';
 
-/** Built-in accessibility labels owned by the number input entry point. */
+/** Built-in accessibility labels owned by the Number Input entry point. */
 export interface HellNumberInputLabels {
-  /** Accessible label for the increment stepper when no field label is set. */
+  /** Accessible label for an increment step without a named target. */
   readonly increment: string;
-  /** Accessible label for the decrement stepper when no field label is set. */
+  /** Accessible label for a decrement step without a named target. */
   readonly decrement: string;
-  /** Accessible label for the increment stepper, incorporating the field label. */
+  /** Accessible label for an increment step targeting a named input. */
   readonly incrementFor: (label: string) => string;
-  /** Accessible label for the decrement stepper, incorporating the field label. */
+  /** Accessible label for a decrement step targeting a named input. */
   readonly decrementFor: (label: string) => string;
 }
 
-/** Injection token resolving to the effective number input labels. */
-export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels> = hellCreateLabels<HellNumberInputLabels>(
-  'HELL_NUMBER_INPUT_LABELS',
-  {
+/** Injection token resolving to the effective Number Input labels. */
+export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels> =
+  hellCreateLabels<HellNumberInputLabels>('HELL_NUMBER_INPUT_LABELS', {
     increment: 'Increase value',
     decrement: 'Decrease value',
     incrementFor: (label) => `Increase ${label}`,
     decrementFor: (label) => `Decrease ${label}`,
-  },
-);
-
-let nextNumberInputId = 0;
-
-/** Public parts of the HellNumberInput module, styleable through its Part Style Map. */
-export type HellNumberInputPart = 'root' | 'input' | 'increment' | 'decrement' | 'suffix';
-
-/** Part Style Map accepted by the HellNumberInput `ui` input. */
-export type HellNumberInputUi = HellUi<HellNumberInputPart>;
-
-const HELL_NUMBER_INPUT_RECIPE = {
-  root: 'relative inline-flex w-full max-w-40 min-w-24 items-stretch rounded-hell-md border border-hell-border bg-hell-surface-elevated transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:border-hell-border-strong focus-within:border-hell-border-focus focus-within:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle',
-  input:
-    'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
-  suffix:
-    'inline-flex flex-none select-none items-center ps-hell-1 pe-hell-2 text-[12px] text-hell-foreground-muted tabular-nums data-[size=sm]:text-[11px] data-[size=lg]:text-[13px]',
-  increment:
-    'inline-flex flex-1 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-hell-foreground-subtle transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
-  decrement:
-    'inline-flex flex-1 cursor-pointer items-center justify-center border-0 border-t border-hell-border bg-transparent p-0 text-hell-foreground-subtle transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
-} satisfies HellRecipe<HellNumberInputPart>;
+  });
 
 /** Contextual flags passed to adapter parse and format hooks. */
 export interface HellNumberInputAdapterContext {
-  /** Whether the field is in integer-only mode. */
+  /** Whether the field accepts integers only. */
   readonly integer: boolean;
 }
 
-/**
- * Strategy for parsing, formatting, normalizing, and comparing numeric values —
- * the core `HellTypedInputAdapter` instantiated for `number` with the
- * integer-mode context.
- */
+/** Strategy for parsing, formatting, normalizing, and comparing numeric values. */
 export type HellNumberInputAdapter = HellTypedInputAdapter<
   number,
   HellNumberInputAdapterContext
@@ -113,13 +87,6 @@ export type HellNumberInputAdapter = HellTypedInputAdapter<
 const INTEGER_PATTERN = /^[+-]?\d+$/;
 const DECIMAL_PATTERN = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
 
-/**
- * Parse number input text into a value or an invalid draft. Accepts an optional
- * sign, plain digits, and a single decimal point in decimal mode; integer mode
- * rejects any fractional part. Exponent notation is rejected so parsing stays
- * deterministic. Empty text commits a nullable clear; anything else that does
- * not match stays as an invalid draft.
- */
 function hellParseNumberInputText(
   text: string,
   context: HellNumberInputAdapterContext,
@@ -131,11 +98,9 @@ function hellParseNumberInputText(
   if (!pattern.test(trimmed)) return hellInvalidTypedValue();
 
   const value = Number(trimmed);
-  if (!Number.isFinite(value)) return hellInvalidTypedValue();
-  return hellTypedValue(value);
+  return Number.isFinite(value) ? hellTypedValue(value) : hellInvalidTypedValue();
 }
 
-/** Format a numeric value as its plain decimal string, or empty string when null. */
 function hellFormatNumberInputValue(
   value: number | null,
   _context: HellNumberInputAdapterContext,
@@ -143,7 +108,6 @@ function hellFormatNumberInputValue(
   return value === null || !Number.isFinite(value) ? '' : String(value);
 }
 
-/** Coerce an external value to a finite number, or null when it is not usable. */
 function hellNormalizeNumberInputValue(
   value: number | null | undefined,
   _context: HellNumberInputAdapterContext,
@@ -151,12 +115,11 @@ function hellNormalizeNumberInputValue(
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-/** Compare two numeric values by identity, treating null as its own value. */
-function hellSameNumberInputValue(a: number | null, b: number | null): boolean {
-  return a === b;
+function hellSameNumberInputValue(left: number | null, right: number | null): boolean {
+  return left === right;
 }
 
-/** Default number input adapter parsing and formatting plain decimal strings. */
+/** Default adapter for plain signed decimal text and nullable clears. */
 export const HELL_DEFAULT_NUMBER_INPUT_ADAPTER: HellNumberInputAdapter = {
   parseText: hellParseNumberInputText,
   format: hellFormatNumberInputValue,
@@ -164,38 +127,54 @@ export const HELL_DEFAULT_NUMBER_INPUT_ADAPTER: HellNumberInputAdapter = {
   isSameValue: hellSameNumberInputValue,
 };
 
-/** Injection token resolving to the effective number input adapter. */
+/** Injection token resolving to the effective Number Input adapter. */
 export const HELL_NUMBER_INPUT_ADAPTER = new InjectionToken<HellNumberInputAdapter>(
   'HELL_NUMBER_INPUT_ADAPTER',
   { factory: () => HELL_DEFAULT_NUMBER_INPUT_ADAPTER },
 );
 
-/** Override the number input adapter for an injector scope. */
+/** Override the Number Input adapter for an injector scope. */
 export function provideHellNumberInputAdapter(adapter: HellNumberInputAdapter): Provider {
   return { provide: HELL_NUMBER_INPUT_ADAPTER, useValue: adapter };
 }
 
-const HOLD_DELAY_MS = 400;
-const HOLD_REPEAT_MS = 60;
+/** Direction selected by a Number Step button. */
+export type HellNumberStepDirection = 'increment' | 'decrement';
+
+interface HellNumberInputStepController {
+  readonly isDisabled: (direction: HellNumberStepDirection) => boolean;
+  readonly apply: (direction: HellNumberStepDirection, multiplied: boolean) => void;
+  readonly focus: () => void;
+  readonly label: (direction: HellNumberStepDirection) => string;
+}
+
+const NUMBER_INPUT_STEP_CONTROLLERS = new WeakMap<
+  HellNumberInput,
+  HellNumberInputStepController
+>();
+
+function numberInputStepController(target: HellNumberInput): HellNumberInputStepController {
+  const controller = NUMBER_INPUT_STEP_CONTROLLERS.get(target);
+  if (!controller) throw new Error('Number Step target is not an active HellNumberInput.');
+  return controller;
+}
+
+const HELL_NUMBER_STEP_RECIPE = {
+  root: 'inline-flex min-w-hell-control-sm flex-none cursor-pointer select-none items-center justify-center border-0 border-s border-hell-border bg-transparent px-hell-2 font-[inherit] font-medium text-hell-foreground-muted transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
+} satisfies HellRecipe<'root'>;
+
+let nextNumberInputId = 0;
 
 /**
- * Number input — a text field with numeric semantics on the shared Typed Value
- * Input model. It parses and formats a real `number | null`, follows the APG
- * spinbutton pattern (reflected value/min/max), steps with Arrow keys
- * (Shift for a larger jump) and Home/End, offers optional hold-to-repeat
- * stepper buttons and a unit suffix, and never clamps typing live — out-of-range
- * values commit but fail validation.
- *
- * Bind `[value]` as `number | null` and listen to `(valueChange)`. Pair with
- * `hellField` for label / description / error wiring.
+ * Numeric parsing, validation, stepping, and forms behavior for a real input.
+ * Step buttons and suffix content compose separately through consumer markup.
  */
-@Component({
-  selector: 'hell-number-input',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgpFormControl],
-  schemas: [NO_ERRORS_SCHEMA],
-  viewProviders: [provideFormFieldState()],
+@Directive({
+  selector: 'input[hellNumberInput]',
+  exportAs: 'hellNumberInput',
+  hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
   providers: [
+    provideFormFieldState({ inherit: false }),
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => HellNumberInput),
@@ -208,169 +187,70 @@ const HOLD_REPEAT_MS = 60;
     },
   ],
   host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-size]': 'size()',
+    type: 'text',
+    role: 'spinbutton',
+    '[attr.id]': 'id()',
+    '[value]': 'display()',
+    '[disabled]': 'isDisabled()',
+    '[required]': 'required()',
+    '[attr.inputmode]': 'integer() ? "numeric" : "decimal"',
+    '[attr.aria-valuenow]': 'current()',
+    '[attr.aria-valuemin]': 'min()',
+    '[attr.aria-valuemax]': 'max()',
+    '[attr.aria-invalid]': 'isInvalid() ? "true" : null',
+    '[attr.aria-describedby]': 'fieldAriaDescribedby()',
+    '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '[attr.data-integer]': 'integer() ? "true" : null',
+    '(input)': 'onInput()',
+    '(blur)': 'onBlur()',
+    '(keydown)': 'onKeydown($event)',
+    '(wheel)': 'onWheel($event)',
   },
-  template: `
-    <input
-      #field
-      ngpFormControl
-      data-slot="input"
-      [class]="part('input')"
-      type="text"
-      autocomplete="off"
-      [attr.inputmode]="integer() ? 'numeric' : 'decimal'"
-      [attr.data-size]="size()"
-      [attr.data-invalid]="isInvalid() ? 'true' : null"
-      [invalid]="isInvalid()"
-      role="spinbutton"
-      [attr.aria-valuenow]="current()"
-      [attr.aria-valuemin]="min()"
-      [attr.aria-valuemax]="max()"
-      [attr.aria-valuetext]="valueText()"
-      [id]="inputId()"
-      [attr.name]="name()"
-      [attr.aria-invalid]="isInvalid() ? 'true' : null"
-      [attr.aria-label]="ariaLabel()"
-      [attr.aria-describedby]="fieldAriaDescribedby()"
-      [attr.aria-labelledby]="fieldAriaLabelledby()"
-      [disabled]="isDisabled()"
-      [attr.placeholder]="placeholder()"
-      [value]="display()"
-      (input)="onInput(field.value)"
-      (blur)="onBlur()"
-      (keydown)="onKeydown($event, field.value)"
-      (wheel)="onWheel($event)"
-    />
-
-    @if (suffix(); as unit) {
-      <span
-        data-slot="suffix"
-        [class]="part('suffix')"
-        [attr.data-size]="size()"
-        aria-hidden="true"
-      >
-        {{ unit }}
-      </span>
-    }
-
-    @if (steppers()) {
-      <span class="flex flex-none flex-col items-stretch border-s border-hell-border">
-        <button
-          type="button"
-          tabindex="-1"
-          data-slot="increment"
-          [class]="part('increment')"
-          [attr.data-size]="size()"
-          [disabled]="isIncrementDisabled()"
-          [attr.aria-label]="incrementLabel()"
-          (pointerdown)="onStepperPointerDown($event, 1)"
-          (pointerup)="stopHold()"
-          (pointerleave)="stopHold()"
-          (pointercancel)="stopHold()"
-          (keydown)="onStepperKeydown($event, 1)"
-        >
-          <svg
-            viewBox="0 0 10 10"
-            class="size-hell-3 w-hell-6"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M2 6.25 5 3.25 8 6.25" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          tabindex="-1"
-          data-slot="decrement"
-          [class]="part('decrement')"
-          [attr.data-size]="size()"
-          [disabled]="isDecrementDisabled()"
-          [attr.aria-label]="decrementLabel()"
-          (pointerdown)="onStepperPointerDown($event, -1)"
-          (pointerup)="stopHold()"
-          (pointerleave)="stopHold()"
-          (pointercancel)="stopHold()"
-          (keydown)="onStepperKeydown($event, -1)"
-        >
-          <svg
-            viewBox="0 0 10 10"
-            class="size-hell-3 w-hell-6"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M2 3.75 5 6.75 8 3.75" />
-          </svg>
-        </button>
-      </span>
-    }
-  `,
 })
 export class HellNumberInput implements ControlValueAccessor, Validator {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<HellNumberInputPart>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<HellNumberInputPart>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_NUMBER_INPUT_RECIPE,
-  });
-
-  /** Control height. Defaults to `md`. */
-  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  /** Forces the invalid visual state. Defaults to `false`. */
+  /** Native input id, generated when the consumer does not author one. */
+  readonly id = input(`hell-number-input-${++nextNumberInputId}`);
+  /** Forces invalid presentation and accessibility state. */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /** Disables the field and steppers. Defaults to `false`. */
+  /** Disables native interaction outside forms use. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Marks the control required for validation. Defaults to `false`. */
+  /** Marks a nullable clear as a required-value validation error. */
   readonly required = input(false, { transform: booleanAttribute });
-  /** Current numeric value in uncontrolled use. Defaults to `null`. */
+  /** Current controlled numeric value. */
   readonly value = input<number | null>(null);
-  /** Lower bound enforced by stepping and validation. Defaults to `null`. */
+  /** Inclusive lower bound for validation and stepping. */
   readonly min = input<number | null>(null);
-  /** Upper bound enforced by stepping and validation. Defaults to `null`. */
+  /** Inclusive upper bound for validation and stepping. */
   readonly max = input<number | null>(null);
-  /** Amount a single Arrow/stepper step changes the value. Defaults to `1`. */
+  /** Amount applied by one arrow or Number Step activation. */
   readonly step = input(1, { transform: numberAttribute });
-  /** Multiplier applied to `step` for Shift+Arrow and PageUp/PageDown. Defaults to `10`. */
+  /** Multiplier applied by Shift+Arrow and PageUp/PageDown. */
   readonly stepMultiplier = input(10, { transform: numberAttribute });
-  /** Integer-only mode: rejects fractional typing and uses the numeric keypad. Defaults to `false`. */
+  /** Rejects fractional drafts and uses numeric input-mode metadata. */
   readonly integer = input(false, { transform: booleanAttribute });
-  /** Renders increment/decrement stepper buttons. Defaults to `false`. */
-  readonly steppers = input(false, { transform: booleanAttribute });
-  /** Unit suffix rendered after the value, e.g. `seconds`, `ms`, `%`. Defaults to `null`. */
-  readonly suffix = input<string | null>(null);
-  /** Placeholder text for the field. Defaults to `null`. */
-  readonly placeholder = input<string | null>(null);
-  /** `id` of the text field. Defaults to a generated unique id. */
-  readonly inputId = input<string>(`hell-number-input-${++nextNumberInputId}-field`);
-  /** `name` attribute of the text field. Defaults to `null`. */
-  readonly name = input<string | null>(null);
-  /** Accessible label for the field. Defaults to `null`. */
-  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
-  /** `aria-describedby` reference for the field. Defaults to `null`. */
+  /** Additional `aria-describedby` ids merged with an enclosing Field. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
-  /** `aria-labelledby` reference for the field. Defaults to `null`. */
+  /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  /** Emits when the committed numeric value changes. */
+  /** Emits each successfully committed number or nullable clear. */
   readonly valueChange = output<number | null>();
 
-  private readonly numberAdapter = inject(HELL_NUMBER_INPUT_ADAPTER);
-  /** Resolved accessibility labels for the stepper buttons. */
-  protected readonly labels = inject(HELL_NUMBER_INPUT_LABELS);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
+  private readonly renderer = inject(Renderer2);
+  private readonly adapter = inject(HELL_NUMBER_INPUT_ADAPTER);
+  private readonly labels = inject(HELL_NUMBER_INPUT_LABELS);
+  private readonly inputState = injectInputState();
+  private readonly inheritedFormField = injectFormFieldState({
+    optional: true,
+    skipSelf: true,
+  });
+  private readonly formField = ngpFormField({
+    ngControl: signal<NgControl | undefined>(undefined),
+  });
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<number | null>(null);
@@ -378,191 +258,241 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
   private onControlChange: (value: number | null) => void = () => {};
   private onControlTouched: () => void = () => {};
   private onValidatorChange: () => void = () => {};
-
-  private holdTimeout: ReturnType<typeof setTimeout> | null = null;
-  private holdInterval: ReturnType<typeof setInterval> | null = null;
+  private hasExternalSnapshot = false;
+  private externalSnapshot: number | null = null;
+  private readonly accessibleNameSnapshot = signal<string | null>(null);
 
   private readonly valueState = new HellTypedValueInputState<number, number | null>({
     external: () => this.effectiveValue(),
     parseExternal: (value) => this.normalizeValue(value),
-    parseText: (text) => this.numberAdapter.parseText(text, this.context()),
-    format: (value) => this.formatValue(value),
+    parseText: (text) => this.adapter.parseText(text, this.context()),
+    format: (value) => this.adapter.format(value, this.context()),
     externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
-  /** Current committed numeric value, or null. */
+  /** Current committed numeric value. */
   protected readonly current: Signal<number | null> = this.valueState.current;
-  /** Text shown in the field for the current value or draft. */
+  /** Native text for either the active draft or committed value. */
   protected readonly display = this.valueState.display;
-  /** Whether the current draft text is unparseable. */
+  /** Whether the active draft is malformed. */
   protected readonly invalidDraft = this.valueState.invalidDraft;
-
-  /** Whether the committed value is outside `min` / `max`. */
+  /** Whether the committed value falls outside current bounds. */
   protected readonly outOfRange = computed(() => this.rangeError(this.current()) !== null);
-  /** Whether a required value is missing. */
+  /** Whether a required number is missing. */
   protected readonly requiredMissing = computed(
     () => this.required() && this.current() === null && !this.invalidDraft(),
   );
-  /** Whether the control is in an invalid state. */
-  protected readonly isInvalid = () =>
+  /** Effective invalid state from behavior, Field, or an explicit override. */
+  protected readonly isInvalid = (): boolean =>
     this.invalid() ||
     this.invalidDraft() ||
     this.outOfRange() ||
     this.requiredMissing() ||
-    this.formField.invalid() === true;
-  /** Whether the control is disabled by input or form state. */
+    this.inheritedFormField()?.invalid() === true;
+  /** Effective disabled state from the public input or forms API. */
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
-
-  /** `aria-valuetext` combining the current value with its unit suffix. */
-  protected readonly valueText = computed<string | null>(() => {
-    const unit = this.suffix();
-    const currentValue = this.current();
-    if (!unit || currentValue === null) return null;
-    return `${this.formatValue(currentValue)} ${unit}`;
-  });
-
-  /** `aria-describedby` value from ancestor form field descriptions. */
-  protected readonly fieldAriaDescribedby = computed(
-    () => this.formField.descriptions().join(' ') || null,
+  /** Effective description ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaDescribedby = computed(() =>
+    this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
   );
-  /** `aria-labelledby` value from ancestor form field labels. */
-  protected readonly fieldAriaLabelledby = computed(
-    () => this.formField.labels().join(' ') || null,
+  /** Effective label ids from native attributes and an enclosing Field. */
+  protected readonly fieldAriaLabelledby = computed(() =>
+    this.mergeIdRefs(this.ariaLabelledby(), this.inheritedFormField()?.labels()),
   );
-
-  /** Whether the increment stepper is disabled at the upper bound. */
-  protected readonly isIncrementDisabled = computed(() => {
-    if (this.isDisabled()) return true;
-    const max = this.max();
-    const currentValue = this.current();
-    return max !== null && currentValue !== null && currentValue >= max;
-  });
-  /** Whether the decrement stepper is disabled at the lower bound. */
-  protected readonly isDecrementDisabled = computed(() => {
-    if (this.isDisabled()) return true;
-    const min = this.min();
-    const currentValue = this.current();
-    return min !== null && currentValue !== null && currentValue <= min;
-  });
-
-  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
-  private readonly formField =
-    this.inheritedFormField() ??
-    ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
-  private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
   constructor() {
-    hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
-    hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
+    NUMBER_INPUT_STEP_CONTROLLERS.set(this, {
+      isDisabled: (direction) => this.isStepDisabled(direction),
+      apply: (direction, multiplied) => this.applyStep(direction, multiplied),
+      focus: () => this.host.focus(),
+      label: (direction) => this.stepLabel(direction),
+    });
+
+    hellSyncFormFieldDescriptions(this.formField, this.fieldAriaDescribedby);
+    hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
+
+    effect(() => {
+      const disabled = this.isDisabled();
+      const inputState = this.inputState();
+      if (inputState.disabled() !== disabled) inputState.setDisabled(disabled);
+      this.formField.disabled.set(disabled);
+    });
+
+    effect(() => {
+      this.formField.invalid.set(this.isInvalid());
+    });
+
+    const inheritedFormField = this.inheritedFormField();
+    effect((onCleanup) => {
+      const id = this.id();
+      this.formField.setFormControl(id);
+      inheritedFormField?.setFormControl(id);
+      onCleanup(() => {
+        if (this.formField.formControl() === id) this.formField.removeFormControl();
+        if (inheritedFormField?.formControl() === id) inheritedFormField.removeFormControl();
+      });
+    });
+
+    if (inheritedFormField) {
+      hellSyncFormFieldDescriptions(
+        this.formField,
+        computed(() => inheritedFormField.descriptions().join(' ') || null),
+      );
+      hellSyncFormFieldLabels(
+        this.formField,
+        computed(() => inheritedFormField.labels().join(' ') || null),
+      );
+    }
+
+    effect(() => {
+      const external = this.normalizeValue(this.effectiveValue());
+      if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
+        this.valueState.clearDraft();
+        this.valueState.clearLocal();
+      }
+      this.externalSnapshot = external;
+      this.hasExternalSnapshot = true;
+    });
+
     effect(() => {
       this.invalidDraft();
       this.current();
       this.min();
       this.max();
       this.required();
+      this.integer();
       this.onValidatorChange();
     });
-    this.destroyRef.onDestroy(() => this.stopHold());
+
+    afterEveryRender(() => {
+      // The composed Input primitive and authored attributes also settle after
+      // host bindings. Number Input owns the public id and needs a text field so
+      // invalid drafts are never sanitized by native number-input behavior.
+      const id = this.id();
+      if (this.host.id !== id) this.renderer.setAttribute(this.host, 'id', id);
+      if (this.host.type !== 'text') this.renderer.setAttribute(this.host, 'type', 'text');
+      const accessibleName = this.readAccessibleName();
+      if (this.accessibleNameSnapshot() !== accessibleName) {
+        this.accessibleNameSnapshot.set(accessibleName);
+      }
+    });
   }
 
-  /** Accessible label for the increment stepper. */
-  protected readonly incrementLabel = () => {
-    const label = this.ariaLabel();
-    return label ? this.labels.incrementFor(label) : this.labels.increment;
-  };
-  /** Accessible label for the decrement stepper. */
-  protected readonly decrementLabel = () => {
-    const label = this.ariaLabel();
-    return label ? this.labels.decrementFor(label) : this.labels.decrement;
-  };
-
-  /** Writes a value from the form model into the control. */
+  /** Writes a number from Angular forms without emitting it back. */
   writeValue(value: number | null): void {
+    const normalized = this.normalizeValue(value);
+    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
+
     this.controlMode.set(true);
-    this.controlValue.set(this.normalizeValue(value));
-    this.valueState.clearDraft();
-    this.valueState.clearLocal();
+    this.controlValue.set(normalized);
+    if (changed) {
+      this.valueState.clearDraft();
+      this.valueState.clearLocal();
+    }
     this.onValidatorChange();
   }
 
-  /** Registers the form model's change callback. */
+  /** Registers the Angular forms change callback. */
   registerOnChange(fn: (value: number | null) => void): void {
     this.onControlChange = fn;
   }
 
-  /** Registers the form model's touched callback. */
+  /** Registers the Angular forms touched callback. */
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
   }
 
-  /** Registers the callback invoked when validation state changes. */
+  /** Registers the Angular forms validator-change callback. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
-  /** Sets the disabled state from the form model. */
+  /** Applies disabled state supplied by Angular forms. */
   setDisabledState(isDisabled: boolean): void {
     this.controlDisabled.set(isDisabled);
   }
 
-  /** Reports required, malformed, below-min, and above-max as distinct errors. */
+  /** Reports malformed drafts, missing required values, and bound violations. */
   validate(_control: AbstractControl | null): ValidationErrors | null {
     const errors: ValidationErrors = {};
-
-    if (this.invalidDraft()) {
-      errors['numberInputMalformed'] = true;
-    } else if (this.requiredMissing()) {
-      errors['required'] = true;
-    }
+    if (this.invalidDraft()) errors['numberInputMalformed'] = true;
+    else if (this.requiredMissing()) errors['required'] = true;
 
     const rangeError = this.rangeError(this.current());
     if (rangeError) Object.assign(errors, rangeError);
-
     return Object.keys(errors).length > 0 ? errors : null;
   }
 
-  /** Records field text as a draft as the user types. */
-  protected onInput(value: string): void {
-    this.valueState.writeDraft(value);
+  private isStepDisabled(direction: HellNumberStepDirection): boolean {
+    if (this.isDisabled()) return true;
+    const candidate = this.stepCandidate();
+    if (candidate === null) return false;
+    return direction === 'increment'
+      ? this.max() !== null && candidate >= (this.max() as number)
+      : this.min() !== null && candidate <= (this.min() as number);
+  }
+
+  private applyStep(direction: HellNumberStepDirection, multiplied = false): void {
+    if (this.isStepDisabled(direction)) return;
+    this.commitPendingDraft();
+
+    const directionValue = direction === 'increment' ? 1 : -1;
+    const amount =
+      this.step() * (multiplied ? this.stepMultiplier() : 1);
+    const current = this.current();
+    const base = current ?? this.stepAnchor();
+    const target = current === null ? base : base + directionValue * amount;
+    this.jumpTo(target);
+  }
+
+  private stepLabel(direction: HellNumberStepDirection): string {
+    const name = this.accessibleNameSnapshot();
+    if (direction === 'increment') {
+      return name ? this.labels.incrementFor(name) : this.labels.increment;
+    }
+    return name ? this.labels.decrementFor(name) : this.labels.decrement;
+  }
+
+  /** Records the native field value as a draft. */
+  protected onInput(): void {
+    this.valueState.writeDraft(this.host.value);
     this.onValidatorChange();
   }
 
-  /** Commits the pending draft when the field loses focus. */
+  /** Commits a draft and marks the native field touched on blur. */
   protected onBlur(): void {
-    const next = this.valueState.commitDraft();
-    if (next.committed) this.emitValue(next.value);
+    const result = this.valueState.commitDraft();
+    if (result.committed) this.emitValue(result.value);
     this.onControlTouched();
     this.onValidatorChange();
   }
 
-  /** Handles committing (Enter), stepping (Arrows), and jumping (Home/End). */
-  protected onKeydown(event: KeyboardEvent, text: string): void {
+  /** Handles commit, arrows, multiplier keys, and bounded Home/End jumps. */
+  protected onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
-      event.preventDefault();
-      const next = this.valueState.commitText(text);
-      if (next.committed) this.emitValue(next.value);
+      const result = this.valueState.commitText(this.host.value);
+      if (result.committed) this.emitValue(result.value);
       this.onValidatorChange();
       return;
     }
 
     if (this.isDisabled()) return;
-
     switch (event.key) {
       case 'ArrowUp':
         event.preventDefault();
-        this.stepBy(1, event.shiftKey);
+        this.applyStep('increment', event.shiftKey);
         break;
       case 'ArrowDown':
         event.preventDefault();
-        this.stepBy(-1, event.shiftKey);
+        this.applyStep('decrement', event.shiftKey);
         break;
       case 'PageUp':
         event.preventDefault();
-        this.stepBy(1, true);
+        this.applyStep('increment', true);
         break;
       case 'PageDown':
         event.preventDefault();
-        this.stepBy(-1, true);
+        this.applyStep('decrement', true);
         break;
       case 'Home':
         if (this.min() !== null) {
@@ -581,64 +511,17 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     }
   }
 
-  /** Ignores wheel scrolling while the field is focused so it never changes the value. */
+  /** Prevents focused-wheel scrolling from changing numeric field behavior. */
   protected onWheel(event: WheelEvent): void {
-    const element = this.field().nativeElement;
-    if (element.ownerDocument?.activeElement === element) {
-      event.preventDefault();
-    }
+    if (this.host.ownerDocument?.activeElement === this.host) event.preventDefault();
   }
 
-  /** Starts a step plus hold-to-repeat from a pointer press on a stepper. */
-  protected onStepperPointerDown(event: PointerEvent, direction: 1 | -1): void {
-    if (typeof event.button === 'number' && event.button !== 0) return;
-    // Keep focus on the text field so keyboard stepping stays available.
-    event.preventDefault();
-    this.startHold(direction, event.shiftKey);
-  }
-
-  /** Steps once when a stepper button is activated by keyboard. */
-  protected onStepperKeydown(event: KeyboardEvent, direction: 1 | -1): void {
-    if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Spacebar') return;
-    event.preventDefault();
-    this.stepBy(direction, event.shiftKey);
-  }
-
-  /** Stops any in-progress hold-to-repeat timers. */
-  protected stopHold(): void {
-    if (this.holdTimeout !== null) {
-      clearTimeout(this.holdTimeout);
-      this.holdTimeout = null;
-    }
-    if (this.holdInterval !== null) {
-      clearInterval(this.holdInterval);
-      this.holdInterval = null;
-    }
-  }
-
-  private startHold(direction: 1 | -1, large: boolean): void {
-    if (this.isDisabled()) return;
-    this.stepBy(direction, large);
-    this.stopHold();
-    this.holdTimeout = setTimeout(() => {
-      this.holdInterval = setInterval(() => this.stepBy(direction, large), HOLD_REPEAT_MS);
-    }, HOLD_DELAY_MS);
-  }
-
-  private stepBy(direction: 1 | -1, large: boolean): void {
-    if (this.isDisabled()) return;
-    // Commit any pending typed draft first so we step from what the user typed,
-    // not the stale committed value it shadows.
-    this.commitPendingDraft();
-    const stepSize = large ? this.step() * this.stepMultiplier() : this.step();
-    const currentValue = this.current();
-    const base = currentValue ?? this.stepAnchor();
-    const raw = currentValue === null ? base : base + direction * stepSize;
-    this.jumpTo(raw);
+  private commitPendingDraft(): void {
+    const result = this.valueState.commitDraft();
+    if (result.committed) this.emitValue(result.value);
   }
 
   private jumpTo(target: number): void {
-    // Home/End reach this directly, so commit a pending draft here too.
     this.commitPendingDraft();
     const next = this.roundToStep(this.clamp(target));
     const previous = this.current();
@@ -648,14 +531,13 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
-  /** Commits the pending draft through the same path Enter uses, if one exists. */
-  private commitPendingDraft(): void {
-    const result = this.valueState.commitDraft();
-    if (result.committed) this.emitValue(result.value);
-  }
-
   private stepAnchor(): number {
     return this.clamp(this.min() ?? 0);
+  }
+
+  private stepCandidate(): number | null {
+    const parsed = this.adapter.parseText(this.display(), this.context());
+    return parsed.valid ? this.normalizeValue(parsed.value) : this.current();
   }
 
   private clamp(value: number): number {
@@ -696,25 +578,182 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     return this.controlMode() ? this.controlValue() : this.value();
   }
 
-  private formatValue(value: number | null): string {
-    return this.numberAdapter.format(value, this.context());
-  }
-
   private normalizeValue(value: number | null | undefined): number | null {
     const context = this.context();
-    return this.numberAdapter.normalize
-      ? this.numberAdapter.normalize(value, context)
+    return this.adapter.normalize
+      ? this.adapter.normalize(value, context)
       : hellNormalizeNumberInputValue(value, context);
   }
 
-  private sameValue(a: number | null, b: number | null): boolean {
-    return this.numberAdapter.isSameValue?.(a, b) ?? hellSameNumberInputValue(a, b);
+  private sameValue(left: number | null, right: number | null): boolean {
+    return this.adapter.isSameValue?.(left, right) ?? hellSameNumberInputValue(left, right);
+  }
+
+  private mergeIdRefs(
+    explicit: string | null,
+    fieldIds: readonly string[] | undefined,
+  ): string | null {
+    const ids = hellUniqueIdRefs([explicit, ...(fieldIds ?? [])].filter(Boolean).join(' '));
+    return ids.join(' ') || null;
+  }
+
+  private readAccessibleName(): string | null {
+    const ids = this.fieldAriaLabelledby()?.split(/\s+/).filter(Boolean) ?? [];
+    const text = ids
+      .map((id) => this.elementById(id)?.textContent?.trim() ?? '')
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    if (text) return text;
+
+    const direct = this.host.getAttribute('aria-label')?.trim();
+    if (direct) return direct;
+
+    const nativeLabel = Array.from(this.host.labels ?? [])
+      .map((label) => label.textContent?.trim() ?? '')
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    return nativeLabel || null;
+  }
+
+  private elementById(id: string): Element | null {
+    const documentMatch = this.host.ownerDocument.getElementById(id);
+    if (documentMatch) return documentMatch;
+
+    // Angular test hosts and embedded roots may be detached from ownerDocument.
+    // Search the local ancestor tree without assuming a global document mount.
+    let scope: HTMLElement | null = this.host.parentElement;
+    while (scope) {
+      if (scope.id === id) return scope;
+      const localMatch = Array.from(scope.querySelectorAll<HTMLElement>('[id]')).find(
+        (candidate) => candidate.id === id,
+      );
+      if (localMatch) return localMatch;
+      scope = scope.parentElement;
+    }
+    return null;
   }
 
   private emitValue(value: number | null): void {
+    // Native submission may run before Angular renders the committed display.
+    this.host.value = this.adapter.format(value, this.context());
     if (this.controlMode()) this.controlValue.set(value);
     this.valueChange.emit(value);
     this.onControlChange(value);
     this.onValidatorChange();
   }
 }
+
+const HOLD_DELAY_MS = 400;
+const HOLD_REPEAT_MS = 60;
+
+/**
+ * One directional button that controls an explicit exported Number Input.
+ * Its projected content owns the glyph or copy; the directive owns stepping.
+ */
+@Directive({
+  selector: 'button[hellNumberStep]',
+  exportAs: 'hellNumberStep',
+  host: {
+    '[class]': "part('root')",
+    '[attr.type]': 'nativeButtonType()',
+    tabindex: '-1',
+    'data-slot': 'root',
+    '[attr.data-direction]': 'direction()',
+    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.disabled]': 'isDisabled() ? "" : null',
+    '[attr.aria-label]': 'label()',
+    '(pointerdown)': 'onPointerDown($event)',
+    '(pointerup)': 'stopHold()',
+    '(pointerleave)': 'stopHold()',
+    '(pointercancel)': 'stopHold()',
+    '(click)': 'onClick($event)',
+  },
+})
+export class HellNumberStep {
+  /** Direction applied by this button. */
+  readonly direction = input.required<HellNumberStepDirection>({ alias: 'hellNumberStep' });
+  /** Explicit Number Input controller targeted by this button. */
+  readonly target = input.required<HellNumberInput>({ alias: 'hellNumberStepFor' });
+  /** Disables this step independently of its target's state and bounds. */
+  readonly disabled = input(false, { transform: booleanAttribute });
+  /** Optional accessible-label override. */
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** Tailwind refinements for this button's single root Public Part. */
+  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for the root Public Part. */
+  protected readonly part = hellPartStyler<'root'>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NUMBER_STEP_RECIPE,
+  });
+  private readonly controller = computed(() => numberInputStepController(this.target()));
+  /** Effective native disabled state from the button, target, or target bounds. */
+  protected readonly isDisabled = computed(
+    () => this.disabled() || this.controller().isDisabled(this.direction()),
+  );
+  /** Effective accessible label from an override or the named target. */
+  protected readonly label = computed(
+    () => this.ariaLabel() ?? this.controller().label(this.direction()),
+  );
+
+  private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef).nativeElement;
+  private readonly destroyRef = inject(DestroyRef);
+  private holdTimeout: ReturnType<typeof setTimeout> | null = null;
+  private holdInterval: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.stopHold());
+  }
+
+  /** Preserves an authored native type and otherwise prevents form submission. */
+  protected nativeButtonType(): string {
+    return this.host.getAttribute('type') ?? 'button';
+  }
+
+  /** Starts an immediate step followed by hold-to-repeat for primary pointers. */
+  protected onPointerDown(event: PointerEvent): void {
+    if (event.button !== 0 || this.isDisabled()) return;
+    event.preventDefault();
+    this.stopHold();
+    this.activate(event.shiftKey);
+    this.holdTimeout = setTimeout(() => {
+      this.holdInterval = setInterval(() => {
+        if (this.isDisabled()) {
+          this.stopHold();
+          return;
+        }
+        this.activate(event.shiftKey);
+      }, HOLD_REPEAT_MS);
+    }, HOLD_DELAY_MS);
+  }
+
+  /** Supports keyboard, assistive-technology, and programmatic click activation. */
+  protected onClick(event: MouseEvent): void {
+    // A pointer activation already stepped on pointerdown so holding can repeat.
+    if (event.detail > 0 || this.isDisabled()) return;
+    this.activate(event.shiftKey);
+  }
+
+  /** Stops any in-progress hold-to-repeat timers. */
+  protected stopHold(): void {
+    if (this.holdTimeout !== null) {
+      clearTimeout(this.holdTimeout);
+      this.holdTimeout = null;
+    }
+    if (this.holdInterval !== null) {
+      clearInterval(this.holdInterval);
+      this.holdInterval = null;
+    }
+  }
+
+  private activate(multiplied: boolean): void {
+    const controller = this.controller();
+    controller.apply(this.direction(), multiplied);
+    controller.focus();
+  }
+}
+
+/** Canonical bulk-import tuple for the Number Input entry point. */
+export const HELL_NUMBER_INPUT_IMPORTS = [HellNumberInput, HellNumberStep] as const;

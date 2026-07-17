@@ -350,19 +350,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/confirm-a11y-contracts.spec.ts`. See #113 and #131 (spec #93).
 - Added the `@hell-ui/angular/number-input` Package Entry Point (Styled
   Primitive), joining the Typed Value Input family alongside date and time
-  input. `HellNumberInput` binds a real `number | null` through
-  `ControlValueAccessor` + `Validator`: a text field (numeric/decimal
-  `inputmode`, not native `type="number"`) with APG spinbutton semantics
+  input. `input[hellNumberInput]` binds a real `number | null` through
+  `ControlValueAccessor` + `Validator` on the consumer's native text field
+  (numeric/decimal `inputmode`, not native `type="number"`) with APG spinbutton semantics
   (`role`/`aria-valuenow`/`aria-valuemin`/`aria-valuemax` reflected), Arrow
   stepping (Shift/PageUp/PageDown for a larger jump) and Home/End to bounds,
-  optional hold-to-repeat stepper buttons, a unit `suffix` Public Part, integer
-  mode, and a pluggable locale parse/format adapter behind
+  explicit hold-to-repeat `button[hellNumberStep]` controls, projected unit
+  content with consumer-authored `aria-valuetext`, integer mode, and a pluggable locale parse/format adapter behind
   `HELL_NUMBER_INPUT_ADAPTER`. Stepping clamps into `[min, max]`; typing never
   clamps live — out-of-range values commit but fail validation. The `Validator`
   reports `required`, `numberInputMalformed`, `min`, and `max` as distinct
   keys, and the control shares date input's ambient form-field
-  invalid/label/description wiring. Public Parts: `root`, `input`,
-  `increment`, `decrement`, `suffix`. Closes #105 (spec #94).
+  invalid/label/description wiring. The input and each Number Step expose only
+  their own local `root` Part Style Map. Closes #105 (spec #94); current native
+  composition finalized by #200.
 
 - More granular Public Parts across six entrypoints, all styleable through the
   existing `ui` Part Style Maps: `HellAvatar` gains `image` and `fallback`
@@ -904,6 +905,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `getInputValue()` / `setInputValue()` to `getValue()` / `setValue()`, commit
   through `blur()` when required, and replace `openPicker()` with harnesses for
   the consumer-owned composition. Closes #199.
+- BREAKING: Number Input is now numeric parsing, formatting, validation,
+  stepping, and forms behavior on the authored native
+  `input[hellNumberInput]` instead of the owned `<hell-number-input>`
+  component. First carried by the next `@hell-ui/angular` release after
+  `0.2.0` (currently Unreleased). Keep the controlled `value` / `valueChange`
+  pair, `number | null`, CVA, required/integer/bounds validation, adapter
+  overrides, invalid drafts, external synchronization, wheel prevention, and
+  spinbutton keyboard behavior. Move `inputId`, `name`, `placeholder`,
+  autocomplete, and ARIA attributes onto the real input. Replace the removed
+  `steppers` flag with explicit `button[hellNumberStep]` controls bound through
+  required `hellNumberStepFor` controller references; they retain modifier and
+  hold-repeat behavior, bound disabling, Label Contract strings, and target
+  focus. Replace the removed `suffix` string with consumer-owned projected
+  content and author `aria-valuetext` when the unit changes the announced
+  value. The former five-part `HellNumberInputPart` / `HellNumberInputUi`
+  anatomy has no compatibility aliases; the input, each Number Step, Control
+  Group, and suffix own separate local `root` Part Style Maps. Focused
+  unit/browser/axe coverage, docs, API reports, architecture checks, and an
+  isolated packed consumer protect the replacement. Closes #200.
 - BREAKING: Removed the `@hell-ui/angular/drop-zone` and
   `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
   First carried by the next `@hell-ui/angular` release after `0.2.0` (currently
@@ -1121,7 +1141,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`Hell<Module>Part = 'root'` and their `Hell<Module>Ui = HellUi<...>`
   counterparts) from every entry point. Single-part modules now type their
   `ui` input as `HellUiInput<'root'>` from `@hell-ui/angular/core` directly;
-  multi-part unions such as `HellToasterPart` or `HellNumberInputPart` and
+  multi-part unions such as `HellToasterPart` or `HellDatePickerPart` and
   their `Ui` maps remain exported. Migrate `HellXUi` annotations on single-part
   modules to `HellUi<'root'>` (or drop the annotation). Evidence: API reports
   shrink accordingly; behavior, recipes, and `data-slot` contracts are

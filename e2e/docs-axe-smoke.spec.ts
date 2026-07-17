@@ -428,11 +428,17 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Number input',
     include: ['main'],
     prepare: async (page) => {
+      const basic = page.locator('app-number-input-basic-example');
+      const port = basic.getByRole('spinbutton', { name: 'Listen port' });
+      await expect(port).toBeVisible();
+      await expect(port).toHaveAttribute('hellNumberInput', '');
+      await expect(basic.locator('hell-number-input')).toHaveCount(0);
+
+      const duration = page.locator('app-number-input-duration-seconds-example');
+      await expect(duration.getByText('seconds', { exact: true })).toBeVisible();
       await expect(
-        page
-          .locator('app-number-input-basic-example')
-          .getByRole('spinbutton', { name: 'Listen port' }),
-      ).toBeVisible();
+        duration.getByRole('spinbutton', { name: 'Announce interval' }),
+      ).toHaveAttribute('aria-valuetext', '30 seconds');
     },
   },
   {
