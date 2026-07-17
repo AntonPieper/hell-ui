@@ -148,10 +148,3 @@ export const HELL_LISTBOX_IMPORTS = [
   HellListboxSection,
   HellListboxHeader,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_LISTBOX_IMPORTS.
- */
-export const HELL_LISTBOX_DIRECTIVES = HELL_LISTBOX_IMPORTS;

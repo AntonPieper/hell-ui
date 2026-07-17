@@ -12,9 +12,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 
-// @public @deprecated
-export const HELL_TABLE_UTILITIES_DIRECTIVES: readonly [typeof HellTableContainer, typeof HellTable, typeof HellTableHead, typeof HellTableBody, typeof HellTableRow, typeof HellTableRowIgnore, typeof HellTableRowAction, typeof HellTableSelectionCell, typeof HellTableRowCheckbox, typeof HellTableRowRadio, typeof HellTableHeaderCell, typeof HellTableSortTrigger, typeof HellTableCell, typeof HellTableResizeHandle];
-
 // @public
 export const HELL_TABLE_UTILITIES_IMPORTS: readonly [typeof HellTableContainer, typeof HellTable, typeof HellTableHead, typeof HellTableBody, typeof HellTableRow, typeof HellTableRowIgnore, typeof HellTableRowAction, typeof HellTableSelectionCell, typeof HellTableRowCheckbox, typeof HellTableRowRadio, typeof HellTableHeaderCell, typeof HellTableSortTrigger, typeof HellTableCell, typeof HellTableResizeHandle];
 

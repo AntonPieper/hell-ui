@@ -1123,10 +1123,3 @@ export const HELL_TABLE_UTILITIES_IMPORTS = [
   HellTableCell,
   HellTableResizeHandle,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_TABLE_UTILITIES_IMPORTS.
- */
-export const HELL_TABLE_UTILITIES_DIRECTIVES = HELL_TABLE_UTILITIES_IMPORTS;

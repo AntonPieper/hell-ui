@@ -529,10 +529,3 @@ export const HELL_RESIZABLE_IMPORTS = [
   HellResizablePane,
   HellResizableHandle,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_RESIZABLE_IMPORTS.
- */
-export const HELL_RESIZABLE_DIRECTIVES = HELL_RESIZABLE_IMPORTS;

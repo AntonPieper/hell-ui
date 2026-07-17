@@ -421,10 +421,3 @@ export const HELL_PAGINATION_IMPORTS = [
   HellPageLink,
   HellPaginationStrip,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_PAGINATION_IMPORTS.
- */
-export const HELL_PAGINATION_DIRECTIVES = HELL_PAGINATION_IMPORTS;

@@ -179,10 +179,3 @@ export const HELL_CONTROL_GROUP_IMPORTS = [
   HellControlGroupSuffix,
   HellControlGroupAction,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_CONTROL_GROUP_IMPORTS.
- */
-export const HELL_CONTROL_GROUP_DIRECTIVES = HELL_CONTROL_GROUP_IMPORTS;

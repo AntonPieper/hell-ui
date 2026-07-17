@@ -1191,10 +1191,3 @@ export const HELL_TANSTACK_TABLE_IMPORTS = [
   HellTanStackColumnFilter,
   FlexRenderDirective,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_TANSTACK_TABLE_IMPORTS.
- */
-export const HELL_TANSTACK_TABLE_DIRECTIVES = HELL_TANSTACK_TABLE_IMPORTS;

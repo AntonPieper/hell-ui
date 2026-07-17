@@ -430,10 +430,3 @@ export class HellToaster {
 
 /** All Hell toast directives and components, for convenient bulk import. */
 export const HELL_TOAST_IMPORTS = [HellToaster] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_TOAST_IMPORTS.
- */
-export const HELL_TOAST_DIRECTIVES = HELL_TOAST_IMPORTS;

@@ -12,9 +12,6 @@ import { HellSize } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 
-// @public @deprecated
-export const HELL_CHIP_DIRECTIVES: readonly [typeof HellChipSet, typeof HellChipInput, typeof HellChip, typeof HellChipRemove];
-
 // @public
 export const HELL_CHIP_IMPORTS: readonly [typeof HellChipSet, typeof HellChipInput, typeof HellChip, typeof HellChipRemove];
 

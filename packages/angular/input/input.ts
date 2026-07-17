@@ -139,10 +139,3 @@ export class HellSearchClear {
 
 /** Search-field directives of the input entry point, for bulk `imports`. */
 export const HELL_SEARCH_IMPORTS = [HellSearch, HellSearchClear] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_SEARCH_IMPORTS.
- */
-export const HELL_SEARCH_DIRECTIVES = HELL_SEARCH_IMPORTS;

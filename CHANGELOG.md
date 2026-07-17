@@ -8,11 +8,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 ### Added
 
 - Every public Angular directive tuple now has an accurately named
-  `HELL_*_IMPORTS` export. Existing `HELL_*_DIRECTIVES` names remain deprecated
-  identity aliases during the migration window, so applications can adopt the
-  canonical names without changing tuple contents or runtime behavior. API
-  reports, architecture checks, and a packed consumer protect the additive
-  contract. Closes #208.
+  `HELL_*_IMPORTS` export. Temporary deprecated `HELL_*_DIRECTIVES` identity
+  aliases supported the in-repo migration without changing tuple contents or
+  runtime behavior; see Breaking changes for their removal before the next
+  release. API reports, architecture checks, and a packed consumer protect the
+  canonical contract. Closes #208.
 - Added the directive-first `@hell-ui/angular/file-picker` Styled Primitive.
   `[hellFilePicker]` acquires files through drop or one internal native browse
   action, then emits one `HellFileSelection` with accepted files and structured
@@ -150,7 +150,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `selectedChange` output. Disabled options render but cannot be toggled, so a
   consumer enforces a selection floor by disabling still-selected options. It
   composes freely inside a `[hellMenu]` panel next to hand-written items,
-  sections, and separators, and joins `HELL_MENU_DIRECTIVES`. Closes #150
+  sections, and separators, and joins `HELL_MENU_IMPORTS`. Closes #150
   (spec #147). Evidence: menu unit suite, docs data-driven options example.
 - Brought the select, combobox, date-input, audio-player, and TanStack table
   shell (including its virtual-rows strategy) entry points under API reports:
@@ -236,7 +236,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/multi-select-menu-button-contracts.spec.ts`, the docs page at
   `/components/multi-select-menu-button`, and its axe WCAG A/AA smoke coverage.
   Closes #109 (spec #98).
-- Added `HELL_CHIP_DIRECTIVES` to `@hell-ui/angular/chip` (array of
+- Added `HELL_CHIP_IMPORTS` to `@hell-ui/angular/chip` (array of
   `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and
   "Conditional content" docs sections on the alert and empty-state pages that
@@ -258,7 +258,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   glyph and derives its `Remove {label}` name from the chip's text). The
   combobox stylesheet carries the composed chip stylesheet, so a packed
   consumer importing only `@hell-ui/angular/combobox/styles.css` gets the chip
-  recipe and built-in glyph. `HELL_COMBOBOX_DIRECTIVES` now includes
+  recipe and built-in glyph. `HELL_COMBOBOX_IMPORTS` now includes
   `hellComboboxChips`, and the entry point exports `HellComboboxChipsPart` /
   `HellComboboxChipsUi`. Existing non-chips combobox behavior is unchanged.
   Evidence: `packages/angular/combobox/combobox.spec.ts`,
@@ -440,8 +440,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 - Docs pages, live examples, search source, unit hosts, harness examples, and
   browser-contract fixtures now use the canonical `HELL_*_IMPORTS` tuple names.
-  Compatibility aliases remain available only for external consumers during
-  the migration window. Closes #210.
+  This completed the in-repo consumer migration before the temporary
+  compatibility aliases were removed. Closes #210.
 - Library composition, release guidance, and packed-consumer fixtures now use
   the canonical `HELL_*_IMPORTS` tuple names exclusively. Tooling-generated
   workspaces no longer rely on compatibility aliases, and architecture checks
@@ -695,7 +695,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   API report shrinks by four symbols.
 - BREAKING: the avatar-group entry point folds into avatar. Import
   `HellAvatarGroup`, `HellAvatarGroupItem`, `HellAvatarGroupOverflow`, and
-  `HELL_AVATAR_GROUP_DIRECTIVES` from `@hell-ui/angular/avatar`, and its
+  `HELL_AVATAR_GROUP_IMPORTS` from `@hell-ui/angular/avatar`, and its
   stylesheet from `@hell-ui/angular/avatar/styles.css` — the
   `@hell-ui/angular/avatar-group` import path and stylesheet are gone.
   One avatar family, one entry point. Closes #178. Evidence: avatar and
@@ -834,6 +834,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Removed the 26 deprecated `HELL_*_DIRECTIVES` import-tuple aliases
+  from `accordion`, `alert`, `app-shell`, `avatar`, `breadcrumbs`, `card`,
+  `chip`, `combobox`, `control-group`, `dialog`, `empty-state`, `field`,
+  `input`, `listbox`, `menu`, `omnibar`, `page-header`, `pagination`,
+  `resizable`, `select`, `table`, `table-tanstack`,
+  `table-tanstack/virtual`, `tabs`, `toast`, and `toolbar`. First carried by
+  the next `@hell-ui/angular` release after `0.2.0` (currently Unreleased).
+  Replace each removed name one-for-one with the same entry point's canonical
+  `HELL_*_IMPORTS` export; for example, replace `HELL_TOOLBAR_DIRECTIVES` with
+  `HELL_TOOLBAR_IMPORTS`. Tuple contents and runtime behavior are unchanged.
+  The first-beta consumer guide lists every exact mapping. Closes #211.
 - BREAKING: Replaced the owned `@hell-ui/angular/split-view` Composite and
   stylesheet with the projection-first `@hell-ui/angular/master-detail`
   controller. First carried by the next `@hell-ui/angular` release after
@@ -1034,7 +1045,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `HellNativeSelect` now exports from `@hell-ui/angular/select` (the entry
   point whose docs already pointed at it) instead of `@hell-ui/angular/input`.
   The `@hell-ui/angular/search` entry point is removed: `HellSearch`,
-  `HellSearchClear`, and `HELL_SEARCH_DIRECTIVES` now export from
+  `HellSearchClear`, and `HELL_SEARCH_IMPORTS` now export from
   `@hell-ui/angular/input`, so "search" in Hell unambiguously means core's
   `HellSearchService`/ranker infrastructure. Selectors, behavior, recipes, and
   `data-slot` contracts are unchanged — only import paths move. Closes #157.

@@ -968,10 +968,3 @@ export const HELL_APP_SHELL_IMPORTS = [
   HellSidenavToggle,
   HellSecondaryToggle,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_APP_SHELL_IMPORTS.
- */
-export const HELL_APP_SHELL_DIRECTIVES = HELL_APP_SHELL_IMPORTS;

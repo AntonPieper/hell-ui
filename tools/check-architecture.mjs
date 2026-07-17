@@ -82,8 +82,7 @@ function main() {
   checkDocsLazyRouteImportGraphContract();
   checkDocsRootImportContract();
   checkDocsCategoryNavigationContract();
-  checkImportTupleExpansionContract();
-  checkImportTupleConsumerMigrationContract();
+  checkImportTupleRetirementContract();
   checkPackageEntryPoints();
   checkCodeMirrorEntrypointIsolationContract();
   checkAudioTranscriptEntrypointIsolationContract();
@@ -105,78 +104,88 @@ function main() {
   console.log('Architecture checks passed.');
 }
 
-function checkImportTupleExpansionContract() {
-  for (const file of walk(join(root, libraryRoot)).filter((path) => path.endsWith('.ts'))) {
-    const source = readFile(file);
-    for (const match of source.matchAll(/export const (HELL_[A-Z0-9_]+)_DIRECTIVES\s*=/g)) {
-      const legacyName = `${match[1]}_DIRECTIVES`;
-      const importsName = `${match[1]}_IMPORTS`;
-      if (!new RegExp(`export const ${importsName}\\s*=`).test(source)) {
-        failures.push(
-          `Import Tuple Expansion ${relative(root, file)} exports ${legacyName} without ${importsName}`,
-        );
-      }
-      const escapedLegacy = legacyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const escapedImports = importsName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const deprecatedAlias = new RegExp(
-        `/\\*\\*\\s*\\* Legacy import tuple name\\.\\s*\\* @alias\\s*` +
-          `\\* @deprecated Use ${escapedImports}\\.\\s*\\*/\\s*` +
-          `export const ${escapedLegacy}\\s*=\\s*${escapedImports}\\s*;`,
-      );
-      if (!deprecatedAlias.test(source)) {
-        failures.push(
-          `Import Tuple Expansion ${relative(root, file)} must keep ${legacyName} as a deprecated alias of ${importsName}`,
-        );
-      }
-    }
-  }
-}
-
-function checkImportTupleConsumerMigrationContract() {
+function checkImportTupleRetirementContract() {
   const packageRoot = join(root, libraryRoot);
-  const aliases = new Map();
-
-  for (const file of walk(packageRoot).filter((path) => path.endsWith('.ts'))) {
-    const source = readFile(file);
-    for (const match of source.matchAll(/export const (HELL_[A-Z0-9_]+)_DIRECTIVES\s*=\s*(HELL_[A-Z0-9_]+_IMPORTS)\s*;/g)) {
-      aliases.set(`${match[1]}_DIRECTIVES`, match[2]);
-    }
-  }
-
-  const legacyPattern = new RegExp(
-    `\\b(?:${[...aliases.keys()].map(escapeRegExp).join('|')})\\b`,
-    'g',
+  const retiredTupleBases = [
+    'ACCORDION',
+    'ALERT',
+    'APP_SHELL',
+    'AVATAR_GROUP',
+    'BREADCRUMBS',
+    'CARD',
+    'CHIP',
+    'COMBOBOX',
+    'CONTROL_GROUP',
+    'DIALOG',
+    'EMPTY_STATE',
+    'FIELD',
+    'SEARCH',
+    'LISTBOX',
+    'MENU',
+    'OMNIBAR',
+    'PAGE_HEADER',
+    'PAGINATION',
+    'RESIZABLE',
+    'SELECT',
+    'TABLE_UTILITIES',
+    'TANSTACK_TABLE',
+    'TANSTACK_TABLE_VIRTUAL',
+    'TABS',
+    'TOAST',
+    'TOOLBAR',
+  ];
+  const replacements = new Map(
+    retiredTupleBases.map((base) => [`HELL_${base}_DIRECTIVES`, `HELL_${base}_IMPORTS`]),
   );
+  const legacyPattern = /\bHELL_[A-Z0-9_]+_DIRECTIVES\b/g;
+  const allowedMigrationReferences = new Set([
+    'apps/docs/src/app/pages/components/master-detail/master-detail.page.ts:HELL_SPLIT_VIEW_DIRECTIVES',
+  ]);
   const files = [
-    ...walk(packageRoot).filter(
+    ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
+    ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
+    ...walk(join(root, 'e2e')).filter((path) => /\.(?:json|ts)$/.test(path)),
+    ...walk(join(root, 'tools')).filter(
       (path) =>
-        path.endsWith('.ts') &&
-        !path.endsWith('.spec.ts') &&
-        basename(path) !== 'public-api.ts',
+        /\.(?:json|mjs|ts)$/.test(path) &&
+        path !== join(root, 'tools/check-architecture.mjs'),
     ),
-    ...walk(packageRoot).filter((path) => path.endsWith('.spec.ts')),
-    ...walk(join(root, 'apps/docs/src')).filter((path) => path.endsWith('.ts')),
-    ...walk(join(root, 'e2e')).filter((path) => path.endsWith('.ts')),
-    ...walk(join(root, 'tools')).filter((path) => /\.(?:mjs|ts)$/.test(path)),
+    ...walk(join(root, 'etc/api-reports')).filter((path) => path.endsWith('.md')),
     join(root, 'README.md'),
     join(packageRoot, 'README.md'),
-    ...walk(join(root, 'docs/release')).filter((path) => path.endsWith('.md')),
   ];
 
   for (const file of files) {
     const source = readFile(file);
     for (const match of source.matchAll(legacyPattern)) {
       const legacyName = match[0];
-      const importsName = aliases.get(legacyName);
-      const lineStart = source.lastIndexOf('\n', match.index) + 1;
-      const nextLineBreak = source.indexOf('\n', match.index);
-      const lineEnd = nextLineBreak === -1 ? source.length : nextLineBreak;
-      const line = source.slice(lineStart, lineEnd).trim();
-      if (line === `export const ${legacyName} = ${importsName};`) continue;
+      const reference = `${relative(root, file)}:${legacyName}`;
+      if (allowedMigrationReferences.has(reference)) continue;
 
+      const importsName =
+        replacements.get(legacyName) ?? legacyName.replace(/_DIRECTIVES$/, '_IMPORTS');
       const lineNumber = source.slice(0, match.index).split('\n').length;
       failures.push(
-        `Import Tuple Consumer Migration ${relative(root, file)}:${lineNumber} uses ${legacyName}; use ${importsName}`,
+        `Import Tuple Retirement ${relative(root, file)}:${lineNumber} still exposes or consumes ${legacyName}; use ${importsName}`,
+      );
+    }
+  }
+
+  const packageSource = libraryPackageFiles()
+    .filter((path) => path.endsWith('.ts'))
+    .map(readFile)
+    .join('\n');
+  const migrationGuide = readFile(join(root, 'docs/release/first-beta-consumer-guide.md'));
+  for (const [legacyName, importsName] of replacements) {
+    if (!new RegExp(`export const ${escapeRegExp(importsName)}\\s*=`).test(packageSource)) {
+      failures.push(`Import Tuple Retirement is missing canonical replacement ${importsName}`);
+    }
+    const mapping = new RegExp(
+      `${escapeRegExp(legacyName)}[^\\n]*${escapeRegExp(importsName)}`,
+    );
+    if (!mapping.test(migrationGuide)) {
+      failures.push(
+        `Import Tuple Retirement migration guide must map ${legacyName} to ${importsName}`,
       );
     }
   }

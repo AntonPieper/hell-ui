@@ -269,10 +269,3 @@ export const HELL_ALERT_IMPORTS = [
   HellAlertDismiss,
   HellAlertIcon,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_ALERT_IMPORTS.
- */
-export const HELL_ALERT_DIRECTIVES = HELL_ALERT_IMPORTS;

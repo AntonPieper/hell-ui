@@ -8,9 +8,6 @@ import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 
-// @public @deprecated
-export const HELL_CONTROL_GROUP_DIRECTIVES: readonly [typeof HellControlGroup, typeof HellControlGroupPrefix, typeof HellControlGroupSuffix, typeof HellControlGroupAction];
-
 // @public
 export const HELL_CONTROL_GROUP_IMPORTS: readonly [typeof HellControlGroup, typeof HellControlGroupPrefix, typeof HellControlGroupSuffix, typeof HellControlGroupAction];
 

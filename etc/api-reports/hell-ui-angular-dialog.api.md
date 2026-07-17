@@ -14,9 +14,6 @@ import { NgpDismissGuard } from 'ng-primitives/portal';
 import { NgpDismissGuardInput } from 'ng-primitives/portal';
 import { TemplateRef } from '@angular/core';
 
-// @public @deprecated
-export const HELL_DIALOG_DIRECTIVES: readonly [typeof HellDialogTrigger, typeof HellDialogOverlay, typeof HellDialogTitle, typeof HellDialogDescription, typeof HellDialog, typeof HellDialogScope];
-
 // @public
 export const HELL_DIALOG_IMPORTS: readonly [typeof HellDialogTrigger, typeof HellDialogOverlay, typeof HellDialogTitle, typeof HellDialogDescription, typeof HellDialog, typeof HellDialogScope];
 

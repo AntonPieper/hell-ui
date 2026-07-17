@@ -135,10 +135,3 @@ export const HELL_ACCORDION_IMPORTS = [
   HellAccordionTrigger,
   HellAccordionContent,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_ACCORDION_IMPORTS.
- */
-export const HELL_ACCORDION_DIRECTIVES = HELL_ACCORDION_IMPORTS;
