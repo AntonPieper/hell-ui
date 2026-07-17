@@ -371,10 +371,3 @@ export const HELL_COMBOBOX_IMPORTS = [
   HellComboboxOption,
   HellComboboxEmpty,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_COMBOBOX_IMPORTS.
- */
-export const HELL_COMBOBOX_DIRECTIVES = HELL_COMBOBOX_IMPORTS;

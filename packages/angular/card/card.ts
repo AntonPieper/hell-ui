@@ -104,10 +104,3 @@ export const HELL_CARD_IMPORTS = [
   HellCardBody,
   HellCardFooter,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_CARD_IMPORTS.
- */
-export const HELL_CARD_DIRECTIVES = HELL_CARD_IMPORTS;

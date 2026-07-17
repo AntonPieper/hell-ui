@@ -130,10 +130,3 @@ export class HellTabPanel {
 
 /** All directives that make up the tabs entry point, for bulk `imports`. */
 export const HELL_TABS_IMPORTS = [HellTabset, HellTabList, HellTab, HellTabPanel] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_TABS_IMPORTS.
- */
-export const HELL_TABS_DIRECTIVES = HELL_TABS_IMPORTS;

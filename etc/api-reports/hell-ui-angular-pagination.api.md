@@ -11,9 +11,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/pagination';
 import { InjectionToken } from '@angular/core';
 
-// @public @deprecated
-export const HELL_PAGINATION_DIRECTIVES: readonly [typeof HellPagination, typeof HellPageLink, typeof HellPaginationStrip];
-
 // @public
 export const HELL_PAGINATION_IMPORTS: readonly [typeof HellPagination, typeof HellPageLink, typeof HellPaginationStrip];
 

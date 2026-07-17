@@ -10,9 +10,6 @@ import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/listbox';
 import { NgpListboxOption } from 'ng-primitives/listbox';
 
-// @public @deprecated
-export const HELL_LISTBOX_DIRECTIVES: readonly [typeof HellListbox, typeof HellListboxTrigger, typeof HellListboxOption, typeof HellListboxSection, typeof HellListboxHeader];
-
 // @public
 export const HELL_LISTBOX_IMPORTS: readonly [typeof HellListbox, typeof HellListboxTrigger, typeof HellListboxOption, typeof HellListboxSection, typeof HellListboxHeader];
 

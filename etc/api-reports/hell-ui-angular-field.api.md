@@ -9,9 +9,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/form-field';
 
-// @public @deprecated
-export const HELL_FIELD_DIRECTIVES: readonly [typeof HellField, typeof HellFieldLabel, typeof HellFieldDescription, typeof HellFieldError];
-
 // @public
 export const HELL_FIELD_IMPORTS: readonly [typeof HellField, typeof HellFieldLabel, typeof HellFieldDescription, typeof HellFieldError];
 

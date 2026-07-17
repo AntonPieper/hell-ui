@@ -135,10 +135,3 @@ export const HELL_FIELD_IMPORTS = [
   HellFieldDescription,
   HellFieldError,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_FIELD_IMPORTS.
- */
-export const HELL_FIELD_DIRECTIVES = HELL_FIELD_IMPORTS;

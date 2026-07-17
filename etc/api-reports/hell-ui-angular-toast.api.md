@@ -11,9 +11,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { TemplateRef } from '@angular/core';
 
-// @public @deprecated
-export const HELL_TOAST_DIRECTIVES: readonly [typeof HellToaster];
-
 // @public
 export const HELL_TOAST_IMPORTS: readonly [typeof HellToaster];
 

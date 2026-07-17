@@ -402,6 +402,37 @@ Known experimental/best-effort surfaces:
 - `@hell-ui/angular/features/pdf-viewer`
 - audio-player speech transcript options such as `allowSpeechTranscript`
 
+Removed import-tuple compatibility exports:
+
+| Removed alias                                      | Replacement                                                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `HELL_ACCORDION_DIRECTIVES`                        | `HELL_ACCORDION_IMPORTS` from `@hell-ui/angular/accordion`                                          |
+| `HELL_ALERT_DIRECTIVES`                            | `HELL_ALERT_IMPORTS` from `@hell-ui/angular/alert`                                                   |
+| `HELL_APP_SHELL_DIRECTIVES`                        | `HELL_APP_SHELL_IMPORTS` from `@hell-ui/angular/app-shell`                                          |
+| `HELL_AVATAR_GROUP_DIRECTIVES`                     | `HELL_AVATAR_GROUP_IMPORTS` from `@hell-ui/angular/avatar`                                          |
+| `HELL_BREADCRUMBS_DIRECTIVES`                      | `HELL_BREADCRUMBS_IMPORTS` from `@hell-ui/angular/breadcrumbs`                                      |
+| `HELL_CARD_DIRECTIVES`                             | `HELL_CARD_IMPORTS` from `@hell-ui/angular/card`                                                     |
+| `HELL_CHIP_DIRECTIVES`                             | `HELL_CHIP_IMPORTS` from `@hell-ui/angular/chip`                                                     |
+| `HELL_COMBOBOX_DIRECTIVES`                         | `HELL_COMBOBOX_IMPORTS` from `@hell-ui/angular/combobox`                                            |
+| `HELL_CONTROL_GROUP_DIRECTIVES`                    | `HELL_CONTROL_GROUP_IMPORTS` from `@hell-ui/angular/control-group`                                  |
+| `HELL_DIALOG_DIRECTIVES`                           | `HELL_DIALOG_IMPORTS` from `@hell-ui/angular/dialog`                                                 |
+| `HELL_EMPTY_STATE_DIRECTIVES`                      | `HELL_EMPTY_STATE_IMPORTS` from `@hell-ui/angular/empty-state`                                      |
+| `HELL_FIELD_DIRECTIVES`                            | `HELL_FIELD_IMPORTS` from `@hell-ui/angular/field`                                                   |
+| `HELL_SEARCH_DIRECTIVES`                           | `HELL_SEARCH_IMPORTS` from `@hell-ui/angular/input`                                                  |
+| `HELL_LISTBOX_DIRECTIVES`                          | `HELL_LISTBOX_IMPORTS` from `@hell-ui/angular/listbox`                                               |
+| `HELL_MENU_DIRECTIVES`                             | `HELL_MENU_IMPORTS` from `@hell-ui/angular/menu`                                                     |
+| `HELL_OMNIBAR_DIRECTIVES`                          | `HELL_OMNIBAR_IMPORTS` from `@hell-ui/angular/omnibar`                                               |
+| `HELL_PAGE_HEADER_DIRECTIVES`                      | `HELL_PAGE_HEADER_IMPORTS` from `@hell-ui/angular/page-header`                                      |
+| `HELL_PAGINATION_DIRECTIVES`                       | `HELL_PAGINATION_IMPORTS` from `@hell-ui/angular/pagination`                                        |
+| `HELL_RESIZABLE_DIRECTIVES`                        | `HELL_RESIZABLE_IMPORTS` from `@hell-ui/angular/resizable`                                          |
+| `HELL_SELECT_DIRECTIVES`                           | `HELL_SELECT_IMPORTS` from `@hell-ui/angular/select`                                                 |
+| `HELL_TABLE_UTILITIES_DIRECTIVES`                  | `HELL_TABLE_UTILITIES_IMPORTS` from `@hell-ui/angular/table`                                        |
+| `HELL_TANSTACK_TABLE_DIRECTIVES`                   | `HELL_TANSTACK_TABLE_IMPORTS` from `@hell-ui/angular/table-tanstack`                                |
+| `HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES`           | `HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS` from `@hell-ui/angular/table-tanstack/virtual`                |
+| `HELL_TABS_DIRECTIVES`                             | `HELL_TABS_IMPORTS` from `@hell-ui/angular/tabs`                                                     |
+| `HELL_TOAST_DIRECTIVES`                            | `HELL_TOAST_IMPORTS` from `@hell-ui/angular/toast`                                                   |
+| `HELL_TOOLBAR_DIRECTIVES`                          | `HELL_TOOLBAR_IMPORTS` from `@hell-ui/angular/toolbar`                                               |
+
 Removed pre-beta table compatibility surfaces:
 
 | Removed surface                                                                    | Replacement                                                                                                                          |

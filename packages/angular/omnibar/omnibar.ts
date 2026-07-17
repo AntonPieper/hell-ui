@@ -1134,10 +1134,3 @@ export const HELL_OMNIBAR_IMPORTS = [
   HellOmnibarActionsStrip,
   HellOmnibarAction,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_OMNIBAR_IMPORTS.
- */
-export const HELL_OMNIBAR_DIRECTIVES = HELL_OMNIBAR_IMPORTS;

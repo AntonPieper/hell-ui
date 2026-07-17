@@ -99,10 +99,3 @@ export const HELL_AVATAR_GROUP_IMPORTS = [
   HellAvatarGroupItem,
   HellAvatarGroupOverflow,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_AVATAR_GROUP_IMPORTS.
- */
-export const HELL_AVATAR_GROUP_DIRECTIVES = HELL_AVATAR_GROUP_IMPORTS;

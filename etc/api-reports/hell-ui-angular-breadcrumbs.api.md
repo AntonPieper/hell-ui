@@ -10,9 +10,6 @@ import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/breadcrumbs';
 import { InjectionToken } from '@angular/core';
 
-// @public @deprecated
-export const HELL_BREADCRUMBS_DIRECTIVES: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];
-
 // @public
 export const HELL_BREADCRUMBS_IMPORTS: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];
 

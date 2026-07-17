@@ -11,9 +11,6 @@ import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 
-// @public @deprecated
-export const HELL_ALERT_DIRECTIVES: readonly [typeof HellAlert, typeof HellAlertTitle, typeof HellAlertDescription, typeof HellAlertActions, typeof HellAlertDismiss, typeof HellAlertIcon];
-
 // @public
 export const HELL_ALERT_IMPORTS: readonly [typeof HellAlert, typeof HellAlertTitle, typeof HellAlertDescription, typeof HellAlertActions, typeof HellAlertDismiss, typeof HellAlertIcon];
 

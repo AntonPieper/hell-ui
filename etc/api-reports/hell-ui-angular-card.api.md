@@ -8,9 +8,6 @@ import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 
-// @public @deprecated
-export const HELL_CARD_DIRECTIVES: readonly [typeof HellCard, typeof HellCardHeader, typeof HellCardBody, typeof HellCardFooter];
-
 // @public
 export const HELL_CARD_IMPORTS: readonly [typeof HellCard, typeof HellCardHeader, typeof HellCardBody, typeof HellCardFooter];
 

@@ -9,9 +9,6 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/accordion';
 
-// @public @deprecated
-export const HELL_ACCORDION_DIRECTIVES: readonly [typeof HellAccordion, typeof HellAccordionItem, typeof HellAccordionTrigger, typeof HellAccordionContent];
-
 // @public
 export const HELL_ACCORDION_IMPORTS: readonly [typeof HellAccordion, typeof HellAccordionItem, typeof HellAccordionTrigger, typeof HellAccordionContent];
 

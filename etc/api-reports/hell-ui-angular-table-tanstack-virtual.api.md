@@ -11,9 +11,6 @@ import { ɵHellDomWriter } from '@hell-ui/angular/table-tanstack';
 import { ɵHellTanStackBodyItem } from '@hell-ui/angular/table-tanstack';
 import { ɵHellTanStackBodyStrategy } from '@hell-ui/angular/table-tanstack';
 
-// @public @deprecated
-export const HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES: readonly [typeof HellTanStackVirtualRows];
-
 // @public
 export const HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS: readonly [typeof HellTanStackVirtualRows];
 

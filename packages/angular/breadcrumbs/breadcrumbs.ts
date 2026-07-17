@@ -251,10 +251,3 @@ export const HELL_BREADCRUMBS_IMPORTS = [
   HellBreadcrumbSeparator,
   HellBreadcrumbEllipsis,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_BREADCRUMBS_IMPORTS.
- */
-export const HELL_BREADCRUMBS_DIRECTIVES = HELL_BREADCRUMBS_IMPORTS;

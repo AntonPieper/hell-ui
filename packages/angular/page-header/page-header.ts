@@ -257,10 +257,3 @@ export const HELL_PAGE_HEADER_IMPORTS = [
   HellPageHeaderDescription,
   HellPageHeaderToolbar,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_PAGE_HEADER_IMPORTS.
- */
-export const HELL_PAGE_HEADER_DIRECTIVES = HELL_PAGE_HEADER_IMPORTS;

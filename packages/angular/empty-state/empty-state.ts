@@ -227,10 +227,3 @@ export const HELL_EMPTY_STATE_IMPORTS = [
   HellEmptyStateDescription,
   HellEmptyStateActions,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_EMPTY_STATE_IMPORTS.
- */
-export const HELL_EMPTY_STATE_DIRECTIVES = HELL_EMPTY_STATE_IMPORTS;

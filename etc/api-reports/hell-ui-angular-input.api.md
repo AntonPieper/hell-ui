@@ -16,9 +16,6 @@ import * as i1 from 'ng-primitives/input';
 import * as i2 from 'ng-primitives/textarea';
 import * as i3 from 'ng-primitives/search';
 
-// @public @deprecated
-export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSearchClear];
-
 // @public
 export const HELL_SEARCH_IMPORTS: readonly [typeof HellSearch, typeof HellSearchClear];
 

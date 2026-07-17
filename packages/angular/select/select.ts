@@ -309,10 +309,3 @@ export const HELL_SELECT_IMPORTS = [
   HellSelectPortal,
   HellSelectOption,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_SELECT_IMPORTS.
- */
-export const HELL_SELECT_DIRECTIVES = HELL_SELECT_IMPORTS;

@@ -923,10 +923,3 @@ export const HELL_TOOLBAR_IMPORTS = [
   HellToolbarSeparator,
   HellToolbarWidget,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_TOOLBAR_IMPORTS.
- */
-export const HELL_TOOLBAR_DIRECTIVES = HELL_TOOLBAR_IMPORTS;

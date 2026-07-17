@@ -12,9 +12,6 @@ import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/select';
 import * as i2 from 'ng-primitives/input';
 
-// @public @deprecated
-export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelect, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
-
 // @public
 export const HELL_SELECT_IMPORTS: readonly [typeof HellSelect, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
 

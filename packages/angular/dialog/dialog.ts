@@ -362,10 +362,3 @@ export const HELL_DIALOG_IMPORTS = [
   HellDialog,
   HellDialogScope,
 ] as const;
-
-/**
- * Legacy import tuple name.
- * @alias
- * @deprecated Use HELL_DIALOG_IMPORTS.
- */
-export const HELL_DIALOG_DIRECTIVES = HELL_DIALOG_IMPORTS;
