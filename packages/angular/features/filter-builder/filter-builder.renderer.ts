@@ -17,9 +17,9 @@ import {
   signal,
 } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import {
   hellPartStyler,
   hellRankLocalSearch,
@@ -104,9 +104,9 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
   imports: [
     NgTemplateOutlet,
     HellButton,
-    ...HELL_CHIP_DIRECTIVES,
-    ...HELL_COMBOBOX_DIRECTIVES,
-    ...HELL_CONTROL_GROUP_DIRECTIVES,
+    ...HELL_CHIP_IMPORTS,
+    ...HELL_COMBOBOX_IMPORTS,
+    ...HELL_CONTROL_GROUP_IMPORTS,
     HellPopover,
     HellPopoverTrigger,
   ],

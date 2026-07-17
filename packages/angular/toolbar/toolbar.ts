@@ -3,7 +3,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { HostBinding } from '@angular/core';
 import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, InjectionToken, NO_ERRORS_SCHEMA, NgZone, Renderer2, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { hellCreateLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { NgpRovingFocusItem } from 'ng-primitives/roving-focus';
 import { NgpToolbar } from 'ng-primitives/toolbar';
@@ -252,7 +252,7 @@ const COLLAPSED_METRICS: HellToolbarOverflowMetrics = {
 @Component({
   selector: 'hell-overflow-toolbar-renderer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, HellButton, ...HELL_MENU_DIRECTIVES],
+  imports: [NgTemplateOutlet, HellButton, ...HELL_MENU_IMPORTS],
   schemas: [NO_ERRORS_SCHEMA],
   host: {
     class: 'contents',

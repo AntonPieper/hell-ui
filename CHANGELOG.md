@@ -438,6 +438,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Library composition, release guidance, and packed-consumer fixtures now use
+  the canonical `HELL_*_IMPORTS` tuple names exclusively. Tooling-generated
+  workspaces no longer rely on compatibility aliases, and architecture checks
+  prevent production or release examples from regressing to the deprecated
+  names. Closes #209.
 - BREAKING: Menu no longer exports the data-driven `HellMenuOptions` renderer,
   its `HellMenuOptionsPart`/`HellMenuOptionsUi` types, or the
   `<hell-menu-options>` selector. Replace renderer bindings with an explicit

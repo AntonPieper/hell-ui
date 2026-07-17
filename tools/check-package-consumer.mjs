@@ -1544,7 +1544,7 @@ function chipInputConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
-  HELL_CHIP_DIRECTIVES,
+  HELL_CHIP_IMPORTS,
   HellChip,
   HellChipInput,
   HellChipRemove,
@@ -1556,7 +1556,7 @@ const chipDirectives: readonly [
   typeof HellChipInput,
   typeof HellChip,
   typeof HellChipRemove,
-] = HELL_CHIP_DIRECTIVES;
+] = HELL_CHIP_IMPORTS;
 
 @Component({
   selector: 'app-root',
@@ -1599,13 +1599,13 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function controlGroupConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '${packageName}/control-group';
+import { HELL_CONTROL_GROUP_IMPORTS } from '${packageName}/control-group';
 import { HellInput } from '${packageName}/input';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellInput, ...HELL_CONTROL_GROUP_DIRECTIVES],
+  imports: [HellInput, ...HELL_CONTROL_GROUP_IMPORTS],
   template: \`
     <div
       hellControlGroup
@@ -1683,7 +1683,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function filePickerConsumerMainTs() {
   return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_ALERT_DIRECTIVES } from '${packageName}/alert';
+import { HELL_ALERT_IMPORTS } from '${packageName}/alert';
 import { HellButton } from '${packageName}/button';
 import {
   HellFilePicker,
@@ -1711,7 +1711,7 @@ const MAX_QUEUE_ITEMS = 3;
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_ALERT_DIRECTIVES, HellButton, HellFilePicker, HellProgress, HellProgressBar],
+  imports: [...HELL_ALERT_IMPORTS, HellButton, HellFilePicker, HellProgress, HellProgressBar],
   template: \`
     <div
       hellFilePicker
@@ -1845,7 +1845,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function paginationConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '${packageName}/pagination';
+import { HELL_PAGINATION_IMPORTS, type HellPaginationStripUi } from '${packageName}/pagination';
 
 const stripUi = {
   root: 'gap-hell-4',
@@ -1859,7 +1859,7 @@ const pageButtonUi = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_PAGINATION_DIRECTIVES],
+  imports: [...HELL_PAGINATION_IMPORTS],
   template: \`
     <hell-pagination [page]="2" [pageCount]="6" [ui]="stripUi" />
     <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
@@ -1881,9 +1881,9 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function comboboxProjectionConsumerMainTs() {
   return `import { Component, computed, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_CHIP_DIRECTIVES } from '${packageName}/chip';
-import { HELL_COMBOBOX_DIRECTIVES } from '${packageName}/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '${packageName}/control-group';
+import { HELL_CHIP_IMPORTS } from '${packageName}/chip';
+import { HELL_COMBOBOX_IMPORTS } from '${packageName}/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '${packageName}/control-group';
 import { hellSearchResource, type HellPickValue } from '${packageName}/core';
 
 interface Group {
@@ -1901,9 +1901,9 @@ const GROUPS: readonly Group[] = [
   selector: 'app-root',
   standalone: true,
   imports: [
-    ...HELL_CHIP_DIRECTIVES,
-    ...HELL_COMBOBOX_DIRECTIVES,
-    ...HELL_CONTROL_GROUP_DIRECTIVES,
+    ...HELL_CHIP_IMPORTS,
+    ...HELL_COMBOBOX_IMPORTS,
+    ...HELL_CONTROL_GROUP_IMPORTS,
   ],
   template: \`
     <div hellControlGroup data-test-id="combobox-projection">
@@ -1968,32 +1968,32 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_ACCORDION_DIRECTIVES } from '${packageName}/accordion';
+import { HELL_ACCORDION_IMPORTS } from '${packageName}/accordion';
 import { HellAvatar, type HellAvatarPart, type HellAvatarUi } from '${packageName}/avatar';
-import { HELL_BREADCRUMBS_DIRECTIVES } from '${packageName}/breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS } from '${packageName}/breadcrumbs';
 import { HellButton } from '${packageName}/button';
-import { HELL_CARD_DIRECTIVES } from '${packageName}/card';
+import { HELL_CARD_IMPORTS } from '${packageName}/card';
 import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '${packageName}/checkbox';
-import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
+import { HELL_FIELD_IMPORTS } from '${packageName}/field';
 import { HellIcon } from '${packageName}/icon';
 import { HellInput } from '${packageName}/input';
-import { HELL_LISTBOX_DIRECTIVES } from '${packageName}/listbox';
-import { HELL_MENU_DIRECTIVES } from '${packageName}/menu';
+import { HELL_LISTBOX_IMPORTS } from '${packageName}/listbox';
+import { HELL_MENU_IMPORTS } from '${packageName}/menu';
 import { HellPopover, HellPopoverTrigger } from '${packageName}/popover';
 import { HellProgress, HellProgressBar } from '${packageName}/progress';
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from '${packageName}/radio';
 import { HellSearch, HellSearchClear } from '${packageName}/input';
-import { HELL_SELECT_DIRECTIVES } from '${packageName}/select';
+import { HELL_SELECT_IMPORTS } from '${packageName}/select';
 import { HellSeparator } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
 import { HellSkeleton } from '${packageName}/skeleton';
 import { HellSpinner } from '${packageName}/spinner';
 import { HellSwitch, HellNativeSwitch, type HellSwitchUi } from '${packageName}/switch';
 import { HellBadge, HellChip, HellKbd } from '${packageName}/chip';
-import { HELL_TABS_DIRECTIVES } from '${packageName}/tabs';
+import { HELL_TABS_IMPORTS } from '${packageName}/tabs';
 import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '${packageName}/toggle';
 import { HellTooltip, HellTooltipTrigger } from '${packageName}/tooltip';
-import { HELL_COMBOBOX_DIRECTIVES } from '${packageName}/combobox';
+import { HELL_COMBOBOX_IMPORTS } from '${packageName}/combobox';
 
 const primitiveRootPart: HellAvatarPart = 'root';
 
@@ -2020,18 +2020,18 @@ interface MenuChannel {
   selector: 'app-root',
   standalone: true,
   imports: [
-    ...HELL_ACCORDION_DIRECTIVES,
+    ...HELL_ACCORDION_IMPORTS,
     HellAvatar,
-    ...HELL_BREADCRUMBS_DIRECTIVES,
+    ...HELL_BREADCRUMBS_IMPORTS,
     HellButton,
-    ...HELL_CARD_DIRECTIVES,
+    ...HELL_CARD_IMPORTS,
     HellCheckbox,
     HellNativeCheckbox,
-    ...HELL_FIELD_DIRECTIVES,
+    ...HELL_FIELD_IMPORTS,
     HellIcon,
     HellInput,
-    ...HELL_LISTBOX_DIRECTIVES,
-    ...HELL_MENU_DIRECTIVES,
+    ...HELL_LISTBOX_IMPORTS,
+    ...HELL_MENU_IMPORTS,
     HellPopover,
     HellPopoverTrigger,
     HellProgress,
@@ -2042,7 +2042,7 @@ interface MenuChannel {
     HellNativeRadio,
     HellSearch,
     HellSearchClear,
-    ...HELL_SELECT_DIRECTIVES,
+    ...HELL_SELECT_IMPORTS,
     HellSeparator,
     HellSlider,
     HellSkeleton,
@@ -2052,13 +2052,13 @@ interface MenuChannel {
     HellBadge,
     HellKbd,
     HellChip,
-    ...HELL_TABS_DIRECTIVES,
+    ...HELL_TABS_IMPORTS,
     HellToggle,
     HellToggleGroup,
     HellToggleGroupItem,
     HellTooltip,
     HellTooltipTrigger,
-    ...HELL_COMBOBOX_DIRECTIVES,
+    ...HELL_COMBOBOX_IMPORTS,
   ],
   template: \`
     <button hellButton type="button" [ui]="buttonUi">Save</button>
@@ -2335,19 +2335,19 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function compositesConsumerMainTs() {
   return `import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
+import { HELL_APP_SHELL_IMPORTS } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
-import { HELL_DIALOG_DIRECTIVES } from '${packageName}/dialog';
+import { HELL_DIALOG_IMPORTS } from '${packageName}/dialog';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/features/dialpad';
-import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
+import { HELL_OMNIBAR_IMPORTS, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import {
-  HELL_TOOLBAR_DIRECTIVES,
+  HELL_TOOLBAR_IMPORTS,
   type HellOverflowToolbarUi,
 } from '${packageName}/toolbar';
 import {
-  HELL_TOAST_DIRECTIVES,
+  HELL_TOAST_IMPORTS,
   HellToastService,
   type HellToasterUi,
   type HellToastRef,
@@ -2369,16 +2369,16 @@ interface SearchItem {
   selector: 'app-root',
   standalone: true,
   imports: [
-    ...HELL_APP_SHELL_DIRECTIVES,
-    ...HELL_DIALOG_DIRECTIVES,
-    ...HELL_OMNIBAR_DIRECTIVES,
+    ...HELL_APP_SHELL_IMPORTS,
+    ...HELL_DIALOG_IMPORTS,
+    ...HELL_OMNIBAR_IMPORTS,
     HellDateInput,
     HellDatePicker,
     HellDateRangePicker,
     HellDialpad,
     HellTimeInput,
-    ...HELL_TOOLBAR_DIRECTIVES,
-    ...HELL_TOAST_DIRECTIVES,
+    ...HELL_TOOLBAR_IMPORTS,
+    ...HELL_TOAST_IMPORTS,
   ],
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
@@ -2663,19 +2663,14 @@ function toolbarConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
-  HELL_TOOLBAR_DIRECTIVES,
   HELL_TOOLBAR_IMPORTS,
   type HellOverflowToolbarUi,
 } from '${packageName}/toolbar';
 
-if (HELL_TOOLBAR_IMPORTS !== HELL_TOOLBAR_DIRECTIVES) {
-  throw new Error('The deprecated toolbar tuple must remain an identity alias.');
-}
-
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   template: \`
     <div hellToolbar label="Formatting">
       <button hellToolbarItem type="button" (click)="activations += 1">Bold</button>
@@ -2724,12 +2719,12 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function pageHeaderConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_PAGE_HEADER_DIRECTIVES, type HellPageHeaderUi } from '${packageName}/page-header';
+import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from '${packageName}/page-header';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_PAGE_HEADER_DIRECTIVES],
+  imports: [...HELL_PAGE_HEADER_IMPORTS],
   template: \`
     <hell-page-header [level]="2" [ui]="pageHeaderUi">
       <hell-page-header-back (back)="backCount += 1" />
@@ -2898,12 +2893,12 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function appShellConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
+import { HELL_APP_SHELL_IMPORTS } from '${packageName}/app-shell';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
@@ -2927,7 +2922,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function resizableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi } from '${packageName}/resizable';
+import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi } from '${packageName}/resizable';
 
 const paneUi = {
   root: 'hd-surface-elevated p-4 overflow-hidden',
@@ -2941,7 +2936,7 @@ const handleUi = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: \`
     <div hellResizable orientation="horizontal" ui="h-[240px]">
       <section hellResizablePane [initialFlex]="2" [ui]="paneUi">Left</section>
@@ -2964,7 +2959,7 @@ function masterDetailConsumerMainTs() {
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_MASTER_DETAIL_IMPORTS } from '${packageName}/master-detail';
 import { HellPageLink, HellPagination } from '${packageName}/pagination';
-import { HELL_RESIZABLE_DIRECTIVES } from '${packageName}/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '${packageName}/resizable';
 import { HellToolbar, HellToolbarItem } from '${packageName}/toolbar';
 
 @Component({
@@ -2976,7 +2971,7 @@ import { HellToolbar, HellToolbarItem } from '${packageName}/toolbar';
     HellToolbar,
     HellToolbarItem,
     ...HELL_MASTER_DETAIL_IMPORTS,
-    ...HELL_RESIZABLE_DIRECTIVES,
+    ...HELL_RESIZABLE_IMPORTS,
   ],
   template: \`
     <div
@@ -3115,7 +3110,7 @@ function tableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
-  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HELL_TABLE_UTILITIES_IMPORTS,
   HellTableRowIgnore,
   type HellTableResizeHandleUi,
 } from '${packageName}/table';
@@ -3123,7 +3118,7 @@ import {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS, HellTableRowIgnore],
   template: \`
     <div hellTableContainer ui="bg-hell-surface-muted">
       <table hellTableRoot ui="text-sm">
