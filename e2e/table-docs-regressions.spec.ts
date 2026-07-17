@@ -5,6 +5,22 @@ async function gotoTableDocs(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Table', level: 1 })).toBeVisible();
 }
 
+async function gotoTanStackShellExample(page: Page): Promise<{
+  readonly example: Locator;
+  readonly shell: Locator;
+  readonly search: Locator;
+}> {
+  await gotoTableDocs(page);
+
+  const example = page.locator('app-table-tanstack-shell-example');
+  const shell = example.locator('hell-tanstack-table');
+  return {
+    example,
+    shell,
+    search: shell.getByRole('combobox', { name: 'Search people' }),
+  };
+}
+
 async function boxFor(
   locator: Locator,
 ): Promise<{ x: number; y: number; width: number; height: number }> {
@@ -139,11 +155,7 @@ test.describe('table docs regressions', () => {
   });
 
   test('TanStack shell projects toolbar and repeatable footer controls', async ({ page }) => {
-    await gotoTableDocs(page);
-
-    const example = page.locator('app-table-tanstack-shell-example');
-    const shell = example.locator('hell-tanstack-table');
-    const search = shell.getByRole('combobox', { name: 'Search people' });
+    const { shell, search } = await gotoTanStackShellExample(page);
     const nameHeader = shell.locator('th[data-column-id="name"]');
 
     await expect(search).toBeVisible();
@@ -173,6 +185,10 @@ test.describe('table docs regressions', () => {
     await nameHeader.getByRole('button', { name: /Sort name clear sorting/ }).click();
     await expect.poll(async () => nameHeader.getAttribute('aria-sort')).toBeNull();
     await expect.poll(async () => nameHeader.getAttribute('data-sort')).toBeNull();
+  });
+
+  test('TanStack shell projected controls apply role filtering', async ({ page }) => {
+    const { shell, search } = await gotoTanStackShellExample(page);
 
     await search.click();
     await page
@@ -191,6 +207,10 @@ test.describe('table docs regressions', () => {
     await expect(shell.getByRole('row', { name: /Grace Hopper/ })).toBeVisible();
     await expect(shell.getByRole('cell', { name: 'Katherine Johnson' })).toHaveCount(0);
     await page.keyboard.press('Escape');
+  });
+
+  test('TanStack shell server search opens detail and reports empty state', async ({ page }) => {
+    const { example, shell, search } = await gotoTanStackShellExample(page);
 
     await search.fill('Grace');
 
@@ -206,6 +226,10 @@ test.describe('table docs regressions', () => {
 
     await search.fill('nobody');
     await expect(shell.getByTestId('table-server-empty')).toBeVisible();
+  });
+
+  test('TanStack shell menu action reports server error', async ({ page }) => {
+    const { shell } = await gotoTanStackShellExample(page);
 
     await shell.getByRole('button', { name: 'More table actions' }).click();
     await page.getByRole('menuitem', { name: 'Simulate server error' }).click();
