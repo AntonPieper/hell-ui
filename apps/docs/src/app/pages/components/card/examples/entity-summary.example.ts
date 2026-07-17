@@ -3,7 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidEllipsisVertical } from '@ng-icons/font-awesome/solid';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellChip } from '@hell-ui/angular/chip';
 
@@ -11,7 +11,7 @@ import { HellChip } from '@hell-ui/angular/chip';
   selector: 'app-card-entity-summary-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidEllipsisVertical })],
-  imports: [...HELL_CARD_DIRECTIVES, HellAvatar, HellButton, HellIcon, HellChip],
+  imports: [...HELL_CARD_IMPORTS, HellAvatar, HellButton, HellIcon, HellChip],
   template: `
     <div hellCard class="max-w-95" [elevation]="2">
       <div hellCardHeader>

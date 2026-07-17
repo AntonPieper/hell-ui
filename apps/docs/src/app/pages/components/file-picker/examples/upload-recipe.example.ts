@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 import { HellButton } from '@hell-ui/angular/button';
 import {
   HellFilePicker,
@@ -34,7 +34,7 @@ const UPLOAD_TICK_MS = 180;
   selector: 'app-file-picker-upload-recipe-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ...HELL_ALERT_DIRECTIVES,
+    ...HELL_ALERT_IMPORTS,
     HellButton,
     HellFilePicker,
     HellProgress,

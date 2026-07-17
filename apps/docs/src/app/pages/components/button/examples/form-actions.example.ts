@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-button-form-actions-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_FIELD_IMPORTS],
   template: `
     <form class="grid max-w-sm gap-4" (submit)="$event.preventDefault(); saving.set(true)">
       <div hellField>

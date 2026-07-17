@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell, faSolidEnvelope, faSolidLock } from '@ng-icons/font-awesome/solid';
 import { HellCheckbox } from '@hell-ui/angular/checkbox';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-checkbox-settings-list-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidBell, faSolidEnvelope, faSolidLock })],
-  imports: [HellCheckbox, ...HELL_CARD_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, HellIcon],
+  imports: [HellCheckbox, ...HELL_CARD_IMPORTS, ...HELL_FIELD_IMPORTS, HellIcon],
   template: `
     <div hellCard class="max-w-md" [elevation]="0">
       <div hellCardHeader>Notification preferences</div>

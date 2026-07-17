@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import { hellSearchResource } from '@hell-ui/angular/core';
 
 interface Customer {
@@ -22,7 +22,7 @@ const CUSTOMERS: readonly Customer[] = [
 @Component({
   selector: 'app-combobox-async-source-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CONTROL_GROUP_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS, ...HELL_CONTROL_GROUP_IMPORTS],
   template: `
     <div hellControlGroup class="max-w-80">
       <div

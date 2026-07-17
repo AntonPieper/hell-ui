@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 
 interface Invoice {
   readonly id: string;
@@ -21,7 +21,7 @@ const INVOICES: readonly Invoice[] = [
 @Component({
   selector: 'app-pagination-with-table-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellNativeSelect, HellPagination, HellPageLink],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS, HellNativeSelect, HellPagination, HellPageLink],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div hellTableContainer>

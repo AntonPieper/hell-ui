@@ -257,7 +257,7 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
       </ul>
       <p>
-        <code>HELL_CHIP_DIRECTIVES</code> — array of <code>HellChipSet</code>,
+        <code>HELL_CHIP_IMPORTS</code> — array of <code>HellChipSet</code>,
         <code>HellChipInput</code>, <code>HellChip</code>, and <code>HellChipRemove</code>, for bulk
         <code>imports</code>.
       </p>

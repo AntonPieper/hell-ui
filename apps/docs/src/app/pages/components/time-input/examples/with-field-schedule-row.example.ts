@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellDateInput } from '@hell-ui/angular/date-input';
 import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-time-input-with-field-schedule-row-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellDateInput, HellTimeInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellDateInput, HellTimeInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div class="flex flex-wrap items-end gap-3">
       <div hellField>

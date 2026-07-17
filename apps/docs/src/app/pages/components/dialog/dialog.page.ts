@@ -226,7 +226,7 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p><code>hellDialogScope</code>: behavior-only marker; <code>exportAs: 'hellDialogScope'</code>; no inputs.</p>
       <p>
         Exported types: <code>HellDialogTemplateContext&lt;TData, TResult&gt;</code>.
-        <code>HELL_DIALOG_DIRECTIVES</code> bundles all six directives for bulk import.
+        <code>HELL_DIALOG_IMPORTS</code> bundles all six directives for bulk import.
       </p>
 
       <h2>Accessibility</h2>

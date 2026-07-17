@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import {
   hellRankLocalSearch,
   hellSearchResource,
@@ -38,7 +38,7 @@ const recencyRanker: HellSearchRanker = (items, request) => {
   selector: 'app-combobox-ranked-filtering-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideHellSearchRanker(recencyRanker)],
-  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CONTROL_GROUP_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS, ...HELL_CONTROL_GROUP_IMPORTS],
   template: `
     <div hellControlGroup class="max-w-72">
       <div

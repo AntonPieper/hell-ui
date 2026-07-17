@@ -6,7 +6,7 @@ import {
   type WritableSignal,
 } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellTableShellToolbar, HellTanStackTable } from '@hell-ui/angular/table-tanstack';
 import {
   createAngularTable,
@@ -61,7 +61,7 @@ function saveColumnVisibility(state: VisibilityState): void {
     HellButton,
     HellTanStackTable,
     HellTableShellToolbar,
-    ...HELL_MENU_DIRECTIVES,
+    ...HELL_MENU_IMPORTS,
   ],
   template: `
     <hell-tanstack-table [table]="table" stickyHeader>

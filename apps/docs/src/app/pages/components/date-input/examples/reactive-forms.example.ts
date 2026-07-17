@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-date-input-reactive-forms-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellDateInput],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellDateInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-date">Invoice date</label>

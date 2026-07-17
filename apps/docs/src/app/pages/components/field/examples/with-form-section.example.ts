@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellCheckbox } from '@hell-ui/angular/checkbox';
 import { HellInput } from '@hell-ui/angular/input';
 import { HellNativeSelect } from '@hell-ui/angular/select';
@@ -8,7 +8,7 @@ import { HellNativeSelect } from '@hell-ui/angular/select';
 @Component({
   selector: 'app-field-with-form-section-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, ...HELL_CARD_DIRECTIVES, HellCheckbox, HellInput, HellNativeSelect],
+  imports: [...HELL_FIELD_IMPORTS, ...HELL_CARD_IMPORTS, HellCheckbox, HellInput, HellNativeSelect],
   template: `
     <div hellCard class="max-w-md" [elevation]="0">
       <div hellCardHeader>Invite a teammate</div>

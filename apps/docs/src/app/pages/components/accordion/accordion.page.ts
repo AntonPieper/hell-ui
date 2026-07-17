@@ -180,7 +180,7 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
             <li><code>ui: HellUiInput&lt;'root'&gt;</code>.</li>
           </ul>
         </li>
-        <li>Import every directive at once via <code>HELL_ACCORDION_DIRECTIVES</code>.</li>
+        <li>Import every directive at once via <code>HELL_ACCORDION_IMPORTS</code>.</li>
       </ul>
 
       <h2>Accessibility</h2>

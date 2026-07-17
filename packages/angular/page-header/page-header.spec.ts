@@ -2,10 +2,10 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_PAGE_HEADER_DIRECTIVES, HELL_PAGE_HEADER_LABELS, type HellPageHeaderLevel, type HellPageHeaderUi } from './page-header';
+import { HELL_PAGE_HEADER_IMPORTS, HELL_PAGE_HEADER_LABELS, type HellPageHeaderLevel, type HellPageHeaderUi } from './page-header';
 
 @Component({
-  imports: [...HELL_PAGE_HEADER_DIRECTIVES],
+  imports: [...HELL_PAGE_HEADER_IMPORTS],
   template: `
     <hell-page-header [level]="level()" [ui]="ui()">
       @if (showBack()) {
@@ -140,7 +140,7 @@ describe('HellPageHeaderBack', () => {
 
   it('honors a per-instance aria-label override', () => {
     @Component({
-      imports: [...HELL_PAGE_HEADER_DIRECTIVES],
+      imports: [...HELL_PAGE_HEADER_IMPORTS],
       template: `<hell-page-header-back aria-label="Return to list" />`,
     })
     class OverrideHost {}
@@ -155,7 +155,7 @@ describe('HellPageHeaderBack', () => {
 
   it('resolves its default name from HELL_PAGE_HEADER_LABELS', () => {
     @Component({
-      imports: [...HELL_PAGE_HEADER_DIRECTIVES],
+      imports: [...HELL_PAGE_HEADER_IMPORTS],
       template: `<hell-page-header-back />`,
     })
     class LocalizedHost {}

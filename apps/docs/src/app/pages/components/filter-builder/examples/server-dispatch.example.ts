@@ -6,8 +6,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import { hellSearchResource } from '@hell-ui/angular/core';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
@@ -97,8 +97,8 @@ const WORK_ORDERS: readonly WorkOrder[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ...HELL_FILTER_BUILDER_IMPORTS,
-    ...HELL_COMBOBOX_DIRECTIVES,
-    ...HELL_CONTROL_GROUP_DIRECTIVES,
+    ...HELL_COMBOBOX_IMPORTS,
+    ...HELL_CONTROL_GROUP_IMPORTS,
     FilterBuilderDateRangeEditor,
   ],
   template: `

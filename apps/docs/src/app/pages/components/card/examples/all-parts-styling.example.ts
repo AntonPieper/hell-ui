@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 
 @Component({
   selector: 'app-card-all-parts-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES],
+  imports: [...HELL_CARD_IMPORTS],
   template: `
     <!-- Every card directive owns a single 'root' part — refine each -->
     <!-- directive's own ui input rather than styling descendants from hellCard. -->

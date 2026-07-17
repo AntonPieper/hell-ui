@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidPlus } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_PAGE_HEADER_DIRECTIVES, type HellPageHeaderUi } from '@hell-ui/angular/page-header';
+import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from '@hell-ui/angular/page-header';
 import { HellChip } from '@hell-ui/angular/chip';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-page-header-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidPlus })],
-  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_IMPORTS, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <hell-page-header [ui]="headerUi">
       <span hellPageHeaderTitle>Billing</span>

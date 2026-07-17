@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
+import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 import { HellChip } from '@hell-ui/angular/chip';
 
 type InvoiceStatus = 'Paid' | 'Open' | 'Overdue';
@@ -36,9 +36,9 @@ const STATUS_VARIANT: Record<InvoiceStatus, 'success' | 'info' | 'danger'> = {
   imports: [
     HellInput,
     HellChip,
-    ...HELL_LISTBOX_DIRECTIVES,
-    ...HELL_SEARCH_DIRECTIVES,
-    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    ...HELL_LISTBOX_IMPORTS,
+    ...HELL_SEARCH_IMPORTS,
+    ...HELL_TABLE_UTILITIES_IMPORTS,
   ],
   template: `
     <div class="grid gap-hell-3">

@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-popover-with-card-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAvatar, HellButton, HellPopover, HellPopoverTrigger, HellChip, ...HELL_CARD_DIRECTIVES],
+  imports: [HellAvatar, HellButton, HellPopover, HellPopoverTrigger, HellChip, ...HELL_CARD_IMPORTS],
   template: `
     <div class="min-h-[220px]">
       <button

@@ -175,7 +175,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/audio-player',
  detail:'components/audio-player/examples/voicemail-inbox.example.ts',
  terms:
-'audio-player voicemail-inbox components/audio-player/examples/voicemail-inbox.example hell-audio-player hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellChip tag card composite unread urgent allowDownload',
+'audio-player voicemail-inbox components/audio-player/examples/voicemail-inbox.example hell-audio-player hellCard hellCardHeader hellCardBody HELL_CARD_IMPORTS hellChip tag card composite unread urgent allowDownload',
  },
  {
  title:'Audio Player: Title and date',
@@ -280,7 +280,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/breadcrumbs',
  detail:'components/breadcrumbs/examples/collapsed-ellipsis.example.ts',
  terms:
-'collapsed-ellipsis hellBreadcrumbEllipsis hellMenuTrigger hellMenu hellMenuItem HELL_MENU_DIRECTIVES deep path long trail hidden crumbs menu composite',
+'collapsed-ellipsis hellBreadcrumbEllipsis hellMenuTrigger hellMenu hellMenuItem HELL_MENU_IMPORTS deep path long trail hidden crumbs menu composite',
  },
  {
  title:'Breadcrumbs: Custom Separator',
@@ -490,7 +490,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/code-editor',
  detail:'components/code-editor/examples/config-editor.example.ts',
  terms:
-'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hellSelect HELL_CARD_DIRECTIVES HellSelect hellButton language picker dirty reset apply ui root',
+'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hellSelect HELL_CARD_IMPORTS HellSelect hellButton language picker dirty reset apply ui root',
  },
  {
  title:'Code Editor: Supplying a language',
@@ -525,21 +525,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/basic.example.ts',
  terms:
-'components/combobox/examples/basic.example components/combobox HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_DIRECTIVES hellSearchResource hellControlGroup domain objects compareWith disabled single-select currency projection first',
+'components/combobox/examples/basic.example components/combobox HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_IMPORTS hellSearchResource hellControlGroup domain objects compareWith disabled single-select currency projection first',
  },
  {
  title:'Combobox: Chip Input composition',
  path:'/components/combobox',
  detail:'components/combobox/examples/chips.example.ts',
  terms:
-'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellChipSet hellChipInput hellChip hellChipRemove HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_CHIP_DIRECTIVES hellControlGroup hellSearchResource domain objects multi-select removable chips assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace consumer owned selection',
+'components/combobox/examples/chips.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellChipSet hellChipInput hellChip hellChipRemove HellPickValue HELL_COMBOBOX_IMPORTS HELL_CHIP_IMPORTS hellControlGroup hellSearchResource domain objects multi-select removable chips assign groups keyboard roving focus Arrow Left Right Home End Delete Backspace consumer owned selection',
  },
  {
  title:'Combobox: Multiple',
  path:'/components/combobox',
  detail:'components/combobox/examples/multiple.example.ts',
  terms:
-'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChipSet hellChip HellPickValue hellSearchResource HELL_COMBOBOX_DIRECTIVES HELL_CHIP_DIRECTIVES domain objects multi-select array labels read only summary',
+'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellChipSet hellChip HellPickValue hellSearchResource HELL_COMBOBOX_IMPORTS HELL_CHIP_IMPORTS domain objects multi-select array labels read only summary',
  },
  {
  title:'Combobox: Filtering and ranking',
@@ -560,14 +560,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'components/combobox/examples/with-field-tag.example.ts',
  terms:
-'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChipSet hellChip hellChipRemove HellPickValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES HELL_CHIP_DIRECTIVES hellSearchResource reviewers domain objects multi-select removable chips',
+'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellChipSet hellChip hellChipRemove HellPickValue HELL_COMBOBOX_IMPORTS HELL_FIELD_IMPORTS HELL_CHIP_IMPORTS hellSearchResource reviewers domain objects multi-select removable chips',
  },
  {
  title:'Control Group: Basic composition',
  path:'/components/control-group',
  detail:'components/control-group/examples/basic.example.ts',
  terms:
-'control-group basic composition hellControlGroup hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction HELL_CONTROL_GROUP_DIRECTIVES hellInput hellField prefix suffix action copy workspace url projection consumer-owned',
+'control-group basic composition hellControlGroup hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction HELL_CONTROL_GROUP_IMPORTS hellInput hellField prefix suffix action copy workspace url projection consumer-owned',
  },
  {
  title:'Control Group: Sizes and states',
@@ -980,7 +980,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/input',
  detail:'components/input/examples/with-search-icon.example.ts',
  terms:
-'field composite control-group components/input/examples/with-search-icon.example components/input hellInput hellControlGroup hellControlGroupPrefix hellControlGroupAction HELL_CONTROL_GROUP_DIRECTIVES hellField hellFieldLabel hellFieldDescription hell-icon HellIcon prefix clear button provideIcons faSolidMagnifyingGlass faSolidXmark focus-within',
+'field composite control-group components/input/examples/with-search-icon.example components/input hellInput hellControlGroup hellControlGroupPrefix hellControlGroupAction HELL_CONTROL_GROUP_IMPORTS hellField hellFieldLabel hellFieldDescription hell-icon HellIcon prefix clear button provideIcons faSolidMagnifyingGlass faSolidXmark focus-within',
  },
  {
  title:'Listbox: With search and card',
@@ -1120,7 +1120,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'components/omnibar/examples/basic.example.ts',
  terms:
-'components/omnibar/examples/basic.example components/omnibar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText query queryChange submit HELL_OMNIBAR_DIRECTIVES hellSearchResource HellSearchField status items local ranking command palette projected smallest usage',
+'components/omnibar/examples/basic.example components/omnibar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText query queryChange submit HELL_OMNIBAR_IMPORTS hellSearchResource HellSearchField status items local ranking command palette projected smallest usage',
  },
  {
  title:'Omnibar: Command palette with kbd',
@@ -1141,7 +1141,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'components/omnibar/examples/sizes.example.ts',
  terms:
-'components/omnibar/examples/sizes.example components/omnibar hell-omnibar size sm md lg data-size query queryChange hellSearchResource HellSearchField hellOmnibarGroup hellOmnibarItem hellOmnibarItemText HELL_OMNIBAR_DIRECTIVES control height density',
+'components/omnibar/examples/sizes.example components/omnibar hell-omnibar size sm md lg data-size query queryChange hellSearchResource HellSearchField hellOmnibarGroup hellOmnibarItem hellOmnibarItemText HELL_OMNIBAR_IMPORTS control height density',
  },
  {
  title:'Omnibar: Styling all parts',
@@ -1190,7 +1190,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pagination',
  detail:'components/pagination/examples/with-table.example.ts',
  terms:
-'rows per hellNativeSelect HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell composite invoices',
+'rows per hellNativeSelect HELL_TABLE_UTILITIES_IMPORTS hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell composite invoices',
  },
  {
  title:'Pdf Viewer: Basic',
@@ -1204,7 +1204,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/pdf-viewer',
  detail:'components/pdf-viewer/examples/document-review.example.ts',
  terms:
-'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellChip master detail review queue approve invoice',
+'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hellMasterDetail hellMasterPane hellMasterDetailBack HELL_MASTER_DETAIL_IMPORTS hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_IMPORTS hellButton hell-icon HellIcon hellChip master detail review queue approve invoice',
  },
  {
  title:'Pdf Viewer: Events And Error Handling',
@@ -1435,14 +1435,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/search',
  detail:'components/search/examples/basic.example.ts',
  terms:
-'hellSearch hellSearchClear hellInput HellButton HELL_SEARCH_DIRECTIVES filter list computed signal input clear',
+'hellSearch hellSearchClear hellInput HellButton HELL_SEARCH_IMPORTS filter list computed signal input clear',
  },
  {
  title:'Search: Empty State',
  path:'/components/search',
  detail:'components/search/examples/empty-state.example.ts',
  terms:
-'empty-state hellSearch hellSearchClear data-empty escape clear icon HellIcon faSolidXmark iconOnly HELL_SEARCH_DIRECTIVES',
+'empty-state hellSearch hellSearchClear data-empty escape clear icon HellIcon faSolidXmark iconOnly HELL_SEARCH_IMPORTS',
  },
  {
  title:'Search: Styling',
@@ -1456,35 +1456,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/search',
  detail:'components/search/examples/with-table-filter-toolbar.example.ts',
  terms:
-'composite hellSearch hellListbox hellListboxOption HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableRow hellTableHeaderCell hellTableCell hellChip invoices status',
+'composite hellSearch hellListbox hellListboxOption HELL_TABLE_UTILITIES_IMPORTS hellTableContainer hellTableRoot hellTableRow hellTableHeaderCell hellTableCell hellChip invoices status',
  },
  {
  title:'Select: Basic',
  path:'/components/select',
  detail:'components/select/examples/basic.example.ts',
  terms:
-'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES projection placeholder disabled option valueChange single-choice dropdown button',
+'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_IMPORTS projection placeholder disabled option valueChange single-choice dropdown button',
  },
  {
  title:'Select: Multiple',
  path:'/components/select',
  detail:'components/select/examples/multiple.example.ts',
  terms:
-'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_DIRECTIVES projection multi-select array selected count tags permissions',
+'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellChip HELL_SELECT_IMPORTS projection multi-select array selected count tags permissions',
  },
  {
  title:'Select: Field integration',
  path:'/components/select',
  detail:'components/select/examples/preset.example.ts',
  terms:
-'hellSelect HellSelect hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES projection compareWith domain object value form field region',
+'hellSelect HellSelect hellSelectValue hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription HELL_FIELD_IMPORTS projection compareWith domain object value form field region',
  },
  {
  title:'Select: Rich options',
  path:'/components/select',
  detail:'components/select/examples/rich-options.example.ts',
  terms:
-'rich-options hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES projection compareWith domain object custom option markup icon description status',
+'rich-options hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_IMPORTS projection compareWith domain object custom option markup icon description status',
  },
  {
  title:'Select: Styling',
@@ -1498,7 +1498,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/select',
  detail:'components/select/examples/with-field-status.example.ts',
  terms:
-'with-field-status hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellChip HellChipVariant hellButton projection form review decision status submit error',
+'with-field-status hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_IMPORTS hellChip HellChipVariant hellButton projection form review decision status submit error',
  },
  {
  title:'Separator: All Parts Styling',
@@ -1533,7 +1533,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/separator',
  detail:'components/separator/examples/with-card.example.ts',
  terms:
-'with-card hellSeparator hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellButton iconOnly hell-icon notification settings list composite',
+'with-card hellSeparator hellCard hellCardHeader hellCardBody HELL_CARD_IMPORTS hellButton iconOnly hell-icon notification settings list composite',
  },
  {
  title:'Skeleton: All Parts Styling',
@@ -1659,7 +1659,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/spinner',
  detail:'components/spinner/examples/with-card-pending-action.example.ts',
  terms:
-'pending action hellSpinner hellButton hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES confirm renewal subscription signal composite',
+'pending action hellSpinner hellButton hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_IMPORTS confirm renewal subscription signal composite',
  },
  {
  title:'Master Detail: Basic controller',
@@ -1729,7 +1729,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'components/table/examples/primitive-table.example.ts',
  terms:
-'primitive components/table/examples/primitive-table.example components/table HELL_TABLE_UTILITIES_DIRECTIVES hellTableHeaderCell sortable sort sortToggle hellTableSortTrigger hellTableRow active selected hellTableSelectionCell hellTableRowRadio hellTableRowAction hell-icon selection row action',
+'primitive components/table/examples/primitive-table.example components/table HELL_TABLE_UTILITIES_IMPORTS hellTableHeaderCell sortable sort sortToggle hellTableSortTrigger hellTableRow active selected hellTableSelectionCell hellTableRowRadio hellTableRowAction hell-icon selection row action',
  },
  {
  title:'Table: Styling (all parts)',
@@ -1757,7 +1757,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/tabs',
  detail:'components/tabs/examples/basic.example.ts',
  terms:
-'hellTabset hellTabList hellTab hellTabPanel HELL_TABS_DIRECTIVES account settings general security billing simplest usage',
+'hellTabset hellTabList hellTab hellTabPanel HELL_TABS_IMPORTS account settings general security billing simplest usage',
  },
  {
  title:'Tabs: Disabled Tabs',
@@ -1994,7 +1994,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/page-header',
  detail:'components/page-header/examples/list.example.ts',
  terms:
-'page header page-header components/page-header/examples/list.example hell-page-header hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar HELL_PAGE_HEADER_DIRECTIVES hell-overflow-toolbar heading title meta badge tag description toolbar list screen composite chrome',
+'page header page-header components/page-header/examples/list.example hell-page-header hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar HELL_PAGE_HEADER_IMPORTS hell-overflow-toolbar heading title meta badge tag description toolbar list screen composite chrome',
  },
  {
  title:'Page header: Detail screen',
@@ -2015,7 +2015,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toolbar',
  detail:'components/toolbar/examples/basic.example.ts',
  terms:
-'toolbar components/toolbar/examples/basic.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem HELL_TOOLBAR_DIRECTIVES hellButton consumer-owned click roving focus Arrow Home End orientation label ordinary primitive smallest usage',
+'toolbar components/toolbar/examples/basic.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem HELL_TOOLBAR_IMPORTS hellButton consumer-owned click roving focus Arrow Home End orientation label ordinary primitive smallest usage',
  },
  {
  title:'Toolbar: Overflow policies',
@@ -2036,7 +2036,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toolbar',
  detail:'components/toolbar/examples/table-toolbar.example.ts',
  terms:
-'toolbar table standalone widget components/toolbar/examples/table-toolbar.example hell-overflow-toolbar HellOverflowToolbar hellToolbarAction hellToolbarSeparator hellToolbarWidget iconOnly search field never collapses HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
+'toolbar table standalone widget components/toolbar/examples/table-toolbar.example hell-overflow-toolbar HellOverflowToolbar hellToolbarAction hellToolbarSeparator hellToolbarWidget iconOnly search field never collapses HELL_TABLE_UTILITIES_IMPORTS hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
  },
  {
  title:'Toolbar: Styling',
@@ -2122,48 +2122,48 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/combobox',
  detail:'hellComboboxInput, hellComboboxOption, hellComboboxEmpty',
  terms:
-'HELL_COMBOBOX_DIRECTIVES HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty projection first Search Resource Control Group Chip Set Chip Input domain objects',
+'HELL_COMBOBOX_IMPORTS HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty projection first Search Resource Control Group Chip Set Chip Input domain objects',
  },
  {
  title:'Chip Input keyboard bridge',
  path:'/components/chip',
  detail:'input[hellChipInput] with hellChipSet',
  terms:
-'HELL_CHIP_DIRECTIVES HellChipInput hellChipInput hellChipSet hellChip hellChipRemove input editable empty Backspace ArrowLeft ArrowRight focus removal consumer-owned value model',
+'HELL_CHIP_IMPORTS HellChipInput hellChipInput hellChipSet hellChip hellChipRemove input editable empty Backspace ArrowLeft ArrowRight focus removal consumer-owned value model',
  },
  {
  title:'Dialog scoping',
  path:'/components/dialog',
  detail:'hellDialogScope keeps overlays inside app content',
  terms:
-'HELL_DIALOG_DIRECTIVES hellDialogTrigger hellDialogOverlay hellDialogScope hellDialog hellDialogTitle hellDialogDescription',
+'HELL_DIALOG_IMPORTS hellDialogTrigger hellDialogOverlay hellDialogScope hellDialog hellDialogTitle hellDialogDescription',
  },
  {
  title:'Field anatomy',
  path:'/components/field',
  detail:'hellFieldLabel, hellFieldDescription, hellFieldError',
  terms:
-'HELL_FIELD_DIRECTIVES hellField hellFieldLabel hellFieldDescription hellFieldError form field input aria',
+'HELL_FIELD_IMPORTS hellField hellFieldLabel hellFieldDescription hellFieldError form field input aria',
  },
  {
  title:'Listbox primitives',
  path:'/components/listbox',
  detail:'hellListbox, hellListboxOption, hellListboxHeader',
  terms:
-'HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxSection hellListboxHeader value valueChange mode',
+'HELL_LISTBOX_IMPORTS hellListbox hellListboxOption hellListboxSection hellListboxHeader value valueChange mode',
  },
  {
  title:'Menu and submenu triggers',
  path:'/components/menu',
  detail:'hellMenuTrigger, hellSubmenuTrigger, hellMenuItem',
  terms:
-'HELL_MENU_DIRECTIVES hellMenuTrigger hellSubmenuTrigger hellMenu hellMenuItem hellMenuSection hellMenuLabel submenu',
+'HELL_MENU_IMPORTS hellMenuTrigger hellSubmenuTrigger hellMenu hellMenuItem hellMenuSection hellMenuLabel submenu',
  },
  {
  title:'Search primitives',
  path:'/components/search',
  detail:'hellSearch, hellSearchClear',
- terms:'HELL_SEARCH_DIRECTIVES hellSearch hellSearchClear search primitive clear input',
+ terms:'HELL_SEARCH_IMPORTS hellSearch hellSearchClear search primitive clear input',
  },
  {
  title:'Search Resource',
@@ -2177,20 +2177,20 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/select',
  detail:'hellSelect with hellSelectPortal and hellSelectDropdown',
  terms:
-'HELL_SELECT_DIRECTIVES hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption projection domain value valueChange openChange',
+'HELL_SELECT_IMPORTS hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption projection domain value valueChange openChange',
  },
  {
  title:'Tabs anatomy',
  path:'/components/tabs',
  detail:'hellTabset, hellTabList, hellTab, hellTabPanel',
- terms:'HELL_TABS_DIRECTIVES hellTabset hellTabList hellTab hellTabPanel value vertical',
+ terms:'HELL_TABS_IMPORTS hellTabset hellTabList hellTab hellTabPanel value vertical',
  },
  {
  title:'App shell slots',
  path:'/components/app-shell',
  detail:'hellAppShell, hellAppTopbar, hellAppSidenav, hellAppContent',
  terms:
-'HELL_APP_SHELL_DIRECTIVES hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellAppSecondary hellSidenavToggle hellSecondaryToggle',
+'HELL_APP_SHELL_IMPORTS hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellAppSecondary hellSidenavToggle hellSecondaryToggle',
  },
  {
  title:'Date input adapter',
@@ -2211,14 +2211,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'hell-omnibar, hellOmnibarItem, hellOmnibarAction',
  terms:
-'hell-omnibar HellOmnibar HELL_OMNIBAR_DIRECTIVES hellOmnibar query queryChange open openChange submit hellOmnibarItem hellOmnibarAction hellOmnibarGroup command palette hotkey keyboard navigation F6 dismissal focus restoration scroll anchoring Search Resource hellSearchResource status projected results Chip Set Chip Input hellChip hellChipRemove',
+'hell-omnibar HellOmnibar HELL_OMNIBAR_IMPORTS hellOmnibar query queryChange open openChange submit hellOmnibarItem hellOmnibarAction hellOmnibarGroup command palette hotkey keyboard navigation F6 dismissal focus restoration scroll anchoring Search Resource hellSearchResource status projected results Chip Set Chip Input hellChip hellChipRemove',
  },
  {
  title:'Resizable panes',
  path:'/components/resizable',
  detail:'hellResizablePane and hellResizableHandle compose adjustable panes',
  terms:
-'HELL_RESIZABLE_DIRECTIVES hellResizable hellResizablePane hellResizableHandle horizontal vertical minSize initialFlex',
+'HELL_RESIZABLE_IMPORTS hellResizable hellResizablePane hellResizableHandle horizontal vertical minSize initialFlex',
  },
  {
  title:'Master Detail directives',
@@ -2232,14 +2232,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/page-header',
  detail:'hell-page-header, hell-page-header-back, hellPageHeaderTitle',
  terms:
-'HELL_PAGE_HEADER_DIRECTIVES hell-page-header hell-page-header-back HellPageHeaderBack hellPageHeaderLeading hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar level heading role aria-level back output HELL_PAGE_HEADER_LABELS HELL_PAGE_HEADER_LABELS HellPageHeaderPart HellPageHeaderUi composite slot chrome breadcrumbs toolbar',
+'HELL_PAGE_HEADER_IMPORTS hell-page-header hell-page-header-back HellPageHeaderBack hellPageHeaderLeading hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar level heading role aria-level back output HELL_PAGE_HEADER_LABELS HELL_PAGE_HEADER_LABELS HellPageHeaderPart HellPageHeaderUi composite slot chrome breadcrumbs toolbar',
  },
  {
  title:'Toolbar directives',
  path:'/components/toolbar',
  detail:'hellToolbar, hellToolbarItem, hell-overflow-toolbar, hellToolbarAction',
  terms:
-'HELL_TOOLBAR_DIRECTIVES hellToolbar hellToolbarItem HellToolbar HellToolbarItem hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellOverflowToolbarPart HellOverflowToolbarUi HellOverflowToolbarLabels HELL_OVERFLOW_TOOLBAR_LABELS provideHellLabels',
+'HELL_TOOLBAR_IMPORTS hellToolbar hellToolbarItem HellToolbar HellToolbarItem hell-overflow-toolbar HellOverflowToolbar hellToolbarAction overflow never auto always overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellOverflowToolbarPart HellOverflowToolbarUi HellOverflowToolbarLabels HELL_OVERFLOW_TOOLBAR_LABELS provideHellLabels',
  },
  {
  title:'Time input adapter',
@@ -2274,7 +2274,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'hellTable, hell-tanstack-table, hellTanStackVirtualRows',
  terms:
-'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle HellTanStackTable hell-tanstack-table HellTableStatus hellTableShellCell hellTableShellHeader hellTableShellToolbar hellTableShellFooter hell-tanstack-pagination HellPaginationStrip hellTableShellExpandedRow hellTanStackVirtualRows TanStack Table TanStack Virtual omnibar menu master detail',
+'HELL_TABLE_UTILITIES_IMPORTS hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle HellTanStackTable hell-tanstack-table HellTableStatus hellTableShellCell hellTableShellHeader hellTableShellToolbar hellTableShellFooter hell-tanstack-pagination HellPaginationStrip hellTableShellExpandedRow hellTanStackVirtualRows TanStack Table TanStack Virtual omnibar menu master detail',
  },
 ];
 

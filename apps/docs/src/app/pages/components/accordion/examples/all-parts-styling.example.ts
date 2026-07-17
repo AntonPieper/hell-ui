@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
+import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
 
 @Component({
   selector: 'app-accordion-all-parts-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ACCORDION_DIRECTIVES],
+  imports: [...HELL_ACCORDION_IMPORTS],
   template: `
     <!-- Every accordion module owns a single 'root' part — refine each -->
     <!-- module's own ui input rather than styling descendants from hellAccordion. -->

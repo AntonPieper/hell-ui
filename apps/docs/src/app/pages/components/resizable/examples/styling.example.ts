@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
-  HELL_RESIZABLE_DIRECTIVES,
+  HELL_RESIZABLE_IMPORTS,
   type HellResizableHandleUi,
 } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-resizable-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <!-- Each directive owns its own Part Style Map. The group and panes expose a -->
     <!-- single 'root'; the handle exposes 'root' and 'grip', refined via a map. -->

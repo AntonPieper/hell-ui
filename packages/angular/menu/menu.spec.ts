@@ -2,10 +2,10 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
-import { HELL_MENU_DIRECTIVES, HellMenuTrigger } from './menu';
+import { HELL_MENU_IMPORTS, HellMenuTrigger } from './menu';
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu>
@@ -23,7 +23,7 @@ class MenuHost {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu ui="rounded-hell-pill bg-hell-primary">
@@ -48,7 +48,7 @@ class MenuUiHost {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <div #menuContainer></div>
     <ng-template #menu>
@@ -72,7 +72,7 @@ class EnabledMenuAnchorTriggerHost {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu><button hellMenuItem type="button">Item</button></div>
@@ -84,7 +84,7 @@ class EnabledMenuAnchorTriggerHost {
 class DisabledMenuTriggerHost {}
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu>
@@ -125,7 +125,7 @@ interface ColumnPreference {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu>
@@ -168,7 +168,7 @@ class MenuDomainRowsHost {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #rootMenu>
       <div hellMenu>

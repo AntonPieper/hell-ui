@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_EMPTY_STATE_COPY, HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_COPY, HELL_EMPTY_STATE_IMPORTS } from '@hell-ui/angular/empty-state';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-empty-state-conditional-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton],
+  imports: [...HELL_EMPTY_STATE_IMPORTS, HellButton],
   template: `
     <div class="h-72 rounded-hell-lg border border-hell-border bg-hell-surface">
       <hell-empty-state glyph="error" [title]="copy.title">

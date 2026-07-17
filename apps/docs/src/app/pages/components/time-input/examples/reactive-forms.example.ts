@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-time-input-reactive-forms-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellTimeInput],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellTimeInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-time">Meeting time</label>

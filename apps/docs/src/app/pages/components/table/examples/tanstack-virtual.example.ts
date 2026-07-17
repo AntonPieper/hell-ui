@@ -17,8 +17,8 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import { HellTableRowRadio } from '@hell-ui/angular/table';
 import {
   HellTableShellCell,
@@ -80,8 +80,8 @@ type StatusFilter = 'all' | Person['status'];
     HellTableShellFooter,
     HellTableShellToolbar,
     HellTableRowRadio,
-    ...HELL_MENU_DIRECTIVES,
-    ...HELL_OMNIBAR_DIRECTIVES,
+    ...HELL_MENU_IMPORTS,
+    ...HELL_OMNIBAR_IMPORTS,
   ],
   providers: [provideIcons(TABLE_EXAMPLE_ICONS)],
   template: `

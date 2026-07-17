@@ -221,7 +221,7 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
           — Label Contract for built-in accessibility strings. Default
           <code>showHiddenNavigation: 'Show hidden navigation'</code>.
         </li>
-        <li>Import every directive at once via <code>HELL_BREADCRUMBS_DIRECTIVES</code>.</li>
+        <li>Import every directive at once via <code>HELL_BREADCRUMBS_IMPORTS</code>.</li>
       </ul>
 
       <h2>Accessibility</h2>

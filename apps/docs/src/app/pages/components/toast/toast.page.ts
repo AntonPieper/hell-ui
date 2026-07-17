@@ -293,7 +293,7 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
       <h3>Also exported</h3>
       <ul>
         <li><code>HellToastRef</code> and <code>HellToastUpdate</code> — the reference and patch contracts described above.</li>
-        <li><code>HELL_TOAST_DIRECTIVES</code> — <code>[HellToaster]</code> for bulk import.</li>
+        <li><code>HELL_TOAST_IMPORTS</code> — <code>[HellToaster]</code> for bulk import.</li>
         <li><code>HellToastLabels</code>, <code>HELL_TOAST_LABELS</code>, <code>provideHellLabels(HELL_TOAST_LABELS, …)</code> — the Label Contract for the region, stack, dismiss, and dismiss-all strings.</li>
       </ul>
 

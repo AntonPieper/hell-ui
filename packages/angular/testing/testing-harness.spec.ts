@@ -4,20 +4,20 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { HellDatePicker } from '@hell-ui/angular/date-picker';
-import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 import { HellSlider } from '@hell-ui/angular/slider';
-import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
+import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
 import { HellDateInput } from '@hell-ui/angular/date-input';
 import { HellFilePicker } from '@hell-ui/angular/file-picker';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import { HellTimeInput } from '@hell-ui/angular/time-input';
 import { HellToaster, HellToastService } from '@hell-ui/angular/toast';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 import { HellButtonHarness, HellDialogDescriptionHarness, HellDialogHarness, HellDialogOverlayHarness, HellDialogTitleHarness, HellDialogTriggerHarness, HellAccordionHarness, HellComboboxHarness, HellDateInputHarness, HellDatePickerHarness, HellFilePickerHarness, HellMenuHarness, HellMenuTriggerHarness, HellOmnibarHarness, HellOmnibarPanelHarness, HellSelectHarness, HellSliderHarness, HellTabsetHarness, HellTableContainerHarness, HellTableRowActionHarness, HellTableRowCheckboxHarness, HellTableRowRadioHarness, HellTimeInputHarness, HellToasterHarness } from './public-api';
 
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
@@ -49,7 +49,7 @@ class ButtonHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES, HellButton],
+  imports: [...HELL_DIALOG_IMPORTS, HellButton],
   template: `
     <button id="open-dialog" type="button" [hellDialogTrigger]="dialogTemplate">
       Open dialog
@@ -71,7 +71,7 @@ class ButtonHarnessHost {
 class DialogHarnessHost {}
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div id="table-container" hellTableContainer>
       <table hellTable>
@@ -151,7 +151,7 @@ class TableHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_SELECT_DIRECTIVES],
+  imports: [...HELL_SELECT_IMPORTS],
   template: `
     <button hellSelect type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
       <span hellSelectValue>Priority</span>
@@ -167,7 +167,7 @@ class SelectHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS],
   template: `
     <div hellCombobox [value]="selected()" (valueChange)="selected.set($any($event))">
       <input hellComboboxInput aria-label="Assignee" />
@@ -184,7 +184,7 @@ class ComboboxHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_MENU_IMPORTS],
   template: `
     <ng-template #menu>
       <div hellMenu><button hellMenuItem type="button" (click)="count += 1">Run</button></div>
@@ -198,7 +198,7 @@ class MenuHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_TABS_DIRECTIVES],
+  imports: [...HELL_TABS_IMPORTS],
   template: `
     <div hellTabset [value]="value()" (valueChange)="value.set($any($event))">
       <div hellTabList>
@@ -215,7 +215,7 @@ class TabsHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_ACCORDION_DIRECTIVES],
+  imports: [...HELL_ACCORDION_IMPORTS],
   template: `
     <div hellAccordion type="single" collapsible>
       <div hellAccordionItem value="details">
@@ -292,7 +292,7 @@ class FilePickerHarnessHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar [openOnFocus]="true" [query]="query()" (queryChange)="query.set($event)" (submit)="submitted = $event.item">
       <button hellOmnibarItem value="alpha">Alpha</button>

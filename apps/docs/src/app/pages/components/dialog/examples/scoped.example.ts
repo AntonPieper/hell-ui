@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
 
 @Component({
   selector: 'app-dialog-scoped-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
+  imports: [HellButton, ...HELL_CARD_IMPORTS, ...HELL_DIALOG_IMPORTS],
   template: `
     <!-- hellDialogScope marks the region the overlay should cover. -->
     <section hellDialogScope class="rounded-hell-md border border-hell-border p-hell-6">

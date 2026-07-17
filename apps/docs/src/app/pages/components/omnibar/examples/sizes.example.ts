@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 
 interface Command {
   readonly id: string;
@@ -16,7 +16,7 @@ const COMMANDS: readonly Command[] = [
 @Component({
   selector: 'app-omnibar-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <div class="flex max-w-90 flex-col gap-3">
       @for (demo of demos; track demo.size) {

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-master-detail-resizable-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_MASTER_DETAIL_IMPORTS, ...HELL_RESIZABLE_DIRECTIVES],
+  imports: [HellButton, ...HELL_MASTER_DETAIL_IMPORTS, ...HELL_RESIZABLE_IMPORTS],
   template: `
     <div
       hellMasterDetail

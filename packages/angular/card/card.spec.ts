@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_CARD_DIRECTIVES } from './card';
+import { HELL_CARD_IMPORTS } from './card';
 
 @Component({
-  imports: [...HELL_CARD_DIRECTIVES],
+  imports: [...HELL_CARD_IMPORTS],
   template: `
     <div
       id="custom-card"

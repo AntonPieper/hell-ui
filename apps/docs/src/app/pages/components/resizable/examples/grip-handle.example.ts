@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-resizable-grip-handle-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <!-- appearance="grip" gives the divider a visible pill with a three-dot indicator. -->
     <div hellResizable class="h-64">

@@ -7,15 +7,15 @@ import {
   faSolidPlus,
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_PAGE_HEADER_DIRECTIVES } from '@hell-ui/angular/page-header';
+import { HELL_PAGE_HEADER_IMPORTS } from '@hell-ui/angular/page-header';
 import { HellChip } from '@hell-ui/angular/chip';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-page-header-list-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidPlus, faSolidFilter, faSolidDownload, faSolidGear })],
-  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_DIRECTIVES, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, HellChip, ...HELL_PAGE_HEADER_IMPORTS, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <hell-page-header>
       <span hellPageHeaderTitle>Team members</span>

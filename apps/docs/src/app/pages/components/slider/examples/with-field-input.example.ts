@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 import { HellSlider } from '@hell-ui/angular/slider';
 
 @Component({
   selector: 'app-slider-with-field-input-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellInput, HellSlider],
+  imports: [...HELL_FIELD_IMPORTS, HellInput, HellSlider],
   template: `
     <div hellField class="max-w-sm">
       <label hellFieldLabel id="alert-threshold-label" for="alert-threshold-input">

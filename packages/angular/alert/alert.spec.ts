@@ -2,10 +2,10 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_ALERT_DIRECTIVES, HellAlertUi, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
+import { HELL_ALERT_IMPORTS, HellAlertUi, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
 
 @Component({
-  imports: [...HELL_ALERT_DIRECTIVES],
+  imports: [...HELL_ALERT_IMPORTS],
   template: `
     <hell-alert
       [variant]="variant()"

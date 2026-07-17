@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_ACCORDION_DIRECTIVES } from './accordion';
+import { HELL_ACCORDION_IMPORTS } from './accordion';
 
 @Component({
-  imports: [...HELL_ACCORDION_DIRECTIVES],
+  imports: [...HELL_ACCORDION_IMPORTS],
   template: `
     <div
       id="accordion"

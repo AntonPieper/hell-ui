@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 import { HellChip } from '@hell-ui/angular/chip';
 
 const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
@@ -7,7 +7,7 @@ const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
 @Component({
   selector: 'app-select-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES, HellChip],
+  imports: [...HELL_SELECT_IMPORTS, HellChip],
   template: `
     <div class="flex max-w-72 flex-col gap-hell-2">
       <button

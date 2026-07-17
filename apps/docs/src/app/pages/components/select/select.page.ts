@@ -194,7 +194,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <code>root</code> Part Style Map; its platform-owned behavior is unchanged.
       </p>
       <p>
-        Import <code>HELL_SELECT_DIRECTIVES</code> for the complete projected suite. Pick values
+        Import <code>HELL_SELECT_IMPORTS</code> for the complete projected suite. Pick values
         use <code>HellPickSingleValue</code>, <code>HellPickMultipleValue</code>, and
         <code>HellPickValue</code> from <code>@hell-ui/angular/core</code>.
       </p>

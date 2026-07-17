@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-alert-conditional-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES, HellButton],
+  imports: [...HELL_ALERT_IMPORTS, HellButton],
   template: `
     <div class="mb-hell-3">
       <button hellButton variant="soft" size="sm" type="button" (click)="closable.set(!closable())">

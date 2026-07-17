@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES, type HellAlertUi } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS, type HellAlertUi } from '@hell-ui/angular/alert';
 
 @Component({
   selector: 'app-alert-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES],
+  imports: [...HELL_ALERT_IMPORTS],
   template: `
     <hell-alert variant="info" [ui]="compactUi">
       <h3 hellAlertTitle ui="text-xs">Compact density</h3>

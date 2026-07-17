@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidMagnifyingGlass, faSolidXmark } from '@ng-icons/font-awesome/solid';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-input-with-search-icon-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellIcon, HellInput, ...HELL_CONTROL_GROUP_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellIcon, HellInput, ...HELL_CONTROL_GROUP_IMPORTS, ...HELL_FIELD_IMPORTS],
   providers: [provideIcons({ faSolidMagnifyingGlass, faSolidXmark })],
   template: `
     <div hellField>

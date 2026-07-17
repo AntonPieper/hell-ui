@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-alert-async-role-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES, HellButton],
+  imports: [...HELL_ALERT_IMPORTS, HellButton],
   template: `
     <button hellButton variant="primary" type="button" (click)="failed.set(true)">
       Simulate a failed call

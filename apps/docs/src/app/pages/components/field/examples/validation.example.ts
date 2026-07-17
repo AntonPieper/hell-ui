@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-field-validation-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellInput],
+  imports: [...HELL_FIELD_IMPORTS, HellInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="validation-password">Password</label>

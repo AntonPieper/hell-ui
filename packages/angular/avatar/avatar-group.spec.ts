@@ -2,10 +2,10 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 
-import { HELL_AVATAR_GROUP_DIRECTIVES } from './avatar-group';
+import { HELL_AVATAR_GROUP_IMPORTS } from './avatar-group';
 
 @Component({
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES, HellAvatar],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS, HellAvatar],
   template: `
     <hell-avatar-group id="colocated-group">
       <hell-avatar id="colocated-item" hellAvatarGroupItem fallback="AP" />
@@ -15,7 +15,7 @@ import { HELL_AVATAR_GROUP_DIRECTIVES } from './avatar-group';
 class ColocatedAvatarHost {}
 
 @Component({
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS],
   template: `
     <hell-avatar-group id="group">
       <span id="item-a" hellAvatarGroupItem>A</span>
@@ -27,7 +27,7 @@ class ColocatedAvatarHost {}
 class DefaultGroupHost {}
 
 @Component({
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS],
   template: `
     <hell-avatar-group id="group" size="lg">
       <span id="item" hellAvatarGroupItem [selected]="itemSelected()">A</span>
@@ -39,7 +39,7 @@ class SizedGroupHost {
 }
 
 @Component({
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS],
   template: `
     <hell-avatar-group
       id="string-group"

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar';
+import { HELL_AVATAR_GROUP_IMPORTS } from '@hell-ui/angular/avatar';
 
 interface TeamMember {
   name: string;
@@ -11,7 +11,7 @@ interface TeamMember {
 @Component({
   selector: 'app-avatar-group-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES, HellAvatar],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS, HellAvatar],
   template: `
     <hell-avatar-group [ui]="groupUi">
       @for (person of team; track person.name) {

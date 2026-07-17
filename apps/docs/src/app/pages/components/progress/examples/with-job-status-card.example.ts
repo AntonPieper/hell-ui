@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
 import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-progress-with-job-status-card-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES, HellProgress, HellProgressBar, HellChip],
+  imports: [...HELL_CARD_IMPORTS, HellProgress, HellProgressBar, HellChip],
   template: `
     <div hellCard class="max-w-95" [elevation]="1">
       <div hellCardHeader>

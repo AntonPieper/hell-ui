@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 
 interface Person {
   readonly id: string;
@@ -19,7 +19,7 @@ const people: readonly Person[] = [
 @Component({
   selector: 'app-table-primitive-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TABLE_UTILITIES_IMPORTS],
   providers: [provideIcons({ faSolidFolderOpen })],
   template: `
     <div hellTableContainer data-testid="primitive-table" ui="rounded-hell-lg">

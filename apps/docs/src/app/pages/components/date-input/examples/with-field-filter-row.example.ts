@@ -4,12 +4,12 @@ import { faSolidXmark } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellDateInput } from '@hell-ui/angular/date-input';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-date-input-with-field-filter-row-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellDateInput, HellIcon, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellButton, HellDateInput, HellIcon, ...HELL_FIELD_IMPORTS],
   providers: [provideIcons({ faSolidXmark })],
   template: `
     <div class="flex flex-wrap items-end gap-3">

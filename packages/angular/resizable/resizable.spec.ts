@@ -2,10 +2,10 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, HELL_RESIZABLE_LABELS } from './resizable';
+import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi, HELL_RESIZABLE_LABELS } from './resizable';
 
 @Component({
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <div id="group" hellResizable>
       <section id="pane-a" hellResizablePane [minSize]="40">A</section>
@@ -19,7 +19,7 @@ import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, HELL_RESIZABLE_L
 class ResizableHost {}
 
 @Component({
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   providers: [provideHellLabels(HELL_RESIZABLE_LABELS, { resizePanels: 'Contract resize handle' })],
   template: `
     <div id="contract-group" hellResizable>
@@ -32,7 +32,7 @@ class ResizableHost {}
 class ResizableLabelContractHost {}
 
 @Component({
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <div id="ui-group" hellResizable orientation="vertical" ui="h-[360px] bg-hell-surface-muted">
       <section id="ui-pane-a" hellResizablePane [ui]="paneUi" [minSize]="40">A</section>

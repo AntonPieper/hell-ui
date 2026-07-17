@@ -3,7 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import {
-  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HELL_TABLE_UTILITIES_IMPORTS,
   type HellTableResizeHandleUi,
 } from '@hell-ui/angular/table';
 
@@ -22,7 +22,7 @@ const releases: readonly Release[] = [
 @Component({
   selector: 'app-table-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TABLE_UTILITIES_IMPORTS],
   providers: [provideIcons({ faSolidFolderOpen })],
   template: `
     <div hellTableContainer ui="rounded-hell-xl border-hell-primary-soft shadow-hell-md">

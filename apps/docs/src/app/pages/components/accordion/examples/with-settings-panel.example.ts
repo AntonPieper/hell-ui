@@ -1,15 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell, faSolidFileInvoice, faSolidSliders } from '@ng-icons/font-awesome/solid';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-accordion-with-settings-panel-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidBell, faSolidFileInvoice, faSolidSliders })],
-  imports: [...HELL_ACCORDION_DIRECTIVES, ...HELL_CARD_DIRECTIVES, HellIcon],
+  imports: [...HELL_ACCORDION_IMPORTS, ...HELL_CARD_IMPORTS, HellIcon],
   template: `
     <div hellCard [elevation]="0">
       <div hellCardHeader>Workspace settings</div>

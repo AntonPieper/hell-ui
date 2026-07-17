@@ -13,7 +13,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
+import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
 import { hdCopyTextToClipboard } from './code-tools';
 
 const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
@@ -23,7 +23,7 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [provideIcons(EXAMPLE_TABS_ICONS)],
-  imports: [NgComponentOutlet, HellButton, HellIcon, ...HELL_TABS_DIRECTIVES],
+  imports: [NgComponentOutlet, HellButton, HellIcon, ...HELL_TABS_IMPORTS],
   template: `
     <div
       class="hd-example-tabs"

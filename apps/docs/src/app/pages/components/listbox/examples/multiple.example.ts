@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
+import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
 
 interface Check {
   readonly id: string;
@@ -18,7 +18,7 @@ const CHECKS: readonly Check[] = [
 @Component({
   selector: 'app-listbox-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_LISTBOX_DIRECTIVES],
+  imports: [...HELL_LISTBOX_IMPORTS],
   template: `
     <div class="grid gap-2">
       <span id="listbox-multiple-label" class="text-sm font-semibold text-hell-foreground">

@@ -247,7 +247,7 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
             Part Style Map type: <code>HellResizableHandleUi</code>.
           </li>
           <li>
-            <code>HELL_RESIZABLE_DIRECTIVES</code> — the group, pane, and handle bundled for
+            <code>HELL_RESIZABLE_IMPORTS</code> — the group, pane, and handle bundled for
             <code>imports</code>.
           </li>
           <li>

@@ -199,7 +199,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
             </li>
           </ul>
         </li>
-        <li>Import every directive at once via <code>HELL_FIELD_DIRECTIVES</code>.</li>
+        <li>Import every directive at once via <code>HELL_FIELD_IMPORTS</code>.</li>
       </ul>
 
       <h2>Accessibility</h2>

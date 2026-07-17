@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
 
 @Component({
   selector: 'app-dialog-dismissal-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
+  imports: [HellButton, ...HELL_CARD_IMPORTS, ...HELL_DIALOG_IMPORTS],
   template: `
     <!-- Escape and outside-click dismissal are on by default. -->
     <button hellButton [hellDialogTrigger]="casual">Casual dialog</button>

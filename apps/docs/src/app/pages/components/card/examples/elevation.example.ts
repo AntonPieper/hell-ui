@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 
 @Component({
   selector: 'app-card-elevation-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES],
+  imports: [...HELL_CARD_IMPORTS],
   template: `
     <div hellCard [elevation]="0">
       <div hellCardHeader><strong>Flat</strong></div>

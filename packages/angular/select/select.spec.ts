@@ -3,11 +3,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import { HellSelect, HELL_SELECT_DIRECTIVES } from './select';
+import { HellSelect, HELL_SELECT_IMPORTS } from './select';
 import type { HellPickValue } from '@hell-ui/angular/core';
 
 interface Region {
@@ -23,7 +23,7 @@ const REGIONS: readonly Region[] = [
 ];
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
+  imports: [ReactiveFormsModule, ...HELL_SELECT_IMPORTS],
   template: `
     <button
       hellSelect
@@ -47,7 +47,7 @@ class SelectFormHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
+  imports: [ReactiveFormsModule, ...HELL_SELECT_IMPORTS],
   template: `
     <button
       id="multi-select"
@@ -71,7 +71,7 @@ class SelectMultipleFormHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
+  imports: [ReactiveFormsModule, ...HELL_SELECT_IMPORTS, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="deployment-region">Deployment region</label>
@@ -111,7 +111,7 @@ class SelectProjectedFormHost {
 }
 
 @Component({
-  imports: [...HELL_SELECT_DIRECTIVES],
+  imports: [...HELL_SELECT_IMPORTS],
   template: `
     <button hellSelect type="button" ui="rounded-hell-pill bg-hell-primary">
       <span hellSelectValue ui="text-hell-danger">Selection</span>

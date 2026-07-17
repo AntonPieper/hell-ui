@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import {
   HELL_DEFAULT_DATE_INPUT_ADAPTER,
   HellDateInput,
@@ -112,7 +112,7 @@ class ValidationHost {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellDateInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellDateInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="field-date">Invoice date</label>
@@ -130,7 +130,7 @@ class FieldHost {}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, HellDateInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [ReactiveFormsModule, HellDateInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="invalid-field-date">Restricted date</label>

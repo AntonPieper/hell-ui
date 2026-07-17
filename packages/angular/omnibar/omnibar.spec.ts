@@ -4,10 +4,10 @@ import { TestBed } from '@angular/core/testing';
 import { HellChip, HellChipRemove } from '@hell-ui/angular/chip';
 import { hellSearchResource, provideHellLabels, type HellUiInput } from '@hell-ui/angular/core';
 import { HellGlobalKeydownService } from '@hell-ui/angular/internal/hotkeys';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 
 import {
-  HELL_OMNIBAR_DIRECTIVES,
+  HELL_OMNIBAR_IMPORTS,
   HELL_OMNIBAR_LABELS,
   type HellOmnibarPart,
   type HellOmnibarSubmitEvent,
@@ -15,7 +15,7 @@ import {
 } from './omnibar';
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES, ...HELL_MENU_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS, ...HELL_MENU_IMPORTS],
   template: `
     <hell-omnibar
       [query]="query()"
@@ -75,7 +75,7 @@ interface Command {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar
       [query]="query()"
@@ -111,7 +111,7 @@ class OmnibarLocalResourceHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar [query]="query()" (queryChange)="query.set($event)">
       @if (search.status() === 'loading') {
@@ -139,7 +139,7 @@ class OmnibarAsyncResourceHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES, HellChip, HellChipRemove],
+  imports: [...HELL_OMNIBAR_IMPORTS, HellChip, HellChipRemove],
   template: `
     <hell-omnibar
       [query]="query()"
@@ -161,7 +161,7 @@ class OmnibarChipCompositionHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar [openOnFocus]="true" [ui]="ui()">
       <div hellOmnibarActions aria-label="Filters" [ui]="actionsStripUi">
@@ -205,14 +205,14 @@ class OmnibarPartStyleHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   providers: [provideHellLabels(HELL_OMNIBAR_LABELS, { clearSearch: 'Suche löschen' })],
   template: `<hell-omnibar />`,
 })
 class OmnibarLocalizedHost {}
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar
       [hotkey]="hotkey()"
@@ -236,7 +236,7 @@ class OmnibarHotkeyHost {
 }
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <input data-slot="outside-input" />
     <hell-omnibar hotkey="/" [openOnFocus]="false" />

@@ -5,7 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 
 import { HellNumberInput, HELL_DEFAULT_NUMBER_INPUT_ADAPTER, provideHellNumberInputAdapter, HELL_NUMBER_INPUT_LABELS, type HellNumberInputPart, type HellNumberInputUi } from './number-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   imports: [HellNumberInput],
@@ -58,7 +58,7 @@ class NumberInputPartStyleHost {
 }
 
 @Component({
-  imports: [HellNumberInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellNumberInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="port-field-control">Listen port</label>

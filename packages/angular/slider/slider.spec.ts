@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { type HellSize } from '@hell-ui/angular/core';
 import { HellSlider, type HellSliderUi } from './slider';
 
@@ -39,7 +39,7 @@ class SliderFormHost {
 }
 
 @Component({
-  imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
+  imports: [...HELL_FIELD_IMPORTS, HellSlider],
   template: `
     <span id="external-slider-label">External volume</span>
     <p id="external-slider-help">Applies to the current output device.</p>

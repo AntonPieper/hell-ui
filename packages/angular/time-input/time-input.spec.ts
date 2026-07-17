@@ -14,7 +14,7 @@ import {
   type HellTimeInputUi,
   type HellTimeValue,
 } from './time-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 {
   const elementPrototype = HTMLElement.prototype as HTMLElement & {
@@ -62,7 +62,7 @@ class TimeInputPartStyleHost {
 }
 
 @Component({
-  imports: [HellTimeInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellTimeInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="start-field-control">Start time</label>

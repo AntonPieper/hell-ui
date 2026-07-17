@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-control-group-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellInput, ...HELL_CONTROL_GROUP_DIRECTIVES],
+  imports: [HellInput, ...HELL_CONTROL_GROUP_IMPORTS],
   template: `
     <div
       hellControlGroup

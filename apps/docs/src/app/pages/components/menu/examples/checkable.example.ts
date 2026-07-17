@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-menu-checkable-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_MENU_DIRECTIVES],
+  imports: [HellButton, ...HELL_MENU_IMPORTS],
   template: `
     <button hellButton variant="ghost" [hellMenuTrigger]="view" type="button">View</button>
 

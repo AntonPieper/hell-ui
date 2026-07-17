@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellNumberInput } from '@hell-ui/angular/number-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-number-input-reactive-forms-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellNumberInput],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellNumberInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-port">Listen port</label>

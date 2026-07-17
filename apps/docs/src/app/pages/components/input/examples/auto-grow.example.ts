@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellTextarea } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-input-auto-grow-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellTextarea, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellTextarea, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label hellFieldLabel for="auto-grow-note">Release note</label>

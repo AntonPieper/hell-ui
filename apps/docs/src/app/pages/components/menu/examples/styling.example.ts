@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidStar } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 
@@ -10,7 +10,7 @@ const MENU_STYLING_ICONS = { faSolidStar };
 @Component({
   selector: 'app-menu-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, ...HELL_MENU_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_MENU_IMPORTS],
   providers: [provideIcons(MENU_STYLING_ICONS)],
   template: `
     <button hellButton variant="primary" [hellMenuTrigger]="styled" type="button">

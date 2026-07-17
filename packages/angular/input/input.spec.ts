@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellInput, HellTextarea } from './input';
 
 @Component({
-  imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label data-field="input-label" hellFieldLabel for="input-control">Input</label>

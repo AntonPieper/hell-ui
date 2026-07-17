@@ -240,7 +240,7 @@ import { PageHeader } from '../../../shared/page-header';
           so app localization owns the strings.
         </li>
         <li>
-          <code>HELL_EMPTY_STATE_DIRECTIVES</code>: array of the component plus all four projection
+          <code>HELL_EMPTY_STATE_IMPORTS</code>: array of the component plus all four projection
           markers, for bulk <code>imports</code>.
         </li>
       </ul>

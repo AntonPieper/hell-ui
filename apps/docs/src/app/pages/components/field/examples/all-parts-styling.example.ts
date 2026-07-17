@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-field-all-parts-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellInput],
+  imports: [...HELL_FIELD_IMPORTS, HellInput],
   template: `
     <!-- Every field module owns a single 'root' part — refine each module's -->
     <!-- own ui input rather than styling descendants from hellField. -->

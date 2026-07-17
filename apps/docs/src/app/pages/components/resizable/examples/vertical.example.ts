@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-resizable-vertical-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <!-- orientation="vertical" stacks panes and turns the handle into a row divider. -->
     <div hellResizable orientation="vertical" class="h-80">

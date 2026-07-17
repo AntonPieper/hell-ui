@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar';
+import { HELL_AVATAR_GROUP_IMPORTS } from '@hell-ui/angular/avatar';
 import { HellSize } from '@hell-ui/angular/core';
 
 interface TeamMember {
@@ -12,7 +12,7 @@ interface TeamMember {
 @Component({
   selector: 'app-avatar-group-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_AVATAR_GROUP_DIRECTIVES, HellAvatar],
+  imports: [...HELL_AVATAR_GROUP_IMPORTS, HellAvatar],
   template: `
     @for (size of sizes; track size) {
       <hell-avatar-group [size]="size">

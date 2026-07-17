@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 
 interface HarnessSearchItem {
   readonly id: string;
@@ -20,7 +20,7 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
 @Component({
   selector: 'hd-floating-dismissal-harness',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellPopover, HellPopoverTrigger, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellPopover, HellPopoverTrigger, ...HELL_OMNIBAR_IMPORTS],
   template: `
     <section
       class="harness"

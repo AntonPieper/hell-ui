@@ -225,7 +225,7 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           <p>Exports and labels:</p>
           <ul>
             <li>
-              <code>HELL_TOOLBAR_DIRECTIVES</code> contains <code>HellToolbar</code>,
+              <code>HELL_TOOLBAR_IMPORTS</code> contains <code>HellToolbar</code>,
               <code>HellToolbarItem</code>, <code>HellOverflowToolbar</code>, and the three measured
               declaration directives.
             </li>

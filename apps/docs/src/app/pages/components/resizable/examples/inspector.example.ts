@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 import { HellChip } from '@hell-ui/angular/chip';
 
 interface Ticket {
@@ -21,9 +21,9 @@ const tickets: readonly Ticket[] = [
   selector: 'app-resizable-inspector-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ...HELL_RESIZABLE_DIRECTIVES,
-    ...HELL_CARD_DIRECTIVES,
-    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    ...HELL_RESIZABLE_IMPORTS,
+    ...HELL_CARD_IMPORTS,
+    ...HELL_TABLE_UTILITIES_IMPORTS,
     HellChip,
   ],
   template: `

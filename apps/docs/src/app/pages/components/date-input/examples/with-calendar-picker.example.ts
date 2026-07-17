@@ -10,10 +10,10 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendarDays } from '@ng-icons/font-awesome/solid';
 
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import { HellDateInput } from '@hell-ui/angular/date-input';
 import { HellDatePicker } from '@hell-ui/angular/date-picker';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 
@@ -27,8 +27,8 @@ import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
     HellIcon,
     HellPopover,
     HellPopoverTrigger,
-    ...HELL_CONTROL_GROUP_DIRECTIVES,
-    ...HELL_FIELD_DIRECTIVES,
+    ...HELL_CONTROL_GROUP_IMPORTS,
+    ...HELL_FIELD_IMPORTS,
   ],
   providers: [provideIcons({ faSolidCalendarDays })],
   template: `

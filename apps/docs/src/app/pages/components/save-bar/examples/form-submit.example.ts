@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-save-bar-form-submit-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellInput, HellSaveBar],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellInput, HellSaveBar],
   template: `
     <!-- saveType="submit" wires the built-in Save to native form submission, so
          pressing Enter in a field also saves. Handle (ngSubmit), not (saved).

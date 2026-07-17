@@ -6,7 +6,7 @@ import { NgpCombobox, injectComboboxState } from 'ng-primitives/combobox';
 import { NgpRadioGroup, injectRadioGroupState } from 'ng-primitives/radio';
 import { NgpRovingFocusGroup, injectRovingFocusGroupState } from 'ng-primitives/roving-focus';
 
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { HellRadio, HellRadioGroup } from '@hell-ui/angular/radio';
 import {
   HELL_NGP_STATE_WRITER_UPGRADE_PATH,
@@ -70,7 +70,7 @@ class ComboboxCvaStateProbe {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ComboboxCvaStateProbe, ...HELL_COMBOBOX_DIRECTIVES],
+  imports: [ReactiveFormsModule, ComboboxCvaStateProbe, ...HELL_COMBOBOX_IMPORTS],
   template: `
     <div
       hellCombobox

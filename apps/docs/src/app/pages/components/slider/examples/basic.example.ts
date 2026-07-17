@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellSlider } from '@hell-ui/angular/slider';
 
 @Component({
   selector: 'app-slider-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
+  imports: [...HELL_FIELD_IMPORTS, HellSlider],
   template: `
     <div hellField>
       <label hellFieldLabel id="volume-slider-label" for="volume-slider">Volume</label>

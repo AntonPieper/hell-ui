@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellNativeCheckbox } from '@hell-ui/angular/checkbox';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-checkbox-native-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellNativeCheckbox, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellNativeCheckbox, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField orientation="horizontal">
       <input

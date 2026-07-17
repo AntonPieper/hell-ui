@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_LISTBOX_DIRECTIVES } from './listbox';
+import { HELL_LISTBOX_IMPORTS } from './listbox';
 
 @Component({
-  imports: [...HELL_LISTBOX_DIRECTIVES],
+  imports: [...HELL_LISTBOX_IMPORTS],
   template: `
     <div
       hellListbox
@@ -26,7 +26,7 @@ class ListboxUiHost {
 }
 
 @Component({
-  imports: [...HELL_LISTBOX_DIRECTIVES],
+  imports: [...HELL_LISTBOX_IMPORTS],
   template: `
     <div hellListbox aria-label="Plain listbox" [value]="value()">
       <div hellListboxOption value="ada">Ada</div>

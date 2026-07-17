@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-themed-panel-demo',
-  imports: [HellButton, HellChip, ...HELL_CARD_DIRECTIVES],
+  imports: [HellButton, HellChip, ...HELL_CARD_IMPORTS],
   template: `
     <section
       hellCard

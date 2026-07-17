@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { hellTableInferredRoleForHost } from './table-role-inference';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableResizeHandleUi } from './table';
+import { HELL_TABLE_UTILITIES_IMPORTS, type HellTableResizeHandleUi } from './table';
 
 @Component({
   standalone: true,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table id="native-root" hellTableRoot contentWidth>
       <thead id="native-header" hellTableHeader>
@@ -35,7 +35,7 @@ class NativeTablePrimitiveHost {}
 
 @Component({
   standalone: true,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div id="inferred-root" hellTableRoot>
       <div id="inferred-header" hellTableHeader>
@@ -55,7 +55,7 @@ class InferredRoleTablePrimitiveHost {}
 
 @Component({
   standalone: true,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div id="explicit-root" hellTableRoot role="grid">
       <div id="explicit-row" hellTableRow role="row">
@@ -68,7 +68,7 @@ class ExplicitRoleTablePrimitiveHost {}
 
 @Component({
   standalone: true,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div id="ui-root" hellTableRoot ui="bg-hell-surface-muted">
       <div id="ui-row" hellTableRow ui="bg-hell-primary-soft" active>
