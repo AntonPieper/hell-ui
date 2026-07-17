@@ -354,7 +354,7 @@ export class HellDialogDescription {
 }
 
 /** All directives that make up the Dialog module, for convenient bulk import. */
-export const HELL_DIALOG_DIRECTIVES = [
+export const HELL_DIALOG_IMPORTS = [
   HellDialogTrigger,
   HellDialogOverlay,
   HellDialogTitle,
@@ -362,3 +362,10 @@ export const HELL_DIALOG_DIRECTIVES = [
   HellDialog,
   HellDialogScope,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_DIALOG_IMPORTS.
+ */
+export const HELL_DIALOG_DIRECTIVES = HELL_DIALOG_IMPORTS;

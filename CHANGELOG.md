@@ -7,6 +7,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Every public Angular directive tuple now has an accurately named
+  `HELL_*_IMPORTS` export. Existing `HELL_*_DIRECTIVES` names remain deprecated
+  identity aliases during the migration window, so applications can adopt the
+  canonical names without changing tuple contents or runtime behavior. API
+  reports, architecture checks, and a packed consumer protect the additive
+  contract. Closes #208.
 - Added the directive-first `@hell-ui/angular/file-picker` Styled Primitive.
   `[hellFilePicker]` acquires files through drop or one internal native browse
   action, then emits one `HellFileSelection` with accepted files and structured

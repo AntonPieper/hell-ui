@@ -13,8 +13,11 @@ import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 
-// @public
+// @public @deprecated
 export const HELL_RESIZABLE_DIRECTIVES: readonly [typeof HellResizable, typeof HellResizablePane, typeof HellResizableHandle];
+
+// @public
+export const HELL_RESIZABLE_IMPORTS: readonly [typeof HellResizable, typeof HellResizablePane, typeof HellResizableHandle];
 
 // @public
 export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels>;

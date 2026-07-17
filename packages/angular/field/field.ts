@@ -129,9 +129,16 @@ export class HellFieldError {
 }
 
 /** All directives that make up the field entry point, for bulk `imports`. */
-export const HELL_FIELD_DIRECTIVES = [
+export const HELL_FIELD_IMPORTS = [
   HellField,
   HellFieldLabel,
   HellFieldDescription,
   HellFieldError,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_FIELD_IMPORTS.
+ */
+export const HELL_FIELD_DIRECTIVES = HELL_FIELD_IMPORTS;

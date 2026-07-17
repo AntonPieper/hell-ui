@@ -362,7 +362,7 @@ export class HellComboboxEmpty {
 }
 
 /** All projection-first Combobox directives, for bulk imports. */
-export const HELL_COMBOBOX_DIRECTIVES = [
+export const HELL_COMBOBOX_IMPORTS = [
   HellCombobox,
   HellComboboxInput,
   HellComboboxButton,
@@ -371,3 +371,10 @@ export const HELL_COMBOBOX_DIRECTIVES = [
   HellComboboxOption,
   HellComboboxEmpty,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_COMBOBOX_IMPORTS.
+ */
+export const HELL_COMBOBOX_DIRECTIVES = HELL_COMBOBOX_IMPORTS;

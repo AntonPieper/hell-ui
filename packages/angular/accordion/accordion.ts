@@ -129,9 +129,16 @@ export class HellAccordionContent {
 }
 
 /** All directives that make up the accordion entry point, for bulk `imports`. */
-export const HELL_ACCORDION_DIRECTIVES = [
+export const HELL_ACCORDION_IMPORTS = [
   HellAccordion,
   HellAccordionItem,
   HellAccordionTrigger,
   HellAccordionContent,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_ACCORDION_IMPORTS.
+ */
+export const HELL_ACCORDION_DIRECTIVES = HELL_ACCORDION_IMPORTS;

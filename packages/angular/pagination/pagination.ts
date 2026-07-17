@@ -416,8 +416,15 @@ export class HellPaginationStrip {
 }
 
 /** All HellPagination directives and components, for convenient bulk import. */
-export const HELL_PAGINATION_DIRECTIVES = [
+export const HELL_PAGINATION_IMPORTS = [
   HellPagination,
   HellPageLink,
   HellPaginationStrip,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_PAGINATION_IMPORTS.
+ */
+export const HELL_PAGINATION_DIRECTIVES = HELL_PAGINATION_IMPORTS;

@@ -1121,7 +1121,7 @@ export interface HellOmnibarSubmitEvent<T = unknown> {
  * parts, item slots, actions strip, and action button directives. Compose
  * tokens from the public Chip primitives.
  */
-export const HELL_OMNIBAR_DIRECTIVES = [
+export const HELL_OMNIBAR_IMPORTS = [
   HellOmnibar,
   HellOmnibarPanel,
   HellOmnibarGroup,
@@ -1134,3 +1134,10 @@ export const HELL_OMNIBAR_DIRECTIVES = [
   HellOmnibarActionsStrip,
   HellOmnibarAction,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_OMNIBAR_IMPORTS.
+ */
+export const HELL_OMNIBAR_DIRECTIVES = HELL_OMNIBAR_IMPORTS;

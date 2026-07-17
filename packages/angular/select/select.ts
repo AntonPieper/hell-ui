@@ -300,7 +300,8 @@ export class HellNativeSelect {
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
-export const HELL_SELECT_DIRECTIVES = [
+/** All directives that make up the Select entry point, for bulk `imports`. */
+export const HELL_SELECT_IMPORTS = [
   HellSelect,
   HellSelectValue,
   HellSelectPlaceholder,
@@ -308,3 +309,10 @@ export const HELL_SELECT_DIRECTIVES = [
   HellSelectPortal,
   HellSelectOption,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_SELECT_IMPORTS.
+ */
+export const HELL_SELECT_DIRECTIVES = HELL_SELECT_IMPORTS;

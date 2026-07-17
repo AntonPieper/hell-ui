@@ -2664,8 +2664,13 @@ function toolbarConsumerMainTs() {
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   HELL_TOOLBAR_DIRECTIVES,
+  HELL_TOOLBAR_IMPORTS,
   type HellOverflowToolbarUi,
 } from '${packageName}/toolbar';
+
+if (HELL_TOOLBAR_IMPORTS !== HELL_TOOLBAR_DIRECTIVES) {
+  throw new Error('The deprecated toolbar tuple must remain an identity alias.');
+}
 
 @Component({
   selector: 'app-root',

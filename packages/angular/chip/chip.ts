@@ -446,4 +446,11 @@ export class HellKbd {
 }
 
 /** All chip-set directives of the chip entry point, for bulk `imports`. */
-export const HELL_CHIP_DIRECTIVES = [HellChipSet, HellChipInput, HellChip, HellChipRemove] as const;
+export const HELL_CHIP_IMPORTS = [HellChipSet, HellChipInput, HellChip, HellChipRemove] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_CHIP_IMPORTS.
+ */
+export const HELL_CHIP_DIRECTIVES = HELL_CHIP_IMPORTS;

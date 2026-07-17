@@ -11,8 +11,11 @@ import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/avatar';
 
-// @public
+// @public @deprecated
 export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
+
+// @public
+export const HELL_AVATAR_GROUP_IMPORTS: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
 
 // @public
 export class HellAvatar {

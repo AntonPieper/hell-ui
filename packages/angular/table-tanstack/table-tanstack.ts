@@ -1174,7 +1174,8 @@ function normalizeDomName(name: string): string {
     .toLowerCase();
 }
 
-export const HELL_TANSTACK_TABLE_DIRECTIVES = [
+/** All directives that make up the TanStack Table entry point, for bulk `imports`. */
+export const HELL_TANSTACK_TABLE_IMPORTS = [
   HellTanStackTable,
   HellTableShellHeader,
   HellTableShellCell,
@@ -1190,3 +1191,10 @@ export const HELL_TANSTACK_TABLE_DIRECTIVES = [
   HellTanStackColumnFilter,
   FlexRenderDirective,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_TANSTACK_TABLE_IMPORTS.
+ */
+export const HELL_TANSTACK_TABLE_DIRECTIVES = HELL_TANSTACK_TABLE_IMPORTS;

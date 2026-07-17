@@ -915,7 +915,7 @@ function sameOrder(a: readonly number[], b: readonly number[]): boolean {
 /**
  * Standalone imports for plain Toolbar plus the complete Overflow Toolbar API.
  */
-export const HELL_TOOLBAR_DIRECTIVES = [
+export const HELL_TOOLBAR_IMPORTS = [
   HellToolbar,
   HellToolbarItem,
   HellOverflowToolbar,
@@ -923,3 +923,10 @@ export const HELL_TOOLBAR_DIRECTIVES = [
   HellToolbarSeparator,
   HellToolbarWidget,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_TOOLBAR_IMPORTS.
+ */
+export const HELL_TOOLBAR_DIRECTIVES = HELL_TOOLBAR_IMPORTS;

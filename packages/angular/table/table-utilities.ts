@@ -1107,8 +1107,7 @@ export { HellTable as HellTableRoot, HellTableHead as HellTableHeader };
  * row/cell directives, row action/selection controls, sortable header cell, and
  * resize handle.
  */
-/** Preferred plural alias for the table utility directives. */
-export const HELL_TABLE_UTILITIES_DIRECTIVES = [
+export const HELL_TABLE_UTILITIES_IMPORTS = [
   HellTableContainer,
   HellTable,
   HellTableHead,
@@ -1124,3 +1123,10 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableCell,
   HellTableResizeHandle,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_TABLE_UTILITIES_IMPORTS.
+ */
+export const HELL_TABLE_UTILITIES_DIRECTIVES = HELL_TABLE_UTILITIES_IMPORTS;

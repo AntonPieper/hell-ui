@@ -10,8 +10,11 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/tabs';
 
-// @public
+// @public @deprecated
 export const HELL_TABS_DIRECTIVES: readonly [typeof HellTabset, typeof HellTabList, typeof HellTab, typeof HellTabPanel];
+
+// @public
+export const HELL_TABS_IMPORTS: readonly [typeof HellTabset, typeof HellTabList, typeof HellTab, typeof HellTabPanel];
 
 // @public
 export class HellTab {

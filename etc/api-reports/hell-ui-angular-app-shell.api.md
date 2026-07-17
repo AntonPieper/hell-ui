@@ -13,8 +13,11 @@ import { OnDestroy } from '@angular/core';
 // @public
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
 
-// @public
+// @public @deprecated
 export const HELL_APP_SHELL_DIRECTIVES: readonly [typeof HellAppShell, typeof HellAppTopbar, typeof HellAppSidenav, typeof HellAppContent, typeof HellAppSecondary, typeof HellAppSecondaryBody, typeof HellNavItem, typeof HellNavItemIcon, typeof HellNavItemLabel, typeof HellNavItemTrailing, typeof HellNavSection, typeof HellNavSectionToggle, typeof HellNavSectionItems, typeof HellSidenavToggle, typeof HellSecondaryToggle];
+
+// @public
+export const HELL_APP_SHELL_IMPORTS: readonly [typeof HellAppShell, typeof HellAppTopbar, typeof HellAppSidenav, typeof HellAppContent, typeof HellAppSecondary, typeof HellAppSecondaryBody, typeof HellNavItem, typeof HellNavItemIcon, typeof HellNavItemLabel, typeof HellNavItemTrailing, typeof HellNavSection, typeof HellNavSectionToggle, typeof HellNavSectionItems, typeof HellSidenavToggle, typeof HellSecondaryToggle];
 
 // @public
 export const HELL_APP_SHELL_LABELS: InjectionToken<HellAppShellLabels>;

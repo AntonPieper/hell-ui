@@ -248,7 +248,7 @@ export class HellPageHeader {
 }
 
 /** All directives that make up the page-header entry point, for bulk `imports`. */
-export const HELL_PAGE_HEADER_DIRECTIVES = [
+export const HELL_PAGE_HEADER_IMPORTS = [
   HellPageHeader,
   HellPageHeaderBack,
   HellPageHeaderLeading,
@@ -257,3 +257,10 @@ export const HELL_PAGE_HEADER_DIRECTIVES = [
   HellPageHeaderDescription,
   HellPageHeaderToolbar,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_PAGE_HEADER_IMPORTS.
+ */
+export const HELL_PAGE_HEADER_DIRECTIVES = HELL_PAGE_HEADER_IMPORTS;

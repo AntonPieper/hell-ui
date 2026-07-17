@@ -220,10 +220,17 @@ export class HellEmptyState {
 }
 
 /** All directives that make up the empty-state entry point, for bulk `imports`. */
-export const HELL_EMPTY_STATE_DIRECTIVES = [
+export const HELL_EMPTY_STATE_IMPORTS = [
   HellEmptyState,
   HellEmptyStateMedia,
   HellEmptyStateTitle,
   HellEmptyStateDescription,
   HellEmptyStateActions,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_EMPTY_STATE_IMPORTS.
+ */
+export const HELL_EMPTY_STATE_DIRECTIVES = HELL_EMPTY_STATE_IMPORTS;

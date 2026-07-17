@@ -11,8 +11,11 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/combobox';
 
-// @public
+// @public @deprecated
 export const HELL_COMBOBOX_DIRECTIVES: readonly [typeof HellCombobox, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty];
+
+// @public
+export const HELL_COMBOBOX_IMPORTS: readonly [typeof HellCombobox, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty];
 
 // @public
 export class HellCombobox<T = unknown> implements ControlValueAccessor {

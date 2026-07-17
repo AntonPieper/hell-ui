@@ -14,8 +14,11 @@ import { NgpMenuItemRadio } from 'ng-primitives/menu';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 import { Signal } from '@angular/core';
 
-// @public
+// @public @deprecated
 export const HELL_MENU_DIRECTIVES: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];
+
+// @public
+export const HELL_MENU_IMPORTS: readonly [typeof HellMenuTrigger, typeof HellSubmenuTrigger, typeof HellMenu, typeof HellMenuItem, typeof HellMenuItemCheckbox, typeof HellMenuItemRadio, typeof HellMenuItemRadioGroup, typeof HellMenuItemIndicator, typeof HellMenuSeparator, typeof HellMenuSection, typeof HellMenuLabel, typeof HellMenuItemIcon, typeof HellMenuItemTrailing];
 
 // @public
 export class HellMenu {

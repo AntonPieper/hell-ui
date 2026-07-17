@@ -4,6 +4,7 @@
   "extraExports": [
     "export {",
     "  HELL_OVERFLOW_TOOLBAR_LABELS,",
+    "  HELL_TOOLBAR_IMPORTS,",
     "  HELL_TOOLBAR_DIRECTIVES,",
     "  HellOverflowToolbar,",
     "  HellToolbar,",

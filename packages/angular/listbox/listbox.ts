@@ -141,10 +141,17 @@ export class HellListboxHeader {
 }
 
 /** All directives exported by the listbox entry point, for bulk `imports`. */
-export const HELL_LISTBOX_DIRECTIVES = [
+export const HELL_LISTBOX_IMPORTS = [
   HellListbox,
   HellListboxTrigger,
   HellListboxOption,
   HellListboxSection,
   HellListboxHeader,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_LISTBOX_IMPORTS.
+ */
+export const HELL_LISTBOX_DIRECTIVES = HELL_LISTBOX_IMPORTS;

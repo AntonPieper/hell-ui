@@ -249,4 +249,12 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   }
 }
 
-export const HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES = [HellTanStackVirtualRows] as const;
+/** All directives that make up the TanStack virtual rows entry point, for bulk `imports`. */
+export const HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS = [HellTanStackVirtualRows] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS.
+ */
+export const HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES = HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS;
