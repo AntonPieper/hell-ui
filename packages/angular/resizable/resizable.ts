@@ -524,8 +524,15 @@ export class HellResizableHandle implements AfterViewInit {
 }
 
 /** Standalone imports for the complete resizable API: group, pane, and handle. */
-export const HELL_RESIZABLE_DIRECTIVES = [
+export const HELL_RESIZABLE_IMPORTS = [
   HellResizable,
   HellResizablePane,
   HellResizableHandle,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_RESIZABLE_IMPORTS.
+ */
+export const HELL_RESIZABLE_DIRECTIVES = HELL_RESIZABLE_IMPORTS;

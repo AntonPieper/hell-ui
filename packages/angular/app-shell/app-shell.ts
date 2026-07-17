@@ -951,7 +951,7 @@ function nullableBooleanAttribute(value: boolean | string | null | undefined): b
 }
 
 /** All app shell directives, for importing the module's building blocks together. */
-export const HELL_APP_SHELL_DIRECTIVES = [
+export const HELL_APP_SHELL_IMPORTS = [
   HellAppShell,
   HellAppTopbar,
   HellAppSidenav,
@@ -968,3 +968,10 @@ export const HELL_APP_SHELL_DIRECTIVES = [
   HellSidenavToggle,
   HellSecondaryToggle,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_APP_SHELL_IMPORTS.
+ */
+export const HELL_APP_SHELL_DIRECTIVES = HELL_APP_SHELL_IMPORTS;

@@ -10,8 +10,11 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 
-// @public
+// @public @deprecated
 export const HELL_PAGE_HEADER_DIRECTIVES: readonly [typeof HellPageHeader, typeof HellPageHeaderBack, typeof HellPageHeaderLeading, typeof HellPageHeaderTitle, typeof HellPageHeaderMeta, typeof HellPageHeaderDescription, typeof HellPageHeaderToolbar];
+
+// @public
+export const HELL_PAGE_HEADER_IMPORTS: readonly [typeof HellPageHeader, typeof HellPageHeaderBack, typeof HellPageHeaderLeading, typeof HellPageHeaderTitle, typeof HellPageHeaderMeta, typeof HellPageHeaderDescription, typeof HellPageHeaderToolbar];
 
 // @public
 export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellPageHeaderLabels>;

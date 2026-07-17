@@ -12,8 +12,11 @@ import * as i0 from '@angular/core';
 // @public
 export const HELL_EMPTY_STATE_COPY: Record<HellEmptyStateGlyph, HellEmptyStateCopy>;
 
-// @public
+// @public @deprecated
 export const HELL_EMPTY_STATE_DIRECTIVES: readonly [typeof HellEmptyState, typeof HellEmptyStateMedia, typeof HellEmptyStateTitle, typeof HellEmptyStateDescription, typeof HellEmptyStateActions];
+
+// @public
+export const HELL_EMPTY_STATE_IMPORTS: readonly [typeof HellEmptyState, typeof HellEmptyStateMedia, typeof HellEmptyStateTitle, typeof HellEmptyStateDescription, typeof HellEmptyStateActions];
 
 // @public
 export class HellEmptyState {

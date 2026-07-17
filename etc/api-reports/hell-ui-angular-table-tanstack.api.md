@@ -27,8 +27,11 @@ import { Type } from '@angular/core';
 // @public (undocumented)
 export const HELL_TABLE_STATUS_VIEWS: InjectionToken<HellTableStatusViews>;
 
-// @public (undocumented)
+// @public @deprecated
 export const HELL_TANSTACK_TABLE_DIRECTIVES: readonly [typeof HellTanStackTable, typeof HellTableShellHeader, typeof HellTableShellCell, typeof HellTableShellFooterCell, typeof HellTableShellExpandedRow, typeof HellTableShellLoading, typeof HellTableShellEmpty, typeof HellTableShellError, typeof HellTableShellToolbar, typeof HellTableShellFooter, typeof HellTanStackPagination, typeof HellTanStackGlobalFilter, typeof HellTanStackColumnFilter, typeof FlexRenderDirective];
+
+// @public
+export const HELL_TANSTACK_TABLE_IMPORTS: readonly [typeof HellTanStackTable, typeof HellTableShellHeader, typeof HellTableShellCell, typeof HellTableShellFooterCell, typeof HellTableShellExpandedRow, typeof HellTableShellLoading, typeof HellTableShellEmpty, typeof HellTableShellError, typeof HellTableShellToolbar, typeof HellTableShellFooter, typeof HellTanStackPagination, typeof HellTanStackGlobalFilter, typeof HellTanStackColumnFilter, typeof FlexRenderDirective];
 
 // @public (undocumented)
 export class HellDefaultTableEmptyState {
@@ -604,7 +607,6 @@ export interface ɵHellTanStackBodyStrategy<TData extends RowData = RowData> {
 // types/hell-ui-angular-table-tanstack.d.ts:325:5 - (ae-undocumented) Missing documentation for "value".
 // types/hell-ui-angular-table-tanstack.d.ts:326:5 - (ae-undocumented) Missing documentation for "setFilter".
 // types/hell-ui-angular-table-tanstack.d.ts:327:5 - (ae-undocumented) Missing documentation for "clearFilter".
-// types/hell-ui-angular-table-tanstack.d.ts:333:15 - (ae-undocumented) Missing documentation for "HELL_TANSTACK_TABLE_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

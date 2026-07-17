@@ -12,8 +12,11 @@ import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/select';
 import * as i2 from 'ng-primitives/input';
 
-// @public (undocumented)
+// @public @deprecated
 export const HELL_SELECT_DIRECTIVES: readonly [typeof HellSelect, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
+
+// @public
+export const HELL_SELECT_IMPORTS: readonly [typeof HellSelect, typeof HellSelectValue, typeof HellSelectPlaceholder, typeof HellSelectDropdown, typeof HellSelectPortal, typeof HellSelectOption];
 
 // @public
 export class HellNativeSelect {
@@ -94,7 +97,6 @@ export class HellSelectValue {
 // types/hell-ui-angular-select.d.ts:62:1 - (ae-undocumented) Missing documentation for "HellSelectPortal".
 // types/hell-ui-angular-select.d.ts:68:1 - (ae-undocumented) Missing documentation for "HellSelectOption".
 // types/hell-ui-angular-select.d.ts:74:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-select.d.ts:95:15 - (ae-undocumented) Missing documentation for "HELL_SELECT_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

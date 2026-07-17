@@ -94,8 +94,15 @@ export class HellAvatarGroupOverflow {
 }
 
 /** All directives that make up the avatar-group entry point, for bulk `imports`. */
-export const HELL_AVATAR_GROUP_DIRECTIVES = [
+export const HELL_AVATAR_GROUP_IMPORTS = [
   HellAvatarGroup,
   HellAvatarGroupItem,
   HellAvatarGroupOverflow,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_AVATAR_GROUP_IMPORTS.
+ */
+export const HELL_AVATAR_GROUP_DIRECTIVES = HELL_AVATAR_GROUP_IMPORTS;

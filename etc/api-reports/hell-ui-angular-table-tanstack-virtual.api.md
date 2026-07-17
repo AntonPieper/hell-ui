@@ -11,8 +11,11 @@ import { ɵHellDomWriter } from '@hell-ui/angular/table-tanstack';
 import { ɵHellTanStackBodyItem } from '@hell-ui/angular/table-tanstack';
 import { ɵHellTanStackBodyStrategy } from '@hell-ui/angular/table-tanstack';
 
-// @public (undocumented)
+// @public @deprecated
 export const HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES: readonly [typeof HellTanStackVirtualRows];
+
+// @public
+export const HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS: readonly [typeof HellTanStackVirtualRows];
 
 // @public
 export class HellTanStackVirtualRows<TData extends RowData = RowData> implements ɵHellTanStackBodyStrategy<TData>, OnDestroy {
@@ -53,7 +56,6 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData> implements
 // types/hell-ui-angular-table-tanstack-virtual.d.ts:28:5 - (ae-undocumented) Missing documentation for "connectBody".
 // types/hell-ui-angular-table-tanstack-virtual.d.ts:29:5 - (ae-undocumented) Missing documentation for "connectRow".
 // types/hell-ui-angular-table-tanstack-virtual.d.ts:30:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-angular-table-tanstack-virtual.d.ts:45:15 - (ae-undocumented) Missing documentation for "HELL_TANSTACK_TABLE_VIRTUAL_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

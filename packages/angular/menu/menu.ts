@@ -525,7 +525,7 @@ export class HellMenuItemTrailing {
 }
 
 /** All directives that make up the menu entry point, for bulk `imports`. */
-export const HELL_MENU_DIRECTIVES = [
+export const HELL_MENU_IMPORTS = [
   HellMenuTrigger,
   HellSubmenuTrigger,
   HellMenu,
@@ -540,3 +540,10 @@ export const HELL_MENU_DIRECTIVES = [
   HellMenuItemIcon,
   HellMenuItemTrailing,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_MENU_IMPORTS.
+ */
+export const HELL_MENU_DIRECTIVES = HELL_MENU_IMPORTS;

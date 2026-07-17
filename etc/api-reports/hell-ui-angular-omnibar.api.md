@@ -12,8 +12,11 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
 
-// @public
+// @public @deprecated
 export const HELL_OMNIBAR_DIRECTIVES: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
+
+// @public
+export const HELL_OMNIBAR_IMPORTS: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
 
 // @public
 export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels>;

@@ -82,6 +82,7 @@ function main() {
   checkDocsLazyRouteImportGraphContract();
   checkDocsRootImportContract();
   checkDocsCategoryNavigationContract();
+  checkImportTupleExpansionContract();
   checkPackageEntryPoints();
   checkCodeMirrorEntrypointIsolationContract();
   checkAudioTranscriptEntrypointIsolationContract();
@@ -101,6 +102,33 @@ function main() {
   }
 
   console.log('Architecture checks passed.');
+}
+
+function checkImportTupleExpansionContract() {
+  for (const file of walk(join(root, libraryRoot)).filter((path) => path.endsWith('.ts'))) {
+    const source = readFile(file);
+    for (const match of source.matchAll(/export const (HELL_[A-Z0-9_]+)_DIRECTIVES\s*=/g)) {
+      const legacyName = `${match[1]}_DIRECTIVES`;
+      const importsName = `${match[1]}_IMPORTS`;
+      if (!new RegExp(`export const ${importsName}\\s*=`).test(source)) {
+        failures.push(
+          `Import Tuple Expansion ${relative(root, file)} exports ${legacyName} without ${importsName}`,
+        );
+      }
+      const escapedLegacy = legacyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedImports = importsName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const deprecatedAlias = new RegExp(
+        `/\\*\\*\\s*\\* Legacy import tuple name\\.\\s*\\* @alias\\s*` +
+          `\\* @deprecated Use ${escapedImports}\\.\\s*\\*/\\s*` +
+          `export const ${escapedLegacy}\\s*=\\s*${escapedImports}\\s*;`,
+      );
+      if (!deprecatedAlias.test(source)) {
+        failures.push(
+          `Import Tuple Expansion ${relative(root, file)} must keep ${legacyName} as a deprecated alias of ${importsName}`,
+        );
+      }
+    }
+  }
 }
 
 function checkDocsExamples() {

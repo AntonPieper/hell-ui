@@ -242,7 +242,7 @@ export class HellBreadcrumbEllipsis {
 }
 
 /** All directives that make up the breadcrumbs entry point, for bulk `imports`. */
-export const HELL_BREADCRUMBS_DIRECTIVES = [
+export const HELL_BREADCRUMBS_IMPORTS = [
   HellBreadcrumbs,
   HellBreadcrumbList,
   HellBreadcrumbItem,
@@ -251,3 +251,10 @@ export const HELL_BREADCRUMBS_DIRECTIVES = [
   HellBreadcrumbSeparator,
   HellBreadcrumbEllipsis,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_BREADCRUMBS_IMPORTS.
+ */
+export const HELL_BREADCRUMBS_DIRECTIVES = HELL_BREADCRUMBS_IMPORTS;

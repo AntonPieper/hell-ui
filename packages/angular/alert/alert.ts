@@ -261,7 +261,7 @@ export class HellAlertDismiss {
 }
 
 /** All directives and components of the alert entry point, for bulk `imports`. */
-export const HELL_ALERT_DIRECTIVES = [
+export const HELL_ALERT_IMPORTS = [
   HellAlert,
   HellAlertTitle,
   HellAlertDescription,
@@ -269,3 +269,10 @@ export const HELL_ALERT_DIRECTIVES = [
   HellAlertDismiss,
   HellAlertIcon,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_ALERT_IMPORTS.
+ */
+export const HELL_ALERT_DIRECTIVES = HELL_ALERT_IMPORTS;

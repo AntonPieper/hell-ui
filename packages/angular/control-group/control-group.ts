@@ -173,9 +173,16 @@ export class HellControlGroupAction {
 }
 
 /** All directives in the Control Group entry point, for bulk imports. */
-export const HELL_CONTROL_GROUP_DIRECTIVES = [
+export const HELL_CONTROL_GROUP_IMPORTS = [
   HellControlGroup,
   HellControlGroupPrefix,
   HellControlGroupSuffix,
   HellControlGroupAction,
 ] as const;
+
+/**
+ * Legacy import tuple name.
+ * @alias
+ * @deprecated Use HELL_CONTROL_GROUP_IMPORTS.
+ */
+export const HELL_CONTROL_GROUP_DIRECTIVES = HELL_CONTROL_GROUP_IMPORTS;

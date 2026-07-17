@@ -18,8 +18,11 @@ import { InjectionToken } from '@angular/core';
 // @public
 export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellOverflowToolbarLabels>;
 
-// @public
+// @public @deprecated
 export const HELL_TOOLBAR_DIRECTIVES: readonly [typeof HellToolbar, typeof HellToolbarItem, typeof HellOverflowToolbar, typeof HellToolbarAction, typeof HellToolbarSeparator, typeof HellToolbarWidget];
+
+// @public
+export const HELL_TOOLBAR_IMPORTS: readonly [typeof HellToolbar, typeof HellToolbarItem, typeof HellOverflowToolbar, typeof HellToolbarAction, typeof HellToolbarSeparator, typeof HellToolbarWidget];
 
 // @public
 export class HellOverflowToolbar {
