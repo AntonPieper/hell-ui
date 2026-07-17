@@ -20,7 +20,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 /**
@@ -52,7 +52,7 @@ import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
       faSolidMagnifyingGlass,
     }),
   ],
-  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <section class="grid gap-6 p-6" data-testid="toolbar-contract-harness">
       <h1>Toolbar contract harness</h1>

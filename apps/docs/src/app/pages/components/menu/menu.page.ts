@@ -300,7 +300,7 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <code>HellMenuItemCheckbox</code>, <code>HellMenuItemRadio</code>,
         <code>HellMenuItemIndicator</code>, <code>HellMenuSeparator</code>,
         <code>HellMenuSection</code>, <code>HellMenuLabel</code>, <code>HellMenuItemIcon</code>, and
-        <code>HellMenuItemTrailing</code>. <code>HELL_MENU_DIRECTIVES</code> re-exports every
+        <code>HellMenuItemTrailing</code>. <code>HELL_MENU_IMPORTS</code> re-exports every
         directive for bulk <code>imports</code>.
       </p>
 

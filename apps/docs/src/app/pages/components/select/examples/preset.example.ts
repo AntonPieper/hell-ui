@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 interface Region {
   readonly id: string;
@@ -17,7 +17,7 @@ const REGIONS: readonly Region[] = [
 @Component({
   selector: 'app-select-preset-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
+  imports: [...HELL_SELECT_IMPORTS, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField class="max-w-72">
       <label hellFieldLabel for="deploy-region">Deployment region</label>

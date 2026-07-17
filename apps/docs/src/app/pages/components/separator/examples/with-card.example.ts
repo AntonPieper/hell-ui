@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidEllipsisVertical } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellSeparator } from '@hell-ui/angular/separator';
 
@@ -10,7 +10,7 @@ import { HellSeparator } from '@hell-ui/angular/separator';
   selector: 'app-separator-with-card-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidEllipsisVertical })],
-  imports: [HellButton, ...HELL_CARD_DIRECTIVES, HellIcon, HellSeparator],
+  imports: [HellButton, ...HELL_CARD_IMPORTS, HellIcon, HellSeparator],
   template: `
     <div hellCard class="max-w-95">
       <div hellCardHeader>

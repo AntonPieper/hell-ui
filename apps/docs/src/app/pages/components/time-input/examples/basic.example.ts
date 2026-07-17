@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-time-input-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellTimeInput],
+  imports: [...HELL_FIELD_IMPORTS, HellTimeInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="reminder-time">Reminder time</label>

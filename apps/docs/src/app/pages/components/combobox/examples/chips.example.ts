@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
+import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
 import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
 
 interface Group {
@@ -24,9 +24,9 @@ const GROUPS: readonly Group[] = [
   selector: 'app-combobox-chips-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ...HELL_COMBOBOX_DIRECTIVES,
-    ...HELL_CHIP_DIRECTIVES,
-    ...HELL_CONTROL_GROUP_DIRECTIVES,
+    ...HELL_COMBOBOX_IMPORTS,
+    ...HELL_CHIP_IMPORTS,
+    ...HELL_CONTROL_GROUP_IMPORTS,
   ],
   template: `
     <div class="flex max-w-96 flex-col gap-hell-1">

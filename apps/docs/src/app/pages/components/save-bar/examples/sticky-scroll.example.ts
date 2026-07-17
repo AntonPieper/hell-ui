@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-save-bar-sticky-scroll-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellInput, HellSaveBar],
+  imports: [...HELL_FIELD_IMPORTS, HellInput, HellSaveBar],
   template: `
     <!-- The bar renders in normal flow at the end of the scrolled content and
          sticks to the bottom of the nearest scroll container — no portal, no

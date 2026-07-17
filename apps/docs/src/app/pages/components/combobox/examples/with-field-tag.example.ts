@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 interface Reviewer {
   readonly id: string;
@@ -22,7 +22,7 @@ const REVIEWERS: readonly Reviewer[] = [
 @Component({
   selector: 'app-combobox-with-field-tag-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, ...HELL_CHIP_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS, ...HELL_FIELD_IMPORTS, ...HELL_CHIP_IMPORTS],
   template: `
     <div hellField class="max-w-96">
       <label hellFieldLabel for="mr-reviewers">Reviewers</label>

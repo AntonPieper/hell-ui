@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-import { HELL_CONTROL_GROUP_DIRECTIVES } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-control-group-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellInput, ...HELL_CONTROL_GROUP_DIRECTIVES, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellInput, ...HELL_CONTROL_GROUP_IMPORTS, ...HELL_FIELD_IMPORTS],
   template: `
     <div hellField>
       <label id="workspace-url-label" hellFieldLabel for="workspace-url">Workspace URL</label>

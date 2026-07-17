@@ -10,7 +10,7 @@ import {
   faSolidPlus,
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-toolbar-overflow-policies-example',
@@ -26,7 +26,7 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       faSolidBoxOpen,
     }),
   ],
-  imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div class="max-w-[360px] rounded-hell-md border border-hell-border bg-hell-surface p-hell-3">

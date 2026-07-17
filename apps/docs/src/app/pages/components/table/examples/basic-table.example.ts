@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 
 interface Invoice {
   readonly id: string;
@@ -17,7 +17,7 @@ const invoices: readonly Invoice[] = [
 @Component({
   selector: 'app-table-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div hellTableContainer>
       <table hellTableRoot>

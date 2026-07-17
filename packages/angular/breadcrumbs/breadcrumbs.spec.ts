@@ -2,10 +2,10 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_BREADCRUMBS_DIRECTIVES, HELL_BREADCRUMBS_LABELS } from './breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS, HELL_BREADCRUMBS_LABELS } from './breadcrumbs';
 
 @Component({
-  imports: [...HELL_BREADCRUMBS_DIRECTIVES],
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
   template: `
     <nav hellBreadcrumbs>
       <ol hellBreadcrumbList>
@@ -21,7 +21,7 @@ import { HELL_BREADCRUMBS_DIRECTIVES, HELL_BREADCRUMBS_LABELS } from './breadcru
 class BreadcrumbEllipsisHost {}
 
 @Component({
-  imports: [...HELL_BREADCRUMBS_DIRECTIVES],
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
   providers: [provideHellLabels(HELL_BREADCRUMBS_LABELS, { showHiddenNavigation: 'Contract breadcrumbs' })],
   template: `
     <nav hellBreadcrumbs>
@@ -36,7 +36,7 @@ class BreadcrumbEllipsisHost {}
 class BreadcrumbLabelContractHost {}
 
 @Component({
-  imports: [...HELL_BREADCRUMBS_DIRECTIVES],
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
   template: `
     <nav id="breadcrumbs-string" hellBreadcrumbs aria-label="Styled breadcrumb" ui="flex text-hell-danger">
       <ol id="list-string" hellBreadcrumbList ui="grid gap-hell-4">
@@ -61,7 +61,7 @@ class BreadcrumbLabelContractHost {}
 class BreadcrumbPartStyleStringHost {}
 
 @Component({
-  imports: [...HELL_BREADCRUMBS_DIRECTIVES],
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
   providers: [provideHellLabels(HELL_BREADCRUMBS_LABELS, { showHiddenNavigation: 'Map breadcrumbs' })],
   template: `
     <nav id="breadcrumbs-map" hellBreadcrumbs [ui]="breadcrumbsUi">

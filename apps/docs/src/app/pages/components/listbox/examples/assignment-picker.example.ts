@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
+import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
 
 interface Teammate {
   readonly id: string;
@@ -24,9 +24,9 @@ const TEAMMATES: readonly Teammate[] = [
   imports: [
     HellAvatar,
     HellInput,
-    ...HELL_CARD_DIRECTIVES,
-    ...HELL_LISTBOX_DIRECTIVES,
-    ...HELL_SEARCH_DIRECTIVES,
+    ...HELL_CARD_IMPORTS,
+    ...HELL_LISTBOX_IMPORTS,
+    ...HELL_SEARCH_IMPORTS,
   ],
   template: `
     <div hellCard class="max-w-80" [elevation]="1">

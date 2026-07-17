@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-search-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
     <!-- HellSearch: refine root with the ui string shorthand. -->
     <div

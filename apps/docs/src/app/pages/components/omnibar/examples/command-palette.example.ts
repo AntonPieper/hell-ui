@@ -10,7 +10,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import { HellKbd } from '@hell-ui/angular/chip';
 
 interface Command {
@@ -33,7 +33,7 @@ const COMMANDS: readonly Command[] = [
 @Component({
   selector: 'app-omnibar-command-palette-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellIcon, HellKbd, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellIcon, HellKbd, ...HELL_OMNIBAR_IMPORTS],
   providers: [
     provideIcons({
       faSolidArrowRightArrowLeft,

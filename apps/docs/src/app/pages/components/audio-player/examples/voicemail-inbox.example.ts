@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellChip } from '@hell-ui/angular/chip';
 
 interface Voicemail {
@@ -16,7 +16,7 @@ interface Voicemail {
 @Component({
   selector: 'app-audio-player-voicemail-inbox-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAudioPlayer, HellChip, ...HELL_CARD_DIRECTIVES],
+  imports: [HellAudioPlayer, HellChip, ...HELL_CARD_IMPORTS],
   template: `
     <div hellCard class="max-w-xl">
       <div hellCardHeader>

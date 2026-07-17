@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { type HellChipVariant } from '@hell-ui/angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 import { HellChip } from '@hell-ui/angular/chip';
 
 type Decision = 'Approved' | 'Changes requested' | 'Rejected';
@@ -18,7 +18,7 @@ const DECISION_VARIANT: Record<Decision, HellChipVariant> = {
 @Component({
   selector: 'app-select-with-field-status-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, HellButton, HellChip],
+  imports: [...HELL_SELECT_IMPORTS, ...HELL_FIELD_IMPORTS, HellButton, HellChip],
   template: `
     <form class="grid max-w-96 gap-hell-4" (submit)="submit($event)">
       <div hellField>

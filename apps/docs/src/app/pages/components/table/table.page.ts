@@ -312,7 +312,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <h3>Primitives — <code>@hell-ui/angular/table</code></h3>
           <ul>
             <li>
-              <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: the standalone import list for the whole
+              <code>HELL_TABLE_UTILITIES_IMPORTS</code>: the standalone import list for the whole
               primitive suite.
             </li>
             <li>

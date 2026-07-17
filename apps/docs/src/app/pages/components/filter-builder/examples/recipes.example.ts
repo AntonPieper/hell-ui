@@ -1,7 +1,7 @@
 import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { hellRankLocalSearch } from '@hell-ui/angular/core';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
@@ -39,7 +39,7 @@ const STATUS_OPTIONS: readonly StatusOption[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ...HELL_FILTER_BUILDER_IMPORTS,
-    ...HELL_COMBOBOX_DIRECTIVES,
+    ...HELL_COMBOBOX_IMPORTS,
     HellButton,
     HellInput,
     JsonPipe,

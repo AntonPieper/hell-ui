@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 
 @Component({
   selector: 'app-alert-variants-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES],
+  imports: [...HELL_ALERT_IMPORTS],
   template: `
     <hell-alert variant="info">
       <h3 hellAlertTitle>Maintenance scheduled</h3>

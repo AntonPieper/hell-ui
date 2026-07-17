@@ -10,7 +10,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-toolbar-basic-example',
@@ -25,7 +25,7 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
       faSolidGear,
     }),
   ],
-  imports: [HellButton, HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div hellToolbar label="Document actions" ui="flex-wrap">

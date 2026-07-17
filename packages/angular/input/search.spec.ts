@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_SEARCH_DIRECTIVES, HellInput } from './input';
+import { HELL_SEARCH_IMPORTS, HellInput } from './input';
 
 @Component({
-  imports: [HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
     <div id="search-string" hellSearch ui="grid gap-hell-4">
       <input id="search-string-input" hellInput type="search" value="Ada" />

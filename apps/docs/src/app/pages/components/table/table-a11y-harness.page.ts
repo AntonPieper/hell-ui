@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal, type WritableSignal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import {
-  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HELL_TABLE_UTILITIES_IMPORTS,
   type HellTableResizeAdapter,
   type HellTableResizeEvent,
   type HellTableResizeItem,
@@ -37,7 +37,7 @@ const people: readonly Person[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HellButton,
-    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    ...HELL_TABLE_UTILITIES_IMPORTS,
     HellTanStackTable,
     HellTableShellCell,
     HellTableShellEmpty,

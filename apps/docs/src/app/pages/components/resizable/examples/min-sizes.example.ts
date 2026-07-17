@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-resizable-min-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <!-- Each handle rebalances only its two adjacent panes; minSize keeps every -->
     <!-- pane usable. Dragging never collapses a neighbour below its minimum. -->

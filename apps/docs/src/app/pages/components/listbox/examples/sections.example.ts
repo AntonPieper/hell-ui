@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
+import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
 
 @Component({
   selector: 'app-listbox-sections-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_LISTBOX_DIRECTIVES],
+  imports: [...HELL_LISTBOX_IMPORTS],
   template: `
     <div
       hellListbox

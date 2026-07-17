@@ -438,6 +438,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Docs pages, live examples, search source, unit hosts, harness examples, and
+  browser-contract fixtures now use the canonical `HELL_*_IMPORTS` tuple names.
+  Compatibility aliases remain available only for external consumers during
+  the migration window. Closes #210.
 - Library composition, release guidance, and packed-consumer fixtures now use
   the canonical `HELL_*_IMPORTS` tuple names exclusively. Tooling-generated
   workspaces no longer rely on compatibility aliases, and architecture checks

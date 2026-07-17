@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGauge, faSolidHouse } from '@ng-icons/font-awesome/solid';
 import { HellAppShell, HellAppContent, HellAppTopbar } from '@hell-ui/angular/app-shell';
-import { HELL_BREADCRUMBS_DIRECTIVES } from '@hell-ui/angular/breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 const HD_BREADCRUMBS_APP_SHELL_TOPBAR_ICONS = {
@@ -14,7 +14,7 @@ const HD_BREADCRUMBS_APP_SHELL_TOPBAR_ICONS = {
 @Component({
   selector: 'app-breadcrumbs-with-app-shell-topbar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAppShell, HellAppContent, HellAppTopbar, ...HELL_BREADCRUMBS_DIRECTIVES, HellIcon],
+  imports: [HellAppShell, HellAppContent, HellAppTopbar, ...HELL_BREADCRUMBS_IMPORTS, HellIcon],
   providers: [provideIcons(HD_BREADCRUMBS_APP_SHELL_TOPBAR_ICONS)],
   template: `
     <!-- class is a docs layout hook; hellAppShell itself renders default styling. -->

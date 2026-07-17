@@ -178,7 +178,7 @@ import tabsWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' wit
           <code>ui: HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
-          <code>HELL_TABS_DIRECTIVES</code>: array of all four directives, for bulk
+          <code>HELL_TABS_IMPORTS</code>: array of all four directives, for bulk
           <code>imports</code>.
         </li>
       </ul>

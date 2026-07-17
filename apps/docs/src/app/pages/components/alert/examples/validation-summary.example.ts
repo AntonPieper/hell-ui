@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 
 @Component({
   selector: 'app-alert-validation-summary-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES],
+  imports: [...HELL_ALERT_IMPORTS],
   template: `
     <hell-alert variant="danger">
       <h3 hellAlertTitle>Fix 3 fields before saving</h3>

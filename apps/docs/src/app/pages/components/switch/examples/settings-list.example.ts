@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidMoon, faSolidVolumeHigh, faSolidWifi } from '@ng-icons/font-awesome/solid';
 import { HellSwitch } from '@hell-ui/angular/switch';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-switch-settings-list-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidMoon, faSolidVolumeHigh, faSolidWifi })],
-  imports: [HellSwitch, ...HELL_CARD_DIRECTIVES, ...HELL_FIELD_DIRECTIVES, HellIcon],
+  imports: [HellSwitch, ...HELL_CARD_IMPORTS, ...HELL_FIELD_IMPORTS, HellIcon],
   template: `
     <div hellCard class="max-w-md" [elevation]="0">
       <div hellCardHeader>Device settings</div>

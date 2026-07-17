@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellSize } from '@hell-ui/angular/core';
-import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
+import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
 
 @Component({
   selector: 'app-dialog-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
+  imports: [HellButton, ...HELL_CARD_IMPORTS, ...HELL_DIALOG_IMPORTS],
   template: `
     @for (size of sizes; track size) {
       <button hellButton [hellDialogTrigger]="sized" [hellDialogData]="size">{{ size }}</button>

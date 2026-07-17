@@ -7,7 +7,7 @@ import {
   faSolidPenToSquare,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 
@@ -22,7 +22,7 @@ const MENU_SECTIONS_ICONS = {
 @Component({
   selector: 'app-menu-sections-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, ...HELL_MENU_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_MENU_IMPORTS],
   providers: [provideIcons(MENU_SECTIONS_ICONS)],
   template: `
     <button hellButton [hellMenuTrigger]="file" type="button">File</button>

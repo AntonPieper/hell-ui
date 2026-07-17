@@ -3,10 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { BreakpointObserver, type BreakpointState } from '@angular/cdk/layout';
 import { ReplaySubject } from 'rxjs';
 
-import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
+import { HELL_APP_SHELL_IMPORTS, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div hellAppShell #shell="hellAppShell">
       <header hellAppTopbar>
@@ -50,7 +50,7 @@ class TestHost {
 }
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div
       hellAppShell
@@ -79,7 +79,7 @@ class ControlledShellHost {
 }
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div id="sentinel-shell" hellAppShell>
       <header hellAppTopbar>
@@ -97,7 +97,7 @@ class ControlledShellHost {
 class SentinelShellHost {}
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div id="focus-shell" hellAppShell>
       <header hellAppTopbar>
@@ -120,7 +120,7 @@ class SentinelShellHost {}
 class FocusShellHost {}
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div id="fallback-shell" hellAppShell>
       <header hellAppTopbar>
@@ -142,7 +142,7 @@ class FocusShellHost {}
 class FallbackShellHost {}
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_IMPORTS],
   template: `
     <div id="ui-shell" hellAppShell ui="bg-hell-surface-muted text-hell-primary">
       <header id="ui-topbar" hellAppTopbar [ui]="topbarUi">

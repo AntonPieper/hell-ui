@@ -182,7 +182,7 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
         <code>ui</code>. <code>HellComboboxOption</code> adds <code>value</code>,
         <code>disabled</code>, <code>index</code>, and <code>activated</code>.
         <code>HellComboboxPortal</code> has no input and renders its template only while open.
-        <code>HELL_COMBOBOX_DIRECTIVES</code> bundles the complete seven-directive suite.
+        <code>HELL_COMBOBOX_IMPORTS</code> bundles the complete seven-directive suite.
       </p>
       <p>
         Search Resource and <code>HellPickValue</code> live in

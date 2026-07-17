@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
+import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
 
 interface Owner {
   readonly id: string;
@@ -16,7 +16,7 @@ const OWNERS: readonly Owner[] = [
 @Component({
   selector: 'app-listbox-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_LISTBOX_DIRECTIVES],
+  imports: [...HELL_LISTBOX_IMPORTS],
   template: `
     <div class="grid gap-2">
       <span id="listbox-basic-label" class="text-sm font-semibold text-hell-foreground">

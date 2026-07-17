@@ -9,7 +9,7 @@ import {
   faSolidSwatchbook,
   faSolidUniversalAccess,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellChip } from '@hell-ui/angular/chip';
@@ -125,7 +125,7 @@ const HD_OVERVIEW_SECTIONS: readonly OverviewSectionLink[] = [
   selector: 'hd-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons(HD_OVERVIEW_ICONS)],
-  imports: [RouterLink, HellButton, HellIcon, HellChip, ...HELL_CARD_DIRECTIVES],
+  imports: [RouterLink, HellButton, HellIcon, HellChip, ...HELL_CARD_IMPORTS],
   template: `
     <div class="hd-landing">
       <section class="hd-hero">

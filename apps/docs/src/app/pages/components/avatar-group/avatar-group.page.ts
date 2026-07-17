@@ -170,7 +170,7 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           </ul>
         </li>
         <li>
-          <code>HELL_AVATAR_GROUP_DIRECTIVES</code>: bundle of all three, for bulk
+          <code>HELL_AVATAR_GROUP_IMPORTS</code>: bundle of all three, for bulk
           <code>imports</code>.
         </li>
       </ul>

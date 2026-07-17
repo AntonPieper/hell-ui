@@ -3,7 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidFilePdf } from '@ng-icons/font-awesome/solid';
 import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
 import { HellChip } from '@hell-ui/angular/chip';
@@ -30,7 +30,7 @@ const DOCS: readonly ReviewDoc[] = [
     HellButton,
     HellIcon,
     HellChip,
-    ...HELL_CARD_DIRECTIVES,
+    ...HELL_CARD_IMPORTS,
     ...HELL_MASTER_DETAIL_IMPORTS,
   ],
   providers: [provideIcons({ faSolidCircleCheck, faSolidFilePdf })],

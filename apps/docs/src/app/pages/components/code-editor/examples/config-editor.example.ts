@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 type ConfigLanguage = 'TypeScript' | 'JavaScript' | 'JSX';
 
@@ -21,8 +21,8 @@ const INITIAL_CONFIG = `export default {
   imports: [
     HellCodeEditor,
     HellButton,
-    ...HELL_CARD_DIRECTIVES,
-    ...HELL_SELECT_DIRECTIVES,
+    ...HELL_CARD_IMPORTS,
+    ...HELL_SELECT_IMPORTS,
   ],
   template: `
     <div hellCard class="max-w-140">

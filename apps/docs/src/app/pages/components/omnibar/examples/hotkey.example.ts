@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import { HellKbd } from '@hell-ui/angular/chip';
 
 interface Command {
@@ -18,7 +18,7 @@ const COMMANDS: readonly Command[] = [
 @Component({
   selector: 'app-omnibar-hotkey-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellKbd, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellKbd, ...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar
       class="max-w-90"

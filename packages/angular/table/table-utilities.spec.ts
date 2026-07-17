@@ -4,10 +4,10 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
+import { HELL_TABLE_UTILITIES_IMPORTS, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
 
 @Component({
-  imports: [HellButton, HellInput, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -132,7 +132,7 @@ class TableUtilitiesHost {
 }
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div id="ui-container" hellTableContainer busy ui="bg-hell-surface-muted rounded-hell-lg">
       <table id="ui-table" hellTableRoot ui="text-sm">
@@ -188,7 +188,7 @@ class TableUtilitiesUiHost {
 }
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table>
       <tbody>
@@ -212,7 +212,7 @@ class TableUtilitiesStackedUiHost {
 }
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -244,7 +244,7 @@ class TableUtilitiesStackedUiHost {
 class TableUtilitiesResizerAriaOverrideHost {}
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   providers: [provideHellLabels(HELL_TABLE_UTILITIES_LABELS, { resizeColumn: 'Spaltenbreite ändern' })],
   template: `
     <table hellTable>
@@ -263,7 +263,7 @@ class TableUtilitiesResizerAriaOverrideHost {}
 class TableUtilitiesLocalizedLabelHost {}
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -297,7 +297,7 @@ class TableUtilitiesSortableAriaHost {
 }
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <table hellTable>
       <thead hellTableHead>

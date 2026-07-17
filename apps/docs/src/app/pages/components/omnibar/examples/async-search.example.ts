@@ -6,7 +6,7 @@ import {
   faSolidUser,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import {
   hellSearchResource,
   type HellSearchField,
@@ -35,7 +35,7 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
 @Component({
   selector: 'app-omnibar-async-search-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellIcon, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellIcon, ...HELL_OMNIBAR_IMPORTS],
   providers: [provideIcons({ faSolidFilter, faSolidMagnifyingGlass, faSolidUser, faSolidXmark })],
   template: `
     <hell-omnibar

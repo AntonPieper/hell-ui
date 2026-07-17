@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidCircleHalfStroke, faSolidCircleXmark } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 interface EnvStatus {
   readonly id: string;
@@ -45,7 +45,7 @@ const RICH_OPTION_ICONS = {
 @Component({
   selector: 'app-select-rich-options-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES, HellIcon],
+  imports: [...HELL_SELECT_IMPORTS, HellIcon],
   providers: [provideIcons(RICH_OPTION_ICONS)],
   template: `
     <button

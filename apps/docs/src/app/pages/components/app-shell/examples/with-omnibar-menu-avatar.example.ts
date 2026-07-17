@@ -10,9 +10,9 @@ import {
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellIcon } from '@hell-ui/angular/icon';
 
@@ -43,9 +43,9 @@ const HD_APP_SHELL_FRAME_ICONS = {
   selector: 'app-app-shell-with-omnibar-menu-avatar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ...HELL_APP_SHELL_DIRECTIVES,
-    ...HELL_OMNIBAR_DIRECTIVES,
-    ...HELL_MENU_DIRECTIVES,
+    ...HELL_APP_SHELL_IMPORTS,
+    ...HELL_OMNIBAR_IMPORTS,
+    ...HELL_MENU_IMPORTS,
     HellAvatar,
     HellIcon,
   ],

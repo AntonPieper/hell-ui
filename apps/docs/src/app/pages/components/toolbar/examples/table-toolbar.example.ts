@@ -9,8 +9,8 @@ import {
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 interface Member {
   readonly name: string;
@@ -38,7 +38,7 @@ const MEMBERS: readonly Member[] = [
       faSolidXmark,
     }),
   ],
-  imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TOOLBAR_IMPORTS, ...HELL_TABLE_UTILITIES_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <hell-overflow-toolbar

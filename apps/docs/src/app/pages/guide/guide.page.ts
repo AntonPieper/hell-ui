@@ -5,7 +5,7 @@ import { CodeBlock } from '../../shared/code-block';
 
 const ENTRYPOINT_IMPORTS_CODE = `// TypeScript: one narrow entry point per surface you use.
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 // CSS: shared tokens once, then one stylesheet per entry point you render.
 // styles.css

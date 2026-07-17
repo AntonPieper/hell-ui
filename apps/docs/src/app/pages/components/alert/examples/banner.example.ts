@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 
 @Component({
   selector: 'app-alert-banner-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ALERT_DIRECTIVES],
+  imports: [...HELL_ALERT_IMPORTS],
   template: `
     <div class="overflow-hidden rounded-hell-md border border-hell-border">
       <!-- The banner look is a Part Style Map refinement, not a component mode. -->

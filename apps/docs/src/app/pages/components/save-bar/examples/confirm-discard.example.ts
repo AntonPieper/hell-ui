@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { injectHellPrompt } from '@hell-ui/angular/confirm';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 import { HellSaveBar } from '@hell-ui/angular/save-bar';
 
 @Component({
   selector: 'app-save-bar-confirm-discard-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellInput, HellSaveBar],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellInput, HellSaveBar],
   template: `
     <div class="flex flex-col gap-hell-4">
       <div hellField>

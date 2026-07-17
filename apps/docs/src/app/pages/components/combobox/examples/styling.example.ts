@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { hellSearchResource } from '@hell-ui/angular/core';
 
 interface Priority {
@@ -14,7 +14,7 @@ const PRIORITIES: readonly Priority[] = (
 @Component({
   selector: 'app-combobox-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS],
   template: `
     <div
       hellCombobox

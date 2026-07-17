@@ -253,7 +253,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>
           Localize built-in toggle labels with <code>provideHellLabels(HELL_APP_SHELL_LABELS, &#123; … &#125;)</code>
           from <code>@hell-ui/angular/app-shell</code>. Import the whole suite via
-          <code>HELL_APP_SHELL_DIRECTIVES</code>.
+          <code>HELL_APP_SHELL_IMPORTS</code>.
         </li>
       </ul>
 

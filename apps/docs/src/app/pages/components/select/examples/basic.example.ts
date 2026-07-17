@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
 
 @Component({
   selector: 'app-select-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES],
+  imports: [...HELL_SELECT_IMPORTS],
   template: `
     <button
       hellSelect

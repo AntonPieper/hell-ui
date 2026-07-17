@@ -5,7 +5,7 @@ import {
   faSolidRightFromBracket,
   faSolidUser,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellIcon } from '@hell-ui/angular/icon';
 
@@ -18,7 +18,7 @@ const MENU_PROFILE_ICONS = {
 @Component({
   selector: 'app-menu-profile-menu-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAvatar, HellIcon, ...HELL_MENU_DIRECTIVES],
+  imports: [HellAvatar, HellIcon, ...HELL_MENU_IMPORTS],
   providers: [provideIcons(MENU_PROFILE_ICONS)],
   template: `
     <!-- An avatar-backed trigger: a bare button hosting the avatar, not hellButton. -->

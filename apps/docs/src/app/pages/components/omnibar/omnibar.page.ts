@@ -308,7 +308,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           <code>provideHellLabels(HELL_OMNIBAR_LABELS, overrides)</code>, and <code>HELL_OMNIBAR_LABELS</code> to
           localize the clear-button label.
         </li>
-        <li><code>HELL_OMNIBAR_DIRECTIVES</code> — the full standalone import array for the composition.</li>
+        <li><code>HELL_OMNIBAR_IMPORTS</code> — the full standalone import array for the composition.</li>
       </ul>
       <p>
         Panel geometry/surface theming is exposed through CSS variables on the host:

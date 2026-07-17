@@ -9,7 +9,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import {
-  HELL_TOOLBAR_DIRECTIVES,
+  HELL_TOOLBAR_IMPORTS,
   type HellOverflowToolbarUi,
 } from '@hell-ui/angular/toolbar';
 
@@ -25,7 +25,7 @@ import {
       faSolidGear,
     }),
   ],
-  imports: [HellIcon, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div class="max-w-[420px]">
       <hell-overflow-toolbar label="Styled actions" [ui]="toolbarUi">

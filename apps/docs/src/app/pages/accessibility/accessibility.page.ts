@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
 
 import { PageHeader } from '../../shared/page-header';
 
@@ -54,7 +54,7 @@ const ACCESSIBILITY_OWNERSHIP: readonly AccessibilityOwnership[] = [
 @Component({
   selector: 'hd-accessibility',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ...HELL_TABLE_UTILITIES_DIRECTIVES, PageHeader],
+  imports: [RouterLink, ...HELL_TABLE_UTILITIES_IMPORTS, PageHeader],
   styles: [
     `
       :host {

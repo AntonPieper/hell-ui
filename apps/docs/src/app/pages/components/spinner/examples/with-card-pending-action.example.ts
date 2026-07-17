@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellSpinner } from '@hell-ui/angular/spinner';
 
 @Component({
   selector: 'app-spinner-with-card-pending-action-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES, HellButton, HellSpinner],
+  imports: [...HELL_CARD_IMPORTS, HellButton, HellSpinner],
   template: `
     <div hellCard class="max-w-95" [elevation]="2">
       <div hellCardHeader>Renew subscription</div>

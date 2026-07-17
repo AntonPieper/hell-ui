@@ -3,14 +3,14 @@ import { TestBed } from '@angular/core/testing';
 
 import {
   HELL_EMPTY_STATE_COPY,
-  HELL_EMPTY_STATE_DIRECTIVES,
+  HELL_EMPTY_STATE_IMPORTS,
   type HellEmptyStateGlyph,
   type HellEmptyStateHeadingLevel,
   type HellEmptyStateUi,
 } from './empty-state';
 
 @Component({
-  imports: [...HELL_EMPTY_STATE_DIRECTIVES],
+  imports: [...HELL_EMPTY_STATE_IMPORTS],
   template: `
     <hell-empty-state
       id="inputs"

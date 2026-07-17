@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
 
 interface NotificationChannel {
   readonly id: string;
@@ -21,7 +21,7 @@ const MIN_SELECTED = 1;
 @Component({
   selector: 'app-multi-select-menu-button-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_MENU_DIRECTIVES],
+  imports: [HellButton, ...HELL_MENU_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <button

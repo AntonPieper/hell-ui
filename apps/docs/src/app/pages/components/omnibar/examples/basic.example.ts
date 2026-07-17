@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 
 interface QuickAction {
   readonly id: string;
@@ -17,7 +17,7 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
 @Component({
   selector: 'app-omnibar-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_IMPORTS],
   template: `
     <hell-omnibar
       class="max-w-90"

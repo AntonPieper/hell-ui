@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 
 const ENVIRONMENTS = ['Production', 'Staging', 'Preview', 'Local'] as const;
 
 @Component({
   selector: 'app-select-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_SELECT_DIRECTIVES],
+  imports: [...HELL_SELECT_IMPORTS],
   template: `
     <button
       hellSelect

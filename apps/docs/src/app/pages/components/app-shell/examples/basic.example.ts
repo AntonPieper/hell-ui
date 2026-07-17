@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGauge, faSolidUsers } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 const HD_APP_SHELL_BASIC_ICONS = {
@@ -13,7 +13,7 @@ const HD_APP_SHELL_BASIC_ICONS = {
 @Component({
   selector: 'app-app-shell-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_APP_SHELL_DIRECTIVES, HellIcon],
+  imports: [...HELL_APP_SHELL_IMPORTS, HellIcon],
   providers: [provideIcons(HD_APP_SHELL_BASIC_ICONS)],
   template: `
     <!-- The shell fills its container; the docs give it a fixed height + border. -->

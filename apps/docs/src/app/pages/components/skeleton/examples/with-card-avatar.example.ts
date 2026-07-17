@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 @Component({
   selector: 'app-skeleton-with-card-avatar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES, HellAvatar, HellButton, HellSkeleton],
+  imports: [...HELL_CARD_IMPORTS, HellAvatar, HellButton, HellSkeleton],
   template: `
     <div hellCard class="max-w-95" [elevation]="2" [attr.aria-busy]="loading()">
       <div hellCardHeader>

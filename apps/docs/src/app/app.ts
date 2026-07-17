@@ -92,9 +92,9 @@ import {
 } from '@hell-ui/angular/app-shell';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
+import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 import { HellChip } from '@hell-ui/angular/chip';
 import { HellToaster } from '@hell-ui/angular/toast';
 import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
@@ -288,9 +288,9 @@ const HD_THEMES: readonly ThemeOption[] = [
     HellIcon,
     HellChip,
     HellToaster,
-    ...HELL_MENU_DIRECTIVES,
-    ...HELL_OMNIBAR_DIRECTIVES,
-    ...HELL_SELECT_DIRECTIVES,
+    ...HELL_MENU_IMPORTS,
+    ...HELL_OMNIBAR_IMPORTS,
+    ...HELL_SELECT_IMPORTS,
   ],
   templateUrl: './app.html',
 })

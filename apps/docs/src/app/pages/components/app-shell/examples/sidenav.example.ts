@@ -7,7 +7,7 @@ import {
   faSolidKey,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
+import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellChip } from '@hell-ui/angular/chip';
 
@@ -22,7 +22,7 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
 @Component({
   selector: 'app-app-shell-sidenav-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_APP_SHELL_DIRECTIVES, HellIcon, HellChip],
+  imports: [...HELL_APP_SHELL_IMPORTS, HellIcon, HellChip],
   providers: [provideIcons(HD_APP_SHELL_SIDENAV_ICONS)],
   template: `
     <div hellAppShell class="h-[28rem] overflow-hidden rounded-hell-lg border border-hell-border">

@@ -7,7 +7,7 @@ import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 import {
   HELL_OVERFLOW_TOOLBAR_LABELS,
-  HELL_TOOLBAR_DIRECTIVES,
+  HELL_TOOLBAR_IMPORTS,
   HellOverflowToolbarRenderer,
   type HellOverflowToolbarRendererPart,
   type HellOverflowToolbarUi,
@@ -200,7 +200,7 @@ describe('hellResolveToolbarOverflow', () => {
 });
 
 @Component({
-  imports: [HellButton, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div hellToolbar label="Formatting actions" [orientation]="orientation()" ui="rounded-hell-md">
       <button hellButton hellToolbarItem type="button" (click)="run('bold')">Bold</button>
@@ -230,7 +230,7 @@ class PlainToolbarHost {
 }
 
 @Component({
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   template: `
     <div hellToolbar label="Native actions">
       <button hellToolbarItem type="button">One</button>
@@ -357,7 +357,7 @@ describe('HellToolbar', () => {
 });
 
 @Component({
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   template: `
     <hell-overflow-toolbar label="Record actions" [ui]="ui">
       <ng-template hellToolbarAction label="Save" overflow="never" (activated)="log('save')">
@@ -392,7 +392,7 @@ class ToolbarHost {
 }
 
 @Component({
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   template: `
     <hell-overflow-toolbar label="Bulk actions">
       @for (label of labels(); track label) {
@@ -406,7 +406,7 @@ class WidthToolbarHost {
 }
 
 @Component({
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   template: `
     <hell-overflow-toolbar label="Editor">
       <ng-template hellToolbarAction label="Bold" iconOnly (activated)="log('bold')">
@@ -430,7 +430,7 @@ class CapabilitiesHost {
 }
 
 @Component({
-  imports: [...HELL_TOOLBAR_DIRECTIVES],
+  imports: [...HELL_TOOLBAR_IMPORTS],
   providers: [
     provideHellLabels(HELL_OVERFLOW_TOOLBAR_LABELS, {
       overflowTrigger: 'Weitere Aktionen',

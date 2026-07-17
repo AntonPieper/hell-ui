@@ -7,7 +7,7 @@ import {
   type ValidationErrors,
 } from '@angular/forms';
 import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
 const required = (control: AbstractControl): ValidationErrors | null =>
@@ -19,7 +19,7 @@ const email = (control: AbstractControl): ValidationErrors | null =>
 @Component({
   selector: 'app-save-bar-contextual-form-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellInput, HellSaveBar],
+  imports: [ReactiveFormsModule, ...HELL_FIELD_IMPORTS, HellInput, HellSaveBar],
   template: `
     <!-- Even inside a <form>, the default Save (type="button") emits (saved)
          without submitting — no double-fire, no ngSubmit needed. -->

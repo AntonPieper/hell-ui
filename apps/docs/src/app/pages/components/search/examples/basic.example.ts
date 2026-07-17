@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
 
 const NAMES = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson', 'Margaret Hamilton'];
 
 @Component({
   selector: 'app-search-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
     <div hellSearch class="grid max-w-90 gap-hell-3">
       <div class="flex items-center gap-hell-2">

@@ -154,6 +154,9 @@ function checkImportTupleConsumerMigrationContract() {
         !path.endsWith('.spec.ts') &&
         basename(path) !== 'public-api.ts',
     ),
+    ...walk(packageRoot).filter((path) => path.endsWith('.spec.ts')),
+    ...walk(join(root, 'apps/docs/src')).filter((path) => path.endsWith('.ts')),
+    ...walk(join(root, 'e2e')).filter((path) => path.endsWith('.ts')),
     ...walk(join(root, 'tools')).filter((path) => /\.(?:mjs|ts)$/.test(path)),
     join(root, 'README.md'),
     join(packageRoot, 'README.md'),

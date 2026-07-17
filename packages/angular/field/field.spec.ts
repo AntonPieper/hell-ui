@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellInput } from '@hell-ui/angular/input';
-import { HELL_FIELD_DIRECTIVES } from './field';
+import { HELL_FIELD_IMPORTS } from './field';
 
 @Component({
-  imports: [HellInput, ...HELL_FIELD_DIRECTIVES],
+  imports: [HellInput, ...HELL_FIELD_IMPORTS],
   template: `
     <div id="string-field" hellField orientation="horizontal" ui="gap-hell-4">
       <label data-field="string-label" hellFieldLabel for="string-control">Email</label>

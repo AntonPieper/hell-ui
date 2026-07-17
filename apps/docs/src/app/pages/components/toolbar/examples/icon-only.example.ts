@@ -9,7 +9,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 @Component({
@@ -24,7 +24,7 @@ import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
       faSolidAlignRight,
     }),
   ],
-  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_DIRECTIVES],
+  imports: [HellButton, HellIcon, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div hellToolbar label="Text formatting">

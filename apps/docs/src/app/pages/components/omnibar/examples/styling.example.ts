@@ -12,7 +12,7 @@ import {
 } from '@hell-ui/angular/core';
 import { HellChip, HellChipRemove } from '@hell-ui/angular/chip';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 
 interface Runbook {
   readonly id: string;
@@ -29,7 +29,7 @@ const RUNBOOKS: readonly Runbook[] = [
 @Component({
   selector: 'app-omnibar-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellChip, HellChipRemove, HellIcon, ...HELL_OMNIBAR_DIRECTIVES],
+  imports: [HellChip, HellChipRemove, HellIcon, ...HELL_OMNIBAR_IMPORTS],
   providers: [provideIcons({ faSolidBolt, faSolidLayerGroup, faSolidXmark })],
   template: `
     <!-- One [ui] map per module refines that module's rendered parts. The

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'hd-resizable-contract-harness',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <section class="grid gap-6 p-6" data-testid="resizable-contract-harness">
       <h1>Resizable contract harness</h1>

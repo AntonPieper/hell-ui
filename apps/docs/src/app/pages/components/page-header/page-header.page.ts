@@ -155,7 +155,7 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         </ul>
         <p>Exports and labels:</p>
         <ul>
-          <li><code>HELL_PAGE_HEADER_DIRECTIVES</code> — bulk-import tuple of the header, the back affordance, and every slot marker.</li>
+          <li><code>HELL_PAGE_HEADER_IMPORTS</code> — bulk-import tuple of the header, the back affordance, and every slot marker.</li>
           <li><code>HELL_PAGE_HEADER_LABELS</code> — overrides the built-in labels (<code>back</code>).</li>
           <li><code>HellPageHeaderPart</code> — <code>'root' | 'leading' | 'titleGroup' | 'title' | 'meta' | 'description' | 'toolbar'</code>.</li>
         </ul>

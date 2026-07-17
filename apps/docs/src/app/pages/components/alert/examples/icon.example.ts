@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBullhorn } from '@ng-icons/font-awesome/solid';
-import { HELL_ALERT_DIRECTIVES } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-alert-icon-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidBullhorn })],
-  imports: [...HELL_ALERT_DIRECTIVES, HellIcon],
+  imports: [...HELL_ALERT_IMPORTS, HellIcon],
   template: `
     <hell-alert variant="info">
       <hell-icon hellAlertIcon name="faSolidBullhorn" size="20px" />

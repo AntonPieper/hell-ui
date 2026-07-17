@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
+import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
 
 @Component({
   selector: 'app-tabs-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABS_DIRECTIVES],
+  imports: [...HELL_TABS_IMPORTS],
   template: `
     <div hellTabset value="general">
       <div hellTabList aria-label="Account sections">

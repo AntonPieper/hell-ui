@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
+import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
 import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
 
 interface IssueLabel {
@@ -24,7 +24,7 @@ const LABELS: readonly IssueLabel[] = [
 @Component({
   selector: 'app-combobox-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_COMBOBOX_DIRECTIVES, ...HELL_CHIP_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS, ...HELL_CHIP_IMPORTS],
   template: `
     <div class="flex max-w-80 flex-col gap-hell-2">
       <div

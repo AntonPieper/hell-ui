@@ -3,12 +3,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HELL_CHIP_DIRECTIVES } from '@hell-ui/angular/chip';
+import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
 import { HellControlGroup } from '@hell-ui/angular/control-group';
 import type { HellPickValue } from '@hell-ui/angular/core';
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellCombobox, HELL_COMBOBOX_DIRECTIVES } from './combobox';
+import { HellCombobox, HELL_COMBOBOX_IMPORTS } from './combobox';
 
 interface Person {
   readonly id: string;
@@ -24,7 +24,7 @@ const PEOPLE: readonly Person[] = [
 ];
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
+  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_IMPORTS],
   template: `
     <div
       hellCombobox
@@ -49,7 +49,7 @@ class ComboboxFormHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
+  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_IMPORTS],
   template: `
     <div
       id="multi-combobox"
@@ -73,7 +73,7 @@ class ComboboxMultipleFormHost {
 }
 
 @Component({
-  imports: [HellControlGroup, ...HELL_COMBOBOX_DIRECTIVES],
+  imports: [HellControlGroup, ...HELL_COMBOBOX_IMPORTS],
   template: `
     <div hellControlGroup aria-label="Reviewer control">
       <span hellControlGroupPrefix>{{ selected()?.name ?? 'Unassigned' }}</span>
@@ -140,8 +140,8 @@ class ComboboxProjectedHost {
   imports: [
     ReactiveFormsModule,
     HellControlGroup,
-    ...HELL_CHIP_DIRECTIVES,
-    ...HELL_COMBOBOX_DIRECTIVES,
+    ...HELL_CHIP_IMPORTS,
+    ...HELL_COMBOBOX_IMPORTS,
   ],
   template: `
     <div hellControlGroup [disabled]="control.disabled" aria-label="Team control">
@@ -209,7 +209,7 @@ class ComboboxChipInputHost {
 }
 
 @Component({
-  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  imports: [...HELL_COMBOBOX_IMPORTS],
   template: `
     <div hellCombobox ui="rounded-hell-pill bg-hell-primary-soft">
       <input hellComboboxInput aria-label="Assignee" ui="text-hell-danger" />

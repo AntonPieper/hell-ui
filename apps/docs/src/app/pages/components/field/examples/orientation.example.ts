@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellCheckbox } from '@hell-ui/angular/checkbox';
 import { HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-field-orientation-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellCheckbox, HellInput],
+  imports: [...HELL_FIELD_IMPORTS, HellCheckbox, HellInput],
   template: `
     <div hellField>
       <label hellFieldLabel for="orientation-name">Full name</label>

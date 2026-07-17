@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCloudArrowUp } from '@ng-icons/font-awesome/solid';
-import { HELL_EMPTY_STATE_DIRECTIVES } from '@hell-ui/angular/empty-state';
+import { HELL_EMPTY_STATE_IMPORTS } from '@hell-ui/angular/empty-state';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-empty-state-custom-content-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_EMPTY_STATE_DIRECTIVES, HellButton, HellIcon],
+  imports: [...HELL_EMPTY_STATE_IMPORTS, HellButton, HellIcon],
   providers: [provideIcons({ faSolidCloudArrowUp })],
   template: `
     <div class="h-80 rounded-hell-lg border border-hell-border bg-hell-surface">

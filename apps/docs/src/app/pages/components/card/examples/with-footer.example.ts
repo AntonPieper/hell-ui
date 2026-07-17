@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellButton } from '@hell-ui/angular/button';
 
 @Component({
   selector: 'app-card-with-footer-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_CARD_DIRECTIVES, HellButton],
+  imports: [...HELL_CARD_IMPORTS, HellButton],
   template: `
     <div hellCard class="max-w-95">
       <div hellCardHeader><strong>Delete project</strong></div>

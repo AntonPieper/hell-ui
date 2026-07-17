@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_TABS_DIRECTIVES } from './tabs';
+import { HELL_TABS_IMPORTS } from './tabs';
 
 @Component({
-  imports: [...HELL_TABS_DIRECTIVES],
+  imports: [...HELL_TABS_IMPORTS],
   template: `
     <div
       hellTabset

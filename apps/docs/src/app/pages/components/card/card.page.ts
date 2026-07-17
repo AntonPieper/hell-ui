@@ -197,7 +197,7 @@ import { PageHeader } from '../../../shared/page-header';
           <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
         </li>
         <li>
-          <code>HELL_CARD_DIRECTIVES</code>: array of all four directives, for bulk
+          <code>HELL_CARD_IMPORTS</code>: array of all four directives, for bulk
           <code>imports</code>.
         </li>
       </ul>

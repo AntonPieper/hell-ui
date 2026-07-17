@@ -3,12 +3,12 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidXmark } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_SEARCH_DIRECTIVES, HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-search-empty-state-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellInput, ...HELL_SEARCH_DIRECTIVES],
+  imports: [HellButton, HellIcon, HellInput, ...HELL_SEARCH_IMPORTS],
   providers: [provideIcons({ faSolidXmark })],
   template: `
     <div hellSearch class="flex max-w-90 items-center gap-hell-2">

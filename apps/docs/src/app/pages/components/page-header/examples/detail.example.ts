@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidPenToSquare, faSolidShareNodes, faSolidTrash } from '@ng-icons/font-awesome/solid';
-import { HELL_BREADCRUMBS_DIRECTIVES } from '@hell-ui/angular/breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_PAGE_HEADER_DIRECTIVES } from '@hell-ui/angular/page-header';
-import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
+import { HELL_PAGE_HEADER_IMPORTS } from '@hell-ui/angular/page-header';
+import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
 
 @Component({
   selector: 'app-page-header-detail-example',
@@ -12,9 +12,9 @@ import { HELL_TOOLBAR_DIRECTIVES } from '@hell-ui/angular/toolbar';
   providers: [provideIcons({ faSolidPenToSquare, faSolidShareNodes, faSolidTrash })],
   imports: [
     HellIcon,
-    ...HELL_PAGE_HEADER_DIRECTIVES,
-    ...HELL_BREADCRUMBS_DIRECTIVES,
-    ...HELL_TOOLBAR_DIRECTIVES,
+    ...HELL_PAGE_HEADER_IMPORTS,
+    ...HELL_BREADCRUMBS_IMPORTS,
+    ...HELL_TOOLBAR_IMPORTS,
   ],
   template: `
     <hell-page-header>

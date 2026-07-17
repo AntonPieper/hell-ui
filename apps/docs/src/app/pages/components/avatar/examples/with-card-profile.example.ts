@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
 import { HellChip } from '@hell-ui/angular/chip';
 
 @Component({
   selector: 'app-avatar-with-card-profile-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellAvatar, HellChip, ...HELL_CARD_DIRECTIVES],
+  imports: [HellAvatar, HellChip, ...HELL_CARD_IMPORTS],
   template: `
     <div hellCard class="max-w-sm">
       <div hellCardBody class="flex items-start gap-hell-4">

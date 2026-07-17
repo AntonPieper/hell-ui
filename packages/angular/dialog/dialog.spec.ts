@@ -4,11 +4,11 @@ import { InteractivityChecker } from '@angular/cdk/a11y';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
 import { type HellSize } from '@hell-ui/angular/core';
-import { HELL_DIALOG_DIRECTIVES } from './dialog';
+import { HELL_DIALOG_IMPORTS } from './dialog';
 import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <section id="scope-a" hellDialogScope>
       <button id="open-a" type="button" [hellDialogTrigger]="dialogA">Open A</button>
@@ -37,7 +37,7 @@ import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from
 class ScopedDialogHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <a id="disabled-dialog" href="#dialog" [hellDialogTrigger]="dialog" disabled>Open</a>
     <ng-template #dialog>
@@ -50,7 +50,7 @@ class ScopedDialogHost {}
 class DisabledDialogTriggerHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <a id="enabled-dialog" href="#dialog" [hellDialogTrigger]="dialog">Open</a>
     <ng-template #dialog>
@@ -63,7 +63,7 @@ class DisabledDialogTriggerHost {}
 class EnabledDialogTriggerHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button id="open-default" type="button" [hellDialogTrigger]="defaultDialog" [closeOnOutsideClick]="true">
       Default
@@ -93,7 +93,7 @@ class EnabledDialogTriggerHost {}
 class ClosePolicyDialogHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button id="open-result" type="button" [hellDialogTrigger]="resultDialog" (closed)="onDialogClosed($any($event))">
       Open
@@ -118,7 +118,7 @@ class DialogClosedResultHost {
 }
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button
       id="open-data"
@@ -141,7 +141,7 @@ class DialogClosedResultHost {
 class DialogDataHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button id="open-named" type="button" [hellDialogTrigger]="namedDialog">Open named</button>
 
@@ -159,7 +159,7 @@ class DialogDataHost {}
 class NamedDialogHost {}
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button id="open-ui" type="button" [hellDialogTrigger]="uiDialog">Open UI</button>
 
@@ -183,7 +183,7 @@ class DialogPartStyleHost {
 }
 
 @Component({
-  imports: [...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_IMPORTS],
   template: `
     <button id="open-sized" type="button" [hellDialogTrigger]="sizedDialog">Open sized</button>
 

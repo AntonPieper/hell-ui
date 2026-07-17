@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
+import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
 
 @Component({
   selector: 'app-accordion-multiple-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_ACCORDION_DIRECTIVES],
+  imports: [...HELL_ACCORDION_IMPORTS],
   template: `
     <div hellAccordion type="multiple" [value]="['permissions']">
       <div hellAccordionItem value="permissions">

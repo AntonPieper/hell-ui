@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
+import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellInput, HellTextarea } from '@hell-ui/angular/input';
 
 interface Customer {
@@ -17,9 +17,9 @@ interface Customer {
     HellButton,
     HellInput,
     HellTextarea,
-    ...HELL_CARD_DIRECTIVES,
-    ...HELL_DIALOG_DIRECTIVES,
-    ...HELL_FIELD_DIRECTIVES,
+    ...HELL_CARD_IMPORTS,
+    ...HELL_DIALOG_IMPORTS,
+    ...HELL_FIELD_IMPORTS,
   ],
   template: `
     <div class="flex items-center gap-hell-4">

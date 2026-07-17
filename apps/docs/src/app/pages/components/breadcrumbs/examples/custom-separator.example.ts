@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_BREADCRUMBS_DIRECTIVES } from '@hell-ui/angular/breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
 
 @Component({
   selector: 'app-breadcrumbs-custom-separator-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_BREADCRUMBS_DIRECTIVES],
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
   template: `
     <nav hellBreadcrumbs aria-label="Slash separator">
       <ol hellBreadcrumbList>
