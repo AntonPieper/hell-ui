@@ -3,9 +3,10 @@ import { NgpSeparator } from 'ng-primitives/separator';
 import type { HellOrientation, HellSize } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
-const HELL_SEPARATOR_RECIPE = {
+/** Default part recipe for `hellSeparator`; pinned by the separator recipe snapshot. */
+export const HELL_SEPARATOR_RECIPE: HellRecipe<'root'> = {
   root: 'block shrink-0 border-0 bg-hell-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[spacing=none]:m-0 data-[orientation=horizontal]:data-[spacing=xs]:my-hell-1 data-[orientation=horizontal]:data-[spacing=sm]:my-hell-2 data-[orientation=horizontal]:data-[spacing=md]:my-hell-4 data-[orientation=horizontal]:data-[spacing=lg]:my-hell-6 data-[orientation=horizontal]:data-[spacing=xl]:my-hell-8 data-[orientation=vertical]:data-[spacing=xs]:mx-hell-1 data-[orientation=vertical]:data-[spacing=sm]:mx-hell-2 data-[orientation=vertical]:data-[spacing=md]:mx-hell-4 data-[orientation=vertical]:data-[spacing=lg]:mx-hell-6 data-[orientation=vertical]:data-[spacing=xl]:mx-hell-8',
-} satisfies HellRecipe<'root'>;
+};
 
 /** Visual or semantic divider between sections of content. */
 @Directive({

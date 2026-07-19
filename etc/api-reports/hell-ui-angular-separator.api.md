@@ -7,9 +7,13 @@
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
+import { HellRecipe } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/separator';
+
+// @public
+export const HELL_SEPARATOR_RECIPE: HellRecipe<'root'>;
 
 // @public
 export class HellSeparator {
