@@ -9,8 +9,9 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
   template: `
     <button hellButton [hellTooltip]="tip" placement="top" type="button">Deploy</button>
 
+    <!-- Custom styling earns a template: ui refines the explicit surface's only
+         Public Part, root, and never touches the trigger's own styling. -->
     <ng-template #tip>
-      <!-- ui refines HellTooltipSurface's only Public Part, root. -->
       <span
         hellTooltipSurface
         ui="rounded-hell-lg bg-hell-primary px-hell-3 py-hell-2 text-hell-primary-foreground shadow-hell-lg"
