@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellCard > recipes > keeps the default part classes stable > card 1`] = `
+{
+  "root": [
+    "flex",
+    "min-w-0",
+    "max-w-full",
+    "flex-col",
+    "overflow-clip",
+    "rounded-hell-lg",
+    "border",
+    "border-solid",
+    "border-hell-border",
+    "bg-hell-surface-elevated",
+    "shadow-hell-xs",
+    "data-[elevation=0]:shadow-none",
+    "data-[elevation=2]:shadow-hell-md",
+    "data-[elevation=3]:shadow-hell-lg",
+  ],
+}
+`;
+
+exports[`HellCard > recipes > keeps the default part classes stable > cardBody 1`] = `
+{
+  "root": [
+    "min-h-0",
+    "min-w-0",
+    "flex-auto",
+    "p-hell-6",
+  ],
+}
+`;
+
+exports[`HellCard > recipes > keeps the default part classes stable > cardFooter 1`] = `
+{
+  "root": [
+    "flex",
+    "justify-end",
+    "gap-hell-3",
+    "border-t",
+    "border-hell-border",
+    "px-hell-6",
+    "py-hell-4",
+  ],
+}
+`;
+
+exports[`HellCard > recipes > keeps the default part classes stable > cardHeader 1`] = `
+{
+  "root": [
+    "flex",
+    "items-center",
+    "justify-between",
+    "gap-hell-4",
+    "border-b",
+    "border-hell-border",
+    "px-hell-6",
+    "py-hell-5",
+    "text-sm",
+    "font-semibold",
+    "text-hell-foreground",
+  ],
+}
+`;
