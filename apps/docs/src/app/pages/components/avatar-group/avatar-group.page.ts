@@ -96,7 +96,7 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
 
       <h2>With tooltip &amp; menu</h2>
       <p>
-        A realistic assignee stack: each visible avatar is a <code>hellTooltipTrigger</code> that
+        A realistic assignee stack: each visible avatar is a <code>hellTooltip</code> that
         names the person on hover, and the overflow badge is a <code>hellMenuTrigger</code> that
         lists whoever didn't fit. The visual stack alone never carries the full list — the menu
         does.

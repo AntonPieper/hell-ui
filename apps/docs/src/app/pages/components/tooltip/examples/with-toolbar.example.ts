@@ -8,7 +8,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellKbd } from '@hell-ui/angular/chip';
-import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
+import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
 
 const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
 
@@ -16,7 +16,7 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
   selector: 'app-tooltip-with-toolbar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons(TOOLBAR_ICONS)],
-  imports: [HellButton, HellIcon, HellKbd, HellTooltip, HellTooltipTrigger],
+  imports: [HellButton, HellIcon, HellKbd, HellTooltip, HellTooltipSurface],
   template: `
     <div class="inline-flex gap-1 rounded-hell-md border border-hell-border p-1">
       <button
@@ -26,7 +26,7 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         size="sm"
         type="button"
         aria-label="Bold"
-        [hellTooltipTrigger]="boldHint"
+        [hellTooltip]="boldHint"
         [showDelay]="300"
       >
         <hell-icon name="faSolidBold" />
@@ -38,7 +38,7 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         size="sm"
         type="button"
         aria-label="Italic"
-        [hellTooltipTrigger]="italicHint"
+        [hellTooltip]="italicHint"
         [showDelay]="300"
       >
         <hell-icon name="faSolidItalic" />
@@ -50,7 +50,7 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         size="sm"
         type="button"
         aria-label="Underline"
-        [hellTooltipTrigger]="underlineHint"
+        [hellTooltip]="underlineHint"
         [showDelay]="300"
       >
         <hell-icon name="faSolidUnderline" />
@@ -58,21 +58,21 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
     </div>
 
     <ng-template #boldHint>
-      <span hellTooltip class="flex items-center gap-2">
+      <span hellTooltipSurface class="flex items-center gap-2">
         Bold
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">Ctrl</kbd>
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">B</kbd>
       </span>
     </ng-template>
     <ng-template #italicHint>
-      <span hellTooltip class="flex items-center gap-2">
+      <span hellTooltipSurface class="flex items-center gap-2">
         Italic
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">Ctrl</kbd>
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">I</kbd>
       </span>
     </ng-template>
     <ng-template #underlineHint>
-      <span hellTooltip class="flex items-center gap-2">
+      <span hellTooltipSurface class="flex items-center gap-2">
         Underline
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">Ctrl</kbd>
         <kbd hellKbd ui="border-white/20 bg-white/10 text-white">U</kbd>

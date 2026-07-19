@@ -54,7 +54,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         shortcuts, never for content the user actually needs.
       </hd-page-header>
       <p>
-        <code>HellTooltipTrigger</code> and <code>HellTooltip</code> are a directive pair built on
+        <code>HellTooltip</code> and <code>HellTooltipSurface</code> are a directive pair built on
         <code>NgpTooltipTrigger</code> and <code>NgpTooltip</code> from <code>ng-primitives</code>.
         The trigger attaches to a native <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and
         owns placement, delay, and open state; the surface directive goes on whatever element you
@@ -78,7 +78,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
 
       <h2>Basic</h2>
       <p>
-        Bind <code>[hellTooltipTrigger]</code> to a template reference; the surface inside it opens
+        Bind <code>[hellTooltip]</code> to a template reference; the surface inside it opens
         on hover and on keyboard focus, and closes automatically once the pointer or focus leaves
         the trigger.
       </p>
@@ -134,12 +134,12 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
 
       <h2>Styling</h2>
       <p>
-        <code>HellTooltip</code> exposes exactly one Public Part, <code>root</code> — the surface
+        <code>HellTooltipSurface</code> exposes exactly one Public Part, <code>root</code> — the surface
         element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
         <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through
         Hell's Tailwind merge, so refinements win deterministically over the defaults they
-        conflict with. <code>HellTooltipTrigger</code> renders no owned structure of its own — it
+        conflict with. <code>HellTooltip</code> renders no owned structure of its own — it
         attaches directly to your <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and has no
         Part Style Map.
       </p>
@@ -153,7 +153,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         </thead>
         <tbody>
           <tr>
-            <td><code>HellTooltip</code></td>
+            <td><code>HellTooltipSurface</code></td>
             <td><code>root</code></td>
             <td>
               The surface element — background, text color, radius, shadow, max width, and open
@@ -171,12 +171,12 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
       </hd-example-tabs>
 
       <h2>API</h2>
-      <h3><code>hellTooltipTrigger</code></h3>
+      <h3><code>hellTooltip</code></h3>
       <p>
-        Selector: <code>button[hellTooltipTrigger], a[hellTooltipTrigger]</code>.
+        Selector: <code>button[hellTooltip], a[hellTooltip]</code>.
       </p>
       <ul>
-        <li><code>[hellTooltipTrigger]</code>: <code>TemplateRef</code> — the tooltip content.</li>
+        <li><code>[hellTooltip]</code>: <code>TemplateRef</code> — the tooltip content.</li>
         <li>
           <code>placement</code>: <code>NgpTooltipPlacement</code> (Floating UI) —
           <code>'top' | 'right' | 'bottom' | 'left'</code> plus <code>-start</code>/<code>-end</code>
@@ -197,13 +197,13 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         <li><code>hoverableContent</code>: <code>boolean</code>, default <code>false</code> — keep the tooltip open while the pointer is over the tooltip surface itself.</li>
         <li><code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new open state.</li>
         <li>
-          Exported as <code>hellTooltipTrigger</code> with the Anchored Surface Contract state:
+          Exported as <code>hellTooltip</code> with the Anchored Surface Contract state:
           a reactive <code>open()</code> signal plus <code>show()</code> and <code>hide()</code>.
         </li>
       </ul>
 
-      <h3><code>hellTooltip</code></h3>
-      <p>Selector: <code>[hellTooltip]</code>.</p>
+      <h3><code>hellTooltipSurface</code></h3>
+      <p>Selector: <code>[hellTooltipSurface]</code>.</p>
       <ul>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — a shorthand class

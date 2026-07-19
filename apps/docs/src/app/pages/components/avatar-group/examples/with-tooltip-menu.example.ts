@@ -5,7 +5,7 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HELL_AVATAR_GROUP_IMPORTS } from '@hell-ui/angular/avatar';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
+import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
 
 interface TeamMember {
   name: string;
@@ -22,8 +22,8 @@ interface TeamMember {
     ...HELL_MENU_IMPORTS,
     HellAvatar,
     HellIcon,
+    HellTooltipSurface,
     HellTooltip,
-    HellTooltipTrigger,
   ],
   template: `
     <ng-template #overflowMenu>
@@ -40,13 +40,13 @@ interface TeamMember {
     <hell-avatar-group>
       @for (person of visibleAssignees(); track person.name) {
         <ng-template #assigneeHint>
-          <span hellTooltip>{{ person.name }}</span>
+          <span hellTooltipSurface>{{ person.name }}</span>
         </ng-template>
         <button
           hellAvatarGroupItem
           type="button"
           [selected]="focused() === person.name"
-          [hellTooltipTrigger]="assigneeHint"
+          [hellTooltip]="assigneeHint"
           placement="top"
           [attr.aria-label]="person.name"
           (click)="focused.set(person.name)"

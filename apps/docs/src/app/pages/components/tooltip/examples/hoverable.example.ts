@@ -1,15 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
+import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
 
 @Component({
   selector: 'app-tooltip-hoverable-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellTooltip, HellTooltipTrigger],
+  imports: [HellButton, HellTooltip, HellTooltipSurface],
   template: `
     <button
       hellButton
-      [hellTooltipTrigger]="hoverable"
+      [hellTooltip]="hoverable"
       placement="right"
       [hideDelay]="100"
       [hoverableContent]="true"
@@ -18,7 +18,7 @@ import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
       Hoverable
     </button>
     <ng-template #hoverable>
-      <span hellTooltip>Stays open while you hover this hint.</span>
+      <span hellTooltipSurface>Stays open while you hover this hint.</span>
     </ng-template>
   `,
 })
