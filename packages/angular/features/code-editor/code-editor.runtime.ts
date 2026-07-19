@@ -387,7 +387,10 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
         cleanedAttribute(options.ariaLabel) ?? (options.readOnly ? 'Code viewer' : 'Code editor');
     }
     if (describedby) attrs['aria-describedby'] = describedby;
-    if (options.readOnly) attrs['tabindex'] = '0';
+    // Explicit on editable content too: WebKit reports tabIndex -1 for
+    // contenteditable elements, dropping the editor from the tab order and
+    // failing scrollable-region-focusable checks once content overflows.
+    attrs['tabindex'] = '0';
 
     return EditorView.contentAttributes.of(attrs);
   }

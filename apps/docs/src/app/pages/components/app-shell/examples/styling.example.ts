@@ -86,7 +86,7 @@ const HD_APP_SHELL_STYLING_ICONS = {
         </div>
       </nav>
 
-      <main hellAppContent ui="bg-hell-surface p-hell-8">
+      <main hellAppContent tabindex="0" ui="bg-hell-surface p-hell-8">
         <h3 class="m-0 text-base font-semibold text-hell-primary">Themed shell</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           Each slot's <code>ui</code> shorthand refines only that directive's <code>root</code> part;

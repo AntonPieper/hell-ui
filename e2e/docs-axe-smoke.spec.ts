@@ -1,5 +1,6 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { HD_DOCS_SECTIONS } from '../apps/docs/src/app/docs-catalog';
 
 type AxeViolation = Awaited<ReturnType<AxeBuilder['analyze']>>['violations'][number];
 
@@ -11,44 +12,49 @@ type DocsAxeTarget = {
   readonly prepare?: (page: Page) => Promise<void>;
 };
 
+type DocsAxeExtraTarget = {
+  readonly name: string;
+  readonly include: readonly string[];
+  readonly prepare?: (page: Page) => Promise<void>;
+};
+
+type DocsAxePageOverride = {
+  /** Page h1 text when it differs from the catalog nav label. */
+  readonly heading?: string | RegExp;
+  /** Replaces the default `['main']` include of the page's generated target. */
+  readonly include?: readonly string[];
+  /** Stateful setup for the page's generated target. */
+  readonly prepare?: (page: Page) => Promise<void>;
+  /** Additional stateful targets (open overlays, per-example scans) on the same page. */
+  readonly extraTargets?: readonly DocsAxeExtraTarget[];
+};
+
 const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
-const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
-  {
-    name: 'accordion',
-    path: '/components/accordion',
-    heading: 'Accordion',
-    include: ['main'],
+/**
+ * Hand-written exceptions to the generated one-target-per-catalog-page default.
+ * Keys must be docs catalog paths; a stale key fails the suite at load time.
+ */
+const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
+  '/': {
+    heading: 'Angular components for dense business software',
   },
-  {
-    name: 'app shell',
-    path: '/components/app-shell',
-    heading: 'App shell',
-    include: [
-      'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
-    ],
-    prepare: async (page) => {
-      const shell = page.locator(
-        'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
-      );
-      const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
-      await expect(shell).toBeVisible();
-      await expect(
-        secondary.locator(
-          '> [hellAppSecondaryBody][data-slot="root"] > button[hellSecondaryToggle]',
-        ),
-      ).toBeVisible();
-      await shell
-        .locator('> [hellAppTopbar][data-slot="root"] > button[hellSidenavToggle]')
-        .click();
-      await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
-    },
+  '/accessibility': {
+    heading: 'Accessibility responsibilities',
   },
-  {
-    name: 'alert',
-    path: '/components/alert',
-    heading: 'Alert',
-    include: ['main'],
+  '/components/control-group': {
+    heading: 'Control Group',
+  },
+  '/components/file-picker': {
+    heading: 'File Picker',
+  },
+  '/components/input': {
+    heading: 'Input, Select & Textarea',
+  },
+  '/components/master-detail': {
+    heading: 'Master Detail',
+  },
+  '/components/alert': {
     prepare: async (page) => {
       await page
         .locator('app-alert-async-role-example')
@@ -59,170 +65,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
       ).toBeVisible();
     },
   },
-  {
-    name: 'breadcrumbs',
-    path: '/components/breadcrumbs',
-    heading: 'Breadcrumbs',
-    include: ['main'],
-  },
-  {
-    name: 'button',
-    path: '/components/button',
-    heading: 'Button',
-    include: ['main'],
-  },
-  {
-    name: 'checkbox',
-    path: '/components/checkbox',
-    heading: 'Checkbox',
-    include: ['main'],
-  },
-  {
-    name: 'chip',
-    path: '/components/chip',
-    heading: 'Chip',
-    include: ['main'],
-  },
-  {
-    name: 'date-picker',
-    path: '/components/date-picker',
-    heading: 'Date picker',
-    include: ['main'],
-  },
-  {
-    name: 'date input',
-    path: '/components/date-input',
-    heading: 'Date input',
-    include: ['main', '[data-date-input-calendar]'],
-    prepare: async (page) => {
-      const example = page.locator('app-date-input-with-calendar-picker-example');
-      await expect(example.getByRole('textbox', { name: 'Ship date' })).toBeVisible();
-      await example.getByRole('button', { name: 'Choose ship date' }).click();
-      await expect(page.locator('[data-date-input-calendar]').getByRole('grid')).toBeVisible();
-    },
-  },
-  {
-    name: 'dialog',
-    path: '/components/dialog',
-    heading: 'Dialog',
-    include: ['[role="dialog"][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Publish article' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
-      await expect(dialog).toBeVisible();
-      await expect
-        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
-        .toBe('1');
-    },
-  },
-  {
-    name: 'confirm',
-    path: '/components/confirm',
-    heading: 'Confirm',
-    include: ['[role="dialog"][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Publish article' }).click();
-      const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
-      await expect(dialog).toBeVisible();
-      await expect
-        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
-        .toBe('1');
-    },
-  },
-  {
-    name: 'anchored prompt',
-    path: '/components/confirm',
-    heading: 'Confirm',
-    include: ['[role="dialog"][data-slot="root"]'],
-    prepare: async (page) => {
-      await page
-        .locator('app-confirm-anchored-row-delete-example')
-        .getByRole('button', { name: 'Delete staging-eu-west' })
-        .click();
-      const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
-      await expect(panel).toBeVisible();
-      await expect
-        .poll(() => panel.evaluate((element) => getComputedStyle(element).opacity))
-        .toBe('1');
-    },
-  },
-  {
-    name: 'choice',
-    path: '/components/confirm',
-    heading: 'Confirm',
-    include: ['[role="dialog"][data-slot="root"]'],
-    prepare: async (page) => {
-      const example = page.locator('app-confirm-choice-unsaved-changes-example');
-      await example.getByRole('textbox', { name: 'Release note' }).fill('Ship dark mode v2');
-      await example.getByRole('button', { name: 'Close editor' }).click();
-      const dialog = page.getByRole('dialog', { name: 'You have unsaved changes' });
-      await expect(dialog).toBeVisible();
-      await expect
-        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
-        .toBe('1');
-    },
-  },
-  {
-    name: 'dialpad',
-    path: '/components/dialpad',
-    heading: 'Dialpad',
-    include: ['main'],
-  },
-  {
-    name: 'empty-state',
-    path: '/components/empty-state',
-    heading: 'Empty state',
-    include: ['main'],
-  },
-  {
-    name: 'File Picker upload recipe',
-    path: '/components/file-picker',
-    heading: 'File Picker',
-    include: ['app-file-picker-upload-recipe-example'],
-  },
-  {
-    name: 'input, select & textarea',
-    path: '/components/input',
-    heading: 'Input, Select & Textarea',
-    include: ['main'],
-  },
-  {
-    name: 'popover non-modal',
-    path: '/components/popover',
-    heading: 'Popover',
-    include: ['main', '[hellPopover][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Playback volume' }).click();
-      await expect(page.getByRole('dialog', { name: 'Volume' })).toBeVisible();
-    },
-  },
-  {
-    name: 'listbox',
-    path: '/components/listbox',
-    heading: 'Listbox',
-    include: ['main'],
-  },
-  {
-    name: 'popover',
-    path: '/components/popover',
-    heading: 'Popover',
-    include: ['main', '[hellPopover][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Assigned to Mara Voss' }).click();
-      await expect(page.getByRole('dialog', { name: 'Mara Voss' })).toBeVisible();
-    },
-  },
-  {
-    name: 'radio',
-    path: '/components/radio',
-    heading: 'Radio',
-    include: ['main'],
-  },
-  {
-    name: 'save-bar',
-    path: '/components/save-bar',
-    heading: 'Save bar',
-    include: ['main'],
+  '/components/save-bar': {
     prepare: async (page) => {
       const example = page.locator('app-save-bar-contextual-form-example');
       const name = example.getByRole('textbox', { name: 'Display name' });
@@ -231,166 +74,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
       await expect(example.locator('hell-save-bar')).toBeVisible();
     },
   },
-  {
-    name: 'slider',
-    path: '/components/slider',
-    heading: 'Slider',
-    include: ['main'],
-  },
-  {
-    name: 'switch',
-    path: '/components/switch',
-    heading: 'Switch',
-    include: ['main'],
-  },
-  {
-    name: 'tabs',
-    path: '/components/tabs',
-    heading: 'Tabs',
-    include: ['main'],
-  },
-  {
-    name: 'tooltip',
-    path: '/components/tooltip',
-    heading: 'Tooltip',
-    include: ['main', '[hellTooltipSurface][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Top' }).focus();
-      await expect(page.getByRole('tooltip', { name: "I'm on top" })).toBeVisible();
-    },
-  },
-  {
-    name: 'menu',
-    path: '/components/menu',
-    heading: 'Menu',
-    include: ['main', '[hellMenu][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Actions' }).first().click();
-      await expect(page.getByRole('menu').first()).toBeVisible();
-    },
-  },
-  {
-    name: 'filter-builder',
-    path: '/components/filter-builder',
-    heading: 'Filter Builder',
-    include: [
-      'main',
-      '[hellPopover][data-slot="root"]',
-      '[hellComboboxDropdown][data-slot="panel"]',
-    ],
-    prepare: async (page) => {
-      const example = page.locator('app-filter-builder-recipes-example');
-      const picker = example.getByRole('combobox', { name: 'People filter builder' });
-      await picker.fill('Status');
-      await picker.press('Enter');
-      const editor = example.locator('[data-slot="editor"][data-mode="create"]');
-      await editor.getByRole('combobox', { name: 'Status option' }).fill('pau');
-      await editor.getByRole('combobox', { name: 'Status option' }).press('ArrowDown');
-      await expect(page.getByRole('option', { name: 'Paused' })).toBeVisible();
-    },
-  },
-  {
-    name: 'filter-builder entity status',
-    path: '/components/filter-builder',
-    heading: 'Filter Builder',
-    include: ['main', '[hellComboboxDropdown][data-slot="panel"]'],
-    prepare: async (page) => {
-      const example = page.locator('app-filter-builder-server-dispatch-example');
-      const picker = example.getByRole('combobox', { name: 'Work order filter builder' });
-      await picker.fill('Owner');
-      await picker.press('Enter');
-      const editor = example.locator('[data-slot="editor"][data-field="owner"]');
-      await editor.getByRole('combobox', { name: 'Owner directory' }).fill('not in the directory');
-      await editor.getByRole('combobox', { name: 'Owner directory' }).press('ArrowDown');
-      await expect(page.getByText('No owners match')).toBeVisible();
-    },
-  },
-  {
-    name: 'filter-builder date range',
-    path: '/components/filter-builder',
-    heading: 'Filter Builder',
-    include: ['main'],
-    prepare: async (page) => {
-      const example = page.locator('app-filter-builder-date-range-example');
-      const picker = example.getByRole('combobox', { name: 'Created date filter builder' });
-      await picker.fill('Created date');
-      await picker.press('Enter');
-      const editor = example.locator('[data-slot="editor"][data-field="created"]');
-      const input = editor.getByRole('textbox', { name: 'Created from' });
-      await input.fill('2026-05-01');
-      await input.press('Enter');
-      await expect(input).toHaveValue('2026-05-01');
-    },
-  },
-  {
-    name: 'multi-select-menu-button',
-    path: '/components/multi-select-menu-button',
-    heading: 'Multi-select menu button',
-    include: ['main', '[hellMenu][data-slot="root"]'],
-    prepare: async (page) => {
-      await page.getByRole('button', { name: 'Channels' }).first().click();
-      await expect(page.getByRole('menu').first()).toBeVisible();
-    },
-  },
-  {
-    name: 'select',
-    path: '/components/select',
-    heading: 'Select',
-    include: ['main', '[hellSelectDropdown][data-slot="root"]'],
-    prepare: async (page) => {
-      const select = page.getByRole('combobox', { name: 'Priority' }).first();
-      await select.focus();
-      await page.keyboard.press('ArrowDown');
-      await expect(page.getByRole('option', { name: 'Lowest' })).toBeVisible();
-    },
-  },
-  {
-    name: 'combobox',
-    path: '/components/combobox',
-    heading: 'Combobox',
-    include: ['main', '[hellComboboxDropdown][data-slot="root"]'],
-    prepare: async (page) => {
-      const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
-      await input.evaluate((element) =>
-        element.scrollIntoView({ block: 'center', behavior: 'instant' }),
-      );
-      await page.getByRole('button', { name: 'Toggle currencies' }).click();
-      await expect(
-        page.getByRole('option', { name: 'AUD — Australian Dollar', exact: true }),
-      ).toBeVisible();
-      await expect(input).toHaveAttribute('aria-expanded', 'true');
-    },
-  },
-  {
-    name: 'omnibar',
-    path: '/components/omnibar',
-    heading: 'Omnibar',
-    include: ['main', '.hell-omnibar-overlay-pane [data-slot="panel"]'],
-    prepare: async (page) => {
-      const input = page.getByRole('combobox', { name: 'Search people' });
-      await input.fill('user');
-      await expect(page.getByRole('option', { name: /User 1/ }).first()).toBeVisible();
-    },
-  },
-  {
-    name: 'toolbar',
-    path: '/components/toolbar',
-    heading: 'Toolbar',
-    include: ['main', '[data-slot="overflowMenu"]'],
-    prepare: async (page) => {
-      await page
-        .locator('hell-overflow-toolbar')
-        .first()
-        .getByRole('button', { name: 'More actions' })
-        .click();
-      await expect(page.getByRole('menu').first()).toBeVisible();
-    },
-  },
-  {
-    name: 'page header',
-    path: '/components/page-header',
-    heading: 'Page header',
-    include: ['main'],
+  '/components/page-header': {
     prepare: async (page) => {
       await expect(
         page
@@ -399,58 +83,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
       ).toBeVisible();
     },
   },
-  {
-    name: 'table primitives docs example',
-    path: '/components/table',
-    heading: 'Table',
-    include: ['app-table-primitive-example'],
-    prepare: async (page) => {
-      await expect(
-        page
-          .locator('app-table-primitive-example')
-          .getByRole('cell', { name: 'Ada Lovelace', exact: true }),
-      ).toBeVisible();
-    },
-  },
-  {
-    name: 'TanStack table shell docs example',
-    path: '/components/table',
-    heading: 'Table',
-    include: ['app-table-tanstack-shell-example'],
-  },
-  {
-    name: 'TanStack virtual row strategy docs example',
-    path: '/components/table',
-    heading: 'Table',
-    include: ['app-table-tanstack-virtual-example'],
-  },
-  {
-    name: 'time picker docs example',
-    path: '/components/time-picker',
-    heading: 'Time picker',
-    include: ['main'],
-  },
-  {
-    name: 'time input docs example',
-    path: '/components/time-input',
-    heading: 'Time input',
-    include: ['main', '[data-testid="time-picker-panel"]'],
-    prepare: async (page) => {
-      const example = page.locator('app-time-input-with-time-picker-example');
-      await expect(example.locator('#picker-time')).toBeVisible();
-      await example.getByRole('button', { name: 'Choose time' }).click();
-      await expect(
-        page.locator('[data-testid="time-picker-panel"]').getByRole('spinbutton', {
-          name: 'Hours',
-        }),
-      ).toBeVisible();
-    },
-  },
-  {
-    name: 'number input docs example',
-    path: '/components/number-input',
-    heading: 'Number input',
-    include: ['main'],
+  '/components/number-input': {
     prepare: async (page) => {
       const basic = page.locator('app-number-input-basic-example');
       const port = basic.getByRole('spinbutton', { name: 'Listen port' });
@@ -465,19 +98,363 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
       ).toHaveAttribute('aria-valuetext', '30 seconds');
     },
   },
-  {
-    name: 'pdf viewer shell',
-    path: '/components/pdf-viewer',
-    heading: 'PDF viewer',
-    include: ['app-pdf-viewer-initial-view-example hell-pdf-viewer'],
-    prepare: async (page) => {
-      await page.getByRole('tab', { name: 'Preview' }).nth(1).click();
-      await expect(
-        page.locator('app-pdf-viewer-initial-view-example hell-pdf-viewer'),
-      ).toBeVisible();
-    },
+  '/components/app-shell': {
+    extraTargets: [
+      {
+        name: 'App shell secondary panel interactions',
+        include: [
+          'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
+        ],
+        prepare: async (page) => {
+          const shell = page.locator(
+            'app-app-shell-secondary-panel-example > [hellAppShell][data-slot="root"]',
+          );
+          const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
+          await expect(shell).toBeVisible();
+          await expect(
+            secondary.locator(
+              '> [hellAppSecondaryBody][data-slot="root"] > button[hellSecondaryToggle]',
+            ),
+          ).toBeVisible();
+          await shell
+            .locator('> [hellAppTopbar][data-slot="root"] > button[hellSidenavToggle]')
+            .click();
+          await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
+        },
+      },
+    ],
   },
-];
+  '/components/date-input': {
+    extraTargets: [
+      {
+        name: 'Date input calendar picker open',
+        include: ['main', '[data-date-input-calendar]'],
+        prepare: async (page) => {
+          const example = page.locator('app-date-input-with-calendar-picker-example');
+          await expect(example.getByRole('textbox', { name: 'Ship date' })).toBeVisible();
+          await example.getByRole('button', { name: 'Choose ship date' }).click();
+          await expect(
+            page.locator('[data-date-input-calendar]').getByRole('grid'),
+          ).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/dialog': {
+    extraTargets: [
+      {
+        name: 'Dialog publish confirmation open',
+        include: ['[role="dialog"][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Publish article' }).click();
+          const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
+          await expect(dialog).toBeVisible();
+          await expect
+            .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+        },
+      },
+    ],
+  },
+  '/components/confirm': {
+    extraTargets: [
+      {
+        name: 'Confirm publish dialog open',
+        include: ['[role="dialog"][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Publish article' }).click();
+          const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
+          await expect(dialog).toBeVisible();
+          await expect
+            .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+        },
+      },
+      {
+        name: 'Confirm anchored delete prompt open',
+        include: ['[role="dialog"][data-slot="root"]'],
+        prepare: async (page) => {
+          await page
+            .locator('app-confirm-anchored-row-delete-example')
+            .getByRole('button', { name: 'Delete staging-eu-west' })
+            .click();
+          const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
+          await expect(panel).toBeVisible();
+          await expect
+            .poll(() => panel.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+        },
+      },
+      {
+        name: 'Confirm unsaved changes choice open',
+        include: ['[role="dialog"][data-slot="root"]'],
+        prepare: async (page) => {
+          const example = page.locator('app-confirm-choice-unsaved-changes-example');
+          await example
+            .getByRole('textbox', { name: 'Release note' })
+            .fill('Ship dark mode v2');
+          await example.getByRole('button', { name: 'Close editor' }).click();
+          const dialog = page.getByRole('dialog', { name: 'You have unsaved changes' });
+          await expect(dialog).toBeVisible();
+          await expect
+            .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+        },
+      },
+    ],
+  },
+  '/components/popover': {
+    extraTargets: [
+      {
+        name: 'Popover profile card open',
+        include: ['main', '[hellPopover][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Assigned to Mara Voss' }).click();
+          await expect(page.getByRole('dialog', { name: 'Mara Voss' })).toBeVisible();
+        },
+      },
+      {
+        name: 'Popover non-modal volume open',
+        include: ['main', '[hellPopover][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Playback volume' }).click();
+          await expect(page.getByRole('dialog', { name: 'Volume' })).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/tooltip': {
+    extraTargets: [
+      {
+        name: 'Tooltip surface open',
+        include: ['main', '[hellTooltipSurface][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Top' }).focus();
+          await expect(page.getByRole('tooltip', { name: "I'm on top" })).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/menu': {
+    extraTargets: [
+      {
+        name: 'Menu actions open',
+        include: ['main', '[hellMenu][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Actions' }).first().click();
+          await expect(page.getByRole('menu').first()).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/multi-select-menu-button': {
+    extraTargets: [
+      {
+        name: 'Multi-select menu button channels open',
+        include: ['main', '[hellMenu][data-slot="root"]'],
+        prepare: async (page) => {
+          await page.getByRole('button', { name: 'Channels' }).first().click();
+          await expect(page.getByRole('menu').first()).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/select': {
+    extraTargets: [
+      {
+        name: 'Select dropdown open',
+        include: ['main', '[hellSelectDropdown][data-slot="root"]'],
+        prepare: async (page) => {
+          const select = page.getByRole('combobox', { name: 'Priority' }).first();
+          await select.focus();
+          await page.keyboard.press('ArrowDown');
+          await expect(page.getByRole('option', { name: 'Lowest' })).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/combobox': {
+    extraTargets: [
+      {
+        name: 'Combobox dropdown open',
+        include: ['main', '[hellComboboxDropdown][data-slot="root"]'],
+        prepare: async (page) => {
+          const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
+          await input.evaluate((element) =>
+            element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+          );
+          await page.getByRole('button', { name: 'Toggle currencies' }).click();
+          await expect(
+            page.getByRole('option', { name: 'AUD — Australian Dollar', exact: true }),
+          ).toBeVisible();
+          await expect(input).toHaveAttribute('aria-expanded', 'true');
+        },
+      },
+    ],
+  },
+  '/components/omnibar': {
+    extraTargets: [
+      {
+        name: 'Omnibar results open',
+        include: ['main', '.hell-omnibar-overlay-pane [data-slot="panel"]'],
+        prepare: async (page) => {
+          const input = page.getByRole('combobox', { name: 'Search people' });
+          await input.fill('user');
+          await expect(page.getByRole('option', { name: /User 1/ }).first()).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/toolbar': {
+    extraTargets: [
+      {
+        name: 'Toolbar overflow menu open',
+        include: ['main', '[data-slot="overflowMenu"]'],
+        prepare: async (page) => {
+          await page
+            .locator('hell-overflow-toolbar')
+            .first()
+            .getByRole('button', { name: 'More actions' })
+            .click();
+          await expect(page.getByRole('menu').first()).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/filter-builder': {
+    extraTargets: [
+      {
+        name: 'Filter Builder recipes editor open',
+        include: [
+          'main',
+          '[hellPopover][data-slot="root"]',
+          '[hellComboboxDropdown][data-slot="panel"]',
+        ],
+        prepare: async (page) => {
+          const example = page.locator('app-filter-builder-recipes-example');
+          const picker = example.getByRole('combobox', { name: 'People filter builder' });
+          await picker.fill('Status');
+          await picker.press('Enter');
+          const editor = example.locator('[data-slot="editor"][data-mode="create"]');
+          await editor.getByRole('combobox', { name: 'Status option' }).fill('pau');
+          await editor.getByRole('combobox', { name: 'Status option' }).press('ArrowDown');
+          await expect(page.getByRole('option', { name: 'Paused' })).toBeVisible();
+        },
+      },
+      {
+        name: 'Filter Builder server dispatch empty state',
+        include: ['main', '[hellComboboxDropdown][data-slot="panel"]'],
+        prepare: async (page) => {
+          const example = page.locator('app-filter-builder-server-dispatch-example');
+          const picker = example.getByRole('combobox', {
+            name: 'Work order filter builder',
+          });
+          await picker.fill('Owner');
+          await picker.press('Enter');
+          const editor = example.locator('[data-slot="editor"][data-field="owner"]');
+          await editor
+            .getByRole('combobox', { name: 'Owner directory' })
+            .fill('not in the directory');
+          await editor.getByRole('combobox', { name: 'Owner directory' }).press('ArrowDown');
+          await expect(page.getByText('No owners match')).toBeVisible();
+        },
+      },
+      {
+        name: 'Filter Builder date range editor',
+        include: ['main'],
+        prepare: async (page) => {
+          const example = page.locator('app-filter-builder-date-range-example');
+          const picker = example.getByRole('combobox', {
+            name: 'Created date filter builder',
+          });
+          await picker.fill('Created date');
+          await picker.press('Enter');
+          const editor = example.locator('[data-slot="editor"][data-field="created"]');
+          const input = editor.getByRole('textbox', { name: 'Created from' });
+          await input.fill('2026-05-01');
+          await input.press('Enter');
+          await expect(input).toHaveValue('2026-05-01');
+        },
+      },
+    ],
+  },
+  '/components/table': {
+    extraTargets: [
+      {
+        name: 'Table primitives example',
+        include: ['app-table-primitive-example'],
+        prepare: async (page) => {
+          await expect(
+            page
+              .locator('app-table-primitive-example')
+              .getByRole('cell', { name: 'Ada Lovelace', exact: true }),
+          ).toBeVisible();
+        },
+      },
+      {
+        name: 'Table TanStack shell example',
+        include: ['app-table-tanstack-shell-example'],
+      },
+      {
+        name: 'Table TanStack virtual example',
+        include: ['app-table-tanstack-virtual-example'],
+      },
+    ],
+  },
+  '/components/time-input': {
+    extraTargets: [
+      {
+        name: 'Time input picker panel open',
+        include: ['main', '[data-testid="time-picker-panel"]'],
+        prepare: async (page) => {
+          const example = page.locator('app-time-input-with-time-picker-example');
+          await expect(example.locator('#picker-time')).toBeVisible();
+          await example.getByRole('button', { name: 'Choose time' }).click();
+          await expect(
+            page.locator('[data-testid="time-picker-panel"]').getByRole('spinbutton', {
+              name: 'Hours',
+            }),
+          ).toBeVisible();
+        },
+      },
+    ],
+  },
+  '/components/pdf-viewer': {
+    extraTargets: [
+      {
+        name: 'PDF viewer shell preview',
+        include: ['app-pdf-viewer-initial-view-example hell-pdf-viewer'],
+        prepare: async (page) => {
+          await page.getByRole('tab', { name: 'Preview' }).nth(1).click();
+          await expect(
+            page.locator('app-pdf-viewer-initial-view-example hell-pdf-viewer'),
+          ).toBeVisible();
+        },
+      },
+    ],
+  },
+};
+
+const DOCS_AXE_PAGES = HD_DOCS_SECTIONS.flatMap((section) => section.items);
+
+const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = DOCS_AXE_PAGES.flatMap((page) => {
+  const override = DOCS_AXE_OVERRIDES[page.path];
+  const heading = override?.heading ?? page.label;
+  const defaultTarget: DocsAxeTarget = {
+    name: page.label,
+    path: page.path,
+    heading,
+    include: override?.include ?? ['main'],
+    ...(override?.prepare ? { prepare: override.prepare } : {}),
+  };
+  const extraTargets = (override?.extraTargets ?? []).map(
+    (extra): DocsAxeTarget => ({ ...extra, path: page.path, heading }),
+  );
+  return [defaultTarget, ...extraTargets];
+});
+
+assertOverridesMatchCatalog();
+assertTargetNamesAreUnique();
 
 test.describe('public docs axe smoke', () => {
   for (const target of DOCS_AXE_TARGETS) {
@@ -496,6 +473,32 @@ test.describe('public docs axe smoke', () => {
     });
   }
 });
+
+function assertOverridesMatchCatalog(): void {
+  const knownPaths = new Set(DOCS_AXE_PAGES.map((page) => page.path));
+  const stalePaths = Object.keys(DOCS_AXE_OVERRIDES).filter((path) => !knownPaths.has(path));
+  if (stalePaths.length) {
+    throw new Error(
+      `Docs axe overrides reference paths that are not in the docs catalog: ${stalePaths.join(', ')}. ` +
+        'Remove the stale override entries or restore the catalog pages.',
+    );
+  }
+}
+
+function assertTargetNamesAreUnique(): void {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  for (const target of DOCS_AXE_TARGETS) {
+    if (seen.has(target.name)) duplicates.add(target.name);
+    seen.add(target.name);
+  }
+  if (duplicates.size) {
+    throw new Error(
+      `Docs axe targets have duplicate names: ${[...duplicates].join(', ')}. ` +
+        'Give extra targets names that do not collide with catalog page labels.',
+    );
+  }
+}
 
 function formatAxeViolations(target: DocsAxeTarget, violations: readonly AxeViolation[]): string {
   if (!violations.length) return `${target.name} (${target.path}) has no axe violations.`;

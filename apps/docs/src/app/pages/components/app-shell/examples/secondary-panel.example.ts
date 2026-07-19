@@ -32,7 +32,7 @@ const HD_APP_SHELL_SECONDARY_ICONS = {
         </a>
       </nav>
 
-      <main hellAppContent>
+      <main hellAppContent tabindex="0">
         <h3 class="m-0 text-base font-semibold">Activity feed as a secondary panel</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           Click the <em>Activity</em> header row to hide the panel. Once hidden, the whole collapsed
