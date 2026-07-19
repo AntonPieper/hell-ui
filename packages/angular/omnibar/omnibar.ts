@@ -17,6 +17,7 @@ import {
   ViewChild,
   booleanAttribute,
   computed,
+  contentChild,
   effect,
   inject,
   input,
@@ -67,6 +68,7 @@ export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels> = hellCreate
 
 let nextOmnibarId = 0;
 let nextOmnibarItemId = 0;
+let nextOmnibarGroupLabelId = 0;
 
 const HELL_OMNIBAR_OVERLAY_STYLE_VARIABLES = [
   '--hell-omnibar-panel-bg',
@@ -824,14 +826,19 @@ export class HellOmnibarPanel {
   });
 }
 
-/** Groups related result items under an optional label. */
+/**
+ * Groups related result items under an optional label. A projected
+ * `[hellOmnibarGroupLabel]` names the group through `aria-labelledby`;
+ * the `label` input is the fallback for groups without a visible label.
+ */
 @Directive({
   selector: '[hellOmnibarGroup]',
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
     role: 'group',
-    '[attr.aria-label]': 'label() || null',
+    '[attr.aria-labelledby]': 'visibleLabel()?.id ?? null',
+    '[attr.aria-label]': 'visibleLabel() ? null : label() || null',
   },
 })
 export class HellOmnibarGroup {
@@ -843,14 +850,17 @@ export class HellOmnibarGroup {
     defaultPart: 'root',
     recipe: () => HELL_OMNIBAR_GROUP_RECIPE,
   });
-  /** Accessible label describing the group. */
+  /** Fallback accessible label for groups without a visible label. */
   readonly label = input<string>('');
+
+  /** Projected visible label that names the group when present. */
+  protected readonly visibleLabel = contentChild(HellOmnibarGroupLabel);
 }
 
-/** Visual label heading for a result group. */
+/** Visible label heading that supplies its result group's accessible name. */
 @Directive({
   selector: '[hellOmnibarGroupLabel]',
-  host: { '[class]': "part('root')", 'data-slot': 'root', role: 'presentation' },
+  host: { '[class]': "part('root')", 'data-slot': 'root', '[id]': 'id' },
 })
 export class HellOmnibarGroupLabel {
   /** Tailwind class refinements for public parts. */
@@ -861,6 +871,9 @@ export class HellOmnibarGroupLabel {
     defaultPart: 'root',
     recipe: () => HELL_OMNIBAR_GROUP_LABEL_RECIPE,
   });
+
+  /** Stable id the parent group references through `aria-labelledby`. */
+  readonly id = `hell-omnibar-group-label-${++nextOmnibarGroupLabelId}`;
 }
 
 /**

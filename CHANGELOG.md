@@ -438,6 +438,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Generic value plumbing no longer manufactures type safety with casts. The
+  internal typed-value input state defaults its output type to its value type
+  and requires an explicit `toOutput` mapper whenever the value type is not
+  assignable to the output type — omitting the mapper is now a compile error.
+  Pick-value normalization and the picker engine adapter accept typed
+  `HellPickValue<T>` engine output (or caller-decoded values) instead of
+  casting `unknown` to the item type; a mapper that maps a committed value to
+  `null` is now respected instead of leaking the unmapped value. Select,
+  combobox, and the date/time/number inputs compile and behave unchanged.
+  Closes #256. Evidence: type-assertion and runtime specs in the internal core
+  suites, contracted internal-core API report.
 - Docs pages, live examples, search source, unit hosts, harness examples, and
   browser-contract fixtures now use the canonical `HELL_*_IMPORTS` tuple names.
   This completed the in-repo consumer migration before the temporary
