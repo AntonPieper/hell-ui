@@ -111,7 +111,7 @@ export class HellOmnibarItem<T = unknown> {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly select: _angular_core.OutputEmitterRef<T>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItem<any>, "button[hellOmnibarItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "itemValue": { "alias": "value"; "required": false; "isSignal": true; }; "closeOnSelect": { "alias": "closeOnSelect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "select": "select"; }, never, never, true, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItem<any>, "button[hellOmnibarItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "itemValue": { "alias": "value"; "required": true; "isSignal": true; }; "closeOnSelect": { "alias": "closeOnSelect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "select": "select"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItem<any>, never>;
 }
 

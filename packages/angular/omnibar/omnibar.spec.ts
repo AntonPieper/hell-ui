@@ -422,9 +422,11 @@ describe('HellOmnibar command interaction runtime', () => {
     fixture.detectChanges();
 
     expect(host.selectEvents).toEqual([host.beta]);
+    expect(host.selectEvents[0]).toBe(host.beta);
     expect(host.submitEvents).toEqual([
       { query: 'be', item: host.beta, source: 'keyboard' },
     ]);
+    expect(host.submitEvents[0]?.item).toBe(host.beta);
     expect(host.open()).toBe(true);
   });
 

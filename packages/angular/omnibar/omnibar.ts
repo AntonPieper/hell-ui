@@ -864,9 +864,11 @@ export class HellOmnibarGroupLabel {
 }
 
 /**
- * A selectable result row. `[value]` is the payload emitted via `(select)`
- * and `(submit)` on the parent omnibar. Active state and click selection
- * are managed by the command palette/listbox pair; consumers control rendering.
+ * A selectable result row. `[value]` is the required payload emitted via
+ * `(select)` and `(submit)` on the parent omnibar; omitting it is a template
+ * type-checking error, so activation never carries an undefined payload.
+ * Active state and click selection are managed by the command palette/listbox
+ * pair; consumers control rendering.
  */
 @Directive({
   selector: 'button[hellOmnibarItem]',
@@ -896,8 +898,8 @@ export class HellOmnibarItem<T = unknown> {
     recipe: () => HELL_OMNIBAR_ITEM_RECIPE,
   });
 
-  /** Payload emitted via `(select)` and the parent `(submit)` when activated. */
-  readonly itemValue = input<T>(undefined as T, { alias: 'value' });
+  /** Required payload emitted via `(select)` and the parent `(submit)` when activated. */
+  readonly itemValue = input.required<T>({ alias: 'value' });
   /** Whether selecting this item closes the panel; defaults to true. */
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
   /** Whether the item is disabled for navigation and activation. Defaults to false. */

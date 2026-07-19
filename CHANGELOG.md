@@ -834,6 +834,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: The omnibar item payload input `value` on
+  `button[hellOmnibarItem]` is now required. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Omitting
+  the binding is now a template type-checking error (NG8008) instead of
+  silently carrying an undefined payload into the item's `(select)` output
+  and the parent `(submit)` event; both emit exactly the bound payload with
+  no undefined fallback. Bind `[value]` (or a static `value` attribute for
+  string payloads) on every omnibar item. Unit coverage and the omnibar API
+  report protect the required contract. Closes #253.
 - BREAKING: Renamed the public Tooltip vocabulary without compatibility
   aliases. The trigger directive `HellTooltipTrigger`
   (`button[hellTooltipTrigger], a[hellTooltipTrigger]`, exported as
