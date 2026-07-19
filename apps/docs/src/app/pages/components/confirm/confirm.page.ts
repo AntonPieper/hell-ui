@@ -137,7 +137,7 @@ import confirmDangerExampleCodeRaw from './examples/danger.example.ts?raw' with 
         component capture its Prompt Interface and expose a navigation method; the environment
         guard then delegates without trying to inject a view-owned factory itself:
       </p>
-      <pre><code>{{ routeGuardRecipe }}</code></pre>
+      <pre tabindex="0"><code>{{ routeGuardRecipe }}</code></pre>
 
       <h2>API</h2>
       <h3><code>injectHellPrompt(): HellPrompt</code></h3>
