@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { HellButton } from '@hell-ui/angular/button';
 import { provideHellLabels } from '@hell-ui/angular/core';
-import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
+import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
 
 import {
   HELL_OVERFLOW_TOOLBAR_LABELS,
@@ -200,7 +200,7 @@ describe('hellResolveToolbarOverflow', () => {
 });
 
 @Component({
-  imports: [HellButton, HellTooltip, HellTooltipTrigger, ...HELL_TOOLBAR_IMPORTS],
+  imports: [HellButton, HellTooltip, HellTooltipSurface, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div hellToolbar label="Formatting actions" [orientation]="orientation()" ui="rounded-hell-md">
       <button hellButton hellToolbarItem type="button" (click)="run('bold')">Bold</button>
@@ -211,12 +211,12 @@ describe('hellResolveToolbarOverflow', () => {
         hellButton
         hellToolbarItem
         type="button"
-        [hellTooltipTrigger]="shareHint"
+        [hellTooltip]="shareHint"
         (click)="run('share')"
       >
         Share
       </button>
-      <ng-template #shareHint><span hellTooltip>Share this document</span></ng-template>
+      <ng-template #shareHint><span hellTooltipSurface>Share this document</span></ng-template>
     </div>
   `,
 })
@@ -251,7 +251,7 @@ describe('HellToolbar', () => {
 
   afterEach(() => {
     while (mounted.length) mounted.pop()?.remove();
-    cleanupPortaledTestElements('[hellTooltip]');
+    cleanupPortaledTestElements('[hellTooltipSurface]');
   });
 
   const create = async () => {
@@ -319,7 +319,7 @@ describe('HellToolbar', () => {
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
 
     expect(buttons[0].className).toContain('inline-flex');
-    expect(fixture.debugElement.queryAll(By.directive(HellTooltipTrigger))).toHaveLength(1);
+    expect(fixture.debugElement.queryAll(By.directive(HellTooltip))).toHaveLength(1);
     buttons[0].click();
     buttons[2].click();
     expect(fixture.componentInstance.events).toEqual(['bold', 'share']);

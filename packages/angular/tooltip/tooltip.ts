@@ -9,18 +9,18 @@ const HELL_TOOLTIP_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 /**
- * Trigger for an `ng-template` tooltip. Bind `[hellTooltipTrigger]` to the
+ * Trigger for an `ng-template` tooltip. Bind `[hellTooltip]` to the
  * template and pass placement, delay, overflow, disabled, and hoverable-content
  * options through to ng-primitives.
  */
 @Directive({
-  selector: 'button[hellTooltipTrigger], a[hellTooltipTrigger]',
-  exportAs: 'hellTooltipTrigger',
+  selector: 'button[hellTooltip], a[hellTooltip]',
+  exportAs: 'hellTooltip',
   hostDirectives: [
     {
       directive: NgpTooltipTrigger,
       inputs: [
-        'ngpTooltipTrigger:hellTooltipTrigger',
+        'ngpTooltipTrigger:hellTooltip',
         'ngpTooltipTriggerPlacement:placement',
         'ngpTooltipTriggerOffset:offset',
         'ngpTooltipTriggerShowDelay:showDelay',
@@ -41,7 +41,7 @@ const HELL_TOOLTIP_RECIPE = {
     '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
   },
 })
-export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
+export class HellTooltip extends HellNativeInteractiveDisabledGuard {
   /** Underlying ng-primitives tooltip trigger state. */
   protected readonly trigger = inject(NgpTooltipTrigger);
   private readonly triggerState = injectTooltipTriggerState();
@@ -79,7 +79,7 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
  * Hell Floating Scope so hoverable tooltip content counts as an inside target.
  */
 @Directive({
-  selector: '[hellTooltip]',
+  selector: '[hellTooltipSurface]',
   hostDirectives: [NgpTooltip],
   host: {
     '[class]': "part('root')",
@@ -88,7 +88,7 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
     role: 'tooltip',
   },
 })
-export class HellTooltip {
+export class HellTooltipSurface {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
@@ -97,7 +97,7 @@ export class HellTooltip {
     defaultPart: 'root',
     recipe: () => HELL_TOOLTIP_RECIPE,
   });
-  /** Trigger state of the associated `hellTooltipTrigger`. */
+  /** Trigger state of the associated `hellTooltip`. */
   protected readonly tooltipTrigger = injectTooltipTriggerState();
 
   constructor() {

@@ -2165,7 +2165,7 @@ import { HellSwitch, HellNativeSwitch, type HellSwitchUi } from '${packageName}/
 import { HellBadge, HellChip, HellKbd } from '${packageName}/chip';
 import { HELL_TABS_IMPORTS } from '${packageName}/tabs';
 import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '${packageName}/toggle';
-import { HellTooltip, HellTooltipTrigger } from '${packageName}/tooltip';
+import { HellTooltip, HellTooltipSurface } from '${packageName}/tooltip';
 import { HELL_COMBOBOX_IMPORTS } from '${packageName}/combobox';
 
 const primitiveRootPart: HellAvatarPart = 'root';
@@ -2230,7 +2230,7 @@ interface MenuChannel {
     HellToggleGroup,
     HellToggleGroupItem,
     HellTooltip,
-    HellTooltipTrigger,
+    HellTooltipSurface,
     ...HELL_COMBOBOX_IMPORTS,
   ],
   template: \`
@@ -2317,9 +2317,9 @@ interface MenuChannel {
       <div hellPopover [ui]="popoverUi">Summary</div>
     </ng-template>
 
-    <button type="button" [hellTooltipTrigger]="tooltip">Hint</button>
+    <button type="button" [hellTooltip]="tooltip">Hint</button>
     <ng-template #tooltip>
-      <span hellTooltip [ui]="tooltipUi">Helpful hint</span>
+      <span hellTooltipSurface [ui]="tooltipUi">Helpful hint</span>
     </ng-template>
 
     <button
