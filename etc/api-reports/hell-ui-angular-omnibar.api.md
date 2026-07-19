@@ -86,12 +86,14 @@ export class HellOmnibarGroup {
     readonly label: _angular_core.InputSignal<string>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroup, "[hellOmnibarGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    protected readonly visibleLabel: _angular_core.Signal<HellOmnibarGroupLabel | undefined>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroup, "[hellOmnibarGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, {}, ["visibleLabel"], never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarGroup, never>;
 }
 
 // @public
 export class HellOmnibarGroupLabel {
+    readonly id: string;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroupLabel, "[hellOmnibarGroupLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
