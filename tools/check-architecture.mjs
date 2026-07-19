@@ -92,6 +92,7 @@ function main() {
   checkComponentContract();
   checkNativeNumberInputContract();
   checkSlimAppShellContract();
+  checkTooltipVocabularyContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableAdapterBoundaryContract();
@@ -1636,6 +1637,55 @@ function decoratedClassModules(source) {
   }));
 }
 
+function checkTooltipVocabularyContract() {
+  const rel = 'packages/angular/tooltip/tooltip.ts';
+  const source = readFile(join(root, rel));
+  const requiredFragments = [
+    "selector: 'button[hellTooltip], a[hellTooltip]'",
+    "exportAs: 'hellTooltip'",
+    'export class HellTooltip ',
+    "selector: '[hellTooltipSurface]'",
+    'export class HellTooltipSurface ',
+  ];
+  const retiredFragments = ["selector: '[hellTooltip]'"];
+
+  for (const fragment of requiredFragments) {
+    if (!source.includes(fragment)) {
+      failures.push(`${rel} canonical Tooltip vocabulary is missing ${fragment}`);
+    }
+  }
+  for (const fragment of retiredFragments) {
+    if (source.includes(fragment)) {
+      failures.push(`${rel} still exposes the retired Tooltip surface ${fragment}`);
+    }
+  }
+
+  const retiredNamePattern = /\b[hH]ellTooltipTrigger\b/g;
+  const files = [
+    ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
+    ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
+    ...walk(join(root, 'e2e')).filter((path) => /\.(?:json|ts)$/.test(path)),
+    ...walk(join(root, 'tools')).filter(
+      (path) =>
+        /\.(?:json|mjs|ts)$/.test(path) &&
+        path !== join(root, 'tools/check-architecture.mjs'),
+    ),
+    ...walk(join(root, 'etc/api-reports')).filter((path) => path.endsWith('.md')),
+    join(root, 'README.md'),
+    join(root, libraryRoot, 'README.md'),
+  ];
+
+  for (const file of files) {
+    const fileSource = readFile(file);
+    for (const match of fileSource.matchAll(retiredNamePattern)) {
+      const lineNumber = fileSource.slice(0, match.index).split('\n').length;
+      failures.push(
+        `Tooltip vocabulary ${relative(root, file)}:${lineNumber} still uses retired ${match[0]}; the trigger is hellTooltip and the surface is hellTooltipSurface`,
+      );
+    }
+  }
+}
+
 function checkNativeButtonSelectorContract() {
   const files = libraryProductionTsFiles().map((file) => join(root, file));
 
@@ -1666,7 +1716,7 @@ function checkInteractiveTriggerSelectorContract() {
   const nativeInteractiveTriggers = new Set([
     'hellDialogTrigger',
     'hellPopoverTrigger',
-    'hellTooltipTrigger',
+    'hellTooltip',
     'hellMenuTrigger',
     'hellFlyoutTrigger',
   ]);
@@ -1678,7 +1728,7 @@ function checkInteractiveTriggerSelectorContract() {
     for (const module of decoratedClassModules(source)) {
       const selector = /selector:\s*['"]([^'"]+)['"]/.exec(module.moduleSource)?.[1];
       if (!selector) continue;
-      const trigger = [...nativeInteractiveTriggers].find((name) => selector.includes(name));
+      const trigger = [...nativeInteractiveTriggers].find((name) => selector.includes(`[${name}]`));
       if (!trigger) continue;
 
       const unsafeArms = selector

@@ -112,7 +112,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <h2>With tooltip</h2>
       <p>
         Icon-only toggle group items carry no visible label, so pair each one with a
-        <code>hellTooltipTrigger</code>/<code>hellTooltip</code> pair from
+        <code>hellTooltip</code>/<code>hellTooltipSurface</code> pair from
         <code>@hell-ui/angular/tooltip</code> and an <code>aria-label</code> — a common shape for a
         compact formatting toolbar.
       </p>

@@ -834,6 +834,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Renamed the public Tooltip vocabulary without compatibility
+  aliases. The trigger directive `HellTooltipTrigger`
+  (`button[hellTooltipTrigger], a[hellTooltipTrigger]`, exported as
+  `hellTooltipTrigger`) is now `HellTooltip` (`button[hellTooltip],
+  a[hellTooltip]`, exported as `hellTooltip`), and the consumer-authored
+  surface previously named `HellTooltip` (`[hellTooltip]`) is now
+  `HellTooltipSurface` (`[hellTooltipSurface]`). First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Bind
+  `[hellTooltip]` to the tooltip template on the trigger and mark the rendered
+  surface element with `hellTooltipSurface`; template-backed behavior, trigger
+  inputs and `openChange`, `open()` / `show()` / `hide()`, and the surface's
+  single-root `ui` Part Style Map are otherwise unchanged. No selector, class,
+  export, directive array, or migration shim preserves either retired name,
+  and architecture checks now reject them. Closes #239.
 - BREAKING: Removed the 26 deprecated `HELL_*_DIRECTIVES` import-tuple aliases
   from `accordion`, `alert`, `app-shell`, `avatar`, `breadcrumbs`, `card`,
   `chip`, `combobox`, `control-group`, `dialog`, `empty-state`, `field`,

@@ -2,7 +2,7 @@ import { Component, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpTooltipTrigger } from 'ng-primitives/tooltip';
 
-import { HellTooltip, HellTooltipTrigger } from './tooltip';
+import { HellTooltip, HellTooltipSurface } from './tooltip';
 
 beforeAll(() => {
   const elementPrototype = Element.prototype as Element & {
@@ -14,30 +14,30 @@ beforeAll(() => {
 });
 
 @Component({
-  imports: [HellTooltip, HellTooltipTrigger],
+  imports: [HellTooltipSurface, HellTooltip],
   template: `
     <ng-template #tooltip>
-      <div hellTooltip>Tooltip</div>
+      <div hellTooltipSurface>Tooltip</div>
     </ng-template>
-    <button id="disabled-button" type="button" [hellTooltipTrigger]="tooltip" disabled>
+    <button id="disabled-button" type="button" [hellTooltip]="tooltip" disabled>
       Button
     </button>
-    <a id="disabled-anchor" href="#tooltip" [hellTooltipTrigger]="tooltip" disabled>Anchor</a>
+    <a id="disabled-anchor" href="#tooltip" [hellTooltip]="tooltip" disabled>Anchor</a>
   `,
 })
 class DisabledTooltipTriggerHost {}
 
 @Component({
-  imports: [HellTooltip, HellTooltipTrigger],
+  imports: [HellTooltipSurface, HellTooltip],
   template: `
     <div #tooltipContainer></div>
     <ng-template #tooltip>
-      <div hellTooltip ui="rounded-hell-pill bg-hell-primary">Tooltip</div>
+      <div hellTooltipSurface ui="rounded-hell-pill bg-hell-primary">Tooltip</div>
     </ng-template>
     <button
       id="trigger"
       type="button"
-      [hellTooltipTrigger]="tooltip"
+      [hellTooltip]="tooltip"
       [container]="tooltipContainer"
       [showDelay]="0"
       (openChange)="openEvents.push($event)"
@@ -48,11 +48,11 @@ class DisabledTooltipTriggerHost {}
 })
 class TooltipUiHost {
   readonly primitiveTrigger = viewChild.required(NgpTooltipTrigger);
-  readonly hellTrigger = viewChild.required(HellTooltipTrigger);
+  readonly hellTrigger = viewChild.required(HellTooltip);
   readonly openEvents: boolean[] = [];
 }
 
-describe('HellTooltipTrigger', () => {
+describe('HellTooltip', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DisabledTooltipTriggerHost, TooltipUiHost],
@@ -60,7 +60,7 @@ describe('HellTooltipTrigger', () => {
   });
 
   afterEach(() => {
-    cleanupPortaledTestElements('[hellTooltip]');
+    cleanupPortaledTestElements('[hellTooltipSurface]');
   });
 
   it('reflects disabled semantics on buttons and anchors', () => {
@@ -134,7 +134,7 @@ async function waitForTooltip(fixture: {
   const timeout = Date.now() + 10_000;
   while (Date.now() < timeout) {
     fixture.detectChanges();
-    const tooltip = root.querySelector<HTMLElement>('[hellTooltip]');
+    const tooltip = root.querySelector<HTMLElement>('[hellTooltipSurface]');
     if (tooltip) return tooltip;
     await nextFrame();
     fixture.detectChanges();

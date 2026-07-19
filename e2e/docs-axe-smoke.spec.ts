@@ -253,7 +253,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'tooltip',
     path: '/components/tooltip',
     heading: 'Tooltip',
-    include: ['main', '[hellTooltip][data-slot="root"]'],
+    include: ['main', '[hellTooltipSurface][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Top' }).focus();
       await expect(page.getByRole('tooltip', { name: "I'm on top" })).toBeVisible();
