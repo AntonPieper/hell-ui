@@ -27,18 +27,37 @@ export interface HellTypedValueCommitResult<TOutput> {
 }
 
 /**
- * Adapter boundary for text inputs that edit a typed external value. It keeps
- * parsing, stable formatting, external equality, and output mapping owned by
- * the concrete date/time component while the state machine owns draft policy.
+ * Value half of the adapter boundary for text inputs that edit a typed
+ * external value. It keeps parsing, stable formatting, and external equality
+ * owned by the concrete date/time component while the state machine owns
+ * draft policy.
  */
-export interface HellTypedValueInputAdapter<TValue, TExternal, TOutput = TValue | null> {
+export interface HellTypedValueInputValueAdapter<TValue, TExternal> {
   readonly external: () => TExternal;
   readonly parseExternal: (external: TExternal) => TValue | null;
   readonly parseText: (text: string) => HellTypedValueParseResult<TValue>;
   readonly format: (value: TValue | null) => string;
-  readonly toOutput?: (value: TValue | null) => TOutput | null;
   readonly externalChanged?: (base: TExternal, current: TExternal) => boolean;
 }
+
+/**
+ * Output half of the adapter boundary. Committed values pass to callers as
+ * `TOutput`, which defaults to the value type. The `toOutput` mapper is
+ * optional only while the value type is assignable to the output type;
+ * a differing output type must supply an explicit mapper instead of relying
+ * on a manufactured identity cast.
+ */
+export type HellTypedValueOutputAdapter<TValue, TOutput> = [TValue] extends [TOutput]
+  ? { readonly toOutput?: (value: TValue | null) => TOutput | null }
+  : { readonly toOutput: (value: TValue | null) => TOutput | null };
+
+/**
+ * Adapter boundary for text inputs that edit a typed external value: the
+ * value half plus the output-mapping half.
+ */
+export type HellTypedValueInputAdapter<TValue, TExternal, TOutput = TValue> =
+  HellTypedValueInputValueAdapter<TValue, TExternal> &
+    HellTypedValueOutputAdapter<TValue, TOutput>;
 
 /** Valid parse helper. `null` is a real value: a clear commit. */
 export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue> {
@@ -55,7 +74,7 @@ export function hellInvalidTypedValue(): HellTypedValueInvalidParse {
  * invalid draft state, commit parsed values on blur/Enter, support nullable
  * clear commits, and drop drafts when external value changes.
  */
-export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null> {
+export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue> {
   private readonly local = signal<{
     readonly base: TExternal;
     readonly value: TValue | null;
@@ -132,7 +151,13 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null
   }
 
   private toOutput(value: TValue | null): TOutput | null {
-    return this.adapter.toOutput?.(value) ?? (value as unknown as TOutput | null);
+    const mapOutput = this.adapter.toOutput;
+    if (mapOutput) return mapOutput(value);
+    // `HellTypedValueOutputAdapter` only permits omitting `toOutput` when
+    // `TValue` is assignable to `TOutput`, so the identity fallback is sound.
+    // TypeScript cannot carry that conditional-type evidence into a generic
+    // body, so the contract-guarded widening happens here and nowhere else.
+    return value as (TValue & TOutput) | null;
   }
 
   private externalChanged(base: TExternal, current: TExternal): boolean {
