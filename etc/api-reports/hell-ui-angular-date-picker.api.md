@@ -6,18 +6,19 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/date-picker';
 import { InjectionToken } from '@angular/core';
 
 // @public
-export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels>;
+export const HELL_DATE_PICKER_LABELS: InjectionToken<HellLabels<HellDatePickerLabels>>;
 
 // @public
 export class HellDatePicker {
     protected readonly label: _angular_core.Signal<string>;
-    protected readonly labels: HellDatePickerLabels;
+    protected readonly labels: HellLabels<HellDatePickerLabels>;
     readonly locale: _angular_core.InputSignal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
@@ -39,7 +40,7 @@ export interface HellDatePickerLabels {
 export class HellDatePickerNextYear {
     constructor();
     protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly labels: HellDatePickerLabels;
+    protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected shift(months: number): void;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerNextYear, "button[hellDatePickerNextYear]", never, {}, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerNextYear, never>;
@@ -52,7 +53,7 @@ export type HellDatePickerPart = 'root' | 'header' | 'nav' | 'navButton' | 'labe
 export class HellDatePickerPreviousYear {
     constructor();
     protected readonly disabled: _angular_core.Signal<boolean>;
-    protected readonly labels: HellDatePickerLabels;
+    protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected shift(months: number): void;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerPreviousYear, "button[hellDatePickerPreviousYear]", never, {}, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerPreviousYear, never>;
@@ -64,7 +65,7 @@ export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 // @public
 export class HellDateRangePicker {
     protected readonly label: _angular_core.Signal<string>;
-    protected readonly labels: HellDatePickerLabels;
+    protected readonly labels: HellLabels<HellDatePickerLabels>;
     readonly locale: _angular_core.InputSignal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     protected readonly rangeComplete: _angular_core.Signal<boolean>;

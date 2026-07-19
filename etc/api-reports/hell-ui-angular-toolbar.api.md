@@ -7,6 +7,7 @@
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellButtonVariant } from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
@@ -16,7 +17,7 @@ import * as i2 from 'ng-primitives/roving-focus';
 import { InjectionToken } from '@angular/core';
 
 // @public
-export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellOverflowToolbarLabels>;
+export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellLabels<HellOverflowToolbarLabels>>;
 
 // @public
 export const HELL_TOOLBAR_IMPORTS: readonly [typeof HellToolbar, typeof HellToolbarItem, typeof HellOverflowToolbar, typeof HellToolbarAction, typeof HellToolbarSeparator, typeof HellToolbarWidget];

@@ -6,13 +6,14 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { Signal } from '@angular/core';
 
 // @public
-export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels>;
+export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellLabels<HellAudioPlayerLabels>>;
 
 // @public
 export class HellAudioPlayer {
@@ -47,7 +48,7 @@ export class HellAudioPlayer {
     // (undocumented)
     protected readonly interim: Signal<string>;
     // (undocumented)
-    protected readonly labels: HellAudioPlayerLabels;
+    protected readonly labels: HellLabels<HellAudioPlayerLabels>;
     readonly lang: _angular_core.InputSignal<string | null>;
     // (undocumented)
     protected readonly muted: _angular_core.WritableSignal<boolean>;

@@ -5,6 +5,7 @@
 ```ts
 
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/breadcrumbs';
@@ -14,12 +15,12 @@ import { InjectionToken } from '@angular/core';
 export const HELL_BREADCRUMBS_IMPORTS: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];
 
 // @public
-export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels>;
+export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellLabels<HellBreadcrumbLabels>>;
 
 // @public
 export class HellBreadcrumbEllipsis {
     readonly ariaLabel: i0.InputSignal<string | null>;
-    protected readonly labels: HellBreadcrumbLabels;
+    protected readonly labels: HellLabels<HellBreadcrumbLabels>;
     protected nativeButtonType(): 'button' | null;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;

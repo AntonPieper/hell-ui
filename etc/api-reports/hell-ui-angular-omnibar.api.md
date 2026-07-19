@@ -7,6 +7,7 @@
 import * as _angular_core from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
@@ -16,7 +17,7 @@ import { ScrollStrategy } from '@angular/cdk/overlay';
 export const HELL_OMNIBAR_IMPORTS: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
 
 // @public
-export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels>;
+export const HELL_OMNIBAR_LABELS: InjectionToken<HellLabels<HellOmnibarLabels>>;
 
 // @public
 export class HellOmnibar {
@@ -32,7 +33,7 @@ export class HellOmnibar {
     protected readonly inputId: string;
     protected readonly isEmpty: _angular_core.Signal<boolean>;
     protected readonly isOpen: _angular_core.Signal<boolean>;
-    protected readonly labels: HellOmnibarLabels;
+    protected readonly labels: HellLabels<HellOmnibarLabels>;
     readonly minPanelWidth: _angular_core.InputSignal<number>;
     protected onBlur(event: FocusEvent): void;
     protected onClearClick(event: MouseEvent): void;

@@ -6,6 +6,7 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
@@ -15,7 +16,7 @@ import { TemplateRef } from '@angular/core';
 export const HELL_TOAST_IMPORTS: readonly [typeof HellToaster];
 
 // @public
-export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels>;
+export const HELL_TOAST_LABELS: InjectionToken<HellLabels<HellToastLabels>>;
 
 // @public
 export interface HellToastAction {

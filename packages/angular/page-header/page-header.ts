@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Directive, computed, contentChild, contentChildren, inject, input, output } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { hellCreateLabels, hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the page-header entry point. */
@@ -10,7 +10,7 @@ export interface HellPageHeaderLabels {
 }
 
 /** Injection token resolving to the effective page-header labels. */
-export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellPageHeaderLabels> = hellCreateLabels<HellPageHeaderLabels>(
+export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellLabels<HellPageHeaderLabels>> = hellCreateLabels<HellPageHeaderLabels>(
   'HELL_PAGE_HEADER_LABELS',
   {
     back: 'Go back',

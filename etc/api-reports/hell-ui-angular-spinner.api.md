@@ -6,17 +6,18 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 
 // @public
-export const HELL_SPINNER_LABELS: InjectionToken<HellSpinnerLabels>;
+export const HELL_SPINNER_LABELS: InjectionToken<HellLabels<HellSpinnerLabels>>;
 
 // @public
 export class HellSpinner {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    protected readonly labels: HellSpinnerLabels;
+    protected readonly labels: HellLabels<HellSpinnerLabels>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

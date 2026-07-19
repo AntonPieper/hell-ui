@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, booleanAttribute, computed, effect, inject, input, output } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { hellCreateLabels, hellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
@@ -29,7 +29,7 @@ export interface HellSaveBarLabels {
 }
 
 /** Injection token resolving to the effective save-bar labels. */
-export const HELL_SAVE_BAR_LABELS: InjectionToken<HellSaveBarLabels> = hellCreateLabels<HellSaveBarLabels>('HELL_SAVE_BAR_LABELS', {
+export const HELL_SAVE_BAR_LABELS: InjectionToken<HellLabels<HellSaveBarLabels>> = hellCreateLabels<HellSaveBarLabels>('HELL_SAVE_BAR_LABELS', {
   message: 'You have unsaved changes',
   save: 'Save',
   discard: 'Discard',

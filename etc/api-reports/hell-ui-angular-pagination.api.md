@@ -6,6 +6,7 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/pagination';
@@ -15,7 +16,7 @@ import { InjectionToken } from '@angular/core';
 export const HELL_PAGINATION_IMPORTS: readonly [typeof HellPagination, typeof HellPageLink, typeof HellPaginationStrip];
 
 // @public
-export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels>;
+export const HELL_PAGINATION_LABELS: InjectionToken<HellLabels<HellPaginationLabels>>;
 
 // @public
 export class HellPageLink {
@@ -62,7 +63,7 @@ export class HellPaginationStrip {
         root: string;
     };
     protected currentPage(): number;
-    protected readonly labels: HellPaginationLabels;
+    protected readonly labels: HellLabels<HellPaginationLabels>;
     protected pageCount(): number;
     protected readonly pages: _angular_core.Signal<number[]>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellPaginationStripPart>;

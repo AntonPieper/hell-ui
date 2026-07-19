@@ -25,7 +25,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellSlider } from '@hell-ui/angular/slider';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 import {
@@ -74,7 +74,7 @@ export interface HellAudioPlayerLabels {
 }
 
 /** Injection token resolving to the effective audio player labels. */
-export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels> = hellCreateLabels<HellAudioPlayerLabels>('HELL_AUDIO_PLAYER_LABELS', {
+export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellLabels<HellAudioPlayerLabels>> = hellCreateLabels<HellAudioPlayerLabels>('HELL_AUDIO_PLAYER_LABELS', {
   play: 'Play',
   pause: 'Pause',
   seek: 'Seek',

@@ -34,7 +34,7 @@ import {
 import { injectInputState } from 'ng-primitives/input';
 
 import {
-  hellCreateLabels,
+  hellCreateLabels, type HellLabels,
   hellInvalidTypedValue,
   hellPartStyler,
   hellTypedValue,
@@ -64,7 +64,7 @@ export interface HellNumberInputLabels {
 }
 
 /** Injection token resolving to the effective Number Input labels. */
-export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels> =
+export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellLabels<HellNumberInputLabels>> =
   hellCreateLabels<HellNumberInputLabels>('HELL_NUMBER_INPUT_LABELS', {
     increment: 'Increase value',
     decrement: 'Decrease value',

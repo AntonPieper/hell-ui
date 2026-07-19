@@ -1,6 +1,6 @@
 import {
   Directive, ElementRef, inject, input } from '@angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpBreadcrumbs,
@@ -20,7 +20,7 @@ export interface HellBreadcrumbLabels {
 }
 
 /** Injection token resolving to the effective breadcrumbs labels. */
-export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels> = hellCreateLabels<HellBreadcrumbLabels>('HELL_BREADCRUMBS_LABELS', {
+export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellLabels<HellBreadcrumbLabels>> = hellCreateLabels<HellBreadcrumbLabels>('HELL_BREADCRUMBS_LABELS', {
   showHiddenNavigation: 'Show hidden navigation',
 });
 

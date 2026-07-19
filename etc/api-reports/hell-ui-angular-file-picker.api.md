@@ -6,12 +6,13 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 
 // @public
-export const HELL_FILE_PICKER_LABELS: InjectionToken<HellFilePickerLabels>;
+export const HELL_FILE_PICKER_LABELS: InjectionToken<HellLabels<HellFilePickerLabels>>;
 
 // @public
 export class HellFilePicker implements OnDestroy {
