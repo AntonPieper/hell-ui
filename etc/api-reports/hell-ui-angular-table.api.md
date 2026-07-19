@@ -7,6 +7,7 @@
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
@@ -16,7 +17,7 @@ import { OnDestroy } from '@angular/core';
 export const HELL_TABLE_UTILITIES_IMPORTS: readonly [typeof HellTableContainer, typeof HellTable, typeof HellTableHead, typeof HellTableBody, typeof HellTableRow, typeof HellTableRowIgnore, typeof HellTableRowAction, typeof HellTableSelectionCell, typeof HellTableRowCheckbox, typeof HellTableRowRadio, typeof HellTableHeaderCell, typeof HellTableSortTrigger, typeof HellTableCell, typeof HellTableResizeHandle];
 
 // @public
-export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellTableUtilitiesLabels>;
+export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellLabels<HellTableUtilitiesLabels>>;
 
 // @public
 class HellTable {
@@ -163,7 +164,7 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     protected readonly ariaValueNow: _angular_core.WritableSignal<number | null>;
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
     protected isDisabled(): boolean;
-    protected readonly labels: HellTableUtilitiesLabels;
+    protected readonly labels: HellLabels<HellTableUtilitiesLabels>;
     readonly minWidth: _angular_core.InputSignalWithTransform<number, unknown>;
     protected nativeButtonType(): 'button' | null;
     ngAfterViewInit(): void;

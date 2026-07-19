@@ -6,13 +6,14 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellTimeValue } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 
 // @public
-export const HELL_TIME_PICKER_LABELS: InjectionToken<HellTimePickerLabels>;
+export const HELL_TIME_PICKER_LABELS: InjectionToken<HellLabels<HellTimePickerLabels>>;
 
 // @public
 export class HellTimePicker {
@@ -21,7 +22,7 @@ export class HellTimePicker {
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly formattedValue: _angular_core.Signal<string>;
     protected increaseUnitLabel(unit: keyof HellTimeValue): string;
-    protected readonly labels: HellTimePickerLabels;
+    protected readonly labels: HellLabels<HellTimePickerLabels>;
     protected readonly minutePresets: readonly [0, 15, 30, 45];
     protected onSpinKeydown(event: KeyboardEvent, unit: keyof HellTimeValue): void;
     protected pad(value: number): string;

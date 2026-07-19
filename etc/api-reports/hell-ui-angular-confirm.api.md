@@ -5,11 +5,12 @@
 ```ts
 
 import { HellButtonVariant } from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
 import { Placement } from '@floating-ui/dom';
 
 // @public
-export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels>;
+export const HELL_CONFIRM_LABELS: InjectionToken<HellLabels<HellConfirmLabels>>;
 
 // @public
 export interface HellConfirmLabels {

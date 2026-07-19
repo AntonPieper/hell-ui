@@ -14,7 +14,7 @@ import {
   signal,
 } from '@angular/core';
 import {
-  hellCreateLabels,
+  hellCreateLabels, type HellLabels,
   hellPartStyler,
   HellChipVariant,
   HellOrientation,
@@ -38,7 +38,7 @@ export interface HellChipLabels {
 }
 
 /** Injection token resolving to the effective chip labels. */
-export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels> = hellCreateLabels<HellChipLabels>('HELL_CHIP_LABELS', {
+export const HELL_CHIP_LABELS: InjectionToken<HellLabels<HellChipLabels>> = hellCreateLabels<HellChipLabels>('HELL_CHIP_LABELS', {
   remove: (label) => `Remove ${label}`,
   removeChip: 'Remove',
 });

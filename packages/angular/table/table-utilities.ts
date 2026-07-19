@@ -1,4 +1,4 @@
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HellResizePairInteractionController,
@@ -51,7 +51,7 @@ export interface HellTableUtilitiesLabels {
 }
 
 /** Injection token resolving to the effective table utilities labels. */
-export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellTableUtilitiesLabels> = hellCreateLabels<HellTableUtilitiesLabels>('HELL_TABLE_UTILITIES_LABELS', {
+export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellLabels<HellTableUtilitiesLabels>> = hellCreateLabels<HellTableUtilitiesLabels>('HELL_TABLE_UTILITIES_LABELS', {
   resizeColumn: 'Resize column',
 });
 

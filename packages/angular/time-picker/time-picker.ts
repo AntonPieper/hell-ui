@@ -9,7 +9,7 @@ import {
   model,
 } from '@angular/core';
 import {
-  hellCreateLabels,
+  hellCreateLabels, type HellLabels,
   hellPartStyler,
   type HellRecipe,
   type HellTimeValue,
@@ -44,7 +44,7 @@ export interface HellTimePickerLabels {
 }
 
 /** Injection token resolving to the effective time picker labels. */
-export const HELL_TIME_PICKER_LABELS: InjectionToken<HellTimePickerLabels> =
+export const HELL_TIME_PICKER_LABELS: InjectionToken<HellLabels<HellTimePickerLabels>> =
   hellCreateLabels<HellTimePickerLabels>('HELL_TIME_PICKER_LABELS', {
     hours: 'Hours',
     minutes: 'Minutes',

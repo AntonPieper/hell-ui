@@ -32,7 +32,7 @@ import {
 } from '@hell-ui/angular/internal/core';
 import { HellChipSetController } from '@hell-ui/angular/internal/chip';
 import { HellFloatingDismissController, hellOutsideFocus } from '@hell-ui/angular/internal/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { HellChipInput } from '@hell-ui/angular/chip';
 import { HellSearch, HellSearchClear } from '@hell-ui/angular/input';
@@ -60,7 +60,7 @@ export interface HellOmnibarLabels {
 }
 
 /** Injection token resolving to the effective omnibar labels. */
-export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels> = hellCreateLabels<HellOmnibarLabels>('HELL_OMNIBAR_LABELS', {
+export const HELL_OMNIBAR_LABELS: InjectionToken<HellLabels<HellOmnibarLabels>> = hellCreateLabels<HellOmnibarLabels>('HELL_OMNIBAR_LABELS', {
   clearSearch: 'Clear search',
 });
 

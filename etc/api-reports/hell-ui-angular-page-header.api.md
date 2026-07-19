@@ -5,6 +5,7 @@
 ```ts
 
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
@@ -14,7 +15,7 @@ import { InjectionToken } from '@angular/core';
 export const HELL_PAGE_HEADER_IMPORTS: readonly [typeof HellPageHeader, typeof HellPageHeaderBack, typeof HellPageHeaderLeading, typeof HellPageHeaderTitle, typeof HellPageHeaderMeta, typeof HellPageHeaderDescription, typeof HellPageHeaderToolbar];
 
 // @public
-export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellPageHeaderLabels>;
+export const HELL_PAGE_HEADER_LABELS: InjectionToken<HellLabels<HellPageHeaderLabels>>;
 
 // @public
 export class HellPageHeader {

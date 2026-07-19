@@ -1,6 +1,6 @@
 import { Directive, inject, input } from '@angular/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken } from '@angular/core';
 
@@ -11,7 +11,7 @@ export interface HellSpinnerLabels {
 }
 
 /** Injection token resolving to the effective spinner labels. */
-export const HELL_SPINNER_LABELS: InjectionToken<HellSpinnerLabels> = hellCreateLabels<HellSpinnerLabels>('HELL_SPINNER_LABELS', {
+export const HELL_SPINNER_LABELS: InjectionToken<HellLabels<HellSpinnerLabels>> = hellCreateLabels<HellSpinnerLabels>('HELL_SPINNER_LABELS', {
   loading: 'Loading',
 });
 

@@ -6,6 +6,7 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
@@ -13,7 +14,7 @@ import { InjectionToken } from '@angular/core';
 import { OutputEmitterRef } from '@angular/core';
 
 // @public
-export const HELL_SAVE_BAR_LABELS: InjectionToken<HellSaveBarLabels>;
+export const HELL_SAVE_BAR_LABELS: InjectionToken<HellLabels<HellSaveBarLabels>>;
 
 // @public
 export class HellSaveBar {
@@ -23,7 +24,7 @@ export class HellSaveBar {
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly discarded: OutputEmitterRef<void>;
     protected readonly effectiveMessage: _angular_core.Signal<string>;
-    protected readonly labels: HellSaveBarLabels;
+    protected readonly labels: HellLabels<HellSaveBarLabels>;
     readonly message: _angular_core.InputSignal<string | undefined>;
     readonly mode: _angular_core.InputSignal<HellSaveBarMode>;
     protected onDiscard(): void;

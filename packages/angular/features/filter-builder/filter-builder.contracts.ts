@@ -8,7 +8,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 
 import type { HellFilter, HellFilterFieldDescriptor } from './filter-builder.state';
 
@@ -107,7 +107,7 @@ export interface HellFilterBuilderLabels {
 }
 
 /** Injection token resolving to the effective Filter Builder labels. */
-export const HELL_FILTER_BUILDER_LABELS: InjectionToken<HellFilterBuilderLabels> =
+export const HELL_FILTER_BUILDER_LABELS: InjectionToken<HellLabels<HellFilterBuilderLabels>> =
   hellCreateLabels<HellFilterBuilderLabels>('HELL_FILTER_BUILDER_LABELS', {
     input: 'Filters',
     placeholder: 'Add filter',

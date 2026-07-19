@@ -1,4 +1,4 @@
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
 // eslint-disable-next-line no-restricted-imports -- Private HostBindings keep renderer coordination out of public directive declarations.
@@ -36,7 +36,7 @@ export interface HellAppShellLabels {
 }
 
 /** Injection token resolving to the effective app shell labels. */
-export const HELL_APP_SHELL_LABELS: InjectionToken<HellAppShellLabels> = hellCreateLabels<HellAppShellLabels>('HELL_APP_SHELL_LABELS', {
+export const HELL_APP_SHELL_LABELS: InjectionToken<HellLabels<HellAppShellLabels>> = hellCreateLabels<HellAppShellLabels>('HELL_APP_SHELL_LABELS', {
   expandSidebar: 'Expand sidebar',
   collapseSidebar: 'Collapse sidebar',
   showSecondaryPanel: 'Show secondary panel',

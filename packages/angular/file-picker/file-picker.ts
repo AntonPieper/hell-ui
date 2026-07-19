@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 
 import {
-  hellCreateLabels,
+  hellCreateLabels, type HellLabels,
   hellPartStyler,
   type HellRecipe,
   type HellUiInput,
@@ -62,7 +62,7 @@ export interface HellFilePickerLabels {
 }
 
 /** Injection token resolving to the effective File Picker labels. */
-export const HELL_FILE_PICKER_LABELS: InjectionToken<HellFilePickerLabels> =
+export const HELL_FILE_PICKER_LABELS: InjectionToken<HellLabels<HellFilePickerLabels>> =
   hellCreateLabels<HellFilePickerLabels>('HELL_FILE_PICKER_LABELS', {
     rejectedType: (name) => `${name} is not an accepted file type`,
     rejectedSize: (name, maxBytes) =>

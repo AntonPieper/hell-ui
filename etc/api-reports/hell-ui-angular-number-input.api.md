@@ -8,6 +8,7 @@ import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellTypedInputAdapter } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from '@hell-ui/angular/input';
@@ -27,7 +28,7 @@ export const HELL_NUMBER_INPUT_ADAPTER: InjectionToken<HellNumberInputAdapter>;
 export const HELL_NUMBER_INPUT_IMPORTS: readonly [typeof HellNumberInput, typeof HellNumberStep];
 
 // @public
-export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellNumberInputLabels>;
+export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellLabels<HellNumberInputLabels>>;
 
 // @public
 export class HellNumberInput implements ControlValueAccessor, Validator {

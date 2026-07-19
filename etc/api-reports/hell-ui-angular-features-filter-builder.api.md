@@ -5,6 +5,7 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import { InjectionToken } from '@angular/core';
@@ -13,7 +14,7 @@ import { InjectionToken } from '@angular/core';
 export const HELL_FILTER_BUILDER_IMPORTS: readonly [typeof HellFilterBuilder, typeof HellFilterBuilderEditor];
 
 // @public
-export const HELL_FILTER_BUILDER_LABELS: InjectionToken<HellFilterBuilderLabels>;
+export const HELL_FILTER_BUILDER_LABELS: InjectionToken<HellLabels<HellFilterBuilderLabels>>;
 
 // @public
 export interface HellFilter<TField extends string = string, TOperator extends string = string, TValue = unknown> {
