@@ -31,11 +31,22 @@ export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link
 export type HellChipVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
 
 // @public
-export function hellCreateLabels<T extends object>(description: string, defaults: T): InjectionToken<T>;
+export function hellCreateLabels<T extends object>(description: string, defaults: T): HellLabelToken<T>;
 
 export { HellFloatingElement }
 
 export { hellInvalidTypedValue }
+
+// @public
+export type HellLabelOverrides<V> = V extends HellLabels<object> ? Partial<Omit<V, 'ɵhellLabelBrand'>> : never;
+
+// @public
+export type HellLabels<T extends object> = T & {
+    readonly ɵhellLabelBrand: true;
+};
+
+// @public
+export type HellLabelToken<T extends object> = InjectionToken<HellLabels<T>>;
 
 // @public
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
@@ -214,7 +225,7 @@ export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
 
 // @public
-export function provideHellLabels<T extends object>(token: InjectionToken<T>, overrides: Partial<T>): Provider;
+export function provideHellLabels<V extends object>(token: InjectionToken<V>, overrides: HellLabelOverrides<V>): Provider;
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;

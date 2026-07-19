@@ -5,6 +5,7 @@
 ```ts
 
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
@@ -17,7 +18,7 @@ export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
 export const HELL_APP_SHELL_IMPORTS: readonly [typeof HellAppShell, typeof HellAppTopbar, typeof HellAppSidenav, typeof HellAppContent, typeof HellAppSecondary, typeof HellAppSecondaryBody, typeof HellNavItem, typeof HellNavItemIcon, typeof HellNavItemLabel, typeof HellNavItemTrailing, typeof HellNavSection, typeof HellNavSectionToggle, typeof HellNavSectionItems, typeof HellSidenavToggle, typeof HellSecondaryToggle];
 
 // @public
-export const HELL_APP_SHELL_LABELS: InjectionToken<HellAppShellLabels>;
+export const HELL_APP_SHELL_LABELS: InjectionToken<HellLabels<HellAppShellLabels>>;
 
 // @public
 export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX: number;

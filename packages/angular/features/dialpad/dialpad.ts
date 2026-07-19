@@ -11,7 +11,7 @@ import { ChangeDetectionStrategy,
   signal, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken } from '@angular/core';
 
@@ -32,7 +32,7 @@ export interface HellDialpadLabels {
 }
 
 /** Injection token resolving to the effective dialpad labels. */
-export const HELL_DIALPAD_LABELS: InjectionToken<HellDialpadLabels> = hellCreateLabels<HellDialpadLabels>('HELL_DIALPAD_LABELS', {
+export const HELL_DIALPAD_LABELS: InjectionToken<HellLabels<HellDialpadLabels>> = hellCreateLabels<HellDialpadLabels>('HELL_DIALPAD_LABELS', {
   dialpad: 'Dial pad',
   backspace: 'Backspace',
   call: 'Call',

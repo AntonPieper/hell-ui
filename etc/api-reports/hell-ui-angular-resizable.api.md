@@ -8,6 +8,7 @@ import { AfterContentInit } from '@angular/core';
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
@@ -17,7 +18,7 @@ import { InjectionToken } from '@angular/core';
 export const HELL_RESIZABLE_IMPORTS: readonly [typeof HellResizable, typeof HellResizablePane, typeof HellResizableHandle];
 
 // @public
-export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels>;
+export const HELL_RESIZABLE_LABELS: InjectionToken<HellLabels<HellResizableLabels>>;
 
 // @public
 export class HellResizable implements AfterContentInit {
@@ -40,7 +41,7 @@ export class HellResizableHandle implements AfterViewInit {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
     protected readonly ariaValueNow: _angular_core.WritableSignal<number | null>;
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
-    protected readonly labels: HellResizableLabels;
+    protected readonly labels: HellLabels<HellResizableLabels>;
     ngAfterViewInit(): void;
     protected onKey(e: KeyboardEvent): void;
     protected onPointerDown(e: PointerEvent): void;

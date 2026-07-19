@@ -9,7 +9,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
@@ -20,7 +20,7 @@ export interface HellAlertLabels {
 }
 
 /** Injection token resolving to the effective alert labels. */
-export const HELL_ALERT_LABELS: InjectionToken<HellAlertLabels> = hellCreateLabels<HellAlertLabels>('HELL_ALERT_LABELS', {
+export const HELL_ALERT_LABELS: InjectionToken<HellLabels<HellAlertLabels>> = hellCreateLabels<HellAlertLabels>('HELL_ALERT_LABELS', {
   dismiss: 'Dismiss',
 });
 

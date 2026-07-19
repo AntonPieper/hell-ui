@@ -5,6 +5,7 @@
 ```ts
 
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
@@ -15,7 +16,7 @@ import { OutputEmitterRef } from '@angular/core';
 export const HELL_ALERT_IMPORTS: readonly [typeof HellAlert, typeof HellAlertTitle, typeof HellAlertDescription, typeof HellAlertActions, typeof HellAlertDismiss, typeof HellAlertIcon];
 
 // @public
-export const HELL_ALERT_LABELS: InjectionToken<HellAlertLabels>;
+export const HELL_ALERT_LABELS: InjectionToken<HellLabels<HellAlertLabels>>;
 
 // @public
 export class HellAlert {
@@ -50,7 +51,7 @@ export class HellAlertDescription {
 export class HellAlertDismiss {
     protected readonly alert: HellAlert;
     readonly ariaLabel: i0.InputSignal<string | null>;
-    protected readonly labels: HellAlertLabels;
+    protected readonly labels: HellLabels<HellAlertLabels>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertDismiss, "button[hellAlertDismiss]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

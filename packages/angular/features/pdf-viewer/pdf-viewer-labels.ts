@@ -1,5 +1,5 @@
 import type { InjectionToken } from '@angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 
 /** Built-in accessibility labels owned by the `@hell-ui/angular/features/pdf-viewer` entry point. */
 export interface HellPdfViewerLabels {
@@ -29,7 +29,7 @@ export interface HellPdfViewerLabels {
 }
 
 /** Injection token resolving to the effective PDF viewer labels. */
-export const HELL_PDF_VIEWER_LABELS: InjectionToken<HellPdfViewerLabels> = hellCreateLabels<HellPdfViewerLabels>(
+export const HELL_PDF_VIEWER_LABELS: InjectionToken<HellLabels<HellPdfViewerLabels>> = hellCreateLabels<HellPdfViewerLabels>(
   'HELL_PDF_VIEWER_LABELS',
   {
     togglePageOverview: 'Toggle page overview',

@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { NgpPagination, injectPaginationState } from 'ng-primitives/pagination';
 import { ngpButton } from 'ng-primitives/button';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 /** Built-in accessibility labels owned by the pagination entry point. */
@@ -33,7 +33,7 @@ export interface HellPaginationLabels {
 }
 
 /** Injection token resolving to the effective pagination labels. */
-export const HELL_PAGINATION_LABELS: InjectionToken<HellPaginationLabels> =
+export const HELL_PAGINATION_LABELS: InjectionToken<HellLabels<HellPaginationLabels>> =
   hellCreateLabels<HellPaginationLabels>('HELL_PAGINATION_LABELS', {
     navigation: 'Pagination',
     firstPage: 'First page',

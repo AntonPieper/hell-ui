@@ -4,7 +4,7 @@ import { HostBinding } from '@angular/core';
 import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, InjectionToken, NO_ERRORS_SCHEMA, NgZone, Renderer2, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { hellCreateLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { NgpRovingFocusItem } from 'ng-primitives/roving-focus';
 import { NgpToolbar } from 'ng-primitives/toolbar';
 import {
@@ -30,7 +30,7 @@ export interface HellOverflowToolbarLabels {
 }
 
 /** Injection token resolving to the effective Overflow Toolbar labels. */
-export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellOverflowToolbarLabels> =
+export const HELL_OVERFLOW_TOOLBAR_LABELS: InjectionToken<HellLabels<HellOverflowToolbarLabels>> =
   hellCreateLabels<HellOverflowToolbarLabels>('HELL_OVERFLOW_TOOLBAR_LABELS', {
     overflowTrigger: 'More actions',
   });

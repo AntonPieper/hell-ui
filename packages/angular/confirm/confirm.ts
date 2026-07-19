@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import type { Signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import type { HellButtonVariant } from '@hell-ui/angular/core';
 import {
   HellDialog,
@@ -98,7 +98,7 @@ export interface HellConfirmLabels {
 }
 
 /** Injection token resolving to the effective confirm labels. */
-export const HELL_CONFIRM_LABELS: InjectionToken<HellConfirmLabels> =
+export const HELL_CONFIRM_LABELS: InjectionToken<HellLabels<HellConfirmLabels>> =
   hellCreateLabels<HellConfirmLabels>('HELL_CONFIRM_LABELS', {
     confirm: 'Confirm',
     cancel: 'Cancel',

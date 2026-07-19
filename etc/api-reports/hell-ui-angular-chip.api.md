@@ -7,6 +7,7 @@
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellChipVariant } from '@hell-ui/angular/core';
+import { HellLabels } from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
@@ -16,7 +17,7 @@ import { InjectionToken } from '@angular/core';
 export const HELL_CHIP_IMPORTS: readonly [typeof HellChipSet, typeof HellChipInput, typeof HellChip, typeof HellChipRemove];
 
 // @public
-export const HELL_CHIP_LABELS: InjectionToken<HellChipLabels>;
+export const HELL_CHIP_LABELS: InjectionToken<HellLabels<HellChipLabels>>;
 
 // @public
 export class HellBadge {

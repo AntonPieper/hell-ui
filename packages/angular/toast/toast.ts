@@ -10,7 +10,7 @@ import {
   input,
   type InjectionToken,
 } from '@angular/core';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 import {
@@ -37,7 +37,7 @@ export interface HellToastLabels {
 }
 
 /** Injection token resolving to the effective toast labels. */
-export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels> =
+export const HELL_TOAST_LABELS: InjectionToken<HellLabels<HellToastLabels>> =
   hellCreateLabels<HellToastLabels>('HELL_TOAST_LABELS', {
     notifications: 'Notifications',
     notification: 'Notification',

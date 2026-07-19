@@ -15,7 +15,7 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
-import { hellPartStyler, hellCreateLabels, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, hellCreateLabels, type HellLabels, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
@@ -33,7 +33,7 @@ export interface HellResizableLabels {
 }
 
 /** Injection token resolving to the effective resizable labels. */
-export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels> = hellCreateLabels<HellResizableLabels>('HELL_RESIZABLE_LABELS', {
+export const HELL_RESIZABLE_LABELS: InjectionToken<HellLabels<HellResizableLabels>> = hellCreateLabels<HellResizableLabels>('HELL_RESIZABLE_LABELS', {
   resizePanels: 'Resize panels',
 });
 

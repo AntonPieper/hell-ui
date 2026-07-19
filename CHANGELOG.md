@@ -834,6 +834,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `provideHellLabels` now rejects tokens that `hellCreateLabels` did
+  not create at compile time instead of throwing at runtime. First carried by
+  the next `@hell-ui/angular` release after `0.2.0` (currently Unreleased).
+  `hellCreateLabels` returns the branded `HellLabelToken<T>` — an
+  `InjectionToken<HellLabels<T>>` whose value type carries a compile-time-only
+  brand — and `provideHellLabels` accepts only branded tokens through the new
+  `HellLabelOverrides` conditional type, so passing a foreign `InjectionToken`
+  (or an annotation that widens the brand away) is now a type error. The
+  central runtime defaults registry and its foreign-token throw are deleted;
+  built-in defaults travel on the token itself. Entry-point label token
+  constants are now typed `InjectionToken<HellLabels<...>>`; existing
+  per-injector overrides and `inject(HELL_*_LABELS)` inference keep working
+  unchanged. Evidence: `packages/angular/core/labels.spec.ts` and the updated
+  API reports. Closes #257.
 - BREAKING: The omnibar item payload input `value` on
   `button[hellOmnibarItem]` is now required. First carried by the next
   `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Omitting

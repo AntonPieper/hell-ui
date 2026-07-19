@@ -30,7 +30,7 @@ import {
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken } from '@angular/core';
 
@@ -47,7 +47,7 @@ export interface HellDatePickerLabels {
 }
 
 /** Injection token resolving to the effective date picker labels. */
-export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels> = hellCreateLabels<HellDatePickerLabels>('HELL_DATE_PICKER_LABELS', {
+export const HELL_DATE_PICKER_LABELS: InjectionToken<HellLabels<HellDatePickerLabels>> = hellCreateLabels<HellDatePickerLabels>('HELL_DATE_PICKER_LABELS', {
   previousYear: 'Previous year',
   nextYear: 'Next year',
   previousMonth: 'Previous month',
