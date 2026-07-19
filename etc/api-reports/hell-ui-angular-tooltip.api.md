@@ -6,20 +6,29 @@
 
 import * as _angular_core from '@angular/core';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
-import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 import { HellUiInput } from '@hell-ui/angular/core';
-import * as i1 from 'ng-primitives/tooltip';
-import { NgpTooltipTrigger } from 'ng-primitives/tooltip';
+import * as ng_primitives_portal from 'ng-primitives/portal';
+import * as ng_primitives_tooltip from 'ng-primitives/tooltip';
+import { NgpTooltipPlacement } from 'ng-primitives/tooltip';
+import { Signal } from '@angular/core';
+import { TemplateRef } from '@angular/core';
 
 // @public
-export class HellTooltip extends HellNativeInteractiveDisabledGuard {
+export class HellTooltip {
     constructor();
+    readonly container: _angular_core.InputSignal<string | HTMLElement | null>;
+    readonly content: _angular_core.InputSignal<string | TemplateRef<unknown> | null | undefined>;
     hide(): void;
-    readonly open: _angular_core.Signal<boolean>;
+    readonly hideDelay: _angular_core.InputSignalWithTransform<number, unknown>;
+    readonly hoverableContent: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    readonly offset: _angular_core.InputSignalWithTransform<ng_primitives_portal.NgpOffset, ng_primitives_portal.NgpOffsetInput | null | undefined>;
+    readonly open: Signal<boolean>;
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
+    readonly placement: _angular_core.InputSignal<NgpTooltipPlacement>;
     show(): void;
-    protected readonly trigger: NgpTooltipTrigger<any>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTooltip, "button[hellTooltip], a[hellTooltip]", ["hellTooltip"], {}, { "openChange": "openChange"; }, never, never, true, [{ directive: typeof i1.NgpTooltipTrigger; inputs: { "ngpTooltipTrigger": "hellTooltip"; "ngpTooltipTriggerPlacement": "placement"; "ngpTooltipTriggerOffset": "offset"; "ngpTooltipTriggerShowDelay": "showDelay"; "ngpTooltipTriggerHideDelay": "hideDelay"; "ngpTooltipTriggerDisabled": "disabled"; "ngpTooltipTriggerContainer": "container"; "ngpTooltipTriggerShowOnOverflow": "showOnOverflow"; "ngpTooltipTriggerHoverableContent": "hoverableContent"; }; outputs: {}; }]>;
+    readonly showDelay: _angular_core.InputSignalWithTransform<number, unknown>;
+    readonly showOnOverflow: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTooltip, "[hellTooltip]", ["hellTooltip"], { "content": { "alias": "hellTooltip"; "required": false; "isSignal": true; }; "placement": { "alias": "placement"; "required": false; "isSignal": true; }; "offset": { "alias": "offset"; "required": false; "isSignal": true; }; "showDelay": { "alias": "showDelay"; "required": false; "isSignal": true; }; "hideDelay": { "alias": "hideDelay"; "required": false; "isSignal": true; }; "container": { "alias": "container"; "required": false; "isSignal": true; }; "showOnOverflow": { "alias": "showOnOverflow"; "required": false; "isSignal": true; }; "hoverableContent": { "alias": "hoverableContent"; "required": false; "isSignal": true; }; }, { "openChange": "openChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTooltip, never>;
 }
 
@@ -27,9 +36,9 @@ export class HellTooltip extends HellNativeInteractiveDisabledGuard {
 export class HellTooltipSurface {
     constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    protected readonly tooltipTrigger: _angular_core.Signal<i1.NgpTooltipTriggerState<unknown>>;
+    protected readonly tooltipTrigger: Signal<ng_primitives_tooltip.NgpTooltipTriggerState<unknown>>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTooltipSurface, "[hellTooltipSurface]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTooltip; inputs: {}; outputs: {}; }]>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTooltipSurface, "[hellTooltipSurface]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof ng_primitives_tooltip.NgpTooltip; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTooltipSurface, never>;
 }
 

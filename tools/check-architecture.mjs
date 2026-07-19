@@ -1641,13 +1641,18 @@ function checkTooltipVocabularyContract() {
   const rel = 'packages/angular/tooltip/tooltip.ts';
   const source = readFile(join(root, rel));
   const requiredFragments = [
-    "selector: 'button[hellTooltip], a[hellTooltip]'",
+    "selector: '[hellTooltip]'",
     "exportAs: 'hellTooltip'",
     'export class HellTooltip ',
+    'string | TemplateRef<unknown> | null | undefined',
+    'useTextContent: signal(false)',
     "selector: '[hellTooltipSurface]'",
     'export class HellTooltipSurface ',
   ];
-  const retiredFragments = ["selector: '[hellTooltip]'"];
+  const retiredFragments = [
+    "selector: 'button[hellTooltip], a[hellTooltip]'",
+    'HellNativeInteractiveDisabledGuard',
+  ];
 
   for (const fragment of requiredFragments) {
     if (!source.includes(fragment)) {
@@ -1713,10 +1718,11 @@ function checkNativeButtonSelectorContract() {
 }
 
 function checkInteractiveTriggerSelectorContract() {
+  // hellTooltip is intentionally absent: Tooltip attaches to any host without
+  // adding focusability or mutating the host (#240).
   const nativeInteractiveTriggers = new Set([
     'hellDialogTrigger',
     'hellPopoverTrigger',
-    'hellTooltip',
     'hellMenuTrigger',
     'hellFlyoutTrigger',
   ]);
