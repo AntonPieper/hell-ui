@@ -21,7 +21,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import { HellTooltip } from '@hell-ui/angular/tooltip';
 
 /**
  * Query-param-only browser contract harness for the toolbar. Rendered on
@@ -52,7 +52,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
       faSolidMagnifyingGlass,
     }),
   ],
-  imports: [HellButton, HellIcon, HellTooltip, HellTooltipSurface, ...HELL_TOOLBAR_IMPORTS],
+  imports: [HellButton, HellIcon, HellTooltip, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <section class="grid gap-6 p-6" data-testid="toolbar-contract-harness">
       <h1>Toolbar contract harness</h1>
@@ -93,14 +93,12 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           type="button"
           aria-label="Share"
           data-testid="plain-toolbar-share"
-          [hellTooltip]="shareHint"
+          hellTooltip="Share formatting"
           (click)="run('Share')"
         >
           <hell-icon name="faSolidShareNodes" size="13px" />
         </button>
       </div>
-
-      <ng-template #shareHint><span hellTooltipSurface>Share formatting</span></ng-template>
 
       <div
         hellToolbar

@@ -217,7 +217,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/avatar-group',
  detail:'components/avatar-group/examples/with-tooltip-menu.example.ts',
  terms:
-'avatar-group with-tooltip-menu composite hellTooltip hellTooltipSurface hellMenuTrigger hellMenu hellMenuItem hellMenuLabel hellAvatarGroupOverflow assignee stack overflow hover',
+'avatar-group with-tooltip-menu composite hellTooltip string hellMenuTrigger hellMenu hellMenuItem hellMenuLabel hellAvatarGroupOverflow assignee stack overflow hover',
  },
  {
  title:'Avatar: Basic',
@@ -1994,7 +1994,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toggle',
  detail:'components/toggle/examples/with-tooltip.example.ts',
  terms:
-'composite hellToggleGroup hellToggleGroupItem hellTooltipSurface hellTooltip formatting toolbar icon-only bold italic underline aria-label',
+'composite hellToggleGroup hellToggleGroupItem hellTooltip string formatting toolbar icon-only bold italic underline aria-label',
  },
  {
  title:'Page header: List screen',
@@ -2036,7 +2036,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/toolbar',
  detail:'components/toolbar/examples/icon-only.example.ts',
  terms:
-'toolbar icon-only components/toolbar/examples/icon-only.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem hellButton hellTooltipSurface hellTooltip iconOnly aria-label tooltip separator formatting bold italic align compact square icon button consumer-owned label',
+'toolbar icon-only components/toolbar/examples/icon-only.example hellToolbar hellToolbarItem HellToolbar HellToolbarItem hellButton hellTooltip string iconOnly aria-label tooltip separator formatting bold italic align compact square icon button consumer-owned label',
  },
  {
  title:'Toolbar: Standalone above a table, with a widget',
@@ -2064,35 +2064,35 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/tooltip',
  detail:'components/tooltip/examples/basic.example.ts',
  terms:
-'hellTooltip hellTooltipSurface hellButton smallest usage hover',
+'hellTooltip string one-binding plain text hint hellButton smallest usage hover focus implicit default surface',
  },
  {
  title:'Tooltip: Delay',
  path:'/components/tooltip',
  detail:'components/tooltip/examples/delay.example.ts',
  terms:
-'showDelay hideDelay hellTooltip hellTooltipSurface hellButton timing',
+'showDelay hideDelay cooldown provideHellTooltipDefaults scoped defaults hellTooltip hellButton timing',
  },
  {
- title:'Tooltip: Hoverable content',
+ title:'Tooltip: Dynamic content',
  path:'/components/tooltip',
- detail:'components/tooltip/examples/hoverable.example.ts',
+ detail:'components/tooltip/examples/dynamic-content.example.ts',
  terms:
-'hoverable always-hoverable hellTooltip hellTooltipSurface hellButton hover-bridge',
+'dynamic content reactive string present absent empty null disabled open state preserved hellTooltip hellButton notifications',
  },
  {
  title:'Tooltip: Placement',
  path:'/components/tooltip',
  detail:'components/tooltip/examples/placements.example.ts',
  terms:
-'placements top right bottom left hellTooltip hellTooltipSurface hellButton floating-ui',
+'placements top right bottom left hellTooltip hellButton floating-ui string',
  },
  {
- title:'Tooltip: With icon buttons and shortcuts',
+ title:'Tooltip: Rich content',
  path:'/components/tooltip',
  detail:'components/tooltip/examples/with-toolbar.example.ts',
  terms:
-'toolbar button kbd shortcut hellTooltip hellTooltipSurface hellButton hellIcon hellKbd iconOnly composite bold italic underline',
+'rich content template toolbar button kbd shortcut hellTooltip hellTooltipSurface provideHellTooltipDefaults hellButton hellIcon hellKbd iconOnly composite bold italic underline',
  },
  {
  title:'Getting Started: Button Demo',
