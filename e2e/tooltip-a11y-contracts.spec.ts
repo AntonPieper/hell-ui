@@ -133,7 +133,7 @@ test.describe('tooltip browser accessibility contract', () => {
     expect(hideTiming.hiddenAt - hideTiming.leaveAt).toBeGreaterThanOrEqual(290);
   });
 
-  test('hoverable tooltip content stays open while the pointer is over the tooltip', async ({
+  test('tooltip content is always hoverable and stays open while the pointer is over it', async ({
     page,
   }) => {
     await gotoTooltip(page);
@@ -145,7 +145,7 @@ test.describe('tooltip browser accessibility contract', () => {
 
     await trigger.hover();
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toHaveAttribute('data-hoverable', '');
+    // Hoverability is an invariant: no data-hoverable switch, always auto.
     await expect(tooltip).toHaveCSS('pointer-events', 'auto');
     await expectDescribedBy(trigger, tooltip);
 

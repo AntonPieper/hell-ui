@@ -99,10 +99,14 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
 
       <h2>Delay</h2>
       <p>
-        <code>showDelay</code> (default <code>500</code>ms) and <code>hideDelay</code> (default
-        <code>0</code>ms) tune how eager or patient a tooltip feels. Raise <code>showDelay</code>
-        for hints on controls a user's pointer passes over incidentally, so tooltips don't flash on
-        every pixel the cursor crosses.
+        <code>showDelay</code> (guaranteed default <code>500</code>ms), <code>hideDelay</code>
+        (guaranteed default <code>0</code>ms), and <code>cooldown</code> (guaranteed default
+        <code>300</code>ms) tune how eager or patient a tooltip feels. Raise
+        <code>showDelay</code> for hints on controls a user's pointer passes over incidentally, so
+        tooltips don't flash on every pixel the cursor crosses; the cooldown skips the show delay
+        when moving between adjacent tooltips, so scanning a toolbar doesn't repeat the full wait
+        on every button. Set shared timing once per injector scope with
+        <code>provideHellTooltipDefaults</code> instead of repeating inputs.
       </p>
       <hd-example-tabs [code]="tooltipDelayExampleCode">
         <app-tooltip-delay-example />
@@ -110,10 +114,10 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
 
       <h2>Hoverable content</h2>
       <p>
-        Set <code>hoverableContent</code> to keep the surface open while the pointer travels from
-        the trigger onto the tooltip itself — useful when the hint is long enough that a user might
-        want to select its text, or sits close enough to the trigger that a small gap would
-        otherwise close it prematurely.
+        Tooltip content is always hoverable: the surface stays open while the pointer travels from
+        the trigger onto the tooltip itself, so users with magnification or a large cursor can read
+        content the pointer would otherwise hide. This is an accessibility invariant, not an
+        option.
       </p>
       <hd-example-tabs [code]="tooltipHoverableExampleCode">
         <app-tooltip-hoverable-example />
@@ -173,10 +177,16 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
       <h2>API</h2>
       <h3><code>hellTooltip</code></h3>
       <p>
-        Selector: <code>button[hellTooltip], a[hellTooltip]</code>.
+        Selector: <code>[hellTooltip]</code> — any host element.
       </p>
       <ul>
-        <li><code>[hellTooltip]</code>: <code>TemplateRef</code> — the tooltip content.</li>
+        <li>
+          <code>[hellTooltip]</code>:
+          <code>string | TemplateRef&lt;unknown&gt; | null | undefined</code> — the tooltip
+          content. A string renders the implicit default surface; a template contains a
+          consumer-authored <code>hellTooltipSurface</code>; <code>null</code>,
+          <code>undefined</code>, and the empty string close and disable the interaction.
+        </li>
         <li>
           <code>placement</code>: <code>NgpTooltipPlacement</code> (Floating UI) —
           <code>'top' | 'right' | 'bottom' | 'left'</code> plus <code>-start</code>/<code>-end</code>
@@ -184,23 +194,39 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         </li>
         <li>
           <code>offset</code>: <code>number | &#123; mainAxis?, crossAxis?, alignmentAxis? &#125;</code>,
-          default <code>0</code>.
+          default <code>4</code>.
         </li>
-        <li><code>showDelay</code>: <code>number</code> (ms), default <code>500</code>.</li>
-        <li><code>hideDelay</code>: <code>number</code> (ms), default <code>0</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>, default <code>false</code>.</li>
+        <li><code>flip</code>: <code>boolean | &#123; padding?, fallbackPlacements? &#125;</code>, default <code>true</code> — flip when the preferred placement lacks space.</li>
+        <li><code>shift</code>: <code>boolean | &#123; padding?, limiter? &#125;</code> — shift to keep the surface in view; enabled by the engine by default.</li>
+        <li><code>showDelay</code>: <code>number</code> (ms), guaranteed default <code>500</code>.</li>
+        <li><code>hideDelay</code>: <code>number</code> (ms), guaranteed default <code>0</code>.</li>
+        <li><code>cooldown</code>: <code>number</code> (ms), guaranteed default <code>300</code> — moving between tooltips within this window skips the show delay.</li>
         <li>
           <code>container</code>: <code>string | HTMLElement | null</code>, default
           <code>document.body</code>.
         </li>
         <li><code>showOnOverflow</code>: <code>boolean</code>, default <code>false</code> — show the tooltip only when the trigger's own content is visually truncated.</li>
-        <li><code>hoverableContent</code>: <code>boolean</code>, default <code>false</code> — keep the tooltip open while the pointer is over the tooltip surface itself.</li>
+        <li><code>anchor</code>: <code>HTMLElement | null</code> — position the surface relative to this element instead of the trigger.</li>
+        <li><code>position</code>: <code>NgpPosition | null</code> — programmatic coordinates for the surface instead of the trigger's box.</li>
+        <li><code>trackPosition</code>: <code>boolean</code>, default <code>false</code> — re-measure the trigger position on every animation frame.</li>
+        <li><code>scrollBehavior</code>: <code>'reposition' | 'close'</code>, default <code>'reposition'</code> — how an open tooltip reacts to window scrolling.</li>
         <li><code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new open state.</li>
         <li>
           Exported as <code>hellTooltip</code> with the Anchored Surface Contract state:
           a reactive <code>open()</code> signal plus <code>show()</code> and <code>hide()</code>.
         </li>
       </ul>
+
+      <h3><code>provideHellTooltipDefaults</code></h3>
+      <p>
+        <code>provideHellTooltipDefaults(defaults: HellTooltipDefaults)</code> sets injector-scoped
+        defaults for the behavior and positioning inputs above (placement, offset, flip, shift,
+        timing, cooldown, container, overflow-only display, position tracking, and scroll
+        behavior). Partial defaults merge over the nearest ancestor provider instead of resetting
+        unspecified values, and a local trigger input wins over every provider. Content, styling,
+        disabled state, host-text fallback, template context, hoverability, and Escape dismissal
+        are not configurable through defaults.
+      </p>
 
       <h3><code>hellTooltipSurface</code></h3>
       <p>Selector: <code>[hellTooltipSurface]</code>.</p>
@@ -230,16 +256,18 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
           interactive controls.
         </li>
         <li>
-          When <code>hoverableContent</code> is enabled the surface carries
-          <code>data-hoverable</code>, which switches it from <code>pointer-events-none</code> to
-          <code>pointer-events-auto</code> so the pointer can move onto it without the tooltip
-          closing first.
+          The surface is always hoverable (<code>pointer-events-auto</code>): the pointer can
+          travel from the trigger onto the tooltip without it closing first. Escape always
+          dismisses the tooltip without moving focus.
         </li>
         <li>
-          A disabled trigger sets the native <code>disabled</code> attribute on a
-          <code>&lt;button&gt;</code> host, or <code>aria-disabled="true"</code> plus
-          <code>tabindex="-1"</code> on an <code>&lt;a&gt;</code> host, and blocks click/Enter
-          activation either way.
+          The surface's entrance animation is suppressed under
+          <code>prefers-reduced-motion</code>.
+        </li>
+        <li>
+          A natively disabled control never opens its tooltip; the trigger does not mutate or
+          block the host. Explanatory help for a disabled control belongs on a separate focusable
+          wrapper.
         </li>
       </ul>
 

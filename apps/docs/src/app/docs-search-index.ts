@@ -2078,7 +2078,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/tooltip',
  detail:'components/tooltip/examples/hoverable.example.ts',
  terms:
-'hoverableContent hellTooltip hellTooltipSurface hellButton hover-bridge',
+'hoverable always-hoverable hellTooltip hellTooltipSurface hellButton hover-bridge',
  },
  {
  title:'Tooltip: Placement',
