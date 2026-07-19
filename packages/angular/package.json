@@ -209,9 +209,6 @@
     "./toggle": {
       "@heinrich/source": "./toggle/public-api.ts"
     },
-    "./tooltip": {
-      "@heinrich/source": "./tooltip/public-api.ts"
-    },
     "./chip": {
       "@heinrich/source": "./chip/public-api.ts"
     },
@@ -220,6 +217,9 @@
     },
     "./pagination": {
       "@heinrich/source": "./pagination/public-api.ts"
+    },
+    "./tooltip": {
+      "@heinrich/source": "./tooltip/public-api.ts"
     },
     "./app-shell": {
       "@heinrich/source": "./app-shell/public-api.ts"
@@ -437,11 +437,6 @@
       "style": "./toggle/styles.css",
       "default": "./toggle/styles.css"
     },
-    "./tooltip/styles.css": {
-      "@heinrich/source": "./tooltip/styles.css",
-      "style": "./tooltip/styles.css",
-      "default": "./tooltip/styles.css"
-    },
     "./chip/styles.css": {
       "@heinrich/source": "./chip/styles.css",
       "style": "./chip/styles.css",
@@ -456,6 +451,11 @@
       "@heinrich/source": "./pagination/styles.css",
       "style": "./pagination/styles.css",
       "default": "./pagination/styles.css"
+    },
+    "./tooltip/styles.css": {
+      "@heinrich/source": "./tooltip/styles.css",
+      "style": "./tooltip/styles.css",
+      "default": "./tooltip/styles.css"
     },
     "./app-shell/styles.css": {
       "@heinrich/source": "./app-shell/styles.css",

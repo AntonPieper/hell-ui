@@ -2317,6 +2317,7 @@ interface MenuChannel {
       <div hellPopover [ui]="popoverUi">Summary</div>
     </ng-template>
 
+    <button type="button" hellTooltip="One-binding string hint">Hint</button>
     <button type="button" [hellTooltip]="tooltip">Hint</button>
     <ng-template #tooltip>
       <span hellTooltipSurface [ui]="tooltipUi">Helpful hint</span>
