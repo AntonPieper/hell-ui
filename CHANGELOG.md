@@ -843,6 +843,19 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   no undefined fallback. Bind `[value]` (or a static `value` attribute for
   string payloads) on every omnibar item. Unit coverage and the omnibar API
   report protect the required contract. Closes #253.
+- BREAKING: The core Search Resource no longer exposes `clear()`, which
+  implicitly wrote `''` into the caller-owned query signal while emptying
+  results. First carried by the next `@hell-ui/angular` release after `0.2.0`
+  (currently Unreleased). Use the split contract instead: `clearResults()`
+  cancels work and empties items, status, and error while leaving the
+  caller-owned query signal untouched, and `reset()` is `clearResults()` plus
+  setting the query signal to `''` — the only resource operation that writes
+  the query — without dispatching an empty-query request. Both keep the
+  resource cleared until a later query change or an explicit `refresh()`.
+  Replace `resource.clear()` with `resource.reset()` to keep the old behavior,
+  or `resource.clearResults()` when the query should survive. Evidence:
+  `packages/angular/core/search-resource.spec.ts` and the updated core API
+  report. Closes #255.
 - BREAKING: Renamed the public Tooltip vocabulary without compatibility
   aliases. The trigger directive `HellTooltipTrigger`
   (`button[hellTooltipTrigger], a[hellTooltipTrigger]`, exported as

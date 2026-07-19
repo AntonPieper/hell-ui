@@ -71,7 +71,7 @@ describe('hellSearchResource', () => {
     expect(requests).toEqual(['alpha', 'alpha', 'gamma']);
   });
 
-  it('keeps local items cleared until a later query change or explicit refresh', async () => {
+  it('keeps local results cleared, query untouched, until a later query change or explicit refresh', async () => {
     const query = signal('alpha');
     const sourceItems = signal<readonly string[]>(['alpha-one', 'beta-one']);
 
@@ -82,10 +82,11 @@ describe('hellSearchResource', () => {
     await settleResource();
     expect(resource.items()).toEqual(['alpha-one']);
 
-    resource.clear();
+    resource.clearResults();
     sourceItems.set(['alpha-two', 'beta-two']);
     await settleResource();
 
+    expect(query()).toBe('alpha');
     expect(resource.items()).toEqual([]);
     expect(resource.status()).toBe('idle');
 
@@ -95,18 +96,39 @@ describe('hellSearchResource', () => {
     expect(resource.items()).toEqual(['beta-two']);
     expect(resource.status()).toBe('success');
 
-    resource.clear();
-    sourceItems.set(['gamma']);
+    resource.clearResults();
+    sourceItems.set(['beta-three', 'gamma']);
     await settleResource();
 
+    expect(query()).toBe('beta');
     expect(resource.items()).toEqual([]);
     expect(resource.status()).toBe('idle');
 
     resource.refresh();
     await settleResource();
 
-    expect(resource.items()).toEqual(['gamma']);
+    expect(resource.items()).toEqual(['beta-three']);
     expect(resource.status()).toBe('success');
+  });
+
+  it('resets the caller-owned query and local results together', async () => {
+    const query = signal('alpha');
+    const sourceItems = signal<readonly string[]>(['alpha-one', 'beta-one']);
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({ query, items: sourceItems }),
+    );
+
+    await settleResource();
+    expect(resource.items()).toEqual(['alpha-one']);
+
+    resource.reset();
+    await settleResource();
+
+    expect(query()).toBe('');
+    expect(resource.items()).toEqual([]);
+    expect(resource.status()).toBe('idle');
+    expect(resource.error()).toBeNull();
   });
 
   it('debounces async dispatch and forwards query, params, limit, and AbortSignal', async () => {
@@ -438,7 +460,7 @@ describe('hellSearchResource', () => {
     expect(resource.items()).toEqual(['later']);
   });
 
-  it('keeps async state cleared until a later query change or explicit refresh', async () => {
+  it('keeps async state reset until a later query change or explicit refresh', async () => {
     vi.useFakeTimers();
     const query = signal('one');
     const calls: HellSearchSourceRequest[] = [];
@@ -461,7 +483,7 @@ describe('hellSearchResource', () => {
     await settleResource();
     expect(resource.status()).toBe('error');
 
-    resource.clear();
+    resource.reset();
     TestBed.tick();
     await vi.advanceTimersByTimeAsync(0);
 
@@ -480,7 +502,7 @@ describe('hellSearchResource', () => {
     expect(resource.items()).toEqual(['two']);
     expect(resource.status()).toBe('success');
 
-    resource.clear();
+    resource.reset();
     TestBed.tick();
     await vi.advanceTimersByTimeAsync(0);
 
@@ -495,6 +517,49 @@ describe('hellSearchResource', () => {
     await settleResource();
 
     expect(resource.items()).toEqual(['refreshed']);
+    expect(resource.status()).toBe('success');
+  });
+
+  it('clears async results, query untouched, and refreshes with the preserved query', async () => {
+    vi.useFakeTimers();
+    const query = signal('one');
+    const calls: HellSearchSourceRequest[] = [];
+
+    const resource = TestBed.runInInjectionContext(() =>
+      hellSearchResource({
+        query,
+        debounce: 0,
+        source: (request) => {
+          calls.push(request);
+          return calls.length === 1
+            ? Promise.reject(new Error('boom'))
+            : [request.query];
+        },
+      }),
+    );
+
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+    await settleResource();
+    expect(resource.status()).toBe('error');
+    expect(resource.error()).toBeInstanceOf(Error);
+
+    resource.clearResults();
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(query()).toBe('one');
+    expect(resource.items()).toEqual([]);
+    expect(resource.error()).toBeNull();
+    expect(resource.status()).toBe('idle');
+    expect(calls).toHaveLength(1);
+
+    resource.refresh();
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.query).toBe('one');
+    await settleResource();
+
+    expect(resource.items()).toEqual(['one']);
     expect(resource.status()).toBe('success');
   });
 

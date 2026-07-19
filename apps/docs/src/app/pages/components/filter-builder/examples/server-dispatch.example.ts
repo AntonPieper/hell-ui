@@ -296,7 +296,7 @@ export class FilterBuilderServerDispatchExample {
       operator: 'is',
       value: owner,
     });
-    if (committed) this.ownerSearch.clear();
+    if (committed) this.ownerSearch.reset();
   }
 
   protected dispatch(filters: readonly WorkOrderFilter[]): void {
