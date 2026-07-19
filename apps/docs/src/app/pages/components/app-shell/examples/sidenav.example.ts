@@ -62,7 +62,7 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
         </div>
       </nav>
 
-      <main hellAppContent>
+      <main hellAppContent tabindex="0">
         <h3 class="m-0 text-base font-semibold">Navigation anatomy</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           <code>hellNavItem</code> composes an icon, label, and trailing slot. Click

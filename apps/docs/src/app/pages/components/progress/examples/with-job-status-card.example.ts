@@ -16,10 +16,10 @@ import { HellChip } from '@hell-ui/angular/chip';
       <div hellCardBody class="flex flex-col gap-2">
         <p class="hd-muted text-sm">Exporting 42,000 invoices to the warehouse bucket.</p>
         <div class="flex justify-between text-sm font-medium">
-          <span id="export-label">Rows exported</span>
+          <span>Rows exported</span>
           <span>72%</span>
         </div>
-        <div hellProgress aria-labelledby="export-label" [value]="72">
+        <div hellProgress aria-label="Rows exported" [value]="72">
           <div hellProgressBar></div>
         </div>
       </div>

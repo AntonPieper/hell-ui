@@ -38,7 +38,7 @@ const HD_APP_SHELL_BASIC_ICONS = {
         </a>
       </nav>
 
-      <main hellAppContent>
+      <main hellAppContent tabindex="0">
         <h3 class="m-0 text-base font-semibold">Dashboard</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           Click the bars button to collapse the sidenav to an icon rail. The grid columns animate

@@ -8,14 +8,22 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellKbd } from '@hell-ui/angular/chip';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import {
+  HellTooltip,
+  HellTooltipSurface,
+  provideHellTooltipDefaults,
+} from '@hell-ui/angular/tooltip';
 
 const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
 
 @Component({
   selector: 'app-tooltip-with-toolbar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons(TOOLBAR_ICONS)],
+  providers: [
+    provideIcons(TOOLBAR_ICONS),
+    // One eager policy for the whole toolbar instead of a [showDelay] per button.
+    provideHellTooltipDefaults({ showDelay: 300 }),
+  ],
   imports: [HellButton, HellIcon, HellKbd, HellTooltip, HellTooltipSurface],
   template: `
     <div class="inline-flex gap-1 rounded-hell-md border border-hell-border p-1">
@@ -27,7 +35,6 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         type="button"
         aria-label="Bold"
         [hellTooltip]="boldHint"
-        [showDelay]="300"
       >
         <hell-icon name="faSolidBold" />
       </button>
@@ -39,7 +46,6 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         type="button"
         aria-label="Italic"
         [hellTooltip]="italicHint"
-        [showDelay]="300"
       >
         <hell-icon name="faSolidItalic" />
       </button>
@@ -51,12 +57,12 @@ const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
         type="button"
         aria-label="Underline"
         [hellTooltip]="underlineHint"
-        [showDelay]="300"
       >
         <hell-icon name="faSolidUnderline" />
       </button>
     </div>
 
+    <!-- Rich markup earns a template: each hint is a consumer-authored surface. -->
     <ng-template #boldHint>
       <span hellTooltipSurface class="flex items-center gap-2">
         Bold

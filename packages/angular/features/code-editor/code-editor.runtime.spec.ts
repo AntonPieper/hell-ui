@@ -92,6 +92,15 @@ describe('HellCodeEditorRuntime', () => {
     runtime.destroy();
   });
 
+  it('keeps editable content in the tab order with an explicit tabindex', () => {
+    const host = document.createElement('div');
+    const runtime = new HellCodeEditorRuntime(runtimeOptions({ host }));
+
+    expect(runtime.view.contentDOM.getAttribute('tabindex')).toBe('0');
+
+    runtime.destroy();
+  });
+
   it('prefers aria-labelledby over aria-label for the content element name', () => {
     const host = document.createElement('div');
     const runtime = new HellCodeEditorRuntime(

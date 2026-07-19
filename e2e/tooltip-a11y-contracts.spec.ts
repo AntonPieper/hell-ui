@@ -138,20 +138,25 @@ test.describe('tooltip browser accessibility contract', () => {
   }) => {
     await gotoTooltip(page);
 
-    const trigger = page.getByRole('button', { name: 'Hoverable' });
-    const tooltip = page.getByRole('tooltip', {
-      name: 'Stays open while you hover this hint.',
-    });
+    // A right-placed surface opens beside its trigger, so it can never be
+    // occluded by the sticky docs header regardless of scroll position.
+    const trigger = page.getByRole('button', { name: 'Right', exact: true });
+    const tooltip = page.getByRole('tooltip', { name: "I'm on the right" });
 
     await trigger.hover();
     await expect(tooltip).toBeVisible();
-    // Hoverability is an invariant: no data-hoverable switch, always auto.
+    // Hoverability is an invariant: no hoverable-content switch, always auto.
     await expect(tooltip).toHaveCSS('pointer-events', 'auto');
     await expectDescribedBy(trigger, tooltip);
 
+    // Settle the entrance animation so the measured box is the final geometry.
+    await finishPageAnimations(page);
     const box = await tooltip.boundingBox();
     if (!box) throw new Error('Expected hoverable tooltip to have a layout box.');
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
+    // One pointer event crosses from the trigger onto the surface: the
+    // surface's pointerenter precedes the engine's bridge check, so the
+    // guaranteed 0ms hide delay never fires mid-crossing.
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.waitForTimeout(300);
     await expect(tooltip).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-describedby', /.+/);
@@ -159,5 +164,38 @@ test.describe('tooltip browser accessibility contract', () => {
     await page.mouse.move(0, 0);
     await expect(tooltip).toBeHidden({ timeout: 1_000 });
     await expect(trigger).not.toHaveAttribute('aria-describedby');
+  });
+
+  test('present content changes update the open tooltip in place and absence closes it', async ({
+    page,
+  }) => {
+    await gotoTooltip(page);
+
+    const trigger = page.getByRole('button', { name: 'Mark one as read' });
+    const tooltip = page.getByRole('tooltip', { name: '3 unread notifications' });
+
+    await trigger.hover();
+    await expect(tooltip).toBeVisible();
+    await expectDescribedBy(trigger, tooltip);
+    const tooltipId = await tooltip.getAttribute('id');
+
+    // A present-to-present content change re-renders the same open overlay:
+    // same tooltip id, no close/reopen lifecycle transition.
+    await trigger.click();
+    const updated = page.getByRole('tooltip', { name: '2 unread notifications' });
+    await expect(updated).toBeVisible();
+    await expect(updated).toHaveAttribute('id', tooltipId ?? '');
+    await expect(trigger).toHaveAttribute('data-open', '');
+
+    // Draining the count to zero makes the content empty: absent content
+    // closes immediately and disables the interaction without a disabled input.
+    await trigger.click();
+    await trigger.click();
+    await expect(page.getByRole('tooltip')).toBeHidden();
+    await expect(trigger).not.toHaveAttribute('aria-describedby');
+
+    // Still hovering the trigger: absence keeps the tooltip disabled.
+    await page.waitForTimeout(700);
+    await expect(page.getByRole('tooltip')).toBeHidden();
   });
 });
