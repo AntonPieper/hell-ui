@@ -188,11 +188,6 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             <td>The scrollable listbox region holding projected groups and items.</td>
           </tr>
           <tr>
-            <td><code>HellOmnibarPanel</code> (<code>[hellOmnibarPanel]</code>)</td>
-            <td><code>root</code></td>
-            <td>Optional wrapper you place around the projected panel body.</td>
-          </tr>
-          <tr>
             <td><code>HellOmnibarGroup</code> (<code>[hellOmnibarGroup]</code>)</td>
             <td><code>root</code></td>
             <td>A labeled group of related result items.</td>
@@ -208,26 +203,6 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             <td>A selectable result row (the <code>option</code> button).</td>
           </tr>
           <tr>
-            <td><code>HellOmnibarItemIcon</code> (<code>[hellOmnibarItemIcon]</code>)</td>
-            <td><code>root</code></td>
-            <td>Leading icon slot inside a result row.</td>
-          </tr>
-          <tr>
-            <td><code>HellOmnibarItemText</code> (<code>[hellOmnibarItemText]</code>)</td>
-            <td><code>root</code></td>
-            <td>Primary text column inside a result row.</td>
-          </tr>
-          <tr>
-            <td><code>HellOmnibarItemSubtext</code> (<code>[hellOmnibarItemSubtext]</code>)</td>
-            <td><code>root</code></td>
-            <td>Secondary text under the primary label.</td>
-          </tr>
-          <tr>
-            <td><code>HellOmnibarItemTrailing</code> (<code>[hellOmnibarItemTrailing]</code>)</td>
-            <td><code>root</code></td>
-            <td>Trailing slot inside a result row, e.g. a shortcut chip.</td>
-          </tr>
-          <tr>
             <td><code>HellOmnibarActionsStrip</code> (<code>[hellOmnibarActions]</code>)</td>
             <td><code>root</code></td>
             <td>The toolbar of action buttons rendered above results.</td>
@@ -239,6 +214,15 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
           </tr>
         </tbody>
       </table>
+      <p>
+        Item chrome — icons, text columns, subtext, and trailing hints — is consumer-owned markup
+        styled with plain classes. Typical recipes: icon
+        <code>inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle</code>
+        (add <code>in-data-[active=true]:text-hell-foreground</code> to brighten it on the active
+        row), text column <code>flex min-w-0 flex-1 flex-col overflow-hidden *:truncate</code>,
+        subtext <code>text-[11px] text-hell-foreground-muted</code>, and trailing
+        <code>ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-muted</code>.
+      </p>
       <p>
         Omnibar composes public Chip Set/Input behavior, so a projected <code>hellChip</code> in the
         leading slot participates in token focus/removal without an Omnibar-specific chip API. The

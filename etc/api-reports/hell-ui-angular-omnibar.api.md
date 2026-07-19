@@ -14,7 +14,7 @@ import { InjectionToken } from '@angular/core';
 import { ScrollStrategy } from '@angular/cdk/overlay';
 
 // @public
-export const HELL_OMNIBAR_IMPORTS: readonly [typeof HellOmnibar, typeof HellOmnibarPanel, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarItemIcon, typeof HellOmnibarItemText, typeof HellOmnibarItemSubtext, typeof HellOmnibarItemTrailing, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
+export const HELL_OMNIBAR_IMPORTS: readonly [typeof HellOmnibar, typeof HellOmnibarGroup, typeof HellOmnibarGroupLabel, typeof HellOmnibarItem, typeof HellOmnibarActionsStrip, typeof HellOmnibarAction];
 
 // @public
 export const HELL_OMNIBAR_LABELS: InjectionToken<HellLabels<HellOmnibarLabels>>;
@@ -119,48 +119,8 @@ export class HellOmnibarItem<T = unknown> {
 }
 
 // @public
-export class HellOmnibarItemIcon {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemIcon, "[hellOmnibarItemIcon]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemIcon, never>;
-}
-
-// @public
-export class HellOmnibarItemSubtext {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemSubtext, "[hellOmnibarItemSubtext]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemSubtext, never>;
-}
-
-// @public
-export class HellOmnibarItemText {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemText, "[hellOmnibarItemText]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemText, never>;
-}
-
-// @public
-export class HellOmnibarItemTrailing {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemTrailing, "[hellOmnibarItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemTrailing, never>;
-}
-
-// @public
 export interface HellOmnibarLabels {
     readonly clearSearch: string;
-}
-
-// @public
-export class HellOmnibarPanel {
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarPanel, "[hellOmnibarPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarPanel, never>;
 }
 
 // @public

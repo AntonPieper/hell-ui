@@ -77,7 +77,7 @@ const RUNBOOKS: readonly Runbook[] = [
         </button>
       </div>
 
-      <div hellOmnibarPanel [ui]="'flex flex-col gap-hell-2'">
+      <div class="flex flex-col gap-hell-2">
         @if (search.status() === 'loading') {
           <div role="status" class="p-hell-3 text-sm text-hell-foreground-muted">
             Loading runbooks…
@@ -94,18 +94,17 @@ const RUNBOOKS: readonly Runbook[] = [
             @for (runbook of search.items(); track runbook.id) {
               <button hellOmnibarItem type="button" [value]="runbook" [ui]="'rounded-hell-md'">
                 <hell-icon
-                  hellOmnibarItemIcon
+                  class="inline-flex w-4 shrink-0 items-center justify-center text-hell-primary"
                   name="faSolidLayerGroup"
                   size="13px"
-                  [ui]="'text-hell-primary'"
                 />
-                <span hellOmnibarItemText [ui]="'font-medium'">
+                <span class="flex min-w-0 flex-1 flex-col overflow-hidden font-medium *:truncate">
                   {{ runbook.title }}
-                  <span hellOmnibarItemSubtext [ui]="'text-hell-foreground-subtle'">
+                  <span class="text-[11px] text-hell-foreground-subtle">
                     {{ runbook.owner }}
                   </span>
                 </span>
-                <span hellOmnibarItemTrailing [ui]="'text-hell-primary'">open</span>
+                <span class="ms-auto inline-flex items-center text-[11px] text-hell-primary">open</span>
               </button>
             }
           </div>

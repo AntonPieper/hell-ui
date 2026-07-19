@@ -147,7 +147,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/app-shell',
  detail:'components/app-shell/examples/with-omnibar-menu-avatar.example.ts',
  terms:
-'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent --hell-app-content-max-width ui search account aria-current',
+'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent --hell-app-content-max-width ui search account aria-current',
  },
  {
  title:'Audio Player: Basic',
@@ -1113,42 +1113,42 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'components/omnibar/examples/async-search.example.ts',
  terms:
-'async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar query queryChange hellSearchResource HellSearchResourceSource HellSearchField status loading error abort signal debounce hellOmnibarLeading hellOmnibarActions hellOmnibarAction pressed hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemSubtext hellOmnibarItemTrailing hellOmnibarFooter hell-icon HellIcon disabled item footer remote backend projected',
+'async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar query queryChange hellSearchResource HellSearchResourceSource HellSearchField status loading error abort signal debounce hellOmnibarLeading hellOmnibarActions hellOmnibarAction pressed hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarFooter hell-icon HellIcon disabled item footer remote backend projected',
  },
  {
  title:'Omnibar: Basic',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/basic.example.ts',
  terms:
-'components/omnibar/examples/basic.example components/omnibar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText query queryChange submit HELL_OMNIBAR_IMPORTS hellSearchResource HellSearchField status items local ranking command palette projected smallest usage',
+'components/omnibar/examples/basic.example components/omnibar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem query queryChange submit HELL_OMNIBAR_IMPORTS hellSearchResource HellSearchField status items local ranking command palette projected smallest usage',
  },
  {
  title:'Omnibar: Command palette with kbd',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/command-palette.example.ts',
  terms:
-'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/chip hotkey mod+k query submit hellSearchResource HellSearchField hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemTrailing hell-icon HellIcon topbar grouped commands shortcut chips composite',
+'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/chip hotkey mod+k query submit hellSearchResource HellSearchField hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hell-icon HellIcon topbar grouped commands shortcut chips composite',
  },
  {
  title:'Omnibar: Global hotkey',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/hotkey.example.ts',
  terms:
-'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut query hellSearchResource HellSearchField hellOmnibarTrailing hellKbd kbd @hell-ui/angular/chip hellOmnibarGroup hellOmnibarItem hellOmnibarItemText command palette editable target protection',
+'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut query hellSearchResource HellSearchField hellOmnibarTrailing hellKbd kbd @hell-ui/angular/chip hellOmnibarGroup hellOmnibarItem command palette editable target protection',
  },
  {
  title:'Omnibar: Sizes',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/sizes.example.ts',
  terms:
-'components/omnibar/examples/sizes.example components/omnibar hell-omnibar size sm md lg data-size query queryChange hellSearchResource HellSearchField hellOmnibarGroup hellOmnibarItem hellOmnibarItemText HELL_OMNIBAR_IMPORTS control height density',
+'components/omnibar/examples/sizes.example components/omnibar hell-omnibar size sm md lg data-size query queryChange hellSearchResource HellSearchField hellOmnibarGroup hellOmnibarItem HELL_OMNIBAR_IMPORTS control height density',
  },
  {
  title:'Omnibar: Styling all parts',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/styling.example.ts',
  terms:
-'components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map HellOmnibarUi HellOmnibarPart data-slot control inputWrap input clear panel actions results hellOmnibarPanel hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemSubtext hellOmnibarItemTrailing hellOmnibarActions hellOmnibarAction hellChip hellChipRemove hellChipInput HellChip HellChipRemove hell-icon HellIcon hellSearchResource HellSearchResourceSource status loading error projected design tokens bg-hell-primary-soft rounded-hell',
+'components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map HellOmnibarUi HellOmnibarPart data-slot control inputWrap input clear panel actions results hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarActions hellOmnibarAction hellChip hellChipRemove hellChipInput HellChip HellChipRemove hell-icon HellIcon hellSearchResource HellSearchResourceSource status loading error projected design tokens bg-hell-primary-soft rounded-hell',
  },
  {
  title:'Pagination: Basic',

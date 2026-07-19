@@ -75,12 +75,18 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
               [value]="person"
               [disabled]="isPersonDisabled(person)"
             >
-              <hell-icon hellOmnibarItemIcon name="faSolidUser" size="13px" />
-              <span hellOmnibarItemText>
+              <hell-icon
+                class="inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle in-data-[active=true]:text-hell-foreground"
+                name="faSolidUser"
+                size="13px"
+              />
+              <span class="flex min-w-0 flex-1 flex-col overflow-hidden *:truncate">
                 {{ person.name }}
-                <span hellOmnibarItemSubtext>{{ person.email }}</span>
+                <span class="text-[11px] text-hell-foreground-muted">{{ person.email }}</span>
               </span>
-              <span hellOmnibarItemTrailing>{{ person.team }}</span>
+              <span class="ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-muted">
+                {{ person.team }}
+              </span>
             </button>
           }
         </div>

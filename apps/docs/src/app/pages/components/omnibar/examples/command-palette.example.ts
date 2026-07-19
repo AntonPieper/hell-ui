@@ -65,9 +65,13 @@ const COMMANDS: readonly Command[] = [
             <div hellOmnibarGroupLabel>{{ group.section }}</div>
             @for (command of group.commands; track command.id) {
               <button hellOmnibarItem type="button" [value]="command">
-                <hell-icon hellOmnibarItemIcon [name]="command.icon" size="13px" />
-                <span hellOmnibarItemText>{{ command.label }}</span>
-                <span hellOmnibarItemTrailing>
+                <hell-icon
+                  class="inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle in-data-[active=true]:text-hell-foreground"
+                  [name]="command.icon"
+                  size="13px"
+                />
+                <span class="flex min-w-0 flex-1 flex-col overflow-hidden">{{ command.label }}</span>
+                <span class="ms-auto inline-flex items-center gap-1">
                   <kbd hellKbd>{{ command.shortcut }}</kbd>
                 </span>
               </button>

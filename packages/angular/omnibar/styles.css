@@ -289,46 +289,4 @@
     padding-block: calc(var(--spacing) * 1);
   }
 
-  [hellOmnibarItemIcon][data-slot='root'] {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(var(--spacing) * 4);
-    color: var(--color-hell-foreground-subtle);
-  }
-
-  button[hellOmnibarItem][data-slot='root'][data-active='true']
-    [hellOmnibarItemIcon][data-slot='root'] {
-    color: var(--color-hell-foreground);
-  }
-
-  [hellOmnibarItemText][data-slot='root'] {
-    flex: 1 1 auto;
-    min-width: 0;
-    display: inline-flex;
-    flex-direction: column;
-    gap: 1px;
-    overflow: hidden;
-  }
-
-  [hellOmnibarItemText][data-slot='root'] > * {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  [hellOmnibarItemSubtext][data-slot='root'] {
-    font-size: 11px;
-    color: var(--color-hell-foreground-muted);
-  }
-
-  [hellOmnibarItemTrailing][data-slot='root'] {
-    margin-inline-start: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--spacing) * 1);
-    font-size: 11px;
-    color: var(--color-hell-foreground-muted);
-  }
 }

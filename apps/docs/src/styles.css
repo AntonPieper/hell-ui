@@ -447,7 +447,7 @@
     font-family: var(--font-mono);
   }
 
-  .hd-docs-search [hellOmnibarItemTrailing][data-slot='root'] {
+  .hd-docs-search-result-section {
     max-width: 128px;
     overflow: hidden;
     white-space: nowrap;

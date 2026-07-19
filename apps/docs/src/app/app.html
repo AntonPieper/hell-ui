@@ -162,12 +162,18 @@
                 [value]="result"
                 (select)="onDocsSearchSelect($any($event), shell)"
               >
-                <hell-icon hellOmnibarItemIcon [name]="result.icon" size="13px" />
-                <span hellOmnibarItemText>
+                <hell-icon
+                  class="inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle in-data-[active=true]:text-hell-foreground"
+                  [name]="result.icon"
+                  size="13px"
+                />
+                <span class="flex min-w-0 flex-1 flex-col overflow-hidden *:truncate">
                   <span>{{ result.title }}</span>
-                  <span hellOmnibarItemSubtext>{{ result.detail }}</span>
+                  <span class="text-[11px] text-hell-foreground-muted">{{ result.detail }}</span>
                 </span>
-                <span hellOmnibarItemTrailing>
+                <span
+                  class="hd-docs-search-result-section ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-muted"
+                >
                   {{ result.section }}
                   <hell-icon name="faSolidArrowRight" size="10px" />
                 </span>

@@ -68,7 +68,7 @@ const HD_APP_SHELL_FRAME_ICONS = {
             <div hellOmnibarGroupLabel>Pages</div>
             @for (page of pageSearch.items(); track page.id) {
               <button hellOmnibarItem type="button" [value]="page" (select)="goTo($event)">
-                <span hellOmnibarItemText>{{ page.label }}</span>
+                <span class="flex min-w-0 flex-1 flex-col overflow-hidden">{{ page.label }}</span>
               </button>
             }
           </div>

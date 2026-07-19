@@ -111,7 +111,7 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
             <div hellOmnibarGroupLabel>Harness results</div>
             @for (item of omnibarSearch.items(); track item.id) {
               <button hellOmnibarItem type="button" [value]="item" [closeOnSelect]="false">
-                <span hellOmnibarItemText>{{ item.label }}</span>
+                <span class="flex min-w-0 flex-1 flex-col overflow-hidden">{{ item.label }}</span>
               </button>
             }
           </div>
