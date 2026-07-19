@@ -101,11 +101,12 @@ export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceReque
 // @public
 export interface HellSearchResource<T> {
     cancel(): void;
-    clear(): void;
+    clearResults(): void;
     readonly error: Signal<unknown>;
     readonly items: Signal<readonly T[]>;
     readonly query: WritableSignal<string>;
     refresh(): void;
+    reset(): void;
     readonly status: Signal<HellSearchStatus>;
 }
 

@@ -85,8 +85,20 @@ export interface HellSearchResource<T> {
   refresh(): void;
   /** Stop scheduled or active work while preserving settled state. */
   cancel(): void;
-  /** Cancel work and reset query, items, status, and error. */
-  clear(): void;
+  /**
+   * Cancel work and empty items, status, and error while leaving the
+   * caller-owned query signal untouched. The resource stays cleared until a
+   * later query change or an explicit `refresh()`.
+   */
+  clearResults(): void;
+  /**
+   * Cancel work, empty items, status, and error, and set the caller-owned
+   * query signal to the empty string without dispatching an empty-query
+   * request. This is the only resource operation that writes the query; the
+   * resource stays reset until a later query change or an explicit
+   * `refresh()`.
+   */
+  reset(): void;
 }
 
 /**
@@ -176,6 +188,17 @@ export function hellSearchResource<T, P = unknown>(
 
   destroyRef.onDestroy(() => lifecycle.cancel());
 
+  const clearResults = () => {
+    lifecycle.cancel();
+    settledStatus = 'idle';
+    settledError = null;
+    itemState.set([]);
+    errorState.set(null);
+    statusState.set('idle');
+    cleared = true;
+    lastObservedSnapshot = readSearchSnapshot(options);
+  };
+
   return {
     query: options.query,
     items: itemState.asReadonly(),
@@ -191,14 +214,9 @@ export function hellSearchResource<T, P = unknown>(
       lifecycle.cancel();
       lastObservedSnapshot = readSearchSnapshot(options);
     },
-    clear: () => {
-      lifecycle.cancel();
-      settledStatus = 'idle';
-      settledError = null;
-      itemState.set([]);
-      errorState.set(null);
-      statusState.set('idle');
-      cleared = true;
+    clearResults,
+    reset: () => {
+      clearResults();
       options.query.set('');
       lastObservedSnapshot = readSearchSnapshot(options);
     },

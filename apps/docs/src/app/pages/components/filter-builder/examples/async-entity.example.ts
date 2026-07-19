@@ -148,7 +148,7 @@ export class FilterBuilderAsyncEntityExample {
       operator: 'is',
       value: owner,
     });
-    if (committed) this.ownerSearch.clear();
+    if (committed) this.ownerSearch.reset();
   }
 }
 
