@@ -1,7 +1,14 @@
-import { Component, TemplateRef, signal, viewChild } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, TemplateRef, signal, viewChild, type ElementRef } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { NgpTooltipTriggerStateToken } from 'ng-primitives/tooltip';
 
-import { HellTooltip, HellTooltipSurface } from './tooltip';
+import {
+  HellTooltip,
+  HellTooltipSurface,
+  provideHellTooltipDefaults,
+  type HellTooltipDefaults,
+} from './tooltip';
 
 beforeAll(() => {
   const elementPrototype = Element.prototype as Element & {
@@ -65,6 +72,110 @@ class ArbitraryHostTooltipHost {
   `,
 })
 class NativeDisabledTooltipHost {
+  readonly hellTrigger = viewChild.required(HellTooltip);
+}
+
+@Component({
+  selector: 'hell-spec-guaranteed-timing-host',
+  imports: [HellTooltip],
+  template: `<button type="button" hellTooltip="Hint">Guaranteed</button>`,
+})
+class GuaranteedTimingHost {}
+
+@Component({
+  selector: 'hell-spec-scoped-defaults-host',
+  imports: [HellTooltip],
+  providers: [
+    provideHellTooltipDefaults({ showDelay: 120, placement: 'bottom', cooldown: 40, offset: 10 }),
+  ],
+  template: `<button type="button" hellTooltip="Hint">Scoped</button>`,
+})
+class ScopedDefaultsHost {}
+
+@Component({
+  selector: 'hell-spec-nested-defaults-child',
+  imports: [HellTooltip],
+  providers: [provideHellTooltipDefaults({ hideDelay: 80, showDelay: undefined })],
+  template: `<button type="button" hellTooltip="Hint">Nested</button>`,
+})
+class NestedDefaultsChild {}
+
+@Component({
+  selector: 'hell-spec-nested-defaults-host',
+  imports: [NestedDefaultsChild],
+  providers: [provideHellTooltipDefaults({ showDelay: 120, cooldown: 40 })],
+  template: `<hell-spec-nested-defaults-child />`,
+})
+class NestedDefaultsHost {}
+
+@Component({
+  selector: 'hell-spec-local-precedence-host',
+  imports: [HellTooltip],
+  providers: [provideHellTooltipDefaults({ placement: 'bottom', showDelay: 120, offset: 10 })],
+  template: `
+    <button type="button" hellTooltip="Hint" placement="left" [showDelay]="25">Local</button>
+  `,
+})
+class LocalPrecedenceHost {}
+
+@Component({
+  selector: 'hell-spec-excluded-defaults-host',
+  imports: [HellTooltip],
+  providers: [
+    provideHellTooltipDefaults({
+      hoverableContent: false,
+      useTextContent: true,
+      disabled: true,
+      content: 'smuggled',
+    } as unknown as HellTooltipDefaults),
+  ],
+  template: `<button type="button" hellTooltip="Hint">Excluded</button>`,
+})
+class ExcludedDefaultsHost {}
+
+@Component({
+  selector: 'hell-spec-forwarded-capabilities-host',
+  imports: [HellTooltip],
+  template: `
+    <div #anchorEl></div>
+    <div #containerEl></div>
+    <button
+      type="button"
+      hellTooltip="Hint"
+      placement="right-start"
+      offset="12"
+      [flip]="false"
+      [shift]="false"
+      [showDelay]="5"
+      [hideDelay]="6"
+      [cooldown]="7"
+      [container]="containerEl"
+      [showOnOverflow]="true"
+      [anchor]="anchorEl"
+      [position]="position"
+      [trackPosition]="true"
+      scrollBehavior="close"
+    >
+      Forwarded
+    </button>
+  `,
+})
+class ForwardedCapabilitiesHost {
+  readonly anchorEl = viewChild.required<ElementRef<HTMLElement>>('anchorEl');
+  readonly containerEl = viewChild.required<ElementRef<HTMLElement>>('containerEl');
+  readonly position = { x: 24, y: 48 };
+}
+
+@Component({
+  selector: 'hell-spec-hover-travel-host',
+  imports: [HellTooltip],
+  template: `
+    <button id="travel-trigger" type="button" hellTooltip="Hint" [showDelay]="0" [hideDelay]="0">
+      Travel
+    </button>
+  `,
+})
+class HoverTravelTooltipHost {
   readonly hellTrigger = viewChild.required(HellTooltip);
 }
 
@@ -240,6 +351,166 @@ describe('HellTooltip', () => {
     expect(directive.open()).toBe(true);
   });
 });
+
+describe('HellTooltip scoped defaults', () => {
+  it('guarantees 500ms show delay, 0ms hide delay, and 300ms cooldown without overrides', () => {
+    const fixture = TestBed.createComponent(GuaranteedTimingHost);
+    fixture.detectChanges();
+
+    const state = engineState(fixture);
+    expect(state.showDelay()).toBe(500);
+    expect(state.hideDelay()).toBe(0);
+    expect(state.cooldown()).toBe(300);
+  });
+
+  it('applies partial scoped defaults while keeping guaranteed values for unspecified keys', () => {
+    const fixture = TestBed.createComponent(ScopedDefaultsHost);
+    fixture.detectChanges();
+
+    const state = engineState(fixture);
+    expect(state.showDelay()).toBe(120);
+    expect(state.placement()).toBe('bottom');
+    expect(state.cooldown()).toBe(40);
+    expect(state.offset()).toBe(10);
+    expect(state.hideDelay()).toBe(0);
+  });
+
+  it('merges a nested provider over its nearest ancestor instead of resetting values', () => {
+    const fixture = TestBed.createComponent(NestedDefaultsHost);
+    fixture.detectChanges();
+
+    const state = engineState(fixture);
+    // Refined by the nested provider.
+    expect(state.hideDelay()).toBe(80);
+    // Inherited from the ancestor provider; the nested partial (including its
+    // explicit `showDelay: undefined`) must not reset them.
+    expect(state.showDelay()).toBe(120);
+    expect(state.cooldown()).toBe(40);
+  });
+
+  it('lets local trigger inputs win over every provider', () => {
+    const fixture = TestBed.createComponent(LocalPrecedenceHost);
+    fixture.detectChanges();
+
+    const state = engineState(fixture);
+    expect(state.placement()).toBe('left');
+    expect(state.showDelay()).toBe(25);
+    // No local input, so the scoped default still applies.
+    expect(state.offset()).toBe(10);
+  });
+
+  it('cannot configure content, disabled state, host-text fallback, or hoverability', () => {
+    const fixture = TestBed.createComponent(ExcludedDefaultsHost);
+    fixture.detectChanges();
+
+    const state = engineState(fixture);
+    expect(state.hoverableContent()).toBe(true);
+    expect(state.useTextContent()).toBe(false);
+    expect(state.disabled()).toBe(false);
+  });
+});
+
+describe('HellTooltip forwarded capabilities', () => {
+  it('forwards positioning and behavior inputs to the delegated engine under upstream types', () => {
+    const fixture = TestBed.createComponent(ForwardedCapabilitiesHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const state = engineState(fixture);
+    expect(state.placement()).toBe('right-start');
+    expect(state.offset()).toBe(12);
+    expect(state.flip()).toBe(false);
+    expect(state.shift()).toBe(false);
+    expect(state.showDelay()).toBe(5);
+    expect(state.hideDelay()).toBe(6);
+    expect(state.cooldown()).toBe(7);
+    expect(state.container()).toBe(host.containerEl().nativeElement);
+    expect(state.showOnOverflow()).toBe(true);
+    expect(state.anchor()).toBe(host.anchorEl().nativeElement);
+    expect(state.position()).toEqual({ x: 24, y: 48 });
+    expect(state.trackPosition()).toBe(true);
+    expect(state.scrollBehavior()).toBe('close');
+  });
+});
+
+describe('HellTooltip invariants', () => {
+  it('always renders a hoverable surface that suppresses entrance motion under reduced motion', async () => {
+    const fixture = TestBed.createComponent(HoverTravelTooltipHost);
+    fixture.detectChanges();
+
+    expect(engineState(fixture).hoverableContent()).toBe(true);
+
+    fixture.componentInstance.hellTrigger().show();
+    const tooltip = await waitForTooltip(fixture);
+
+    expect(tooltip.hasAttribute('data-hoverable')).toBe(false);
+    expect(tooltip.className).toContain('pointer-events-auto');
+    expect(tooltip.className).not.toContain('pointer-events-none');
+    expect(tooltip.className).toContain('animate-[hell-pop-in');
+    expect(tooltip.className).toContain('motion-reduce:animate-none');
+
+    fixture.componentInstance.hellTrigger().hide();
+    await waitFor(fixture, () => !fixture.componentInstance.hellTrigger().open());
+    cleanupPortaledTestElements('[hellTooltipSurface]');
+  });
+
+  it('keeps the tooltip open while the pointer travels from the trigger onto the surface', async () => {
+    const fixture = TestBed.createComponent(HoverTravelTooltipHost);
+    fixture.detectChanges();
+    const directive = fixture.componentInstance.hellTrigger();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#travel-trigger');
+    // The delegated hover bridge computes a travel corridor from real layout
+    // boxes; give the boxless test DOM a trigger and a surface 10px above it.
+    trigger.getBoundingClientRect = () => new DOMRect(0, 100, 100, 20);
+    trigger.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    const tooltip = await waitForTooltip(fixture);
+    tooltip.getBoundingClientRect = () => new DOMRect(0, 60, 100, 30);
+
+    trigger.dispatchEvent(
+      new MouseEvent('mouseleave', { bubbles: true, clientX: 50, clientY: 100 }),
+    );
+    tooltip.dispatchEvent(new MouseEvent('pointerenter', { bubbles: true }));
+    await settleFrames(fixture, 5);
+    expect(directive.open()).toBe(true);
+    expect(queryTooltip()).not.toBeNull();
+
+    tooltip.dispatchEvent(new MouseEvent('pointerleave', { bubbles: true }));
+    await waitFor(fixture, () => !directive.open());
+    expect(queryTooltip()).toBeNull();
+    cleanupPortaledTestElements('[hellTooltipSurface]');
+  });
+
+  it('closes on Escape without moving focus', async () => {
+    const fixture = TestBed.createComponent(HoverTravelTooltipHost);
+    fixture.detectChanges();
+    const directive = fixture.componentInstance.hellTrigger();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#travel-trigger');
+    trigger.focus();
+    await waitForTooltip(fixture);
+    expect(directive.open()).toBe(true);
+    expect(document.activeElement).toBe(trigger);
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await waitFor(fixture, () => !directive.open());
+
+    expect(directive.open()).toBe(false);
+    expect(queryTooltip()).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    cleanupPortaledTestElements('[hellTooltipSurface]');
+  });
+});
+
+/**
+ * Reads the delegated engine's public trigger state from the trigger's element
+ * injector — the same seam `HellTooltipSurface` and upstream consumers use.
+ */
+function engineState(fixture: ComponentFixture<unknown>) {
+  return fixture.debugElement
+    .query(By.directive(HellTooltip))
+    .injector.get(NgpTooltipTriggerStateToken)();
+}
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);

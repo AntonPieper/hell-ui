@@ -867,6 +867,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   or `resource.clearResults()` when the query should survive. Evidence:
   `packages/angular/core/search-resource.spec.ts` and the updated core API
   report. Closes #255.
+- BREAKING: Exposed the delegated Tooltip behavior surface and injector-scoped
+  defaults. `[hellTooltip]` now forwards the upstream ng-primitives
+  capabilities under upstream types — `placement`, `offset`, `flip`, `shift`,
+  `container`, `anchor`, programmatic `position`, `trackPosition`,
+  `showOnOverflow`, `scrollBehavior`, `showDelay`, `hideDelay`, and
+  `cooldown` — and the new `provideHellTooltipDefaults(...)` provider accepts a
+  partial `HellTooltipDefaults` per injector scope. Nested providers merge
+  over the nearest ancestor policy instead of resetting unspecified values,
+  and a local trigger input wins over every provider. First carried by the
+  next `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Hell
+  now guarantees a 500 ms show delay, 0 ms hide delay, and 300 ms cooldown
+  when nothing overrides them (previously the trigger defaulted to a 0 ms
+  show delay and a 500 ms hide delay). The `hoverableContent` input and the
+  surface's `data-hoverable` state attribute are removed: tooltip content is
+  always hoverable (`pointer-events-auto`), Escape always dismisses without
+  moving focus, and the Tooltip Surface recipe suppresses its entrance
+  animation under `prefers-reduced-motion`. Content, styling, disabled state,
+  host-text fallback, template context, hoverability, and Escape dismissal
+  are not configurable through defaults, and no parallel Hell overlay,
+  dismissal, timing, or hover state machine exists. Evidence:
+  `packages/angular/tooltip/tooltip.spec.ts`, the tooltip API report, and the
+  tooltip browser accessibility contract. Closes #241.
 - BREAKING: Delivered the explicit Tooltip content contract on the canonical
   trigger. `[hellTooltip]` now accepts exactly
   `string | TemplateRef<unknown> | null | undefined`: a present string renders
