@@ -31,7 +31,7 @@ class FakeStream<TValue> implements HellPickerEngineStream<TValue> {
 
 class FakeEngine implements HellPickerEngineAdapter<string> {
   readonly hostElement = document.createElement('div');
-  readonly valueChanges = new FakeStream<unknown>();
+  readonly valueChanges = new FakeStream<HellPickValue<string> | undefined>();
   readonly openChanges = new FakeStream<boolean>();
   readonly writes: Array<HellPickValue<string>> = [];
   readonly disabledWrites: boolean[] = [];
@@ -82,6 +82,23 @@ describe('hellNormalizePickValue helpers', () => {
   it('routes by mode', () => {
     expect(hellNormalizePickValue<string>('a', false)).toBe('a');
     expect(hellNormalizePickValue<string>('a', true)).toEqual(['a']);
+  });
+
+  it('rejects untyped engine output at the normalization boundary', () => {
+    const untyped: unknown = 'a';
+    // @ts-expect-error -- unknown engine output must be decoded to a pick value first
+    expect(hellNormalizePickSingleValue<string>(untyped)).toBe('a');
+    // @ts-expect-error -- unknown engine output must be decoded to a pick value first
+    expect(hellNormalizePickMultipleValue<string>(untyped)).toEqual(['a']);
+    // @ts-expect-error -- unknown engine output must be decoded to a pick value first
+    expect(hellNormalizePickValue<string>(untyped, false)).toBe('a');
+  });
+
+  it('accepts an explicitly decoded pick value', () => {
+    const decodePick = (value: unknown): HellPickValue<string> | undefined =>
+      typeof value === 'string' ? value : undefined;
+    expect(hellNormalizePickValue<string>(decodePick('a'), false)).toBe('a');
+    expect(hellNormalizePickValue<string>(decodePick(1), false)).toBeNull();
   });
 });
 

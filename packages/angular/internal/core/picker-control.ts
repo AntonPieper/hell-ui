@@ -8,23 +8,42 @@ import type {
   HellPickValue,
 } from './pick-value';
 
-/** Normalizes an engine-emitted single pick value: nullish commits a clear. */
-export function hellNormalizePickSingleValue<T>(value: unknown): HellPickSingleValue<T> {
-  if (value == null) return null;
-  return value as T;
+/**
+ * Normalizes an engine-emitted single pick value: nullish commits a clear.
+ * The input must already be typed pick output; untyped engine emissions are
+ * decoded to `HellPickValue<T>` by the caller instead of being cast here.
+ */
+export function hellNormalizePickSingleValue<T>(
+  value: HellPickSingleValue<T> | undefined,
+): HellPickSingleValue<T> {
+  return value ?? null;
+}
+
+/** Narrows a non-null pick value to its multiple (array) shape. */
+function hellIsPickMultipleValue<T>(value: T | readonly T[]): value is readonly T[] {
+  return Array.isArray(value);
 }
 
 /** Normalizes an engine-emitted multiple pick value to a fresh array. */
-export function hellNormalizePickMultipleValue<T>(value: unknown): HellPickMultipleValue<T> {
+export function hellNormalizePickMultipleValue<T>(
+  value: HellPickValue<T> | undefined,
+): HellPickMultipleValue<T> {
   if (value == null) return [];
-  if (Array.isArray(value)) return [...value];
-  return [value as T];
+  if (hellIsPickMultipleValue(value)) return [...value];
+  return [value];
 }
 
-/** Normalizes a pick value against the picker's current mode. */
-export function hellNormalizePickValue<T>(value: unknown, multiple: boolean): HellPickValue<T> {
+/**
+ * Normalizes a pick value against the picker's current mode. Single mode
+ * passes an already-array value through unchanged, matching the engine's own
+ * mode/value reconciliation.
+ */
+export function hellNormalizePickValue<T>(
+  value: HellPickValue<T> | undefined,
+  multiple: boolean,
+): HellPickValue<T> {
   if (multiple) return hellNormalizePickMultipleValue<T>(value);
-  return hellNormalizePickSingleValue<T>(value);
+  return value ?? null;
 }
 
 /** Structural stream shape shared by the picker engines' outputs. */
@@ -42,8 +61,12 @@ export interface HellPickerEngineAdapter<T> {
   readonly host: () => HTMLElement;
   /** Whether the engine is currently in multiple mode. */
   readonly multiple: () => boolean;
-  /** Engine value emissions, re-emitted to the form after normalization. */
-  readonly valueChanges: HellPickerEngineStream<unknown>;
+  /**
+   * Engine value emissions, re-emitted to the form after normalization.
+   * The stream carries typed pick output; an engine whose raw emissions are
+   * untyped must decode them into `HellPickValue<T>` before adapting.
+   */
+  readonly valueChanges: HellPickerEngineStream<HellPickValue<T> | undefined>;
   /** Engine open emissions; an open dropdown counts as inside the control. */
   readonly openChanges: HellPickerEngineStream<boolean>;
   /** Writes a normalized form value into the engine without re-emitting. */

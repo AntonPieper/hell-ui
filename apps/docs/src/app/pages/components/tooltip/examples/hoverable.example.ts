@@ -12,7 +12,6 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
       [hellTooltip]="hoverable"
       placement="right"
       [hideDelay]="100"
-      [hoverableContent]="true"
       type="button"
     >
       Hoverable

@@ -4,6 +4,7 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
+  InjectionToken,
   Injector,
   TemplateRef,
   booleanAttribute,
@@ -15,22 +16,119 @@ import {
   output,
   signal,
   untracked,
+  type Provider,
   type Signal,
 } from '@angular/core';
 import {
   NgpTooltip,
-  injectTooltipTriggerState,
   ngpTooltipTrigger,
   provideTooltipTriggerState,
   type NgpTooltipPlacement,
 } from 'ng-primitives/tooltip';
-import { NgpOverlay, coerceOffset, type NgpOverlayContent } from 'ng-primitives/portal';
+import {
+  NgpOverlay,
+  coerceFlip,
+  coerceOffset,
+  coerceShift,
+  type NgpFlip,
+  type NgpFlipInput,
+  type NgpOffset,
+  type NgpOffsetInput,
+  type NgpOverlayContent,
+  type NgpPosition,
+  type NgpShift,
+  type NgpShiftInput,
+} from 'ng-primitives/portal';
 import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 
 const HELL_TOOLTIP_RECIPE = {
-  root: 'pointer-events-none absolute max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))] rounded-hell-sm bg-[#1c222a] px-2 py-1 text-xs font-medium leading-[var(--text-xs--line-height)] text-white shadow-hell-md [overflow-wrap:anywhere] data-hoverable:pointer-events-auto animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  root: 'pointer-events-auto absolute max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))] rounded-hell-sm bg-[#1c222a] px-2 py-1 text-xs font-medium leading-[var(--text-xs--line-height)] text-white shadow-hell-md [overflow-wrap:anywhere] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)] motion-reduce:animate-none',
 } satisfies HellRecipe<'root'>;
+
+/**
+ * Injector-scoped defaults for `HellTooltip` behavior and positioning policy.
+ *
+ * Every key is optional: a partial defaults object refines the nearest
+ * ancestor policy instead of resetting unspecified values, and a local trigger
+ * input always wins over the effective scoped default. Hell guarantees a
+ * 500&nbsp;ms show delay, 0&nbsp;ms hide delay, and 300&nbsp;ms cooldown when
+ * nothing overrides them.
+ *
+ * Content, styling, disabled state, host-text fallback, template context,
+ * hoverability, and Escape dismissal are deliberately not configurable here;
+ * `anchor` and programmatic `position` stay per-trigger inputs because they
+ * reference concrete elements and coordinates rather than scope policy.
+ */
+export interface HellTooltipDefaults {
+  /** Preferred placement of the surface relative to the trigger. */
+  readonly placement?: NgpTooltipPlacement;
+  /** Distance between the surface and the trigger, as the upstream offset shape. */
+  readonly offset?: NgpOffset;
+  /** Delay in milliseconds before the tooltip shows. */
+  readonly showDelay?: number;
+  /** Delay in milliseconds before the tooltip hides. */
+  readonly hideDelay?: number;
+  /** Cooldown in milliseconds during which moving between tooltips skips the show delay. */
+  readonly cooldown?: number;
+  /** Flip behavior when there is not enough space for the preferred placement. */
+  readonly flip?: NgpFlip;
+  /** Shift behavior that keeps the surface in view. */
+  readonly shift?: NgpShift;
+  /** Element or selector the overlay is appended to. */
+  readonly container?: HTMLElement | string | null;
+  /** Whether tooltips only show when the trigger element overflows. */
+  readonly showOnOverflow?: boolean;
+  /** Whether to track the trigger position on every animation frame. */
+  readonly trackPosition?: boolean;
+  /** How the tooltip behaves when the window is scrolled. */
+  readonly scrollBehavior?: 'reposition' | 'close';
+}
+
+const HELL_TOOLTIP_DEFAULTS = new InjectionToken<HellTooltipDefaults>('HELL_TOOLTIP_DEFAULTS', {
+  providedIn: 'root',
+  factory: () => ({}),
+});
+
+/**
+ * Provides partial `HellTooltip` defaults for an injector scope. Specified
+ * keys merge over the nearest ancestor provider (or Hell's guaranteed
+ * defaults); unspecified and explicitly `undefined` keys keep their inherited
+ * values. Local trigger inputs take precedence over every provider.
+ */
+export function provideHellTooltipDefaults(defaults: HellTooltipDefaults): Provider {
+  return {
+    provide: HELL_TOOLTIP_DEFAULTS,
+    useFactory: (): HellTooltipDefaults => ({
+      ...(inject(HELL_TOOLTIP_DEFAULTS, { optional: true, skipSelf: true }) ?? {}),
+      ...hellSpecifiedTooltipDefaults(defaults),
+    }),
+  };
+}
+
+/** Drops `undefined` entries so unspecified keys never reset ancestor values. */
+function hellSpecifiedTooltipDefaults(defaults: HellTooltipDefaults): HellTooltipDefaults {
+  return Object.fromEntries(Object.entries(defaults).filter(([, value]) => value !== undefined));
+}
+
+/** Hell-guaranteed timing when neither a provider nor a local input overrides it. */
+const HELL_TOOLTIP_GUARANTEED_TIMING = {
+  showDelay: 500,
+  hideDelay: 0,
+  cooldown: 300,
+} as const;
+
+/** Coerces an optional numeric input, keeping absence (`null`/`undefined`) as unset. */
+const hellOptionalNumber = (value: unknown): number | undefined =>
+  value == null ? undefined : numberAttribute(value);
+
+/** Coerces an optional boolean input, keeping absence (`null`/`undefined`) as unset. */
+const hellOptionalBoolean = (value: unknown): boolean | undefined =>
+  value == null ? undefined : booleanAttribute(value);
+
+/** Coerces an optional offset input, keeping absence (`null`/`undefined`) as unset. */
+const hellOptionalOffset = (value: NgpOffsetInput | null | undefined): NgpOffset | undefined =>
+  value == null ? undefined : coerceOffset(value);
 
 /** Normalized present content: absence (`''`, `null`, `undefined`) collapses to `null`. */
 type HellTooltipPresentContent = string | TemplateRef<unknown> | null;
@@ -56,6 +154,14 @@ const HELL_TOOLTIP_CONTENT_STATE = new WeakMap<
  * they close and disable the interaction. The trigger never adds focusability,
  * never derives the host's accessible name from content, and never opens on a
  * natively disabled control.
+ *
+ * Lifecycle, overlay, positioning, timing, hover bridging, Escape handling,
+ * and `aria-describedby` are delegated to ng-primitives, and the upstream
+ * behavior and positioning capabilities stay reachable through the trigger's
+ * inputs under upstream types. Unset inputs fall back to the nearest
+ * `provideHellTooltipDefaults` policy, then to Hell's guaranteed defaults.
+ * The surface is always hoverable and Escape always dismisses without moving
+ * focus.
  */
 @Directive({
   selector: '[hellTooltip]',
@@ -67,22 +173,41 @@ export class HellTooltip {
   readonly content = input<string | TemplateRef<unknown> | null | undefined>(undefined, {
     alias: 'hellTooltip',
   });
-  /** Preferred placement of the surface relative to the trigger. Defaults to `top`. */
-  readonly placement = input<NgpTooltipPlacement>('top');
-  /** Distance in pixels between the surface and the trigger. Defaults to `4`. */
-  readonly offset = input(4, { transform: coerceOffset });
-  /** Delay in milliseconds before the tooltip shows. Defaults to `0`. */
-  readonly showDelay = input(0, { transform: numberAttribute });
-  /** Delay in milliseconds before the tooltip hides. Defaults to `500`. */
-  readonly hideDelay = input(500, { transform: numberAttribute });
-  /** Element or selector the overlay is appended to. Defaults to `body`. */
-  readonly container = input<HTMLElement | string | null>('body');
-  /** Whether the tooltip only shows when the trigger element overflows. Defaults to `false`. */
-  readonly showOnOverflow = input(false, { transform: booleanAttribute });
-  /** Whether hovering the surface keeps the tooltip open. Defaults to `false`. */
-  readonly hoverableContent = input(false, { transform: booleanAttribute });
+  /** Preferred placement of the surface. Unset uses the scoped default, then `top`. */
+  readonly placement = input<NgpTooltipPlacement | undefined>(undefined);
+  /** Distance between the surface and the trigger. Unset uses the scoped default, then `4`. */
+  readonly offset = input(undefined, { transform: hellOptionalOffset });
+  /** Flip behavior when the preferred placement lacks space. Unset uses the scoped default, then `true`. */
+  readonly flip = input<NgpFlip, NgpFlipInput | null | undefined>(undefined, {
+    transform: coerceFlip,
+  });
+  /** Shift behavior keeping the surface in view. Unset uses the scoped default, then the engine default. */
+  readonly shift = input<NgpShift, NgpShiftInput | null | undefined>(undefined, {
+    transform: coerceShift,
+  });
+  /** Show delay in milliseconds. Unset uses the scoped default, then the guaranteed `500`. */
+  readonly showDelay = input(undefined, { transform: hellOptionalNumber });
+  /** Hide delay in milliseconds. Unset uses the scoped default, then the guaranteed `0`. */
+  readonly hideDelay = input(undefined, { transform: hellOptionalNumber });
+  /** Cooldown in milliseconds that skips the show delay when moving between tooltips. Unset uses the scoped default, then the guaranteed `300`. */
+  readonly cooldown = input(undefined, { transform: hellOptionalNumber });
+  /** Element or selector the overlay is appended to. Unset uses the scoped default, then `body`. */
+  readonly container = input<HTMLElement | string | null | undefined>(undefined);
+  /** Whether the tooltip only shows when the trigger overflows. Unset uses the scoped default, then `false`. */
+  readonly showOnOverflow = input(undefined, { transform: hellOptionalBoolean });
+  /** Anchor element the surface is positioned against instead of the trigger. */
+  readonly anchor = input<HTMLElement | null>(null);
+  /** Programmatic coordinates the surface is positioned at instead of the trigger. */
+  readonly position = input<NgpPosition | null>(null);
+  /** Whether to track the trigger position on every animation frame. Unset uses the scoped default, then `false`. */
+  readonly trackPosition = input(undefined, { transform: hellOptionalBoolean });
+  /** Scroll behavior of an open tooltip. Unset uses the scoped default, then `reposition`. */
+  readonly scrollBehavior = input<'reposition' | 'close' | undefined>(undefined);
   /** Emits the new open state whenever the tooltip shows or hides. */
   readonly openChange = output<boolean>();
+
+  /** Effective scoped defaults from the nearest `provideHellTooltipDefaults` chain. */
+  private readonly defaults = inject(HELL_TOOLTIP_DEFAULTS);
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
@@ -105,13 +230,28 @@ export class HellTooltip {
   private readonly state = ngpTooltipTrigger<unknown>({
     tooltip: signal<NgpOverlayContent<unknown> | string | null>(HellTooltipContentHost),
     disabled: computed(() => this.presentContent() === null || this.hostDisabled()),
-    placement: this.placement,
-    offset: this.offset,
-    showDelay: this.showDelay,
-    hideDelay: this.hideDelay,
-    container: this.container,
-    showOnOverflow: this.showOnOverflow,
-    hoverableContent: this.hoverableContent,
+    placement: computed(() => this.placement() ?? this.defaults.placement ?? 'top'),
+    offset: computed(() => this.offset() ?? this.defaults.offset ?? 4),
+    flip: computed(() => this.flip() ?? this.defaults.flip ?? true),
+    shift: computed(() => this.shift() ?? this.defaults.shift),
+    showDelay: computed(
+      () => this.showDelay() ?? this.defaults.showDelay ?? HELL_TOOLTIP_GUARANTEED_TIMING.showDelay,
+    ),
+    hideDelay: computed(
+      () => this.hideDelay() ?? this.defaults.hideDelay ?? HELL_TOOLTIP_GUARANTEED_TIMING.hideDelay,
+    ),
+    cooldown: computed(
+      () => this.cooldown() ?? this.defaults.cooldown ?? HELL_TOOLTIP_GUARANTEED_TIMING.cooldown,
+    ),
+    container: computed(() => this.container() ?? this.defaults.container ?? 'body'),
+    showOnOverflow: computed(() => this.showOnOverflow() ?? this.defaults.showOnOverflow ?? false),
+    anchor: this.anchor,
+    position: this.position,
+    trackPosition: computed(() => this.trackPosition() ?? this.defaults.trackPosition ?? false),
+    scrollBehavior: computed(() => this.scrollBehavior() ?? this.defaults.scrollBehavior ?? 'reposition'),
+    // Hoverability is an accessibility invariant, not configuration: the
+    // pointer can always travel onto the surface.
+    hoverableContent: signal(true),
     // The host's text is never tooltip content.
     useTextContent: signal(false),
   });
@@ -166,7 +306,9 @@ export class HellTooltip {
  * Tooltip surface: the displayed hint region. Implicit string surfaces and
  * consumer-authored template surfaces render the same public selector,
  * `role="tooltip"`, root Public Part marker, recipe, and Floating Scope
- * registration; `ui` styles only this surface, never the trigger host.
+ * registration; `ui` styles only this surface, never the trigger host. The
+ * surface is always hoverable, and its entrance animation is suppressed under
+ * reduced-motion preferences.
  */
 @Directive({
   selector: '[hellTooltipSurface]',
@@ -174,7 +316,6 @@ export class HellTooltip {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.data-hoverable]': 'tooltipTrigger().hoverableContent() ? "" : null',
     role: 'tooltip',
   },
 })
@@ -187,8 +328,6 @@ export class HellTooltipSurface {
     defaultPart: 'root',
     recipe: () => HELL_TOOLTIP_RECIPE,
   });
-  /** Trigger state of the associated `hellTooltip`. */
-  protected readonly tooltipTrigger = injectTooltipTriggerState();
 
   constructor() {
     hellRegisterFloatingHost();
