@@ -5,11 +5,24 @@
 ```ts
 
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
+import { HellRecipe } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i0 from '@angular/core';
 
 // @public
+export const HELL_CARD_BODY_RECIPE: HellRecipe<'root'>;
+
+// @public
+export const HELL_CARD_FOOTER_RECIPE: HellRecipe<'root'>;
+
+// @public
+export const HELL_CARD_HEADER_RECIPE: HellRecipe<'root'>;
+
+// @public
 export const HELL_CARD_IMPORTS: readonly [typeof HellCard, typeof HellCardHeader, typeof HellCardBody, typeof HellCardFooter];
+
+// @public
+export const HELL_CARD_RECIPE: HellRecipe<'root'>;
 
 // @public
 export class HellCard {

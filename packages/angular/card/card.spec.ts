@@ -1,20 +1,35 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { hellTwMerge } from '@hell-ui/angular/core';
 
-import { HELL_CARD_IMPORTS } from './card';
+import {
+  HELL_CARD_BODY_RECIPE,
+  HELL_CARD_FOOTER_RECIPE,
+  HELL_CARD_HEADER_RECIPE,
+  HELL_CARD_IMPORTS,
+  HELL_CARD_RECIPE,
+} from './card';
+
+/**
+ * Card specs assert behavior and state attributes. Part-Class Pipeline merge
+ * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * rendered classes are compared against the shared pipeline output for the
+ * exported recipes instead of asserting individual utility classes, and the
+ * recipe snapshots below pin the default classes without bootstrapping.
+ */
+const CARD_UI_SHORTHAND = 'rounded-hell-pill shadow-none p-hell-4';
 
 @Component({
   imports: [...HELL_CARD_IMPORTS],
   template: `
-    <div
-      id="custom-card"
-      hellCard
-      [elevation]="3"
-      ui="rounded-hell-pill shadow-none p-hell-4"
-    >
+    <div id="default-card" hellCard>
+      <div id="default-header" hellCardHeader>Header</div>
+      <div id="default-body" hellCardBody>Body</div>
+      <div id="default-footer" hellCardFooter>Footer</div>
+    </div>
+
+    <div id="custom-card" hellCard [elevation]="3" [ui]="cardUiShorthand">
       <div id="plain-header" hellCardHeader>Plain header</div>
-      <div id="plain-body" hellCardBody>Plain body</div>
-      <div id="plain-footer" hellCardFooter>Plain footer</div>
     </div>
 
     <div id="mapped-card" hellCard [ui]="cardUi">
@@ -25,6 +40,8 @@ import { HELL_CARD_IMPORTS } from './card';
   `,
 })
 class CardHost {
+  protected readonly cardUiShorthand = CARD_UI_SHORTHAND;
+
   protected readonly cardUi = {
     root: 'rounded-hell-pill shadow-hell-lg',
   };
@@ -47,48 +64,99 @@ describe('HellCard', () => {
     await TestBed.configureTestingModule({ imports: [CardHost] }).compileComponents();
   });
 
-  it('exposes local root Part Style Maps while preserving card state attributes', () => {
+  it('marks every card part with its public data-slot', () => {
     const fixture = TestBed.createComponent(CardHost);
     fixture.detectChanges();
 
-    const customCard = query(fixture.nativeElement, '#custom-card');
-    const plainHeader = query(fixture.nativeElement, '#plain-header');
-    const plainBody = query(fixture.nativeElement, '#plain-body');
-    const plainFooter = query(fixture.nativeElement, '#plain-footer');
-    const mappedCard = query(fixture.nativeElement, '#mapped-card');
-    const mappedHeader = query(fixture.nativeElement, '#mapped-header');
-    const mappedBody = query(fixture.nativeElement, '#mapped-body');
-    const mappedFooter = query(fixture.nativeElement, '#mapped-footer');
+    for (const id of ['default-card', 'default-header', 'default-body', 'default-footer']) {
+      expect(query(fixture.nativeElement, `#${id}`).getAttribute('data-slot')).toBe('root');
+    }
+  });
 
-    expect(customCard.getAttribute('data-slot')).toBe('root');
-    expect(customCard.getAttribute('data-elevation')).toBe('3');
-    expect(customCard.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(customCard.classList.contains('rounded-hell-lg')).toBe(false);
-    expect(customCard.classList.contains('shadow-none')).toBe(true);
-    expect(customCard.classList.contains('shadow-hell-xs')).toBe(false);
-    expect(customCard.classList.contains('p-hell-4')).toBe(true);
+  it('reflects elevation through the data-elevation state attribute', () => {
+    const fixture = TestBed.createComponent(CardHost);
+    fixture.detectChanges();
 
-    expect(plainHeader.getAttribute('data-slot')).toBe('root');
-    expect(plainBody.getAttribute('data-slot')).toBe('root');
-    expect(plainFooter.getAttribute('data-slot')).toBe('root');
-    expect(plainHeader.classList.contains('px-hell-2')).toBe(false);
-    expect(plainBody.classList.contains('p-hell-2')).toBe(false);
-    expect(plainFooter.classList.contains('justify-start')).toBe(false);
+    expect(query(fixture.nativeElement, '#default-card').getAttribute('data-elevation')).toBe('1');
+    expect(query(fixture.nativeElement, '#custom-card').getAttribute('data-elevation')).toBe('3');
+  });
 
-    expect(mappedCard.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(mappedCard.classList.contains('shadow-hell-lg')).toBe(true);
-    expect(mappedCard.classList.contains('shadow-hell-xs')).toBe(false);
-    expect(mappedHeader.classList.contains('px-hell-2')).toBe(true);
-    expect(mappedHeader.classList.contains('px-hell-6')).toBe(false);
-    expect(mappedHeader.classList.contains('text-hell-danger')).toBe(true);
-    expect(mappedBody.classList.contains('p-hell-2')).toBe(true);
-    expect(mappedBody.classList.contains('p-hell-6')).toBe(false);
-    expect(mappedFooter.classList.contains('justify-start')).toBe(true);
-    expect(mappedFooter.classList.contains('justify-end')).toBe(false);
-    expect(mappedFooter.classList.contains('border-t-0')).toBe(true);
-    expect(mappedFooter.classList.contains('border-t')).toBe(false);
+  it('renders the pure default recipes when no ui is provided', () => {
+    const fixture = TestBed.createComponent(CardHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, '#default-card')).toEqual(sortClasses(HELL_CARD_RECIPE.root));
+    expect(renderedClasses(fixture, '#default-header')).toEqual(
+      sortClasses(HELL_CARD_HEADER_RECIPE.root),
+    );
+    expect(renderedClasses(fixture, '#default-body')).toEqual(
+      sortClasses(HELL_CARD_BODY_RECIPE.root),
+    );
+    expect(renderedClasses(fixture, '#default-footer')).toEqual(
+      sortClasses(HELL_CARD_FOOTER_RECIPE.root),
+    );
+  });
+
+  it('routes ui string shorthand through the shared Part-Class Pipeline', () => {
+    const fixture = TestBed.createComponent(CardHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, '#custom-card')).toEqual(
+      sortClasses(hellTwMerge(HELL_CARD_RECIPE.root, CARD_UI_SHORTHAND)),
+    );
+  });
+
+  it('routes ui part maps through the shared Part-Class Pipeline per directive', () => {
+    const fixture = TestBed.createComponent(CardHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, '#mapped-card')).toEqual(
+      sortClasses(hellTwMerge(HELL_CARD_RECIPE.root, 'rounded-hell-pill shadow-hell-lg')),
+    );
+    expect(renderedClasses(fixture, '#mapped-header')).toEqual(
+      sortClasses(hellTwMerge(HELL_CARD_HEADER_RECIPE.root, 'px-hell-2 text-hell-danger')),
+    );
+    expect(renderedClasses(fixture, '#mapped-body')).toEqual(
+      sortClasses(hellTwMerge(HELL_CARD_BODY_RECIPE.root, 'p-hell-2')),
+    );
+    expect(renderedClasses(fixture, '#mapped-footer')).toEqual(
+      sortClasses(hellTwMerge(HELL_CARD_FOOTER_RECIPE.root, 'justify-start border-t-0')),
+    );
+  });
+
+  it('does not style projected child directives from a parent ui', () => {
+    const fixture = TestBed.createComponent(CardHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, '#plain-header')).toEqual(
+      sortClasses(HELL_CARD_HEADER_RECIPE.root),
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      expect(classesByPart(HELL_CARD_RECIPE)).toMatchSnapshot('card');
+      expect(classesByPart(HELL_CARD_HEADER_RECIPE)).toMatchSnapshot('cardHeader');
+      expect(classesByPart(HELL_CARD_BODY_RECIPE)).toMatchSnapshot('cardBody');
+      expect(classesByPart(HELL_CARD_FOOTER_RECIPE)).toMatchSnapshot('cardFooter');
+    });
   });
 });
+
+function classesByPart(recipe: Readonly<Record<string, string>>): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
+  );
+}
+
+/** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
+function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {
+  return sortClasses(query(fixture.nativeElement, selector).className);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query(root: HTMLElement, selector: string): HTMLElement {
   const element = root.querySelector(selector);

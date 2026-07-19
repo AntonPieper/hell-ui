@@ -1,18 +1,23 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { hellTwMerge } from '@hell-ui/angular/core';
 
-import { HellSeparator } from './separator';
+import { HELL_SEPARATOR_RECIPE, HellSeparator } from './separator';
+
+/**
+ * Separator specs assert behavior and state attributes. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * rendered classes are compared against the shared pipeline output for the
+ * exported recipe instead of asserting individual utility classes, and the
+ * recipe snapshot below pins the default classes without bootstrapping.
+ */
+const SEPARATOR_UI_SHORTHAND = 'bg-hell-danger';
 
 @Component({
   imports: [HellSeparator],
   template: `
-    <hr
-      id="separator-string"
-      hellSeparator
-      orientation="horizontal"
-      spacing="md"
-      ui="bg-hell-danger"
-    />
+    <hr id="separator-default" hellSeparator />
+    <hr id="separator-string" hellSeparator [ui]="separatorUiShorthand" />
     <div
       id="separator-map"
       hellSeparator
@@ -22,48 +27,91 @@ import { HellSeparator } from './separator';
     ></div>
   `,
 })
-class SeparatorPartStyleHost {
-  readonly separatorUi = {
+class SeparatorHost {
+  protected readonly separatorUiShorthand = SEPARATOR_UI_SHORTHAND;
+
+  protected readonly separatorUi = {
     root: 'bg-hell-info w-hell-2',
   };
 }
 
-describe('HellSeparator Part Style Map', () => {
+describe('HellSeparator', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [SeparatorPartStyleHost] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SeparatorHost] }).compileComponents();
   });
 
-  it('applies string shorthand to the root part and preserves separator state', () => {
-    const fixture = TestBed.createComponent(SeparatorPartStyleHost);
+  it('exposes separator semantics and defaults through state attributes', () => {
+    const fixture = TestBed.createComponent(SeparatorHost);
     fixture.detectChanges();
 
-    const separator = byId(fixture.nativeElement, 'separator-string');
-    const classes = separator.className.split(/\s+/);
+    const separator = byId(fixture.nativeElement, 'separator-default');
 
     expect(separator.getAttribute('data-slot')).toBe('root');
     expect(separator.getAttribute('role')).toBe('separator');
     expect(separator.getAttribute('data-orientation')).toBe('horizontal');
     expect(separator.getAttribute('data-spacing')).toBe('md');
-    expect(classes).toContain('bg-hell-danger');
-    expect(classes).not.toContain('bg-hell-border');
   });
 
-  it('applies object maps to the root part with deterministic class merging', () => {
-    const fixture = TestBed.createComponent(SeparatorPartStyleHost);
+  it('reflects orientation and spacing inputs through state attributes', () => {
+    const fixture = TestBed.createComponent(SeparatorHost);
     fixture.detectChanges();
 
     const separator = byId(fixture.nativeElement, 'separator-map');
-    const classes = separator.className.split(/\s+/);
 
-    expect(separator.getAttribute('data-slot')).toBe('root');
     expect(separator.getAttribute('role')).toBe('separator');
+    expect(separator.getAttribute('aria-orientation')).toBe('vertical');
     expect(separator.getAttribute('data-orientation')).toBe('vertical');
     expect(separator.getAttribute('data-spacing')).toBe('sm');
-    expect(classes).toContain('bg-hell-info');
-    expect(classes).toContain('w-hell-2');
-    expect(classes).not.toContain('bg-hell-border');
+  });
+
+  it('renders the pure default recipe when no ui is provided', () => {
+    const fixture = TestBed.createComponent(SeparatorHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, 'separator-default')).toEqual(
+      sortClasses(HELL_SEPARATOR_RECIPE.root),
+    );
+  });
+
+  it('routes ui string shorthand through the shared Part-Class Pipeline', () => {
+    const fixture = TestBed.createComponent(SeparatorHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, 'separator-string')).toEqual(
+      sortClasses(hellTwMerge(HELL_SEPARATOR_RECIPE.root, SEPARATOR_UI_SHORTHAND)),
+    );
+  });
+
+  it('routes ui part maps through the shared Part-Class Pipeline', () => {
+    const fixture = TestBed.createComponent(SeparatorHost);
+    fixture.detectChanges();
+
+    expect(renderedClasses(fixture, 'separator-map')).toEqual(
+      sortClasses(hellTwMerge(HELL_SEPARATOR_RECIPE.root, 'bg-hell-info w-hell-2')),
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      expect(classesByPart(HELL_SEPARATOR_RECIPE)).toMatchSnapshot('separator');
+    });
   });
 });
+
+function classesByPart(recipe: Readonly<Record<string, string>>): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
+  );
+}
+
+/** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
+function renderedClasses(fixture: { nativeElement: HTMLElement }, id: string): string[] {
+  return sortClasses(byId(fixture.nativeElement, id).className);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function byId(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);
