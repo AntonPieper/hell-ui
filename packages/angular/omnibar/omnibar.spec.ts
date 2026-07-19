@@ -170,12 +170,12 @@ class OmnibarChipCompositionHost {
       <div hellOmnibarGroup label="Results" [ui]="groupUi">
         <div hellOmnibarGroupLabel [ui]="groupLabelUi">Results</div>
         <button hellOmnibarItem value="alpha" [ui]="itemUi">
-          <span hellOmnibarItemIcon [ui]="itemIconUi">A</span>
-          <span hellOmnibarItemText [ui]="itemTextUi">
+          <span class="inline-flex w-4 shrink-0 items-center justify-center" aria-hidden="true">A</span>
+          <span class="flex min-w-0 flex-1 flex-col overflow-hidden">
             <span>Alpha</span>
-            <span hellOmnibarItemSubtext [ui]="itemSubtextUi">Project</span>
+            <span class="text-[11px] text-hell-foreground-muted">Project</span>
           </span>
-          <span hellOmnibarItemTrailing [ui]="itemTrailingUi">Enter</span>
+          <span data-testid="item-trailing" class="ms-auto inline-flex items-center">Enter</span>
         </button>
       </div>
     </hell-omnibar>
@@ -198,10 +198,6 @@ class OmnibarPartStyleHost {
   readonly groupUi = { root: 'gap-hell-2' };
   readonly groupLabelUi = { root: 'text-hell-danger' };
   readonly itemUi = { root: 'rounded-none' };
-  readonly itemIconUi = { root: 'text-hell-danger' };
-  readonly itemTextUi = { root: 'gap-hell-2' };
-  readonly itemSubtextUi = { root: 'text-hell-danger' };
-  readonly itemTrailingUi = { root: 'text-hell-danger' };
 }
 
 @Component({
@@ -576,8 +572,9 @@ describe('HellOmnibar command interaction runtime', () => {
     expect(query<HTMLElement>(panel, '[hellOmnibarAction]').className).toContain(
       'text-hell-danger',
     );
-    expect(query<HTMLElement>(panel, '[hellOmnibarItemSubtext]').className).toContain(
-      'text-hell-danger',
+    expect(query<HTMLElement>(panel, '[hellOmnibarItem]').className).toContain('rounded-none');
+    expect(query<HTMLElement>(panel, '[data-testid="item-trailing"]').className).toContain(
+      'ms-auto',
     );
   });
 

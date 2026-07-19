@@ -119,10 +119,6 @@ const HELL_OMNIBAR_RECIPE = {
   results: 'flex flex-1 flex-col overflow-y-auto',
 } satisfies HellRecipe<HellOmnibarPart>;
 
-const HELL_OMNIBAR_PANEL_RECIPE = {
-  root: '',
-} satisfies HellRecipe<'root'>;
-
 const HELL_OMNIBAR_GROUP_RECIPE = {
   root: 'flex flex-col gap-px',
 } satisfies HellRecipe<'root'>;
@@ -136,22 +132,6 @@ const HELL_OMNIBAR_ITEM_RECIPE = {
   // omnibar items visually in family with select/combobox/listbox options;
   // width/reset atoms are the button-host specifics.
   root: `flex w-full items-center gap-hell-3 border-0 text-start font-[inherit] ${HELL_OPTION_SURFACE_METRICS} ${HELL_OPTION_SURFACE_SELECTED_STATES} focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]`,
-} satisfies HellRecipe<'root'>;
-
-const HELL_OMNIBAR_ITEM_ICON_RECIPE = {
-  root: 'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle',
-} satisfies HellRecipe<'root'>;
-
-const HELL_OMNIBAR_ITEM_TEXT_RECIPE = {
-  root: 'flex min-w-0 flex-1 flex-col overflow-hidden',
-} satisfies HellRecipe<'root'>;
-
-const HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE = {
-  root: 'text-[11px] text-hell-foreground-muted',
-} satisfies HellRecipe<'root'>;
-
-const HELL_OMNIBAR_ITEM_TRAILING_RECIPE = {
-  root: 'ms-auto inline-flex items-center',
 } satisfies HellRecipe<'root'>;
 
 const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {
@@ -810,22 +790,6 @@ export class HellOmnibar {
 
 /* ──────────────────────────── Children ──────────────────────────── */
 
-/** Optional wrapper for the omnibar panel body. */
-@Directive({
-  selector: '[hellOmnibarPanel]',
-  host: { '[class]': "part('root')", 'data-slot': 'root' },
-})
-export class HellOmnibarPanel {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_PANEL_RECIPE,
-  });
-}
-
 /**
  * Groups related result items under an optional label. A projected
  * `[hellOmnibarGroupLabel]` names the group through `aria-labelledby`;
@@ -962,70 +926,6 @@ export class HellOmnibarItem<T = unknown> {
   }
 }
 
-/** Leading icon slot inside a result item. */
-@Directive({
-  selector: '[hellOmnibarItemIcon]',
-  host: { '[class]': "part('root')", 'data-slot': 'root', 'aria-hidden': 'true' },
-})
-export class HellOmnibarItemIcon {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_ITEM_ICON_RECIPE,
-  });
-}
-
-/** Primary text slot inside a result item. */
-@Directive({
-  selector: '[hellOmnibarItemText]',
-  host: { '[class]': "part('root')", 'data-slot': 'root' },
-})
-export class HellOmnibarItemText {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_ITEM_TEXT_RECIPE,
-  });
-}
-
-/** Secondary text slot inside a result item. */
-@Directive({
-  selector: '[hellOmnibarItemSubtext]',
-  host: { '[class]': "part('root')", 'data-slot': 'root' },
-})
-export class HellOmnibarItemSubtext {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE,
-  });
-}
-
-/** Trailing slot inside a result item, e.g. a shortcut hint. */
-@Directive({
-  selector: '[hellOmnibarItemTrailing]',
-  host: { '[class]': "part('root')", 'data-slot': 'root' },
-})
-export class HellOmnibarItemTrailing {
-  /** Tailwind class refinements for public parts. */
-  readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
-
-  /** Merged Part-Class Pipeline classes for one public part. */
-  protected readonly part = hellPartStyler<'root'>(this.ui, {
-    defaultPart: 'root',
-    recipe: () => HELL_OMNIBAR_ITEM_TRAILING_RECIPE,
-  });
-}
-
 /** Toolbar container for action buttons rendered above the results. */
 @Directive({
   selector: '[hellOmnibarActions]',
@@ -1132,20 +1032,16 @@ export interface HellOmnibarSubmitEvent<T = unknown> {
 }
 
 /**
- * Standalone imports for the complete omnibar composition: root, panel/group
- * parts, item slots, actions strip, and action button directives. Compose
- * tokens from the public Chip primitives.
+ * Standalone imports for the complete omnibar composition: root, group
+ * parts, result items, actions strip, and action button directives. Compose
+ * tokens from the public Chip primitives; item chrome (icons, text, subtext,
+ * trailing hints) is consumer-owned markup styled with plain classes.
  */
 export const HELL_OMNIBAR_IMPORTS = [
   HellOmnibar,
-  HellOmnibarPanel,
   HellOmnibarGroup,
   HellOmnibarGroupLabel,
   HellOmnibarItem,
-  HellOmnibarItemIcon,
-  HellOmnibarItemText,
-  HellOmnibarItemSubtext,
-  HellOmnibarItemTrailing,
   HellOmnibarActionsStrip,
   HellOmnibarAction,
 ] as const;

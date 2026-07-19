@@ -35,7 +35,7 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
           <div hellOmnibarGroupLabel>Actions</div>
           @for (action of search.items(); track action.id) {
             <button hellOmnibarItem type="button" [value]="action">
-              <span hellOmnibarItemText>{{ action.label }}</span>
+              <span class="flex min-w-0 flex-1 flex-col overflow-hidden">{{ action.label }}</span>
             </button>
           }
         </div>

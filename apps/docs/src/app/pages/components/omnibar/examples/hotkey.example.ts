@@ -32,7 +32,7 @@ const COMMANDS: readonly Command[] = [
       <div hellOmnibarGroup label="Commands">
         @for (command of search.items(); track command.id) {
           <button hellOmnibarItem type="button" [value]="command">
-            <span hellOmnibarItemText>{{ command.label }}</span>
+            <span class="flex min-w-0 flex-1 flex-col overflow-hidden">{{ command.label }}</span>
           </button>
         }
       </div>

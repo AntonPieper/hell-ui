@@ -845,6 +845,29 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Removed the omnibar decoration-only directive family:
+  `HellOmnibarPanel` (`[hellOmnibarPanel]`), `HellOmnibarItemIcon`
+  (`[hellOmnibarItemIcon]`), `HellOmnibarItemText` (`[hellOmnibarItemText]`),
+  `HellOmnibarItemSubtext` (`[hellOmnibarItemSubtext]`), and
+  `HellOmnibarItemTrailing` (`[hellOmnibarItemTrailing]`), plus their
+  entrypoint stylesheet rules. First carried by the next `@hell-ui/angular`
+  release after `0.2.0` (currently Unreleased). The checked-in directive
+  census (`docs/architecture/directive-census.md`) verified none of the five
+  serves a content-query or behavior role: each only wrote default classes
+  (and, for the icon, a static `aria-hidden`) onto consumer-owned markup.
+  Replace them with plain elements and classes — icon
+  `inline-flex w-4 shrink-0 items-center justify-center
+  text-hell-foreground-subtle` (optionally
+  `in-data-[active=true]:text-hell-foreground`), text column
+  `flex min-w-0 flex-1 flex-col overflow-hidden *:truncate`, subtext
+  `text-[11px] text-hell-foreground-muted`, trailing
+  `ms-auto inline-flex items-center gap-1 text-[11px]
+  text-hell-foreground-muted`, and drop the panel wrapper attribute (it
+  carried no styling). `HELL_OMNIBAR_IMPORTS` now contains the six behavior,
+  marker, and a11y-bearing omnibar directives; omnibar behavior (active item,
+  keyboard navigation, selection, dismissal) is unchanged and protected by
+  the existing unit suite. Evidence: `packages/angular/omnibar/omnibar.spec.ts`
+  and the updated omnibar API report. Closes #261.
 - BREAKING: `provideHellLabels` now rejects tokens that `hellCreateLabels` did
   not create at compile time instead of throwing at runtime. First carried by
   the next `@hell-ui/angular` release after `0.2.0` (currently Unreleased).
