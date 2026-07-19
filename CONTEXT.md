@@ -20,6 +20,10 @@ A module that combines multiple primitives into a higher-level experience. A Com
 The single consumer-facing value, open, focus, keyboard, and accessibility model for one semantic interaction. Projection may change its presentation, but a convenience renderer must not introduce a parallel model.
 _Avoid_: Renderer-owned twin, convenience state machine.
 
+**Control Value Authority**
+The single consumer-facing writable model for one stateful control's committed value. Forms integration and delegated interaction engines adapt to it instead of owning parallel committed values; draft text and derived rendering state are not Control Value Authorities.
+_Avoid_: CVA-owned value, form-mode value, controlled-value twin.
+
 **Multi-Select Menu Button**
 A documented recipe (formerly a Composite entry point) that opens a menu of consumer-rendered checkbox items from a button and reflects the selected count through consumer-owned markup. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
 _Avoid_: Column visibility selector, table column picker.
