@@ -71,8 +71,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       <h2>Basic</h2>
       <p>
         Pass the Omnibar's caller-owned query signal to <code>hellSearchResource</code>, then project
-        <code>search.items()</code> as <code>hellOmnibarItem</code> buttons. Each item carries a
-        <code>value</code> your <code>(submit)</code> handler receives on Enter or click; the consumer
+        <code>search.items()</code> as <code>hellOmnibarItem</code> buttons. Each item binds a
+        required <code>value</code> your <code>(submit)</code> handler receives on Enter or click; the consumer
         also decides what empty chrome to render from <code>search.status()</code>.
       </p>
       <hd-example-tabs [code]="basicCode" previewClass="min-h-[220px]">
@@ -276,7 +276,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       </p>
       <p><strong><code>HellOmnibarItem</code></strong> — inputs / outputs:</p>
       <ul>
-        <li><code>value</code>: <code>T</code>. Payload emitted via <code>(select)</code> and the parent <code>(submit)</code>.</li>
+        <li><code>value</code>: <code>T</code> (required). Payload emitted via <code>(select)</code> and the parent <code>(submit)</code>; omitting the binding is a template type-checking error.</li>
         <li><code>closeOnSelect</code>: <code>boolean</code>. Whether activation closes the panel. Default <code>true</code>.</li>
         <li><code>disabled</code>: <code>boolean</code>. Skips the row in navigation/activation. Default <code>false</code>.</li>
         <li><code>select</code>: <code>output&lt;T&gt;</code>. Emits the item value on activation.</li>
