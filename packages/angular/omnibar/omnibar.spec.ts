@@ -206,6 +206,22 @@ class OmnibarPartStyleHost {
 
 @Component({
   imports: [...HELL_OMNIBAR_IMPORTS],
+  template: `
+    <hell-omnibar [openOnFocus]="true">
+      <div hellOmnibarGroup label="Stale fallback" data-testid="labelled-group">
+        <div hellOmnibarGroupLabel>Results</div>
+        <button hellOmnibarItem value="alpha">Alpha</button>
+      </div>
+      <div hellOmnibarGroup label="Recent" data-testid="fallback-group">
+        <button hellOmnibarItem value="beta">Beta</button>
+      </div>
+    </hell-omnibar>
+  `,
+})
+class OmnibarGroupNamingHost {}
+
+@Component({
+  imports: [...HELL_OMNIBAR_IMPORTS],
   providers: [provideHellLabels(HELL_OMNIBAR_LABELS, { clearSearch: 'Suche löschen' })],
   template: `<hell-omnibar />`,
 })
@@ -264,6 +280,7 @@ describe('HellOmnibar command interaction runtime', () => {
         OmnibarAsyncResourceHost,
         OmnibarChipCompositionHost,
         OmnibarPartStyleHost,
+        OmnibarGroupNamingHost,
       ],
     }).compileComponents();
   });
@@ -562,6 +579,35 @@ describe('HellOmnibar command interaction runtime', () => {
     expect(query<HTMLElement>(panel, '[hellOmnibarItemSubtext]').className).toContain(
       'text-hell-danger',
     );
+  });
+
+  it('names a group from its visible label through aria-labelledby', async () => {
+    const fixture = TestBed.createComponent(OmnibarGroupNamingHost);
+    fixture.detectChanges();
+
+    query<HTMLInputElement>(fixture.nativeElement, 'input').focus();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const group = query<HTMLElement>(overlayRoot(), '[data-testid="labelled-group"]');
+    const visibleLabel = query<HTMLElement>(group, '[hellOmnibarGroupLabel]');
+    expect(visibleLabel.id).not.toBe('');
+    expect(visibleLabel.getAttribute('role')).toBeNull();
+    expect(group.getAttribute('aria-labelledby')).toBe(visibleLabel.id);
+    expect(group.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('falls back to the label input for a group without a visible label', async () => {
+    const fixture = TestBed.createComponent(OmnibarGroupNamingHost);
+    fixture.detectChanges();
+
+    query<HTMLInputElement>(fixture.nativeElement, 'input').focus();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const group = query<HTMLElement>(overlayRoot(), '[data-testid="fallback-group"]');
+    expect(group.getAttribute('aria-labelledby')).toBeNull();
+    expect(group.getAttribute('aria-label')).toBe('Recent');
   });
 });
 
