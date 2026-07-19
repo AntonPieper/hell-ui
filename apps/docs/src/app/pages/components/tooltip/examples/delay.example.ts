@@ -1,16 +1,20 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import { HellTooltip, provideHellTooltipDefaults } from '@hell-ui/angular/tooltip';
 
 @Component({
   selector: 'app-tooltip-delay-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellTooltip, HellTooltipSurface],
+  // One scoped policy instead of repeating [showDelay]/[hideDelay] per trigger.
+  providers: [provideHellTooltipDefaults({ showDelay: 600, hideDelay: 300 })],
+  imports: [HellButton, HellTooltip],
   template: `
-    <button hellButton [hellTooltip]="slow" [showDelay]="600" [hideDelay]="300" type="button">
-      Hover for 600ms
-    </button>
-    <ng-template #slow><span hellTooltipSurface>Took my time</span></ng-template>
+    <div class="flex flex-wrap gap-hell-3">
+      <button hellButton hellTooltip="Took my time" type="button">Hover for 600ms</button>
+      <button hellButton hellTooltip="The cooldown skipped the wait" type="button">
+        Then dart over here
+      </button>
+    </div>
   `,
 })
 export class TooltipDelayExample {}

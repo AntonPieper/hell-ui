@@ -10,7 +10,7 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import { HellTooltip } from '@hell-ui/angular/tooltip';
 
 @Component({
   selector: 'app-toolbar-icon-only-example',
@@ -24,7 +24,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
       faSolidAlignRight,
     }),
   ],
-  imports: [HellButton, HellIcon, HellTooltip, HellTooltipSurface, ...HELL_TOOLBAR_IMPORTS],
+  imports: [HellButton, HellIcon, HellTooltip, ...HELL_TOOLBAR_IMPORTS],
   template: `
     <div class="flex flex-col gap-hell-3">
       <div hellToolbar label="Text formatting">
@@ -35,7 +35,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           size="sm"
           type="button"
           aria-label="Bold"
-          [hellTooltip]="boldHint"
+          hellTooltip="Bold"
           (click)="run('bold')"
         >
           <hell-icon name="faSolidBold" size="13px" />
@@ -47,7 +47,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           size="sm"
           type="button"
           aria-label="Italic"
-          [hellTooltip]="italicHint"
+          hellTooltip="Italic"
           (click)="run('italic')"
         >
           <hell-icon name="faSolidItalic" size="13px" />
@@ -66,7 +66,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           size="sm"
           type="button"
           aria-label="Align left"
-          [hellTooltip]="alignLeftHint"
+          hellTooltip="Align left"
           (click)="run('align-left')"
         >
           <hell-icon name="faSolidAlignLeft" size="13px" />
@@ -78,7 +78,7 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           size="sm"
           type="button"
           aria-label="Align center"
-          [hellTooltip]="alignCenterHint"
+          hellTooltip="Align center"
           (click)="run('align-center')"
         >
           <hell-icon name="faSolidAlignCenter" size="13px" />
@@ -90,23 +90,18 @@ import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
           size="sm"
           type="button"
           aria-label="Align right"
-          [hellTooltip]="alignRightHint"
+          hellTooltip="Align right"
           (click)="run('align-right')"
         >
           <hell-icon name="faSolidAlignRight" size="13px" />
         </button>
       </div>
 
-      <ng-template #boldHint><span hellTooltipSurface>Bold</span></ng-template>
-      <ng-template #italicHint><span hellTooltipSurface>Italic</span></ng-template>
-      <ng-template #alignLeftHint><span hellTooltipSurface>Align left</span></ng-template>
-      <ng-template #alignCenterHint><span hellTooltipSurface>Align center</span></ng-template>
-      <ng-template #alignRightHint><span hellTooltipSurface>Align right</span></ng-template>
-
       <p class="m-0 text-sm text-hell-foreground-muted">
-        Each item is the same consumer-owned <code>hellButton</code>, Tooltip trigger, and click
-        handler it would be outside the toolbar. <code>hellToolbarItem</code> adds only focus
-        registration, so the richer tooltip and button classes compose without competing bindings.
+        Each item is the same consumer-owned <code>hellButton</code>, string
+        <code>hellTooltip</code>, and click handler it would be outside the toolbar.
+        <code>hellToolbarItem</code> adds only focus registration, so the tooltip and button
+        directives compose on one host without competing bindings.
         Last action: <strong>{{ lastAction() }}</strong>.
       </p>
     </div>

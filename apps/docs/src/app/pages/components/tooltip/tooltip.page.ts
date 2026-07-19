@@ -14,8 +14,8 @@ import { TooltipDelayExample } from './examples/delay.example';
 import tooltipDelayExampleCodeRaw from './examples/delay.example.ts?raw' with {
   loader: 'text',
 };
-import { TooltipHoverableExample } from './examples/hoverable.example';
-import tooltipHoverableExampleCodeRaw from './examples/hoverable.example.ts?raw' with {
+import { TooltipDynamicContentExample } from './examples/dynamic-content.example';
+import tooltipDynamicContentExampleCodeRaw from './examples/dynamic-content.example.ts?raw' with {
   loader: 'text',
 };
 import { TooltipPlacementsExample } from './examples/placements.example';
@@ -36,7 +36,7 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
     TooltipAllPartsStylingExample,
     TooltipBasicExample,
     TooltipDelayExample,
-    TooltipHoverableExample,
+    TooltipDynamicContentExample,
     TooltipPlacementsExample,
     TooltipWithToolbarExample,
     PageHeader,
@@ -54,11 +54,13 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         shortcuts, never for content the user actually needs.
       </hd-page-header>
       <p>
-        <code>HellTooltip</code> and <code>HellTooltipSurface</code> are a directive pair built on
-        <code>NgpTooltipTrigger</code> and <code>NgpTooltip</code> from <code>ng-primitives</code>.
-        The trigger attaches to a native <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and
-        owns placement, delay, and open state; the surface directive goes on whatever element you
-        render inside an <code>&lt;ng-template&gt;</code>. Positioning comes from
+        <code>HellTooltip</code> attaches to any host element and takes its content directly
+        through the <code>[hellTooltip]</code> binding. A plain string renders the library's
+        default surface, so a routine hint is one attribute; a template containing your own
+        <code>HellTooltipSurface</code> unlocks rich markup and custom styling without ever
+        touching the trigger's own classes. Lifecycle, timing, Escape dismissal, hover bridging,
+        and <code>aria-describedby</code> are delegated to <code>NgpTooltipTrigger</code> and
+        <code>NgpTooltip</code> from <code>ng-primitives</code>; positioning comes from
         <a href="https://floating-ui.com" target="_blank" rel="noreferrer">Floating UI</a>, and the
         surface registers with any active Hell Floating Scope so a hoverable tooltip nested inside
         another floating surface still counts as an inside interaction.
@@ -78,9 +80,11 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
 
       <h2>Basic</h2>
       <p>
-        Bind <code>[hellTooltip]</code> to a template reference; the surface inside it opens
-        on hover and on keyboard focus, and closes automatically once the pointer or focus leaves
-        the trigger.
+        Set <code>hellTooltip</code> to a string and you're done — the library renders its default
+        surface, which opens on hover and on keyboard focus and closes once the pointer or focus
+        leaves the trigger. Use the static attribute for fixed hints and
+        <code>[hellTooltip]="expression"</code> for reactive ones; the trigger needs no template,
+        no surface element, and no extra import.
       </p>
       <hd-example-tabs [code]="tooltipBasicExampleCode">
         <app-tooltip-basic-example />
@@ -103,33 +107,41 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         (guaranteed default <code>0</code>ms), and <code>cooldown</code> (guaranteed default
         <code>300</code>ms) tune how eager or patient a tooltip feels. Raise
         <code>showDelay</code> for hints on controls a user's pointer passes over incidentally, so
-        tooltips don't flash on every pixel the cursor crosses; the cooldown skips the show delay
-        when moving between adjacent tooltips, so scanning a toolbar doesn't repeat the full wait
-        on every button. Set shared timing once per injector scope with
-        <code>provideHellTooltipDefaults</code> instead of repeating inputs.
+        tooltips don't flash on every pixel the cursor crosses. This example sets the timing once
+        for both triggers with <code>provideHellTooltipDefaults</code> instead of repeating inputs
+        — a local input still wins wherever one trigger needs an exception. Hover the first
+        button, wait out its 600&nbsp;ms delay, then move straight to the second: within the
+        cooldown window the show delay is skipped, so scanning adjacent controls doesn't repeat
+        the full wait.
       </p>
       <hd-example-tabs [code]="tooltipDelayExampleCode">
         <app-tooltip-delay-example />
       </hd-example-tabs>
 
-      <h2>Hoverable content</h2>
+      <h2>Dynamic content</h2>
       <p>
-        Tooltip content is always hoverable: the surface stays open while the pointer travels from
-        the trigger onto the tooltip itself, so users with magnification or a large cursor can read
-        content the pointer would otherwise hide. This is an accessibility invariant, not an
-        option.
+        Bind <code>[hellTooltip]</code> to a signal-backed string and every present-to-present
+        change is a pure presentation update: the open surface re-renders in place without
+        closing, reopening, or emitting spurious <code>openChange</code> transitions. Absence is
+        the off switch — <code>null</code>, <code>undefined</code>, and the empty string close the
+        tooltip immediately and disable the interaction until content returns, so conditional
+        hints need no separate disabled flag. Here each click rewrites the hint while it stays
+        open; at zero the content becomes empty and the tooltip is gone until you reset.
       </p>
-      <hd-example-tabs [code]="tooltipHoverableExampleCode">
-        <app-tooltip-hoverable-example />
+      <hd-example-tabs [code]="tooltipDynamicContentExampleCode">
+        <app-tooltip-dynamic-content-example />
       </hd-example-tabs>
 
-      <h2>With icon buttons and shortcuts</h2>
+      <h2>Rich content</h2>
       <p>
-        A common toolbar shape: icon-only <code>hellButton</code>s (narrow entry point
-        <code>@hell-ui/angular/button</code>) with <code>hell-icon</code>s
+        When a hint outgrows plain text, bind <code>[hellTooltip]</code> to an
+        <code>ng-template</code> containing your own <code>hellTooltipSurface</code> — the one
+        case that earns a template. A common toolbar shape: icon-only <code>hellButton</code>s
+        (narrow entry point <code>@hell-ui/angular/button</code>) with <code>hell-icon</code>s
         (<code>@hell-ui/angular/icon</code>) for glyphs, and <code>hellKbd</code>
-        (<code>@hell-ui/angular/chip</code>) inside each tooltip to spell out the shortcut next to
-        the action name. Icon-only buttons still need their own <code>aria-label</code> — the
+        (<code>@hell-ui/angular/chip</code>) inside each surface to spell out the shortcut next to
+        the action name, while <code>provideHellTooltipDefaults</code> gives the whole toolbar one
+        eager show delay. Icon-only buttons still need their own <code>aria-label</code> — the
         tooltip is a supplementary hint on top, not the button's accessible name.
       </p>
       <hd-example-tabs [code]="tooltipWithToolbarExampleCode">
@@ -143,9 +155,10 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
         <code>&#123; root?: string &#125;</code> map. Both forms merge on top of the default recipe through
         Hell's Tailwind merge, so refinements win deterministically over the defaults they
-        conflict with. <code>HellTooltip</code> renders no owned structure of its own — it
-        attaches directly to your <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and has no
-        Part Style Map.
+        conflict with. Implicit string surfaces use the same recipe and theme hooks — only a
+        template surface takes a <code>ui</code> refinement. <code>HellTooltip</code> renders no
+        owned structure of its own — it attaches directly to your trigger host and has no Part
+        Style Map, so it can never collide with <code>hellButton</code>'s styling contract.
       </p>
       <table class="hd-doc-table">
         <thead>
@@ -236,8 +249,6 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
           string or a <code>&#123; root?: string &#125;</code> map that
           refines the <code>root</code> public part.
         </li>
-        <li>
-          </li>
       </ul>
 
       <h2>Accessibility</h2>
@@ -292,7 +303,7 @@ export class TooltipPage {
   protected readonly tooltipAllPartsStylingExampleCode = tooltipAllPartsStylingExampleCodeRaw;
   protected readonly tooltipBasicExampleCode = tooltipBasicExampleCodeRaw;
   protected readonly tooltipDelayExampleCode = tooltipDelayExampleCodeRaw;
-  protected readonly tooltipHoverableExampleCode = tooltipHoverableExampleCodeRaw;
+  protected readonly tooltipDynamicContentExampleCode = tooltipDynamicContentExampleCodeRaw;
   protected readonly tooltipPlacementsExampleCode = tooltipPlacementsExampleCodeRaw;
   protected readonly tooltipWithToolbarExampleCode = tooltipWithToolbarExampleCodeRaw;
 }
