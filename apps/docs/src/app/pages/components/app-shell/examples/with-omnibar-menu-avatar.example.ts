@@ -114,7 +114,7 @@ const HD_APP_SHELL_FRAME_ICONS = {
         }
       </nav>
 
-      <main hellAppContent ui="[--hell-app-content-max-width:960px]">
+      <main hellAppContent tabindex="0" ui="[--hell-app-content-max-width:960px]">
         <h3 class="m-0 text-base font-semibold">{{ activeLabel() }}</h3>
         <p class="mt-2 text-sm text-hell-foreground-muted">
           A realistic frame: the omnibar drives navigation from the topbar, the avatar opens an
