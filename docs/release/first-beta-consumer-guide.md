@@ -441,6 +441,75 @@ properties) with the controlled input/output pairs when consumer logic needs
 state. Deliberate close actions such as routed-nav clicks may continue calling
 `shell.closeMobilePanels()`.
 
+## Tooltip content is explicit and surfaces stay separate
+
+The Tooltip vocabulary is renamed without compatibility aliases. The trigger
+`HellTooltipTrigger` (`button[hellTooltipTrigger], a[hellTooltipTrigger]`,
+exported as `hellTooltipTrigger`) is now `HellTooltip` (`[hellTooltip]` on any
+host, exported as `hellTooltip`), and the consumer-authored surface previously
+named `HellTooltip` (`[hellTooltip]`) is now `HellTooltipSurface`
+(`[hellTooltipSurface]`). The trigger binding is the content itself — exactly
+`string | TemplateRef<unknown> | null | undefined`:
+
+```html
+<!-- Before: every hint required a template and a surface directive -->
+<button hellButton type="button" [hellTooltipTrigger]="hint">Save</button>
+<ng-template #hint>
+  <div hellTooltip>Saves to every environment</div>
+</ng-template>
+
+<!-- After: plain text is one binding on the trigger -->
+<button hellButton type="button" hellTooltip="Saves to every environment">Save</button>
+
+<!-- After: rich markup keeps a template with an explicit, separately styled surface -->
+<button hellButton type="button" [hellTooltip]="hint">Save</button>
+<ng-template #hint>
+  <div hellTooltipSurface [ui]="{ root: 'rounded-hell-pill' }">
+    Press <kbd>S</kbd> to save
+  </div>
+</ng-template>
+```
+
+Rules for migration:
+
+- Replace simple Tooltip templates with strings; keep a template only for rich
+  markup or a custom `ui`. A present string renders the implicit default
+  Tooltip Surface with the same `[hellTooltipSurface]` selector,
+  `role="tooltip"`, root Public Part, recipe, and theme hooks as an explicit
+  surface. The surface's `ui` styles only that floating surface, never the
+  trigger host, so `HellButton` and Tooltip compose on one host without input
+  collisions.
+- `null`, `undefined`, and the empty string are absent content: they close and
+  disable the interaction. The removed trigger `disabled` input has no
+  replacement flag — bind absent content instead. Present-to-present content
+  changes (including string/template transitions) update presentation without
+  closing an open tooltip.
+- The removed `hoverableContent` input and `data-hoverable` state attribute
+  have no replacements: the surface is always hoverable, Escape always
+  dismisses without moving focus, and the entrance animation respects
+  `prefers-reduced-motion`.
+- The trigger now attaches to any host without adding focusability or
+  mutating the host (`type`, `aria-disabled`, and `tabindex` writes are
+  removed), never derives the host's accessible name from content, and never
+  opens on a natively disabled control; give explanatory help for a disabled
+  control a separate focusable wrapper.
+- Upstream positioning and timing capabilities stay reachable under upstream
+  ng-primitives types: `placement`, `offset`, `flip`, `shift`, `container`,
+  `anchor`, programmatic `position`, `trackPosition`, `showOnOverflow`,
+  `scrollBehavior`, `showDelay`, `hideDelay`, and `cooldown`. Scope policy
+  with `provideHellTooltipDefaults(...)`: partial `HellTooltipDefaults`
+  objects merge over the nearest ancestor provider, local trigger inputs win,
+  and Hell guarantees a 500 ms show delay, 0 ms hide delay, and 300 ms
+  cooldown when nothing overrides them.
+- `open`, `(openChange)`, `show()`, `hide()`, and `exportAs` `hellTooltip`
+  keep the Anchored Surface Contract. Tooltip exports no directive
+  convenience array: import `HellTooltip` for the common path and add
+  `HellTooltipSurface` only for custom surfaces.
+
+The dedicated [`tooltip`](../../tools/check-package-consumer.mjs)
+package-consumer scenario proves both packed paths: the one-binding string
+hint and a custom template with a separately styled explicit Tooltip Surface.
+
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
@@ -448,7 +517,7 @@ state. Deliberate close actions such as routed-nav clicks may continue calling
 Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
 Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
 directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
-`HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltip`,
+`HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltipSurface`,
 `HellSelect`, and `HellCombobox` families), the App Shell/nav
 directives, Resizable directives,
 Pagination/PaginationStrip, and Table primitives have migrated from
@@ -520,7 +589,7 @@ Rules for migration:
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
   RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
-  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Select, Combobox, Date Input,
+  ToggleGroupItem, Menu, Listbox, Popover, Tooltip Surface, Select, Combobox, Date Input,
   Time Input, Number Input, Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.

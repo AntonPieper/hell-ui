@@ -1638,6 +1638,18 @@ function decoratedClassModules(source) {
 }
 
 function checkTooltipVocabularyContract() {
+  const tooltipEntrypoint = entrypointPublicApiFiles().find(
+    (entrypoint) => entrypoint.specifier === '@hell-ui/angular/tooltip',
+  );
+  if (!tooltipEntrypoint) {
+    failures.push('Entrypoint metadata is missing @hell-ui/angular/tooltip');
+  } else if (tooltipEntrypoint.category !== entrypointCategories.MIXED_ENTRYPOINT) {
+    failures.push(
+      '@hell-ui/angular/tooltip must stay classified as a Mixed Entry Point: ' +
+        'its string convenience surface and consumer-authored surface share one Interaction State Machine (#238)',
+    );
+  }
+
   const rel = 'packages/angular/tooltip/tooltip.ts';
   const source = readFile(join(root, rel));
   const requiredFragments = [
@@ -1646,12 +1658,15 @@ function checkTooltipVocabularyContract() {
     'export class HellTooltip ',
     'string | TemplateRef<unknown> | null | undefined',
     'useTextContent: signal(false)',
+    'hoverableContent: signal(true)',
     "selector: '[hellTooltipSurface]'",
     'export class HellTooltipSurface ',
   ];
   const retiredFragments = [
     "selector: 'button[hellTooltip], a[hellTooltip]'",
     'HellNativeInteractiveDisabledGuard',
+    'disabled = input',
+    'hoverableContent = input',
   ];
 
   for (const fragment of requiredFragments) {
@@ -1666,6 +1681,9 @@ function checkTooltipVocabularyContract() {
   }
 
   const retiredNamePattern = /\b[hH]ellTooltipTrigger\b/g;
+  // Tooltip deliberately exports no directive convenience array (#238): the
+  // common path imports only HellTooltip, so no tuple may blur that boundary.
+  const retiredTuplePattern = /\bHELL_TOOLTIP[A-Z0-9_]*_(?:DIRECTIVES|IMPORTS)\b/g;
   const files = [
     ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
     ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
@@ -1686,6 +1704,12 @@ function checkTooltipVocabularyContract() {
       const lineNumber = fileSource.slice(0, match.index).split('\n').length;
       failures.push(
         `Tooltip vocabulary ${relative(root, file)}:${lineNumber} still uses retired ${match[0]}; the trigger is hellTooltip and the surface is hellTooltipSurface`,
+      );
+    }
+    for (const match of fileSource.matchAll(retiredTuplePattern)) {
+      const lineNumber = fileSource.slice(0, match.index).split('\n').length;
+      failures.push(
+        `Tooltip vocabulary ${relative(root, file)}:${lineNumber} exposes or consumes ${match[0]}; Tooltip has no directive convenience array — import HellTooltip (and HellTooltipSurface for custom surfaces) directly`,
       );
     }
   }

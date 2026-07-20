@@ -45,6 +45,7 @@ const packageConsumerCiGroups = [
       'file-picker',
       'pagination',
       'combobox-projection',
+      'tooltip',
     ],
   },
   { name: 'button', scenarios: ['button'] },
@@ -354,6 +355,26 @@ const packageConsumerScenarioCatalog = [
         property: 'border-radius',
         expected: '999px',
       },
+    ],
+  },
+  {
+    name: 'tooltip',
+    description:
+      'narrow Mixed Tooltip entry renders the one-binding string path and a separately styled explicit Tooltip Surface',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: tooltipConsumerMainTs,
+    stylesCss: tooltipConsumerStylesCss,
+    cssIncludes: [
+      '@keyframes hell-pop-in',
+      'max-width:min(240px,calc(100vw - var(--spacing-hell-8)))',
+      'background-color:#1c222a',
+      'pointer-events:auto',
+      'border-radius:var(--radius-hell-pill)',
+      'background-color:var(--color-hell-primary)',
     ],
   },
   {
@@ -3651,6 +3672,69 @@ function paginationConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/pagination/styles.css";
+`;
+}
+
+function tooltipConsumerMainTs() {
+  return `import { Component, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HellTooltip,
+  HellTooltipSurface,
+  provideHellTooltipDefaults,
+  type HellTooltipDefaults,
+} from '${packageName}/tooltip';
+
+const workspaceTooltipDefaults: HellTooltipDefaults = {
+  placement: 'bottom',
+  offset: 8,
+  showDelay: 200,
+};
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellTooltip, HellTooltipSurface],
+  providers: [provideHellTooltipDefaults(workspaceTooltipDefaults)],
+  template: \`
+    <button type="button" hellTooltip="Saves to every environment">Save</button>
+    <button type="button" [hellTooltip]="hint()">Deploy</button>
+    <button
+      #trigger="hellTooltip"
+      type="button"
+      [hellTooltip]="shortcuts"
+      placement="top"
+      [offset]="4"
+      (openChange)="shortcutsOpen.set($event)"
+      [attr.data-tooltip-open]="trigger.open()"
+    >
+      Shortcuts
+    </button>
+    <ng-template #shortcuts>
+      <div hellTooltipSurface [ui]="surfaceUi">Press S to save</div>
+    </ng-template>
+    <button type="button" (click)="toggle(trigger)">Toggle shortcuts hint</button>
+  \`,
+})
+class App {
+  protected readonly hint = signal<string | null>('Deploys the current branch');
+  protected readonly shortcutsOpen = signal(false);
+  protected readonly surfaceUi = { root: 'rounded-hell-pill bg-hell-primary' };
+
+  protected toggle(trigger: HellTooltip): void {
+    if (trigger.open()) trigger.hide();
+    else trigger.show();
+  }
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function tooltipConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/tooltip/styles.css";
 `;
 }
 
