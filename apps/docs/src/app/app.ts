@@ -83,12 +83,6 @@ import {
   HellAppSecondaryBody,
   HellSidenavToggle,
   HellSecondaryToggle,
-  HellNavItem,
-  HellNavItemIcon,
-  HellNavItemLabel,
-  HellNavSection,
-  HellNavSectionItems,
-  HellNavSectionToggle,
 } from '@hell-ui/angular/app-shell';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
@@ -278,12 +272,6 @@ const HD_THEMES: readonly ThemeOption[] = [
     HellAppSecondaryBody,
     HellSidenavToggle,
     HellSecondaryToggle,
-    HellNavItem,
-    HellNavItemIcon,
-    HellNavItemLabel,
-    HellNavSection,
-    HellNavSectionToggle,
-    HellNavSectionItems,
     HellButton,
     HellIcon,
     HellChip,

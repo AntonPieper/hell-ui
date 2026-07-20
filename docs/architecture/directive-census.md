@@ -24,10 +24,11 @@ theme adapters, and docs usage.
 
 | Role | Count |
 | --- | ---: |
-| behavior | 147 |
+| behavior | 144 |
 | projection/query marker | 21 |
-| styling hook | 32 |
+| styling hook | 28 |
 | decoration only (all removed in #261) | 5 |
+| app-shell navigation family (removed in #206) | 7 |
 | total | 205 |
 
 ## Census
@@ -62,14 +63,15 @@ theme adapters, and docs usage.
 | `HellAppShell` | `[hellAppShell]` | component | behavior | Outputs (sidenavCollapsedChange, secondaryHiddenChange). |
 | `HellAppSidenav` | `[hellAppSidenav]` | directive | behavior | `@HostBinding` collapse/mobile-hidden/`inert` state; registers as the shell's sidenav panel. |
 | `HellAppTopbar` | `[hellAppTopbar]` | directive | styling hook | Topbar chrome recipe for the shell's top slot. |
-| `HellNavItem` | `[hellNavItem]` | directive | styling hook | Reflects `data-active`; app-shell stylesheet couples child slots to its state. |
-| `HellNavItemIcon` | `[hellNavItemIcon]` | directive | styling hook | App-shell stylesheet targets it for collapsed-sidenav sizing. Family disposition tracked in #206. |
-| `HellNavItemLabel` | `[hellNavItemLabel]` | directive | styling hook | App-shell stylesheet hides it while the sidenav is collapsed. Family disposition tracked in #206. |
-| `HellNavItemTrailing` | `[hellNavItemTrailing]` | directive | styling hook | App-shell stylesheet hides it while the sidenav is collapsed. Family disposition tracked in #206. |
-| `HellNavSection` | `[hellNavSection]` | directive | behavior | Outputs (collapsedChange). |
-| `HellNavSectionItems` | `[hellNavSectionItems]` | directive | behavior | Binds `aria-hidden`/`inert` from section-collapse and sidenav state. |
-| `HellNavSectionToggle` | `button[hellNavSectionToggle]` | directive | behavior | Host listeners (click). |
 | `HellSecondaryToggle` | `button[hellSecondaryToggle]` | directive | behavior | Host listeners (click). |
+
+The navigation mini-family (`HellNavItem`, `HellNavItemIcon`,
+`HellNavItemLabel`, `HellNavItemTrailing`, `HellNavSection`,
+`HellNavSectionToggle`, `HellNavSectionItems`) was removed in #206: navigation
+links, labels, icons, trailing content, and collapsible groups are now docs
+recipes over plain elements and existing primitives, keyed off the shell's
+stable state attributes (`data-sidenav-collapsed`, `data-mobile-layout`, and
+the sidenav's `data-collapsed`).
 | `HellSidenavToggle` | `button[hellSidenavToggle]` | directive | behavior | Host listeners (click). |
 
 ### audio-player

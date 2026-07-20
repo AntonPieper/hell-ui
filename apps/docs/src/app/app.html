@@ -260,15 +260,21 @@
     @for (section of sections; track $index) {
       @if (section.heading) {
         <div
-          hellNavSection
-          [collapsed]="isSectionCollapsed(section.heading)"
-          (collapsedChange)="setSectionCollapsed(section.heading, $event)"
+          class="hd-nav-section"
+          [attr.data-expanded]="isSectionCollapsed(section.heading) ? 'false' : 'true'"
         >
-          <button type="button" hellNavSectionToggle>{{ section.heading }}</button>
-          <div hellNavSectionItems>
+          <button
+            type="button"
+            class="hd-nav-section-toggle"
+            [attr.aria-expanded]="!isSectionCollapsed(section.heading)"
+            (click)="setSectionCollapsed(section.heading, !isSectionCollapsed(section.heading))"
+          >
+            {{ section.heading }}
+          </button>
+          <div class="hd-nav-section-items">
             @for (item of section.items; track item.path) {
               <a
-                hellNavItem
+                class="hd-nav-item"
                 [routerLink]="item.path"
                 routerLinkActive="active"
                 ariaCurrentWhenActive="page"
@@ -276,8 +282,8 @@
                 [routerLinkActiveOptions]="{ exact: !!item.exact }"
                 (click)="shell.closeMobilePanels()"
               >
-                <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
-                <span hellNavItemLabel>{{ item.label }}</span>
+                <hell-icon class="hd-nav-item-icon" [name]="item.icon" size="14px" />
+                <span class="hd-nav-item-label">{{ item.label }}</span>
               </a>
             }
           </div>
@@ -285,7 +291,7 @@
       } @else {
         @for (item of section.items; track item.path) {
           <a
-            hellNavItem
+            class="hd-nav-item"
             [routerLink]="item.path"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
@@ -293,8 +299,8 @@
             [routerLinkActiveOptions]="{ exact: !!item.exact }"
             (click)="shell.closeMobilePanels()"
           >
-            <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
-            <span hellNavItemLabel>{{ item.label }}</span>
+            <hell-icon class="hd-nav-item-icon" [name]="item.icon" size="14px" />
+            <span class="hd-nav-item-label">{{ item.label }}</span>
           </a>
         }
       }
