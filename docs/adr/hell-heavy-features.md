@@ -39,7 +39,7 @@ Current local evidence:
 
 - `@hell-ui/angular` root is core-only (`packages/angular/public-api.ts`).
 - Package peer metadata is package-wide (`packages/angular/package.json`), so optional feature peers still appear in the main package metadata.
-- Package-consumer peer tiers are asserted with strict installs in `tools/check-package-consumer.mjs`.
+- Package-consumer peer groups are asserted with strict installs by the checked-in fixtures in `tools/consumer-fixtures/` (`tools/check-consumer-fixtures.mjs`).
 - `audio-player` is exported by the composites aggregate and narrow `@hell-ui/angular/audio-player` entrypoint; the speech transcript path has no npm peer but does carry Web Speech / media-capture runtime risk. That runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and `provideHellAudioTranscript()`.
 
 ## Decision
@@ -60,7 +60,7 @@ Benefits:
 
 - One npm package and release train.
 - APF secondary entrypoints preserve narrow imports and code splitting.
-- Existing package-consumer scenarios already prove root/button installs do not need CodeMirror or pdf.js peers.
+- Existing consumer fixtures already prove root/button installs do not need CodeMirror or pdf.js peers.
 - Works well for small business-UI features whose dependencies are just the core/style stack.
 
 Costs:
@@ -87,12 +87,12 @@ Costs:
 
 | Feature | Current consumer evidence | Keep-in-package impact | Split-package impact | Decision |
 | --- | --- | --- | --- | --- |
-| PDF viewer | `pdf-viewer` package-consumer scenario requires the core group, `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; the app supplies a worker source. | `pdfjs-dist` remains an optional peer in `@hell-ui/angular` metadata even though root/button do not install it. PDF runtime owns pdf.js viewer imports, workers, printing, downloads, global quirks, and browser-only assumptions. | Main package drops the pdf.js peer and PDF feature entrypoint; new package owns `pdfjs-dist`, worker docs, package-consumer scenario, and lifecycle risk. | Split to a separate Angular package. |
+| PDF viewer | The `pdf-viewer` consumer fixture requires the core group, `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; the app supplies a worker source. | `pdfjs-dist` remains an optional peer in `@hell-ui/angular` metadata even though root/button do not install it. PDF runtime owns pdf.js viewer imports, workers, printing, downloads, global quirks, and browser-only assumptions. | Main package drops the pdf.js peer and PDF feature entrypoint; new package owns `pdfjs-dist`, worker docs, consumer fixture, and lifecycle risk. | Split to a separate Angular package. |
 | CodeMirror | `code-editor` scenario requires the core group, `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. Root/button scenarios are asserted to exclude heavy feature peers. | Optional CodeMirror peers remain visible in main metadata, but the feature is a small wrapper over caller-supplied CodeMirror extensions and has an established narrow entrypoint. | Removes CodeMirror peer names from core metadata but adds package overhead for a comparatively narrow editor shell. | Keep as optional entrypoint, guarded by consumer/architecture checks. |
-| Audio transcript | `audio-player` and `audio-transcript` package-consumer scenarios prove the base player and opt-in provider peer groups; neither uses CodeMirror or pdf.js peers. Docs/API mark speech transcript experimental; runtime uses `SpeechRecognition`, `webkitSpeechRecognition`, and `HTMLMediaElement.captureStream()` only inside `@hell-ui/angular/features/audio-transcript`. | No extra npm peer impact, and the transcript runtime no longer travels with audio-player/composites unless the provider is imported. | A separate package would be mostly packaging overhead because there is no third-party peer to isolate. | Keep in package behind the explicit optional feature/provider entrypoint. |
-| Table shell | Primitive `/table` and TanStack-shell `/table-tanstack` package-consumer scenarios prove the supported paths. | Primitive table styling remains compact business UI. TanStack-owned dynamic table behavior stays behind the TanStack shell path, and TanStack Virtual stays isolated to its optional body strategy. | A separate package is not needed for primitives or the TanStack shell, but package-consumer gates must prove TanStack/Virtual peers do not leak into `/table` or root. | Use `/table` plus `/table-tanstack`; reject unsupported paths before beta. |
+| Audio transcript | The `icon-audio` consumer fixture proves the base player and opt-in provider peer group; it uses no CodeMirror or pdf.js peers. Docs/API mark speech transcript experimental; runtime uses `SpeechRecognition`, `webkitSpeechRecognition`, and `HTMLMediaElement.captureStream()` only inside `@hell-ui/angular/features/audio-transcript`. | No extra npm peer impact, and the transcript runtime no longer travels with audio-player/composites unless the provider is imported. | A separate package would be mostly packaging overhead because there is no third-party peer to isolate. | Keep in package behind the explicit optional feature/provider entrypoint. |
+| Table shell | The `styled-controls` (primitive `/table`) and TanStack-shell `table-tanstack` consumer fixtures prove the supported paths. | Primitive table styling remains compact business UI. TanStack-owned dynamic table behavior stays behind the TanStack shell path, and TanStack Virtual stays isolated to its optional body strategy. | A separate package is not needed for primitives or the TanStack shell, but package-consumer gates must prove TanStack/Virtual peers do not leak into `/table` or root. | Use `/table` plus `/table-tanstack`; reject unsupported paths before beta. |
 
-Root, core, and button package-consumer scenarios must continue to exclude `@codemirror/*`, `@lezer/highlight`, and `pdfjs-dist`. This is currently asserted by `assertHeavyPeersAreIsolated()` in the package-consumer runner.
+The foundation and styled consumer fixtures must continue to exclude `@codemirror/*`, `@lezer/highlight`, and `pdfjs-dist`. This is currently asserted by the `forbiddenDependencies` manifests of the checked-in fixtures in `tools/consumer-fixtures/`.
 
 ## Consequences
 

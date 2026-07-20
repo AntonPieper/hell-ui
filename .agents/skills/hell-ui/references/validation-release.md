@@ -13,7 +13,7 @@ before commit:
 - Library packages: `pnpm run build:lib`, `pnpm run test:api-report`,
   `pnpm run test:package-pack`
 - Docs/UI: `pnpm run build:docs`, focused `pnpm run e2e`, and live Visual QA
-- Consumer/release: `pnpm run test:package-consumer -- --minimal-deps`,
+- Consumer/release: `pnpm run test:consumer-fixtures`,
   `pnpm run release:dry-run`
 
 Playwright shards natively in CI (`--shard=N/9`); locally, prefer the focused

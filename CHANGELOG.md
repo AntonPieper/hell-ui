@@ -438,6 +438,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Package-consumer proof consolidated onto checked-in boundary fixtures. The
+  embedded template-string scenario catalog and its hand-maintained CI
+  grouping (`tools/check-package-consumer.mjs`, `test:package-consumer`,
+  `HELL_PACKAGE_CONSUMER_GROUP`/`HELL_PACKAGE_CONSUMER_SCENARIOS`) are
+  deleted; coverage now lives in nine real consumer projects under
+  `tools/consumer-fixtures/` — foundation without CSS (`root-core`),
+  `testing`, `styled-controls`, `overlays-router`, `icon-audio`,
+  `table-tanstack`, `table-tanstack-virtual`, `code-editor`, and
+  `pdf-viewer` — one per dependency/packaging boundary rather than one per
+  component. Each fixture pins its peer group, forbids leaking optional
+  peers, asserts one or two CSS sentinels per imported stylesheet export
+  instead of exhaustive fragment lists, and may run a headless-Chromium
+  smoke, including a computed-style step that replaces the release-gate
+  runtime style check. CI discovers fixtures from the directory, fans one
+  matrix job out per fixture against the audited tarball artifact, and
+  publishes the single stable `Package consumer` gate context so rulesets
+  never pin per-fixture job names. Closes #275. Evidence: full local
+  `test:consumer-fixtures` runs with smokes enabled and the CI fixture
+  matrix plus gate on this change's pull request.
 - The page-header Composite ships a dedicated recipe module instead of its
   component implementation. `page-header/page-header.recipes.ts` now owns the
   `hell-page-header` and `hell-page-header-back` Part Recipes plus the private

@@ -49,5 +49,5 @@ pnpm run build:lib
 ```
 
 Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
-`pnpm run test:package-consumer`, `pnpm run test:api-report`, or
+`pnpm run test:consumer-fixtures`, `pnpm run test:api-report`, or
 `pnpm run release:dry-run` when the touched surface warrants it.

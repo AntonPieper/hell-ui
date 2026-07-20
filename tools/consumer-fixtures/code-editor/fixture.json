@@ -1,0 +1,24 @@
+{
+  "description": "code editor boundary: the kept optional CodeMirror feature entry with the CodeMirror peer group",
+  "peerGroup": "code-editor",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "hell-code-editor",
+    "background-image:linear-gradient(180deg,color-mix(in oklab,var(--color-hell-surface-subtle) 94%,white),var(--color-hell-surface-subtle))"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "hell-code-editor",
+        "textIncludes": "console.log"
+      }
+    ]
+  }
+}

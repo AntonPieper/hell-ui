@@ -1,0 +1,65 @@
+{
+  "description": "normal styled controls: styled primitive, mixed, and table-primitive entries with core peers plus tailwindcss",
+  "peerGroup": "primitive",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "--color-hell-primary:#3452ff",
+    "mask:var(--hell-icon-chevron-down) center/contain no-repeat",
+    "button[hellAlertDismiss][data-slot=root]:empty:before",
+    "margin-inline-start:var(--_hell-avatar-group-overlap)",
+    "[hellBreadcrumbSeparator][data-slot=root]:empty:before",
+    "background-color:var(--color-hell-primary)",
+    "text-underline-offset:3px",
+    ".data-\\[elevation\\=2\\]\\:shadow-hell-md",
+    "label:has(>[hellCheckbox][data-slot=root]:not([data-disabled],:disabled))",
+    "--_hell-chip-bg:var(--color-hell-surface-muted)",
+    "max-height:min(320px,var(--ngp-combobox-available-height,320px))",
+    "[data-focus-within=true]{border-color:var(--color-hell-border-focus)",
+    "transition-property:border-color,box-shadow",
+    "flex-basis:100%",
+    "border-style:dashed",
+    "min-height:140px",
+    "height:var(--spacing-hell-control-md)",
+    ".aria-selected\\:bg-hell-primary-soft",
+    "[hellMenu][data-slot=root][popover]{inset:auto",
+    "border-inline-start-width:1px",
+    "min-width:var(--spacing-hell-control-sm)",
+    "@keyframes hell-pop-in",
+    "transition-property:width",
+    "input[hellNativeRadio][data-slot=root]:before",
+    "max-height:min(320px,var(--ngp-select-available-height,320px))",
+    ".data-\\[orientation\\=horizontal\\]\\:h-px",
+    "animation:hell-shimmer 1.6s linear infinite",
+    "hell-slider[data-slot=root]>[data-slot=track]:before",
+    "[hellSpinner][data-slot=root][data-variant=ring]",
+    "label:has(>[hellSwitch][data-slot=root]:not([data-disabled],:disabled))",
+    "table-layout:fixed",
+    "cursor:col-resize",
+    "button[hellTab][data-slot=root][data-orientation=vertical][data-active]:before",
+    "--_hell-toggle-scale:1",
+    "max-width:min(240px,calc(100vw - var(--spacing-hell-8)))"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "[data-test-id=\"styled-controls-status\"]",
+        "textIncludes": "Styled controls ready"
+      },
+      {
+        "selector": "[data-test-id=\"primary-link\"]",
+        "computedStyle": {
+          "property": "color",
+          "equals": "rgb(52, 82, 255)"
+        }
+      }
+    ]
+  }
+}

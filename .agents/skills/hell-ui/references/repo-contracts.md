@@ -45,5 +45,5 @@ work.
 - TanStack Table stays behind `@hell-ui/angular/table-tanstack`.
 - TanStack Virtual stays behind `@hell-ui/angular/table-tanstack/virtual`.
 - pdf.js stays behind `@hell-ui/angular/features/pdf-viewer`.
-- Consumer docs and README claims should match package-consumer scenarios and
+- Consumer docs and README claims should match the consumer fixtures and
   pack-audit evidence, not workspace intuition.

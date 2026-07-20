@@ -1,0 +1,29 @@
+{
+  "description": "TanStack table boundary: Hell-styled shell over a caller-owned TanStack Table engine with the strict optional table peer",
+  "peerGroup": "table-tanstack",
+  "forbiddenDependencies": [
+    "@tanstack/virtual-core",
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "hell-tanstack-table",
+    "hell-tanstack-pagination",
+    "table-layout:fixed",
+    "background-color:var(--color-hell-primary)",
+    "label:has(>[hellCheckbox][data-slot=root]:not([data-disabled],:disabled))",
+    "height:var(--spacing-hell-control-md)",
+    "input[hellNativeRadio][data-slot=root]:before"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "hell-tanstack-table",
+        "textIncludes": "Person Ada Lovelace"
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "description": "overlays and router boundary: composite shell, dialog, omnibar, toast, prompts, layout composites, and Filter Builder with the router peer installed",
+  "peerGroup": "composite-router",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)",
+    "[hellAppTopbar][data-slot=root]>[hellSidenavToggle][data-slot=root]",
+    "--hell-app-content-max-width:960px",
+    "padding:var(--spacing-hell-5)",
+    "z-index:var(--hell-z-dialog-scoped)",
+    "@keyframes hell-dialog-in",
+    "hell-omnibar[data-slot=root]",
+    "max-width:65ch",
+    "min-width:var(--spacing-hell-control-sm)",
+    "flex:var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0)",
+    "grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr))",
+    "font-size:22px",
+    "hell-toaster",
+    "--hell-toast-offset",
+    "hell-overflow-toolbar[data-slot=root]",
+    "z-index:var(--hell-z-popover,60)",
+    "min-width:180px"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "[data-test-id=\"overlays-router-status\"]",
+        "textIncludes": "Overlays and router ready"
+      }
+    ]
+  }
+}

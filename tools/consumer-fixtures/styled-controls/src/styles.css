@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/accordion/styles.css';
+@import '@hell-ui/angular/alert/styles.css';
+@import '@hell-ui/angular/avatar/styles.css';
+@import '@hell-ui/angular/breadcrumbs/styles.css';
+@import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/card/styles.css';
+@import '@hell-ui/angular/checkbox/styles.css';
+@import '@hell-ui/angular/chip/styles.css';
+@import '@hell-ui/angular/combobox/styles.css';
+@import '@hell-ui/angular/control-group/styles.css';
+@import '@hell-ui/angular/date-input/styles.css';
+@import '@hell-ui/angular/field/styles.css';
+@import '@hell-ui/angular/file-picker/styles.css';
+@import '@hell-ui/angular/input/styles.css';
+@import '@hell-ui/angular/listbox/styles.css';
+@import '@hell-ui/angular/menu/styles.css';
+@import '@hell-ui/angular/number-input/styles.css';
+@import '@hell-ui/angular/pagination/styles.css';
+@import '@hell-ui/angular/popover/styles.css';
+@import '@hell-ui/angular/progress/styles.css';
+@import '@hell-ui/angular/radio/styles.css';
+@import '@hell-ui/angular/select/styles.css';
+@import '@hell-ui/angular/separator/styles.css';
+@import '@hell-ui/angular/skeleton/styles.css';
+@import '@hell-ui/angular/slider/styles.css';
+@import '@hell-ui/angular/spinner/styles.css';
+@import '@hell-ui/angular/switch/styles.css';
+@import '@hell-ui/angular/table/styles.css';
+@import '@hell-ui/angular/tabs/styles.css';
+@import '@hell-ui/angular/time-input/styles.css';
+@import '@hell-ui/angular/toggle/styles.css';
+@import '@hell-ui/angular/tooltip/styles.css';
+
+:root {
+  --color-hell-primary: #3452ff;
+}

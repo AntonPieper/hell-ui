@@ -43,7 +43,7 @@ tokens, themes, or design polish.
   Dialpad is the multi-part reference.
 - Shipped recipe CSS may depend on component CSS `@source` pointing at built
   FESM output. Consumer apps should not need Hell `@source` scanning for default
-  visuals; prove that with package-consumer scenarios.
+  visuals; prove that with consumer fixtures.
 
 ## Design Taste
 

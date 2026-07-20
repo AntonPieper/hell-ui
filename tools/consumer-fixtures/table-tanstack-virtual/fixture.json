@@ -1,0 +1,23 @@
+{
+  "description": "TanStack virtual boundary: the optional TanStack Virtual body strategy mounts on the Hell-styled shell",
+  "peerGroup": "table-tanstack-virtual",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "hell-tanstack-table",
+    "table-layout:fixed"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "hell-tanstack-table",
+        "textIncludes": "Ada Lovelace"
+      }
+    ]
+  }
+}

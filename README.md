@@ -24,7 +24,7 @@ pnpm release:dry-run # local release preflight
 
 `release:dry-run` chains changelog, lint, architecture, unit tests,
 `build:lib`, pack audit, and the API report. The tag-triggered release
-workflow runs the same gates plus package-consumer scenarios and the docs
+workflow runs the same gates plus the consumer fixtures and the docs
 build before publishing. Trusted npm publishing and provenance setup is
 specified in `docs/release/npm-publishing.md`.
 
@@ -95,7 +95,7 @@ Peer dependency tiers:
 | Code editor                   | `/features/code-editor`; `code-editor`                                                                                                  | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`.                                                                                       |
 | PDF viewer                    | `/features/pdf-viewer`; `pdf-viewer`                                                                                                    | Core peers plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`, and the exact optional `pdfjs-dist` peer.                                                                                                                  |
 
-CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers remain optional and are not required by root, button, table, audio-player, audio-transcript, or composite package-consumer scenarios. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, and TanStack Virtual is isolated behind `@hell-ui/angular/table-tanstack/virtual`. pdf.js is isolated behind `@hell-ui/angular/features/pdf-viewer`. The audio transcript runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and has no CodeMirror/pdf.js peers.
+CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers remain optional and are not required by the foundation, styled-controls, table, icon/audio, or composite consumer fixtures. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, and TanStack Virtual is isolated behind `@hell-ui/angular/table-tanstack/virtual`. pdf.js is isolated behind `@hell-ui/angular/features/pdf-viewer`. The audio transcript runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and has no CodeMirror/pdf.js peers.
 
 ## Public API Tiers
 

@@ -39,19 +39,13 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
-      # The package-consumer runtime style check launches a headless chromium
-      # (HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK=1).
+      # The consumer fixture smokes load built consumer apps in headless
+      # chromium (HELL_CONSUMER_FIXTURE_SMOKE=1).
       - name: Install Playwright chromium
         run: pnpm run ci:playwright:chromium
 
       - name: Release dry run
         run: pnpm run release:dry-run
-
-      - name: Package consumer scenarios
-        env:
-          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
-          HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK: 1
-        run: pnpm run test:package-consumer -- --minimal-deps
 
       - name: Consumer fixtures
         env:

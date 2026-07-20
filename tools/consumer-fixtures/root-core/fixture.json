@@ -1,11 +1,16 @@
 {
-  "description": "root entry core-only with package-wide light peers",
+  "description": "foundation without CSS: root and /core entries plus behavior-only Part Style Map controls with package-wide light peers",
   "peerGroup": "core",
-  "forbiddenDependencies": ["@tanstack/angular-table", "@tanstack/virtual-core"],
+  "forbiddenDependencies": [
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
   "smoke": {
     "steps": [
       {
-        "selector": "app-root p",
+        "selector": "[data-test-id=\"root-core-status\"]",
         "textIncludes": "Root core contract: 1 result"
       }
     ]

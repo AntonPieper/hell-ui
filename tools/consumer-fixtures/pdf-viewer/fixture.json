@@ -1,0 +1,13 @@
+{
+  "description": "PDF/browser feature boundary: the optional pdf.js feature entry with the exact pdf.js peer and icon peers",
+  "peerGroup": "pdf-viewer",
+  "forbiddenDependencies": [
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "hell-pdf-viewer[data-slot=root]"
+  ]
+}
