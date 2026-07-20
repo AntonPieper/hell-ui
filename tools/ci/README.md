@@ -39,6 +39,14 @@ The `e2e-plan` job maps the triggering event to a tier and a shard count
 constant. Shards use Playwright's native `--shard=N/T`; every selected test
 runs in exactly one shard by construction.
 
+Shard job names embed the tier and shard count (`E2E pr (shard 1/3)`,
+`E2E main (shard 4/6)`, ...), so branch protection never pins per-shard
+contexts. The `e2e-gate` job publishes the single stable `E2E` context for
+rulesets to require: it runs on every outcome and fails unless `e2e-plan` and
+every planned shard succeeded, so a failed, cancelled, or skipped shard cannot
+pass as a missing check. Tier or shard-count changes therefore never require a
+ruleset edit.
+
 Package-consumer jobs select scenario groups with
 `HELL_PACKAGE_CONSUMER_GROUP`; the harness owns the group definitions and
 fails when a scenario is missing from group coverage or a group name is
