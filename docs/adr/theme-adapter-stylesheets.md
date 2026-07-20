@@ -1,7 +1,15 @@
 # ADR: Theme adapter stylesheets
 
-- Status: Accepted
+- Status: Accepted; amended 2026-07-20 (Default Style Bundle interaction)
 - Date: 2026-07-01
+
+## Amendment (2026-07-20)
+
+The target package identity is `hell-ui`. Theme Adapter Stylesheets remain
+explicit opt-ins and are not included in the Default Style Bundle accepted by
+`0002-public-package-and-stylesheet-surface.md`. Consumers import an adapter
+after `hell-ui/styles.css` or after the Shared Style Substrate and relevant
+Entrypoint-Scoped Stylesheets in Granular Style Mode.
 
 ## Context
 
@@ -16,17 +24,20 @@ contract.
 
 Use optional Theme Adapter Stylesheets.
 
-- Keep `@hell-ui/angular/tokens.css` limited to Semantic Theme Tokens,
+- Keep `hell-ui/tokens.css` limited to Semantic Theme Tokens,
   palettes, skin-wide primitives, and page-level skin backgrounds.
-- Export per-skin adapter CSS files from `@hell-ui/angular/themes/<skin>.css`.
-- Import adapters after `tokens.css` and after the concrete entrypoint styles
-  they adapt.
+- Export per-skin adapter CSS files from `hell-ui/themes/<skin>.css`.
+- Import adapters after the selected standard-style mode: either
+  `hell-ui/styles.css` or `tokens.css` plus the concrete entrypoint styles they
+  adapt.
+- Do not include adapters in the Default Style Bundle.
 - Adapter selectors may target component directive selectors only together with
   stable Public Parts expressed through `data-slot`.
 - Adapter coverage is explicit and partial. If a component is not listed in an
   adapter stylesheet, it keeps the default entrypoint style for that skin.
 - Do not create category CSS aggregates or make `tokens.css` a component
-  selector registry.
+  selector registry. The package-level Default Style Bundle is the sole
+  accepted standard CSS aggregate.
 
 ## Consequences
 
