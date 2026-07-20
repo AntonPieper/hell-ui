@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellCodeEditor > recipes > keeps the default part classes stable > codeEditor 1`] = `
+{
+  "editor": [
+    "h-full",
+    "min-h-[inherit]",
+  ],
+  "root": [
+    "bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-hell-surface-subtle)_94%,white),var(--color-hell-surface-subtle))]",
+    "block",
+    "border",
+    "border-hell-border",
+    "data-[readonly=true]:bg-hell-surface-subtle",
+    "duration-[var(--hell-duration-fast)]",
+    "ease-[var(--ease-hell-out)]",
+    "max-h-[16rem]",
+    "overflow-hidden",
+    "rounded-hell-md",
+    "shadow-hell-xs",
+    "text-hell-foreground",
+    "transition-[border-color,box-shadow]",
+  ],
+}
+`;

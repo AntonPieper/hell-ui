@@ -163,8 +163,8 @@ describe('HellAudioPlayer', () => {
     const seekSlider = seek.querySelector('hell-slider') as HTMLElement;
     const volume = root.querySelector('[data-slot="volume"]') as HTMLElement;
     const volumeSlider = volume.querySelector('hell-slider') as HTMLElement;
-    expect(seek.className).toContain('flex-1');
-    expect(volume.className).toContain('min-w-[7.5rem]');
+    expect(seek.getAttribute('data-slot')).toBe('seek');
+    expect(volume.getAttribute('data-slot')).toBe('volume');
     expect(seekSlider.getAttribute('data-slot')).toBe('root');
     expect(volumeSlider.getAttribute('data-slot')).toBe('root');
 

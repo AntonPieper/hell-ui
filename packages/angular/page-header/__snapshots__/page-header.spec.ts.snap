@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`page-header recipe module > recipes > keeps the default part classes stable > pageHeader 1`] = `
+{
+  "description": [
+    "m-0",
+    "max-w-prose",
+    "text-sm",
+    "text-hell-foreground-muted",
+  ],
+  "leading": [
+    "flex",
+    "min-w-0",
+    "flex-wrap",
+    "items-center",
+    "gap-hell-3",
+  ],
+  "meta": [
+    "flex",
+    "flex-wrap",
+    "items-center",
+    "gap-hell-2",
+  ],
+  "root": [
+    "flex",
+    "w-full",
+    "min-w-0",
+    "flex-col",
+    "gap-hell-3",
+  ],
+  "title": [
+    "m-0",
+    "text-xl",
+    "font-semibold",
+    "leading-tight",
+    "text-hell-foreground",
+  ],
+  "titleGroup": [
+    "flex",
+    "min-w-0",
+    "flex-col",
+    "gap-hell-1",
+    "sm:flex-1",
+  ],
+  "toolbar": [
+    "flex",
+    "min-w-0",
+    "items-center",
+    "sm:flex-1",
+    "sm:justify-end",
+  ],
+}
+`;
+
+exports[`page-header recipe module > recipes > keeps the default part classes stable > pageHeaderBack 1`] = `
+{
+  "root": [
+    "inline-flex",
+    "flex-none",
+    "items-center",
+  ],
+}
+`;
+
+exports[`page-header recipe module > recipes > keeps the default part classes stable > pageHeaderLayout 1`] = `
+{
+  "body": [
+    "flex",
+    "min-w-0",
+    "flex-col",
+    "gap-hell-3",
+    "sm:flex-row",
+    "sm:items-start",
+    "sm:justify-between",
+  ],
+  "titleRow": [
+    "flex",
+    "min-w-0",
+    "flex-wrap",
+    "items-center",
+    "gap-hell-3",
+  ],
+}
+`;

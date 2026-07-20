@@ -68,6 +68,7 @@ class SliderFieldHost {}
       [value]="10"
     />
     <hell-slider id="slider-map" aria-label="Map slider" [ui]="ui" [value]="25" />
+    <hell-slider id="slider-default" aria-label="Plain slider" [value]="5" />
   `,
 })
 class SliderUiHost {
@@ -77,6 +78,22 @@ class SliderUiHost {
     range: 'h-hell-2 bg-hell-danger',
     thumb: 'size-hell-6 border-hell-danger bg-hell-danger-soft',
   };
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
 }
 
 describe('HellSlider', () => {
@@ -97,23 +114,45 @@ describe('HellSlider', () => {
     const mapRange = mapSlider.querySelector('[data-slot="range"]') as HTMLElement;
     const mapThumb = mapSlider.querySelector('[data-slot="thumb"]') as HTMLElement;
 
-    expect(stringSlider.getAttribute('data-slot')).toBe('root');
-    expect(stringSlider.classList.contains('h-hell-9')).toBe(true);
-    expect(stringSlider.classList.contains('h-hell-6')).toBe(false);
-    expect(stringSlider.classList.contains('cursor-crosshair')).toBe(true);
-    expect(stringSlider.classList.contains('cursor-pointer')).toBe(false);
-    expect(stringTrack.classList.contains('self-center')).toBe(false);
+    const defaultSlider = fixture.nativeElement.querySelector('#slider-default') as HTMLElement;
+    const defaults = {
+      root: defaultSlider.className,
+      track: defaultSlider.querySelector('[data-slot="track"]')?.getAttribute('class') ?? '',
+      range: defaultSlider.querySelector('[data-slot="range"]')?.getAttribute('class') ?? '',
+      thumb: defaultSlider.querySelector('[data-slot="thumb"]')?.getAttribute('class') ?? '',
+    };
 
-    expect(mapSlider.classList.contains('h-hell-9')).toBe(true);
-    expect(mapSlider.classList.contains('h-hell-6')).toBe(false);
-    expect(mapTrack.classList.contains('self-center')).toBe(true);
-    expect(mapTrack.classList.contains('self-stretch')).toBe(false);
-    expect(mapRange.classList.contains('bg-hell-danger')).toBe(true);
-    expect(mapRange.classList.contains('bg-hell-primary')).toBe(false);
-    expect(mapRange.classList.contains('h-hell-2')).toBe(true);
-    expect(mapThumb.classList.contains('size-hell-6')).toBe(true);
-    expect(mapThumb.classList.contains('size-[18px]')).toBe(false);
-    expect(mapThumb.classList.contains('border-hell-danger')).toBe(true);
+    expect(stringSlider.getAttribute('data-slot')).toBe('root');
+    expectUiRouting(defaults.root, stringSlider.className, 'h-hell-9 cursor-crosshair');
+    // String shorthand routes to the root part only; the track stays default.
+    expectUiRouting(defaults.track, stringTrack.className, '');
+
+    expectUiRouting(defaults.root, mapSlider.className, 'h-hell-9 cursor-crosshair');
+    expectUiRouting(defaults.track, mapTrack.className, 'self-center bg-transparent');
+    expectUiRouting(defaults.range, mapRange.className, 'h-hell-2 bg-hell-danger');
+    expectUiRouting(defaults.thumb, mapThumb.className, 'size-hell-6 border-hell-danger bg-hell-danger-soft');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(SliderUiHost);
+      fixture.detectChanges();
+      const slider = fixture.nativeElement.querySelector('#slider-default') as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (slot: string): string[] =>
+        sortClasses(slider.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
+
+      expect({
+        root: sortClasses(slider.className),
+        track: partClasses('track'),
+        range: partClasses('range'),
+        thumb: partClasses('thumb'),
+      }).toMatchSnapshot('slider');
+    });
   });
 
   it('redispatches track pointerdown to the thumb and clears active drag on pointerup', () => {

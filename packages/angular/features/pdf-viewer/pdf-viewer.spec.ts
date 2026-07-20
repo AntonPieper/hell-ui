@@ -293,8 +293,44 @@ describe('HellPdfViewer', () => {
 
     const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
     expect(viewer.getAttribute('data-slot')).toBe('root');
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(viewer.classList.contains('ring-2')).toBe(true);
     expect(viewer.classList.contains('ring-custom')).toBe(true);
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (slot: string): string[] =>
+        sortClasses(viewer.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
+
+      expect(
+        Object.fromEntries(
+          [
+            'toolbar',
+            'toolbarGroup',
+            'divider',
+            'pageInput',
+            'toolbarText',
+            'zoomSelect',
+            'viewport',
+            'sidebar',
+            'thumb',
+            'thumbLabel',
+            'pageArea',
+          ].map((slot) => [slot, partClasses(slot)]),
+        ),
+      ).toMatchSnapshot('pdfViewer');
+    });
   });
 
   it('merges part-map classes onto their parts and wins over defaults', async () => {
