@@ -438,6 +438,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- The breaking Tooltip redesign (#238) is sealed as one release-ready package
+  contract. The `@hell-ui/angular/tooltip` entry point is pinned as a Mixed
+  Entry Point through manifest-aware architecture checks that also reject the
+  retired trigger/surface vocabulary, the retired `disabled` and
+  `hoverableContent` inputs, host-restricted trigger selectors, and any
+  Tooltip import-tuple alias. A dedicated packed `tooltip` package-consumer
+  scenario compiles and renders the one-binding string path and a custom
+  template with a separately styled explicit Tooltip Surface, asserting the
+  implicit-surface recipe, hover-safe pointer styling, and consumer `ui`
+  output in built CSS. The first-beta consumer guide gains a Tooltip
+  migration section covering the rename, the string convenience path, the
+  removed inputs, absence semantics, and the replacement defaults APIs; see
+  the #239, #240, and #241 Breaking changes entries below for the complete
+  contract story. Closes #243. Evidence: architecture checks, the tooltip API
+  report, the packed tooltip consumer scenario, library and docs production
+  builds, and the full release dry run.
 - Generic value plumbing no longer manufactures type safety with casts. The
   internal typed-value input state defaults its output type to its value type
   and requires an explicit `toOutput` mapper whenever the value type is not
