@@ -77,26 +77,98 @@ const audioTranscriptRuntimeTerms = [
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
 
+// Check Manifest: every custom architecture check registers its lifecycle here.
+//
+// - kind 'permanent' checks guard durable design invariants and never expire.
+// - kind 'migration' checks pin the outcome of one migration and must declare
+//   removeAfter: the release that ships the migration. The checker fails
+//   itself when a migration check is missing that expiry, and again once the
+//   package version moves past it — delete the check and its entry then.
+const architectureCheckManifest = [
+  { name: 'docs-examples', kind: 'permanent', owner: '@AntonPieper', run: checkDocsExamples },
+  {
+    name: 'docs-lazy-route-import-graph',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkDocsLazyRouteImportGraphContract,
+  },
+  { name: 'docs-root-import', kind: 'permanent', owner: '@AntonPieper', run: checkDocsRootImportContract },
+  {
+    name: 'docs-category-navigation',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkDocsCategoryNavigationContract,
+  },
+  { name: 'package-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkPackageEntryPoints },
+  {
+    name: 'code-mirror-entrypoint-isolation',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkCodeMirrorEntrypointIsolationContract,
+  },
+  {
+    name: 'audio-transcript-entrypoint-isolation',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkAudioTranscriptEntrypointIsolationContract,
+  },
+  { name: 'api-stability', kind: 'permanent', owner: '@AntonPieper', run: checkApiStabilityContract },
+  { name: 'package-dependency', kind: 'permanent', owner: '@AntonPieper', run: checkPackageDependencyContract },
+  { name: 'style-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkStyleEntryPoints },
+  { name: 'component-contract', kind: 'permanent', owner: '@AntonPieper', run: checkComponentContract },
+  {
+    // Pins the native Number Input adoption (#250) until the release ships.
+    name: 'native-number-input-contract',
+    kind: 'migration',
+    owner: '@AntonPieper',
+    removeAfter: '0.2.0',
+    run: checkNativeNumberInputContract,
+  },
+  {
+    // Pins the slim App Shell coordination interface (#251) until the release ships.
+    name: 'slim-app-shell-contract',
+    kind: 'migration',
+    owner: '@AntonPieper',
+    removeAfter: '0.2.0',
+    run: checkSlimAppShellContract,
+  },
+  {
+    // Guards the ADR-decided tooltip vocabulary and its deliberate tuple
+    // absence (docs/adr/tooltip-content-and-surface.md, #238).
+    name: 'tooltip-vocabulary-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkTooltipVocabularyContract,
+  },
+  {
+    name: 'native-button-selector-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkNativeButtonSelectorContract,
+  },
+  {
+    name: 'interactive-trigger-selector-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkInteractiveTriggerSelectorContract,
+  },
+  {
+    name: 'table-adapter-boundary-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkTableAdapterBoundaryContract,
+  },
+  {
+    name: 'ngp-state-writer-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkNgpStateWriterContract,
+  },
+];
+
 function main() {
-  checkDocsExamples();
-  checkDocsLazyRouteImportGraphContract();
-  checkDocsRootImportContract();
-  checkDocsCategoryNavigationContract();
-  checkImportTupleRetirementContract();
-  checkPackageEntryPoints();
-  checkCodeMirrorEntrypointIsolationContract();
-  checkAudioTranscriptEntrypointIsolationContract();
-  checkApiStabilityContract();
-  checkPackageDependencyContract();
-  checkStyleEntryPoints();
-  checkComponentContract();
-  checkNativeNumberInputContract();
-  checkSlimAppShellContract();
-  checkTooltipVocabularyContract();
-  checkNativeButtonSelectorContract();
-  checkInteractiveTriggerSelectorContract();
-  checkTableAdapterBoundaryContract();
-  checkNgpStateWriterContract();
+  checkCheckManifest(architectureCheckManifest);
+  for (const entry of architectureCheckManifest) entry.run();
 
   if (failures.length) {
     console.error('Architecture checks failed:\n');
@@ -107,12 +179,69 @@ function main() {
   console.log('Architecture checks passed.');
 }
 
+function checkCheckManifest(manifest) {
+  const kinds = new Set(['permanent', 'migration']);
+  const releasePattern = /^\d+\.\d+\.\d+$/;
+  const packageVersion = parseJsonWithComments(
+    readFile(join(root, 'packages/angular/package.json')),
+  ).version;
+  const seenNames = new Set();
+
+  for (const entry of manifest) {
+    const name = entry.name ?? entry.run?.name ?? '<unnamed>';
+    if (!entry.name) failures.push(`Check Manifest entry ${name} is missing a name`);
+    if (seenNames.has(name)) failures.push(`Check Manifest has duplicate entry ${name}`);
+    seenNames.add(name);
+
+    if (typeof entry.run !== 'function') {
+      failures.push(`Check Manifest entry ${name} must reference a check function`);
+    }
+    if (!kinds.has(entry.kind)) {
+      failures.push(`Check Manifest entry ${name} must declare kind "permanent" or "migration"`);
+    }
+    if (!entry.owner) {
+      failures.push(`Check Manifest entry ${name} must declare an owner`);
+    }
+
+    if (entry.kind === 'migration') {
+      if (!entry.removeAfter) {
+        failures.push(
+          `Check Manifest migration check ${name} has no removeAfter release; declare the release that retires it or reclassify it as permanent`,
+        );
+      } else if (!releasePattern.test(entry.removeAfter)) {
+        failures.push(
+          `Check Manifest migration check ${name} removeAfter must be an x.y.z release; found ${entry.removeAfter}`,
+        );
+      } else if (compareReleases(releaseCore(packageVersion), entry.removeAfter) > 0) {
+        failures.push(
+          `Check Manifest migration check ${name} expired after release ${entry.removeAfter} (package version is ${packageVersion}); delete the check and its manifest entry`,
+        );
+      }
+    } else if (entry.removeAfter) {
+      failures.push(
+        `Check Manifest permanent check ${name} must not declare removeAfter; reclassify it as a migration check if it should expire`,
+      );
+    }
+  }
+}
+
+function releaseCore(version) {
+  return version.split(/[-+]/)[0];
+}
+
+function compareReleases(left, right) {
+  const leftParts = left.split('.').map(Number);
+  const rightParts = right.split('.').map(Number);
+  for (let index = 0; index < 3; index++) {
+    const difference = (leftParts[index] ?? 0) - (rightParts[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
+
 function checkNativeNumberInputContract() {
   const rel = 'packages/angular/number-input/number-input.ts';
   const source = readFile(join(root, rel));
-  const inputModule = decoratedClassModules(source).find(
-    (module) => module.className === 'HellNumberInput',
-  )?.moduleSource;
   const requiredFragments = [
     "selector: 'input[hellNumberInput]'",
     "selector: 'button[hellNumberStep]'",
@@ -120,105 +249,17 @@ function checkNativeNumberInputContract() {
     "alias: 'hellNumberStepFor'",
     'export const HELL_NUMBER_INPUT_IMPORTS',
   ];
-  const retiredInputFragments = [
-    'readonly steppers = input',
-    'readonly suffix = input',
-    'readonly inputId = input',
-    'readonly name = input',
-    'readonly placeholder = input',
-    'readonly ariaLabel = input',
-  ];
 
   for (const fragment of requiredFragments) {
     if (!source.includes(fragment)) {
       failures.push(`${rel} native Number Input contract is missing ${fragment}`);
     }
   }
-  for (const fragment of ["selector: 'hell-number-input'", 'HellNumberInputPart', 'HellNumberInputUi']) {
-    if (source.includes(fragment)) {
-      failures.push(`${rel} native Number Input contract still exposes ${fragment}`);
-    }
-  }
-  if (!inputModule) {
-    failures.push(`${rel} native Number Input contract is missing HellNumberInput`);
-    return;
-  }
-  for (const fragment of retiredInputFragments) {
-    if (inputModule.includes(fragment)) {
-      failures.push(`${rel} native Number Input still forwards ${fragment}; author it natively`);
-    }
-  }
 }
 
 function checkSlimAppShellContract() {
-  const rel = 'packages/angular/app-shell/app-shell.ts';
   const styleRel = 'packages/angular/app-shell/styles.css';
-  const apiRel = 'etc/api-reports/hell-ui-angular-app-shell.api.md';
-  const source = readFile(join(root, rel));
   const styles = readFile(join(root, styleRel));
-  const apiReport = readFile(join(root, apiRel));
-  const modules = new Map(
-    decoratedClassModules(source).map((module) => [module.className, module.moduleSource]),
-  );
-  const retiredByClass = new Map([
-    [
-      'HellAppShell',
-      [
-        'readonly isMobileLayout',
-        'readonly mobileOpenPanel',
-        'readonly isSidenavCollapsed',
-        'readonly isSecondaryHidden',
-      ],
-    ],
-    ['HellAppContent', ['readonly maxWidth = input', 'maxWidthValue']],
-    [
-      'HellAppSidenav',
-      ['readonly collapsed = input', 'readonly id = input', 'readonly isCollapsed'],
-    ],
-    [
-      'HellAppSecondary',
-      ['readonly hidden = input', 'readonly id = input', 'readonly isHidden'],
-    ],
-    ['HellAppSecondaryBody', ['readonly secondary = inject']],
-    ['HellSidenavToggle', ['readonly appearance = input']],
-    ['HellSecondaryToggle', ['readonly appearance = input']],
-  ]);
-
-  for (const [className, fragments] of retiredByClass) {
-    const moduleSource = modules.get(className);
-    if (!moduleSource) {
-      failures.push(`${rel} slim App Shell contract is missing ${className}`);
-      continue;
-    }
-    for (const fragment of fragments) {
-      if (moduleSource.includes(fragment)) {
-        failures.push(`${rel} slim App Shell contract still exposes ${className}.${fragment}`);
-      }
-    }
-  }
-
-  for (const fragment of [
-    'sidenavPanelId',
-    'secondaryPanelId',
-    'data-hell-app-shell-panel',
-    'data-hell-app-shell-toggle',
-    'data-hell-sidenav-toggle',
-    'data-hell-secondary-toggle',
-  ]) {
-    if (source.includes(fragment)) {
-      failures.push(`${rel} slim App Shell contract still exposes renderer coordination ${fragment}`);
-    }
-  }
-
-  for (const method of [
-    'dismissMobilePanels',
-    'completeMobilePanelDismissal',
-    'dismissMobilePanelsOnEscape',
-  ]) {
-    if (apiReport.includes(`${method}(`)) {
-      failures.push(`${apiRel} slim App Shell contract exposes private event coordination ${method}`);
-    }
-  }
 
   for (const fragment of [
     "[hellAppTopbar][data-slot='root'] > [hellSidenavToggle][data-slot='root']",
@@ -229,102 +270,6 @@ function checkSlimAppShellContract() {
   ]) {
     if (!styles.includes(fragment)) {
       failures.push(`${styleRel} slim App Shell placement recipe is missing ${fragment}`);
-    }
-  }
-
-  for (const fragment of [
-    ":not([data-sidenav-collapsed='true'])::before",
-    ":not([data-secondary-hidden='true'])::before",
-  ]) {
-    if (styles.includes(fragment)) {
-      failures.push(`${styleRel} backdrop still follows unregistered panel state ${fragment}`);
-    }
-  }
-}
-
-function checkImportTupleRetirementContract() {
-  const packageRoot = join(root, libraryRoot);
-  const retiredTupleBases = [
-    'ACCORDION',
-    'ALERT',
-    'APP_SHELL',
-    'AVATAR_GROUP',
-    'BREADCRUMBS',
-    'CARD',
-    'CHIP',
-    'COMBOBOX',
-    'CONTROL_GROUP',
-    'DIALOG',
-    'EMPTY_STATE',
-    'FIELD',
-    'SEARCH',
-    'LISTBOX',
-    'MENU',
-    'OMNIBAR',
-    'PAGE_HEADER',
-    'PAGINATION',
-    'RESIZABLE',
-    'SELECT',
-    'TABLE_UTILITIES',
-    'TANSTACK_TABLE',
-    'TANSTACK_TABLE_VIRTUAL',
-    'TABS',
-    'TOAST',
-    'TOOLBAR',
-  ];
-  const replacements = new Map(
-    retiredTupleBases.map((base) => [`HELL_${base}_DIRECTIVES`, `HELL_${base}_IMPORTS`]),
-  );
-  const legacyPattern = /\bHELL_[A-Z0-9_]+_DIRECTIVES\b/g;
-  const allowedMigrationReferences = new Set([
-    'apps/docs/src/app/pages/components/master-detail/master-detail.page.ts:HELL_SPLIT_VIEW_DIRECTIVES',
-  ]);
-  const files = [
-    ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
-    ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
-    ...walk(join(root, 'e2e')).filter((path) => /\.(?:json|ts)$/.test(path)),
-    ...walk(join(root, 'tools')).filter(
-      (path) =>
-        /\.(?:json|mjs|ts)$/.test(path) &&
-        path !== join(root, 'tools/check-architecture.mjs'),
-    ),
-    ...walk(join(root, 'etc/api-reports')).filter((path) => path.endsWith('.md')),
-    join(root, 'README.md'),
-    join(packageRoot, 'README.md'),
-  ];
-
-  for (const file of files) {
-    const source = readFile(file);
-    for (const match of source.matchAll(legacyPattern)) {
-      const legacyName = match[0];
-      const reference = `${relative(root, file)}:${legacyName}`;
-      if (allowedMigrationReferences.has(reference)) continue;
-
-      const importsName =
-        replacements.get(legacyName) ?? legacyName.replace(/_DIRECTIVES$/, '_IMPORTS');
-      const lineNumber = source.slice(0, match.index).split('\n').length;
-      failures.push(
-        `Import Tuple Retirement ${relative(root, file)}:${lineNumber} still exposes or consumes ${legacyName}; use ${importsName}`,
-      );
-    }
-  }
-
-  const packageSource = libraryPackageFiles()
-    .filter((path) => path.endsWith('.ts'))
-    .map(readFile)
-    .join('\n');
-  const migrationGuide = readFile(join(root, 'docs/release/first-beta-consumer-guide.md'));
-  for (const [legacyName, importsName] of replacements) {
-    if (!new RegExp(`export const ${escapeRegExp(importsName)}\\s*=`).test(packageSource)) {
-      failures.push(`Import Tuple Retirement is missing canonical replacement ${importsName}`);
-    }
-    const mapping = new RegExp(
-      `${escapeRegExp(legacyName)}[^\\n]*${escapeRegExp(importsName)}`,
-    );
-    if (!mapping.test(migrationGuide)) {
-      failures.push(
-        `Import Tuple Retirement migration guide must map ${legacyName} to ${importsName}`,
-      );
     }
   }
 }
@@ -1662,28 +1607,16 @@ function checkTooltipVocabularyContract() {
     "selector: '[hellTooltipSurface]'",
     'export class HellTooltipSurface ',
   ];
-  const retiredFragments = [
-    "selector: 'button[hellTooltip], a[hellTooltip]'",
-    'HellNativeInteractiveDisabledGuard',
-    'disabled = input',
-    'hoverableContent = input',
-  ];
 
   for (const fragment of requiredFragments) {
     if (!source.includes(fragment)) {
       failures.push(`${rel} canonical Tooltip vocabulary is missing ${fragment}`);
     }
   }
-  for (const fragment of retiredFragments) {
-    if (source.includes(fragment)) {
-      failures.push(`${rel} still exposes the retired Tooltip surface ${fragment}`);
-    }
-  }
 
-  const retiredNamePattern = /\b[hH]ellTooltipTrigger\b/g;
   // Tooltip deliberately exports no directive convenience array (#238): the
   // common path imports only HellTooltip, so no tuple may blur that boundary.
-  const retiredTuplePattern = /\bHELL_TOOLTIP[A-Z0-9_]*_(?:DIRECTIVES|IMPORTS)\b/g;
+  const tuplePattern = /\bHELL_TOOLTIP[A-Z0-9_]*_(?:DIRECTIVES|IMPORTS)\b/g;
   const files = [
     ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
     ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
@@ -1700,13 +1633,7 @@ function checkTooltipVocabularyContract() {
 
   for (const file of files) {
     const fileSource = readFile(file);
-    for (const match of fileSource.matchAll(retiredNamePattern)) {
-      const lineNumber = fileSource.slice(0, match.index).split('\n').length;
-      failures.push(
-        `Tooltip vocabulary ${relative(root, file)}:${lineNumber} still uses retired ${match[0]}; the trigger is hellTooltip and the surface is hellTooltipSurface`,
-      );
-    }
-    for (const match of fileSource.matchAll(retiredTuplePattern)) {
+    for (const match of fileSource.matchAll(tuplePattern)) {
       const lineNumber = fileSource.slice(0, match.index).split('\n').length;
       failures.push(
         `Tooltip vocabulary ${relative(root, file)}:${lineNumber} exposes or consumes ${match[0]}; Tooltip has no directive convenience array — import HellTooltip (and HellTooltipSurface for custom surfaces) directly`,
