@@ -38,6 +38,8 @@ class ResizableLabelContractHost {}
       <section id="ui-pane-a" hellResizablePane [ui]="paneUi" [minSize]="40">A</section>
       <div id="ui-handle" hellResizableHandle appearance="grip" [ui]="handleUi"></div>
       <section id="ui-pane-b" hellResizablePane [ui]="paneUi" [minSize]="40">B</section>
+      <div id="plain-handle" hellResizableHandle appearance="grip"></div>
+      <section id="ui-pane-c" hellResizablePane [minSize]="40">C</section>
     </div>
   `,
 })
@@ -64,30 +66,51 @@ describe('HellResizable', () => {
 
   it('merges resizable ui classes through local root parts without changing state attributes', () => {
     const fixture = TestBed.createComponent(ResizableUiHost);
+    const defaultsFixture = TestBed.createComponent(ResizableHost);
     fixture.detectChanges();
+    defaultsFixture.detectChanges();
 
     const group = byId(fixture.nativeElement, 'ui-group');
     const pane = byId(fixture.nativeElement, 'ui-pane-a');
     const handle = byId(fixture.nativeElement, 'ui-handle');
     const grip = query(handle, '[data-slot="grip"]');
+    const plainHandle = byId(fixture.nativeElement, 'plain-handle');
+    const plainGrip = query(plainHandle, '[data-slot="grip"]');
+    const defaultGroup = byId(defaultsFixture.nativeElement, 'group');
+    const defaultPane = byId(defaultsFixture.nativeElement, 'pane-a');
 
     expect(group.getAttribute('data-slot')).toBe('root');
     expect(group.getAttribute('data-orientation')).toBe('vertical');
-    expect(group.className).toContain('h-[360px]');
-    expect(group.className).not.toContain('h-full');
-    expect(group.className).toContain('bg-hell-surface-muted');
+    expectUiRouting(defaultGroup.className, group.className, 'h-[360px] bg-hell-surface-muted');
 
     expect(pane.getAttribute('data-slot')).toBe('root');
     expect(pane.getAttribute('data-orientation')).toBe('vertical');
-    expect(pane.className).toContain('overflow-hidden');
-    expect(pane.className).not.toContain('overflow-auto');
+    expectUiRouting(defaultPane.className, pane.className, 'overflow-hidden bg-hell-danger');
 
     expect(handle.getAttribute('data-slot')).toBe('root');
     expect(handle.getAttribute('data-appearance')).toBe('grip');
     expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
-    expect(handle.className).toContain('bg-hell-danger');
-    expect(handle.className).toContain('flex-none');
-    expect(grip.className).toContain('bg-hell-primary');
+    expectUiRouting(plainHandle.className, handle.className, 'bg-hell-danger flex-none');
+    expectUiRouting(plainGrip.className, grip.className, 'bg-hell-primary');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(ResizableUiHost);
+      const defaultsFixture = TestBed.createComponent(ResizableHost);
+      fixture.detectChanges();
+      defaultsFixture.detectChanges();
+
+      const plainHandle = byId(fixture.nativeElement, 'plain-handle');
+
+      expect({
+        group: sortClasses(byId(defaultsFixture.nativeElement, 'group').className),
+        pane: sortClasses(byId(defaultsFixture.nativeElement, 'pane-a').className),
+        handle: sortClasses(byId(defaultsFixture.nativeElement, 'handle-a').className),
+        gripHandle: sortClasses(plainHandle.className),
+        grip: sortClasses(query(plainHandle, '[data-slot="grip"]').className),
+      }).toMatchSnapshot('resizable');
+    });
   });
 
   it('resizes only the panes adjacent to the active handle', () => {
@@ -300,6 +323,25 @@ describe('HellResizable', () => {
     expect(handle.getAttribute('tabindex')).toBe('-1');
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function byId(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);

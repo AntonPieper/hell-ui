@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellEmptyState > recipes > keeps the default part classes stable > emptyState 1`] = `
+{
+  "description": [
+    "max-w-prose",
+    "text-hell-foreground-muted",
+    "text-sm",
+  ],
+  "media": [
+    "flex",
+    "items-center",
+    "justify-center",
+    "leading-none",
+    "text-4xl",
+    "text-hell-foreground-subtle",
+  ],
+  "root": [
+    "flex",
+    "flex-col",
+    "gap-hell-4",
+    "h-full",
+    "items-center",
+    "justify-center",
+    "min-h-0",
+    "min-w-0",
+    "p-hell-8",
+    "text-center",
+    "text-hell-foreground",
+    "w-full",
+  ],
+  "title": [
+    "font-semibold",
+    "text-base",
+    "text-hell-foreground",
+  ],
+}
+`;
