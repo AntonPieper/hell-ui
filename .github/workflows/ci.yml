@@ -125,30 +125,21 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Restore Angular cache
-        uses: actions/cache@v5
-        with:
-          path: .angular/cache
-          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'apps/*/angular.json', 'apps/**/tsconfig*.json', 'packages/*/angular.json', 'packages/**/tsconfig*.json') }}
-          restore-keys: |
-            angular-${{ runner.os }}-
-
       - name: Install
         run: pnpm run ci:install
 
-      - name: Restore built package cache
-        uses: actions/cache@v5
+      # Consumers test the exact tarball the build job audited and uploaded;
+      # nothing is rebuilt or restored from a cache here.
+      - name: Download package tarball
+        uses: actions/download-artifact@v8
         with:
-          path: dist/hell
-          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**') }}
-
-      - name: Ensure built packages
-        run: pnpm run ci:ensure:build:lib
+          name: package-tarball
+          path: artifacts/package
 
       - name: Package consumer scenario
         if: matrix.group != 'fixtures'
         env:
-          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
+          HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
           HELL_PACKAGE_CONSUMER_GROUP: ${{ matrix.group }}
         run: pnpm run ci:test:package-consumer
 
@@ -160,29 +151,20 @@ jobs:
       - name: Consumer fixtures
         if: matrix.group == 'fixtures'
         env:
-          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
+          HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
           HELL_CONSUMER_FIXTURE_SMOKE: 1
         run: pnpm run ci:test:consumer-fixtures
 
+  # Single producer of built output: every run builds the library and docs
+  # fresh, audits and packs the tarball, and uploads both as immutable run
+  # artifacts. dist/ is never stored in or restored from an actions cache.
   build:
     name: Build and API
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Restore built package cache
-        uses: actions/cache@v5
-        with:
-          path: dist/hell
-          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**') }}
-
-      - name: Restore docs cache
-        uses: actions/cache@v5
-        with:
-          path: dist/hell-docs
-          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'apps/docs/**') }}
 
       - name: Enable pnpm
         uses: pnpm/action-setup@v6
@@ -207,14 +189,39 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
-      - name: Ensure built packages
-        run: pnpm run ci:ensure:build:lib
+      - name: Assert fresh build outputs
+        run: |
+          test ! -e dist
+          test ! -e artifacts
 
-      - name: Ensure built docs
-        run: pnpm run ci:ensure:build:docs
+      - name: Check entrypoint manifests
+        run: pnpm run ci:check:entrypoints
+
+      - name: Build packages
+        run: pnpm run ci:build:lib
 
       - name: API report
         run: pnpm run ci:test:api-report:prepared
+
+      - name: Audit and pack package tarball
+        run: pnpm run ci:pack:lib
+
+      - name: Build docs
+        run: pnpm run ci:build:docs:prepared
+
+      - name: Upload package tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-tarball
+          path: artifacts/package/*.tgz
+          if-no-files-found: error
+
+      - name: Upload docs dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-dist
+          path: dist/hell-docs/
+          if-no-files-found: error
 
   e2e:
     name: E2E (shard ${{ matrix.shard }}/9)
@@ -241,14 +248,6 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Restore Angular cache
-        uses: actions/cache@v5
-        with:
-          path: .angular/cache
-          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'apps/*/angular.json', 'apps/**/tsconfig*.json', 'packages/*/angular.json', 'packages/**/tsconfig*.json') }}
-          restore-keys: |
-            angular-${{ runner.os }}-
-
       - name: Install
         run: pnpm run ci:install
 
@@ -270,14 +269,13 @@ jobs:
             docker save --output "${image_tar}" "${image}"
           fi
 
-      - name: Restore docs cache
-        uses: actions/cache@v5
+      # E2E serves the exact docs artifact the build job produced; nothing is
+      # rebuilt or restored from a cache here.
+      - name: Download docs dist
+        uses: actions/download-artifact@v8
         with:
+          name: docs-dist
           path: dist/hell-docs
-          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'apps/docs/**') }}
-
-      - name: Ensure built docs
-        run: pnpm run ci:ensure:build:docs
 
       - name: Start docs server
         run: |

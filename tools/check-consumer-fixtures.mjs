@@ -27,13 +27,20 @@ import {
 import { tmpdir } from 'node:os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { auditPackedPackage, peerGroupContracts } from './package-pack-audit.mjs';
+import {
+  auditPackedPackage,
+  peerGroupContracts,
+  resolvePackedTarball,
+} from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
 const distHell = join(root, 'dist', 'hell');
 
-const args = process.argv.slice(2);
+const { prebuiltTarballSelection, remainingArgs } = extractPrebuiltTarballSelection(
+  process.argv.slice(2),
+);
+const args = remainingArgs;
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const skipPackageBuild = parseSkipPackageBuild(args);
 const smokeEnabled = process.env.HELL_CONSUMER_FIXTURE_SMOKE === '1' || args.includes('--smoke');
@@ -57,38 +64,31 @@ const fixtures = discoverFixtures();
 const selectedFixtures = selectFixtures(fixtures, selectedNames);
 for (const fixture of selectedFixtures) assertFixturePeerContract(fixture);
 
-if (skipPackageBuild) {
-  console.log('[consumer-fixtures] using prebuilt packages from dist; skipping build:lib');
-} else {
-  runPnpm(['run', 'build:lib'], root, 'build-lib');
-}
+const packedPackage = preparePackedTarball();
+const packedTarball = packedPackage.tarball;
 
-if (!existsSync(join(distHell, 'package.json'))) {
-  fail(`Built package missing: ${distHell}`);
-}
-
-const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
-const packageName = distPackageJson.name;
-const packageVersion = distPackageJson.version;
-if (!packageName || !packageVersion) {
-  fail('Built package.json is missing name or version');
-}
-
-const packRoot = mkdtempSync(join(tmpdir(), 'hell-consumer-fixtures-pack-'));
-let packedTarball;
+let auditedPackedPackage;
 try {
-  runPnpm(['pack', '--pack-destination', packRoot], distHell, 'pack');
-  const tarballName = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
-  if (!tarballName) fail(`Packed package missing in ${packRoot}`);
-  packedTarball = join(packRoot, tarballName);
-  auditPackedPackage({ tarball: packedTarball });
+  auditedPackedPackage = auditPackedPackage({ tarball: packedTarball });
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
 
+const packageName = auditedPackedPackage.packageJson.name;
+const packageVersion = auditedPackedPackage.packageJson.version;
+if (!packageName || !packageVersion) {
+  fail('Packed package.json is missing name or version');
+}
+
+try {
   for (const fixture of selectedFixtures) {
     await runFixture(fixture);
   }
 } finally {
-  if (keep) console.log(`[consumer-fixtures] kept packed package ${packRoot}`);
-  else rmSync(packRoot, { force: true, recursive: true });
+  if (!packedPackage.root) {
+    // The prebuilt tarball belongs to the caller; leave it in place.
+  } else if (keep) console.log(`[consumer-fixtures] kept packed package ${packedPackage.root}`);
+  else rmSync(packedPackage.root, { force: true, recursive: true });
 }
 
 console.log(
@@ -438,6 +438,61 @@ function parseSkipPackageBuild(rawArgs) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return rawArgs.some((arg) => arg === '--skip-build' || arg === '--prebuilt');
+}
+
+function extractPrebuiltTarballSelection(rawArgs) {
+  const remaining = [];
+  let selection = (process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim() || null;
+
+  for (let i = 0; i < rawArgs.length; i += 1) {
+    const arg = rawArgs[i];
+    if (arg === '--tarball') {
+      const next = rawArgs[i + 1];
+      if (!next || next.startsWith('--')) fail('--tarball requires a tarball or directory path');
+      selection = next;
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--tarball=')) {
+      selection = arg.slice('--tarball='.length);
+      if (!selection) fail('--tarball requires a tarball or directory path');
+      continue;
+    }
+    remaining.push(arg);
+  }
+
+  return { prebuiltTarballSelection: selection, remainingArgs: remaining };
+}
+
+function preparePackedTarball() {
+  if (prebuiltTarballSelection) {
+    let tarball;
+    try {
+      tarball = resolvePackedTarball(prebuiltTarballSelection);
+    } catch (error) {
+      fail(error instanceof Error ? error.message : String(error));
+    }
+    console.log(
+      `[consumer-fixtures] using prebuilt packed tarball ${tarball}; skipping build:lib and pack`,
+    );
+    return { root: null, tarball };
+  }
+
+  if (skipPackageBuild) {
+    console.log('[consumer-fixtures] using prebuilt packages from dist; skipping build:lib');
+  } else {
+    runPnpm(['run', 'build:lib'], root, 'build-lib');
+  }
+
+  if (!existsSync(join(distHell, 'package.json'))) {
+    fail(`Built package missing: ${distHell}`);
+  }
+
+  const packRoot = mkdtempSync(join(tmpdir(), 'hell-consumer-fixtures-pack-'));
+  runPnpm(['pack', '--pack-destination', packRoot], distHell, 'pack');
+  const tarballName = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
+  if (!tarballName) fail(`Packed package missing in ${packRoot}`);
+  return { root: packRoot, tarball: join(packRoot, tarballName) };
 }
 
 function readWorkspaceScalarMap(sectionName) {
