@@ -24,13 +24,21 @@ groups with `HELL_PACKAGE_CONSUMER_GROUP`; the harness owns the group
 definitions and fails when a scenario is missing from group coverage or a
 group name is unknown.
 
-`dist/` is a build artifact, not a broad mutable cache. `ci:ensure:*` may skip
-work only after a content-addressed restore or an upstream build artifact for
-the same checkout; provider caches keyed only by dependency files must not store
-`dist/`.
+`dist/` is never stored in or restored from a provider cache. The build job is
+the single producer of built output: every run checks the entrypoint manifests
+(`ci:check:entrypoints`), builds the library fresh, runs the API report, audits
+and packs the tarball (`ci:pack:lib` keeps the audited `.tgz` under
+`artifacts/package/`), builds the docs, and uploads the tarball and docs as
+immutable run artifacts. Package-consumer jobs download and test exactly that
+tarball (`HELL_PACKAGE_CONSUMER_TARBALL` points the runners at the artifact
+directory); E2E jobs serve exactly that docs artifact. Provider caches hold
+only the pnpm store, the Angular compiler cache, and the Playwright browser
+image.
 
 Jobs publish these shared artifacts from the repository root:
 
+- `artifacts/package/*.tgz` (the audited package tarball)
+- `dist/hell-docs/` (the built docs the E2E jobs serve)
 - `coverage/`
 - `test-results/playwright-html/`
 - `test-results/playwright/`

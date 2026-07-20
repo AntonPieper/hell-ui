@@ -20,13 +20,17 @@ import {
   packageConsumerPeerTiers,
   packagePeerGroups,
   peerGroupContracts,
+  resolvePackedTarball,
   tableAdapterPeerGroup,
 } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
-const packageConsumerArgs = process.argv.slice(2);
+const { prebuiltTarballSelection, remainingArgs } = extractPrebuiltTarballSelection(
+  process.argv.slice(2),
+);
+const packageConsumerArgs = remainingArgs;
 
 // CI shards scenarios by these groups (ci.yml passes HELL_PACKAGE_CONSUMER_GROUP).
 // assertScenarioGroupsCoverAllOnce keeps every scenario in exactly one group.
@@ -629,27 +633,18 @@ const packageConsumerScenarioCatalog = [
   },
 ];
 
-if (skipPackageBuild) {
-  console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
-} else {
-  runRootPnpm(['run', 'build:lib'], root);
-}
+const packedHell = await resolvePackedHell();
 
-if (!existsSync(join(distHell, 'package.json'))) {
-  fail(`Built package missing: ${distHell}`);
-}
-
-const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
-const packageName = distPackageJson.name;
-if (!packageName) {
-  fail('Built package.json is missing name');
-}
-
-const packedHell = await packBuiltPackage(distHell, 'pack-core');
+let auditedPackedPackage;
 try {
-  auditPackedPackage({ tarball: packedHell.tarball });
+  auditedPackedPackage = auditPackedPackage({ tarball: packedHell.tarball });
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
+}
+
+const packageName = auditedPackedPackage.packageJson.name;
+if (!packageName) {
+  fail('Packed package.json is missing name');
 }
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
@@ -668,11 +663,64 @@ try {
     await runConsumerScenarioGroup(group);
   }
 } finally {
-  if (keep) {
+  if (!packedHell.root) {
+    // The prebuilt tarball belongs to the caller; leave it in place.
+  } else if (keep) {
     console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
   } else {
     rmSync(packedHell.root, { force: true, recursive: true });
   }
+}
+
+async function resolvePackedHell() {
+  if (prebuiltTarballSelection) {
+    let tarball;
+    try {
+      tarball = resolvePackedTarball(prebuiltTarballSelection);
+    } catch (error) {
+      fail(error instanceof Error ? error.message : String(error));
+    }
+    console.log(
+      `[package-consumer] using prebuilt packed tarball ${tarball}; skipping build:lib and pack`,
+    );
+    return { root: null, tarball };
+  }
+
+  if (skipPackageBuild) {
+    console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
+  } else {
+    runRootPnpm(['run', 'build:lib'], root);
+  }
+
+  if (!existsSync(join(distHell, 'package.json'))) {
+    fail(`Built package missing: ${distHell}`);
+  }
+
+  return packBuiltPackage(distHell, 'pack-core');
+}
+
+function extractPrebuiltTarballSelection(args) {
+  const remaining = [];
+  let selection = (process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim() || null;
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--tarball') {
+      const next = args[i + 1];
+      if (!next || next.startsWith('--')) fail('--tarball requires a tarball or directory path');
+      selection = next;
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--tarball=')) {
+      selection = arg.slice('--tarball='.length);
+      if (!selection) fail('--tarball requires a tarball or directory path');
+      continue;
+    }
+    remaining.push(arg);
+  }
+
+  return { prebuiltTarballSelection: selection, remainingArgs: remaining };
 }
 
 function parseScenarioSelection(args) {

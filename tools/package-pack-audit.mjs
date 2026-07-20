@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, posix } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-manifest.mjs';
@@ -156,6 +156,25 @@ export const peerGroupContracts = Object.freeze({
     ],
   },
 });
+
+// Resolve a packed-tarball selection to one .tgz path. The selection is
+// either the tarball file itself or a directory holding exactly one .tgz
+// (for example a downloaded CI artifact directory).
+export function resolvePackedTarball(selection) {
+  const target = resolve(selection);
+  if (!existsSync(target)) throw new Error(`Packed tarball path missing: ${target}`);
+  if (!statSync(target).isDirectory()) return target;
+
+  const tarballs = readdirSync(target).filter((entry) => entry.endsWith('.tgz'));
+  if (tarballs.length !== 1) {
+    throw new Error(
+      `Packed tarball directory ${target} must hold exactly one .tgz; found ${
+        tarballs.length ? tarballs.join(', ') : 'none'
+      }`,
+    );
+  }
+  return join(target, tarballs[0]);
+}
 
 export function auditPackedPackage({ tarball, logger = console, verbose = false } = {}) {
   if (!tarball) throw new Error('Package pack audit requires a tarball path.');

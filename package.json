@@ -33,8 +33,8 @@
     "ci:test:consumer-fixtures": "pnpm run test:consumer-fixtures",
     "ci:build:lib": "pnpm run build:lib",
     "ci:build:docs:prepared": "pnpm run build:docs",
-    "ci:ensure:build:lib": "sh -c 'test -f dist/hell/package.json || pnpm run ci:build:lib'",
-    "ci:ensure:build:docs": "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || pnpm run ci:build:docs:prepared'",
+    "ci:check:entrypoints": "node tools/generate-entrypoint-manifests.mjs --check",
+    "ci:pack:lib": "pnpm run test:package-pack -- --pack-destination artifacts/package",
     "ci:test:api-report:prepared": "pnpm run test:api-report"
   },
   "devDependencies": {
