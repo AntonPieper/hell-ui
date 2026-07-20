@@ -296,9 +296,10 @@ describe('HellMenuItem', () => {
     const checkbox = query<HTMLButtonElement>(menu, 'button[hellMenuItemCheckbox]');
     const indicator = query<HTMLElement>(menu, '[hellMenuItemIndicator]');
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(menu.getAttribute('data-slot')).toBe('root');
     expect(menu.className).toContain('rounded-hell-pill');
-    expect(menu.className).not.toContain('rounded-hell-md');
     expect(menu.className).toContain('bg-hell-primary');
 
     expect(item.getAttribute('data-slot')).toBe('root');
@@ -310,6 +311,26 @@ describe('HellMenuItem', () => {
     expect(indicator.getAttribute('data-slot')).toBe('root');
     expect(indicator.getAttribute('data-checked')).toBe('');
     expect(indicator.className).toContain('text-hell-success-strong');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(CheckableMenuHost);
+      await settle(fixture);
+
+      fixture.componentInstance.trigger().show();
+      const menu = await waitForOverlayElement<HTMLElement>(fixture, document.body, '[hellMenu]');
+
+      expect({
+        menu: sortClasses(menu.className),
+        checkbox: sortClasses(query<HTMLButtonElement>(menu, 'button[hellMenuItemCheckbox]').className),
+        radio: sortClasses(query<HTMLButtonElement>(menu, 'button[hellMenuItemRadio]').className),
+        indicator: sortClasses(query<HTMLElement>(menu, '[hellMenuItemIndicator]').className),
+      }).toMatchSnapshot('menu');
+    });
   });
 
   it('keeps checkbox and radio menu items open while updating checked state', async () => {
@@ -560,6 +581,10 @@ async function nextFrame(): Promise<void> {
 
 function queryOptional<T extends HTMLElement>(root: ParentNode, selector: string): T | null {
   return root.querySelector<T>(selector);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {

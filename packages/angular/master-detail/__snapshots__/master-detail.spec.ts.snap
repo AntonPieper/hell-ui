@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellMasterDetail > recipes > keeps the default part classes stable > masterDetail 1`] = `
+{
+  "back": [],
+  "primary": [],
+  "root": [],
+}
+`;

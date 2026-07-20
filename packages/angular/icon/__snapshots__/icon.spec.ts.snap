@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellIcon > recipes > keeps the default part classes stable > icon 1`] = `
+{
+  "root": [
+    "inline-flex",
+    "leading-none",
+    "text-[var(--_hell-icon-color,currentColor)]",
+  ],
+}
+`;

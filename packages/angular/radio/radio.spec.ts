@@ -195,6 +195,15 @@ class RadioPartStyleHost {
   };
 }
 
+/**
+ * Radio specs assert behavior, forms integration, and state attributes.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
 describe('HellRadio', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -447,18 +456,29 @@ describe('HellRadio', () => {
     expect(custom).toBeInstanceOf(HTMLButtonElement);
     expect(disabled).toBeInstanceOf(HTMLButtonElement);
 
+    const defaultsFixture = TestBed.createComponent(RadioHost);
+    const nativeDefaultsFixture = TestBed.createComponent(NativeRadioFormHost);
+    defaultsFixture.detectChanges();
+    nativeDefaultsFixture.detectChanges();
+    const defaultGroup = query<HTMLElement>(defaultsFixture.nativeElement, '[hellRadioGroup]');
+    const defaultRadio = query<HTMLButtonElement>(defaultsFixture.nativeElement, 'button[hellRadio]');
+    const defaultNativeGroup = query<HTMLElement>(
+      nativeDefaultsFixture.nativeElement,
+      '[hellNativeRadioGroup]',
+    );
+    const defaultNative = query<HTMLInputElement>(
+      nativeDefaultsFixture.nativeElement,
+      'input[hellNativeRadio]',
+    );
+
     expect(group.getAttribute('data-slot')).toBe('root');
-    expect(group.classList.contains('gap-hell-6')).toBe(true);
-    expect(group.classList.contains('gap-hell-3')).toBe(false);
+    expectUiRouting(defaultGroup.className, group.className, 'gap-hell-6');
 
     expect(customMapGroup.getAttribute('data-slot')).toBe('root');
-    expect(customMapGroup.classList.contains('gap-hell-6')).toBe(true);
-    expect(customMapGroup.classList.contains('gap-hell-3')).toBe(false);
+    expectUiRouting(defaultGroup.className, customMapGroup.className, 'gap-hell-6');
 
     expect(custom.getAttribute('data-slot')).toBe('root');
-    expect(custom.classList.contains('gap-hell-5')).toBe(true);
-    expect(custom.classList.contains('gap-hell-3')).toBe(false);
-    expect(custom.classList.contains('text-hell-danger')).toBe(true);
+    expectUiRouting(defaultRadio.className, custom.className, 'gap-hell-5 text-hell-danger');
     expect(custom.getAttribute('aria-checked')).toBe('true');
 
     expect(disabled.getAttribute('data-slot')).toBe('root');
@@ -466,14 +486,34 @@ describe('HellRadio', () => {
     expect(disabled.getAttribute('aria-disabled')).toBe('true');
 
     expect(nativeGroup.getAttribute('data-slot')).toBe('root');
-    expect(nativeGroup.classList.contains('gap-hell-5')).toBe(true);
+    expectUiRouting(defaultNativeGroup.className, nativeGroup.className, 'gap-hell-5');
 
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('border-hell-danger')).toBe(true);
-    expect(native.classList.contains('size-hell-6')).toBe(true);
-    expect(native.classList.contains('size-hell-5')).toBe(false);
+    expectUiRouting(defaultNative.className, native.className, 'border-hell-danger size-hell-6');
     expect(native.getAttribute('data-required')).toBe('true');
     expect(native.getAttribute('aria-required')).toBe('true');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      const nativeFixture = TestBed.createComponent(NativeRadioFormHost);
+      fixture.detectChanges();
+      nativeFixture.detectChanges();
+
+      expect({
+        group: sortClasses(query<HTMLElement>(fixture.nativeElement, '[hellRadioGroup]').className),
+        radio: sortClasses(
+          query<HTMLButtonElement>(fixture.nativeElement, 'button[hellRadio]').className,
+        ),
+        nativeGroup: sortClasses(
+          query<HTMLElement>(nativeFixture.nativeElement, '[hellNativeRadioGroup]').className,
+        ),
+        nativeRadio: sortClasses(
+          query<HTMLInputElement>(nativeFixture.nativeElement, 'input[hellNativeRadio]').className,
+        ),
+      }).toMatchSnapshot('radio');
+    });
   });
 
   it('offers native radio inputs with built-in form semantics', () => {
@@ -503,6 +543,25 @@ describe('HellRadio', () => {
     expect(radios[0].checked).toBe(true);
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);

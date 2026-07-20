@@ -379,14 +379,8 @@ describe('HellOmnibar command interaction runtime', () => {
     const fixture = TestBed.createComponent(OmnibarChipCompositionHost);
     fixture.detectChanges();
 
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
     const chip = query<HTMLElement>(fixture.nativeElement, '[hellChip]');
-    expect([...root.classList].sort()).toEqual(
-      ['flex-nowrap', 'gap-0', 'inline-flex', 'relative', 'w-full'].sort(),
-    );
-    expect(root.classList.contains('flex-wrap')).toBe(false);
-    expect(root.classList.contains('gap-hell-2')).toBe(false);
 
     input.focus();
     input.dispatchEvent(
@@ -551,6 +545,41 @@ describe('HellOmnibar command interaction runtime', () => {
     expect(host.open()).toBe(false);
   });
 
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshots pin the default part
+    // classes — including the chip-composed host, whose omnibar recipe must
+    // keep the control on one row (no wrap, no gap) — without asserting
+    // individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(OmnibarHost);
+      fixture.detectChanges();
+      const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+
+      query<HTMLInputElement>(root, 'input').focus();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const chipFixture = TestBed.createComponent(OmnibarChipCompositionHost);
+      chipFixture.detectChanges();
+
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const panel = query<HTMLElement>(overlayRoot(), '[data-slot="panel"]');
+
+      expect({
+        root: sortClasses(root.className),
+        control: sortClasses(query<HTMLElement>(root, '[data-slot="control"]').className),
+        panel: sortClasses(panel.className),
+        action: sortClasses(query<HTMLElement>(panel, '[hellOmnibarAction]').className),
+        item: sortClasses(query<HTMLElement>(panel, '[hellOmnibarItem]').className),
+        chipComposedRoot: sortClasses(
+          query<HTMLElement>(chipFixture.nativeElement, 'hell-omnibar').className,
+        ),
+      }).toMatchSnapshot('omnibar');
+    });
+  });
+
   it('applies Part Style Maps to the root, portaled panel, and projected directives', async () => {
     const fixture = TestBed.createComponent(OmnibarPartStyleHost);
     fixture.detectChanges();
@@ -558,6 +587,8 @@ describe('HellOmnibar command interaction runtime', () => {
     fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
     fixture.detectChanges();
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(root.className).toContain('max-w-[500px]');
     expect(query<HTMLElement>(root, '[data-slot="control"]').className).toContain(
       'border-hell-danger',

@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellResizable > recipes > keeps the default part classes stable > resizable 1`] = `
+{
+  "grip": [],
+  "gripHandle": [
+    "bg-transparent",
+    "flex",
+  ],
+  "group": [
+    "flex",
+    "h-full",
+    "w-full",
+  ],
+  "handle": [
+    "bg-transparent",
+    "flex",
+  ],
+  "pane": [
+    "min-h-0",
+    "min-w-0",
+    "overflow-auto",
+  ],
+}
+`;

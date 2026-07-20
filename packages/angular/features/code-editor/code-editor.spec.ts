@@ -134,18 +134,42 @@ describe('HellCodeEditor', () => {
     const editor = root.querySelector('[data-slot="editor"]') as HTMLElement;
 
     expect(root.getAttribute('data-slot')).toBe('root');
+    // String shorthand routes to the root part; the editor part is asserted
+    // through its consumer map entry below and pinned by the recipe snapshot.
     expect(root.className).toContain('max-h-[16rem]');
-    expect(editor.className).toContain('h-full');
+    expect(editor.getAttribute('data-slot')).toBe('editor');
 
     fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
     fixture.componentInstance.readOnly.set(true);
     await settle(fixture);
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(root.className).toContain('max-h-[24rem]');
     expect(root.className).toContain('rounded-none');
-    expect(root.className).not.toContain('rounded-hell-md');
     expect(root.getAttribute('data-readonly')).toBe('true');
     expect(editor.className).toContain('min-h-[12rem]');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(CodeEditorHost);
+      await settle(fixture);
+
+      const root = fixture.nativeElement.querySelector('hell-code-editor') as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+
+      expect({
+        root: sortClasses(root.className),
+        editor: sortClasses(
+          root.querySelector('[data-slot="editor"]')?.getAttribute('class') ?? '',
+        ),
+      }).toMatchSnapshot('codeEditor');
+    });
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

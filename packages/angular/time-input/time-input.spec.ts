@@ -239,6 +239,8 @@ describe('HellTimeInput', () => {
     expect(input.parentElement).toBe(fixture.nativeElement);
     expect(input.getAttribute('data-slot')).toBe('root');
     expect(input.getAttribute('data-size')).toBe('sm');
+    // The consumer ui classes are the test's own contract fixtures; merge
+    // semantics are owned centrally by `core/part-class-pipeline.spec.ts`.
     expect(input.classList.contains('max-w-64')).toBe(true);
     expect(input.classList.contains('font-mono')).toBe(true);
   });

@@ -457,15 +457,15 @@ describe('HellDialogTrigger scoped overlays', () => {
     if (!(description instanceof HTMLElement))
       throw new Error('Expected rendered dialog description.');
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(overlay.getAttribute('data-slot')).toBe('root');
     expect(overlay.className).toContain('p-0');
-    expect(overlay.className).not.toContain('p-hell-6');
 
     expect(dialog.getAttribute('data-slot')).toBe('root');
     expect(dialog.getAttribute('data-size')).toBe('lg');
     expect(dialog.className).toContain('max-w-[640px]');
     expect(dialog.className).toContain('rounded-none');
-    expect(dialog.className).not.toContain('rounded-hell-lg');
 
     expect(title.getAttribute('data-slot')).toBe('root');
     expect(title.className).toContain('text-hell-danger');
@@ -476,7 +476,38 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(title.textContent?.trim()).toBe('Styled title');
     expect(description.textContent?.trim()).toBe('Styled description');
   });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(NamedDialogHost);
+      await settle(fixture);
+
+      query<HTMLButtonElement>(fixture.nativeElement, '#open-named').click();
+      await settle(fixture);
+
+      const overlay = query<HTMLElement>(document.body, '#named-overlay');
+      const dialog = query<HTMLElement>(overlay, '[role="dialog"]');
+      const titleIds = dialog.getAttribute('aria-labelledby')?.trim().split(/\s+/) ?? [];
+      const descriptionIds = dialog.getAttribute('aria-describedby')?.trim().split(/\s+/) ?? [];
+      const title = document.getElementById(titleIds[0]);
+      const description = document.getElementById(descriptionIds[0]);
+
+      expect({
+        overlay: sortClasses(overlay.className),
+        dialog: sortClasses(dialog.className),
+        title: sortClasses(title?.className ?? ''),
+        description: sortClasses(description?.className ?? ''),
+      }).toMatchSnapshot('dialog');
+    });
+  });
 });
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 describe('HellDialogScopedOverlayAdapter', () => {
   afterEach(() => {

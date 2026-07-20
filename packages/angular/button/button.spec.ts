@@ -1,7 +1,31 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import type { HellButtonVariant, HellSize } from '@hell-ui/angular/core';
 
 import { HellButton } from './button';
+
+/**
+ * Button specs assert behavior and state attributes. Part-Class Pipeline merge
+ * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach the part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshots below pin the rendered class surface per
+ * variant and size.
+ */
+const BUTTON_UI_SHORTHAND = 'bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover';
+
+const BUTTON_VARIANTS: readonly HellButtonVariant[] = [
+  'default',
+  'primary',
+  'soft',
+  'ghost',
+  'link',
+  'danger',
+  'success',
+];
+
+const BUTTON_SIZES: readonly HellSize[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 
 @Component({
   imports: [HellButton],
@@ -23,17 +47,31 @@ import { HellButton } from './button';
     <button id="custom-map" hellButton [ui]="customUi" type="button">Custom map</button>
     <button id="dynamic-map" hellButton [ui]="dynamicUi()" type="button">Dynamic map</button>
     <button id="class-hook" hellButton class="mt-4 bg-hell-danger" type="button">Class hook</button>
-    <button id="link" hellButton variant="link" size="lg" type="button">Link</button>
+    <button
+      id="recipe"
+      hellButton
+      [variant]="variant()"
+      [size]="size()"
+      [iconOnly]="iconOnly()"
+      [block]="block()"
+      type="button"
+    >
+      Recipe
+    </button>
   `,
 })
 class ButtonHost {
   readonly disabled = signal(false);
   readonly customUi = {
-    root: 'bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover',
+    root: BUTTON_UI_SHORTHAND,
   };
   readonly dynamicUi = signal<{ root?: string }>({
     root: 'bg-hell-danger px-hell-7',
   });
+  readonly variant = signal<HellButtonVariant>('default');
+  readonly size = signal<HellSize>('md');
+  readonly iconOnly = signal(false);
+  readonly block = signal(false);
 }
 
 describe('HellButton', () => {
@@ -49,97 +87,70 @@ describe('HellButton', () => {
     expect(query<HTMLButtonElement>(fixture.nativeElement, '#submit').type).toBe('submit');
   });
 
-  it('renders the root part recipe with variant and size state attributes', () => {
+  it('marks the root part and reflects variant, size, icon-only, and block state attributes', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
     const button = query<HTMLButtonElement>(fixture.nativeElement, '#styled');
 
     expect(button.getAttribute('data-slot')).toBe('root');
-    expect(button.className).toContain('inline-flex');
-    expect(button.className).toContain('bg-hell-primary');
-    expect(button.className).toContain('h-hell-control-sm');
-    expect(button.className).toContain('px-0');
-    expect(button.className).toContain('shrink-0');
-    expect(button.className).toContain('w-full');
     expect(button.getAttribute('data-variant')).toBe('primary');
     expect(button.getAttribute('data-size')).toBe('sm');
     expect(button.getAttribute('data-icon-only')).toBe('');
     expect(button.getAttribute('data-block')).toBe('');
   });
 
-  it('uses string ui shorthand for the root part with deterministic precedence', () => {
+  it('routes ui string shorthand through the shared Part-Class Pipeline', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
-    const button = query<HTMLButtonElement>(fixture.nativeElement, '#custom-string');
-    const classes = button.className.split(/\s+/);
-
-    expect(button.className).toContain('bg-hell-danger');
-    expect(button.className).toContain('px-hell-7');
-    expect(button.className).toContain('shadow-hell-lg');
-    expect(button.className).toContain('data-hover:bg-hell-danger-hover');
-    expect(classes).not.toContain('bg-hell-surface-elevated');
-    expect(classes).not.toContain('px-hell-5');
-    expect(classes).not.toContain('shadow-hell-xs');
+    expectUiRouting(
+      className(fixture, '#native'),
+      className(fixture, '#custom-string'),
+      BUTTON_UI_SHORTHAND,
+    );
   });
 
-  it('keeps explicit root part maps for typed consumers', () => {
+  it('routes ui part maps through the shared Part-Class Pipeline', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
-    const button = query<HTMLButtonElement>(fixture.nativeElement, '#custom-map');
-
-    expect(button.className).toContain('bg-hell-danger');
-    expect(button.className).toContain('px-hell-7');
-    expect(button.className).toContain('shadow-hell-lg');
-    expect(button.className).toContain('data-hover:bg-hell-danger-hover');
+    expectUiRouting(
+      className(fixture, '#native'),
+      className(fixture, '#custom-map'),
+      BUTTON_UI_SHORTHAND,
+    );
   });
 
   it('reacts to ui signal input updates through the public binding', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
-    const button = query<HTMLButtonElement>(fixture.nativeElement, '#dynamic-map');
-
-    expect(button.className).toContain('bg-hell-danger');
-    expect(button.className).toContain('px-hell-7');
+    expectUiRouting(
+      className(fixture, '#native'),
+      className(fixture, '#dynamic-map'),
+      'bg-hell-danger px-hell-7',
+    );
 
     fixture.componentInstance.dynamicUi.set({
       root: 'bg-hell-success-strong px-hell-3',
     });
     fixture.detectChanges();
 
-    const classes = button.className.split(/\s+/);
-
-    expect(classes).toContain('bg-hell-success-strong');
-    expect(classes).toContain('px-hell-3');
-    expect(classes).not.toContain('bg-hell-danger');
-    expect(classes).not.toContain('px-hell-7');
+    expectUiRouting(
+      className(fixture, '#native'),
+      className(fixture, '#dynamic-map'),
+      'bg-hell-success-strong px-hell-3',
+    );
   });
 
   it('keeps template class additive but outside the Tailwind merge path', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
-    const button = query<HTMLButtonElement>(fixture.nativeElement, '#class-hook');
-
-    expect(button.className).toContain('mt-4');
-    expect(button.className).toContain('bg-hell-danger');
-    expect(button.className).toContain('bg-hell-surface-elevated');
-  });
-
-  it('lets the link variant own sizing after semantic size recipes', () => {
-    const fixture = TestBed.createComponent(ButtonHost);
-    fixture.detectChanges();
-
-    const link = query<HTMLButtonElement>(fixture.nativeElement, '#link');
-    const classes = link.className.split(/\s+/);
-
-    expect(classes).toContain('h-auto');
-    expect(classes).toContain('p-0');
-    expect(classes).not.toContain('h-hell-control-lg');
-    expect(classes).not.toContain('px-hell-6');
+    expect(renderedClasses(fixture, '#class-hook')).toEqual(
+      sortClasses(`${className(fixture, '#native')} mt-4 bg-hell-danger`),
+    );
   });
 
   it('keeps anchor disabled semantics explicit', () => {
@@ -182,7 +193,74 @@ describe('HellButton', () => {
     expect(button.disabled).toBe(true);
     expect(button.getAttribute('aria-disabled')).toBeNull();
   });
+
+  describe('recipes', () => {
+    it('keeps the variant recipes stable', () => {
+      const fixture = TestBed.createComponent(ButtonHost);
+      const byVariant: Record<string, string[]> = {};
+
+      for (const variant of BUTTON_VARIANTS) {
+        fixture.componentInstance.variant.set(variant);
+        fixture.detectChanges();
+        byVariant[variant] = renderedClasses(fixture, '#recipe');
+      }
+
+      expect(byVariant).toMatchSnapshot('button variants');
+    });
+
+    it('keeps the size and icon-only recipes stable', () => {
+      const fixture = TestBed.createComponent(ButtonHost);
+      const bySize: Record<string, string[]> = {};
+
+      for (const size of BUTTON_SIZES) {
+        fixture.componentInstance.size.set(size);
+        fixture.componentInstance.iconOnly.set(false);
+        fixture.detectChanges();
+        bySize[size] = renderedClasses(fixture, '#recipe');
+
+        fixture.componentInstance.iconOnly.set(true);
+        fixture.detectChanges();
+        bySize[`${size} icon-only`] = renderedClasses(fixture, '#recipe');
+        fixture.componentInstance.iconOnly.set(false);
+      }
+
+      fixture.componentInstance.size.set('md');
+      fixture.componentInstance.block.set(true);
+      fixture.detectChanges();
+      bySize['md block'] = renderedClasses(fixture, '#recipe');
+
+      expect(bySize).toMatchSnapshot('button sizes');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function className(fixture: { nativeElement: HTMLElement }, selector: string): string {
+  return query(fixture.nativeElement, selector).className;
+}
+
+/** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
+function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {
+  return sortClasses(className(fixture, selector));
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);

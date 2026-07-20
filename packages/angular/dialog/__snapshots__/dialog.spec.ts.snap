@@ -1,0 +1,52 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellDialogTrigger scoped overlays > recipes > keeps the default part classes stable > dialog 1`] = `
+{
+  "description": [
+    "mb-0",
+    "mt-hell-1",
+    "text-[13px]",
+    "text-hell-foreground-muted",
+  ],
+  "dialog": [
+    "animate-[hell-dialog-in_var(--hell-duration-base)_var(--ease-hell-out)]",
+    "bg-hell-surface-elevated",
+    "border",
+    "border-hell-border",
+    "data-[size=lg]:max-w-[720px]",
+    "data-[size=sm]:max-w-[380px]",
+    "data-[size=xl]:max-w-[960px]",
+    "flex",
+    "flex-col",
+    "max-h-[min(90vh,100%)]",
+    "max-w-[480px]",
+    "outline-none",
+    "overflow-hidden",
+    "rounded-hell-lg",
+    "shadow-[var(--shadow-hell-overlay)]",
+    "text-hell-foreground",
+    "w-full",
+  ],
+  "overlay": [
+    "animate-[hell-backdrop-in_var(--hell-duration-base)_var(--ease-hell-out)]",
+    "backdrop-blur-[2px]",
+    "bg-hell-overlay",
+    "box-border",
+    "fixed",
+    "flex",
+    "inset-0",
+    "items-center",
+    "justify-center",
+    "overflow-auto",
+    "overscroll-contain",
+    "p-hell-6",
+    "z-[var(--hell-z-dialog)]",
+  ],
+  "title": [
+    "font-semibold",
+    "m-0",
+    "text-[15px]",
+    "text-hell-foreground",
+  ],
+}
+`;

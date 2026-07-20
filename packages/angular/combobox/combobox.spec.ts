@@ -38,6 +38,7 @@ const PEOPLE: readonly Person[] = [
       <div *hellComboboxPortal hellComboboxDropdown>
         <div hellComboboxOption id="atlas-single" value="atlas">Atlas</div>
         <div hellComboboxOption id="nova-single" value="nova">Nova</div>
+        <div hellComboboxEmpty hidden>No matches</div>
       </div>
     </div>
   `,
@@ -342,6 +343,7 @@ describe('HellCombobox', () => {
   });
 
   it('merges each directive root Part Style Map through the portal', async () => {
+    const defaults = await defaultComboboxClasses();
     const fixture = TestBed.createComponent(ComboboxUiHost);
     fixture.detectChanges();
 
@@ -353,20 +355,32 @@ describe('HellCombobox', () => {
     const empty = query<HTMLElement>(dropdown, '[hellComboboxEmpty]');
 
     expect(root.getAttribute('data-slot')).toBe('root');
-    expect(root.className).toContain('rounded-hell-pill');
-    expect(root.className).not.toContain('rounded-hell-md');
-    expect(root.className).toContain('bg-hell-primary-soft');
+    expectUiRouting(defaults.root, root.className, 'rounded-hell-pill bg-hell-primary-soft');
     expect(input.getAttribute('data-slot')).toBe('root');
-    expect(input.className).toContain('text-hell-danger');
+    expectUiRouting(defaults.input, input.className, 'text-hell-danger');
     expect(button.getAttribute('data-slot')).toBe('root');
-    expect(button.className).toContain('text-hell-success-strong');
+    expectUiRouting(defaults.button, button.className, 'text-hell-success-strong');
     expect(dropdown.getAttribute('data-slot')).toBe('root');
-    expect(dropdown.className).toContain('rounded-hell-pill');
+    expectUiRouting(defaults.dropdown, dropdown.className, 'rounded-hell-pill');
     expect(option.getAttribute('data-slot')).toBe('root');
-    expect(option.className).toContain('px-hell-8');
-    expect(option.className).toContain('bg-hell-primary-soft');
+    expectUiRouting(defaults.option, option.className, 'px-hell-8 bg-hell-primary-soft');
     expect(empty.getAttribute('data-slot')).toBe('root');
-    expect(empty.className).toContain('text-hell-danger');
+    expectUiRouting(defaults.empty, empty.className, 'text-hell-danger');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', async () => {
+      const defaults = await defaultComboboxClasses();
+
+      expect({
+        root: sortClasses(defaults.root),
+        input: sortClasses(defaults.input),
+        button: sortClasses(defaults.button),
+        dropdown: sortClasses(defaults.dropdown),
+        option: sortClasses(defaults.option),
+        empty: sortClasses(defaults.empty),
+      }).toMatchSnapshot('combobox');
+    });
   });
 
   it('keeps the input as the active-descendant owner and links the opened listbox', async () => {
@@ -608,6 +622,33 @@ async function waitForDropdown(fixture: {
   throw new Error('Expected combobox dropdown.');
 }
 
+async function defaultComboboxClasses(): Promise<
+  Record<'root' | 'input' | 'button' | 'dropdown' | 'option' | 'empty', string>
+> {
+  const fixture = TestBed.createComponent(ComboboxFormHost);
+  fixture.detectChanges();
+
+  const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+  const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+  const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+  const dropdown = await openComboboxDropdown(fixture, input, button);
+  const defaults = {
+    root: root.className,
+    input: input.className,
+    button: button.className,
+    dropdown: dropdown.className,
+    option: query<HTMLElement>(dropdown, '[hellComboboxOption]').className,
+    empty: query<HTMLElement>(dropdown, '[hellComboboxEmpty]').className,
+  };
+
+  input.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+  );
+  await waitForDropdownRemoval(fixture);
+
+  return defaults;
+}
+
 async function openComboboxDropdown(
   fixture: {
     detectChanges: () => void;
@@ -669,6 +710,25 @@ async function waitForDropdownRemoval(fixture: {
   }
 
   throw new Error('Expected combobox dropdown to be removed.');
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {

@@ -4,11 +4,22 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 
 import { HELL_AVATAR_GROUP_IMPORTS } from './avatar-group';
 
+/**
+ * Avatar-group specs assert behavior and state attributes. Part-Class
+ * Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
 @Component({
   imports: [...HELL_AVATAR_GROUP_IMPORTS, HellAvatar],
   template: `
+    <hell-avatar id="plain-avatar" fallback="AP" />
     <hell-avatar-group id="colocated-group">
       <hell-avatar id="colocated-item" hellAvatarGroupItem fallback="AP" />
+      <span id="plain-item" hellAvatarGroupItem>A</span>
     </hell-avatar-group>
   `,
 })
@@ -95,20 +106,19 @@ describe('HellAvatarGroup Part Style Map', () => {
     const fixture = TestBed.createComponent(ColocatedAvatarHost);
     fixture.detectChanges();
 
-    const item = byId(fixture.nativeElement, 'colocated-item');
-    const classes = classNames(item);
+    const colocated = byId(fixture.nativeElement, 'colocated-item');
+    const avatarOnly = byId(fixture.nativeElement, 'plain-avatar');
+    const itemOnly = byId(fixture.nativeElement, 'plain-item');
 
-    // HellAvatar recipe survives alongside the item recipe on the shared host.
-    expect(classes).toContain('overflow-hidden');
-    expect(classes).toContain('rounded-full');
-    // HellAvatarGroupItem recipe lands on the same host.
-    expect(classes).toContain('shrink-0');
-    expect(classes).toContain('isolate');
+    // The shared host renders the union of both directives' default parts.
+    expect(sortClasses(colocated.className)).toEqual(
+      sortUnion(avatarOnly.className, itemOnly.className),
+    );
     // Both directives declare data-slot="root"; the merged host resolves to root.
-    expect(item.getAttribute('data-slot')).toBe('root');
+    expect(colocated.getAttribute('data-slot')).toBe('root');
   });
 
-  it('applies root data slots and default recipe classes', () => {
+  it('marks every group part with its public data-slot and reflects state attributes', () => {
     const fixture = TestBed.createComponent(DefaultGroupHost);
     fixture.detectChanges();
 
@@ -125,12 +135,6 @@ describe('HellAvatarGroup Part Style Map', () => {
     expect(group.getAttribute('data-size')).toBe('md');
     expect(item.getAttribute('data-selected')).toBeNull();
     expect(selected.getAttribute('data-selected')).toBe('');
-
-    expect(group.classList.contains('inline-flex')).toBe(true);
-    expect(group.classList.contains('items-center')).toBe(true);
-    expect(item.classList.contains('inline-flex')).toBe(true);
-    expect(item.classList.contains('justify-center')).toBe(true);
-    expect(overflow.classList.contains('bg-hell-surface-muted')).toBe(true);
   });
 
   it('projects item and overflow content into the group', () => {
@@ -170,76 +174,99 @@ describe('HellAvatarGroup Part Style Map', () => {
     expect(item.getAttribute('data-selected')).toBeNull();
   });
 
-  it('applies ui string shorthand to each root part and lets it win over recipes', () => {
+  it('routes ui string shorthand through the shared Part-Class Pipeline per part', () => {
     const fixture = TestBed.createComponent(PartStyleHost);
+    const defaults = defaultGroupClasses();
     fixture.detectChanges();
 
-    const group = byId(fixture.nativeElement, 'string-group');
-    const item = byId(fixture.nativeElement, 'string-item');
-    const overflow = byId(fixture.nativeElement, 'string-overflow');
-    const groupClasses = classNames(group);
-    const itemClasses = classNames(item);
-
-    expect(group.classList.contains('inline-grid')).toBe(true);
-    expect(group.classList.contains('inline-flex')).toBe(false);
-    expect(group.classList.contains('items-start')).toBe(true);
-    expect(group.classList.contains('items-center')).toBe(false);
-    expect(groupClasses).toContain('[--_hell-av-size:44px]');
-    expect(groupClasses).not.toContain('[--_hell-av-size:32px]');
-
-    expect(item.classList.contains('justify-start')).toBe(true);
-    expect(item.classList.contains('justify-center')).toBe(false);
-    expect(item.classList.contains('rounded-hell-md')).toBe(true);
-    expect(item.classList.contains('rounded-full')).toBe(false);
-    expect(itemClasses).toContain('min-h-[44px]');
-    expect(itemClasses).not.toContain('min-h-[var(--_hell-av-size)]');
-
-    expect(overflow.classList.contains('rounded-hell-md')).toBe(true);
-    expect(overflow.classList.contains('rounded-full')).toBe(false);
-    expect(overflow.classList.contains('border-hell-danger')).toBe(true);
-    expect(overflow.classList.contains('border-hell-surface-elevated')).toBe(false);
-    expect(overflow.classList.contains('bg-hell-danger')).toBe(true);
-    expect(overflow.classList.contains('bg-hell-surface-muted')).toBe(false);
-    expect(overflow.classList.contains('text-hell-foreground-inverse')).toBe(true);
-    expect(overflow.classList.contains('text-hell-foreground-muted')).toBe(false);
+    expectUiRouting(
+      defaults.group,
+      byId(fixture.nativeElement, 'string-group').className,
+      'inline-grid items-start [--_hell-av-size:44px]',
+    );
+    expectUiRouting(
+      defaults.item,
+      byId(fixture.nativeElement, 'string-item').className,
+      'justify-start rounded-hell-md min-h-[44px]',
+    );
+    expectUiRouting(
+      defaults.overflow,
+      byId(fixture.nativeElement, 'string-overflow').className,
+      'rounded-hell-md border-hell-danger bg-hell-danger text-hell-foreground-inverse',
+    );
   });
 
-  it('applies ui object maps to each root part and lets them win over recipes', () => {
+  it('routes ui part maps through the shared Part-Class Pipeline per part', () => {
     const fixture = TestBed.createComponent(PartStyleHost);
+    const defaults = defaultGroupClasses();
     fixture.detectChanges();
 
-    const group = byId(fixture.nativeElement, 'map-group');
-    const item = byId(fixture.nativeElement, 'map-item');
-    const overflow = byId(fixture.nativeElement, 'map-overflow');
-
-    expect(group.classList.contains('inline-grid')).toBe(true);
-    expect(group.classList.contains('inline-flex')).toBe(false);
-    expect(group.classList.contains('items-end')).toBe(true);
-    expect(group.classList.contains('items-center')).toBe(false);
-
-    expect(item.classList.contains('justify-start')).toBe(true);
-    expect(item.classList.contains('justify-center')).toBe(false);
-    expect(item.classList.contains('rounded-hell-md')).toBe(true);
-    expect(item.classList.contains('rounded-full')).toBe(false);
-
-    expect(overflow.classList.contains('rounded-hell-md')).toBe(true);
-    expect(overflow.classList.contains('rounded-full')).toBe(false);
-    expect(overflow.classList.contains('border-hell-info')).toBe(true);
-    expect(overflow.classList.contains('border-hell-surface-elevated')).toBe(false);
-    expect(overflow.classList.contains('bg-hell-info')).toBe(true);
-    expect(overflow.classList.contains('bg-hell-surface-muted')).toBe(false);
-    expect(overflow.classList.contains('text-hell-foreground-inverse')).toBe(true);
-    expect(overflow.classList.contains('text-hell-foreground-muted')).toBe(false);
+    expectUiRouting(
+      defaults.group,
+      byId(fixture.nativeElement, 'map-group').className,
+      'inline-grid items-end',
+    );
+    expectUiRouting(
+      defaults.item,
+      byId(fixture.nativeElement, 'map-item').className,
+      'justify-start rounded-hell-md',
+    );
+    expectUiRouting(
+      defaults.overflow,
+      byId(fixture.nativeElement, 'map-overflow').className,
+      'rounded-hell-md border-hell-info bg-hell-info text-hell-foreground-inverse',
+    );
   });
 
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const defaults = defaultGroupClasses();
+
+      expect({
+        group: sortClasses(defaults.group),
+        item: sortClasses(defaults.item),
+        overflow: sortClasses(defaults.overflow),
+      }).toMatchSnapshot('avatarGroup');
+    });
+  });
 });
+
+function defaultGroupClasses(): { group: string; item: string; overflow: string } {
+  const fixture = TestBed.createComponent(DefaultGroupHost);
+  fixture.detectChanges();
+
+  return {
+    group: byId(fixture.nativeElement, 'group').className,
+    item: byId(fixture.nativeElement, 'item-a').className,
+    overflow: byId(fixture.nativeElement, 'overflow').className,
+  };
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortUnion(...classNames: string[]): string[] {
+  return [...new Set(classNames.flatMap((value) => sortClasses(value)))].sort();
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function byId(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${id}.`);
   return element;
-}
-
-function classNames(element: HTMLElement): string[] {
-  return element.className.split(/\s+/);
 }

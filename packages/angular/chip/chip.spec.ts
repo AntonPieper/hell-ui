@@ -12,6 +12,16 @@ import {
   HELL_CHIP_LABELS,
 } from './chip';
 
+/**
+ * Chip specs assert behavior and state attributes. Part-Class Pipeline merge
+ * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part and size.
+ */
+
 @Component({
   imports: [HellChip, HellChipRemove],
   template: `
@@ -42,6 +52,8 @@ import {
     <a id="anchor-chip" hellChip href="#pinned">Pinned</a>
 
     <span id="plain-chip" hellChip>Plain</span>
+
+    <span id="default-lg-chip" hellChip size="lg">Plain large</span>
   `,
 })
 class HostSemanticsHost {
@@ -185,9 +197,11 @@ describe('HellChip host semantics', () => {
     expect(chip.getAttribute('data-slot')).toBe('root');
     expect(chip.getAttribute('data-variant')).toBe('success');
     expect(chip.getAttribute('data-size')).toBe('lg');
-    const classes = chip.className.split(/\s+/);
-    expect(classes).toContain('bg-hell-primary');
-    expect(classes).toContain('text-white');
+    expectUiRouting(
+      query(fixture, '#default-lg-chip').className,
+      chip.className,
+      'bg-hell-primary text-white',
+    );
   });
 
   it('adds interactive semantics only on interactive hosts', () => {
@@ -614,13 +628,17 @@ describe('HellChipInput public keyboard behavior', () => {
       Escalated
     </span>
     <span id="badge-string" hellBadge ui="min-w-hell-8 bg-hell-info">3</span>
+    <span id="static-badge" hellBadge>2</span>
     <kbd id="kbd-map" hellKbd [ui]="kbdUi">K</kbd>
+    <kbd id="static-kbd" hellKbd>J</kbd>
+    <span id="recipe-chip" hellChip [size]="size()">Sized</span>
   `,
 })
 class PillPartStyleHost {
   readonly kbdUi = {
     root: 'h-hell-6 border-hell-primary text-hell-primary',
   };
+  readonly size = signal<'xs' | 'sm' | 'md' | 'lg' | 'xl'>('md');
 }
 
 describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
@@ -644,12 +662,12 @@ describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
     fixture.detectChanges();
 
     const chip = query(fixture, '#chip-string');
-    const classes = chip.className.split(/\s+/);
     expect(chip.getAttribute('data-variant')).toBe('warning');
-    expect(classes).toContain('bg-hell-danger');
-    expect(classes).toContain('px-hell-4');
-    expect(classes).toContain('text-hell-foreground-inverse');
-    expect(classes).not.toContain('px-hell-3');
+    expectUiRouting(
+      query(fixture, '#static-chip').className,
+      chip.className,
+      'bg-hell-danger px-hell-4 text-hell-foreground-inverse',
+    );
   });
 
   it('merges conflicting Badge root classes through hellTwMerge', () => {
@@ -657,12 +675,12 @@ describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
     fixture.detectChanges();
 
     const badge = query(fixture, '#badge-string');
-    const classes = badge.className.split(/\s+/);
     expect(badge.getAttribute('data-slot')).toBe('root');
-    expect(classes).toContain('min-w-hell-8');
-    expect(classes).toContain('bg-hell-info');
-    expect(classes).not.toContain('min-w-hell-4');
-    expect(classes).not.toContain('bg-hell-danger');
+    expectUiRouting(
+      query(fixture, '#static-badge').className,
+      badge.className,
+      'min-w-hell-8 bg-hell-info',
+    );
   });
 
   it('applies Kbd object maps to the root part', () => {
@@ -671,11 +689,58 @@ describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
 
     const kbd = query(fixture, '#kbd-map');
     expect(kbd.getAttribute('data-slot')).toBe('root');
-    expect(kbd.className).toContain('h-hell-6');
-    expect(kbd.className).toContain('border-hell-primary');
-    expect(kbd.className).toContain('text-hell-primary');
+    expectUiRouting(
+      query(fixture, '#static-kbd').className,
+      kbd.className,
+      'h-hell-6 border-hell-primary text-hell-primary',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(PillPartStyleHost);
+      const semantics = TestBed.createComponent(HostSemanticsHost);
+      const set = TestBed.createComponent(ChipSetHost);
+      fixture.detectChanges();
+      semantics.detectChanges();
+      set.detectChanges();
+
+      const bySize: Record<string, string[]> = {};
+      for (const size of ['xs', 'sm', 'md', 'lg', 'xl'] as const) {
+        fixture.componentInstance.size.set(size);
+        fixture.detectChanges();
+        bySize[size] = sortClasses(query(fixture, '#recipe-chip').className);
+      }
+
+      expect({
+        chip: bySize,
+        remove: sortClasses(query(semantics, '#span-remove').className),
+        chipSet: sortClasses(query(set, '[hellChipSet]').className),
+        badge: sortClasses(query(fixture, '#static-badge').className),
+        kbd: sortClasses(query(fixture, '#static-kbd').className),
+      }).toMatchSnapshot('chip');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement>(fixture: { nativeElement: HTMLElement }, selector: string): T {
   const element = fixture.nativeElement.querySelector<T>(selector);

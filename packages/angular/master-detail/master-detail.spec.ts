@@ -330,18 +330,38 @@ describe('HellMasterDetail', () => {
 
   it('uses local root Part Style Maps without reviving owned Split View parts', () => {
     const fixture = TestBed.createComponent(MasterDetailHost);
+    const defaults = TestBed.createComponent(NestedMasterDetailHost);
     fixture.detectChanges();
+    defaults.detectChanges();
 
     const root = byId(fixture.nativeElement, 'master-detail');
     const primary = byId(fixture.nativeElement, 'primary');
     const back = query<HTMLButtonElement>(fixture.nativeElement, '[hellMasterDetailBack]');
+    const defaultRoot = byId(defaults.nativeElement, 'outer-master-detail');
+    const defaultPrimary = byId(defaults.nativeElement, 'outer-primary');
+    const defaultBack = query<HTMLButtonElement>(defaults.nativeElement, '[hellMasterDetailBack]');
 
-    expect(root.className).toContain('bg-hell-surface-muted');
-    expect(primary.className).toContain('bg-hell-primary-soft');
-    expect(back.className).toContain('text-hell-primary');
+    expectUiRouting(defaultRoot.className, root.className, 'bg-hell-surface-muted');
+    expectUiRouting(defaultPrimary.className, primary.className, 'bg-hell-primary-soft');
+    expectUiRouting(defaultBack.className, back.className, 'text-hell-primary');
     expect(primary.getAttribute('data-slot')).toBe('root');
     expect(back.getAttribute('data-slot')).toBe('root');
     expect(root.querySelector('[data-slot="pane"], [data-slot="compactHeader"]')).toBeNull();
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(NestedMasterDetailHost);
+      fixture.detectChanges();
+
+      expect({
+        root: sortClasses(byId(fixture.nativeElement, 'outer-master-detail').className),
+        primary: sortClasses(byId(fixture.nativeElement, 'outer-primary').className),
+        back: sortClasses(
+          query<HTMLButtonElement>(fixture.nativeElement, '[hellMasterDetailBack]').className,
+        ),
+      }).toMatchSnapshot('masterDetail');
+    });
   });
 
   it('disconnects the owner-window ResizeObserver on destroy', () => {
@@ -412,6 +432,25 @@ function observeWidth(root: HTMLElement, width: number, hostId = 'master-detail'
 async function flushFocus(): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function byId<T extends HTMLElement = HTMLElement>(root: ParentNode, id: string): T {

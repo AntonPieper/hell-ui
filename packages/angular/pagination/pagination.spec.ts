@@ -202,6 +202,15 @@ class PaginationUiHost {
   } satisfies HellPaginationStripUi;
 }
 
+/**
+ * Pagination specs assert behavior, labels, and state attributes. Part-Class
+ * Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshots below
+ * pin the rendered class surface per part.
+ */
 describe('HellPageLink', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -360,9 +369,13 @@ describe('HellPageLink', () => {
     const next = query(root, '#ui-next');
     const last = query(root, '#ui-last');
 
+    const defaults = TestBed.createComponent(PaginationRolesHost);
+    defaults.detectChanges();
+    const defaultPagination = query(defaults.nativeElement as HTMLElement, 'nav[hellPagination]');
+    const defaultControl = query(defaults.nativeElement as HTMLElement, '#first');
+
     expect(pagination.getAttribute('data-slot')).toBe('root');
-    expect(pagination.className).toContain('gap-hell-4');
-    expect(pagination.className).not.toContain('gap-hell-1');
+    expectUiRouting(defaultPagination.className, pagination.className, 'gap-hell-4 bg-hell-surface-muted');
 
     for (const control of [first, prev, numbered, next, last]) {
       expect(control.getAttribute('data-slot')).toBe('root');
@@ -370,16 +383,24 @@ describe('HellPageLink', () => {
       expect(control.getAttribute('data-icon-only')).toBe('');
     }
 
-    expect(first.className).toContain('bg-hell-danger');
-    expect(first.className).toContain('px-hell-7');
-    expect(prev.className).toContain('bg-hell-surface-muted');
-    expect(prev.className).toContain('px-hell-6');
-    expect(numbered.className).toContain('rounded-hell-pill');
-    expect(numbered.className).toContain('px-hell-8');
-    expect(next.className).toContain('border-hell-danger');
-    expect(next.className).toContain('px-hell-5');
-    expect(last.className).toContain('bg-hell-danger');
-    expect(last.className).toContain('px-hell-7');
+    expectUiRouting(defaultControl.className, first.className, 'bg-hell-danger px-hell-7');
+    expectUiRouting(defaultControl.className, prev.className, 'bg-hell-surface-muted px-hell-6');
+    expectUiRouting(defaultControl.className, numbered.className, 'rounded-hell-pill bg-hell-primary px-hell-8');
+    expectUiRouting(defaultControl.className, next.className, 'border-hell-danger px-hell-5');
+    expectUiRouting(defaultControl.className, last.className, 'bg-hell-danger px-hell-7');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(PaginationRolesHost);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect({
+        pagination: sortClasses(query(root, 'nav[hellPagination]').className),
+        pageLink: sortClasses(query(root, '#first').className),
+      }).toMatchSnapshot('pagination');
+    });
   });
 });
 
@@ -470,7 +491,7 @@ describe('HellPaginationStrip', () => {
 
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(select.getAttribute('aria-label')).toBe('Page');
-    expect(select.classList.contains('appearance-none')).toBe(true);
+    expect(select.getAttribute('data-slot')).toBe('root');
     expect(select.value).toBe('2');
     expect(root.textContent).toContain('of 5');
 
@@ -505,18 +526,56 @@ describe('HellPaginationStrip', () => {
     const stripPrev = strip.querySelector('[hellPageLink="previous"]') as HTMLButtonElement;
     const stripNext = strip.querySelector('[hellPageLink="next"]') as HTMLButtonElement;
 
+    const defaults = TestBed.createComponent(PaginationHost);
+    defaults.detectChanges();
+    const defaultStrip = query(defaults.nativeElement as HTMLElement, 'hell-pagination');
+    const defaultGlyph = query(defaultStrip, '[data-slot="controlGlyph"]');
+    const defaultControl = defaultStrip.querySelector('[hellPageLink="previous"]') as HTMLButtonElement;
+
     expect(strip.getAttribute('data-slot')).toBe('root');
-    expect(strip.className).toContain('gap-hell-4');
-    expect(stripGlyph.className).toContain('text-hell-danger');
+    expectUiRouting(defaultStrip.className, strip.className, 'gap-hell-4 bg-hell-surface-muted');
+    expectUiRouting(defaultGlyph.className, stripGlyph.className, 'text-hell-danger text-lg');
 
     for (const control of [stripPrev, stripNext]) {
       expect(control.getAttribute('data-slot')).toBe('control');
-      expect(control.className).toContain('rounded-hell-pill');
-      expect(control.className).toContain('px-hell-9');
-      expect(control.className).toContain('h-hell-control-sm');
+      expectUiRouting(defaultControl.className, control.className, 'rounded-hell-pill px-hell-9');
     }
   });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(PaginationHost);
+      fixture.detectChanges();
+      const strip = query(fixture.nativeElement as HTMLElement, 'hell-pagination');
+      const control = strip.querySelector('[hellPageLink="previous"]') as HTMLButtonElement;
+
+      expect({
+        strip: sortClasses(strip.className),
+        control: sortClasses(control.className),
+        controlGlyph: sortClasses(query(strip, '[data-slot="controlGlyph"]').className),
+      }).toMatchSnapshot('paginationStrip');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function pageButtonLabels(root: HTMLElement): string[] {
   return Array.from(root.querySelectorAll<HTMLButtonElement>('button[aria-label^="Page "]')).map(

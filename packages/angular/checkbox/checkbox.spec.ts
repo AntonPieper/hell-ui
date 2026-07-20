@@ -5,6 +5,16 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellCheckbox, type HellCheckboxUi, HellNativeCheckbox } from './checkbox';
 
+/**
+ * Checkbox specs assert behavior, forms integration, and state attributes.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+
 @Component({
   selector: 'hell-checkbox-host',
   imports: [HellCheckbox],
@@ -117,21 +127,26 @@ class NativeCheckboxFormHost {
   imports: [HellCheckbox, HellNativeCheckbox],
   template: `
     <div>
+      <button data-testid="default-checkbox" hellCheckbox [checked]="true"></button>
+      <label>
+        <input data-testid="default-native" type="checkbox" hellNativeCheckbox checked />
+        Default native
+      </label>
       <button
-        id="custom-checkbox"
+        data-testid="custom-checkbox"
         hellCheckbox
         [checked]="true"
         ui="bg-hell-danger size-hell-6 rounded-hell-pill"
       ></button>
       <button
-        id="custom-map-checkbox"
+        data-testid="custom-map-checkbox"
         hellCheckbox
         [checked]="true"
         [ui]="customUi"
       ></button>
       <label>
         <input
-          id="native-checkbox"
+          data-testid="native-checkbox"
           type="checkbox"
           hellNativeCheckbox
           checked
@@ -323,47 +338,34 @@ describe('HellCheckbox', () => {
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
-    const customControls = root.querySelectorAll<HTMLButtonElement>('button[hellCheckbox]');
-    const custom = customControls[0];
-    const customMap = customControls[1];
-    const native = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeCheckbox]');
-
-    expect(custom).toBeInstanceOf(HTMLButtonElement);
-    expect(customMap).toBeInstanceOf(HTMLButtonElement);
+    const defaults = query<HTMLButtonElement>(root, '[data-testid="default-checkbox"]');
+    const defaultNative = query<HTMLInputElement>(root, '[data-testid="default-native"]');
+    const custom = query<HTMLButtonElement>(root, '[data-testid="custom-checkbox"]');
+    const customMap = query<HTMLButtonElement>(root, '[data-testid="custom-map-checkbox"]');
+    const native = query<HTMLInputElement>(root, '[data-testid="native-checkbox"]');
 
     expect(custom.tagName).toBe('BUTTON');
     expect(custom.type).toBe('button');
     expect(custom.getAttribute('role')).toBe('checkbox');
     expect(custom.getAttribute('data-slot')).toBe('root');
-    expect(custom.classList.contains('bg-hell-danger')).toBe(true);
-    expect(custom.classList.contains('size-hell-6')).toBe(true);
-    expect(custom.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(custom.classList.contains('size-hell-5')).toBe(false);
 
-    expect(customMap.getAttribute('data-slot')).toBe('root');
-    expect(customMap.classList.contains('bg-hell-danger')).toBe(true);
-    expect(customMap.classList.contains('size-hell-6')).toBe(true);
-    expect(customMap.classList.contains('size-hell-5')).toBe(false);
+    expectUiRouting(classAttr(defaults), classAttr(custom), 'bg-hell-danger size-hell-6 rounded-hell-pill');
+    expectUiRouting(classAttr(defaults), classAttr(customMap), 'bg-hell-danger size-hell-6 rounded-hell-pill');
 
-    const customMapIndicator = customMap.querySelector<SVGElement>('svg[data-slot="indicator"]');
-    if (!customMapIndicator) throw new Error('Expected svg[data-slot="indicator"].');
-    expect(customMapIndicator.classList.contains('block')).toBe(true);
-    expect(customMapIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
-    expect(customMapIndicator.classList.contains('text-hell-danger')).toBe(true);
-    expect(customMapIndicator.classList.contains('size-hell-3')).toBe(true);
-    expect(customMapIndicator.classList.contains('size-hell-4')).toBe(false);
+    const defaultIndicator = defaults.querySelector('svg[data-slot="indicator"]');
+    const customMapIndicator = customMap.querySelector('svg[data-slot="indicator"]');
+    if (!defaultIndicator || !customMapIndicator) throw new Error('Expected svg[data-slot="indicator"].');
+    expectUiRouting(classAttr(defaultIndicator), classAttr(customMapIndicator), 'text-hell-danger size-hell-3');
 
     expect(native.tagName).toBe('INPUT');
     expect(native.type).toBe('checkbox');
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('border-hell-danger')).toBe(true);
-    expect(native.classList.contains('size-hell-6')).toBe(true);
-    expect(native.classList.contains('size-hell-5')).toBe(false);
+    expectUiRouting(classAttr(defaultNative), classAttr(native), 'border-hell-danger size-hell-6');
     expect(native.getAttribute('aria-required')).toBe('true');
     expect(native.getAttribute('required')).toBe('');
   });
 
-  it('renders the indicator part with default recipe classes and data-slot', () => {
+  it('renders the indicator part only while checked or indeterminate', () => {
     const fixture = TestBed.createComponent(CheckboxHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
@@ -375,21 +377,30 @@ describe('HellCheckbox', () => {
     host.checked.set(true);
     fixture.detectChanges();
 
-    const checkedIndicator = checkbox.querySelector<SVGElement>('svg[data-slot="indicator"]');
-    if (!checkedIndicator) throw new Error('Expected svg[data-slot="indicator"].');
-    expect(checkedIndicator.classList.contains('block')).toBe(true);
-    expect(checkedIndicator.classList.contains('size-hell-4')).toBe(true);
-    expect(checkedIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
+    expect(checkbox.querySelector('svg[data-slot="indicator"]')).not.toBeNull();
 
     host.checked.set(false);
     host.indeterminate.set(true);
     fixture.detectChanges();
 
-    const indeterminateIndicator = checkbox.querySelector<SVGElement>('svg[data-slot="indicator"]');
-    if (!indeterminateIndicator) throw new Error('Expected svg[data-slot="indicator"].');
-    expect(indeterminateIndicator.classList.contains('block')).toBe(true);
-    expect(indeterminateIndicator.classList.contains('size-hell-4')).toBe(true);
-    expect(indeterminateIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
+    expect(checkbox.querySelector('svg[data-slot="indicator"]')).not.toBeNull();
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(CheckboxPartStyleHost);
+      fixture.detectChanges();
+
+      const defaults = query<HTMLButtonElement>(fixture.nativeElement, '[data-testid="default-checkbox"]');
+      const indicator = defaults.querySelector('svg[data-slot="indicator"]');
+      if (!indicator) throw new Error('Expected svg[data-slot="indicator"].');
+
+      expect({
+        root: sortClasses(classAttr(defaults)),
+        indicator: sortClasses(classAttr(indicator)),
+        nativeRoot: sortClasses(classAttr(query(fixture.nativeElement, '[data-testid="default-native"]'))),
+      }).toMatchSnapshot('checkbox');
+    });
   });
 
   it('does not report required when control is disabled', () => {
@@ -410,4 +421,27 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function classAttr(element: Element): string {
+  return element.getAttribute('class') ?? '';
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }

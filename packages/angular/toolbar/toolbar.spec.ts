@@ -218,6 +218,7 @@ describe('hellResolveToolbarOverflow', () => {
       </button>
       <ng-template #shareHint><span hellTooltipSurface>Share this document</span></ng-template>
     </div>
+    <div id="default-toolbar" hellToolbar label="Plain actions"></div>
   `,
 })
 class PlainToolbarHost {
@@ -254,6 +255,22 @@ describe('HellToolbar', () => {
     cleanupPortaledTestElements('[hellTooltipSurface]');
   });
 
+  /**
+   * Proves consumer ui classes reach the part through the Part-Class
+   * Pipeline: every ui class renders, and nothing outside the default render
+   * plus the consumer's ui appears. Merge conflict semantics are owned
+   * centrally by `core/part-class-pipeline.spec.ts`.
+   */
+  function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+    const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+    const custom = sortClasses(customClassName);
+    const ownUi = sortClasses(ui);
+    const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+    expect(custom).toEqual(expect.arrayContaining(ownUi));
+    expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+  }
+
   const create = async () => {
     const fixture = TestBed.createComponent(PlainToolbarHost);
     document.body.appendChild(fixture.nativeElement);
@@ -264,13 +281,17 @@ describe('HellToolbar', () => {
 
   it('owns only the toolbar role, name, orientation, and root Part Style Map', async () => {
     const fixture = await create();
-    const toolbar = query(fixture.nativeElement, '[hellToolbar]');
+    const toolbar = query(fixture.nativeElement, '[hellToolbar]:not(#default-toolbar)');
 
     expect(toolbar.getAttribute('role')).toBe('toolbar');
     expect(toolbar.getAttribute('aria-label')).toBe('Formatting actions');
     expect(toolbar.getAttribute('aria-orientation')).toBe('horizontal');
     expect(toolbar.getAttribute('data-orientation')).toBe('horizontal');
-    expect(toolbar.className).toContain('rounded-hell-md');
+    expectUiRouting(
+      query(fixture.nativeElement, '#default-toolbar').className,
+      toolbar.className,
+      'rounded-hell-md',
+    );
   });
 
   it('delegates one-tab-stop horizontal roving focus and skips disabled items', async () => {
@@ -298,7 +319,7 @@ describe('HellToolbar', () => {
     fixture.componentInstance.orientation.set('vertical');
     await settle(fixture);
 
-    const toolbar = query(fixture.nativeElement, '[hellToolbar]');
+    const toolbar = query(fixture.nativeElement, '[hellToolbar]:not(#default-toolbar)');
     const root = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
     expect(toolbar.getAttribute('aria-orientation')).toBe('vertical');
@@ -318,7 +339,8 @@ describe('HellToolbar', () => {
     const root = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('button'));
 
-    expect(buttons[0].className).toContain('inline-flex');
+    // The consumer's buttons compose HellButton; its data-slot marks the pipeline.
+    expect(buttons[0].getAttribute('data-slot')).toBe('root');
     expect(fixture.debugElement.queryAll(By.directive(HellTooltip))).toHaveLength(1);
     buttons[0].click();
     buttons[2].click();
@@ -617,9 +639,40 @@ describe('HellOverflowToolbar', () => {
     fixture.detectChanges();
     drive(fixture, 1000);
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     const toolbar = query(fixture.nativeElement, 'hell-overflow-toolbar');
     expect(toolbar.className).toContain('bg-hell-surface-muted');
     expect(actionButtons(fixture.nativeElement)[0].className).toContain('font-semibold');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(CapabilitiesHost);
+      mount(fixture);
+      fixture.detectChanges();
+      drive(fixture, 1000);
+
+      const triggerFixture = TestBed.createComponent(ToolbarHost);
+      mount(triggerFixture);
+      triggerFixture.detectChanges();
+      drive(triggerFixture, 1000);
+
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const trigger = triggerFixture.nativeElement.querySelector('[data-slot="overflowTrigger"]');
+
+      expect({
+        overflowToolbar: sortClasses(
+          query(fixture.nativeElement, 'hell-overflow-toolbar').className,
+        ),
+        action: sortClasses(actionButtons(fixture.nativeElement)[0].className),
+        overflowTrigger: sortClasses(trigger?.getAttribute('class') ?? ''),
+      }).toMatchSnapshot('overflowToolbar');
+    });
   });
 
   it('renders an icon-only action with its label as the accessible name and no visible text', () => {

@@ -259,6 +259,35 @@ describe('HellFilterBuilder', () => {
       .toContain('filter-builder-root-shorthand');
   });
 
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes (empty-string ui yields the pure recipes) without asserting
+    // individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(HostComponent);
+      fixture.componentInstance.ui.set('');
+      await settle(fixture);
+
+      const host = fixture.nativeElement as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (slot: string): string[] =>
+        sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
+
+      expect({
+        host: sortClasses(query<HTMLElement>(host, 'hell-filter-builder').className),
+        root: partClasses('root'),
+        tokens: partClasses('tokens'),
+        token: partClasses('token'),
+        tokenLabel: partClasses('tokenLabel'),
+        control: partClasses('control'),
+        clear: partClasses('clear'),
+        live: partClasses('live'),
+      }).toMatchSnapshot('filterBuilder');
+    });
+  });
+
   it('allows Tab to leave an open picker when no enabled option is active', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     await settle(fixture);

@@ -141,6 +141,40 @@ afterAll(() => {
   if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
 });
 
+/**
+ * Select specs assert behavior, forms integration, and ARIA relationships.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+async function defaultSelectClasses(): Promise<
+  Record<'select' | 'value' | 'dropdown' | 'option', string>
+> {
+  const fixture = TestBed.createComponent(SelectFormHost);
+  fixture.detectChanges();
+
+  const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+  const value = query<HTMLElement>(fixture.nativeElement, '[hellSelectValue]');
+  const dropdown = await openSelectDropdown(fixture, select);
+  const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
+  const defaults = {
+    select: select.className,
+    value: value.className,
+    dropdown: dropdown.className,
+    option: option.className,
+  };
+
+  select.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+  );
+  await waitForDropdownRemoval(fixture);
+
+  return defaults;
+}
+
 describe('HellSelect', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -215,6 +249,7 @@ describe('HellSelect', () => {
   });
 
   it('merges select, value, dropdown and option root part styles through the portal', async () => {
+    const defaults = await defaultSelectClasses();
     const fixture = TestBed.createComponent(SelectUiHost);
     fixture.detectChanges();
 
@@ -225,22 +260,31 @@ describe('HellSelect', () => {
     const disabled = query<HTMLElement>(dropdown, '[hellSelectOption][value="high"]');
 
     expect(select.getAttribute('data-slot')).toBe('root');
-    expect(select.className).toContain('rounded-hell-pill');
-    expect(select.className).not.toContain('rounded-hell-md');
-    expect(select.className).toContain('bg-hell-primary');
+    expectUiRouting(defaults.select, select.className, 'rounded-hell-pill bg-hell-primary');
 
     expect(value.getAttribute('data-slot')).toBe('root');
-    expect(value.className).toContain('text-hell-danger');
+    expectUiRouting(defaults.value, value.className, 'text-hell-danger');
 
     expect(dropdown.getAttribute('data-slot')).toBe('root');
-    expect(dropdown.className).toContain('rounded-hell-pill');
-    expect(dropdown.className).not.toContain('rounded-hell-md');
+    expectUiRouting(defaults.dropdown, dropdown.className, 'rounded-hell-pill');
 
     expect(option.getAttribute('data-slot')).toBe('root');
-    expect(option.className).toContain('px-hell-8');
-    expect(option.className).toContain('bg-hell-primary-soft');
+    expectUiRouting(defaults.option, option.className, 'px-hell-8 bg-hell-primary-soft');
     expect(disabled.getAttribute('data-slot')).toBe('root');
     expect(disabled.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', async () => {
+      const defaults = await defaultSelectClasses();
+
+      expect({
+        select: sortClasses(defaults.select),
+        value: sortClasses(defaults.value),
+        dropdown: sortClasses(defaults.dropdown),
+        option: sortClasses(defaults.option),
+      }).toMatchSnapshot('select');
+    });
   });
 
   it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
@@ -532,6 +576,25 @@ async function waitForDropdownRemoval(fixture: {
   }
 
   throw new Error('Expected select dropdown to be removed.');
+}
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function cleanupPortaledTestElements(selector: string): void {

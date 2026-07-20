@@ -77,6 +77,7 @@ class ExplicitRoleTablePrimitiveHost {}
           <button id="ui-action" hellTableRowAction ui="text-hell-danger">Open</button>
           <input id="ui-checkbox" hellTableRowCheckbox type="checkbox" ui="border-hell-danger" />
           <button id="ui-resizer" hellTableResizeHandle [ui]="resizeHandleUi"></button>
+          <button id="plain-resizer" hellTableResizeHandle></button>
         </div>
       </div>
     </div>
@@ -180,6 +181,8 @@ describe('host-agnostic Hell table primitives', () => {
     expectPartAndData(byId(root, 'ui-checkbox'), 'data-hell-table-row-checkbox');
     expectPartAndData(byId(root, 'ui-resizer'), 'data-hell-table-resize-handle');
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(byId(root, 'ui-root').className).toContain('bg-hell-surface-muted');
     expect(byId(root, 'ui-row').className).toContain('bg-hell-primary-soft');
     expect(byId(root, 'ui-cell').className).toContain('text-hell-danger');
@@ -193,6 +196,39 @@ describe('host-agnostic Hell table primitives', () => {
     );
     expect(byId(root, 'ui-root').getAttribute('role')).toBe('table');
     expect(byId(root, 'ui-cell').getAttribute('role')).toBe('cell');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(NativeTablePrimitiveHost);
+      const uiFixture = TestBed.createComponent(UiTablePrimitiveHost);
+      fixture.detectChanges();
+      uiFixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const plainResizer = byId(uiFixture.nativeElement as HTMLElement, 'plain-resizer');
+
+      expect({
+        root: sortClasses(byId(root, 'native-root').className),
+        header: sortClasses(byId(root, 'native-header').className),
+        body: sortClasses(byId(root, 'native-body').className),
+        row: sortClasses(byId(root, 'native-row').className),
+        headerCell: sortClasses(byId(root, 'native-header-cell').className),
+        cell: sortClasses(byId(root, 'native-cell').className),
+        sortTrigger: sortClasses(byId(root, 'sort').className),
+        rowAction: sortClasses(byId(root, 'edit-row').className),
+        rowCheckbox: sortClasses(byId(root, 'select-all').className),
+        rowRadio: sortClasses(byId(root, 'select-row').className),
+        resizeHandle: sortClasses(plainResizer.className),
+        resizeGrip: sortClasses(
+          plainResizer.querySelector('[data-slot="grip"]')?.className ?? '',
+        ),
+      }).toMatchSnapshot('tablePrimitives');
+    });
   });
 
   it('keeps role inference safe for SSR-like hosts with minimal DOM shape', () => {

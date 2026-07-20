@@ -211,6 +211,12 @@ describe('HellTimePicker', () => {
 
   it('renders every public part and merges ui refinements deterministically', () => {
     const fixture = TestBed.createComponent(TimePickerHost);
+    fixture.detectChanges();
+    const defaults = {
+      root: part(fixture.nativeElement, 'root').className,
+      readout: part(fixture.nativeElement, 'readout').className,
+    };
+
     const ui = Object.fromEntries(
       PUBLIC_PARTS.map((name) => [name, `contract-${name}`]),
     ) as HellTimePickerUi;
@@ -237,18 +243,54 @@ describe('HellTimePicker', () => {
     ).toBe(false);
 
     const root = part(fixture.nativeElement, 'root');
-    expect(root.classList.contains('w-[24rem]')).toBe(true);
-    expect(root.classList.contains('w-[min(20rem,calc(100vw-2rem))]')).toBe(false);
-    expect(root.classList.contains('border-hell-danger')).toBe(true);
-    expect(part(fixture.nativeElement, 'readout').classList.contains('text-lg')).toBe(true);
-    expect(part(fixture.nativeElement, 'readout').classList.contains('text-[22px]')).toBe(false);
+    expectUiRouting(defaults.root, root.className, 'contract-root w-[24rem] border-hell-danger');
+    expectUiRouting(
+      defaults.readout,
+      part(fixture.nativeElement, 'readout').className,
+      'contract-readout text-lg',
+    );
 
     fixture.componentInstance.ui.set('w-[26rem] border-hell-primary');
     fixture.detectChanges();
     expect(root.classList.contains('w-[26rem]')).toBe(true);
     expect(part(fixture.nativeElement, 'header').classList.contains('w-[26rem]')).toBe(false);
   });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(TimePickerHost);
+      fixture.detectChanges();
+
+      expect(
+        Object.fromEntries(
+          PUBLIC_PARTS.map((name) => [
+            name,
+            part(fixture.nativeElement, name).className.split(/\s+/).filter(Boolean).sort(),
+          ]),
+        ),
+      ).toMatchSnapshot('timePicker');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
 
 const PUBLIC_PARTS = [
   'root',

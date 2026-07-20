@@ -87,6 +87,9 @@ class NumberInputHost {
       [hellNumberStepFor]="number"
       ui="bg-hell-danger text-hell-danger-foreground"
     >+</button>
+
+    <input #plain="hellNumberInput" hellNumberInput aria-label="Plain number" />
+    <button id="plain-step" hellNumberStep="increment" [hellNumberStepFor]="plain">+</button>
   `,
 })
 class NumberInputStyleHost {}
@@ -292,10 +295,32 @@ describe('HellNumberInput', () => {
     const fixture = TestBed.createComponent(NumberInputStyleHost);
     fixture.detectChanges();
     const field = numberField(fixture);
+    const plain = fixture.nativeElement.querySelector(
+      'input[aria-label="Plain number"]',
+    ) as HTMLInputElement;
 
-    expect(field.classList.contains('max-w-[20rem]')).toBe(true);
-    expect(field.classList.contains('border-hell-danger')).toBe(true);
-    expect(field.classList.contains('border-hell-border')).toBe(false);
+    expectUiRouting(plain.className, field.className, 'max-w-[20rem] border-hell-danger');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(NumberInputStyleHost);
+      fixture.detectChanges();
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const plain = fixture.nativeElement.querySelector(
+        'input[aria-label="Plain number"]',
+      ) as HTMLInputElement;
+      const step = fixture.nativeElement.querySelector('#plain-step') as HTMLButtonElement;
+
+      expect({
+        root: sortClasses(plain.className),
+        step: sortClasses(step.className),
+      }).toMatchSnapshot('numberInput');
+    });
   });
 
   it('parses typed decimals and emits the canonical value', () => {
@@ -772,7 +797,11 @@ describe('HellNumberStep', () => {
     expect(button.tabIndex).toBe(-1);
     expect(button.getAttribute('data-slot')).toBe('root');
     expect(button.getAttribute('data-direction')).toBe('increment');
-    expect(button.classList.contains('bg-hell-danger')).toBe(true);
+    expectUiRouting(
+      (fixture.nativeElement.querySelector('#plain-step') as HTMLButtonElement).className,
+      button.className,
+      'bg-hell-danger text-hell-danger-foreground',
+    );
   });
 
   it('uses target-aware labels, Label Contract overrides, and authored overrides', () => {
@@ -789,6 +818,22 @@ describe('HellNumberStep', () => {
     expect(HELL_NUMBER_INPUT_IMPORTS).toEqual([HellNumberInput, HellNumberStep]);
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
 
 function createHost(): ComponentFixture<NumberInputHost> {
   const fixture = TestBed.createComponent(NumberInputHost);

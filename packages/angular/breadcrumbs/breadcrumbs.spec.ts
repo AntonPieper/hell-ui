@@ -4,6 +4,36 @@ import { TestBed } from '@angular/core/testing';
 
 import { HELL_BREADCRUMBS_IMPORTS, HELL_BREADCRUMBS_LABELS } from './breadcrumbs';
 
+/**
+ * Breadcrumb specs assert behavior, roles, and ARIA. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part.
+ */
+@Component({
+  imports: [...HELL_BREADCRUMBS_IMPORTS],
+  template: `
+    <nav id="breadcrumbs-default" hellBreadcrumbs>
+      <ol id="list-default" hellBreadcrumbList>
+        <li id="item-default" hellBreadcrumbItem>
+          <button id="link-default" hellBreadcrumbLink>Home</button>
+        </li>
+        <li id="separator-default" hellBreadcrumbSeparator></li>
+        <li>
+          <span id="page-default" hellBreadcrumbPage>Current</span>
+        </li>
+        <li>
+          <button id="ellipsis-default" hellBreadcrumbEllipsis></button>
+        </li>
+      </ol>
+    </nav>
+  `,
+})
+class BreadcrumbDefaultHost {}
+
 @Component({
   imports: [...HELL_BREADCRUMBS_IMPORTS],
   template: `
@@ -114,6 +144,7 @@ describe('HellBreadcrumbEllipsis', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        BreadcrumbDefaultHost,
         BreadcrumbEllipsisHost,
         BreadcrumbLabelContractHost,
         BreadcrumbPartStyleStringHost,
@@ -197,31 +228,81 @@ describe('HellBreadcrumbEllipsis', () => {
     expect(ellipsis.getAttribute('type')).toBe('button');
     expect(ellipsis.getAttribute('aria-label')).toBe('Show hidden navigation');
 
-    expectClasses(breadcrumbs, ['flex', 'text-hell-danger'], ['inline-flex']);
-    expectClasses(list, ['grid', 'gap-hell-4'], ['inline-flex', 'gap-1.5']);
-    expectClasses(item, ['grid', 'gap-hell-4'], ['inline-flex', 'gap-hell-1']);
-    expectClasses(link, ['flex', 'text-hell-danger'], ['inline-flex', 'text-inherit']);
-    expectClasses(separator, ['grid', 'text-hell-danger'], ['inline-flex', 'text-hell-foreground-subtle']);
-    expectClasses(page, ['block', 'text-hell-danger'], ['inline-flex', 'text-hell-foreground']);
-    expectClasses(ellipsis, ['grid', 'bg-hell-danger'], ['inline-flex', 'bg-transparent']);
+    const defaults = defaultBreadcrumbClasses();
+
+    expectUiRouting(defaults.breadcrumbs, breadcrumbs.className, 'flex text-hell-danger');
+    expectUiRouting(defaults.list, list.className, 'grid gap-hell-4');
+    expectUiRouting(defaults.item, item.className, 'grid gap-hell-4');
+    expectUiRouting(defaults.link, link.className, 'flex text-hell-danger');
+    expectUiRouting(defaults.separator, separator.className, 'grid text-hell-danger');
+    expectUiRouting(defaults.page, page.className, 'block text-hell-danger');
+    expectUiRouting(defaults.ellipsis, ellipsis.className, 'grid bg-hell-danger text-hell-foreground-inverse');
   });
 
   it('applies object maps to every breadcrumb root', () => {
     const fixture = TestBed.createComponent(BreadcrumbPartStyleMapHost);
     fixture.detectChanges();
 
-    expectClasses(byId(fixture.nativeElement, 'breadcrumbs-map'), ['flex', 'text-hell-info']);
-    expectClasses(byId(fixture.nativeElement, 'list-map'), ['grid', 'gap-hell-3']);
-    expectClasses(byId(fixture.nativeElement, 'item-map'), ['grid', 'gap-hell-2']);
-    expectClasses(byId(fixture.nativeElement, 'link-map'), ['flex', 'text-hell-info']);
-    expectClasses(byId(fixture.nativeElement, 'separator-map'), ['grid', 'text-hell-info']);
-    expectClasses(byId(fixture.nativeElement, 'page-map'), ['block', 'text-hell-info-strong']);
+    const defaults = defaultBreadcrumbClasses();
+
+    expectUiRouting(
+      defaults.breadcrumbs,
+      byId(fixture.nativeElement, 'breadcrumbs-map').className,
+      'flex text-hell-info',
+    );
+    expectUiRouting(defaults.list, byId(fixture.nativeElement, 'list-map').className, 'grid gap-hell-3');
+    expectUiRouting(defaults.item, byId(fixture.nativeElement, 'item-map').className, 'grid gap-hell-2');
+    expectUiRouting(defaults.link, byId(fixture.nativeElement, 'link-map').className, 'flex text-hell-info');
+    expectUiRouting(
+      defaults.separator,
+      byId(fixture.nativeElement, 'separator-map').className,
+      'grid text-hell-info',
+    );
+    expectUiRouting(
+      defaults.page,
+      byId(fixture.nativeElement, 'page-map').className,
+      'block text-hell-info-strong',
+    );
 
     const ellipsis = byId<HTMLButtonElement>(fixture.nativeElement, 'ellipsis-map');
-    expectClasses(ellipsis, ['grid', 'bg-hell-info-soft', 'text-hell-info-strong']);
+    expectUiRouting(defaults.ellipsis, ellipsis.className, 'grid bg-hell-info-soft text-hell-info-strong');
     expect(ellipsis.getAttribute('aria-label')).toBe('Map breadcrumbs');
   });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const defaults = defaultBreadcrumbClasses();
+
+      expect({
+        breadcrumbs: sortClasses(defaults.breadcrumbs),
+        list: sortClasses(defaults.list),
+        item: sortClasses(defaults.item),
+        link: sortClasses(defaults.link),
+        separator: sortClasses(defaults.separator),
+        page: sortClasses(defaults.page),
+        ellipsis: sortClasses(defaults.ellipsis),
+      }).toMatchSnapshot('breadcrumbs');
+    });
+  });
 });
+
+function defaultBreadcrumbClasses(): Record<
+  'breadcrumbs' | 'list' | 'item' | 'link' | 'separator' | 'page' | 'ellipsis',
+  string
+> {
+  const fixture = TestBed.createComponent(BreadcrumbDefaultHost);
+  fixture.detectChanges();
+
+  return {
+    breadcrumbs: byId(fixture.nativeElement, 'breadcrumbs-default').className,
+    list: byId(fixture.nativeElement, 'list-default').className,
+    item: byId(fixture.nativeElement, 'item-default').className,
+    link: byId(fixture.nativeElement, 'link-default').className,
+    separator: byId(fixture.nativeElement, 'separator-default').className,
+    page: byId(fixture.nativeElement, 'page-default').className,
+    ellipsis: byId(fixture.nativeElement, 'ellipsis-default').className,
+  };
+}
 
 function byId<T extends HTMLElement>(root: HTMLElement, id: string): T {
   const element = root.querySelector(`#${id}`);
@@ -233,8 +314,21 @@ function expectPartStyleRoot(element: HTMLElement): void {
   expect(element.getAttribute('data-slot')).toBe('root');
 }
 
-function expectClasses(element: HTMLElement, present: string[], absent: string[] = []): void {
-  const classes = element.className.split(/\s+/);
-  for (const className of present) expect(classes).toContain(className);
-  for (const className of absent) expect(classes).not.toContain(className);
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
 }

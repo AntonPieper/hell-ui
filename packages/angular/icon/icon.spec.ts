@@ -5,6 +5,15 @@ import { faSolidCircleInfo } from '@ng-icons/font-awesome/solid';
 
 import { HellIcon } from './icon';
 
+/**
+ * Icon specs assert behavior, labels, and state attributes. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach the part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface.
+ */
+
 @Component({
   imports: [HellIcon],
   providers: [provideIcons({ faSolidCircleInfo })],
@@ -33,6 +42,7 @@ class LabelledIconHost {}
       ui="flex text-hell-danger"
     />
     <hell-icon id="icon-map" name="faSolidCircleInfo" [ui]="iconUi" />
+    <hell-icon id="icon-default" name="faSolidCircleInfo" />
   `,
 })
 class PartStyleIconHost {
@@ -73,7 +83,6 @@ describe('HellIcon', () => {
     await settle(fixture);
 
     const icon = query<HTMLElement>(fixture.nativeElement, '#icon-string');
-    const classes = icon.className.split(/\s+/);
 
     expect(icon.getAttribute('data-slot')).toBe('root');
     expect(icon.getAttribute('aria-hidden')).toBeNull();
@@ -81,10 +90,11 @@ describe('HellIcon', () => {
     expect(icon.getAttribute('aria-label')).toBe('Info');
     expect(icon.style.getPropertyValue('--ng-icon__size')).toBe('20px');
     expect(icon.style.getPropertyValue('--_hell-icon-color')).toBe('red');
-    expect(classes).toContain('flex');
-    expect(classes).toContain('text-hell-danger');
-    expect(classes).not.toContain('inline-flex');
-    expect(classes).not.toContain('text-[var(--_hell-icon-color,currentColor)]');
+    expectUiRouting(
+      query<HTMLElement>(fixture.nativeElement, '#icon-default').className,
+      icon.className,
+      'flex text-hell-danger',
+    );
   });
 
   it('applies object maps to the icon root', async () => {
@@ -94,9 +104,43 @@ describe('HellIcon', () => {
     const icon = query<HTMLElement>(fixture.nativeElement, '#icon-map');
 
     expect(icon.getAttribute('data-slot')).toBe('root');
-    expect(icon.className).toContain('text-hell-info');
+    expectUiRouting(
+      query<HTMLElement>(fixture.nativeElement, '#icon-default').className,
+      icon.className,
+      'text-hell-info',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', async () => {
+      const fixture = TestBed.createComponent(PartStyleIconHost);
+      await settle(fixture);
+
+      expect({
+        root: sortClasses(query<HTMLElement>(fixture.nativeElement, '#icon-default').className),
+      }).toMatchSnapshot('icon');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
   fixture.detectChanges();

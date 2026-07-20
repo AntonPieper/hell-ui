@@ -8,6 +8,16 @@ import {
   HellControlGroupSuffix,
 } from './control-group';
 
+/**
+ * Control-group specs assert behavior and state attributes. Part-Class
+ * Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+
 @Component({
   imports: [
     HellControlGroup,
@@ -92,10 +102,6 @@ describe('HellControlGroup', () => {
     expect(group.getAttribute('aria-invalid')).toBe('true');
     expect(group.getAttribute('data-disabled')).toBeNull();
     expect(group.getAttribute('aria-disabled')).toBeNull();
-    expect(group.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(group.classList.contains('rounded-hell-md')).toBe(false);
-    expect(group.classList.contains('border-hell-info')).toBe(true);
-    expect(group.classList.contains('border-hell-border')).toBe(false);
 
     expect(Array.from(group.children, (child) => child.id)).toEqual([
       'prefix',
@@ -113,11 +119,23 @@ describe('HellControlGroup', () => {
       expect(surface.getAttribute('data-invalid')).toBe('true');
       expect(surface.getAttribute('data-disabled')).toBeNull();
     }
-    expect(prefix.classList.contains('text-hell-info')).toBe(true);
-    expect(prefix.classList.contains('text-hell-foreground-muted')).toBe(false);
-    expect(suffix.classList.contains('font-semibold')).toBe(true);
-    expect(action.classList.contains('text-hell-info')).toBe(true);
     expect(action.type).toBe('button');
+  });
+
+  it('routes ui shorthand and part maps through the shared Part-Class Pipeline per part', () => {
+    const fixture = TestBed.createComponent(CompositionHost);
+    const defaults = TestBed.createComponent(StateHost);
+    fixture.detectChanges();
+    defaults.detectChanges();
+
+    expectUiRouting(
+      className(defaults, '#state-group'),
+      className(fixture, '#group'),
+      'rounded-hell-pill border-hell-info',
+    );
+    expectUiRouting(className(defaults, '#state-prefix'), className(fixture, '#prefix'), 'text-hell-info');
+    expectUiRouting(className(defaults, '#state-suffix'), className(fixture, '#suffix'), 'font-semibold');
+    expectUiRouting(className(defaults, '#state-action'), className(fixture, '#action'), 'text-hell-info');
   });
 
   it('keeps data-focus-within while focus moves inside and clears it on exit', () => {
@@ -194,7 +212,44 @@ describe('HellControlGroup', () => {
     expect(prefix.getAttribute('data-disabled')).toBeNull();
     expect(suffix.getAttribute('data-disabled')).toBeNull();
   });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(StateHost);
+      fixture.detectChanges();
+
+      expect({
+        group: sortClasses(className(fixture, '#state-group')),
+        prefix: sortClasses(className(fixture, '#state-prefix')),
+        suffix: sortClasses(className(fixture, '#state-suffix')),
+        action: sortClasses(className(fixture, '#state-action')),
+      }).toMatchSnapshot('controlGroup');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function className(fixture: { nativeElement: HTMLElement }, selector: string): string {
+  return query(fixture.nativeElement, selector).className;
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

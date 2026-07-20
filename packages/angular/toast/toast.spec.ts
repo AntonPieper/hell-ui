@@ -570,10 +570,11 @@ describe('HellToaster', () => {
     svc.success('One', { duration: 0 });
     fixture.detectChanges();
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     const root = fixture.nativeElement.querySelector('hell-toaster') as HTMLElement;
     expect(root.getAttribute('data-slot')).toBe('root');
     expect(root.className).toContain('static');
-    expect(root.className).not.toContain('fixed');
 
     host.ui.set(host.objectUi);
     svc.info('Two', {
@@ -592,10 +593,42 @@ describe('HellToaster', () => {
     expect(root.className).toContain('w-[420px]');
     expect(toast.className).toContain('rounded-none');
     expect(toast.className).toContain('border-hell-danger');
-    expect(toast.className).not.toContain('rounded-hell-lg');
     expect(action.className).toContain('bg-hell-danger');
     expect(close.className).toContain('text-hell-danger');
     expect(dismissAll.className).toContain('bg-hell-danger');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(HellToaster);
+      const svc = TestBed.inject(HellToastService);
+      fixture.detectChanges();
+
+      svc.success('One', { duration: 0, action: { label: 'Undo', onClick: () => void 0 } });
+      svc.success('Two', { duration: 0 });
+      fixture.detectChanges();
+
+      const root = fixture.nativeElement as HTMLElement;
+      const partClasses = (slot: string): string[] => {
+        const element = root.matches(`[data-slot="${slot}"]`)
+          ? root
+          : root.querySelector(`[data-slot="${slot}"]`);
+        return (element?.getAttribute('class') ?? '').split(/\s+/).filter(Boolean).sort();
+      };
+
+      expect({
+        root: partClasses('root'),
+        region: partClasses('region'),
+        viewport: partClasses('viewport'),
+        toast: partClasses('toast'),
+        action: partClasses('action'),
+        close: partClasses('close'),
+        dismissAll: partClasses('dismissAll'),
+      }).toMatchSnapshot('toast');
+    });
   });
 
   it('keeps collapsed overflow toast controls out of the tab order until expansion', () => {

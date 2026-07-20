@@ -3,6 +3,16 @@ import { TestBed } from '@angular/core/testing';
 
 import { HELL_SEARCH_IMPORTS, HellInput } from './input';
 
+/**
+ * Search specs assert behavior and state attributes. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part.
+ */
+
 @Component({
   imports: [HellInput, ...HELL_SEARCH_IMPORTS],
   template: `
@@ -14,6 +24,11 @@ import { HELL_SEARCH_IMPORTS, HellInput } from './input';
     <div id="search-map" hellSearch [ui]="searchUi">
       <input id="search-map-input" hellInput type="search" />
       <button id="clear-map" hellSearchClear [ui]="clearUi">Clear</button>
+    </div>
+
+    <div id="search-default" hellSearch>
+      <input id="search-default-input" hellInput type="search" />
+      <button id="clear-default" hellSearchClear>Clear</button>
     </div>
   `,
 })
@@ -46,8 +61,16 @@ describe('HellSearch Part Style Map', () => {
 
     expectPartStyleRoot(search);
     expectPartStyleRoot(clear);
-    expectClasses(search, ['grid', 'gap-hell-4']);
-    expectClasses(clear, ['flex', 'text-hell-danger']);
+    expectUiRouting(
+      byId(fixture.nativeElement, 'search-default').className,
+      search.className,
+      'grid gap-hell-4',
+    );
+    expectUiRouting(
+      byId(fixture.nativeElement, 'clear-default').className,
+      clear.className,
+      'flex text-hell-danger',
+    );
     expect(search.hasAttribute('data-empty')).toBe(false);
     expect(clear.hasAttribute('data-empty')).toBe(false);
     expect(clear.getAttribute('type')).toBe('button');
@@ -70,8 +93,28 @@ describe('HellSearch Part Style Map', () => {
 
     expectPartStyleRoot(search);
     expectPartStyleRoot(clear);
-    expectClasses(search, ['grid', 'gap-hell-3']);
-    expectClasses(clear, ['flex', 'text-hell-info']);
+    expectUiRouting(
+      byId(fixture.nativeElement, 'search-default').className,
+      search.className,
+      'grid gap-hell-3',
+    );
+    expectUiRouting(
+      byId(fixture.nativeElement, 'clear-default').className,
+      clear.className,
+      'flex text-hell-info',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(SearchPartStyleHost);
+      fixture.detectChanges();
+
+      expect({
+        search: sortClasses(byId(fixture.nativeElement, 'search-default').className),
+        clear: sortClasses(byId(fixture.nativeElement, 'clear-default').className),
+      }).toMatchSnapshot('search');
+    });
   });
 });
 
@@ -85,7 +128,23 @@ function expectPartStyleRoot(element: HTMLElement): void {
   expect(element.getAttribute('data-slot')).toBe('root');
 }
 
-function expectClasses(element: HTMLElement, present: string[]): void {
-  const classes = element.className.split(/\s+/);
-  for (const className of present) expect(classes).toContain(className);
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
 }
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
+
+

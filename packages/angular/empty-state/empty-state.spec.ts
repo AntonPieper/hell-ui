@@ -130,16 +130,52 @@ describe('HellEmptyState', () => {
 
   it('exposes the root Part Style Map while preserving state attributes', () => {
     const fixture = setup();
+    const target = query(fixture.nativeElement as HTMLElement, '#inputs');
+    const defaultClassName = target.className;
+
     fixture.componentInstance.ui.set({ root: 'bg-hell-surface-muted p-hell-2' });
     fixture.detectChanges();
-    const target = query(fixture.nativeElement as HTMLElement, '#inputs');
 
     expect(target.getAttribute('data-slot')).toBe('root');
-    expect(target.classList.contains('bg-hell-surface-muted')).toBe(true);
-    expect(target.classList.contains('p-hell-2')).toBe(true);
-    expect(target.classList.contains('p-hell-8')).toBe(false);
+    expectUiRouting(defaultClassName, target.className, 'bg-hell-surface-muted p-hell-2');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = setup();
+      const target = query(fixture.nativeElement as HTMLElement, '#inputs');
+
+      expect({
+        root: sortClasses(target.className),
+        media: sortClasses(query(target, '[data-slot="media"]').className),
+        title: sortClasses(query(target, '[data-slot="title"]').className),
+        description: sortClasses(query(target, '[data-slot="description"]').className),
+      }).toMatchSnapshot('emptyState');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query(root: HTMLElement, selector: string): HTMLElement {
   const element = root.querySelector(selector);
