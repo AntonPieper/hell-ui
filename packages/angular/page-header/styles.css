@@ -2,5 +2,6 @@
    primitive, so it carries the button styles it composes. */
 @import '../button/styles.css';
 
-/* Page-header recipe defaults are Tailwind utility recipes in the component. */
-@source "./page-header.ts";
+/* Page-header recipe defaults are Tailwind utility recipes in the shipped
+   recipe module; the component implementation itself does not ship. */
+@source "./page-header.recipes.ts";

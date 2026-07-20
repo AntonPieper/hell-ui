@@ -18,6 +18,12 @@
   behavior suite also needs an owned renderer with a parallel Interaction State
   Machine. The Selector Convention still describes DOM ownership; the
   projection-first interaction decision governs behavioral ownership.
+- Amended: 2026-07-20 — composite recipes move into shipped recipe modules. A
+  composite's Part Recipes and private structural class strings live in a
+  sibling `<entrypoint>.recipes.ts` module; the entrypoint stylesheet
+  `@source`s that module and the package ships it instead of the whole
+  component implementation file. Page-header is the tracer; the remaining
+  composites follow the same split.
 
 ## Context
 
@@ -139,6 +145,25 @@ stylesheet and does not maintain a parallel scan list. Library build, pack, and
 package-consumer gates must prove that every source target ships and generates
 the recipe classes.
 
+Composites split their recipe source from their implementation so the
+component file itself does not ship. The default class strings live in a
+sibling recipe module named `<entrypoint>.recipes.ts` (for example
+`page-header/page-header.recipes.ts`) that exports the `HELL_<MODULE>_RECIPE`
+Part Recipes plus constants for private structural wrapper classes that the
+templates render outside the Part Style Map. The component imports those
+constants and binds them (`[class]="layout.body"`); template literals must not
+carry Tailwind classes that live outside the recipe module, or consumer builds
+silently lose them. Part unions stay declared in the component module — the
+architecture guard keys the part/data-slot contract to the component file —
+and the recipe module imports them type-only, keeping the runtime dependency
+one-directional (component → recipes). The split is wired through four points:
+the entrypoint stylesheet registers `@source "./<entrypoint>.recipes.ts"`
+instead of the component file, the ng-package assets copy the recipe module,
+the package `files` list ships it, and the pack audit derives the shipped
+recipe source set from those assets. Page-header is the tracer for this split;
+the larger composites (app-shell, omnibar, toolbar, audio-player, confirm, and
+the rest) adopt the same pattern when their files split.
+
 Required behavior, accessibility, state attributes, geometry, measurement, portal registration, and lifecycle wiring remain internal requirements. They are not removable through the Part Style Map.
 
 For tables, do not add callback-valued entries to generic `HellUi` v1. Start with static part maps plus stable `data-slot` and `data-*` state selectors; add table-specific callback-valued entries only later if state attributes cannot express the required styling without turning Hell into a table DSL.
@@ -230,6 +255,11 @@ and document the `class` caveat.
 - The packaging plan must prove that shipped CSS entrypoints resolve their
   packaged `@source` recipe files without relying on removed legacy CSS classes
   or consumer-maintained scan configuration.
+- Composite entry points ship a `<entrypoint>.recipes.ts` recipe module instead
+  of the component implementation; every Tailwind class the composite renders —
+  Part Recipes and private structural wrappers alike — must live in that
+  module, and the stylesheet `@source`, ng-package assets, package `files`
+  list, and pack audit stay wired to it.
 - Complex components should expose enough Public Parts that consumers can refine styling without rebuilding component-owned structure.
 - `HellUi` v1 remains a string map. Dynamic row/cell styling belongs to stable state attributes first, and table-specific extensions only if evidence requires them.
 - Repeated owned elements share static Public Part names; indexed, variant-keyed,

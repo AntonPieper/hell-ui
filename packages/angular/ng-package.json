@@ -291,7 +291,7 @@
       "output": "omnibar"
     },
     {
-      "glob": "page-header.ts",
+      "glob": "page-header.recipes.ts",
       "input": "page-header",
       "output": "page-header"
     },

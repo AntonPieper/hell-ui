@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, Directive, computed, contentChild, contentChildren, inject, input, output } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { hellCreateLabels, type HellLabels, hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import type { InjectionToken } from '@angular/core';
+
+import { HELL_PAGE_HEADER_BACK_RECIPE, HELL_PAGE_HEADER_LAYOUT_CLASSES, HELL_PAGE_HEADER_RECIPE } from './page-header.recipes';
 
 /** Built-in accessibility labels owned by the page-header entry point. */
 export interface HellPageHeaderLabels {
@@ -51,10 +53,6 @@ export class HellPageHeaderDescription {}
 /** Marks a projected toolbar (or other trailing actions) for the page header's `toolbar` region. */
 @Directive({ selector: '[hellPageHeaderToolbar]' })
 export class HellPageHeaderToolbar {}
-
-const HELL_PAGE_HEADER_BACK_RECIPE = {
-  root: 'inline-flex flex-none items-center',
-} satisfies HellRecipe<'root'>;
 
 /**
  * The optional back affordance for a page header. Renders a ghost icon button
@@ -122,23 +120,6 @@ export class HellPageHeaderBack {
   protected readonly resolvedLabel = computed(() => this.ariaLabel() ?? this.labels.back);
 }
 
-const HELL_PAGE_HEADER_RECIPE = {
-  root: 'flex w-full min-w-0 flex-col gap-hell-3',
-  leading: 'flex min-w-0 flex-wrap items-center gap-hell-3',
-  titleGroup: 'flex min-w-0 flex-col gap-hell-1 sm:flex-1',
-  title: 'm-0 text-xl font-semibold leading-tight text-hell-foreground',
-  meta: 'flex flex-wrap items-center gap-hell-2',
-  description: 'm-0 max-w-prose text-sm text-hell-foreground-muted',
-  // The projected toolbar is `w-full` and measures its own available width to
-  // decide overflow, so the slot must hand it a width that does not depend on
-  // its (possibly collapsed) content. `sm:flex-1` grows the slot from a zero
-  // basis to a share of the row, giving a stable available width; a
-  // content-sized slot (`flex-none`/`auto`) would deadlock a toolbar that
-  // starts collapsed-to-pinned on first paint. `justify-end` keeps the actions
-  // trailing.
-  toolbar: 'flex min-w-0 items-center sm:flex-1 sm:justify-end',
-} satisfies HellRecipe<HellPageHeaderPart>;
-
 /**
  * `hell-page-header` — a slot-based page chrome composite. A developer composes
  * a header from projected content: a leading region (an optional
@@ -170,9 +151,14 @@ const HELL_PAGE_HEADER_RECIPE = {
       </div>
     }
 
-    <div class="flex min-w-0 flex-col gap-hell-3 sm:flex-row sm:items-start sm:justify-between">
+    <!--
+      The row wrappers are private scaffolding, not Public Parts. Their classes
+      bind from the shipped recipe module so consumer Tailwind builds can scan
+      them without the component implementation shipping.
+    -->
+    <div [class]="layout.body">
       <div data-slot="titleGroup" [class]="part('titleGroup')">
-        <div class="flex min-w-0 flex-wrap items-center gap-hell-3">
+        <div [class]="layout.titleRow">
           <!--
             A single element carries the heading role plus a matching aria-level
             so the projected title exposes exactly one main heading at the chosen
@@ -221,6 +207,9 @@ export class HellPageHeader {
     defaultPart: 'root',
     recipe: () => HELL_PAGE_HEADER_RECIPE,
   });
+
+  /** Structural classes of the private row wrappers, from the shipped recipe module. */
+  protected readonly layout = HELL_PAGE_HEADER_LAYOUT_CLASSES;
 
   /**
    * Heading level of the title element (`1`–`6`). Defaults to `1` so the title

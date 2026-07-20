@@ -508,6 +508,9 @@ const packageConsumerScenarioCatalog = [
       'max-width:65ch',
       'font-size:var(--text-xl)',
       'transition-property:background-color,border-color,color,box-shadow',
+      // Private row-wrapper classes ship through the recipe module, not the
+      // (unshipped) component implementation.
+      'justify-content:space-between',
     ],
   },
   {

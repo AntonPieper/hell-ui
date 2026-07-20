@@ -2,7 +2,8 @@ import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_PAGE_HEADER_IMPORTS, HELL_PAGE_HEADER_LABELS, type HellPageHeaderLevel, type HellPageHeaderUi } from './page-header';
+import { HELL_PAGE_HEADER_IMPORTS, HELL_PAGE_HEADER_LABELS, type HellPageHeaderLevel, type HellPageHeaderPart, type HellPageHeaderUi } from './page-header';
+import { HELL_PAGE_HEADER_BACK_RECIPE, HELL_PAGE_HEADER_LAYOUT_CLASSES, HELL_PAGE_HEADER_RECIPE } from './page-header.recipes';
 
 @Component({
   imports: [...HELL_PAGE_HEADER_IMPORTS],
@@ -121,6 +122,66 @@ describe('HellPageHeader', () => {
     );
     expect(query(fixture.nativeElement, '[data-slot="title"]').className).toContain('text-3xl');
     expect(query(fixture.nativeElement, '[data-slot="toolbar"]').className).toContain('gap-hell-4');
+  });
+});
+
+describe('page-header recipe module', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [PageHeaderHost] }).compileComponents();
+  });
+
+  it('renders every public part from the shipped recipe module defaults', () => {
+    const fixture = TestBed.createComponent(PageHeaderHost);
+    const instance = fixture.componentInstance;
+    instance.showBack.set(true);
+    instance.showBreadcrumbs.set(true);
+    instance.showMeta.set(true);
+    instance.showDescription.set(true);
+    instance.showToolbar.set(true);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const elementForPart = (part: HellPageHeaderPart): HTMLElement =>
+      part === 'root'
+        ? query(host, 'hell-page-header')
+        : query(host, `hell-page-header [data-slot="${part}"]`);
+
+    for (const [part, classes] of Object.entries(HELL_PAGE_HEADER_RECIPE)) {
+      const element = elementForPart(part as HellPageHeaderPart);
+      for (const className of classes.split(/\s+/)) {
+        expect(element.classList, `${part} default recipe class ${className}`).toContain(className);
+      }
+    }
+  });
+
+  it('renders the back affordance root from the shipped recipe module defaults', () => {
+    const fixture = TestBed.createComponent(PageHeaderHost);
+    fixture.componentInstance.showBack.set(true);
+    fixture.detectChanges();
+
+    const backRoot = query(fixture.nativeElement, 'hell-page-header-back');
+    for (const className of HELL_PAGE_HEADER_BACK_RECIPE.root.split(/\s+/)) {
+      expect(backRoot.classList, `back root recipe class ${className}`).toContain(className);
+    }
+  });
+
+  it('renders the private row wrappers from the shipped structural classes', () => {
+    const fixture = TestBed.createComponent(PageHeaderHost);
+    const instance = fixture.componentInstance;
+    instance.showMeta.set(true);
+    instance.showToolbar.set(true);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const body = query(host, 'hell-page-header > div:not([data-slot])');
+    for (const className of HELL_PAGE_HEADER_LAYOUT_CLASSES.body.split(/\s+/)) {
+      expect(body.classList, `body wrapper class ${className}`).toContain(className);
+    }
+
+    const titleRow = query(host, '[data-slot="titleGroup"] > div:not([data-slot])');
+    for (const className of HELL_PAGE_HEADER_LAYOUT_CLASSES.titleRow.split(/\s+/)) {
+      expect(titleRow.classList, `title row wrapper class ${className}`).toContain(className);
+    }
   });
 });
 
