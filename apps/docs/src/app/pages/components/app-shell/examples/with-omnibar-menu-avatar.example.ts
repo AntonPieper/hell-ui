@@ -39,6 +39,13 @@ const HD_APP_SHELL_FRAME_ICONS = {
   faSolidUsers,
 };
 
+/** Nav item recipe over the sidenav's `data-collapsed` shell state attribute. */
+const NAV_ITEM =
+  'flex cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
+const NAV_ICON =
+  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle';
+const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
+
 @Component({
   selector: 'app-app-shell-with-omnibar-menu-avatar-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,14 +109,14 @@ const HD_APP_SHELL_FRAME_ICONS = {
       <nav hellAppSidenav aria-label="Primary">
         @for (page of pages; track page.id) {
           <a
-            hellNavItem
+            [class]="navItem"
             href="#"
             [attr.aria-label]="page.label"
             [attr.aria-current]="active() === page.id ? 'page' : null"
             (click)="select($event, page.id)"
           >
-            <hell-icon hellNavItemIcon [name]="iconFor(page.id)" size="14px" />
-            <span hellNavItemLabel>{{ page.label }}</span>
+            <hell-icon [class]="navIcon" [name]="iconFor(page.id)" size="14px" />
+            <span [class]="navLabel">{{ page.label }}</span>
           </a>
         }
       </nav>
@@ -125,6 +132,9 @@ const HD_APP_SHELL_FRAME_ICONS = {
   `,
 })
 export class AppShellWithOmnibarMenuAvatarExample {
+  protected readonly navItem = NAV_ITEM;
+  protected readonly navIcon = NAV_ICON;
+  protected readonly navLabel = NAV_LABEL;
   protected readonly pages = PAGES;
   protected readonly query = signal('');
   protected readonly active = signal<string>('dashboard');

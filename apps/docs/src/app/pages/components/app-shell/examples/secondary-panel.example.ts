@@ -9,6 +9,13 @@ const HD_APP_SHELL_SECONDARY_ICONS = {
   faSolidUsers,
 };
 
+/** Nav item recipe over the sidenav's `data-collapsed` shell state attribute. */
+const NAV_ITEM =
+  'flex cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
+const NAV_ICON =
+  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle';
+const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
+
 @Component({
   selector: 'app-app-shell-secondary-panel-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,13 +29,13 @@ const HD_APP_SHELL_SECONDARY_ICONS = {
       </header>
 
       <nav hellAppSidenav aria-label="Primary">
-        <a hellNavItem href="#" aria-label="Dashboard" aria-current="page" (click)="$event.preventDefault()">
-          <hell-icon hellNavItemIcon name="faSolidGauge" size="14px" />
-          <span hellNavItemLabel>Dashboard</span>
+        <a [class]="navItem" href="#" aria-label="Dashboard" aria-current="page" (click)="$event.preventDefault()">
+          <hell-icon [class]="navIcon" name="faSolidGauge" size="14px" />
+          <span [class]="navLabel">Dashboard</span>
         </a>
-        <a hellNavItem href="#" aria-label="Team" (click)="$event.preventDefault()">
-          <hell-icon hellNavItemIcon name="faSolidUsers" size="14px" />
-          <span hellNavItemLabel>Team</span>
+        <a [class]="navItem" href="#" aria-label="Team" (click)="$event.preventDefault()">
+          <hell-icon [class]="navIcon" name="faSolidUsers" size="14px" />
+          <span [class]="navLabel">Team</span>
         </a>
       </nav>
 
@@ -57,4 +64,8 @@ const HD_APP_SHELL_SECONDARY_ICONS = {
     </div>
   `,
 })
-export class AppShellSecondaryPanelExample {}
+export class AppShellSecondaryPanelExample {
+  protected readonly navItem = NAV_ITEM;
+  protected readonly navIcon = NAV_ICON;
+  protected readonly navLabel = NAV_LABEL;
+}

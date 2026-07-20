@@ -119,7 +119,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/app-shell',
  detail:'components/app-shell/examples/basic.example.ts',
  terms:
-'app-shell hellAppShell hellAppTopbar hellSidenavToggle hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellAppContent hell-icon smallest usage topbar sidenav content collapse rail',
+'app-shell hellAppShell hellAppTopbar hellSidenavToggle hellAppSidenav hellAppContent hell-icon nav item recipe anchor data-collapsed smallest usage topbar sidenav content collapse rail',
  },
  {
  title:'App Shell: Secondary panel placement recipe',
@@ -129,25 +129,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'app-shell hellAppSecondary hellAppSecondaryBody hellSecondaryToggle hellSidenavToggle placement recipe direct child header rail activity feed collapse inert',
  },
  {
- title:'App Shell: Sidenav navigation',
+ title:'App Shell: Sidenav navigation recipe',
  path:'/components/app-shell',
  detail:'components/app-shell/examples/sidenav.example.ts',
  terms:
-'app-shell hellAppShell hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellChip hell-icon collapsible section aria-current badge count rail icon-only',
+'app-shell hellAppShell hellAppSidenav nav item recipe anchor label trailing collapsible group disclosure aria-expanded data-expanded data-collapsed hellChip hell-icon section aria-current badge count rail icon-only',
  },
  {
  title:'App Shell: Styling (all parts)',
  path:'/components/app-shell',
  detail:'components/app-shell/examples/styling.example.ts',
  terms:
-'app-shell ui part style map hellAppShell hellAppTopbar hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellAppContent hellSidenavToggle hellSecondaryToggle hellAppSecondary hellAppSecondaryBody hell-icon root recipe bg-hell text-hell rounded-hell tokens',
+'app-shell ui part style map hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellSidenavToggle hellSecondaryToggle hellAppSecondary hellAppSecondaryBody hell-icon nav item consumer classes root recipe bg-hell text-hell rounded-hell tokens',
  },
  {
  title:'App Shell: With omnibar, menu, and avatar',
  path:'/components/app-shell',
  detail:'components/app-shell/examples/with-omnibar-menu-avatar.example.ts',
  terms:
-'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent --hell-app-content-max-width ui search account aria-current',
+'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar nav recipe hellAppContent --hell-app-content-max-width ui search account aria-current',
  },
  {
  title:'Audio Player: Basic',

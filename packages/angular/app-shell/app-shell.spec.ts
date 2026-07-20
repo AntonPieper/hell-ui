@@ -13,29 +13,8 @@ import { HELL_APP_SHELL_IMPORTS, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell
         <button id="sidenav-toggle" hellSidenavToggle type="button"></button>
       </header>
       <nav hellAppSidenav>
-        <div id="nav-section" hellNavSection>
-          <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
-          <div id="nav-section-items" hellNavSectionItems>
-            <a id="plain-nav-item" hellNavItem href="#">
-              <span id="plain-nav-icon" hellNavIcon>i</span>
-              <span id="plain-nav-label" hellNavLabel>Preferences</span>
-              <span id="plain-nav-trailing" hellNavTrailing>3</span>
-            </a>
-          </div>
-        </div>
-        <div
-          id="controlled-nav-section"
-          hellNavSection
-          [collapsed]="controlledNavSectionCollapsed()"
-          (collapsedChange)="collapsedEvents.push($event)"
-        >
-          <button id="controlled-nav-section-toggle" hellNavSectionToggle type="button">
-            Controlled
-          </button>
-          <div hellNavSectionItems>
-            <a hellNavItem href="#">API keys</a>
-          </div>
-        </div>
+        <a href="#">Preferences</a>
+        <a href="#">API keys</a>
       </nav>
       <main hellAppContent>Content</main>
       <aside hellAppSecondary>
@@ -48,10 +27,7 @@ import { HELL_APP_SHELL_IMPORTS, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell
     </div>
   `,
 })
-class TestHost {
-  readonly controlledNavSectionCollapsed = signal(false);
-  readonly collapsedEvents: boolean[] = [];
-}
+class TestHost {}
 
 @Component({
   imports: [...HELL_APP_SHELL_IMPORTS],
@@ -319,18 +295,7 @@ class ControlledDynamicPanelHost {
         </button>
       </header>
       <nav id="ui-sidenav" hellAppSidenav [ui]="sidenavUi">
-        <div id="ui-nav-section" hellNavSection [ui]="navSectionUi">
-          <button id="ui-nav-section-toggle" hellNavSectionToggle [ui]="navSectionToggleUi">
-            Settings
-          </button>
-          <div id="ui-nav-section-items" hellNavSectionItems [ui]="navSectionItemsUi">
-            <a id="ui-nav-item" hellNavItem active [ui]="navItemUi" href="#">
-              <span id="ui-nav-icon" hellNavItemIcon [ui]="navIconUi">I</span>
-              <span id="ui-nav-label" hellNavItemLabel [ui]="navLabelUi">Preferences</span>
-              <span id="ui-nav-trailing" hellNavItemTrailing [ui]="navTrailingUi">2</span>
-            </a>
-          </div>
-        </div>
+        <a href="#">Preferences</a>
       </nav>
       <main id="ui-content" hellAppContent [ui]="contentUi">Content</main>
       <aside id="ui-secondary" hellAppSecondary [ui]="secondaryUi">
@@ -348,15 +313,6 @@ class UiShellHost {
   readonly topbarUi = { root: 'bg-hell-danger border-hell-danger' };
   readonly sidenavUi = { root: 'bg-hell-surface-muted border-hell-danger' };
   readonly sidenavToggleUi = { root: 'text-hell-danger' };
-  readonly navSectionUi = { root: 'gap-hell-2' };
-  readonly navSectionToggleUi = { root: 'text-hell-danger' };
-  readonly navSectionItemsUi = { root: 'gap-hell-2' };
-  readonly navItemUi = {
-    root: 'bg-hell-danger text-hell-foreground-inverse px-hell-7',
-  };
-  readonly navIconUi = { root: 'text-hell-danger w-6' };
-  readonly navLabelUi = { root: 'text-clip' };
-  readonly navTrailingUi = { root: 'text-hell-danger' };
   readonly contentUi = {
     root: 'bg-hell-surface-muted p-hell-2 [--hell-app-content-max-width:960px]',
   };
@@ -387,7 +343,7 @@ describe('HellAppShell secondary panel', () => {
     }).compileComponents();
   });
 
-  it('merges app shell and nav ui classes through local root parts', () => {
+  it('merges app shell ui classes through local root parts', () => {
     const fixture = TestBed.createComponent(UiShellHost);
     fixture.detectChanges();
 
@@ -396,13 +352,6 @@ describe('HellAppShell secondary panel', () => {
     const topbar = query(root, '#ui-topbar');
     const sidenav = query(root, '#ui-sidenav');
     const sidenavToggle = query(root, '#ui-sidenav-toggle');
-    const navSection = query(root, '#ui-nav-section');
-    const navSectionToggle = query(root, '#ui-nav-section-toggle');
-    const navSectionItems = query(root, '#ui-nav-section-items');
-    const navItem = query(root, '#ui-nav-item');
-    const navIcon = query(root, '#ui-nav-icon');
-    const navLabel = query(root, '#ui-nav-label');
-    const navTrailing = query(root, '#ui-nav-trailing');
     const content = query(root, '#ui-content');
     const secondary = query(root, '#ui-secondary');
     const secondaryToggle = query(root, '#ui-secondary-toggle');
@@ -412,13 +361,6 @@ describe('HellAppShell secondary panel', () => {
       topbar,
       sidenav,
       sidenavToggle,
-      navSection,
-      navSectionToggle,
-      navSectionItems,
-      navItem,
-      navIcon,
-      navLabel,
-      navTrailing,
       content,
       secondary,
       secondaryToggle,
@@ -432,15 +374,6 @@ describe('HellAppShell secondary panel', () => {
     expect(topbar.className).toContain('bg-hell-danger');
     expect(sidenav.className).toContain('border-hell-danger');
     expect(sidenavToggle.className).toContain('text-hell-danger');
-    expect(navSection.className).toContain('gap-hell-2');
-    expect(navSectionToggle.className).toContain('text-hell-danger');
-    expect(navSectionItems.className).toContain('gap-hell-2');
-    expect(navItem.className).toContain('bg-hell-danger');
-    expect(navItem.className).toContain('px-hell-7');
-    expect(navItem.getAttribute('data-active')).toBe('true');
-    expect(navIcon.className).toContain('w-6');
-    expect(navLabel.className).toContain('text-clip');
-    expect(navTrailing.className).toContain('text-hell-danger');
     expect(content.className).toContain('p-hell-2');
     expect(content.className).toContain('[--hell-app-content-max-width:960px]');
     expect(secondary.className).toContain('border-hell-danger');
@@ -465,13 +398,6 @@ describe('HellAppShell secondary panel', () => {
         topbar: partClasses('[hellAppTopbar]'),
         sidenav: partClasses('[hellAppSidenav]'),
         sidenavToggle: partClasses('#sidenav-toggle'),
-        navSection: partClasses('#nav-section'),
-        navSectionToggle: partClasses('#nav-section-toggle'),
-        navSectionItems: partClasses('#nav-section-items'),
-        navItem: partClasses('#plain-nav-item'),
-        navIcon: partClasses('#plain-nav-icon'),
-        navLabel: partClasses('#plain-nav-label'),
-        navTrailing: partClasses('#plain-nav-trailing'),
         content: partClasses('[hellAppContent]'),
         secondary: partClasses('[hellAppSecondary]'),
         secondaryToggle: partClasses('[hellAppSecondaryBody] [hellSecondaryToggle]'),
@@ -496,42 +422,6 @@ describe('HellAppShell secondary panel', () => {
     expect(sidenav.getAttribute('data-collapsed')).toBe('true');
     expect(toggle.getAttribute('aria-label')).toBe('Expand sidebar');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-  });
-
-  it('owns nav section root parts and collapsed attributes', () => {
-    const fixture = TestBed.createComponent(TestHost);
-    const host = fixture.componentInstance;
-    fixture.detectChanges();
-
-    const section = query(fixture.nativeElement, '#nav-section');
-    const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#nav-section-toggle');
-    const items = query(fixture.nativeElement, '#nav-section-items');
-
-    expect(section.getAttribute('data-slot')).toBe('root');
-    expect(section.getAttribute('data-collapsed')).toBeNull();
-    expect(toggle.getAttribute('data-slot')).toBe('root');
-    expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(items.getAttribute('data-slot')).toBe('root');
-    expect(items.getAttribute('aria-hidden')).toBeNull();
-    expect(items.hasAttribute('inert')).toBe(false);
-
-    toggle.click();
-    fixture.detectChanges();
-
-    expect(section.getAttribute('data-collapsed')).toBe('true');
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(items.getAttribute('aria-hidden')).toBe('true');
-    expect(items.hasAttribute('inert')).toBe(true);
-
-    query<HTMLButtonElement>(fixture.nativeElement, '#sidenav-toggle').click();
-    fixture.detectChanges();
-
-    expect(items.getAttribute('aria-hidden')).toBeNull();
-    expect(items.hasAttribute('inert')).toBe(false);
-
-    query<HTMLButtonElement>(fixture.nativeElement, '#controlled-nav-section-toggle').click();
-    fixture.detectChanges();
-    expect(host.collapsedEvents).toEqual([true]);
   });
 
   it('treats explicit shell inputs as the source of truth', () => {
