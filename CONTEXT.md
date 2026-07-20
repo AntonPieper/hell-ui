@@ -32,7 +32,7 @@ _Avoid_: Column visibility selector, table column picker.
 A heavier module with optional dependencies, runtime setup, or large styling. Features stay behind feature-specific Package Entry Points and feature-specific CSS imports.
 
 **Module Category**
-Entrypoint-owned metadata describing a Package Entry Point's architectural role, stored in that entrypoint's `hell-entrypoint.json` sidecar. Examples include `styled-primitive`, `mixed-entrypoint`, `composite`, `feature`, `table-primitives`, `tanstack-table-shell`, or `tanstack-table-body-strategy`. Module Category is not a public import segment and should not create aggregate TypeScript or CSS convenience paths.
+Entrypoint-owned metadata describing a Package Entry Point's architectural role, stored in that entrypoint's `hell-entrypoint.json` sidecar. Examples include `styled-primitive`, `mixed-entrypoint`, `composite`, `feature`, `table-primitives`, `tanstack-table-shell`, or `tanstack-table-body-strategy`. Module Category is not a public import segment and must not create TypeScript or CSS category aggregates. The package-level Default Style Bundle is generated from explicit entrypoint style policy, not inferred from Module Category.
 
 **Component Contract**
 The shared Interface expected from public Hell modules: behavior directives, stable public parts for owned structure, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual values, and a Part Style Map for visual customization.
@@ -48,7 +48,7 @@ _Avoid_: Future customization surface, part style map.
 **Public Part**
 A named, stable element or region in a Hell module's owned structure that consumers may refine through the module's Part Style Map. Public Parts are represented in DOM with `data-slot`, and the `data-slot` value should match the public part name unless a component documents an exception. Owned-anatomy composites use canonical camelCase Public Part names in both TypeScript and `data-slot`, for example `inputWrap` rather than `input-wrap`. Unknown internal DOM is not part of the component contract.
 Public Parts are reserved for meaningful styling surfaces such as roots, panels, controls, content regions, repeated item surfaces, first-class glyphs, and status regions; scaffolding for control flow, measurement, overlay anchoring, focus sentinels, or incidental layout is private unless consumers have a real styling need.
-Single-host public directives use `root` as their sole Public Part; the directive name supplies semantic identity, while multi-part owned-anatomy components use semantic part names inside their root Part Style Map.
+Single-host public directives use `root` as their sole Public Part; the directive name supplies semantic identity, while multi-part owned-anatomy components use semantic part names inside their root Part Style Map. Behavior-only directives and components without a genuine public root part omit `data-slot="root"`; a DOM marker does not create a Public Part by itself.
 _Avoid_: Private element, arbitrary descendant.
 
 **Projection Marker**
@@ -58,14 +58,15 @@ _Avoid_: Bare-attribute projection selector, slot input, marker deletion for sym
 **Part Style Map**
 The shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUiInput<Part>` shape: either a shorthand class string for the module's default Public Part or a `HellUi<Part>` map from component-local Public Part names to class strings.
 For directive suites and Composites with projected children, a Part Style Map only styles the DOM owned by the directive or component that exposes it; projected child directives expose their own Part Style Maps.
+Consumer-facing Part Style Map types are public; Part Recipes, merge configuration, styler factories, and other Part-Class Pipeline plumbing are package internals.
 _Avoid_: Style Opt-Out, unstyled mode, class override object, omit map, visual layers, template class override path.
 
 **Part Recipe**
-The component-owned default Tailwind class map for its Public Parts. It is the default half of the Part-Class Pipeline and is not a consumer schema.
+The package-internal component-owned default Tailwind class map for its Public Parts. It is the default half of the Part-Class Pipeline and is not a consumer schema or public type contract.
 _Avoid_: Legacy `.hell-*` CSS styling model, global recipe taxonomy.
 
 **Part-Class Pipeline**
-The single class computation path for one Public Part: default recipe classes plus the consumer's matching Part Style Map entry, merged deterministically by Hell's configured Tailwind merge.
+The package-internal single class computation path for one Public Part: default recipe classes plus the consumer's matching Part Style Map entry, merged deterministically by Hell's configured Tailwind merge.
 _Avoid_: Multiple late class override channels.
 
 **Semantic Theme Token**
@@ -73,8 +74,8 @@ A public Hell CSS/Tailwind variable that represents a reusable design value such
 _Avoid_: Button-only theme variable, component-specific public color variable.
 
 **Theme Adapter Stylesheet**
-An optional exported CSS file for one curated skin, imported after the Shared Style Substrate and relevant Entrypoint-Scoped Stylesheets, that maps a skin to explicit component visual decisions through stable Public Part selectors and `data-slot` values. Adapter coverage is intentionally partial; components not selected by an adapter fall back to their default entrypoint styles.
-_Avoid_: Global token registry of component selectors, category aggregate stylesheet, hidden component theme ontology.
+An optional exported CSS file for one curated skin, imported after either the Default Style Bundle or the Shared Style Substrate plus relevant Entrypoint-Scoped Stylesheets, that maps a skin to explicit component visual decisions through stable Public Part selectors and `data-slot` values. It is not included in the Default Style Bundle. Adapter coverage is intentionally partial; components not selected by an adapter fall back to their default entrypoint styles.
+_Avoid_: Global token registry of component selectors, category aggregate stylesheet, implicit default-bundle inclusion, hidden component theme ontology.
 
 **Additive Class Hook**
 Template `class` values used for layout hooks, test hooks, and non-conflicting classes outside the Part-Class Pipeline. It is not the deterministic override path for conflicting Tailwind recipe utilities.
@@ -124,20 +125,29 @@ _Avoid_: Palette combobox, theme combobox.
 A live Angular example plus its raw source code, preview options, and search metadata.
 
 **Package Entry Point**
-A public import path exposed by the `hell` package, including the root entry point and secondary entry points such as `@hell-ui/angular/button`, `@hell-ui/angular/app-shell`, `@hell-ui/angular/table`, and `@hell-ui/angular/features/code-editor`.
+A public TypeScript import path exposed by the `hell-ui` package, including the Light Root Entry Point and secondary entry points such as `hell-ui/button`, `hell-ui/app-shell`, `hell-ui/table`, and `hell-ui/features/code-editor`.
+
+**Internal Package Path**
+A package-owned implementation path such as `hell-ui/internal/*` that is not a Package Entry Point. It may ship as a resolvable Angular Package Format subpath when package entrypoints need shared code, but its `internal` prefix, metadata, absence from consumer docs, and lack of public API stability reports make it explicitly unsupported for consumers. A stable consumer contract is promoted individually to a named non-internal Package Entry Point instead of making an Internal Package Path public.
 
 **Entrypoint Source Directory**
-The source directory that matches a Package Entry Point's import path. For example, `@hell-ui/angular/button` lives in `packages/angular/button`, while `@hell-ui/angular/features/code-editor` lives in `packages/angular/features/code-editor`. This import-path-first layout is the discoverability rule; Module Category stays in the entrypoint sidecar and does not create `primitives` or `composites` source buckets.
+The source directory that matches a Package Entry Point's import path. For example, `hell-ui/button` lives in `packages/angular/button`, while `hell-ui/features/code-editor` lives in `packages/angular/features/code-editor`. This import-path-first layout is the discoverability rule; Module Category stays in the entrypoint sidecar and does not create `primitives` or `composites` source buckets.
 
 **Entrypoint-Scoped Stylesheet**
-The CSS file exported for one Package Entry Point, always addressed as that entry point plus `/styles.css`, such as `@hell-ui/angular/button/styles.css` or `@hell-ui/angular/features/code-editor/styles.css`. Category-level style paths are not public package contracts.
+The CSS file exported for one Package Entry Point, always addressed as that entry point plus `/styles.css`, such as `hell-ui/button/styles.css` or `hell-ui/features/code-editor/styles.css`. Entrypoint-Scoped Stylesheets are the building blocks of Granular Style Mode and the generated Default Style Bundle. Category-level style paths are not public package contracts.
+
+**Default Style Bundle**
+The recommended package-level `hell-ui/styles.css` export, generated deterministically from explicit entrypoint style policy. It contains the Shared Style Substrate followed by standard component styles, while Heavy Feature Stylesheets and Theme Adapter Stylesheets remain explicit opt-ins. It is the deliberate CSS exception to import-path-first aggregation.
+
+**Granular Style Mode**
+The advanced standard-style consumption mode where a consumer imports the Shared Style Substrate and only the Entrypoint-Scoped Stylesheets it needs. A consumer chooses Granular Style Mode instead of the Default Style Bundle for standard component CSS; Heavy Feature Stylesheets and Theme Adapter Stylesheets may be added to either mode.
 
 **Shared Style Substrate**
-The package-level CSS substrate shared by entrypoint-scoped styles. In `@hell-ui/angular`, this is `@hell-ui/angular/tokens.css`; it may be imported once before concrete entrypoint styles but must not become a category aggregate.
+The package-level CSS substrate shared by entrypoint-scoped styles. In `hell-ui`, this is `hell-ui/tokens.css`; the Default Style Bundle includes it first, while Granular Style Mode imports it once before concrete entrypoint styles. It must not become a category aggregate.
 The Shared Style Substrate owns base Semantic Theme Tokens, palettes, and skin-wide primitives; component-specific skin selectors belong in Theme Adapter Stylesheets.
 
 **Light Root Entry Point**
-The Package Entry Point policy where the root `@hell-ui/angular` export stays constrained to stable core only; UI surfaces stay behind narrow import-path entry points, while features and heavier runtime surfaces stay behind secondary entry points.
+The Package Entry Point policy where the root `hell-ui` export stays constrained to stable core only; UI surfaces stay behind narrow import-path entry points, while features and heavier runtime surfaces stay behind secondary entry points.
 
 **Floating Dismissal**
 The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, Escape, or caller-defined events should close a surface. The low-level module has no hidden default and does not depend on a closed reason enum. Each primitive or Composite composes explicit pure matcher dismissal rules such as library-provided `hellOutsideClick` rules or caller-defined rules. A rule returns a fixed dismiss decision or no match; composition functions such as `hellDismissOn`, `hellGuardDismiss`, and `hellWithDismissEffect` return the same rule type. The core module consumes only fixed decision effects such as preventDefault, stopPropagation, or focus restoration; it does not consume generic caller-defined cause shapes.

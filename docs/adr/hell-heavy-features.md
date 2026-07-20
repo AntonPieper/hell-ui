@@ -1,7 +1,23 @@
 # ADR: Heavy feature package boundary
 
-- Status: Accepted; amended 2026-07-08 (PDF viewer split reversed)
+- Status: Accepted; amended 2026-07-08 (PDF viewer split reversed) and
+  2026-07-20 (package and stylesheet surface)
 - Date: 2026-05-28
+
+## Amendment (2026-07-20)
+
+`0002-public-package-and-stylesheet-surface.md` renames the target package to
+`hell-ui` without a compatibility package. References below to
+`@hell-ui/angular` describe the package identity at the time of the original
+decision and its 2026-07-08 amendment.
+
+Feature isolation now applies to CSS as well as TypeScript and peers. Code
+Editor, PDF Viewer, TanStack integrations, and future heavy or optional
+stylesheets are excluded from `hell-ui/styles.css` and remain explicit
+entrypoint imports. The earlier root/core/primitives/composites wording names
+architectural roles, not TypeScript category barrels. Any allowance below for a
+temporary feature bridge does not authorize a compatibility package for the
+package rename.
 
 ## Amendment (2026-07-08)
 
