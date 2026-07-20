@@ -2,6 +2,8 @@ import eslint from '@eslint/js';
 import angular from 'angular-eslint';
 import tseslint from 'typescript-eslint';
 
+import hellBoundaries from './tools/eslint/hell-boundaries.mjs';
+
 export default tseslint.config(
   {
     ignores: [
@@ -99,6 +101,21 @@ export default tseslint.config(
           message: `Access ${name} through an injected seam (DOCUMENT, ownerDocument, defaultView) so SSR and portalled DOM stay correct; add a justified eslint-disable for deliberate typeof guards.`,
         })),
       ],
+    },
+  },
+  {
+    // Entrypoint dependency boundaries (#259): category import edges,
+    // internal-directory access, and optional-peer isolation. Entrypoint
+    // identities and categories derive from the hell-entrypoint.json manifest
+    // sidecars (tools/entrypoint-manifest.mjs); these AST rules run alongside
+    // the architecture checker's source-text checks.
+    files: ['packages/angular/**/*.ts'],
+    ignores: ['packages/angular/**/*.spec.ts', 'packages/angular/test-setup.ts'],
+    plugins: { 'hell-boundaries': hellBoundaries },
+    rules: {
+      'hell-boundaries/entrypoint-boundaries': 'error',
+      'hell-boundaries/optional-peer-isolation': 'error',
+      'hell-boundaries/no-internal-public-api-exports': 'error',
     },
   },
   {
