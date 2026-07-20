@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellTooltip > recipes > keeps the default surface classes stable > tooltip 1`] = `
+{
+  "surface": [
+    "[overflow-wrap:anywhere]",
+    "absolute",
+    "animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]",
+    "bg-[#1c222a]",
+    "font-medium",
+    "leading-[var(--text-xs--line-height)]",
+    "max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))]",
+    "motion-reduce:animate-none",
+    "pointer-events-auto",
+    "px-2",
+    "py-1",
+    "rounded-hell-sm",
+    "shadow-hell-md",
+    "text-white",
+    "text-xs",
+  ],
+}
+`;

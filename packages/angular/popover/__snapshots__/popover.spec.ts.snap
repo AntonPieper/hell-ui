@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellPopoverTrigger > recipes > keeps the default surface classes stable > popover 1`] = `
+{
+  "popover": [
+    "absolute",
+    "animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]",
+    "bg-hell-surface-elevated",
+    "border",
+    "border-hell-border",
+    "border-solid",
+    "max-w-[320px]",
+    "outline-none",
+    "p-hell-4",
+    "rounded-hell-md",
+    "shadow-hell-lg",
+    "text-[13px]",
+    "text-hell-foreground",
+    "z-[var(--hell-z-popover,60)]",
+  ],
+}
+`;
