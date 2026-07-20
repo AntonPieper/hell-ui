@@ -94,8 +94,10 @@ pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,date-input,time-input,number-input,pagination,composite-css,time-picker,app-shell,resizable,master-detail,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=core,testing,button-ui,button,primitive-icons-css,date-input,time-input,number-input,pagination,composite-css,time-picker,app-shell,resizable,master-detail,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=core,testing pnpm run test:package-consumer -- --minimal-deps
+# Root entry contract (checked-in consumer fixture; see tools/consumer-fixtures/README.md)
+pnpm run test:consumer-fixtures root-core
 HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css,date-input,time-input,number-input,pagination pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,time-picker,app-shell,resizable,master-detail,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual pnpm run test:package-consumer -- --minimal-deps

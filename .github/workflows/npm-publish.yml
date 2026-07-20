@@ -53,6 +53,12 @@ jobs:
           HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK: 1
         run: pnpm run test:package-consumer -- --minimal-deps
 
+      - name: Consumer fixtures
+        env:
+          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
+          HELL_CONSUMER_FIXTURE_SMOKE: 1
+        run: pnpm run test:consumer-fixtures
+
       - name: Build docs
         run: pnpm run build:docs
 

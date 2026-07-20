@@ -97,8 +97,10 @@ jobs:
       matrix:
         # Group names are owned by tools/check-package-consumer.mjs, which
         # asserts every scenario belongs to exactly one group and fails on
-        # unknown group names.
+        # unknown group names. The extra "fixtures" group runs the checked-in
+        # consumer fixtures via tools/check-consumer-fixtures.mjs instead.
         group:
+          - fixtures
           - core
           - primitive-foundations
           - button
@@ -144,10 +146,23 @@ jobs:
         run: pnpm run ci:ensure:build:lib
 
       - name: Package consumer scenario
+        if: matrix.group != 'fixtures'
         env:
           HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
           HELL_PACKAGE_CONSUMER_GROUP: ${{ matrix.group }}
         run: pnpm run ci:test:package-consumer
+
+      # The fixture smoke loads the built consumer app in headless chromium.
+      - name: Install Playwright chromium
+        if: matrix.group == 'fixtures'
+        run: pnpm run ci:playwright:chromium
+
+      - name: Consumer fixtures
+        if: matrix.group == 'fixtures'
+        env:
+          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
+          HELL_CONSUMER_FIXTURE_SMOKE: 1
+        run: pnpm run ci:test:consumer-fixtures
 
   build:
     name: Build and API
