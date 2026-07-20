@@ -31,7 +31,9 @@ const packageConsumerArgs = process.argv.slice(2);
 // CI shards scenarios by these groups (ci.yml passes HELL_PACKAGE_CONSUMER_GROUP).
 // assertScenarioGroupsCoverAllOnce keeps every scenario in exactly one group.
 const packageConsumerCiGroups = [
-  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
+  // The root entry contract (formerly the root-core scenario) now lives in
+  // the checked-in consumer fixture run by tools/check-consumer-fixtures.mjs.
+  { name: 'core', scenarios: ['core', 'testing'] },
   {
     name: 'primitive-foundations',
     scenarios: [
@@ -132,18 +134,6 @@ const requiredScenarioCoverageAreas = new Set([
 ]);
 
 const packageConsumerScenarioCatalog = [
-  {
-    name: 'root-core',
-    aliases: ['root'],
-    description: 'root entry core-only with package-wide light peers',
-    coverage: ['root-core'],
-    peerTier: 'core',
-    peerGroup: 'core',
-    dependencies: coreDeps,
-    forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: rootConsumerMainTs,
-    stylesCss: emptyConsumerStylesCss,
-  },
   {
     name: 'core',
     description: 'core entry with package-wide light peers',
@@ -915,7 +905,6 @@ function assertScenarioGroupsCoverAllOnce(label, groups, scenarioNames) {
 
 function assertHeavyPeersAreIsolated(allScenarios) {
   const lightScenarioNames = new Set([
-    'root-core',
     'core',
     'button-ui',
     'button',
@@ -1477,47 +1466,6 @@ function exactInstalledVersion(name) {
 
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
   return packageJson.version ? packageJson.version : null;
-}
-
-function rootConsumerMainTs() {
-  return `import { Component, signal } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { hellPartStyler, hellSearchResource, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSearchResource, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
-
-interface SearchItem {
-  readonly label: string;
-}
-
-const size: HellSize = 'md';
-const recipe: HellRecipe<'root'> = { root: 'block' };
-const ui: HellUi<'root'> = { root: 'rounded-md' };
-const uiInput: HellUiInput<'root'> = 'rounded-md';
-const merged = hellTwMerge('px-hell-4', 'px-hell-7');
-const styler: HellPartStyler<'root'> = hellPartStyler(() => uiInput, {
-  defaultPart: 'root',
-  recipe: () => recipe,
-});
-const styledRoot = styler('root');
-void size;
-void ui;
-void merged;
-void styledRoot;
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  template: \`<p>Root core contract: {{ search.items().length }} result</p>\`,
-})
-class App {
-  protected readonly query = signal('core');
-  protected readonly search: HellSearchResource<SearchItem> = hellSearchResource({
-    query: this.query,
-    items: [{ label: 'Core contracts' }, { label: 'Visual primitive' }],
-  });
-}
-
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
-`;
 }
 
 function coreConsumerMainTs() {

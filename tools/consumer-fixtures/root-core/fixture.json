@@ -1,0 +1,13 @@
+{
+  "description": "root entry core-only with package-wide light peers",
+  "peerGroup": "core",
+  "forbiddenDependencies": ["@tanstack/angular-table", "@tanstack/virtual-core"],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "app-root p",
+        "textIncludes": "Root core contract: 1 result"
+      }
+    ]
+  }
+}

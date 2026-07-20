@@ -2,6 +2,9 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
+      // Consumer fixtures are standalone projects compiled against the packed
+      // tarball by tools/check-consumer-fixtures.mjs, not repo source.
+      "ignore": ["tools/consumer-fixtures/**"],
       "ignoreDependencies": [
         // Declared in pnpm packageExtensions for ng-primitives.
         "@angular/router"
