@@ -63,7 +63,10 @@ app. Two rules keep fixtures honest:
 1. Builds the library once (`build:lib`), unless
    `HELL_PACKAGE_CONSUMER_SKIP_BUILD=1` or `--skip-build` reuses `dist/hell`.
 2. Packs `dist/hell` once with `pnpm pack` and audits the tarball with
-   `auditPackedPackage`.
+   `auditPackedPackage`. Alternatively, `HELL_PACKAGE_CONSUMER_TARBALL=<path>`
+   (or `--tarball <path>`) skips both build and pack and audits a prebuilt
+   tarball instead; the path is a `.tgz` file or a directory holding exactly
+   one, such as a downloaded CI artifact directory.
 3. For every fixture directory (or the fixture names passed as arguments):
    copies the project to a temp workspace, pins dependency versions, applies
    the repo's pnpm overrides, and runs
