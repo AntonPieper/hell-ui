@@ -1,7 +1,9 @@
 /**
  * AST-based ESLint enforcement of @hell-ui/angular entrypoint dependency
- * boundaries (#259). Runs alongside tools/check-architecture.mjs; the rules
- * here cover the same edges the source-text checks guard:
+ * boundaries (#259). Since #270 these rules are the only import-boundary
+ * enforcement; tools/check-architecture.mjs keeps only durable concerns no
+ * standard tool covers (entrypoint manifest integrity, package-output
+ * integrity, optional-peer metadata, table adapter direction). The rules:
  *
  * - entrypoint-boundaries: which entrypoint categories may import which, and
  *   that cross-entrypoint imports go through the target's Package Entry Point
