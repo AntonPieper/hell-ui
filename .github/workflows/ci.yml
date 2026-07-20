@@ -4,14 +4,30 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
   pull_request:
+  schedule:
+    # Nightly full-matrix run on main (UTC).
+    - cron: '30 2 * * *'
   workflow_dispatch:
+    inputs:
+      e2e-tier:
+        description: Browser-risk tier for the E2E jobs (playwright.config.ts)
+        type: choice
+        options:
+          - pr
+          - main
+          - full
+        default: full
 
 permissions:
   contents: read
 
+# The event name keeps the nightly schedule and pushes to main (same ref) from
+# cancelling each other.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -223,15 +239,63 @@ jobs:
           path: dist/hell-docs/
           if-no-files-found: error
 
-  e2e:
-    name: E2E (shard ${{ matrix.shard }}/9)
+  # Browser-risk tiers (#265): the tier and shard count follow the triggering
+  # event. playwright.config.ts owns what each tier runs (HELL_E2E_TIER);
+  # shard counts keep the per-shard test load roughly constant across tiers.
+  e2e-plan:
+    name: E2E plan
     runs-on: ubuntu-latest
-    needs: build
+    timeout-minutes: 2
+    outputs:
+      tier: ${{ steps.plan.outputs.tier }}
+      shard-total: ${{ steps.plan.outputs.shard-total }}
+      shards: ${{ steps.plan.outputs.shards }}
+    steps:
+      - name: Resolve browser-risk tier
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          DISPATCH_TIER: ${{ inputs.e2e-tier }}
+        run: |
+          case "${EVENT_NAME}" in
+            pull_request) tier="pr" ;;
+            push)
+              if [ "${REF_TYPE}" = "tag" ]; then tier="full"; else tier="main"; fi
+              ;;
+            schedule) tier="full" ;;
+            workflow_dispatch) tier="${DISPATCH_TIER:-full}" ;;
+            *)
+              echo "Unexpected event ${EVENT_NAME}" >&2
+              exit 1
+              ;;
+          esac
+
+          case "${tier}" in
+            pr) total=3 ;;
+            main) total=6 ;;
+            full) total=9 ;;
+            *)
+              echo "Unknown tier ${tier}" >&2
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "tier=${tier}"
+            echo "shard-total=${total}"
+            echo "shards=[$(seq 1 "${total}" | paste -sd, -)]"
+          } >> "$GITHUB_OUTPUT"
+
+  e2e:
+    name: E2E ${{ needs.e2e-plan.outputs.tier }} (shard ${{ matrix.shard }}/${{ needs.e2e-plan.outputs.shard-total }})
+    runs-on: ubuntu-latest
+    needs: [build, e2e-plan]
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        shard: ${{ fromJSON(needs.e2e-plan.outputs.shards) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -303,7 +367,9 @@ jobs:
 
       - name: Browser tests
         env:
+          HELL_E2E_TIER: ${{ needs.e2e-plan.outputs.tier }}
           PLAYWRIGHT_SHARD: ${{ matrix.shard }}
+          PLAYWRIGHT_SHARD_TOTAL: ${{ needs.e2e-plan.outputs.shard-total }}
         run: |
           docker run --rm --network host \
             --volume "${PWD}:/workspace" \
@@ -312,9 +378,11 @@ jobs:
             --env HOME=/root \
             --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
             --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
+            --env HELL_E2E_TIER \
             --env PLAYWRIGHT_SHARD \
+            --env PLAYWRIGHT_SHARD_TOTAL \
             mcr.microsoft.com/playwright:v1.59.1-noble \
-            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --shard="${PLAYWRIGHT_SHARD}/9"'
+            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --shard="${PLAYWRIGHT_SHARD}/${PLAYWRIGHT_SHARD_TOTAL}"'
 
       - name: Stop docs server
         if: always()

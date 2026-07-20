@@ -18,11 +18,31 @@ tests run through `test:unit` without coverage output; CI and release checks use
 `test:coverage`, which enables Angular's native coverage switch and enforces the
 thresholds in `vitest.config.ts`.
 
-E2E jobs shard with Playwright's native `--shard=N/9`; every test runs in
-exactly one shard by construction. Package-consumer jobs select scenario
-groups with `HELL_PACKAGE_CONSUMER_GROUP`; the harness owns the group
-definitions and fails when a scenario is missing from group coverage or a
-group name is unknown.
+E2E jobs run browser-risk tiers. `playwright.config.ts` owns the tier
+definitions and reads the tier from `HELL_E2E_TIER`; the same test code backs
+every tier, so a tier only selects browser projects and, for `main`, the
+engine-sensitive subset:
+
+- `pr` (pull requests): chromium runs every behavioral suite plus the docs
+  axe smoke (`e2e/docs-axe-smoke.spec.ts`).
+- `main` (pushes to `main`): chromium as in `pr`, plus firefox and webkit for
+  the engine-sensitive suites enumerated in `ENGINE_SENSITIVE_SUITES` in
+  `playwright.config.ts` — focus and keyboard semantics, overlays, native
+  inputs, media and motion, and measured layout. The config fails loudly when
+  an enumerated suite is renamed or removed.
+- `full` (nightly schedule, release tag pushes, the `workflow_dispatch`
+  default, and local runs without `HELL_E2E_TIER`): the full three-browser
+  matrix, including the full axe suite on every engine.
+
+The `e2e-plan` job maps the triggering event to a tier and a shard count
+(`pr` = 3, `main` = 6, `full` = 9) that keeps the per-shard test load roughly
+constant. Shards use Playwright's native `--shard=N/T`; every selected test
+runs in exactly one shard by construction.
+
+Package-consumer jobs select scenario groups with
+`HELL_PACKAGE_CONSUMER_GROUP`; the harness owns the group definitions and
+fails when a scenario is missing from group coverage or a group name is
+unknown.
 
 `dist/` is never stored in or restored from a provider cache. The build job is
 the single producer of built output: every run checks the entrypoint manifests
