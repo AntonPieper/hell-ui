@@ -84,6 +84,14 @@ describe('HellDatePicker', () => {
   it('merges ui classes into root, navigation, label, and repeated date button parts', () => {
     vi.setSystemTime(new Date(2026, 3, 30));
     const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+    const defaults = {
+      root: datePicker(fixture.nativeElement).className,
+      navButton: button(fixture.nativeElement, 'Previous year').className,
+      label: labelElement(fixture.nativeElement).className,
+      dateButton: dateButtons(fixture.nativeElement)[0].className,
+    };
+
     fixture.componentInstance.ui.set({
       root: 'w-[22rem] border-hell-danger',
       navButton: 'bg-hell-surface-subtle text-hell-danger',
@@ -97,18 +105,40 @@ describe('HellDatePicker', () => {
     const firstDateButton = dateButtons(fixture.nativeElement)[0];
 
     expect(picker.getAttribute('data-slot')).toBe('root');
-    expect(picker.classList.contains('w-[22rem]')).toBe(true);
-    expect(picker.classList.contains('border-hell-danger')).toBe(true);
-    expect(picker.classList.contains('border-hell-border')).toBe(false);
+    expectUiRouting(defaults.root, picker.className, 'w-[22rem] border-hell-danger');
     expect(labelElement(fixture.nativeElement).getAttribute('data-slot')).toBe('label');
-    expect(labelElement(fixture.nativeElement).classList.contains('text-hell-danger')).toBe(true);
+    expectUiRouting(
+      defaults.label,
+      labelElement(fixture.nativeElement).className,
+      'text-hell-danger',
+    );
     expect(navButton.getAttribute('data-slot')).toBe('navButton');
     expect(navButton.getAttribute('data-direction')).toBe('previous');
     expect(navButton.getAttribute('data-step')).toBe('year');
-    expect(navButton.classList.contains('bg-hell-surface-subtle')).toBe(true);
+    expectUiRouting(defaults.navButton, navButton.className, 'bg-hell-surface-subtle text-hell-danger');
     expect(firstDateButton.getAttribute('data-slot')).toBe('dateButton');
-    expect(firstDateButton.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(firstDateButton.classList.contains('text-lg')).toBe(true);
+    expectUiRouting(defaults.dateButton, firstDateButton.className, 'rounded-hell-pill text-lg');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      vi.setSystemTime(new Date(2026, 3, 30));
+      const fixture = TestBed.createComponent(DatePickerHost);
+      fixture.detectChanges();
+
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+
+      expect({
+        root: sortClasses(datePicker(fixture.nativeElement).className),
+        navButton: sortClasses(button(fixture.nativeElement, 'Previous year').className),
+        label: sortClasses(labelElement(fixture.nativeElement).className),
+        dateButton: sortClasses(dateButtons(fixture.nativeElement)[0].className),
+      }).toMatchSnapshot('datePicker');
+    });
   });
 
   it('moves the focused month by one year with previous and next year buttons', () => {
@@ -159,6 +189,7 @@ describe('HellDatePicker', () => {
 
     const picker = rangePicker(fixture.nativeElement);
     expect(picker.getAttribute('data-slot')).toBe('root');
+    // The consumer ui class is the test's own contract fixture.
     expect(picker.classList.contains('w-[23rem]')).toBe(true);
     expect(label(fixture.nativeElement)).toBe('April 2026');
     expect(picker.getAttribute('data-range-complete')).toBe('');
@@ -169,6 +200,22 @@ describe('HellDatePicker', () => {
     expect(picker.hasAttribute('data-range-complete')).toBe(false);
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
 
 function label(root: HTMLElement): string {
   const element = labelElement(root);
