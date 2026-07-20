@@ -23,6 +23,7 @@ export class HellPageHeader {
     protected readonly hasLeading: i0.Signal<boolean>;
     protected readonly hasMeta: i0.Signal<boolean>;
     protected readonly hasToolbar: i0.Signal<boolean>;
+    protected readonly layout: Readonly<Record<"body" | "titleRow", string>>;
     readonly level: i0.InputSignal<HellPageHeaderLevel>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellPageHeaderPart>;
     readonly ui: i0.InputSignal<HellUiInput<HellPageHeaderPart>>;

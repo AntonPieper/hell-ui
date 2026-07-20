@@ -72,7 +72,7 @@
     "switch/switch.ts",
     "toggle/toggle.ts",
     "omnibar/omnibar.ts",
-    "page-header/page-header.ts",
+    "page-header/page-header.recipes.ts",
     "toast/toast.ts",
     "features/code-editor/code-editor.ts",
     "features/filter-builder/filter-builder.ts",

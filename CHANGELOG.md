@@ -438,6 +438,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- The page-header Composite ships a dedicated recipe module instead of its
+  component implementation. `page-header/page-header.recipes.ts` now owns the
+  `hell-page-header` and `hell-page-header-back` Part Recipes plus the private
+  row-wrapper class strings, the entrypoint stylesheet `@source`s that module,
+  and the package assets/files list ship it in place of `page-header.ts`, so
+  the pack audit's shipped recipe source set shrinks by the component file.
+  Runtime behavior, the public API, and rendered classes are unchanged; the
+  Part Style Map ADR documents the split as the template for the remaining
+  composites. Closes #269. Evidence: page-header recipe-module specs, the
+  packed page-header consumer scenario asserting recipe and structural
+  wrapper CSS, the pack audit, and the page-header API report.
 - The breaking Tooltip redesign (#238) is sealed as one release-ready package
   contract. The `@hell-ui/angular/tooltip` entry point is pinned as a Mixed
   Entry Point through manifest-aware architecture checks that also reject the
