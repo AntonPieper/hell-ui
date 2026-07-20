@@ -104,11 +104,13 @@ export default tseslint.config(
     },
   },
   {
-    // Entrypoint dependency boundaries (#259): category import edges,
+    // Entrypoint dependency boundaries (#259, #270): category import edges,
     // internal-directory access, and optional-peer isolation. Entrypoint
     // identities and categories derive from the hell-entrypoint.json manifest
-    // sidecars (tools/entrypoint-manifest.mjs); these AST rules run alongside
-    // the architecture checker's source-text checks.
+    // sidecars (tools/entrypoint-manifest.mjs); these AST rules are the only
+    // import-boundary enforcement — the architecture checker keeps only
+    // durable manifest, package-output, peer-metadata, and table-direction
+    // concerns.
     files: ['packages/angular/**/*.ts'],
     ignores: ['packages/angular/**/*.spec.ts', 'packages/angular/test-setup.ts'],
     plugins: { 'hell-boundaries': hellBoundaries },
@@ -116,6 +118,26 @@ export default tseslint.config(
       'hell-boundaries/entrypoint-boundaries': 'error',
       'hell-boundaries/optional-peer-isolation': 'error',
       'hell-boundaries/no-internal-public-api-exports': 'error',
+    },
+  },
+  {
+    // Docs demonstrate narrow import-path entry points (Light Root Entry
+    // Point): the root specifier stays out of docs app code. Replaces the
+    // architecture checker's regex docs-root-import check (#270).
+    files: ['apps/docs/src/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@hell-ui/angular',
+              message:
+                'Docs must demonstrate narrow import-path entry points; import @hell-ui/angular/<entrypoint> instead of the root entry point.',
+            },
+          ],
+        },
+      ],
     },
   },
   {

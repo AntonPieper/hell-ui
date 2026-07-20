@@ -68,10 +68,7 @@ const docsHeavyLazyRoutePolicies = [
   },
 ];
 
-const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
 const docsCodePreviewLazyWrapperPath = 'apps/docs/src/app/shared/docs-code-viewer.ts';
-const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
-const audioTranscriptEntrypointSpecifier = '@hell-ui/angular/features/audio-transcript';
 const audioTranscriptRuntimeTerms = [
   { label: 'SpeechRecognition', pattern: /\bSpeechRecognition\b|\bwebkitSpeechRecognition\b/ },
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
@@ -84,6 +81,14 @@ const audioTranscriptRuntimeTerms = [
 //   removeAfter: the release that ships the migration. The checker fails
 //   itself when a migration check is missing that expiry, and again once the
 //   package version moves past it — delete the check and its entry then.
+//
+// Import-boundary enforcement is not a checker concern (#270): the AST ESLint
+// rules in tools/eslint/hell-boundaries.mjs own entrypoint category edges,
+// relative cross-entrypoint imports, optional-peer import isolation, and
+// internal public-api export bans. The checker keeps only durable concerns no
+// standard tool covers — entrypoint manifest integrity, package-output
+// integrity, optional-peer isolation at the package-metadata level, and table
+// adapter direction — plus docs and component contracts owned elsewhere.
 const architectureCheckManifest = [
   { name: 'docs-examples', kind: 'permanent', owner: '@AntonPieper', run: checkDocsExamples },
   {
@@ -92,28 +97,38 @@ const architectureCheckManifest = [
     owner: '@AntonPieper',
     run: checkDocsLazyRouteImportGraphContract,
   },
-  { name: 'docs-root-import', kind: 'permanent', owner: '@AntonPieper', run: checkDocsRootImportContract },
   {
     name: 'docs-category-navigation',
     kind: 'permanent',
     owner: '@AntonPieper',
     run: checkDocsCategoryNavigationContract,
   },
-  { name: 'package-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkPackageEntryPoints },
   {
-    name: 'code-mirror-entrypoint-isolation',
+    name: 'entrypoint-manifest-integrity',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkCodeMirrorEntrypointIsolationContract,
+    run: checkEntrypointManifestIntegrity,
   },
   {
-    name: 'audio-transcript-entrypoint-isolation',
+    name: 'package-output-integrity',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkAudioTranscriptEntrypointIsolationContract,
+    run: checkPackageOutputIntegrity,
   },
-  { name: 'api-stability', kind: 'permanent', owner: '@AntonPieper', run: checkApiStabilityContract },
-  { name: 'package-dependency', kind: 'permanent', owner: '@AntonPieper', run: checkPackageDependencyContract },
+  {
+    // Browser transcript runtime APIs (not imports) stay inside the optional
+    // audio-transcript feature; ESLint boundary rules cannot see globals.
+    name: 'audio-transcript-runtime-isolation',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkAudioTranscriptRuntimeIsolationContract,
+  },
+  {
+    name: 'optional-peer-isolation',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkOptionalPeerIsolationContract,
+  },
   { name: 'style-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkStyleEntryPoints },
   { name: 'component-contract', kind: 'permanent', owner: '@AntonPieper', run: checkComponentContract },
   {
@@ -153,10 +168,10 @@ const architectureCheckManifest = [
     run: checkInteractiveTriggerSelectorContract,
   },
   {
-    name: 'table-adapter-boundary-contract',
+    name: 'table-adapter-direction',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkTableAdapterBoundaryContract,
+    run: checkTableAdapterDirectionContract,
   },
   {
     name: 'ngp-state-writer-contract',
@@ -796,20 +811,6 @@ function docsExampleCodeOnly(source) {
   return source.includes('@hell-docs-code-only');
 }
 
-function checkDocsRootImportContract() {
-  const docsRoot = join(root, 'apps/docs/src/app');
-  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
-
-  for (const file of docsFiles) {
-    const source = readFile(file);
-    if (/(?:from|import\()\s*['\"]@hell-ui\/angular['\"]/.test(source)) {
-      failures.push(
-        `Docs app file ${file.slice(root.length + 1)} imports the root @hell-ui/angular entry point; docs must demonstrate narrow import-path entry points`,
-      );
-    }
-  }
-}
-
 // Every component Package Entry Point must have a registered docs page. Entry
 // points deliberately documented on another entry point's page are listed as
 // explicit exceptions naming the page that owns them.
@@ -846,12 +847,15 @@ function checkDocsCategoryNavigationContract() {
   }
 }
 
-function checkPackageEntryPoints() {
+// Entrypoint manifest integrity: the hell-entrypoint.json sidecars stay
+// complete and discoverable, generated public API and ng-package files match
+// the manifest render byte-for-byte, and the Light Root Entry Point policy
+// holds over the manifest itself. ESLint exempts generated public-api.ts files
+// from its relative-import rule because this check pins them.
+function checkEntrypointManifestIntegrity() {
   const publicApiFiles = entrypointPublicApiFiles();
   const rootPublicApi = publicApiFiles.find((entrypoint) => entrypoint.id === 'root');
-  const rootApiPath = join(root, rootPublicApi.publicApiPath);
-  const rootApi = readFile(rootApiPath);
-  const secondaryApis = publicApiFiles.filter((entrypoint) => entrypoint.id !== 'root');
+  const rootApi = readFile(join(root, rootPublicApi.publicApiPath));
 
   // Light Root Entry Point: the root public API re-exports stable core only.
   const nonCoreRootExports = exportPaths(rootApi).filter(
@@ -863,31 +867,33 @@ function checkPackageEntryPoints() {
     );
   }
 
-  const internalCoreExports = new Set(['floating-dismissal', 'floating-scope', 'resize-behavior']);
-  for (const [api, source] of [
-    [rootPublicApi.publicApiPath, rootApi],
-    ...secondaryApis
-      .filter((entrypoint) => entrypoint.category !== entrypointCategories.INTERNAL)
-      .filter((entrypoint) => existsSync(join(root, entrypoint.publicApiPath)))
-      .map((entrypoint) => [
-        entrypoint.publicApiPath,
-        readFile(join(root, entrypoint.publicApiPath)),
-      ]),
-  ]) {
-    for (const exportPath of exportPaths(source)) {
-      const module = basename(exportPath);
-      if (internalCoreExports.has(module)) {
-        failures.push(`Package Entry Point ${api} exports internal core module ${module}`);
-      }
-    }
-  }
-
   const requiredRootApiExports = new Set(rootPublicApi.exports);
   for (const requiredExport of requiredRootApiExports) {
     if (!rootApi.includes(`'${requiredExport}'`) && !rootApi.includes(`"${requiredExport}"`)) {
       failures.push(`Root Package Entry Point is missing ${requiredExport}`);
     }
   }
+
+  const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
+  const supportedTableSpecifiers = [
+    '@hell-ui/angular/table',
+    '@hell-ui/angular/table-tanstack',
+    '@hell-ui/angular/table-tanstack/virtual',
+  ];
+  for (const specifier of supportedTableSpecifiers) {
+    if (!manifestSpecifiers.has(specifier))
+      failures.push(`Entrypoint metadata is missing table entry point ${specifier}`);
+  }
+
+  checkEntrypointManifestSourceCoverage();
+  checkGeneratedEntrypointFiles();
+}
+
+// Package-output integrity: what the package resolves and ships — package.json
+// exports, the @heinrich/source resolution contract, and the import-path-first
+// Angular workspace layout — stays derived from the entrypoint manifest.
+function checkPackageOutputIntegrity() {
+  const publicApiFiles = entrypointPublicApiFiles();
 
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   if (tsconfig.compilerOptions?.paths) {
@@ -927,80 +933,6 @@ function checkPackageEntryPoints() {
       );
     }
   }
-
-  const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
-  const supportedTableSpecifiers = [
-    '@hell-ui/angular/table',
-    '@hell-ui/angular/table-tanstack',
-    '@hell-ui/angular/table-tanstack/virtual',
-  ];
-  for (const specifier of supportedTableSpecifiers) {
-    if (!manifestSpecifiers.has(specifier))
-      failures.push(`Entrypoint metadata is missing table entry point ${specifier}`);
-  }
-
-  const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
-
-  for (const packagePath of packagePaths) {
-    if (!existsSync(join(root, packagePath))) {
-      failures.push(`Package Entry Point is missing ${packagePath}`);
-    }
-  }
-
-  checkEntrypointManifestSourceCoverage();
-  checkGeneratedEntrypointFiles();
-}
-
-function checkCodeMirrorEntrypointIsolationContract() {
-  const codeEditorEntrypoint = entrypointPublicApiFiles().find(
-    (entrypoint) => entrypoint.specifier === codeEditorEntrypointSpecifier,
-  );
-  if (!codeEditorEntrypoint) {
-    failures.push(`Entrypoint metadata is missing ${codeEditorEntrypointSpecifier}`);
-    return;
-  }
-  if (codeEditorEntrypoint.category !== entrypointCategories.FEATURE) {
-    failures.push(`${codeEditorEntrypointSpecifier} must be categorized as a feature entry point`);
-  }
-
-  const nonCodeEditorEntrypointPaths = [
-    ...entrypointPublicApiFiles()
-      .filter((entrypoint) => entrypoint.specifier !== codeEditorEntrypointSpecifier)
-      .map((entrypoint) => entrypoint.publicApiPath),
-    ...libraryProductionTsFiles().filter(
-      (file) => !isEntrypointSourcePath(file, codeEditorEntrypoint),
-    ),
-  ];
-
-  const boundaries = [
-    { label: 'non-code-editor package entrypoint', paths: nonCodeEditorEntrypointPaths },
-  ];
-
-  for (const boundary of boundaries) {
-    for (const rel of [...new Set(boundary.paths)].sort()) {
-      const file = join(root, rel);
-      if (!existsSync(file)) continue;
-
-      const hits = moduleSpecifierReferences(file).filter((hit) =>
-        isCodeMirrorBoundarySpecifier(hit.specifier),
-      );
-      for (const hit of hits) {
-        failures.push(
-          `CodeMirror Optional Entrypoint ${boundary.label} boundary ${rel}:${hit.line} references ${hit.specifier}; ` +
-            'CodeMirror exports/imports must stay inside @hell-ui/angular/features/code-editor.',
-        );
-      }
-    }
-  }
-}
-
-function productionTsFilesUnder(relDir) {
-  const dir = join(root, relDir);
-  if (!existsSync(dir)) return [];
-
-  return walk(dir)
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'))
-    .map(relPath);
 }
 
 function libraryPackageFiles() {
@@ -1018,21 +950,9 @@ function libraryProductionTsFiles() {
     .map(relPath);
 }
 
-function isEntrypointSourcePath(relPath, entrypoint) {
-  return relPath === entrypoint.publicApiPath || relPath.startsWith(`${entrypoint.packageDir}/`);
-}
-
-function isCodeMirrorBoundarySpecifier(specifier) {
-  return (
-    specifier === codeEditorEntrypointSpecifier ||
-    specifier.startsWith(`${codeEditorEntrypointSpecifier}/`) ||
-    /(?:^|\/)code-editor(?:\/|$)/.test(specifier) ||
-    specifier.includes('features/code-editor') ||
-    codeMirrorPackageSpecifierPrefixes.some((prefix) => specifier.startsWith(prefix))
-  );
-}
-
-function checkAudioTranscriptEntrypointIsolationContract() {
+// The transcript runtime terms are browser globals and element methods, not
+// module imports, so the ESLint boundary layer cannot see them.
+function checkAudioTranscriptRuntimeIsolationContract() {
   const libraryProductionPaths = [
     'packages/angular/public-api.ts',
     ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.publicApiPath),
@@ -1048,20 +968,10 @@ function checkAudioTranscriptEntrypointIsolationContract() {
     for (const term of audioTranscriptRuntimeTerms) {
       if (term.pattern.test(source)) {
         failures.push(
-          `Audio Transcript Optional Entrypoint boundary ${rel} references ${term.label}; ` +
+          `Audio Transcript runtime isolation ${rel} references ${term.label}; ` +
             'browser transcript runtime must stay inside @hell-ui/angular/features/audio-transcript.',
         );
       }
-    }
-
-    const hits = moduleSpecifierReferences(file).filter((hit) =>
-      isAudioTranscriptFeatureSpecifier(hit.specifier),
-    );
-    for (const hit of hits) {
-      failures.push(
-        `Audio Transcript Optional Entrypoint boundary ${rel}:${hit.line} references ${hit.specifier}; ` +
-          'base audio-player and composites must not import the transcript feature seam.',
-      );
     }
   }
 }
@@ -1073,55 +983,11 @@ function isAudioTranscriptFeatureSeamPath(rel) {
   );
 }
 
-function isAudioTranscriptFeatureSpecifier(specifier) {
-  return (
-    specifier === audioTranscriptEntrypointSpecifier ||
-    specifier.startsWith(`${audioTranscriptEntrypointSpecifier}/`) ||
-    specifier.includes('features/audio-transcript')
-  );
-}
-
-function checkApiStabilityContract() {
-  checkPublicApiInternalExportContract();
-}
-
-function checkPublicApiInternalExportContract() {
-  const internalDirectoryNames = new Set(['internal', 'adapters', 'ng-primitives']);
-
-  const allowedPublicInternalExports = new Set([
-    // Format: `${publicApiPath} -> ${exportPath}`. Each exception must include a release-policy rationale.
-  ]);
-
-  for (const entrypoint of entrypointPublicApiFiles()) {
-    if (entrypoint.category === entrypointCategories.INTERNAL) continue;
-
-    const publicApiPath = entrypoint.publicApiPath;
-    const fullPath = join(root, publicApiPath);
-    if (!existsSync(fullPath)) continue;
-
-    const source = readFile(fullPath);
-    for (const exportPath of exportPaths(source)) {
-      const exportKey = `${publicApiPath} -> ${exportPath}`;
-      if (allowedPublicInternalExports.has(exportKey)) continue;
-
-      const resolvedPath = resolvePublicExportPath(publicApiPath, exportPath);
-      const segments = resolvedPath.split('/').filter(Boolean);
-      const internalSegment = segments.find((segment) => internalDirectoryNames.has(segment));
-      if (internalSegment) {
-        failures.push(
-          `Public API ${publicApiPath} exports ${exportPath} from internal directory "${internalSegment}" without an explicit architecture allowlist entry`,
-        );
-      }
-    }
-  }
-}
-
-function resolvePublicExportPath(publicApiPath, exportPath) {
-  if (!exportPath.startsWith('.')) return exportPath;
-  return join(dirname(publicApiPath), exportPath).replaceAll('\\', '/');
-}
-
-function checkPackageDependencyContract() {
+// Optional-peer isolation at the package-metadata level: which peers exist,
+// which are optional and why, and version pinning. The import side of the
+// isolation (which sources may import an optional peer) is enforced by
+// tools/eslint/hell-boundaries.mjs.
+function checkOptionalPeerIsolationContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const workspaceCatalog = readWorkspaceCatalog();
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
@@ -1291,37 +1157,6 @@ function checkPackageDependencyContract() {
         `Package dependency contract is missing optional transitive peer dependency ${dependency}`,
       );
     }
-  }
-
-  const tanStackImportOffenders = sourceFiles
-    .filter((file) => !relPath(file).includes('/table-tanstack/'))
-    .filter((file) => relPath(file) !== 'packages/angular/table-tanstack/public-api.ts')
-    .filter((file) => readFile(file).includes('@tanstack/angular-table'))
-    .map(relPath);
-  if (tanStackImportOffenders.length) {
-    failures.push(
-      `Package dependency contract must keep @tanstack/angular-table inside @hell-ui/angular/table-tanstack: ${tanStackImportOffenders.join(', ')}`,
-    );
-  }
-
-  const tanStackVirtualImportOffenders = sourceFiles
-    .filter((file) => !relPath(file).includes('/table-tanstack/virtual/'))
-    .filter((file) => readFile(file).includes('@tanstack/virtual-core'))
-    .map(relPath);
-  if (tanStackVirtualImportOffenders.length) {
-    failures.push(
-      `Package dependency contract must keep @tanstack/virtual-core inside @hell-ui/angular/table-tanstack virtual strategy files: ${tanStackVirtualImportOffenders.join(', ')}`,
-    );
-  }
-
-  const pdfJsImportOffenders = sourceFiles
-    .filter((file) => !relPath(file).includes('/features/pdf-viewer/'))
-    .filter((file) => readFile(file).includes('pdfjs-dist'))
-    .map(relPath);
-  if (pdfJsImportOffenders.length) {
-    failures.push(
-      `Package dependency contract must keep pdfjs-dist inside @hell-ui/angular/features/pdf-viewer: ${pdfJsImportOffenders.join(', ')}`,
-    );
   }
 
   if (peerDependencies['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
@@ -1702,7 +1537,12 @@ function checkInteractiveTriggerSelectorContract() {
   }
 }
 
-function checkTableAdapterBoundaryContract() {
+// Table adapter direction (docs/adr/tanstack-table-shell.md): core table
+// primitives never depend on adapter entrypoints, and adapter engines stay
+// out of the core table surfaces. Kept as durable defense in depth alongside
+// the ESLint boundary layer because the direction edge is an ADR decision,
+// not just an import-policy default.
+function checkTableAdapterDirectionContract() {
   const coreTableBoundaryDirs = [
     'packages/angular/table',
   ];
