@@ -24,6 +24,14 @@
   `@source`s that module and the package ships it instead of the whole
   component implementation file. Page-header is the tracer; the remaining
   composites follow the same split.
+- Amended: 2026-07-20 — the public styling surface is narrowed by
+  `0002-public-package-and-stylesheet-surface.md`. Consumer-facing `HellUi` and
+  `HellUiInput` types, informative component part unions, and concrete
+  component UI types remain public. `HellRecipe`, `hellPartStyler`,
+  `HellPartStyler`, `hellTwMerge`, merge configuration, and other Part-Class
+  Pipeline plumbing are package internals. The `[ui]` input name remains
+  unchanged. `data-slot="root"` is reserved for a genuine single-host Public
+  Part and is omitted from behavior-only or no-public-root hosts.
 
 ## Context
 
@@ -39,15 +47,14 @@ Adopt a component-local Part Style Map as the canonical future styling API. Each
 default part classes + consumer part classes = final class
 ```
 
-The shared core contract is intentionally small:
+The public shared core contract is intentionally small:
 
 ```ts
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
-export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 ```
 
-Multi-part components export their part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Single-part modules do not export `Part`/`Ui` aliases; their `ui` input is typed `HellUiInput<'root'>` directly, since the aliases carried no information beyond the shared core types. Migrated components declare their own typed `[ui]` signal input and compose the shared `hellPartStyler<Part>` factory from core, which owns the single part-class merge pipeline and the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`:
+Multi-part components export their part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Single-part modules do not export `Part`/`Ui` aliases; their `ui` input is typed `HellUiInput<'root'>` directly, since the aliases carried no information beyond the shared core types. Migrated components declare their own typed `[ui]` signal input and compose the shared package-internal `hellPartStyler<Part>` factory, which owns the single part-class merge pipeline and the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`:
 
 ```ts
 readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
@@ -57,6 +64,11 @@ protected readonly part = hellPartStyler<'root'>(this.ui, {
   recipe: () => ({ root: this.rootRecipe() }),
 });
 ```
+
+`HellRecipe<Part>` and `hellPartStyler<Part>` describe the package-internal
+Part Recipe and Part-Class Pipeline. Components share them inside the package,
+but consumers do not import them from the Light Root Entry Point or a secondary
+Package Entry Point.
 
 Do not reintroduce an inheritance base for this contract; the pipeline is a composition seam.
 
@@ -85,6 +97,10 @@ Semantic part names such as `item`, `option`, or `header` belong inside
 multi-part owned-anatomy component maps where one root exposes several Public
 Parts.
 
+Behavior-only directives and components without a genuine public root part do
+not render `data-slot="root"`. A host marker is evidence of an accepted Public
+Part, not a selector convention applied to every directive or component.
+
 Owned-anatomy Composites expose a flat component-owned Part Style Map rather
 than nested passthrough maps for internal primitives. A Composite may render
 `HellButton`, `HellInput`, native elements, or ng-primitives internally, but its
@@ -92,7 +108,12 @@ consumer styling contract is named after the Composite's own anatomy, such as
 `trigger`, `input`, `panel`, `clearButton`, `item`, or `captionToggle`, not
 `buttonUi`, `inputUi`, or `popoverUi`.
 
-The part-class pipeline should call one configured `hellTwMerge`, built with `tailwind-merge` and extended for Hell theme token groups. Individual components should not hand-roll the input, a local merge callback, a `tailwind-merge` call, `clsx`, `cva`, `tailwind-variants`, or a custom `cn` helper for migrated part styling.
+The package-internal part-class pipeline should call one configured
+`hellTwMerge`, built with `tailwind-merge` and extended for Hell theme token
+groups. Individual components should not hand-roll the input, a local merge
+callback, a `tailwind-merge` call, `clsx`, `cva`, `tailwind-variants`, or a
+custom `cn` helper for migrated part styling. Neither the merge helper nor its
+configuration is a consumer API.
 
 Do not expose `[ui].class`, `omit`, or public visual layers. Do not preserve multiple public class override paths that merge late at a lower level.
 
@@ -234,14 +255,21 @@ and document the `class` caveat.
 - Do not design new component APIs around `unstyled`.
 - Existing `unstyled` docs, API reports, component-contract checks, release scenarios, and package-consumer gates must be rewritten around Part Style Maps.
 - The migration must prove behavior-only usage through `[ui]` rather than a legacy boolean.
-- Every public `[ui]` component should export its part union type and `Hell<Component>Ui` type, backed by shared `HellUi`, `HellUiInput`, and `HellRecipe` core types.
-- `hellPartStyler<Part>` is the shared Part-Class Pipeline for components adopting `[ui]`; do not duplicate part-class merge code per component and do not reintroduce an inheritance base.
+- Every public `[ui]` component should export its informative part union type
+  and `Hell<Component>Ui` type, backed by public `HellUi` and `HellUiInput`
+  core types. Single-root aliases that add no information remain unnecessary.
+- `HellRecipe`, `hellPartStyler<Part>`, `HellPartStyler`, `hellTwMerge`, and
+  merge configuration are shared package-internal Part-Class Pipeline
+  contracts, not public exports. Do not duplicate their behavior per component
+  or reintroduce an inheritance base.
 - Each migrated component declares `readonly ui = input<HellUiInput<Part>>(undefined, { alias: 'ui' })`; there is no compatibility class-property path.
 - `ui` string shorthand belongs to a component's documented default Public Part; object-form `ui` remains the explicit multi-part map.
 - `class` is additive and not the deterministic Tailwind conflict override contract.
 - Public Parts should render with stable `data-slot` values; do not rename the DOM marker to `data-part`.
 - Owned-anatomy composite Public Parts should use canonical camelCase names in both exported TypeScript unions and rendered `data-slot` values.
 - Single-host public directives should use `root` as their sole part; semantic names belong to the directive/component type, not the lone part.
+- Behavior-only directives and hosts without a public root part should omit
+  `data-slot="root"`.
 - Owned-anatomy Composites should expose flat, Composite-owned Part Style Maps instead of nested `*Ui` passthroughs for internal primitives.
 - Public Parts should cover durable consumer styling surfaces, not every internal wrapper or measurement node.
 - Migrated component defaults must be represented as complete Tailwind utility strings so configured `hellTwMerge` can resolve conflicts deterministically in the single part-class pipeline.
