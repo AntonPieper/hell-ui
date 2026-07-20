@@ -148,9 +148,10 @@ describe('HellAudioPlayer', () => {
     fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
     fixture.detectChanges();
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(root.className).toContain('max-w-[420px]');
     expect(root.className).toContain('rounded-none');
-    expect(root.className).not.toContain('rounded-hell-md');
 
     const transport = root.querySelector('[data-slot="transport"]') as HTMLElement;
     expect(transport.className).toContain('gap-hell-4');
@@ -192,6 +193,39 @@ describe('HellAudioPlayer', () => {
 
     const captionsText = captions.querySelector('[data-slot="captionsText"]') as HTMLElement;
     expect(captionsText.className).toContain('font-semibold');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', async () => {
+      const { fixture } = await createPlayer();
+      // TestBed hosts the component on a plain div, which carries the root part.
+      const root = fixture.nativeElement as HTMLElement;
+
+      const captionToggle = root.querySelector('[data-slot="captionToggle"]') as HTMLButtonElement;
+      captionToggle.click();
+      fixture.detectChanges();
+
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (slot: string): string[] =>
+        sortClasses(root.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
+
+      expect({
+        root: sortClasses(root.className),
+        transport: partClasses('transport'),
+        time: partClasses('time'),
+        seek: partClasses('seek'),
+        volume: partClasses('volume'),
+        captionToggle: partClasses('captionToggle'),
+        captions: partClasses('captions'),
+        captionsStatus: partClasses('captionsStatus'),
+        captionsBody: partClasses('captionsBody'),
+        captionsEmpty: partClasses('captionsEmpty'),
+      }).toMatchSnapshot('audioPlayer');
+    });
   });
 
   it('marks the committed transcript text with a captionsText Public Part', async () => {
