@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellSkeleton > recipes > keeps the default part classes stable > skeleton 1`] = `
+{
+  "root": [
+    "animate-[hell-shimmer_1.6s_linear_infinite]",
+    "bg-[length:200%_100%]",
+    "bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--color-hell-surface)_70%,transparent)_50%,transparent_100%)]",
+    "bg-hell-surface-muted",
+    "bg-no-repeat",
+    "block",
+    "data-[shape=circle]:rounded-full",
+    "data-[shape=rect]:rounded-hell-md",
+    "motion-reduce:animate-none",
+    "motion-reduce:bg-none",
+    "rounded-sm",
+  ],
+}
+`;

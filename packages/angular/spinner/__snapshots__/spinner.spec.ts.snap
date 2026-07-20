@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellSpinner > recipes > keeps the default part classes stable > spinner 1`] = `
+{
+  "root": [
+    "[--_hell-spinner-track:color-mix(in_oklab,currentColor_18%,transparent)]",
+    "data-[size=lg]:text-[28px]",
+    "data-[size=md]:text-[20px]",
+    "data-[size=sm]:text-[16px]",
+    "data-[size=xl]:text-[40px]",
+    "data-[size=xs]:text-[12px]",
+    "flex-none",
+    "inline-block",
+    "leading-[0]",
+    "text-current",
+  ],
+}
+`;

@@ -4,6 +4,16 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellToggle, HellToggleGroup, HellToggleGroupItem } from './toggle';
 
+/**
+ * Toggle specs assert behavior, forms integration, and state attributes.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+
 @Component({
   imports: [ReactiveFormsModule, HellToggleGroup, HellToggleGroupItem],
   template: `
@@ -49,6 +59,8 @@ class ToggleGroupSingleFormsHost {
       <button hellToggleGroupItem value="left" type="button" [ui]="itemUi">Left</button>
       <button hellToggleGroupItem value="right" type="button" disabled>Right</button>
     </div>
+
+    <button hellToggle type="button">Plain standalone</button>
   `,
 })
 class TogglePartStyleHost {
@@ -180,36 +192,72 @@ describe('HellToggleGroup', () => {
     const standaloneToggles = root.querySelectorAll<HTMLButtonElement>('button[hellToggle]');
     const standalone = standaloneToggles[0];
     const standaloneMap = standaloneToggles[1];
+    const plain = standaloneToggles[2];
     const group = query<HTMLElement>(root, '[hellToggleGroup]');
     const items = root.querySelectorAll<HTMLButtonElement>('button[hellToggleGroupItem]');
     const selected = items[0];
     const disabled = items[1];
 
+    const groupDefaults = TestBed.createComponent(ToggleGroupFormsHost);
+    groupDefaults.detectChanges();
+    const defaultGroup = query<HTMLElement>(groupDefaults.nativeElement, '#group');
+
     expect(standalone.getAttribute('data-slot')).toBe('root');
-    expect(standalone.classList.contains('bg-hell-danger')).toBe(true);
-    expect(standalone.classList.contains('px-hell-7')).toBe(true);
-    expect(standalone.classList.contains('px-hell-5')).toBe(false);
+    expectUiRouting(plain.className, standalone.className, 'bg-hell-danger px-hell-7');
     expect(standalone.hasAttribute('data-selected')).toBe(true);
 
     expect(standaloneMap.getAttribute('data-slot')).toBe('root');
-    expect(standaloneMap.classList.contains('bg-hell-danger')).toBe(true);
-    expect(standaloneMap.classList.contains('px-hell-7')).toBe(true);
-    expect(standaloneMap.classList.contains('px-hell-5')).toBe(false);
+    expectUiRouting(plain.className, standaloneMap.className, 'bg-hell-danger px-hell-7');
 
     expect(group.getAttribute('data-slot')).toBe('root');
-    expect(group.classList.contains('gap-hell-4')).toBe(true);
-    expect(group.classList.contains('bg-hell-danger-soft')).toBe(true);
+    expectUiRouting(defaultGroup.className, group.className, 'gap-hell-4 bg-hell-danger-soft');
 
     expect(selected.getAttribute('data-slot')).toBe('root');
-    expect(selected.classList.contains('px-hell-6')).toBe(true);
-    expect(selected.classList.contains('px-hell-4')).toBe(false);
-    expect(selected.classList.contains('text-hell-danger')).toBe(true);
+    expectUiRouting(disabled.className, selected.className, 'px-hell-6 text-hell-danger');
     expect(selected.hasAttribute('data-selected')).toBe(true);
 
     expect(disabled.getAttribute('data-slot')).toBe('root');
     expect(disabled.hasAttribute('data-disabled')).toBe(true);
   });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(TogglePartStyleHost);
+      const groupFixture = TestBed.createComponent(ToggleGroupFormsHost);
+      fixture.detectChanges();
+      groupFixture.detectChanges();
+
+      const toggles = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+        'button[hellToggle]',
+      );
+
+      expect({
+        toggle: sortClasses(toggles[2].className),
+        group: sortClasses(query<HTMLElement>(groupFixture.nativeElement, '#group').className),
+        item: sortClasses(button(groupFixture.nativeElement, 'bold').className),
+      }).toMatchSnapshot('toggle');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function group(root: HTMLElement): HTMLElement {
   const element = root.querySelector('#group');

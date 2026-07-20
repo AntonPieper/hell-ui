@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellProgress Part Style Maps > recipes > keeps the default part classes stable > progress 1`] = `
+{
+  "bar": [
+    "bg-hell-primary",
+    "block",
+    "duration-[var(--hell-duration-base)]",
+    "ease-[var(--ease-hell-out)]",
+    "h-full",
+    "rounded-[inherit]",
+    "transition-[width]",
+  ],
+  "progress": [
+    "bg-hell-surface-muted",
+    "block",
+    "h-[calc(var(--spacing)*1.5)]",
+    "overflow-hidden",
+    "relative",
+    "rounded-full",
+    "w-full",
+  ],
+}
+`;

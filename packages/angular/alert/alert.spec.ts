@@ -4,6 +4,16 @@ import { TestBed } from '@angular/core/testing';
 
 import { HELL_ALERT_IMPORTS, HellAlertUi, type HellAlertVariant, HELL_ALERT_LABELS } from './alert';
 
+/**
+ * Alert specs assert behavior and state attributes. Part-Class Pipeline merge
+ * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part.
+ */
+
 @Component({
   imports: [...HELL_ALERT_IMPORTS],
   template: `
@@ -46,12 +56,26 @@ describe('HellAlert', () => {
     await TestBed.configureTestingModule({ imports: [AlertHost] }).compileComponents();
   });
 
+  it('marks every alert part with its public data-slot', () => {
+    const fixture = TestBed.createComponent(AlertHost);
+    fixture.detectChanges();
+
+    expect(queryAlert(fixture.nativeElement).getAttribute('data-slot')).toBe('root');
+    for (const slot of ['icon', 'content']) {
+      expect(fixture.nativeElement.querySelector(`[data-slot="${slot}"]`)).not.toBeNull();
+    }
+    for (const id of ['title', 'description', 'actions', 'dismiss']) {
+      expect(
+        fixture.nativeElement.querySelector(`#${id}`)?.getAttribute('data-slot'),
+      ).toBe('root');
+    }
+  });
+
   it('reflects the variant as a data attribute without a live-region role', () => {
     const fixture = TestBed.createComponent(AlertHost);
     fixture.detectChanges();
 
     const alert = queryAlert(fixture.nativeElement);
-    expect(alert.getAttribute('data-slot')).toBe('root');
     expect(alert.getAttribute('data-variant')).toBe('info');
     expect(alert.getAttribute('role')).toBeNull();
     expect(alert.getAttribute('aria-live')).toBeNull();
@@ -93,9 +117,8 @@ describe('HellAlert', () => {
     fixture.detectChanges();
 
     const content = fixture.nativeElement.querySelector('[data-slot="content"]') as HTMLElement;
-    expect(content.querySelector('#title')?.getAttribute('data-slot')).toBe('root');
-    expect(content.querySelector('#description')?.getAttribute('data-slot')).toBe('root');
-    expect(content.querySelector('#actions')?.getAttribute('data-slot')).toBe('root');
+    expect(content.querySelector('#title')).not.toBeNull();
+    expect(content.querySelector('#description')).not.toBeNull();
     expect(content.querySelector('#actions #retry')).not.toBeNull();
   });
 
@@ -105,7 +128,6 @@ describe('HellAlert', () => {
 
     const dismiss = fixture.nativeElement.querySelector('#dismiss') as HTMLButtonElement;
     expect(dismiss.getAttribute('type')).toBe('button');
-    expect(dismiss.getAttribute('data-slot')).toBe('root');
     expect(dismiss.getAttribute('aria-label')).toBe('Dismiss');
 
     dismiss.click();
@@ -129,8 +151,19 @@ describe('HellAlert', () => {
     expect(dismiss.getAttribute('aria-label')).toBe('Dismiss');
   });
 
-  it('refines owned and projected parts through Part Style Maps', () => {
+  it('routes ui part maps through the shared Part-Class Pipeline', () => {
     const fixture = TestBed.createComponent(AlertHost);
+    fixture.detectChanges();
+
+    const alert = queryAlert(fixture.nativeElement);
+    const icon = fixture.nativeElement.querySelector('[data-slot="icon"]') as HTMLElement;
+    const content = fixture.nativeElement.querySelector('[data-slot="content"]') as HTMLElement;
+    const defaults = {
+      root: alert.className,
+      icon: icon.className,
+      content: content.className,
+    };
+
     fixture.componentInstance.ui.set({
       root: 'rounded-hell-xl',
       icon: 'text-hell-primary',
@@ -138,15 +171,26 @@ describe('HellAlert', () => {
     });
     fixture.detectChanges();
 
-    const alert = queryAlert(fixture.nativeElement);
-    const icon = fixture.nativeElement.querySelector('[data-slot="icon"]') as HTMLElement;
-    const content = fixture.nativeElement.querySelector('[data-slot="content"]') as HTMLElement;
+    expectUiRouting(defaults.root, alert.className, 'rounded-hell-xl');
+    expectUiRouting(defaults.icon, icon.className, 'text-hell-primary');
+    expectUiRouting(defaults.content, content.className, 'gap-hell-4');
+  });
 
-    expect(alert.className).toContain('rounded-hell-xl');
-    expect(alert.className).not.toContain('rounded-hell-md');
-    expect(icon.className).toContain('text-hell-primary');
-    expect(content.className).toContain('gap-hell-4');
-    expect(content.className).not.toContain('gap-hell-1');
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(AlertHost);
+      fixture.detectChanges();
+
+      expect({
+        root: renderedClasses(fixture, 'hell-alert'),
+        icon: renderedClasses(fixture, '[data-slot="icon"]'),
+        content: renderedClasses(fixture, '[data-slot="content"]'),
+        title: renderedClasses(fixture, '#title'),
+        description: renderedClasses(fixture, '#description'),
+        actions: renderedClasses(fixture, '#actions'),
+        dismiss: renderedClasses(fixture, '#dismiss'),
+      }).toMatchSnapshot('alert');
+    });
   });
 });
 
@@ -166,6 +210,32 @@ describe('HellAlert Label Contract', () => {
     expect(dismiss.getAttribute('aria-label')).toBe('Verwerfen');
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+/** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
+function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {
+  const element = fixture.nativeElement.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return sortClasses(element.className);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function queryAlert(root: HTMLElement): HTMLElement {
   const alert = root.querySelector('hell-alert');

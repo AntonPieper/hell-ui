@@ -3,6 +3,16 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellSkeleton } from './skeleton';
 
+/**
+ * Skeleton specs assert behavior and state attributes. Part-Class Pipeline merge
+ * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part.
+ */
+
 @Component({
   imports: [HellSkeleton],
   template: `<div id="skeleton-class-hook" hellSkeleton class="h-5 w-3/5"></div>`,
@@ -21,6 +31,7 @@ class SkeletonClassHookHost {}
       ui="rounded-full bg-hell-danger"
     ></div>
     <div id="skeleton-map" hellSkeleton [ui]="skeletonUi"></div>
+    <div id="skeleton-default" hellSkeleton></div>
   `,
 })
 class SkeletonPartStyleHost {
@@ -41,17 +52,17 @@ describe('HellSkeleton', () => {
     fixture.detectChanges();
 
     const skeleton = element(fixture.nativeElement, 'skeleton-string');
-    const classes = skeleton.className.split(/\s+/);
 
     expect(skeleton.getAttribute('data-slot')).toBe('root');
     expect(skeleton.getAttribute('data-shape')).toBe('rect');
     expect(skeleton.getAttribute('aria-hidden')).toBe('true');
     expect(skeleton.style.getPropertyValue('--_hell-skeleton-width')).toBe('12rem');
     expect(skeleton.style.getPropertyValue('--_hell-skeleton-height')).toBe('2rem');
-    expect(classes).toContain('rounded-full');
-    expect(classes).toContain('bg-hell-danger');
-    expect(classes).not.toContain('rounded-sm');
-    expect(classes).not.toContain('bg-hell-surface-muted');
+    expectUiRouting(
+      element(fixture.nativeElement, 'skeleton-default').className,
+      skeleton.className,
+      'rounded-full bg-hell-danger',
+    );
   });
 
   it('leaves sizing to consumer utility classes instead of recipe width/height utilities', () => {
@@ -82,10 +93,43 @@ describe('HellSkeleton', () => {
     const skeleton = element(fixture.nativeElement, 'skeleton-map');
 
     expect(skeleton.getAttribute('data-slot')).toBe('root');
-    expect(skeleton.className).toContain('min-h-hell-8');
-    expect(skeleton.className).toContain('bg-hell-info-soft');
+    expectUiRouting(
+      element(fixture.nativeElement, 'skeleton-default').className,
+      skeleton.className,
+      'min-h-hell-8 bg-hell-info-soft',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(SkeletonPartStyleHost);
+      fixture.detectChanges();
+
+      expect({
+        root: sortClasses(element(fixture.nativeElement, 'skeleton-default').className),
+      }).toMatchSnapshot('skeleton');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function element(root: HTMLElement, id: string): HTMLElement {
   const el = root.querySelector(`#${id}`);

@@ -5,6 +5,16 @@ import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellInput, HellTextarea } from './input';
 
+/**
+ * Input primitive specs assert behavior, field wiring, and state attributes.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach the part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per control.
+ */
+
 @Component({
   imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_IMPORTS],
   template: `
@@ -128,38 +138,55 @@ describe('Hell input primitives', () => {
 
   it('exposes a root part style map for input, native select and textarea', () => {
     const fixture = TestBed.createComponent(PartStyleHost);
+    const defaults = TestBed.createComponent(FieldControlHost);
     fixture.detectChanges();
+    defaults.detectChanges();
 
-    assertPartStyle(control(fixture, 'styled-input'), {
-      absentClass: 'hell-input',
-      mergedClasses: [
-        'data-[size=sm]:h-hell-control-sm',
-        'rounded-hell-pill',
-        'data-[size=sm]:px-hell-6',
-        'data-[size=sm]:text-sm',
-      ],
-      size: 'sm',
-    });
-    assertPartStyle(control(fixture, 'shorthand-input'), {
-      absentClass: 'hell-input',
-      mergedClasses: ['rounded-hell-pill', 'px-hell-6'],
-      size: 'md',
-    });
-    expect(control(fixture, 'shorthand-input').classList.contains('px-hell-4')).toBe(false);
+    assertPartStyle(control(fixture, 'styled-input'), { absentClass: 'hell-input', size: 'sm' });
+    expectUiRouting(
+      control(defaults, 'input-control').className,
+      control(fixture, 'styled-input').className,
+      'rounded-hell-pill data-[size=sm]:px-hell-6 data-[size=sm]:text-sm',
+    );
+
+    assertPartStyle(control(fixture, 'shorthand-input'), { absentClass: 'hell-input', size: 'md' });
+    expectUiRouting(
+      control(defaults, 'input-control').className,
+      control(fixture, 'shorthand-input').className,
+      'rounded-hell-pill px-hell-6',
+    );
+
     assertPartStyle(control(fixture, 'styled-select'), {
       absentClass: 'hell-native-select',
-      mergedClasses: [
-        'data-[size=lg]:h-hell-control-lg',
-        'rounded-hell-pill',
-        'border-hell-info',
-        'bg-hell-info-soft',
-      ],
       size: 'lg',
     });
+    expectUiRouting(
+      control(defaults, 'select-control').className,
+      control(fixture, 'styled-select').className,
+      'rounded-hell-pill border-hell-info bg-hell-info-soft',
+    );
+
     assertPartStyle(control(fixture, 'styled-textarea'), {
       absentClass: 'hell-textarea',
-      mergedClasses: ['min-h-32', 'rounded-hell-lg', 'resize-none'],
       size: 'lg',
+    });
+    expectUiRouting(
+      control(defaults, 'textarea-control').className,
+      control(fixture, 'styled-textarea').className,
+      'rounded-hell-lg min-h-32 resize-none',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(FieldControlHost);
+      fixture.detectChanges();
+
+      expect({
+        input: sortClasses(control(fixture, 'input-control').className),
+        nativeSelect: sortClasses(control(fixture, 'select-control').className),
+        textarea: sortClasses(control(fixture, 'textarea-control').className),
+      }).toMatchSnapshot('input');
     });
   });
 
@@ -223,15 +250,32 @@ function assertPartStyle(
   element: HTMLElement,
   options: {
     readonly absentClass: string;
-    readonly mergedClasses: readonly string[];
     readonly size: string;
   },
 ): void {
   expect(element.getAttribute('data-slot')).toBe('root');
   expect(element.getAttribute('data-size')).toBe(options.size);
+  // The legacy `.hell-*` stylesheet class is retired; its absence is the contract.
   expect(element.classList.contains(options.absentClass)).toBe(false);
-
-  for (const className of options.mergedClasses) {
-    expect(element.classList.contains(className), `${options.absentClass}.${className}`).toBe(true);
-  }
 }
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
+
+

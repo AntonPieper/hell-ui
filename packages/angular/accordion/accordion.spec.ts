@@ -1,11 +1,23 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-
 import { HELL_ACCORDION_IMPORTS } from './accordion';
+
+/**
+ * Accordion specs assert behavior and state attributes. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach each part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface per
+ * part.
+ */
+const ACCORDION_UI_SHORTHAND = 'rounded-hell-lg border-hell-danger';
 
 @Component({
   imports: [...HELL_ACCORDION_IMPORTS],
   template: `
+    <div id="plain-accordion" hellAccordion type="single"></div>
+
     <div
       id="accordion"
       hellAccordion
@@ -54,49 +66,53 @@ describe('HellAccordion', () => {
     await TestBed.configureTestingModule({ imports: [AccordionHost] }).compileComponents();
   });
 
-  it('exposes local root Part Style Maps while preserving accordion state behavior', () => {
+  it('marks every accordion part with its public data-slot', () => {
     const fixture = TestBed.createComponent(AccordionHost);
     fixture.detectChanges();
 
-    const accordion = query(fixture.nativeElement, '#accordion');
+    for (const selector of [
+      '#accordion',
+      '[data-accordion="install-item"]',
+      '[data-accordion="install-trigger"]',
+      '[data-accordion="install-content"]',
+    ]) {
+      expect(query(fixture.nativeElement, selector).getAttribute('data-slot')).toBe('root');
+    }
+  });
+
+  it('reflects open state and content interactivity through state attributes', () => {
+    const fixture = TestBed.createComponent(AccordionHost);
+    fixture.detectChanges();
+
     const installItem = query(fixture.nativeElement, '[data-accordion="install-item"]');
     const installTrigger = query<HTMLButtonElement>(
       fixture.nativeElement,
       '[data-accordion="install-trigger"]',
     );
     const installContent = query(fixture.nativeElement, '[data-accordion="install-content"]');
+    const themingContent = query(fixture.nativeElement, '[data-accordion="theming-content"]');
+
+    expect(installTrigger.type).toBe('button');
+    expect(installItem.getAttribute('data-open')).toBe('');
+    expect(installTrigger.getAttribute('data-open')).toBe('');
+    expect(installContent.getAttribute('data-open')).toBe('');
+    expect(installContent.getAttribute('aria-hidden')).toBeNull();
+    expect(installContent.getAttribute('inert')).toBeNull();
+
+    expect(themingContent.getAttribute('aria-hidden')).toBe('true');
+    expect(themingContent.getAttribute('inert')).toBe('');
+  });
+
+  it('moves the open panel through trigger activation', () => {
+    const fixture = TestBed.createComponent(AccordionHost);
+    fixture.detectChanges();
+
+    const installContent = query(fixture.nativeElement, '[data-accordion="install-content"]');
     const themingTrigger = query<HTMLButtonElement>(
       fixture.nativeElement,
       '[data-accordion="theming-trigger"]',
     );
     const themingContent = query(fixture.nativeElement, '[data-accordion="theming-content"]');
-
-    expect(accordion.getAttribute('data-slot')).toBe('root');
-    expect(accordion.classList.contains('rounded-hell-lg')).toBe(true);
-    expect(accordion.classList.contains('rounded-hell-md')).toBe(false);
-    expect(accordion.classList.contains('border-hell-danger')).toBe(true);
-    expect(accordion.classList.contains('border-hell-border')).toBe(false);
-
-    expect(installItem.getAttribute('data-slot')).toBe('root');
-    expect(installItem.getAttribute('data-open')).toBe('');
-    expect(installItem.classList.contains('border-b-0')).toBe(true);
-    expect(installItem.classList.contains('border-b')).toBe(false);
-    expect(installTrigger.type).toBe('button');
-    expect(installTrigger.getAttribute('data-slot')).toBe('root');
-    expect(installTrigger.getAttribute('data-open')).toBe('');
-    expect(installTrigger.classList.contains('px-hell-7')).toBe(true);
-    expect(installTrigger.classList.contains('px-hell-5')).toBe(false);
-    expect(installTrigger.classList.contains('text-hell-danger')).toBe(true);
-    expect(installTrigger.classList.contains('text-hell-foreground')).toBe(false);
-    expect(installContent.getAttribute('data-slot')).toBe('root');
-    expect(installContent.getAttribute('data-open')).toBe('');
-    expect(installContent.getAttribute('aria-hidden')).toBeNull();
-    expect(installContent.getAttribute('inert')).toBeNull();
-    expect(installContent.classList.contains('text-hell-foreground')).toBe(true);
-    expect(installContent.classList.contains('text-hell-foreground-muted')).toBe(false);
-
-    expect(themingContent.getAttribute('aria-hidden')).toBe('true');
-    expect(themingContent.getAttribute('inert')).toBe('');
 
     themingTrigger.click();
     fixture.detectChanges();
@@ -108,7 +124,75 @@ describe('HellAccordion', () => {
     expect(themingContent.getAttribute('aria-hidden')).toBeNull();
     expect(themingContent.getAttribute('inert')).toBeNull();
   });
+
+  it('routes ui shorthand and part maps through the shared Part-Class Pipeline', () => {
+    const fixture = TestBed.createComponent(AccordionHost);
+    fixture.detectChanges();
+
+    expectUiRouting(
+      className(fixture, '#plain-accordion'),
+      className(fixture, '#accordion'),
+      ACCORDION_UI_SHORTHAND,
+    );
+    expectUiRouting(
+      className(fixture, '[data-accordion="theming-item"]'),
+      className(fixture, '[data-accordion="install-item"]'),
+      'border-b-0',
+    );
+    expectUiRouting(
+      className(fixture, '[data-accordion="theming-trigger"]'),
+      className(fixture, '[data-accordion="install-trigger"]'),
+      'px-hell-7 text-hell-danger',
+    );
+    expectUiRouting(
+      className(fixture, '[data-accordion="theming-content"]'),
+      className(fixture, '[data-accordion="install-content"]'),
+      'text-hell-foreground',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(AccordionHost);
+      fixture.detectChanges();
+
+      expect({
+        accordion: renderedClasses(fixture, '#plain-accordion'),
+        item: renderedClasses(fixture, '[data-accordion="theming-item"]'),
+        trigger: renderedClasses(fixture, '[data-accordion="theming-trigger"]'),
+        content: renderedClasses(fixture, '[data-accordion="theming-content"]'),
+      }).toMatchSnapshot('accordion');
+    });
+  });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function className(fixture: { nativeElement: HTMLElement }, selector: string): string {
+  return query(fixture.nativeElement, selector).className;
+}
+
+/** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
+function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {
+  return sortClasses(className(fixture, selector));
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);
