@@ -379,7 +379,6 @@ describe('HellOmnibar command interaction runtime', () => {
     const fixture = TestBed.createComponent(OmnibarChipCompositionHost);
     fixture.detectChanges();
 
-    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
     const chip = query<HTMLElement>(fixture.nativeElement, '[hellChip]');
 

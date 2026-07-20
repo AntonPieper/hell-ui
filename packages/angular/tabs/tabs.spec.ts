@@ -146,10 +146,6 @@ function expectUiRouting(defaultClassName: string, customClassName: string, ui: 
   expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
 }
 
-function classAttr(element: Element | null): string {
-  return element?.getAttribute('class') ?? '';
-}
-
 function sortClasses(value: string): string[] {
   return value.split(/\s+/).filter(Boolean).sort();
 }
