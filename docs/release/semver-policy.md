@@ -51,7 +51,7 @@ A stage promotion is a release-management decision, not just a version bump.
 
 - Alpha → internal beta: package-consumer smoke coverage and API category docs exist; known gaps are recorded.
 - Internal beta → public beta: release evidence has no critical blockers, migration guide exists, and release dry-run evidence is fresh.
-- Public beta → stable: stable API reports, docs, accessibility evidence, package-consumer scenarios, pack audit, trusted publishing, and changelog/migration history have held through at least one public beta cycle.
+- Public beta → stable: stable API reports, docs, accessibility evidence, consumer fixtures, pack audit, trusted publishing, and changelog/migration history have held through at least one public beta cycle.
 
 If evidence invalidates these promises, update this policy and the release
 evidence in the same reviewed change instead of silently weakening the contract.

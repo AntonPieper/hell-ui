@@ -103,28 +103,36 @@ jobs:
           path: coverage/
           if-no-files-found: ignore
 
-  package-consumer:
-    name: Package consumer (${{ matrix.group }})
+  # The fixture set is discovered from tools/consumer-fixtures/ so adding or
+  # renaming a fixture never requires a workflow edit; the shard job names
+  # embed fixture names and are never pinned by rulesets (see the gate below).
+  package-consumer-plan:
+    name: Package consumer plan
     runs-on: ubuntu-latest
-    needs: build
+    timeout-minutes: 2
+    outputs:
+      fixtures: ${{ steps.plan.outputs.fixtures }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enumerate consumer fixtures
+        id: plan
+        run: |
+          fixtures="$(cd tools/consumer-fixtures && find . -mindepth 2 -maxdepth 2 -name fixture.json -exec dirname {} \; | sed 's|^\./||' | sort | jq --raw-input --slurp --compact-output 'split("\n") | map(select(length > 0))')"
+          test "$(echo "${fixtures}" | jq 'length')" -gt 0
+          echo "fixtures=${fixtures}" >> "$GITHUB_OUTPUT"
+          echo "Planned fixtures: ${fixtures}"
+
+  package-consumer:
+    name: Package consumer (${{ matrix.fixture }})
+    runs-on: ubuntu-latest
+    needs: [build, package-consumer-plan]
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        # Group names are owned by tools/check-package-consumer.mjs, which
-        # asserts every scenario belongs to exactly one group and fails on
-        # unknown group names. The extra "fixtures" group runs the checked-in
-        # consumer fixtures via tools/check-consumer-fixtures.mjs instead.
-        group:
-          - fixtures
-          - core
-          - primitive-foundations
-          - button
-          - composite-foundations
-          - audio
-          - features
-          - table-core
-          - table-tanstack-virtual
+        fixture: ${{ fromJSON(needs.package-consumer-plan.outputs.fixtures) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -152,24 +160,42 @@ jobs:
           name: package-tarball
           path: artifacts/package
 
-      - name: Package consumer scenario
-        if: matrix.group != 'fixtures'
-        env:
-          HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
-          HELL_PACKAGE_CONSUMER_GROUP: ${{ matrix.group }}
-        run: pnpm run ci:test:package-consumer
-
       # The fixture smoke loads the built consumer app in headless chromium.
       - name: Install Playwright chromium
-        if: matrix.group == 'fixtures'
         run: pnpm run ci:playwright:chromium
 
-      - name: Consumer fixtures
-        if: matrix.group == 'fixtures'
+      - name: Consumer fixture
         env:
           HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
           HELL_CONSUMER_FIXTURE_SMOKE: 1
-        run: pnpm run ci:test:consumer-fixtures
+        run: pnpm run ci:test:consumer-fixtures ${{ matrix.fixture }}
+
+  # Stable required-check context: fixture job names embed the fixture name
+  # ("Package consumer (root-core)", ...), so branch protection cannot pin
+  # per-fixture contexts without breaking on every fixture change. Rulesets
+  # pin this single "Package consumer" gate instead. It runs on every outcome
+  # (if: always()) and fails unless the plan and every planned fixture job
+  # succeeded, so a failed, cancelled, or skipped fixture can never slip past
+  # as a missing check.
+  package-consumer-gate:
+    name: Package consumer
+    runs-on: ubuntu-latest
+    needs: [package-consumer-plan, package-consumer]
+    if: always()
+    timeout-minutes: 2
+    steps:
+      - name: Assert every consumer fixture succeeded
+        env:
+          PLAN_RESULT: ${{ needs.package-consumer-plan.result }}
+          FIXTURES_RESULT: ${{ needs.package-consumer.result }}
+        run: |
+          echo "package-consumer-plan: ${PLAN_RESULT}"
+          echo "package-consumer fixtures: ${FIXTURES_RESULT}"
+          if [ "${PLAN_RESULT}" = "success" ] && [ "${FIXTURES_RESULT}" = "success" ]; then
+            exit 0
+          fi
+          echo "Package consumer gate failed: an upstream fixture job did not succeed." >&2
+          exit 1
 
   # Single producer of built output: every run builds the library and docs
   # fresh, audits and packs the tarball, and uploads both as immutable run

@@ -1,0 +1,10 @@
+{
+  "description": "testing API boundary: harnesses compile with package-wide light peers and no CSS",
+  "peerGroup": "core",
+  "forbiddenDependencies": [
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ]
+}

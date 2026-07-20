@@ -33,7 +33,7 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 The release workflow lives at `.github/workflows/npm-publish.yml` in this repository.
 
 - Tag pushes matching `v*.*.*` run `pnpm release:dry-run` first, then the
-  package-consumer scenarios and docs build. The shared dry-run owns changelog,
+  consumer fixtures and docs build. The shared dry-run owns changelog,
   lint, dead-code, architecture, coverage, library build, package lint/audit,
   and API-report checks so local and tagged release gates cannot drift.
 - The release publishes `@hell-ui/angular`; the tag must match the package version.
@@ -85,7 +85,7 @@ GitHub Packages npm registry through
 ## Release steps
 
 1. Update the `packages/angular/package.json` version in a release-prep change.
-2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all package-consumer scenarios run in the gate.
+2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all consumer fixtures run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.
 5. After publish, verify the npm package page shows provenance and that the GitHub Actions run contains the `release-package` artifact.

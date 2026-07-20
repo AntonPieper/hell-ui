@@ -31,7 +31,7 @@ The ideal shape is:
 
 - Root entrypoint stays light. No composites or heavy features from root.
 - Narrow entrypoints remain the default import path for real consumers.
-- Feature entrypoints must have explicit peer-dependency docs, package-consumer scenarios, and style import examples.
+- Feature entrypoints must have explicit peer-dependency docs, consumer fixtures, and style import examples.
 - Any new package export must include an entrypoint-local `hell-entrypoint.json`
   sidecar and be generated/guarded by the entrypoint tooling.
 

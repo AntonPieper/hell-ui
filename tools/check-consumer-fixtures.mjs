@@ -164,6 +164,7 @@ async function runFixture(fixture) {
     assertForbiddenDependenciesNotInstalled(fixture, workspace);
 
     runPnpm(['run', 'build'], workspace, label);
+    assertFixtureCssSentinels(fixture, workspace, label);
     await runFixtureSmoke(fixture, workspace, label);
 
     console.log(`[${label}] ok`);
@@ -293,6 +294,37 @@ function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
   }
 }
 
+// CSS sentinels are one or two distinctive fragments per imported stylesheet
+// export. They prove the stylesheet resolved from the packed tarball and
+// shipped compiled output; exhaustive fragment lists belong to unit tests,
+// not the packaging boundary.
+function assertFixtureCssSentinels(fixture, workspace, label) {
+  const sentinels = fixture.manifest.cssSentinels ?? [];
+  if (!sentinels.length) return;
+
+  const distRoot = join(workspace, 'dist');
+  const cssFiles = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
+  if (!cssFiles.length) fail(`Fixture ${fixture.name} build did not emit CSS under ${distRoot}`);
+
+  const builtCss = normalizeCssForSentinels(
+    cssFiles.map((file) => readFileSync(file, 'utf8')).join('\n'),
+  );
+  const missing = sentinels.filter(
+    (sentinel) => !builtCss.includes(normalizeCssForSentinels(sentinel)),
+  );
+  if (missing.length) {
+    fail(
+      `Fixture ${fixture.name} built CSS is missing sentinel(s): ${missing.join(' | ')}`,
+    );
+  }
+
+  console.log(`[${label}] ok: ${sentinels.length} CSS sentinel(s) found in built CSS`);
+}
+
+function normalizeCssForSentinels(css) {
+  return css.replace(/\s+/g, '');
+}
+
 async function runFixtureSmoke(fixture, workspace, label) {
   const smoke = fixture.manifest.smoke;
   if (!smoke) return;
@@ -325,7 +357,7 @@ async function runFixtureSmoke(fixture, workspace, label) {
 
     for (const step of steps) {
       await assertSmokeStep(fixture, page, step);
-      console.log(`[${label}] smoke ok: ${step.selector} contains ${JSON.stringify(step.textIncludes)}`);
+      console.log(`[${label}] smoke ok: ${describeSmokeStep(step)}`);
     }
   } catch (error) {
     fail(
@@ -337,11 +369,21 @@ async function runFixtureSmoke(fixture, workspace, label) {
   }
 }
 
+// A smoke step asserts either projected text ({ selector, textIncludes }) or a
+// resolved computed style ({ selector, computedStyle: { property, equals } });
+// the computed form proves semantic token overrides survive the packed build.
 async function assertSmokeStep(fixture, page, step) {
-  if (!step.selector || !step.textIncludes) {
-    fail(`Fixture ${fixture.name} smoke steps need selector and textIncludes`);
+  if (step.selector && step.textIncludes) return assertSmokeTextStep(fixture, page, step);
+  if (step.selector && step.computedStyle?.property && step.computedStyle.equals !== undefined) {
+    return assertSmokeComputedStyleStep(fixture, page, step);
   }
 
+  fail(
+    `Fixture ${fixture.name} smoke steps need selector plus textIncludes or computedStyle {property, equals}`,
+  );
+}
+
+async function assertSmokeTextStep(fixture, page, step) {
   const locator = page.locator(step.selector);
   const deadline = Date.now() + 15_000;
   let lastText = '';
@@ -356,6 +398,28 @@ async function assertSmokeStep(fixture, page, step) {
       step.textIncludes,
     )} but found ${JSON.stringify(lastText)}`,
   );
+}
+
+async function assertSmokeComputedStyleStep(fixture, page, step) {
+  const { property, equals } = step.computedStyle;
+  const locator = page.locator(step.selector);
+  await locator.waitFor({ state: 'visible' });
+  const actual = await locator.evaluate(
+    (element, styleProperty) => getComputedStyle(element).getPropertyValue(styleProperty).trim(),
+    property,
+  );
+  if (actual !== equals) {
+    fail(
+      `Fixture ${fixture.name} smoke expected ${step.selector} computed ${property}=${equals}, got ${actual}`,
+    );
+  }
+}
+
+function describeSmokeStep(step) {
+  if (step.textIncludes !== undefined) {
+    return `${step.selector} contains ${JSON.stringify(step.textIncludes)}`;
+  }
+  return `${step.selector} computed ${step.computedStyle.property} is ${JSON.stringify(step.computedStyle.equals)}`;
 }
 
 function fixtureBrowserBuildRoot(fixture, workspace) {

@@ -58,7 +58,7 @@ risk branch.
   helpers, and docs patterns. If the task needs a small generalization, improve
   the local primitive or composite instead of adding a one-off wrapper.
 - Contract: public surface changes keep exports, secondary entrypoints, docs
-  pages/examples/routes/nav/search, API reports, package-consumer scenarios, and
+  pages/examples/routes/nav/search, API reports, consumer fixtures, and
   architecture checks in sync. Use `CONTEXT.md` vocabulary in user-facing output.
 - Styling: library visuals go through Part Style Maps, Public Parts/data-slot,
   data attributes, semantic tokens, CSS custom properties, and component CSS. Do

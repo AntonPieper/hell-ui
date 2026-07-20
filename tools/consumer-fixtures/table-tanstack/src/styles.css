@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/checkbox/styles.css';
+@import '@hell-ui/angular/input/styles.css';
+@import '@hell-ui/angular/radio/styles.css';
+@import '@hell-ui/angular/table-tanstack/styles.css';

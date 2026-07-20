@@ -1,0 +1,29 @@
+{
+  "description": "icon-backed boundary: icon, date pickers, dialpad, and audio player with the transcript feature provider and icon peers installed",
+  "peerGroup": "composite-icons",
+  "forbiddenDependencies": [
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    ".max-w-\\[var\\(--hell-audio-max-width\\,none\\)\\]{max-width:var(--hell-audio-max-width,none)}",
+    ".animate-\\[hell-audio-captions-in_200ms_var\\(--ease-hell-out\\,ease\\)\\]{animation:hell-audio-captions-in .2s var(--ease-hell-out,ease)}",
+    "background-color:var(--color-hell-primary)",
+    "hell-date-range-picker[data-slot=root][data-range-complete]",
+    "--_hell-icon-color",
+    "hell-slider[data-slot=root]>[data-slot=track]:before",
+    "grid-template-columns:minmax(0,1fr) 42px",
+    "font-size:9px"
+  ],
+  "smoke": {
+    "steps": [
+      {
+        "selector": "[data-test-id=\"icon-audio-status\"]",
+        "textIncludes": "Icon-backed components ready"
+      }
+    ]
+  }
+}

@@ -17,7 +17,7 @@ const angularRecipeSourceFiles = JSON.parse(
   .filter((asset) => typeof asset === 'object' && asset.glob.endsWith('.ts'))
   .map((asset) => posix.join(asset.output, asset.glob));
 
-export const packagePeerGroups = Object.freeze({
+const packagePeerGroups = Object.freeze({
   core: Object.freeze([
     '@angular/cdk',
     '@angular/common',
@@ -43,26 +43,9 @@ export const packagePeerGroups = Object.freeze({
   tanStackVirtual: Object.freeze(['@tanstack/virtual-core']),
 });
 
-export const tableAdapterPeerGroup = Object.freeze([
-  ...packagePeerGroups.tanStackTable,
-  ...packagePeerGroups.tanStackVirtual,
-]);
-export const heavyFeaturePeerGroup = Object.freeze([
-  ...packagePeerGroups.codeEditor,
-  ...packagePeerGroups.pdfViewer,
-]);
-
-export const packageConsumerPeerTiers = new Set([
-  'core',
-  'primitive',
-  'composite',
-  'table',
-  'table-tanstack',
-  'audio-transcript',
-  'code-editor',
-  'pdf-viewer',
-]);
-
+// Peer group contracts name the strict-peer install sets the consumer
+// fixtures prove (tools/check-consumer-fixtures.mjs); the tier records which
+// consumption tier a group belongs to.
 export const peerGroupContracts = Object.freeze({
   core: { tier: 'core', peers: packagePeerGroups.core },
   'primitive-ui': { tier: 'primitive', peers: packagePeerGroups.core },

@@ -9,7 +9,7 @@ pnpm run ci:install
 pnpm run ci:test:static
 pnpm run ci:test:unit
 pnpm run ci:test:e2e
-pnpm run ci:test:package-consumer
+pnpm run ci:test:consumer-fixtures
 pnpm run ci:test:api-report:prepared
 ```
 
@@ -47,10 +47,21 @@ every planned shard succeeded, so a failed, cancelled, or skipped shard cannot
 pass as a missing check. Tier or shard-count changes therefore never require a
 ruleset edit.
 
-Package-consumer jobs select scenario groups with
-`HELL_PACKAGE_CONSUMER_GROUP`; the harness owns the group definitions and
-fails when a scenario is missing from group coverage or a group name is
-unknown.
+Package-consumer coverage is the checked-in fixture set under
+`tools/consumer-fixtures/` (see its README for the fixture contract). The
+`package-consumer-plan` job enumerates the fixture directories, and one matrix
+job per fixture runs `pnpm run ci:test:consumer-fixtures <fixture>` against
+the audited tarball artifact with the runtime smoke enabled. Adding, renaming,
+or removing a fixture therefore never requires a workflow edit.
+
+Fixture job names embed the fixture name (`Package consumer (root-core)`,
+`Package consumer (styled-controls)`, ...), so branch protection never pins
+per-fixture contexts — pinned per-fixture names would break on every fixture
+change. The `package-consumer-gate` job publishes the single stable
+`Package consumer` context for rulesets to require: it runs on every outcome
+(`if: always()`) and fails unless the plan and every planned fixture job
+succeeded, so a failed, cancelled, or skipped fixture cannot pass as a
+missing check. Fixture-set changes therefore never require a ruleset edit.
 
 `dist/` is never stored in or restored from a provider cache. The build job is
 the single producer of built output: every run checks the entrypoint manifests
