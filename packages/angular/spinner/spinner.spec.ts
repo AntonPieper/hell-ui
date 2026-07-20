@@ -4,6 +4,15 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellSpinner, HELL_SPINNER_LABELS } from './spinner';
 
+/**
+ * Spinner specs assert behavior, labels, and state attributes. Part-Class Pipeline
+ * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * ui routing asserts that consumer classes reach the part and that nothing
+ * outside the default render and the consumer's ui appears, instead of
+ * asserting individual recipe classes. Part Recipes stay package-private per
+ * ADR 0002, so the recipe snapshot below pins the rendered class surface.
+ */
+
 @Component({
   imports: [HellSpinner],
   providers: [provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' })],
@@ -18,6 +27,7 @@ class SpinnerHost {}
   imports: [HellSpinner],
   providers: [provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Loading from contract' })],
   template: `
+    <span id="spinner-default" hellSpinner></span>
     <span id="spinner-string" hellSpinner variant="dots" size="lg" ui="block text-hell-danger"></span>
     <span id="spinner-map" hellSpinner variant="bars" size="sm" [ui]="spinnerUi"></span>
   `,
@@ -58,7 +68,11 @@ describe('HellSpinner', () => {
     expect(spinnerMap.getAttribute('aria-label')).toBe('Loading from contract');
     expect(spinnerMap.getAttribute('data-variant')).toBe('bars');
     expect(spinnerMap.getAttribute('data-size')).toBe('sm');
-    expect(spinnerMap.className).toContain('text-hell-info');
+    expectUiRouting(
+      spinner(fixture.nativeElement, 'spinner-default').className,
+      spinnerMap.className,
+      'text-hell-info',
+    );
   });
 
   it('applies Spinner string shorthand through hellTwMerge without dropping label behavior', () => {
@@ -66,19 +80,49 @@ describe('HellSpinner', () => {
     fixture.detectChanges();
 
     const spinnerString = spinner(fixture.nativeElement, 'spinner-string');
-    const classes = spinnerString.className.split(/\s+/);
 
     expect(spinnerString.getAttribute('data-slot')).toBe('root');
     expect(spinnerString.getAttribute('role')).toBe('status');
     expect(spinnerString.getAttribute('aria-label')).toBe('Loading from contract');
     expect(spinnerString.getAttribute('data-variant')).toBe('dots');
     expect(spinnerString.getAttribute('data-size')).toBe('lg');
-    expect(classes).toContain('block');
-    expect(classes).toContain('text-hell-danger');
-    expect(classes).not.toContain('inline-block');
-    expect(classes).not.toContain('text-current');
+    expectUiRouting(
+      spinner(fixture.nativeElement, 'spinner-default').className,
+      spinnerString.className,
+      'block text-hell-danger',
+    );
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(SpinnerPartStyleHost);
+      fixture.detectChanges();
+
+      expect({
+        root: sortClasses(spinner(fixture.nativeElement, 'spinner-default').className),
+      }).toMatchSnapshot('spinner');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function spinner(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);

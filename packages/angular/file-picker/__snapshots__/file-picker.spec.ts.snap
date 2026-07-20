@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellFilePicker > recipes > keeps the default part classes stable > filePicker 1`] = `
+{
+  "root": [
+    "bg-hell-surface-subtle",
+    "border-[1.5px]",
+    "border-dashed",
+    "border-hell-border-strong",
+    "cursor-pointer",
+    "data-[disabled=true]:cursor-not-allowed",
+    "data-[disabled=true]:hover:bg-hell-surface-subtle",
+    "data-[disabled=true]:hover:border-hell-border-strong",
+    "data-[disabled=true]:opacity-60",
+    "data-[dragging=true]:bg-hell-primary-soft",
+    "data-[dragging=true]:border-hell-primary",
+    "data-[dragging=true]:text-hell-primary",
+    "duration-[var(--hell-duration-fast)]",
+    "ease-hell-out",
+    "flex",
+    "flex-col",
+    "focus-visible:border-hell-primary",
+    "focus-visible:outline-2",
+    "focus-visible:outline-hell-focus-ring",
+    "focus-visible:outline-offset-2",
+    "gap-hell-3",
+    "hover:bg-hell-primary-soft/50",
+    "hover:border-hell-primary",
+    "items-center",
+    "justify-center",
+    "min-h-[140px]",
+    "outline-none",
+    "p-hell-7",
+    "rounded-hell-lg",
+    "text-center",
+    "text-hell-foreground-muted",
+    "transition-[background-color,border-color,color]",
+  ],
+}
+`;

@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellSearch Part Style Map > recipes > keeps the default part classes stable > search 1`] = `
+{
+  "clear": [],
+  "search": [],
+}
+`;

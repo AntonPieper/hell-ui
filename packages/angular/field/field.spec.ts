@@ -4,6 +4,16 @@ import { TestBed } from '@angular/core/testing';
 import { HellInput } from '@hell-ui/angular/input';
 import { HELL_FIELD_IMPORTS } from './field';
 
+/**
+ * Field specs assert behavior, wiring, and state attributes. Part-Class
+ * Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+
 @Component({
   imports: [HellInput, ...HELL_FIELD_IMPORTS],
   template: `
@@ -12,6 +22,13 @@ import { HELL_FIELD_IMPORTS } from './field';
       <input id="string-control" hellInput />
       <div data-field="string-description" hellFieldDescription>Used for receipts.</div>
       <div data-field="string-error" hellFieldError>Required.</div>
+    </div>
+
+    <div id="default-field" hellField>
+      <label data-field="default-label" hellFieldLabel for="default-control">Plain</label>
+      <input id="default-control" hellInput />
+      <div data-field="default-description" hellFieldDescription>Plain description.</div>
+      <div data-field="default-error" hellFieldError>Plain error.</div>
     </div>
 
     <div id="mapped-field" hellField [ui]="fieldUi">
@@ -63,10 +80,16 @@ describe('HellField', () => {
     const mappedDescription = query(fixture.nativeElement, '[data-field="mapped-description"]');
     const mappedError = query(fixture.nativeElement, '[data-field="mapped-error"]');
 
+    const defaults = {
+      field: query(fixture.nativeElement, '#default-field').className,
+      label: query(fixture.nativeElement, '[data-field="default-label"]').className,
+      description: query(fixture.nativeElement, '[data-field="default-description"]').className,
+      error: query(fixture.nativeElement, '[data-field="default-error"]').className,
+    };
+
     expect(stringField.getAttribute('data-slot')).toBe('root');
     expect(stringField.getAttribute('data-orientation')).toBe('horizontal');
-    expect(stringField.classList.contains('gap-hell-4')).toBe(true);
-    expect(stringField.classList.contains('gap-hell-2')).toBe(false);
+    expectUiRouting(defaults.field, stringField.className, 'gap-hell-4');
     expect(stringLabel.htmlFor).toBe(stringInput.id);
     expect(stringInput.getAttribute('aria-labelledby')).toBe(stringLabel.id);
     expect(stringInput.getAttribute('aria-describedby')).toBe(stringDescription.id);
@@ -76,19 +99,47 @@ describe('HellField', () => {
 
     expect(mappedField.getAttribute('data-slot')).toBe('root');
     expect(mappedField.getAttribute('data-orientation')).toBe('vertical');
-    expect(mappedField.classList.contains('gap-hell-6')).toBe(true);
-    expect(mappedField.classList.contains('gap-hell-2')).toBe(false);
-    expect(mappedField.classList.contains('flex-row')).toBe(true);
-    expect(mappedField.classList.contains('flex-col')).toBe(false);
-    expect(mappedLabel.classList.contains('text-sm')).toBe(true);
-    expect(mappedLabel.classList.contains('text-xs')).toBe(false);
-    expect(mappedLabel.classList.contains('text-hell-danger')).toBe(true);
-    expect(mappedDescription.classList.contains('text-hell-danger')).toBe(true);
-    expect(mappedDescription.classList.contains('text-hell-foreground-muted')).toBe(false);
-    expect(mappedError.classList.contains('text-hell-foreground')).toBe(true);
-    expect(mappedError.classList.contains('text-hell-danger')).toBe(false);
+    expectUiRouting(defaults.field, mappedField.className, 'gap-hell-6 flex-row');
+    expectUiRouting(defaults.label, mappedLabel.className, 'text-sm text-hell-danger');
+    expectUiRouting(defaults.description, mappedDescription.className, 'text-hell-danger');
+    expectUiRouting(defaults.error, mappedError.className, 'text-hell-foreground');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(FieldHost);
+      fixture.detectChanges();
+
+      expect({
+        field: sortClasses(query(fixture.nativeElement, '#default-field').className),
+        label: sortClasses(query(fixture.nativeElement, '[data-field="default-label"]').className),
+        description: sortClasses(
+          query(fixture.nativeElement, '[data-field="default-description"]').className,
+        ),
+        error: sortClasses(query(fixture.nativeElement, '[data-field="default-error"]').className),
+      }).toMatchSnapshot('field');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

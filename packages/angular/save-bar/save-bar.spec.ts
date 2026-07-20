@@ -333,22 +333,59 @@ describe('HellSaveBar', () => {
     it('merges consumer refinements over the root and save recipes', () => {
       const fixture = setup();
       fixture.componentInstance.dirty.set(true);
+      fixture.detectChanges();
+      const host = bar(fixture);
+      const defaults = {
+        root: host.className,
+        save: query(host, '[data-slot="save"]').className,
+      };
+
       fixture.componentInstance.ui.set({ root: 'bg-hell-surface px-hell-2', save: 'min-w-32' });
+      fixture.detectChanges();
+
+      expect(host.getAttribute('data-slot')).toBe('root');
+      expectUiRouting(defaults.root, host.className, 'bg-hell-surface px-hell-2');
+      // The bar stays sticky in normal flow; refinements do not remove positioning.
+      expect(host.classList.contains('sticky')).toBe(true);
+      expectUiRouting(defaults.save, query(host, '[data-slot="save"]').className, 'min-w-32');
+    });
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = setup();
+      fixture.componentInstance.dirty.set(true);
       fixture.detectChanges();
       const host = bar(fixture);
 
-      expect(host.getAttribute('data-slot')).toBe('root');
-      expect(host.classList.contains('bg-hell-surface')).toBe(true);
-      expect(host.classList.contains('bg-hell-surface-elevated')).toBe(false);
-      expect(host.classList.contains('px-hell-2')).toBe(true);
-      expect(host.classList.contains('px-hell-5')).toBe(false);
-      // The bar stays sticky in normal flow; refinements do not remove positioning.
-      expect(host.classList.contains('sticky')).toBe(true);
-
-      expect(query(host, '[data-slot="save"]').classList.contains('min-w-32')).toBe(true);
+      expect({
+        root: sortClasses(host.className),
+        actions: sortClasses(query(host, '[data-slot="actions"]').className),
+        save: sortClasses(query(host, '[data-slot="save"]').className),
+        discard: sortClasses(query(host, '[data-slot="discard"]').className),
+      }).toMatchSnapshot('saveBar');
     });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

@@ -4,6 +4,16 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from './switch';
 
+/**
+ * Switch specs assert behavior, forms integration, and state attributes.
+ * Part-Class Pipeline merge semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * classes reach each part and that nothing outside the default render and the
+ * consumer's ui appears, instead of asserting individual recipe classes. Part
+ * Recipes stay package-private per ADR 0002, so the recipe snapshot below
+ * pins the rendered class surface per part.
+ */
+
 @Component({
   imports: [HellSwitch],
   template: `
@@ -88,6 +98,8 @@ class NativeSwitchFormHost {
 @Component({
   imports: [HellNativeSwitch, HellSwitch],
   template: `
+    <button data-testid="default-switch" hellSwitch [checked]="true"></button>
+    <input data-testid="default-native-switch" type="checkbox" hellNativeSwitch checked />
     <button id="custom-switch" hellSwitch [checked]="true" [ui]="switchUi"></button>
     <input
       id="native-switch"
@@ -248,35 +260,70 @@ describe('HellSwitch', () => {
     const fixture = TestBed.createComponent(SwitchPartStyleHost);
     fixture.detectChanges();
 
-    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+    const root = fixture.nativeElement as HTMLElement;
+    const defaults = query<HTMLButtonElement>(root, '[data-testid="default-switch"]');
+    const defaultNative = query<HTMLInputElement>(root, '[data-testid="default-native-switch"]');
+    const sw = query<HTMLButtonElement>(root, '#custom-switch');
     const thumb = sw.querySelector<HTMLElement>('[data-slot="thumb"]');
-    const native = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeSwitch]');
-    const nativeMap = query<HTMLInputElement>(fixture.nativeElement, '#native-map-switch');
+    const defaultThumb = defaults.querySelector<HTMLElement>('[data-slot="thumb"]');
+    const native = query<HTMLInputElement>(root, '#native-switch');
+    const nativeMap = query<HTMLInputElement>(root, '#native-map-switch');
 
     expect(sw.getAttribute('data-slot')).toBe('root');
-    expect(sw.classList.contains('w-[44px]')).toBe(true);
-    expect(sw.classList.contains('bg-hell-danger')).toBe(true);
-    expect(sw.classList.contains('bg-hell-border-strong')).toBe(false);
     expect(sw.getAttribute('aria-checked')).toBe('true');
+    expectUiRouting(classAttr(defaults), classAttr(sw), 'w-[44px] bg-hell-danger');
 
     expect(thumb).toBeInstanceOf(HTMLElement);
-    expect(thumb?.classList.contains('size-hell-6')).toBe(true);
-    expect(thumb?.classList.contains('size-hell-5')).toBe(false);
-    expect(thumb?.classList.contains('bg-hell-danger-soft')).toBe(true);
+    expectUiRouting(classAttr(defaultThumb), classAttr(thumb), 'size-hell-6 bg-hell-danger-soft');
 
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('w-[44px]')).toBe(true);
-    expect(native.classList.contains('bg-hell-danger')).toBe(true);
-    expect(native.classList.contains('bg-hell-border-strong')).toBe(false);
+    expectUiRouting(classAttr(defaultNative), classAttr(native), 'w-[44px] bg-hell-danger');
     expect(native.getAttribute('data-required')).toBe('true');
     expect(native.getAttribute('aria-required')).toBe('true');
 
     expect(nativeMap.getAttribute('data-slot')).toBe('root');
-    expect(nativeMap.classList.contains('w-[44px]')).toBe(true);
-    expect(nativeMap.classList.contains('bg-hell-danger')).toBe(true);
-    expect(nativeMap.classList.contains('bg-hell-border-strong')).toBe(false);
+    expectUiRouting(classAttr(defaultNative), classAttr(nativeMap), 'w-[44px] bg-hell-danger');
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(SwitchPartStyleHost);
+      fixture.detectChanges();
+
+      const root = fixture.nativeElement as HTMLElement;
+      const defaults = query<HTMLButtonElement>(root, '[data-testid="default-switch"]');
+
+      expect({
+        root: sortClasses(classAttr(defaults)),
+        thumb: sortClasses(classAttr(defaults.querySelector('[data-slot="thumb"]'))),
+        nativeRoot: sortClasses(classAttr(query(root, '[data-testid="default-native-switch"]'))),
+      }).toMatchSnapshot('switch');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function classAttr(element: Element | null): string {
+  return element?.getAttribute('class') ?? '';
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);

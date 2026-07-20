@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellField > recipes > keeps the default part classes stable > field 1`] = `
+{
+  "description": [
+    "data-[orientation=horizontal]:basis-full",
+    "text-hell-foreground-muted",
+    "text-xs",
+  ],
+  "error": [
+    "data-[orientation=horizontal]:basis-full",
+    "text-hell-danger",
+    "text-xs",
+  ],
+  "field": [
+    "data-[orientation=horizontal]:flex-row",
+    "data-[orientation=horizontal]:flex-wrap",
+    "data-[orientation=horizontal]:gap-hell-3",
+    "data-[orientation=horizontal]:items-center",
+    "flex",
+    "flex-col",
+    "gap-hell-2",
+    "min-w-0",
+  ],
+  "label": [
+    "font-semibold",
+    "gap-hell-2",
+    "inline-flex",
+    "items-center",
+    "text-hell-foreground",
+    "text-xs",
+    "tracking-normal",
+  ],
+}
+`;

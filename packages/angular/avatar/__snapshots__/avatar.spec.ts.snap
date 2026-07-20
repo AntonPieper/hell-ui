@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellAvatar Part Style Map > recipes > keeps the default part classes stable > avatar 1`] = `
+{
+  "fallback": [
+    "font-semibold",
+    "text-[calc(var(--_hell-av-size)*0.4)]",
+    "text-hell-primary-soft-foreground",
+    "tracking-[0.02em]",
+  ],
+  "image": [
+    "h-full",
+    "object-cover",
+    "w-full",
+  ],
+  "root": [
+    "[--_hell-av-size:32px]",
+    "bg-hell-primary-soft",
+    "border-2",
+    "border-[color:var(--_hell-avatar-border,var(--color-hell-surface-elevated))]",
+    "border-solid",
+    "data-[shape=square]:rounded-hell-md",
+    "data-[size=lg]:[--_hell-av-size:40px]",
+    "data-[size=md]:[--_hell-av-size:32px]",
+    "data-[size=sm]:[--_hell-av-size:26px]",
+    "data-[size=xl]:[--_hell-av-size:56px]",
+    "data-[size=xs]:[--_hell-av-size:20px]",
+    "duration-[var(--hell-duration-fast)]",
+    "ease-[var(--ease-hell-out)]",
+    "h-[var(--_hell-av-size)]",
+    "inline-flex",
+    "items-center",
+    "justify-center",
+    "overflow-hidden",
+    "relative",
+    "rounded-full",
+    "select-none",
+    "shrink-0",
+    "transition-[border-color]",
+    "w-[var(--_hell-av-size)]",
+  ],
+}
+`;

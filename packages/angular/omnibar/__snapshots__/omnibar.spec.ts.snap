@@ -1,0 +1,59 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellOmnibar command interaction runtime > recipes > keeps the default part classes stable > omnibar 1`] = `
+{
+  "action": [
+    "gap-hell-1",
+    "inline-flex",
+    "items-center",
+    "rounded-hell-sm",
+  ],
+  "chipComposedRoot": [
+    "flex-nowrap",
+    "gap-0",
+    "inline-flex",
+    "relative",
+    "w-full",
+  ],
+  "control": [
+    "gap-hell-2",
+    "inline-flex",
+    "items-center",
+    "w-full",
+  ],
+  "item": [
+    "[&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]",
+    "bg-transparent",
+    "border-0",
+    "cursor-pointer",
+    "data-active:bg-hell-surface-muted",
+    "data-selected:bg-hell-primary-soft",
+    "data-selected:font-medium",
+    "data-selected:text-hell-primary-soft-foreground",
+    "flex",
+    "focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]",
+    "font-[inherit]",
+    "gap-hell-3",
+    "items-center",
+    "outline-none",
+    "px-[calc(var(--spacing)*2.5)]",
+    "py-[calc(var(--spacing)*1.5)]",
+    "rounded-hell-sm",
+    "text-[13px]",
+    "text-hell-foreground",
+    "text-start",
+    "w-full",
+  ],
+  "panel": [
+    "flex",
+    "flex-col",
+    "overflow-hidden",
+    "w-full",
+  ],
+  "root": [
+    "inline-flex",
+    "relative",
+    "w-full",
+  ],
+}
+`;

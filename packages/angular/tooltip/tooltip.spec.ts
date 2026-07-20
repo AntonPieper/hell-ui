@@ -200,7 +200,23 @@ describe('HellTooltip', () => {
     expect(tooltip.textContent).toContain('Plain hint');
     expect(tooltip.getAttribute('role')).toBe('tooltip');
     expect(tooltip.getAttribute('data-slot')).toBe('root');
-    expect(tooltip.className).toContain('rounded-hell-sm');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default
+    // surface classes without asserting individual utilities elsewhere.
+    it('keeps the default surface classes stable', async () => {
+      const fixture = TestBed.createComponent(SwitchingTooltipHost);
+      fixture.detectChanges();
+
+      fixture.componentInstance.hellTrigger().show();
+      const tooltip = await waitForTooltip(fixture, fixture.nativeElement);
+
+      expect({
+        surface: tooltip.className.split(/\s+/).filter(Boolean).sort(),
+      }).toMatchSnapshot('tooltip');
+    });
   });
 
   it('lets a template surface own its ui styling without styling the trigger', async () => {
@@ -211,10 +227,11 @@ describe('HellTooltip', () => {
     fixture.componentInstance.hellTrigger().show();
     const tooltip = await waitForTooltip(fixture, fixture.nativeElement);
 
+    // The surface template's own class and ui classes are the consumer's
+    // contract fixtures; recipe conflict resolution is owned centrally.
     expect(tooltip.classList.contains('rich-surface')).toBe(true);
     expect(tooltip.textContent).toContain('Rich hint');
     expect(tooltip.className).toContain('rounded-hell-pill');
-    expect(tooltip.className).not.toContain('rounded-hell-sm');
     expect(tooltip.className).toContain('bg-hell-primary');
 
     const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#trigger');

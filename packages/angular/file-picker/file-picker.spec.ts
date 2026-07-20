@@ -51,6 +51,22 @@ class FilePickerHost {
   nestedClicks = 0;
 }
 
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
 describe('HellFilePicker', () => {
   const announce = vi.fn(() => Promise.resolve());
 
@@ -85,21 +101,33 @@ describe('HellFilePicker', () => {
 
   it('merges string shorthand into the root Part Style Map', () => {
     const fixture = TestBed.createComponent(FilePickerHost);
+    fixture.detectChanges();
+    const defaultClassName = pickerElement(fixture.nativeElement).className;
+
     fixture.componentInstance.ui.set(
       'grid min-h-hell-10 border-hell-danger bg-hell-danger-soft text-hell-danger',
     );
     fixture.detectChanges();
 
-    const classes = pickerElement(fixture.nativeElement).className.split(/\s+/);
-    expect(classes).toContain('grid');
-    expect(classes).toContain('min-h-hell-10');
-    expect(classes).toContain('border-hell-danger');
-    expect(classes).toContain('bg-hell-danger-soft');
-    expect(classes).toContain('text-hell-danger');
-    expect(classes).not.toContain('flex');
-    expect(classes).not.toContain('min-h-[140px]');
-    expect(classes).not.toContain('border-hell-border-strong');
-    expect(classes).not.toContain('bg-hell-surface-subtle');
+    expectUiRouting(
+      defaultClassName,
+      pickerElement(fixture.nativeElement).className,
+      'grid min-h-hell-10 border-hell-danger bg-hell-danger-soft text-hell-danger',
+    );
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(FilePickerHost);
+      fixture.detectChanges();
+
+      expect({
+        root: pickerElement(fixture.nativeElement).className.split(/\s+/).filter(Boolean).sort(),
+      }).toMatchSnapshot('filePicker');
+    });
   });
 
   it('opens from the host and ordinary content without hijacking nested controls', () => {

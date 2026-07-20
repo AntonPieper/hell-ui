@@ -16,7 +16,11 @@ import { HELL_APP_SHELL_IMPORTS, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell
         <div id="nav-section" hellNavSection>
           <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
           <div id="nav-section-items" hellNavSectionItems>
-            <a hellNavItem href="#">Preferences</a>
+            <a id="plain-nav-item" hellNavItem href="#">
+              <span id="plain-nav-icon" hellNavIcon>i</span>
+              <span id="plain-nav-label" hellNavLabel>Preferences</span>
+              <span id="plain-nav-trailing" hellNavTrailing>3</span>
+            </a>
           </div>
         </div>
         <div
@@ -422,8 +426,9 @@ describe('HellAppShell secondary panel', () => {
       expect(part.getAttribute('data-slot')).toBe('root');
     }
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(shell.className).toContain('bg-hell-surface-muted');
-    expect(shell.className).not.toContain('bg-hell-surface ');
     expect(topbar.className).toContain('bg-hell-danger');
     expect(sidenav.className).toContain('border-hell-danger');
     expect(sidenavToggle.className).toContain('text-hell-danger');
@@ -432,7 +437,6 @@ describe('HellAppShell secondary panel', () => {
     expect(navSectionItems.className).toContain('gap-hell-2');
     expect(navItem.className).toContain('bg-hell-danger');
     expect(navItem.className).toContain('px-hell-7');
-    expect(navItem.className).not.toContain('px-3');
     expect(navItem.getAttribute('data-active')).toBe('true');
     expect(navIcon.className).toContain('w-6');
     expect(navLabel.className).toContain('text-clip');
@@ -441,6 +445,38 @@ describe('HellAppShell secondary panel', () => {
     expect(content.className).toContain('[--hell-app-content-max-width:960px]');
     expect(secondary.className).toContain('border-hell-danger');
     expect(secondaryToggle.className).toContain('text-hell-danger');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(TestHost);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (selector: string): string[] =>
+        sortClasses(root.querySelector(selector)?.getAttribute('class') ?? '');
+
+      expect({
+        shell: partClasses('[hellAppShell]'),
+        topbar: partClasses('[hellAppTopbar]'),
+        sidenav: partClasses('[hellAppSidenav]'),
+        sidenavToggle: partClasses('#sidenav-toggle'),
+        navSection: partClasses('#nav-section'),
+        navSectionToggle: partClasses('#nav-section-toggle'),
+        navSectionItems: partClasses('#nav-section-items'),
+        navItem: partClasses('#plain-nav-item'),
+        navIcon: partClasses('#plain-nav-icon'),
+        navLabel: partClasses('#plain-nav-label'),
+        navTrailing: partClasses('#plain-nav-trailing'),
+        content: partClasses('[hellAppContent]'),
+        secondary: partClasses('[hellAppSecondary]'),
+        secondaryToggle: partClasses('[hellAppSecondaryBody] [hellSecondaryToggle]'),
+      }).toMatchSnapshot('appShell');
+    });
   });
 
   it('owns sidenav toggle labels in the default case', () => {

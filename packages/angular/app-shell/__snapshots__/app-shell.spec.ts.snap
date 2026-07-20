@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HellAppShell secondary panel > recipes > keeps the default part classes stable > appShell 1`] = `
+{
+  "content": [
+    "bg-hell-surface-subtle",
+    "p-hell-6",
+  ],
+  "navIcon": [],
+  "navItem": [
+    "aria-[current=page]:bg-hell-primary-soft",
+    "aria-[current=page]:font-semibold",
+    "aria-[current=page]:text-hell-primary",
+    "data-[active=true]:bg-hell-primary-soft",
+    "data-[active=true]:text-hell-primary",
+    "gap-hell-3",
+    "hover:bg-hell-surface-subtle",
+    "hover:text-hell-foreground",
+    "px-3",
+    "py-2",
+    "rounded-md",
+    "text-hell-foreground-muted",
+  ],
+  "navLabel": [],
+  "navSection": [
+    "flex",
+    "flex-col",
+  ],
+  "navSectionItems": [
+    "gap-0.5",
+  ],
+  "navSectionToggle": [
+    "focus-visible:outline-hell-focus-ring",
+    "gap-hell-2",
+    "hover:bg-hell-surface-subtle",
+    "hover:text-hell-foreground",
+    "px-3",
+    "py-1.5",
+    "rounded-hell-sm",
+    "text-hell-foreground-subtle",
+  ],
+  "navTrailing": [],
+  "secondary": [
+    "bg-hell-surface-elevated",
+    "border-hell-border",
+  ],
+  "secondaryToggle": [],
+  "shell": [
+    "bg-hell-surface",
+    "text-hell-foreground",
+  ],
+  "sidenav": [
+    "bg-hell-surface-elevated",
+    "border-hell-border",
+    "gap-0.5",
+    "p-hell-3",
+  ],
+  "sidenavToggle": [
+    "hover:text-hell-foreground",
+    "text-hell-foreground-muted",
+  ],
+  "topbar": [
+    "bg-hell-surface-elevated",
+    "border-hell-border",
+    "gap-hell-3",
+    "pe-hell-4",
+  ],
+}
+`;

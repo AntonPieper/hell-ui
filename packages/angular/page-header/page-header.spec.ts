@@ -117,6 +117,8 @@ describe('HellPageHeader', () => {
     instance.ui.set({ root: 'bg-hell-surface-muted', title: 'text-3xl', toolbar: 'gap-hell-4' });
     fixture.detectChanges();
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(query(fixture.nativeElement, 'hell-page-header').className).toContain(
       'bg-hell-surface-muted',
     );
@@ -182,6 +184,19 @@ describe('page-header recipe module', () => {
     for (const className of HELL_PAGE_HEADER_LAYOUT_CLASSES.titleRow.split(/\s+/)) {
       expect(titleRow.classList, `title row wrapper class ${className}`).toContain(className);
     }
+  });
+
+  describe('recipes', () => {
+    it('keeps the default part classes stable', () => {
+      const classesByPart = (recipe: Readonly<Record<string, string>>): Record<string, string[]> =>
+        Object.fromEntries(
+          Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
+        );
+
+      expect(classesByPart(HELL_PAGE_HEADER_RECIPE)).toMatchSnapshot('pageHeader');
+      expect(classesByPart(HELL_PAGE_HEADER_BACK_RECIPE)).toMatchSnapshot('pageHeaderBack');
+      expect(classesByPart(HELL_PAGE_HEADER_LAYOUT_CLASSES)).toMatchSnapshot('pageHeaderLayout');
+    });
   });
 });
 

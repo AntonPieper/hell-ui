@@ -120,6 +120,8 @@ describe('HellDialpad labels', () => {
     expect(query(host, '[data-slot="callButton"]').textContent?.trim()).toBe('Call');
   });
 
+  // Touch-target sizing is a deliberate accessibility contract, so these
+  // specific classes are themselves the public contract of the dialpad keys.
   it('keeps native controls at the expected touch target sizes', () => {
     const fixture = TestBed.createComponent(DialpadHost);
     fixture.detectChanges();
@@ -137,26 +139,63 @@ describe('HellDialpad labels', () => {
 
   it('merges consumer ui classes through the part-class pipeline', () => {
     const fixture = TestBed.createComponent(UiDialpadHost);
+    const defaults = TestBed.createComponent(DialpadHost);
     fixture.detectChanges();
+    defaults.detectChanges();
 
     const host = fixture.nativeElement;
-    const dialpad = query(host, 'hell-dialpad');
-    const input = numberInput(host);
-    const clear = query(host, '[data-slot="clearButton"]');
-    const key = query(host, '[data-slot="keyButton"]');
-    const call = query(host, '[data-slot="callButton"]');
+    const defaultHost = defaults.nativeElement;
 
-    expect(dialpad.className).toContain('max-w-[360px]');
-    expect(dialpad.className).not.toContain('max-w-[300px]');
-    expect(dialpad.classList.contains('gap-hell-2')).toBe(false);
-    expect(input.className).toContain('text-3xl');
-    expect(input.className).not.toContain('text-2xl');
-    expect(clear.className).toContain('bg-emerald-600');
-    expect(clear.classList.contains('bg-hell-danger')).toBe(false);
-    expect(key.classList.contains('rounded-full')).toBe(true);
-    expect(key.classList.contains('rounded-hell-md')).toBe(false);
-    expect(call.classList.contains('shadow-none')).toBe(true);
-    expect(call.classList.contains('shadow-sm')).toBe(false);
+    expectUiRouting(
+      query(defaultHost, 'hell-dialpad').className,
+      query(host, 'hell-dialpad').className,
+      'max-w-[360px] gap-4',
+    );
+    expectUiRouting(
+      numberInput(defaultHost).className,
+      numberInput(host).className,
+      'text-3xl text-[var(--color-hell-primary)]',
+    );
+    expectUiRouting(
+      query(defaultHost, '[data-slot="clearButton"]').className,
+      query(host, '[data-slot="clearButton"]').className,
+      'bg-emerald-600 border-emerald-600 hover:bg-emerald-700',
+    );
+    expectUiRouting(
+      query(defaultHost, '[data-slot="keyButton"]').className,
+      query(host, '[data-slot="keyButton"]').className,
+      'rounded-full',
+    );
+    expectUiRouting(
+      query(defaultHost, '[data-slot="callButton"]').className,
+      query(host, '[data-slot="callButton"]').className,
+      'shadow-none',
+    );
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      fixture.detectChanges();
+      const host = fixture.nativeElement as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (slot: string): string[] =>
+        sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
+
+      expect({
+        root: sortClasses(query(host, 'hell-dialpad').className),
+        displayLabel: partClasses('displayLabel'),
+        numberInput: sortClasses(numberInput(host).className),
+        clearButton: partClasses('clearButton'),
+        backspaceButton: partClasses('backspaceButton'),
+        keyButton: partClasses('keyButton'),
+        callButton: partClasses('callButton'),
+      }).toMatchSnapshot('dialpad');
+    });
   });
 
   it('supports label overrides via HELL_DIALPAD_LABELS', () => {
@@ -416,6 +455,22 @@ describe('HellDialpad labels', () => {
     expect(backspace.getAttribute('disabled')).toBe('');
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

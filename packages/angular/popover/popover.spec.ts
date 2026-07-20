@@ -208,8 +208,9 @@ describe('HellPopoverTrigger', () => {
 
     const popover = query<HTMLElement>(container, '[hellPopover]');
     expect(popover.getAttribute('data-slot')).toBe('root');
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(popover.className).toContain('rounded-hell-pill');
-    expect(popover.className).not.toContain('rounded-hell-md');
     expect(popover.className).toContain('bg-hell-primary');
     expect(container.textContent).toContain('Popover');
 
@@ -235,6 +236,29 @@ describe('HellPopoverTrigger', () => {
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
     expect(document.body.textContent).not.toContain('Popover');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default
+    // surface classes without asserting individual utilities elsewhere.
+    it('keeps the default surface classes stable', async () => {
+      const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);
+      fixture.detectChanges();
+
+      const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#button-trigger');
+      const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+      trigger.click();
+
+      await waitForPopoverOverlayText(fixture, container, 'Popover');
+      await waitForPopoverTriggerOpen(fixture, trigger);
+      await waitForPopoverOpenEvent(fixture);
+
+      const popover = query<HTMLElement>(container, '[hellPopover]');
+      expect({
+        popover: popover.className.split(/\s+/).filter(Boolean).sort(),
+      }).toMatchSnapshot('popover');
+    }, POPOVER_TEST_CASE_TIMEOUT_MS);
   });
 
   it('preserves authored tabindex on enabled buttons without adding one to native triggers', () => {

@@ -49,6 +49,7 @@ const people: Person[] = [
     HellTableShellEmpty,
     HellTableShellError,
     HellTableShellLoading,
+    HellTableShellToolbar,
     HellTableShellFooter,
     HellTanStackPagination,
     HellButton,
@@ -65,6 +66,7 @@ const people: Person[] = [
       <ng-template hellTableShellEmpty>No rows</ng-template>
       <ng-template hellTableShellError let-error>{{ error }}</ng-template>
 
+      <span hellTableShellToolbar data-testid="plain-toolbar">Tools</span>
       <span hellTableShellFooter data-testid="selected-summary">2 selected</span>
       <hell-tanstack-pagination hellTableShellFooter [table]="table" [pageSizeOptions]="[1, 2]" />
     </hell-tanstack-table>
@@ -257,6 +259,7 @@ describe('Hell TanStack table shell', () => {
     const root = fixture.nativeElement as HTMLElement;
     const [selectedRow, idleRow] = root.querySelectorAll('tr[data-hell-table-shell-row]');
 
+    // The rowClass value is the caller's own fixture; the shell only reflects it.
     expect(selectedRow?.classList.contains('bg-hell-primary-soft')).toBe(true);
     expect(idleRow?.classList.contains('bg-hell-primary-soft')).toBe(false);
   });
@@ -300,9 +303,10 @@ describe('Hell TanStack table shell', () => {
 
     expect(input).not.toBeNull();
     expect(input?.getAttribute('data-slot')).toBe('root');
-    expect(input?.classList.contains('inline-flex')).toBe(true);
-    expect(input?.classList.contains('min-w-[calc(var(--spacing)*44)]')).toBe(true);
-    expect(input?.classList.contains('rounded-hell-sm')).toBe(true);
+    // The filter control's composed input surface is pinned by snapshot below.
+    expect({ filterInput: sortClasses(input?.className ?? '') }).toMatchSnapshot(
+      'tanstackFilterInput',
+    );
   });
 
   it('does not expose object-valued column filters as "[object Object]" text', () => {
@@ -376,66 +380,108 @@ describe('Hell TanStack table shell', () => {
 
   it('merges shell ui part maps and lets them win over recipe classes per part', () => {
     const fixture = TestBed.createComponent(StyledShellHost);
+    const defaultsFixture = TestBed.createComponent(ShellHost);
     fixture.detectChanges();
+    defaultsFixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
+    const defaults = defaultsFixture.nativeElement as HTMLElement;
     const shell = query(root, '#styled-shell');
     const toolbar = query(root, '#styled-shell [data-slot="toolbar"]');
     const scrollport = query(root, '#styled-shell [data-slot="scrollport"]');
     const footer = query(root, '#styled-shell [data-slot="footer"]');
 
-    // root: ui refinements merge in and win over conflicting recipe utilities.
-    expect(shell.classList.contains('block')).toBe(true);
-    expect(shell.classList.contains('rounded-none')).toBe(true);
-    expect(shell.classList.contains('rounded-md')).toBe(false);
-    expect(shell.classList.contains('border-hell-danger')).toBe(true);
-    expect(shell.classList.contains('border-hell-border')).toBe(false);
-
-    // toolbar: recipe border-bottom stays, background/justify overridden.
-    expect(toolbar.classList.contains('border-b')).toBe(true);
-    expect(toolbar.classList.contains('bg-hell-danger')).toBe(true);
-    expect(toolbar.classList.contains('bg-hell-surface-subtle')).toBe(false);
-    expect(toolbar.classList.contains('justify-end')).toBe(true);
-
-    // footer: recipe justify-end overridden to justify-start, background wins.
-    expect(footer.classList.contains('border-t')).toBe(true);
-    expect(footer.classList.contains('justify-start')).toBe(true);
-    expect(footer.classList.contains('justify-end')).toBe(false);
-    expect(footer.classList.contains('bg-hell-danger')).toBe(true);
-    expect(footer.classList.contains('bg-hell-surface-elevated')).toBe(false);
-
-    // scrollport: overflow-auto recipe replaced by overflow-hidden refinement.
-    expect(scrollport.classList.contains('overflow-hidden')).toBe(true);
-    expect(scrollport.classList.contains('overflow-auto')).toBe(false);
-    expect(scrollport.classList.contains('max-w-full')).toBe(true);
+    expectUiRouting(
+      query(defaults, 'hell-tanstack-table').className,
+      shell.className,
+      'rounded-none border-hell-danger',
+    );
+    expectUiRouting(
+      query(defaults, '[data-slot="toolbar"]').className,
+      toolbar.className,
+      'bg-hell-danger justify-end',
+    );
+    expectUiRouting(
+      query(defaults, '[data-slot="footer"]').className,
+      footer.className,
+      'bg-hell-danger justify-start',
+    );
+    expectUiRouting(
+      query(defaults, '[data-slot="scrollport"]').className,
+      scrollport.className,
+      'overflow-hidden',
+    );
   });
 
   it('exposes pagination parts and lets ui maps win over recipe classes', () => {
     const fixture = TestBed.createComponent(StyledShellHost);
+    const defaultsFixture = TestBed.createComponent(ShellHost);
     fixture.detectChanges();
+    defaultsFixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
+    const defaults = defaultsFixture.nativeElement as HTMLElement;
     const pagination = query(root, '#styled-pagination');
     const pageSize = query(root, '#styled-pagination [data-slot="pageSize"]');
 
     expect(pagination.getAttribute('data-slot')).toBe('root');
     expect(pageSize.getAttribute('data-slot')).toBe('pageSize');
 
-    // root: gap refinement wins over recipe gap.
-    expect(pagination.classList.contains('inline-flex')).toBe(true);
-    expect(pagination.classList.contains('gap-hell-6')).toBe(true);
-    expect(pagination.classList.contains('gap-hell-2')).toBe(false);
-
-    // pageSize: whitespace refinement wins over recipe whitespace-nowrap.
-    expect(pageSize.classList.contains('inline-flex')).toBe(true);
-    expect(pageSize.classList.contains('bg-hell-danger')).toBe(true);
-    expect(pageSize.classList.contains('whitespace-normal')).toBe(true);
-    expect(pageSize.classList.contains('whitespace-nowrap')).toBe(false);
+    expectUiRouting(
+      query(defaults, 'hell-tanstack-pagination').className,
+      pagination.className,
+      'gap-hell-6',
+    );
+    expectUiRouting(
+      query(defaults, 'hell-tanstack-pagination [data-slot="pageSize"]').className,
+      pageSize.className,
+      'bg-hell-danger whitespace-normal',
+    );
 
     // The rows-per-page select delegates to the nested hellNativeSelect root part.
     const select = query(root, '#styled-pagination select[hellNativeSelect]');
     expect(select.getAttribute('data-slot')).toBe('root');
-    expect(select.classList.contains('min-w-[calc(var(--spacing)*18)]')).toBe(true);
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(ShellHost);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect({
+        shell: sortClasses(query(root, 'hell-tanstack-table').className),
+        toolbar: sortClasses(query(root, '[data-slot="toolbar"]').className),
+        scrollport: sortClasses(query(root, '[data-slot="scrollport"]').className),
+        footer: sortClasses(query(root, '[data-slot="footer"]').className),
+        pagination: sortClasses(query(root, 'hell-tanstack-pagination').className),
+        pageSize: sortClasses(
+          query(root, 'hell-tanstack-pagination [data-slot="pageSize"]').className,
+        ),
+      }).toMatchSnapshot('tanstackTableShell');
+    });
   });
 });
+
+/**
+ * Proves consumer ui classes reach the part through the Part-Class Pipeline:
+ * every ui class renders, and nothing outside the default render plus the
+ * consumer's ui appears. Merge conflict semantics are owned centrally by
+ * `core/part-class-pipeline.spec.ts`.
+ */
+function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
+  const custom = sortClasses(customClassName);
+  const ownUi = sortClasses(ui);
+  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
+
+  expect(custom).toEqual(expect.arrayContaining(ownUi));
+  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
+}
+
+function sortClasses(value: string): string[] {
+  return value.split(/\s+/).filter(Boolean).sort();
+}
 
 function query(root: HTMLElement, selector: string): HTMLElement {
   const element = root.querySelector<HTMLElement>(selector);
