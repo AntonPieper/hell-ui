@@ -496,6 +496,8 @@ describe('Hell table utilities directives', () => {
       }
     }
 
+    // The consumer ui classes are the test's own contract fixtures; recipe
+    // conflict resolution is owned centrally by the Part-Class Pipeline spec.
     expect(byId<HTMLElement>(root, 'ui-container').className).toContain('rounded-hell-lg');
     expect(byId<HTMLElement>(root, 'ui-container').getAttribute('aria-busy')).toBe('true');
     expect(byId<HTMLElement>(root, 'ui-table').className).toContain('text-sm');
@@ -518,6 +520,38 @@ describe('Hell table utilities directives', () => {
     expect(byId<HTMLElement>(root, 'ui-resize').className).toContain('w-hell-6');
     expect(byId<HTMLElement>(root, 'ui-resize').querySelector('[data-slot="grip"]')?.className)
       .toContain('bg-hell-danger');
+  });
+
+  describe('recipes', () => {
+    // Part-Class Pipeline merge semantics are owned centrally by
+    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // classes without asserting individual utilities elsewhere.
+    it('keeps the default part classes stable', () => {
+      const fixture = TestBed.createComponent(TableUtilitiesHost);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const sortClasses = (value: string): string[] =>
+        value.split(/\s+/).filter(Boolean).sort();
+      const partClasses = (selector: string): string[] => {
+        const element = root.querySelector(selector);
+        return sortClasses(element?.getAttribute('class') ?? '');
+      };
+
+      expect({
+        table: partClasses('table[hellTable]'),
+        head: partClasses('thead[hellTableHead]'),
+        body: partClasses('tbody[hellTableBody]'),
+        row: partClasses('#person-row'),
+        headerCell: partClasses('#name'),
+        cell: partClasses('td[hellTableCell]'),
+        sortTrigger: partClasses('#name-sort'),
+        rowAction: partClasses('#row-action'),
+        rowCheckbox: partClasses('#row-checkbox'),
+        rowRadio: partClasses('#row-radio'),
+        resizeHandle: partClasses('#name-resizer'),
+        resizeGrip: partClasses('#name-resizer [data-slot="grip"]'),
+      }).toMatchSnapshot('tableUtilities');
+    });
   });
 
   it('preserves non-owned classes when stacked table directives update classes', () => {
