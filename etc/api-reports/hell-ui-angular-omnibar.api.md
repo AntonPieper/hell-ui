@@ -136,11 +136,6 @@ export interface HellOmnibarSubmitEvent<T = unknown> {
 // @public
 export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-omnibar.d.ts:98:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:99:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
-
 // (No @packageDocumentation comment for this package)
 
 ```

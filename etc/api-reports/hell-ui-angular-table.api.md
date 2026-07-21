@@ -23,7 +23,7 @@ export const HELL_TABLE_UTILITIES_LABELS: InjectionToken<HellLabels<HellTableUti
 class HellTable {
     constructor();
     readonly contentWidth: _angular_core.WritableSignal<boolean>;
-    // Warning: (ae-missing-getter) The property "contentWidthInput" has a setter but no getter.
+    get contentWidthInput(): boolean;
     set contentWidthInput(value: boolean);
     static ngAcceptInputType_contentWidthInput: unknown;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -49,13 +49,13 @@ export class HellTableBody {
 export class HellTableCell {
     constructor();
     readonly align: _angular_core.WritableSignal<"start" | "center" | "end">;
-    // Warning: (ae-missing-getter) The property "alignInput" has a setter but no getter.
+    get alignInput(): 'start' | 'center' | 'end';
     set alignInput(value: 'start' | 'center' | 'end');
     readonly host: any;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected role(): string | null;
     readonly space: _angular_core.WritableSignal<"normal" | "empty">;
-    // Warning: (ae-missing-getter) The property "spaceInput" has a setter but no getter.
+    get spaceInput(): 'normal' | 'empty';
     set spaceInput(value: 'normal' | 'empty');
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableCell, "[hellTableCell]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "alignInput": { "alias": "align"; "required": false; }; "spaceInput": { "alias": "space"; "required": false; }; }, {}, never, never, true, never>;
@@ -92,7 +92,7 @@ export class HellTableHeaderCell implements OnDestroy {
     constructor();
     protected readonly ariaSort: _angular_core.Signal<"ascending" | "descending" | null>;
     readonly columnId: _angular_core.WritableSignal<string | null>;
-    // Warning: (ae-missing-getter) The property "columnIdInput" has a setter but no getter.
+    get columnIdInput(): string | null;
     set columnIdInput(value: string | null);
     commit(px: number): void;
     readonly head: HellTableHead | null;
@@ -106,9 +106,9 @@ export class HellTableHeaderCell implements OnDestroy {
     setLiveWidth(px: number): void;
     readonly sort: _angular_core.WritableSignal<"asc" | "desc" | null>;
     readonly sortable: _angular_core.WritableSignal<boolean>;
-    // Warning: (ae-missing-getter) The property "sortableInput" has a setter but no getter.
+    get sortableInput(): boolean;
     set sortableInput(value: boolean);
-    // Warning: (ae-missing-getter) The property "sortInput" has a setter but no getter.
+    get sortInput(): 'asc' | 'desc' | null;
     set sortInput(value: 'asc' | 'desc' | null);
     readonly sortToggle: _angular_core.OutputEmitterRef<MouseEvent | KeyboardEvent>;
     toggleSortFrom(e: MouseEvent | KeyboardEvent): void;
@@ -207,14 +207,14 @@ export interface HellTableResizeSide {
 export class HellTableRow {
     constructor();
     readonly active: _angular_core.WritableSignal<boolean>;
-    // Warning: (ae-missing-getter) The property "activeInput" has a setter but no getter.
+    get activeInput(): boolean;
     set activeInput(value: boolean);
     static ngAcceptInputType_activeInput: unknown;
     static ngAcceptInputType_selectedInput: unknown;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     protected role(): string | null;
     readonly selected: _angular_core.WritableSignal<boolean>;
-    // Warning: (ae-missing-getter) The property "selectedInput" has a setter but no getter.
+    get selectedInput(): boolean;
     set selectedInput(value: boolean);
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableRow, "[hellTableRow]", ["hellTableRow"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "activeInput": { "alias": "active"; "required": false; }; "selectedInput": { "alias": "selected"; "required": false; }; }, {}, never, never, true, never>;

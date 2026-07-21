@@ -17,6 +17,9 @@ import { resolve } from 'node:path';
  *   allowlist entry below with a rationale.
  * - `ae-unresolved-link`: a TSDoc `@link` target does not resolve. Fix the
  *   reference; there is no allowlist for broken links.
+ * - `ae-missing-getter`: a public property declares a setter without a
+ *   getter, making the member write-only. Add the getter or restructure the
+ *   member; there is no allowlist for setter-only properties.
  *
  * It also keeps shared cross-entrypoint contracts explicit: every named
  * symbol a public report imports from a guarded `internal/*` sibling entry
@@ -102,6 +105,8 @@ const classifiedInternalContracts = [
 const forgottenExportPattern =
   /\(ae-forgotten-export\) The symbol "([^"]+)" needs to be exported/g;
 const unresolvedLinkPattern = /\(ae-unresolved-link\)\s*([^\n]*)/g;
+const missingGetterPattern =
+  /\(ae-missing-getter\) The property "([^"]+)" has a setter but no getter/g;
 const namedImportPattern = /^import \{ ([^}]+) \} from '([^']+)';$/gm;
 const namespaceImportPattern = /^import \* as \S+ from '([^']+)';$/gm;
 const internalSpecifierPattern = /^@hell-ui\/angular\/internal\//;
@@ -142,6 +147,17 @@ export function scanApiReportWarnings({
   for (const match of reportText.matchAll(unresolvedLinkPattern)) {
     failures.push(
       `${specifier}: (ae-unresolved-link) ${match[1].trim()} — fix the @link target; broken references are release blocking`,
+    );
+  }
+
+  const setterOnlyProperties = new Set();
+  for (const match of reportText.matchAll(missingGetterPattern)) {
+    const property = match[1];
+    if (setterOnlyProperties.has(property)) continue;
+    setterOnlyProperties.add(property);
+    failures.push(
+      `${specifier}: (ae-missing-getter) "${property}" has a setter but no getter — add the getter or ` +
+        'restructure the member; setter-only properties are release blocking',
     );
   }
 
@@ -282,6 +298,19 @@ export function checkApiReportWarningGateFixture() {
   });
   assert.equal(linkFailures.length, 1, 'an unresolved link must fail');
   assert.match(linkFailures[0], /ae-unresolved-link/, 'the failure must name the category');
+
+  const missingGetterReport = [
+    '// Warning: (ae-missing-getter) The property "setterOnly" has a setter but no getter.',
+    '// fixture.d.ts:9:5 - (ae-missing-getter) The property "setterOnly" has a setter but no getter.',
+  ].join('\n');
+  const missingGetterFailures = scanApiReportWarnings({
+    specifier,
+    reportText: missingGetterReport,
+    allowlist: new Map(),
+  });
+  assert.equal(missingGetterFailures.length, 1, 'a repeated setter-only property must fail exactly once');
+  assert.match(missingGetterFailures[0], /ae-missing-getter/, 'the failure must name the category');
+  assert.match(missingGetterFailures[0], /"setterOnly"/, 'the failure must name the property');
 
   const internalImportReport = [
     "import { FixtureContract } from '@hell-ui/angular/internal/fixture';",

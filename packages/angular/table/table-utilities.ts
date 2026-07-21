@@ -314,8 +314,11 @@ export class HellTable {
     return this.roleSupport.role();
   }
 
-  /** Sets `contentWidth` from the `contentWidth` attribute input. */
+  /** Reads and sets `contentWidth` through the `contentWidth` attribute input. */
   @Input({ alias: 'contentWidth', transform: booleanAttribute })
+  get contentWidthInput(): boolean {
+    return this.contentWidth();
+  }
   set contentWidthInput(value: boolean) {
     this.contentWidth.set(value);
   }
@@ -476,14 +479,20 @@ export class HellTableRow {
     return this.roleSupport.role();
   }
 
-  /** Sets `active` from the `active` attribute input. */
+  /** Reads and sets `active` through the `active` attribute input. */
   @Input({ alias: 'active', transform: booleanAttribute })
+  get activeInput(): boolean {
+    return this.active();
+  }
   set activeInput(value: boolean) {
     this.active.set(value);
   }
 
-  /** Sets `selected` from the `selected` attribute input. */
+  /** Reads and sets `selected` through the `selected` attribute input. */
   @Input({ alias: 'selected', transform: booleanAttribute })
+  get selectedInput(): boolean {
+    return this.selected();
+  }
   set selectedInput(value: boolean) {
     this.selected.set(value);
   }
@@ -689,20 +698,29 @@ export class HellTableHeaderCell implements OnDestroy {
   /** Stable column id used by resize adapters, or `null` when unset. */
   readonly columnId = signal<string | null>(null);
 
-  /** Sets `sort` from the `sort` attribute input. */
+  /** Reads and sets `sort` through the `sort` attribute input. */
   @Input({ alias: 'sort' })
+  get sortInput(): 'asc' | 'desc' | null {
+    return this.sort();
+  }
   set sortInput(value: 'asc' | 'desc' | null) {
     this.sort.set(value);
   }
 
-  /** Sets `sortable` from the `sortable` attribute input. */
+  /** Reads and sets `sortable` through the `sortable` attribute input. */
   @Input({ alias: 'sortable', transform: booleanAttribute })
+  get sortableInput(): boolean {
+    return this.sortable();
+  }
   set sortableInput(value: boolean) {
     this.sortable.set(value);
   }
 
-  /** Sets `columnId` from the `columnId` attribute input. */
+  /** Reads and sets `columnId` through the `columnId` attribute input. */
   @Input({ alias: 'columnId' })
+  get columnIdInput(): string | null {
+    return this.columnId();
+  }
   set columnIdInput(value: string | null) {
     this.columnId.set(value);
   }
@@ -879,14 +897,20 @@ export class HellTableCell {
     return this.roleSupport.role();
   }
 
-  /** Sets `align` from the `align` attribute input. */
+  /** Reads and sets `align` through the `align` attribute input. */
   @Input({ alias: 'align' })
+  get alignInput(): 'start' | 'center' | 'end' {
+    return this.align();
+  }
   set alignInput(value: 'start' | 'center' | 'end') {
     this.align.set(value);
   }
 
-  /** Sets `space` from the `space` attribute input. */
+  /** Reads and sets `space` through the `space` attribute input. */
   @Input({ alias: 'space' })
+  get spaceInput(): 'normal' | 'empty' {
+    return this.space();
+  }
   set spaceInput(value: 'normal' | 'empty') {
     this.space.set(value);
   }

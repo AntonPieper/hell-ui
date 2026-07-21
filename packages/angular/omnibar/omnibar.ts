@@ -24,6 +24,7 @@ import {
   model,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import {
   HELL_FLOATING_SCOPE,
@@ -456,28 +457,8 @@ export class HellOmnibar {
   @ViewChild(CdkConnectedOverlay) private connectedOverlay?: CdkConnectedOverlay;
   @ViewChild('control', { static: true }) private controlRef?: ElementRef<HTMLElement>;
   @ViewChild('input', { static: true }) private inputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('panel') private set panelRef(ref: ElementRef<HTMLElement> | undefined) {
-    const next = ref?.nativeElement ?? null;
-    if (next === this.overlayPanelElement) return;
-
-    this.unregisterOverlayPanel();
-    this.overlayPanelElement = next;
-
-    if (next) {
-      this.controller.registerFloatingElement(next);
-      this.syncOverlayPanelStyles();
-    }
-  }
-  @ViewChild('floatingOutlet') private set floatingOutletRef(
-    ref: ElementRef<HTMLElement> | undefined,
-  ) {
-    const next = ref?.nativeElement ?? null;
-    if (next === this.floatingOutletElement) return;
-
-    this.unregisterFloatingOutlet();
-    this.floatingOutletElement = next;
-    if (next) this.controller.registerFloatingElement(next);
-  }
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly floatingOutletRef = viewChild<ElementRef<HTMLElement>>('floatingOutlet');
   private floatingOutletElement: HTMLElement | null = null;
   private overlayGeometryCleanup: VoidFunction | null = null;
   private overlayGeometryFrame: number | null = null;
@@ -521,6 +502,8 @@ export class HellOmnibar {
       queueMicrotask(() => this.syncOverlayGeometry());
       onCleanup(() => this.stopOverlayGeometryTracking());
     });
+    effect(() => this.trackOverlayPanel(this.panelRef()?.nativeElement ?? null));
+    effect(() => this.trackFloatingOutlet(this.floatingOutletRef()?.nativeElement ?? null));
 
     this.installHotkey();
     this.floatingFocusDismissal.connect(this.destroyRef);
@@ -736,6 +719,26 @@ export class HellOmnibar {
       const value = styles.getPropertyValue(variable);
       if (value) panel.style.setProperty(variable, value.trim());
     }
+  }
+
+  private trackOverlayPanel(next: HTMLElement | null): void {
+    if (next === this.overlayPanelElement) return;
+
+    this.unregisterOverlayPanel();
+    this.overlayPanelElement = next;
+
+    if (next) {
+      this.controller.registerFloatingElement(next);
+      this.syncOverlayPanelStyles();
+    }
+  }
+
+  private trackFloatingOutlet(next: HTMLElement | null): void {
+    if (next === this.floatingOutletElement) return;
+
+    this.unregisterFloatingOutlet();
+    this.floatingOutletElement = next;
+    if (next) this.controller.registerFloatingElement(next);
   }
 
   private unregisterOverlayPanel(): void {
