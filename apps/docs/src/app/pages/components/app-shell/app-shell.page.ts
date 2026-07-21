@@ -93,15 +93,26 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <app-app-shell-basic-example />
       </hd-example-tabs>
 
-      <h2>Sidenav navigation</h2>
+      <h2>Sidenav navigation recipe</h2>
       <p>
-        A <code>hellNavItem</code> composes a leading <code>hellNavItemIcon</code>, a
-        <code>hellNavItemLabel</code>, and an optional <code>hellNavItemTrailing</code> slot for a
-        count or badge. Mark the current route with <code>aria-current="page"</code>. Group related
-        items with <code>hellNavSection</code> + <code>hellNavSectionToggle</code> +
-        <code>hellNavSectionItems</code>; the toggle owns <code>aria-expanded</code> and the section
-        owns collapse state. When the rail itself is collapsed, labels and section headings hide and
-        items fall back to reachable icons.
+        Navigation is consumer-owned markup, not an app-shell API: each entry is a plain
+        <code>&lt;a&gt;</code> composing a <code>hell-icon</code>, a label
+        <code>&lt;span&gt;</code>, and optional trailing content such as a
+        <code>hellChip</code> count. Mark the current route with
+        <code>aria-current="page"</code> and style it through an
+        <code>aria-[current=page]:*</code> variant. The shell reflects its responsive state as
+        stable attributes — <code>data-collapsed</code> on the sidenav plus
+        <code>data-sidenav-collapsed</code>, <code>data-mobile-layout</code>, and friends on the
+        shell root — so rail mode is pure CSS: <code>in-data-[collapsed=true]:*</code> variants
+        hide labels and center icons when the rail collapses.
+      </p>
+      <p>
+        A collapsible group is a small disclosure recipe: the app owns the expanded state, binds
+        <code>aria-expanded</code> on a heading <code>&lt;button&gt;</code>, and hides collapsed
+        items with <code>visibility: hidden</code> so they leave the accessibility tree and tab
+        order. Keying the same rules off <code>[hellAppSidenav][data-collapsed='true']</code>
+        hides the heading, draws a divider, and force-expands the group so every item stays
+        reachable while the rail is icon-only.
       </p>
       <hd-example-tabs [code]="sidenavExampleCode" flush>
         <app-app-shell-sidenav-example />
@@ -156,28 +167,15 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <code>ui="…"</code> to refine that default part with a shorthand class string, or the
         equivalent map form <code>[ui]="&#123; root: '…' &#125;"</code>. Each directive's
         <code>ui</code> styles only the DOM that directive owns, so a shell is themed by refining the
-        individual slots — the topbar, sidenav, nav items, toggles, and secondary panel each carry
-        their own recipe.
+        individual slots — the topbar, sidenav, content, toggles, and secondary panel each carry
+        their own recipe. Navigation markup is consumer-owned, so it has no Part Style Map: edit
+        its recipe classes directly.
       </p>
       <p>Public parts by module (all single-part <code>root</code>):</p>
       <ul>
         <li><code>hellAppShell</code> → <code>root</code>: the grid container surface.</li>
         <li><code>hellAppTopbar</code> → <code>root</code>: the top bar row.</li>
         <li><code>hellAppSidenav</code> → <code>root</code>: the sidenav rail.</li>
-        <li><code>hellNavItem</code> → <code>root</code>: a single nav entry.</li>
-        <li><code>hellNavItemIcon</code> → <code>root</code>: a nav item's leading icon.</li>
-        <li><code>hellNavItemLabel</code> → <code>root</code>: a nav item's text label.</li>
-        <li>
-          <code>hellNavItemTrailing</code> → <code>root</code>: a nav item's trailing slot (badge or
-          count).
-        </li>
-        <li><code>hellNavSection</code> → <code>root</code>: a collapsible group wrapper.</li>
-        <li>
-          <code>hellNavSectionToggle</code> → <code>root</code>: the section heading toggle button.
-        </li>
-        <li>
-          <code>hellNavSectionItems</code> → <code>root</code>: the collapsible items container.
-        </li>
         <li><code>hellAppContent</code> → <code>root</code>: the scrolling content region.</li>
         <li><code>hellSidenavToggle</code> → <code>root</code>: the sidenav toggle button.</li>
         <li><code>hellSecondaryToggle</code> → <code>root</code>: the secondary toggle button.</li>
@@ -236,17 +234,10 @@ const HD_APP_SHELL_PAGE_ICONS = {
           <code>hellAppSecondaryBody</code> for the header action.
         </li>
         <li>
-          <code>hellNavItem</code> — nav entry. Inputs: <code>[active]</code> (boolean, default
-          <code>false</code>) and <code>[ui]</code>. Slots: <code>hellNavItemIcon</code>,
-          <code>hellNavItemLabel</code>, <code>hellNavItemTrailing</code> (each takes
-          <code>[ui]</code>).
-        </li>
-        <li>
-          <code>hellNavSection</code> — collapsible group. Inputs: <code>[collapsed]</code>
-          (<code>boolean | null</code>, default <code>null</code> = uncontrolled), output
-          <code>(collapsedChange)</code>, plus <code>[ui]</code>. Compose with
-          <code>hellNavSectionToggle</code> (button; owns <code>aria-expanded</code>) and
-          <code>hellNavSectionItems</code> (each takes <code>[ui]</code>).
+          Navigation items, labels, icons, trailing content, and collapsible groups are recipes
+          over existing primitives (<code>&lt;a&gt;</code>, <code>&lt;button&gt;</code>,
+          <code>hell-icon</code>, <code>hellChip</code>) styled through the shell's stable state
+          attributes — see the sidenav navigation recipe above.
         </li>
         <li>
           <code>ui</code> everywhere accepts a shorthand string or a <code>Hell*Ui</code> map keyed
@@ -270,20 +261,22 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
         <li>
           Give each navigation surface its own <code>aria-label</code> on the <code>nav</code>
-          element, and mark the current route with <code>aria-current="page"</code> — the nav item
-          styles the current page automatically.
+          element, and mark the current route with <code>aria-current="page"</code> so the recipe's
+          <code>aria-[current=page]:*</code> classes style the current page.
         </li>
         <li>
-          Collapsed sidenavs, hidden secondary bodies, and collapsed section items receive
-          <code>aria-hidden</code> and <code>inert</code> so their controls leave the tab order.
+          Collapsed sidenavs and hidden secondary bodies receive <code>aria-hidden</code> and
+          <code>inert</code> so their controls leave the tab order. In the collapsible group
+          recipe, collapsed items get <code>visibility: hidden</code>, which removes them from the
+          accessibility tree and tab order the same way.
         </li>
         <li>
           On the mobile overlay layout, opening a drawer traps focus inside it and restores focus to
           the opener on close; an outside pointer press or <kbd>Escape</kbd> dismisses open drawers.
         </li>
         <li>
-          <code>hellNavSectionToggle</code> reflects its section's open state through
-          <code>aria-expanded</code>.
+          Give each collapsible-group heading button an <code>aria-expanded</code> binding that
+          reflects the app-owned expanded state.
         </li>
       </ul>
 
@@ -311,8 +304,9 @@ const HD_APP_SHELL_PAGE_ICONS = {
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>
-          Don't add free-text section headings inside the sidenav — the rail draws its own dividers
-          in collapsed mode, so use <code>hellNavSection</code> instead.
+          Don't add free-text section headings inside the sidenav — they have no rail-mode
+          treatment. Use the collapsible group recipe, whose heading hides behind a divider when
+          the rail collapses.
         </li>
         <li>
           Don't apply the toggle directives to non-<code>button</code> elements; native

@@ -2,8 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidGauge,
-  faSolidGear,
-  faSolidKey,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
 import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
@@ -11,10 +9,19 @@ import { HellIcon } from '@hell-ui/angular/icon';
 
 const HD_APP_SHELL_STYLING_ICONS = {
   faSolidGauge,
-  faSolidGear,
-  faSolidKey,
   faSolidUsers,
 };
+
+/**
+ * Because nav items are consumer-owned markup, theming them needs no Part
+ * Style Map: the recipe classes are the styling surface. This variant swaps
+ * the neutral tokens for primary-tinted ones.
+ */
+const NAV_ITEM =
+  'flex cursor-pointer items-center gap-hell-3 rounded-hell-lg px-3 py-2 text-[13px] font-semibold text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary aria-[current=page]:text-white in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
+const NAV_ICON = 'inline-flex w-4 shrink-0 items-center justify-center text-hell-primary';
+const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
+const NAV_TRAILING = 'font-bold text-hell-primary in-data-[collapsed=true]:hidden';
 
 @Component({
   selector: 'app-app-shell-styling-example',
@@ -35,55 +42,20 @@ const HD_APP_SHELL_STYLING_ICONS = {
 
       <nav hellAppSidenav aria-label="Primary" ui="bg-hell-surface-subtle gap-hell-1">
         <a
-          hellNavItem
+          [class]="navItem"
           href="#"
           aria-label="Dashboard"
           aria-current="page"
-          ui="rounded-hell-lg aria-[current=page]:bg-hell-primary aria-[current=page]:text-white"
           (click)="$event.preventDefault()"
         >
-          <hell-icon hellNavItemIcon name="faSolidGauge" size="14px" ui="text-hell-primary" />
-          <span hellNavItemLabel ui="font-semibold">Dashboard</span>
+          <hell-icon [class]="navIcon" name="faSolidGauge" size="14px" />
+          <span [class]="navLabel">Dashboard</span>
         </a>
-        <a
-          hellNavItem
-          href="#"
-          aria-label="Team"
-          ui="rounded-hell-lg"
-          (click)="$event.preventDefault()"
-        >
-          <hell-icon hellNavItemIcon name="faSolidUsers" size="14px" ui="text-hell-primary" />
-          <span hellNavItemLabel ui="font-semibold">Team</span>
-          <span hellNavItemTrailing ui="text-hell-primary font-bold">3</span>
+        <a [class]="navItem" href="#" aria-label="Team" (click)="$event.preventDefault()">
+          <hell-icon [class]="navIcon" name="faSolidUsers" size="14px" />
+          <span [class]="navLabel">Team</span>
+          <span [class]="navTrailing">3</span>
         </a>
-
-        <div hellNavSection ui="mt-hell-2 rounded-hell-md bg-hell-surface p-hell-1">
-          <button type="button" hellNavSectionToggle ui="text-hell-primary rounded-hell-md">
-            Admin
-          </button>
-          <div hellNavSectionItems ui="gap-hell-1">
-            <a
-              hellNavItem
-              href="#"
-              aria-label="Preferences"
-              ui="rounded-hell-lg"
-              (click)="$event.preventDefault()"
-            >
-              <hell-icon hellNavItemIcon name="faSolidGear" size="14px" ui="text-hell-primary" />
-              <span hellNavItemLabel ui="font-semibold">Preferences</span>
-            </a>
-            <a
-              hellNavItem
-              href="#"
-              aria-label="API keys"
-              ui="rounded-hell-lg"
-              (click)="$event.preventDefault()"
-            >
-              <hell-icon hellNavItemIcon name="faSolidKey" size="14px" ui="text-hell-primary" />
-              <span hellNavItemLabel ui="font-semibold">API keys</span>
-            </a>
-          </div>
-        </div>
       </nav>
 
       <main hellAppContent tabindex="0" ui="bg-hell-surface p-hell-8">
@@ -91,7 +63,7 @@ const HD_APP_SHELL_STYLING_ICONS = {
         <p class="mt-2 text-sm text-hell-foreground-muted">
           Each slot's <code>ui</code> shorthand refines only that directive's <code>root</code> part;
           Hell's Tailwind merge keeps the recipe's behavior classes while your utilities win the
-          conflicts.
+          conflicts. The nav items are consumer-owned anchors, so their classes are edited directly.
         </p>
       </main>
 
@@ -110,4 +82,9 @@ const HD_APP_SHELL_STYLING_ICONS = {
     </div>
   `,
 })
-export class AppShellStylingExample {}
+export class AppShellStylingExample {
+  protected readonly navItem = NAV_ITEM;
+  protected readonly navIcon = NAV_ICON;
+  protected readonly navLabel = NAV_LABEL;
+  protected readonly navTrailing = NAV_TRAILING;
+}

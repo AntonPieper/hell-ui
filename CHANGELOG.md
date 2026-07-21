@@ -909,6 +909,39 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: Retired the App Shell navigation mini-family: `HellNavItem`
+  (`[hellNavItem]`), `HellNavItemIcon` (`[hellNavItemIcon]`),
+  `HellNavItemLabel` (`[hellNavItemLabel]`), `HellNavItemTrailing`
+  (`[hellNavItemTrailing]`), `HellNavSection` (`[hellNavSection]`),
+  `HellNavSectionToggle` (`button[hellNavSectionToggle]`), and
+  `HellNavSectionItems` (`[hellNavSectionItems]`), plus their entrypoint
+  stylesheet rules. First carried by the next `@hell-ui/angular` release
+  after `0.2.0` (currently Unreleased). The app-shell entry point now
+  exports only shell layout regions, responsive state, and toggle behavior;
+  `HELL_APP_SHELL_IMPORTS` contains the eight remaining shell directives.
+  Navigation is a consumer recipe over existing primitives keyed off the
+  shell's stable state attributes (`data-sidenav-collapsed`,
+  `data-mobile-layout`, and the sidenav's `data-collapsed`): a nav entry is a
+  plain anchor `flex cursor-pointer items-center gap-hell-3 rounded-md px-3
+  py-2 text-[13px] font-medium text-hell-foreground-muted no-underline
+  hover:bg-hell-surface-subtle hover:text-hell-foreground
+  aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold
+  aria-[current=page]:text-hell-primary
+  in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0`
+  composing an icon `inline-flex w-4 shrink-0 items-center justify-center
+  text-hell-foreground-subtle`, a label `flex-1 truncate
+  in-data-[collapsed=true]:hidden`, and optional trailing content wrapped in
+  `in-data-[collapsed=true]:hidden`; a collapsible group is a disclosure
+  recipe where the app owns the expanded state and `aria-expanded` on a
+  heading button, collapsed items leave the accessibility tree through
+  `visibility: hidden`, and `[hellAppSidenav][data-collapsed='true']` rules
+  hide the heading, draw a divider, and force-expand the group so items stay
+  reachable in the icon-only rail. The docs chrome and the app-shell docs
+  page demonstrate both recipes; collapsed and mobile behavior stays
+  visually and accessibly equivalent through the unchanged shell state
+  attributes and is protected by the app-shell browser contracts. Evidence:
+  `e2e/app-shell-contracts.spec.ts`, `packages/angular/app-shell/app-shell.spec.ts`,
+  and the updated app-shell API report. Closes #206.
 - BREAKING: Removed the omnibar decoration-only directive family:
   `HellOmnibarPanel` (`[hellOmnibarPanel]`), `HellOmnibarItemIcon`
   (`[hellOmnibarItemIcon]`), `HellOmnibarItemText` (`[hellOmnibarItemText]`),

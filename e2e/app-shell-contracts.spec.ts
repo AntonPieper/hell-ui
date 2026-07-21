@@ -143,7 +143,7 @@ test.describe('App Shell responsive contracts', () => {
 
     await parts.sidenavToggle.click();
     await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
-    await expect(appShellLink.locator('[hellNavItemLabel]')).toBeHidden();
+    await expect(appShellLink.locator('.hd-nav-item-label')).toBeHidden();
     await expect(appShellLink).toHaveAttribute('aria-label', 'App shell');
 
     const exampleShell = page
@@ -157,7 +157,7 @@ test.describe('App Shell responsive contracts', () => {
 
     await exampleParts.sidenavToggle.click();
     await expect(exampleShell).toHaveAttribute('data-sidenav-collapsed', 'true');
-    await expect(dashboardLink.locator('[hellNavItemLabel]')).toBeHidden();
+    await expect(dashboardLink.locator('span')).toBeHidden();
     await expect(dashboardLink).toHaveAttribute('aria-label', 'Dashboard');
   });
 

@@ -578,6 +578,185 @@
     font-size: 13px;
   }
 
+  /*
+   * Docs sidenav navigation recipe — consumer-owned markup styled over the
+   * shell's stable state attributes. The app-shell entry point exposes only
+   * layout regions, responsive state, and toggle behavior; nav items and
+   * collapsible sections are plain elements with these classes. Rail mode is
+   * keyed off `[hellAppSidenav][data-collapsed='true']`, which the shell
+   * keeps in sync across desktop collapse and the mobile overlay drawer.
+   */
+
+  .hd-nav-item {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: var(--spacing-hell-3);
+    border-radius: var(--radius-md);
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 2);
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-hell-foreground-muted);
+    text-decoration-line: none;
+  }
+
+  .hd-nav-item:hover {
+    background-color: var(--color-hell-surface-subtle);
+    color: var(--color-hell-foreground);
+  }
+
+  .hd-nav-item[aria-current='page'] {
+    background-color: var(--color-hell-primary-soft);
+    color: var(--color-hell-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .hd-nav-item-icon {
+    display: inline-flex;
+    width: calc(var(--spacing) * 4);
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-hell-foreground-subtle);
+  }
+
+  .hd-nav-item-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /*
+   * Collapsible nav group recipe. Markup:
+   *
+   *   <div class="hd-nav-section" [attr.data-expanded]="expanded">
+   *     <button type="button" class="hd-nav-section-toggle" [attr.aria-expanded]="expanded">…</button>
+   *     <div class="hd-nav-section-items">…items…</div>
+   *   </div>
+   *
+   * The app owns the expanded state and `aria-expanded`; collapsed items
+   * leave the accessibility tree and tab order through `visibility: hidden`.
+   */
+
+  .hd-nav-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hd-nav-section::before {
+    content: '';
+    display: none;
+  }
+
+  .hd-nav-section-toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-hell-2);
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    margin: 0;
+    margin-top: calc(var(--spacing) * 3);
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 1.5);
+    font: inherit;
+    font-size: 10px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--color-hell-foreground-subtle);
+    border-radius: var(--radius-hell-sm);
+    transition:
+      background var(--hell-duration-fast) var(--ease-hell-out),
+      color var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  .hd-nav-section-toggle::after {
+    content: '';
+    flex: 0 0 auto;
+    height: 10px;
+    width: 10px;
+    background-color: currentcolor;
+    -webkit-mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+    mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+    transition: transform var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  .hd-nav-section-toggle:hover {
+    background-color: var(--color-hell-surface-subtle);
+    color: var(--color-hell-foreground);
+  }
+
+  .hd-nav-section-toggle:focus-visible {
+    outline: 2px solid var(--color-hell-focus-ring);
+    outline-offset: 1px;
+  }
+
+  .hd-nav-section[data-expanded='false'] > .hd-nav-section-toggle::after {
+    transform: rotate(-90deg);
+  }
+
+  .hd-nav-section-items {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 0.5);
+    overflow: hidden;
+    max-height: 2000px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition:
+      max-height var(--hell-duration-base) var(--ease-hell-out),
+      opacity var(--hell-duration-fast) var(--ease-hell-out),
+      visibility var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  .hd-nav-section[data-expanded='false'] > .hd-nav-section-items {
+    max-height: 0;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /*
+   * Rail mode. Labels and section toggles hide, items center as icons, and
+   * a divider replaces each section heading. Collapsed sections auto-expand
+   * so every item stays reachable while the rail is icon-only.
+   */
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-item {
+    justify-content: center;
+    padding-inline: calc(var(--spacing) * 0);
+  }
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-item-label {
+    display: none;
+  }
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-section-toggle {
+    display: none;
+  }
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-section::before {
+    display: block;
+    height: 1px;
+    margin-block: calc(var(--spacing) * 2);
+    margin-inline: calc(var(--spacing) * 2);
+    background-color: var(--color-hell-border);
+  }
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-section-items {
+    max-height: 2000px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .hd-secondary-inner {
     padding: var(--spacing-hell-5) var(--spacing-hell-4);
     display: flex;
