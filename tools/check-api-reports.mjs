@@ -7,6 +7,12 @@ import {
   createApiReportDeclarationMirror,
 } from './api-report-model.mjs';
 import { checkApiReportCrossEntrypoint } from './check-api-report-cross-entrypoint.mjs';
+import {
+  checkApiReportWarningGateFixture,
+  scanApiReportWarnings,
+  scanInternalContractImports,
+  validateWarningGateConfiguration,
+} from './check-api-report-warnings.mjs';
 import { entrypointPublicApiFiles, packageName } from './entrypoint-manifest.mjs';
 
 const require = createRequire(import.meta.url);
@@ -81,8 +87,12 @@ const mirroredDeclarations = createApiReportDeclarationMirror({
   })),
 });
 checkApiReportCrossEntrypoint();
+checkApiReportWarningGateFixture();
 
 let failed = false;
+const warningGateFailures = validateWarningGateConfiguration(
+  apiReportEntrypoints.map((entrypoint) => entrypoint.specifier),
+);
 
 for (const entrypoint of apiReportEntrypoints) {
   console.log(`[api-report] ${localBuild ? 'updating' : 'checking'} ${entrypoint.specifier}`);
@@ -108,6 +118,18 @@ for (const entrypoint of apiReportEntrypoints) {
     );
     failed = true;
   }
+
+  // The fresh report is always written to the temp folder, in check and
+  // update mode alike, so the warning gate sees new findings before they
+  // reach a committed baseline.
+  const generatedReport = readFileSync(join(reportTempFolder, entrypoint.reportFileName), 'utf8');
+  warningGateFailures.push(
+    ...scanApiReportWarnings({ specifier: entrypoint.specifier, reportText: generatedReport }),
+    ...scanInternalContractImports({
+      specifier: entrypoint.specifier,
+      reportText: generatedReport,
+    }),
+  );
 }
 
 if (failed) {
@@ -116,8 +138,15 @@ if (failed) {
       ? '[api-report] update failed.'
       : '[api-report] report drift detected. Run `pnpm run build:lib && pnpm run api-report:update`, review the API report changes, and commit approved updates.',
   );
-  process.exit(1);
 }
+
+if (warningGateFailures.length) {
+  console.error('[api-report] release-blocking report findings:');
+  for (const failure of warningGateFailures) console.error(`- ${failure}`);
+  failed = true;
+}
+
+if (failed) process.exit(1);
 
 console.log(
   `[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`,

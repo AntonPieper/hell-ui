@@ -438,6 +438,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Accidental public-contract leaks are now release blocking. The API-report
+  runner gates every freshly generated report — in check and update mode
+  alike — and fails on any non-allowlisted `ae-forgotten-export` or any
+  `ae-unresolved-link` finding, so a routine `api-report:update` can no
+  longer bake a new leak into a committed baseline. Shared cross-entrypoint
+  contracts stay explicit instead of blanket-suppressed: every named symbol a
+  public report imports from a guarded `internal/*` entry point is classified
+  with a rationale in `tools/check-api-report-warnings.mjs`, and stale
+  allowlist or classification entries fail the gate too. The six remaining
+  baseline leaks are resolved at the source: table-tanstack deliberately
+  exports `HellClassValue` and `ɵHellStrategyCleanup`, internal/core exports
+  `HellControlledValueStateOptions`, the date pickers' weekday header labels
+  carry a structural type instead of a module-local interface, `HellPageLink`
+  keeps its native-control helper private behind a protected
+  `nativeButtonType()`, and the audio player's `volumeLevel` mirror became
+  private. Closes #212. Evidence: the warning-gate fixture in
+  `tools/check-api-report-warnings.mjs`, clean `test:api-report` and
+  `api-report:update` runs over all 57 entrypoints, and an injected
+  forgotten-export probe failing both modes.
 - Package-consumer proof consolidated onto checked-in boundary fixtures. The
   embedded template-string scenario catalog and its hand-maintained CI
   grouping (`tools/check-package-consumer.mjs`, `test:package-consumer`,

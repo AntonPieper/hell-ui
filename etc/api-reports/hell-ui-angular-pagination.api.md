@@ -27,8 +27,7 @@ export class HellPageLink {
     protected readonly dataSelected: _angular_core.Signal<"" | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly hellPageLink: _angular_core.InputSignal<HellPageLinkTarget>;
-    // Warning: (ae-forgotten-export) The symbol "HellPaginationNativeControl" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-    protected readonly native: HellPaginationNativeControl;
+    protected nativeButtonType(): 'button' | null;
     protected onClick(event: Event): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

@@ -163,7 +163,7 @@ export type HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
-    '[attr.type]': 'native.nativeButtonType()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.tabindex]': 'controlDisabled() ? -1 : 0',
@@ -188,8 +188,13 @@ export class HellPageLink {
     recipe: () => HELL_PAGE_LINK_RECIPE,
   });
   /** Host-tag-aware native control helpers (button `type`, disabled-anchor guard). */
-  protected readonly native = injectPaginationNativeControl();
+  private readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationState();
+
+  /** Native `type` attribute for the host: `button` on `<button>` hosts, absent on anchors. */
+  protected nativeButtonType(): 'button' | null {
+    return this.native.nativeButtonType();
+  }
 
   /**
    * Whether this control is disabled: an explicit `disabled`, the pagination's
