@@ -438,6 +438,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Setter-only public members are gone and the category is now release
+  blocking. The table utilities' `contentWidth`, `active`, `selected`,
+  `sort`, `sortable`, `columnId`, `align`, and `space` attribute inputs
+  became getter/setter pairs, so reading `activeInput` and friends reflects
+  the bound state instead of `undefined`, and the omnibar's panel and
+  floating-outlet view refs moved to signal `viewChild` queries with no
+  accessor in the published declarations. The API-report warning gate fails
+  on any `ae-missing-getter` finding — alongside the `ae-forgotten-export`
+  and `ae-unresolved-link` categories from #212 — so a write-only property
+  can no longer be baked into a committed baseline. Closes #252. Evidence:
+  the warning-gate fixture in `tools/check-api-report-warnings.mjs`, the
+  attribute-input read-back spec in
+  `packages/angular/table/table-utilities.spec.ts`, and clean
+  `test:api-report` and `api-report:update` runs over all 57 entrypoints.
 - Accidental public-contract leaks are now release blocking. The API-report
   runner gates every freshly generated report — in check and update mode
   alike — and fails on any non-allowlisted `ae-forgotten-export` or any

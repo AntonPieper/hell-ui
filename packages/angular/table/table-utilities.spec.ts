@@ -1,10 +1,11 @@
 import { provideHellLabels } from '@hell-ui/angular/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
-import { HELL_TABLE_UTILITIES_IMPORTS, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
+import { HELL_TABLE_UTILITIES_IMPORTS, HellTable, HellTableCell, HellTableHeaderCell, HellTableRow, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
 
 @Component({
   imports: [HellButton, HellInput, ...HELL_TABLE_UTILITIES_IMPORTS],
@@ -129,6 +130,30 @@ class TableUtilitiesHost {
     this.radioEvents.push(checked);
     this.radioSelected.set(checked);
   }
+}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_IMPORTS],
+  template: `
+    <table id="readback-table" hellTable contentWidth>
+      <thead hellTableHead>
+        <tr hellTableRow>
+          <th id="readback-header" hellTableHeaderCell columnId="name" sortable [sort]="sort()">
+            Name
+          </th>
+        </tr>
+      </thead>
+      <tbody hellTableBody>
+        <tr id="readback-row" hellTableRow active [selected]="selected()">
+          <td id="readback-cell" hellTableCell align="end" space="empty">Ada</td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class TableUtilitiesInputReadbackHost {
+  readonly sort = signal<'asc' | 'desc' | null>('desc');
+  readonly selected = signal(false);
 }
 
 @Component({
@@ -354,6 +379,7 @@ describe('Hell table utilities directives', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableUtilitiesHost,
+        TableUtilitiesInputReadbackHost,
         TableUtilitiesUiHost,
         TableUtilitiesStackedUiHost,
         TableUtilitiesResizerAriaOverrideHost,
@@ -391,6 +417,35 @@ describe('Hell table utilities directives', () => {
     expect(row.getAttribute('data-selected')).toBe('true');
     expect(row.hasAttribute('tabindex')).toBe(false);
     expect(row.hasAttribute('aria-selected')).toBe(false);
+  });
+
+  it('reads attribute inputs back through their properties', () => {
+    const fixture = TestBed.createComponent(TableUtilitiesInputReadbackHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.query(By.css('#readback-table')).injector.get(HellTable);
+    const header = fixture.debugElement
+      .query(By.css('#readback-header'))
+      .injector.get(HellTableHeaderCell);
+    const row = fixture.debugElement.query(By.css('#readback-row')).injector.get(HellTableRow);
+    const cell = fixture.debugElement.query(By.css('#readback-cell')).injector.get(HellTableCell);
+
+    expect(table.contentWidthInput).toBe(true);
+    expect(header.columnIdInput).toBe('name');
+    expect(header.sortableInput).toBe(true);
+    expect(header.sortInput).toBe('desc');
+    expect(row.activeInput).toBe(true);
+    expect(row.selectedInput).toBe(false);
+    expect(cell.alignInput).toBe('end');
+    expect(cell.spaceInput).toBe('empty');
+
+    host.sort.set('asc');
+    host.selected.set(true);
+    fixture.detectChanges();
+
+    expect(header.sortInput).toBe('asc');
+    expect(row.selectedInput).toBe(true);
   });
 
   it('uses native row action, checkbox, and radio controls for row interaction', () => {
