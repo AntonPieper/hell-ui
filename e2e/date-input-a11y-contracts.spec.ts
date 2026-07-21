@@ -108,6 +108,39 @@ test.describe('date input native behavior and composition contracts', () => {
     await expect(page.locator('hell-date-input')).toHaveCount(0);
   });
 
+  test('binds one Signal Forms field with metadata bounds and commit-boundary parse errors', async ({
+    page,
+  }) => {
+    await gotoDateInput(page);
+
+    const example = page.locator('app-date-input-forms-example');
+    const input = example.getByRole('textbox', { name: 'Delivery date' });
+    const state = example.locator('[data-date-input-forms-state]');
+
+    // The field's minDate()/maxDate() metadata drives the native bounds.
+    await expect(input).toHaveValue('2026-06-15');
+    await expect(input).toHaveAttribute('min', '2026-06-01', { timeout: HYDRATION_TIMEOUT });
+    await expect(input).toHaveAttribute('max', '2026-06-30');
+    await expect(state).toContainText('touched: false');
+    await expect(state).toContainText('errors: none');
+
+    // A committed unparseable draft stays editable and reports one parse error.
+    await input.fill('2026-06-3x');
+    await input.blur();
+    await expect(input).toHaveValue('2026-06-3x');
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(state).toContainText('Jun 15 2026');
+    await expect(state).toContainText('touched: true');
+    await expect(state).toContainText('invalidDateInputDraft');
+
+    // A corrected Enter commit updates the field once and clears the error.
+    await input.fill('2026-06-20');
+    await input.press('Enter');
+    await expect(state).toContainText('Jun 20 2026');
+    await expect(state).toContainText('errors: none');
+    await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
   test('serializes canonical committed text for click and Enter native form submissions', async ({
     page,
   }) => {

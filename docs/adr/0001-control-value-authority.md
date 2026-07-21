@@ -163,6 +163,64 @@ reference implementation.
    `one-forms-contract` architecture guard (`tools/check-architecture.mjs`)
    rejects any class that mixes the contract families.
 
+## Typed Value Input pattern (established by the Date Input tracer, #284)
+
+Time Input (#285-family) and Number Input repeat the Date Input slice in
+`packages/angular/date-input/date-input.ts` on top of the base pattern above.
+The extra steps exist because a text-backed typed input keeps draft text as
+interaction state while the typed model stays the sole committed authority.
+
+1. **Keep the draft state machine; retarget its external value.** The shared
+   `HellTypedValueInputState` keeps owning draft text, invalid-draft state,
+   stale-draft rejection, and display formatting. Its `external` callback reads
+   the new `value` model directly — the `controlMode`/`controlValue` branch and
+   the CVA write path disappear. The external-change effect that drops drafts
+   on genuinely changed writes (adapter `isSameValue` equivalence keeps active
+   typing alive) stays as is.
+2. **Add a `transformedValue` commit boundary, scoped to Signal Forms.**
+   Create one `transformedValue(this.value, { parse, format })` whose `parse`
+   runs the same adapter-plus-bounds path the draft machine uses. Blur and
+   Enter route the commit attempt's raw text through `set(...)`: a valid parse
+   writes the model exactly once (emitting `valueChange`), while a failed
+   parse leaves the model untouched and reports one
+   `invalid<Control>Draft`-kind error (`invalidDateInputDraft`,
+   `invalidTimeInputDraft`, `invalidNumberInputDraft`) to the nearest Signal
+   Forms field. Later valid or empty commits and external model writes clear
+   the reported error. Typing only writes drafts; it never touches the
+   boundary. Failed commits report only when an injected self-`FormField`
+   directive is present: Angular's classic `NgControl` integration would
+   otherwise mirror parse errors into `formControl`/`ngModel` errors but then
+   clear them with an event-less revalidation (`emitEvent: false`), leaving
+   event-driven Field mirrors (ng-primitives form-field state) stuck invalid
+   after recovery.
+3. **Mark the native host `ngNoCva`.** These directives sit on real
+   `<input>` elements, where classic forms directives would otherwise select
+   the string-writing `DefaultValueAccessor` instead of the Signal Forms
+   custom-control interop. Angular's `ngNoCva` marker is applied as a static
+   host attribute so `formControl`/`ngModel` bind the `value` model without
+   consumer changes.
+4. **Drop the legacy `Validator` with the accessor.** Angular's custom-control
+   interop never attaches element-level `NG_VALIDATORS` to the bound control,
+   so the directive-owned `required`/range control errors cannot survive the
+   migration; combined with step 2's scoping, classic bound controls receive
+   no directive-owned errors at all. Required and range policy move to the
+   form (control validators, or `required()`/`minDate()`/`maxDate()`-style
+   schema rules whose metadata drives the reserved `required`/`min`/`max`
+   inputs); the control keeps its own visual invalid state
+   (`aria-invalid`/`data-invalid`) for missing required values, out-of-range
+   committed values, and invalid drafts.
+5. **Type the reserved bound inputs.** `min`/`max` become
+   `NonNullable<TValue> | undefined` with an undefined-preserving transform
+   (`null` still means unbounded) so validator metadata can drive and clear
+   them; `required`/`disabled`/`invalid` keep `booleanAttribute` and are also
+   written by bound forms.
+6. **Verify the typed seams.** Beyond the base pattern's five binding paths,
+   specs cover: incomplete and invalid drafts staying editable without
+   committing, parse-failure reporting and clearing through the field and
+   through classic interop errors, stable formatting and synchronous native
+   serialization after commits, nullable clears, equivalence-preserving
+   external writes, and validator-metadata-driven bounds.
+
 ## Consequences
 
 - Consumers get one ordinary `[(value)]` or `[(checked)]` contract that also
