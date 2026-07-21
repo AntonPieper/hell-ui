@@ -928,6 +928,31 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellSlider` now has one Control Value Authority: `value` is a
+  `ModelSignal<number>` implementing Signal Forms' `FormValueControl<number>`,
+  and the component no longer implements `ControlValueAccessor`, registers the
+  `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
+  `registerOnChange` / `registerOnTouched` / `setDisabledState` methods. First
+  carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+  Unreleased). Direct `[value]` binding, new two-way `[(value)]` binding,
+  Signal Forms `[formField]`, Reactive Forms `formControl`, and
+  template-driven `ngModel` all read and write the same model —
+  `formControl`/`ngModel` keep working through Angular's built-in Signal Forms
+  interoperability, one user interaction commits exactly once, and external
+  writes never echo `(valueChange)`. Migration notes: model inputs do not
+  support input transforms, so `value` lost its static-attribute number
+  coercion — replace `value="42"` with the typed binding `[value]="42"`
+  (`min`, `max`, `step`, and `disabled` keep their attribute coercion, and
+  `min`/`max` are now `number | undefined` so a bound Signal Forms field's
+  `min()`/`max()` validator metadata can drive and clear the same bounds). A
+  new `(touch)` output marks the bound field or control touched when focus
+  leaves the slider or a track drag starts. Slider is the tracer for the
+  Control Value Authority migration (`docs/adr/0001-control-value-authority.md`);
+  a new permanent architecture guard rejects any library class that mixes
+  `ControlValueAccessor` with `FormValueControl`/`FormCheckboxControl`.
+  Evidence: `packages/angular/slider/slider.spec.ts`, the styled-controls
+  packed consumer's slider forms scenario, `e2e/slider-a11y-contracts.spec.ts`,
+  and the updated slider API report. Closes #277.
 - BREAKING: Retired the App Shell navigation mini-family: `HellNavItem`
   (`[hellNavItem]`), `HellNavItemIcon` (`[hellNavItemIcon]`),
   `HellNavItemLabel` (`[hellNavItemLabel]`), `HellNavItemTrailing`

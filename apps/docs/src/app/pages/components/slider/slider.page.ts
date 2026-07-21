@@ -21,6 +21,10 @@ import { SliderDisabledExample } from './examples/disabled.example';
 import sliderDisabledExampleCodeRaw from './examples/disabled.example.ts?raw' with {
   loader: 'text',
 };
+import { SliderFormsExample } from './examples/forms.example';
+import sliderFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { SliderWithFieldInputExample } from './examples/with-field-input.example';
 import sliderWithFieldInputExampleCodeRaw from './examples/with-field-input.example.ts?raw' with {
   loader: 'text',
@@ -40,6 +44,7 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     SliderOrientationExample,
     SliderModesExample,
     SliderDisabledExample,
+    SliderFormsExample,
     SliderWithFieldInputExample,
     SliderStylingExample,
     PageHeader,
@@ -57,10 +62,13 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </hd-page-header>
       <p>
         <code>hell-slider</code> is a styled wrapper around <code>ng-primitives/slider</code>. It
-        renders a track, a filled range, and a draggable thumb, and implements the
-        <code>ControlValueAccessor</code> contract so it drops straight into template-driven or
-        reactive forms. Users can drag the thumb, click anywhere on the track to jump and continue
-        dragging in one motion, or use the keyboard.
+        renders a track, a filled range, and a draggable thumb. Its <code>value</code> is one
+        Angular model — bind it directly (<code>[value]</code> plus <code>(valueChange)</code>),
+        two-way (<code>[(value)]</code>), or through forms: it implements Signal Forms'
+        <code>FormValueControl</code> contract for <code>[formField]</code>, and the same model
+        drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability. Users can drag the thumb, click anywhere on the track to jump and
+        continue dragging in one motion, or use the keyboard.
       </p>
       <p>
         Reach for it wherever an approximate value in a known range is faster to set by dragging
@@ -118,6 +126,27 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </p>
       <hd-example-tabs [code]="sliderDisabledExampleCode" previewClass="max-w-md">
         <app-slider-disabled-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the slider's single committed-value authority, so all
+        binding styles observe the same number. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>value</code>, user commits update the
+        field exactly once, focus leaving the slider (or starting a track drag) marks it touched,
+        and the field's <code>disabled</code>, <code>min</code>, and <code>max</code> rules flow
+        into the matching slider inputs. <code>formControl</code> and <code>[(ngModel)]</code> keep
+        working against the same model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        Because <code>value</code> is a model input, it no longer coerces static attribute strings:
+        write <code>[value]="42"</code> (a number binding), not <code>value="42"</code>.
+        Configuration inputs (<code>min</code>, <code>max</code>, <code>step</code>,
+        <code>disabled</code>) keep their attribute coercion.
+      </p>
+      <hd-example-tabs [code]="sliderFormsExampleCode">
+        <app-slider-forms-example />
       </hd-example-tabs>
 
       <h2 id="with-field-and-input">With field and input</h2>
@@ -179,15 +208,29 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>API</h2>
       <ul>
-        <li><code>value</code>: <code>number</code>. Default <code>0</code>.</li>
-        <li><code>(valueChange)</code>: <code>EventEmitter&lt;number&gt;</code>.</li>
-        <li><code>min</code>: <code>number</code>. Default <code>0</code>.</li>
-        <li><code>max</code>: <code>number</code>. Default <code>100</code>.</li>
+        <li>
+          <code>value</code>: <code>ModelSignal&lt;number&gt;</code>. Default <code>0</code>.
+          Supports <code>[value]</code>, <code>[(value)]</code>, and <code>(valueChange)</code>;
+          requires a number binding (no static-attribute string coercion).
+        </li>
+        <li>
+          <code>min</code> / <code>max</code>: <code>number | undefined</code>. Defaults
+          <code>0</code> / <code>100</code> (<code>undefined</code> falls back to the default).
+          Attribute coercion retained; also driven by a bound Signal Forms field's
+          <code>min</code>/<code>max</code> validator metadata.
+        </li>
         <li>
           <code>step</code>: <code>number</code>. Default <code>1</code>. Governs both keyboard
           increments and value rounding.
         </li>
-        <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
+        <li>
+          <code>disabled</code>: <code>boolean</code>. Default <code>false</code>. Also driven by
+          bound forms.
+        </li>
+        <li>
+          <code>(touch)</code>: emits when focus leaves the slider or a track drag starts; Angular
+          forms use it to mark the control touched.
+        </li>
         <li>
           <code>orientation</code>: <code>HellOrientation</code> —
           <code>'horizontal' | 'vertical'</code>. Default <code>'horizontal'</code>.
@@ -217,9 +260,10 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           (<code>HellUi&lt;HellSliderPart&gt;</code>).
         </li>
         <li>
-          Implements Angular's <code>ControlValueAccessor</code>, so <code>formControl</code> and
-          <code>ngModel</code> both work; <code>disabled</code> then follows the control's disabled
-          state as well as the input.
+          Implements Signal Forms' <code>FormValueControl&lt;number&gt;</code>, so
+          <code>[formField]</code>, <code>formControl</code>, and <code>ngModel</code> all work
+          against the one <code>value</code> model; <code>disabled</code> then follows the bound
+          field or control's disabled state as well as the input.
         </li>
       </ul>
 
@@ -284,6 +328,7 @@ export class SliderPage {
   protected readonly sliderOrientationExampleCode = sliderOrientationExampleCodeRaw;
   protected readonly sliderModesExampleCode = sliderModesExampleCodeRaw;
   protected readonly sliderDisabledExampleCode = sliderDisabledExampleCodeRaw;
+  protected readonly sliderFormsExampleCode = sliderFormsExampleCodeRaw;
   protected readonly sliderWithFieldInputExampleCode = sliderWithFieldInputExampleCodeRaw;
   protected readonly sliderStylingExampleCode = sliderStylingExampleCodeRaw;
 }

@@ -13,8 +13,8 @@ test.describe('slider accessibility contracts', () => {
   test('public docs sliders all have accessible names', async ({ page }) => {
     await gotoSliderPage(page);
 
-    await expect(page.getByRole('slider')).toHaveCount(13);
-    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(13);
+    await expect(page.getByRole('slider')).toHaveCount(14);
+    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(14);
   });
 
   test('horizontal slider supports APG arrow and Home/End keyboard behavior', async ({ page }) => {
@@ -99,6 +99,36 @@ test.describe('slider accessibility contracts', () => {
 
     await page.keyboard.press('Home');
     await expectValue(slider, 0);
+  });
+
+  test('signal forms slider shares one value with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await gotoSliderPage(page);
+
+    const example = page.locator('app-slider-forms-example');
+    const slider = example.getByRole('slider', { name: 'Volume' });
+    const value = example.locator('code').first();
+    const touched = example.locator('code').last();
+
+    // The field's max(80) validator metadata drives the slider's own bound.
+    await expect(slider).toHaveAttribute('aria-valuemax', '80');
+    await expectValue(slider, 65);
+    await expect(value).toHaveText('65%');
+    await expect(touched).toHaveText('false');
+
+    await slider.focus();
+    await page.keyboard.press('ArrowRight');
+    await expectValue(slider, 66);
+    await expect(value).toHaveText('66%');
+
+    await page.keyboard.press('End');
+    await expectValue(slider, 80);
+    await expect(value).toHaveText('80%');
+    await expect(touched).toHaveText('false');
+
+    await page.keyboard.press('Tab');
+    await expect(touched).toHaveText('true');
   });
 
   test('disabled slider is named, removed from tab order, and ignores keyboard changes', async ({

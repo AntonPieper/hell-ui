@@ -5,7 +5,7 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
@@ -13,7 +13,7 @@ import { HellUiInput } from '@hell-ui/angular/core';
 import * as ng_primitives_slider from 'ng-primitives/slider';
 
 // @public
-export class HellSlider implements ControlValueAccessor {
+export class HellSlider implements FormValueControl<number> {
     constructor();
     protected readonly activeDrag: _angular_core.WritableSignal<boolean>;
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
@@ -22,22 +22,18 @@ export class HellSlider implements ControlValueAccessor {
     readonly grow: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected markActiveDrag(e: PointerEvent): void;
     protected markControlTouched(): void;
-    readonly max: _angular_core.InputSignalWithTransform<number, unknown>;
-    readonly min: _angular_core.InputSignalWithTransform<number, unknown>;
+    readonly max: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
+    readonly min: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSliderPart>;
-    registerOnChange(fn: (value: number) => void): void;
-    registerOnTouched(fn: () => void): void;
-    setDisabledState(isDisabled: boolean): void;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     protected readonly sliderState: ng_primitives_slider.NgpSliderState;
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly thumb: _angular_core.InputSignal<"always" | "hover">;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSliderPart>>;
-    readonly value: _angular_core.InputSignalWithTransform<number, unknown>;
-    readonly valueChange: _angular_core.OutputEmitterRef<number>;
-    writeValue(value: number): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSlider, "hell-slider", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "step": { "alias": "step"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "thumb": { "alias": "thumb"; "required": false; "isSignal": true; }; "grow": { "alias": "grow"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
+    readonly value: _angular_core.ModelSignal<number>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSlider, "hell-slider", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "step": { "alias": "step"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "thumb": { "alias": "thumb"; "required": false; "isSignal": true; }; "grow": { "alias": "grow"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSlider, never>;
 }
 

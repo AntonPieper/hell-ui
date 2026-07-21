@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { FormField, disabled as disabledSchema, form, max } from '@angular/forms/signals';
 
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { type HellSize } from '@hell-ui/angular/core';
@@ -28,6 +29,17 @@ class SliderHost {
 }
 
 @Component({
+  imports: [HellSlider],
+  template: `
+    <hell-slider aria-label="Volume" [(value)]="value" (valueChange)="valueEvents.push($event)" />
+  `,
+})
+class SliderTwoWayHost {
+  readonly value = signal(30);
+  readonly valueEvents: number[] = [];
+}
+
+@Component({
   imports: [ReactiveFormsModule, HellSlider],
   template: `
     <hell-slider aria-label="Volume" [formControl]="control" (valueChange)="valueEvents.push($event)" />
@@ -35,6 +47,38 @@ class SliderHost {
 })
 class SliderFormHost {
   readonly control = new FormControl(20, { nonNullable: true });
+  readonly valueEvents: number[] = [];
+}
+
+@Component({
+  imports: [FormsModule, HellSlider],
+  template: `
+    <hell-slider aria-label="Volume" [(ngModel)]="value" (valueChange)="valueEvents.push($event)" />
+  `,
+})
+class SliderNgModelHost {
+  readonly value = signal(40);
+  readonly model = viewChild.required(NgModel);
+  readonly valueEvents: number[] = [];
+}
+
+@Component({
+  imports: [FormField, HellSlider],
+  template: `
+    <hell-slider
+      aria-label="Volume"
+      [formField]="volumeForm.volume"
+      (valueChange)="valueEvents.push($event)"
+    />
+  `,
+})
+class SliderSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal({ volume: 25 });
+  readonly volumeForm = form(this.model, (path) => {
+    disabledSchema(path.volume, () => this.formDisabled());
+    max(path.volume, 95);
+  });
   readonly valueEvents: number[] = [];
 }
 
@@ -99,7 +143,15 @@ function expectUiRouting(defaultClassName: string, customClassName: string, ui: 
 describe('HellSlider', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SliderHost, SliderFormHost, SliderFieldHost, SliderUiHost],
+      imports: [
+        SliderHost,
+        SliderTwoWayHost,
+        SliderFormHost,
+        SliderNgModelHost,
+        SliderSignalFormsHost,
+        SliderFieldHost,
+        SliderUiHost,
+      ],
     }).compileComponents();
   });
 
@@ -460,5 +512,119 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     expect(thumb.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', () => {
+    const fixture = TestBed.createComponent(SliderTwoWayHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('30');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set(60);
+    fixture.detectChanges();
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('60');
+    expect(host.valueEvents).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.value()).toBe(61);
+    expect(host.valueEvents).toEqual([61]);
+    expect(thumb.getAttribute('aria-valuenow')).toBe('61');
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(SliderNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('40');
+    expect(host.valueEvents).toEqual([]);
+
+    thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.value()).toBe(41);
+    expect(host.valueEvents).toEqual([41]);
+    expect(host.model().touched).toBe(false);
+
+    slider.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+
+    host.value.set(90);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('90');
+    expect(host.valueEvents).toEqual([41]);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', () => {
+    const fixture = TestBed.createComponent(SliderSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('25');
+    // The field's max validator metadata drives the slider's own max bound.
+    expect(thumb.getAttribute('aria-valuemax')).toBe('95');
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.volumeForm.volume().value.set(70);
+    fixture.detectChanges();
+
+    expect(thumb.getAttribute('aria-valuenow')).toBe('70');
+    expect(host.valueEvents).toEqual([]);
+    expect(host.volumeForm.volume().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model.
+    thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.volumeForm.volume().value()).toBe(71);
+    expect(host.model().volume).toBe(71);
+    expect(host.valueEvents).toEqual([71]);
+    expect(host.volumeForm.volume().dirty()).toBe(true);
+    expect(host.volumeForm.volume().touched()).toBe(false);
+
+    slider.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.volumeForm.volume().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(thumb.hasAttribute('data-disabled')).toBe(true);
+    expect(thumb.getAttribute('aria-disabled')).toBe('true');
+
+    const keydown = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
+    thumb.dispatchEvent(keydown);
+    fixture.detectChanges();
+
+    expect(keydown.defaultPrevented).toBe(true);
+    expect(host.volumeForm.volume().value()).toBe(71);
   });
 });

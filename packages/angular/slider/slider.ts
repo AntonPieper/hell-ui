@@ -6,15 +6,15 @@ import {
   booleanAttribute,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   numberAttribute,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type FormValueControl } from '@angular/forms/signals';
 import { injectFormFieldState } from 'ng-primitives/form-field';
 import {
   NgpSliderRange,
@@ -23,8 +23,6 @@ import {
   ngpSlider,
   provideSliderState,
 } from 'ng-primitives/slider';
-import { HellControlledValueState } from '@hell-ui/angular/internal/core';
-import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellUniqueIdRefs } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
@@ -34,6 +32,16 @@ let nextSliderId = 0;
 export type HellSliderPart = 'root' | 'track' | 'range' | 'thumb';
 /** Part Style Map accepted by the HellSlider `ui` input. */
 export type HellSliderUi = HellUi<HellSliderPart>;
+
+/**
+ * `FormUiControl` reserves `min`/`max` as `number | undefined` inputs so
+ * Signal Forms can reflect `min()`/`max()` validator metadata into the
+ * control (and clear it with `undefined` again). Attribute and property
+ * bindings keep number coercion; `null`/`undefined` mean "unset".
+ */
+function hellSliderBoundAttribute(value: unknown): number | undefined {
+  return value == null ? undefined : numberAttribute(value);
+}
 
 const HELL_SLIDER_RECIPE = {
   root: 'relative inline-flex h-hell-6 w-full cursor-pointer touch-none select-none items-center box-border [--_hell-slider-thumb-clearance:9px] data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-[orientation=horizontal]:data-[size=sm]:h-hell-5 data-[orientation=horizontal]:data-[size=lg]:h-hell-7 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-[calc(var(--spacing)*24)] data-[orientation=vertical]:max-h-full data-[orientation=vertical]:w-hell-6 data-[orientation=vertical]:flex-col data-[orientation=vertical]:py-[var(--_hell-slider-thumb-clearance)] data-[size=sm]:[--_hell-slider-thumb-clearance:7px] data-[size=lg]:[--_hell-slider-thumb-clearance:11px] data-[orientation=vertical]:[--_hell-slider-thumb-clearance:7px]',
@@ -47,22 +55,19 @@ const HELL_SLIDER_RECIPE = {
 /**
  * Single-value slider built on `ng-primitives/slider`. Drag the thumb,
  * click anywhere on the track (which then continues into a drag), or use
- * arrow keys (Home/End jump to min/max). Emits via `(valueChange)`.
+ * arrow keys (Home/End jump to min/max).
  *
- * Use `<hell-slider [value]="vol()" (valueChange)="vol.set($event)" />`.
+ * The `value` model is the slider's one Control Value Authority: bind it
+ * one-way (`[value]` plus `(valueChange)`), two-way (`[(value)]`), or through
+ * Angular forms — Signal Forms `[formField]` via the `FormValueControl`
+ * contract, and `formControl`/`ngModel` via Angular's built-in Signal Forms
+ * interoperability. Use `<hell-slider [(value)]="vol" />`.
  */
 @Component({
   selector: 'hell-slider',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgpSliderTrack, NgpSliderRange, NgpSliderThumb],
-  providers: [
-    provideSliderState(),
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSlider),
-      multi: true,
-    },
-  ],
+  providers: [provideSliderState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -91,7 +96,7 @@ const HELL_SLIDER_RECIPE = {
     ></div>
   `,
 })
-export class HellSlider implements ControlValueAccessor {
+export class HellSlider implements FormValueControl<number> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellSliderPart>>(undefined, { alias: 'ui' });
 
@@ -101,15 +106,26 @@ export class HellSlider implements ControlValueAccessor {
     recipe: () => HELL_SLIDER_RECIPE,
   });
 
-  /** Current slider value. Defaults to `0`. */
-  readonly value = input(0, { transform: numberAttribute });
-  /** Minimum allowed value. Defaults to `0`. */
-  readonly min = input(0, { transform: numberAttribute });
-  /** Maximum allowed value. Defaults to `100`. */
-  readonly max = input(100, { transform: numberAttribute });
+  /**
+   * Committed slider value — the one Control Value Authority. User commits
+   * write it exactly once per change and emit `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. Expects a
+   * `number` binding (no static-attribute coercion). Defaults to `0`.
+   */
+  readonly value = model(0);
+  /**
+   * Minimum allowed value. Defaults to `0`; `undefined` falls back to `0`.
+   * Also driven by a bound Signal Forms field's `min` validator metadata.
+   */
+  readonly min = input(0, { transform: hellSliderBoundAttribute });
+  /**
+   * Maximum allowed value. Defaults to `100`; `undefined` falls back to `100`.
+   * Also driven by a bound Signal Forms field's `max` validator metadata.
+   */
+  readonly max = input(100, { transform: hellSliderBoundAttribute });
   /** Increment size for keyboard and drag stepping. Defaults to `1`. */
   readonly step = input(1, { transform: numberAttribute });
-  /** Whether the slider is disabled. Defaults to `false`. */
+  /** Whether the slider is disabled. Also driven by bound forms. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
   /** Layout axis of the slider. Defaults to `'horizontal'`. */
   readonly orientation = input<HellOrientation>('horizontal');
@@ -129,20 +145,18 @@ export class HellSlider implements ControlValueAccessor {
    */
   readonly grow = input(false, { transform: booleanAttribute });
 
-  /** Emits the new value whenever the user changes it. */
-  readonly valueChange = output<number>();
+  /**
+   * Emits when the user finishes interacting with the slider (focus leaves it
+   * or a track drag begins). Angular forms listen to this output to mark the
+   * bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
   /** Whether the thumb is currently being dragged. */
   protected readonly activeDrag = signal(false);
 
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly thumbRef = viewChild<ElementRef<HTMLElement>>('thumb');
-  private readonly controlledValue = new HellControlledValueState<number>({
-    externalValue: this.value,
-    externalDisabled: this.disabled,
-    initialValue: 0,
-  });
-  private readonly valueAccessor = new HellControlValueAccessorBridge<number>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly hostAriaLabel = signal<string | null>(null);
@@ -153,23 +167,20 @@ export class HellSlider implements ControlValueAccessor {
   );
   private removeActiveDragListeners: (() => void) | null = null;
 
-  private readonly effectiveValue = computed(() => this.coerceValue(this.controlledValue.value()));
-  private readonly effectiveDisabled = this.controlledValue.disabled;
+  private readonly effectiveMin = computed(() => this.min() ?? 0);
+  private readonly effectiveMax = computed(() => this.max() ?? 100);
+  private readonly effectiveValue = computed(() => this.coerceValue(this.value()));
 
   /** Headless slider state and behavior from `ngpSlider`. */
   protected readonly sliderState = ngpSlider({
     id: this.sliderId,
     value: this.effectiveValue,
-    min: this.min,
-    max: this.max,
+    min: this.effectiveMin,
+    max: this.effectiveMax,
     step: this.step,
     orientation: this.orientation,
-    disabled: this.effectiveDisabled,
-    onValueChange: (value) => {
-      this.controlledValue.acceptUserValue(value);
-      this.valueChange.emit(value);
-      this.valueAccessor.emitValue(value);
-    },
+    disabled: this.disabled,
+    onValueChange: (value) => this.value.set(value),
   });
   private readonly thumbAriaLabel = computed(() => this.ariaLabel() ?? this.hostAriaLabel());
   private readonly thumbAriaLabelledby = computed(() =>
@@ -210,14 +221,14 @@ export class HellSlider implements ControlValueAccessor {
       this.setNullableAttribute(thumb, 'aria-label', this.thumbAriaLabel());
       this.setNullableAttribute(thumb, 'aria-labelledby', this.thumbAriaLabelledby());
       this.setNullableAttribute(thumb, 'aria-describedby', this.thumbAriaDescribedby());
-      this.setNullableAttribute(thumb, 'aria-disabled', this.effectiveDisabled() ? 'true' : null);
+      this.setNullableAttribute(thumb, 'aria-disabled', this.disabled() ? 'true' : null);
     });
     effect((onCleanup) => {
       const thumb = this.thumbRef()?.nativeElement;
       if (!thumb) return;
 
       const onKeydown = (event: KeyboardEvent) => {
-        if (!this.effectiveDisabled()) return;
+        if (!this.disabled()) return;
 
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -226,26 +237,6 @@ export class HellSlider implements ControlValueAccessor {
       thumb.addEventListener('keydown', onKeydown, { capture: true });
       onCleanup(() => thumb.removeEventListener('keydown', onKeydown, { capture: true }));
     });
-  }
-
-  /** Writes a form-driven value onto the slider. */
-  writeValue(value: number): void {
-    this.controlledValue.writeValue(value);
-  }
-
-  /** Registers the callback Angular Forms uses to be notified of value changes. */
-  registerOnChange(fn: (value: number) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  /** Registers the callback Angular Forms uses to be notified when the control is touched. */
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  /** Applies a form-driven disabled state to the slider. */
-  setDisabledState(isDisabled: boolean): void {
-    this.controlledValue.setDisabledState(isDisabled);
   }
 
   /**
@@ -306,7 +297,7 @@ export class HellSlider implements ControlValueAccessor {
 
   private canContinueTrackDrag(event: PointerEvent): boolean {
     if (event.button !== 0) return false;
-    if (this.effectiveDisabled()) return false;
+    if (this.disabled()) return false;
 
     const thumb = this.thumbRef();
     if (!thumb) return false;
@@ -315,15 +306,15 @@ export class HellSlider implements ControlValueAccessor {
     return true;
   }
 
-  /** Marks the control as touched for Angular Forms. */
+  /** Emits the `touch` output that marks the slider as touched for Angular forms. */
   protected markControlTouched(): void {
-    this.valueAccessor.markTouched();
+    this.touch.emit();
   }
 
   private coerceValue(value: number): number {
     const numeric = Number(value);
-    const min = this.min();
-    const max = this.max();
+    const min = this.effectiveMin();
+    const max = this.effectiveMax();
     const step = this.step();
     if (!Number.isFinite(numeric)) return min;
     const clamped = Math.min(max, Math.max(min, numeric));
