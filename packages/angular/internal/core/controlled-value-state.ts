@@ -1,6 +1,7 @@
 import { Signal, WritableSignal, computed, linkedSignal, signal } from '@angular/core';
 
-type HellControlledValueStateOptions<T> = {
+/** Constructor contract for {@link HellControlledValueState} owners. */
+export type HellControlledValueStateOptions<T> = {
   externalValue: Signal<T>;
   externalDisabled: Signal<boolean>;
   initialValue: T;
