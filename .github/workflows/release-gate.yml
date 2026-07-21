@@ -1,10 +1,11 @@
 # The one release gate for every registry. The gate runs the full release
 # dry run, packs a single audited tarball, proves every consumer fixture
 # against that exact tarball, builds the docs, and uploads the tarball as the
-# `release-package` artifact. The npm and GitHub Packages publish workflows
-# both call this workflow and only verify and upload the prebuilt artifact,
-# applying registry-specific metadata rewrites at publish time, so both
-# registries ship the same audited content through identical gate criteria.
+# `release-package` artifact. The release workflow (npm-publish.yml) calls
+# this workflow once per tag, and both registry publish jobs only verify and
+# publish that run's prebuilt artifact, applying registry-specific metadata
+# rewrites at publish time, so both registries ship the same audited content
+# through identical gate criteria.
 name: Release gate
 
 on:
@@ -18,10 +19,6 @@ permissions:
 
 env:
   CI: true
-  # The release tarball is built on the same Node runtime CI validates
-  # (NODE_VERSION in ci.yml). The publish jobs may run a newer Node because
-  # they never build; they only verify and upload this prebuilt artifact.
-  NODE_VERSION: 22
 
 jobs:
   release-gate:
@@ -40,7 +37,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # The release tarball is built on the same Node runtime CI
+          # validates: the root .node-version file is the one source of truth
+          # this workflow and every ci.yml job read, so the runtimes cannot
+          # drift. The publish jobs may run a newer Node because they never
+          # build; they only verify and publish this prebuilt artifact.
+          node-version-file: .node-version
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
