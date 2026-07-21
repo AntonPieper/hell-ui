@@ -4,17 +4,19 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { StyledPrimitives } from './controls';
 import { StyledInputs } from './inputs';
 import { ComboboxProjection } from './projection';
+import { SliderForms } from './slider-forms';
 import { StyledTable } from './table';
 
 @Component({
   selector: 'app-root',
-  imports: [StyledPrimitives, StyledInputs, ComboboxProjection, StyledTable],
+  imports: [StyledPrimitives, StyledInputs, ComboboxProjection, SliderForms, StyledTable],
   template: `
     <main data-test-id="styled-controls">
       <p data-test-id="styled-controls-status">Styled controls ready</p>
       <app-styled-primitives />
       <app-styled-inputs />
       <app-combobox-projection />
+      <app-slider-forms />
       <app-styled-table />
     </main>
   `,

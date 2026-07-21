@@ -111,6 +111,58 @@ disabled policy, and touched state are not additional Control Value Authorities.
 Each migration must nevertheless preserve the documented disabled, touched,
 validation, and accessibility behavior for its control.
 
+## Migration pattern (established by the Slider tracer, #277)
+
+Each remaining migration (#283–#290) repeats the slice below; none of it
+introduces a new state seam. `packages/angular/slider/slider.ts` is the
+reference implementation.
+
+1. **Swap the contract.** Replace the `value`/`checked` `input(...)` +
+   `output(...)` pair with one `model(...)` and declare
+   `implements FormValueControl<T>` (or `FormCheckboxControl`) on the class.
+   The model supplies `[value]`, `[(value)]`, and `(valueChange)` (or the
+   `checked` equivalents); do not keep a separate change output.
+2. **Delete the legacy authority.** Remove `ControlValueAccessor` from the
+   implements clause, the `NG_VALUE_ACCESSOR` provider, the
+   `writeValue`/`registerOnChange`/`registerOnTouched`/`setDisabledState`
+   methods, and every `HellControlledValueState`/`HellControlValueAccessorBridge`
+   use in the class. Reactive Forms and Template-driven Forms need no
+   replacement code: Angular binds `formControl`/`ngModel` to Signal Forms
+   custom controls through built-in interoperability.
+3. **Route user commits through the model once.** The delegated engine's
+   change callback (for Slider: `ngpSlider`'s `onValueChange`) calls
+   `this.value.set(next)` and nothing else. External property, two-way, and
+   form writes flow into the same model; the engine consumes it reactively
+   (pass the model — or a derived `computed` — as the engine's value signal,
+   or use the public non-emitting setter / guarded adapter per
+   `ng-primitives-state-adapter.md`), so external sync never re-emits a
+   commit.
+4. **Emit touched.** Add `readonly touch = output<void>()` and emit it at the
+   control's documented interaction boundary (Slider: host `focusout` and
+   track-drag start). The `FormField` directive and the interop layers listen
+   to it; there is no `markTouched` bridge anymore.
+5. **Accept forms-driven UI state through the reserved optional inputs.**
+   `disabled` (keep its `booleanAttribute` transform) is read directly —
+   there is no separate form-owned disabled state. Where the control has
+   matching semantics, type the reserved inputs as the contract requires,
+   e.g. Slider widens `min`/`max` to `number | undefined` (with an
+   undefined-preserving `numberAttribute` transform and internal defaults) so
+   a field's `min()`/`max()` validator metadata can drive and clear them.
+6. **Accept the coercion break.** The model input drops transform-based
+   static-attribute coercion for `value`/`checked`; document the exact typed
+   binding in the docs page and the CHANGELOG breaking entry. Configuration
+   inputs keep their transforms.
+7. **Verify at the seams.** Focused unit specs cover: two-way binding with no
+   echo on external writes and exactly one commit per user interaction;
+   `[formField]` (value both directions, dirty, touched, disabled, reserved
+   validator-metadata inputs); `formControl` and `ngModel` interop including
+   touched and disabled. The styled-controls consumer fixture binds the
+   packed control through direct, two-way, `formField`, `formControl`, and
+   `ngModel` paths at once (`tools/consumer-fixtures/styled-controls`).
+   Update the API report, docs page + example, and CHANGELOG; the permanent
+   `one-forms-contract` architecture guard (`tools/check-architecture.mjs`)
+   rejects any class that mixes the contract families.
+
 ## Consequences
 
 - Consumers get one ordinary `[(value)]` or `[(checked)]` contract that also

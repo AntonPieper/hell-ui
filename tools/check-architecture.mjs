@@ -179,6 +179,20 @@ const architectureCheckManifest = [
     owner: '@AntonPieper',
     run: checkNgpStateWriterContract,
   },
+  {
+    // One Control Value Authority (docs/adr/0001-control-value-authority.md,
+    // #277): a control class implements exactly one Angular forms contract
+    // family. Angular's migration guidance forbids implementing both a
+    // ControlValueAccessor and a Signal Forms control contract on one class;
+    // mixing them would reintroduce the dual committed-value authority the
+    // ADR removes. This lives in the checker rather than the ESLint boundary
+    // plugin because it is a class-contract invariant over TypeScript
+    // heritage clauses and decorator providers, not an import-boundary edge.
+    name: 'one-forms-contract',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkOneFormsContractGuard,
+  },
 ];
 
 function main() {
@@ -1759,6 +1773,87 @@ function checkNgpStateWriterContract() {
     if (usesStateWriter) {
       failures.push(`ng-primitives state writer usage is not approved in ${rel}`);
     }
+  }
+}
+
+// One Control Value Authority guard (docs/adr/0001-control-value-authority.md,
+// #277): a class that implements a Signal Forms custom-control contract
+// (FormValueControl / FormCheckboxControl) must not also carry the legacy
+// ControlValueAccessor contract — neither through its implements clause, nor
+// by registering NG_VALUE_ACCESSOR, nor by declaring the accessor's callback
+// registration methods structurally. The implements clause is the contract
+// marker: every migrated control declares its Signal Forms contract there, so
+// heritage-clause inspection is exact for the invariant this guard pins.
+function checkOneFormsContractGuard() {
+  const signalFormsContracts = new Set(['FormValueControl', 'FormCheckboxControl']);
+  const accessorMethodNames = new Set(['writeValue', 'registerOnChange', 'registerOnTouched']);
+  const sourceFiles = libraryPackageFiles().filter(
+    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'),
+  );
+
+  for (const file of sourceFiles) {
+    const source = readFile(file);
+    if (!source.includes('FormValueControl') && !source.includes('FormCheckboxControl')) continue;
+
+    const rel = relPath(file);
+    const sourceFile = ts.createSourceFile(
+      file,
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS,
+    );
+
+    const heritageTypeName = (expression) => {
+      if (ts.isIdentifier(expression)) return expression.text;
+      if (ts.isPropertyAccessExpression(expression)) return expression.name.text;
+      return null;
+    };
+
+    const visit = (node) => {
+      if (ts.isClassDeclaration(node)) {
+        const className = node.name?.text ?? '<anonymous class>';
+        const implementedNames = (node.heritageClauses ?? [])
+          .filter((clause) => clause.token === ts.SyntaxKind.ImplementsKeyword)
+          .flatMap((clause) => clause.types.map((type) => heritageTypeName(type.expression)))
+          .filter(Boolean);
+        const signalFormsContract = implementedNames.find((name) =>
+          signalFormsContracts.has(name),
+        );
+
+        if (signalFormsContract) {
+          if (implementedNames.includes('ControlValueAccessor')) {
+            failures.push(
+              `${rel}: class ${className} implements both ${signalFormsContract} and ControlValueAccessor; a control keeps exactly one Angular forms contract family (docs/adr/0001-control-value-authority.md)`,
+            );
+          }
+
+          const decoratorText = (ts.canHaveDecorators(node) ? ts.getDecorators(node) ?? [] : [])
+            .map((decorator) => decorator.getText(sourceFile))
+            .join('\n');
+          if (decoratorText.includes('NG_VALUE_ACCESSOR')) {
+            failures.push(
+              `${rel}: class ${className} implements ${signalFormsContract} but still registers the legacy NG_VALUE_ACCESSOR provider (docs/adr/0001-control-value-authority.md)`,
+            );
+          }
+
+          const accessorMethods = node.members.filter(
+            (member) =>
+              ts.isMethodDeclaration(member) &&
+              ts.isIdentifier(member.name) &&
+              accessorMethodNames.has(member.name.text),
+          );
+          for (const method of accessorMethods) {
+            failures.push(
+              `${rel}: class ${className} implements ${signalFormsContract} but still declares ControlValueAccessor method ${method.name.getText(sourceFile)} (docs/adr/0001-control-value-authority.md)`,
+            );
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+
+    visit(sourceFile);
   }
 }
 

@@ -54,6 +54,10 @@
         "textIncludes": "Styled controls ready"
       },
       {
+        "selector": "[data-test-id=\"slider-forms-status\"]",
+        "textIncludes": "Slider forms ready 10-20-30-40-50"
+      },
+      {
         "selector": "[data-test-id=\"primary-link\"]",
         "computedStyle": {
           "property": "color",

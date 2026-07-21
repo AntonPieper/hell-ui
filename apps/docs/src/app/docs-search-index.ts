@@ -1585,6 +1585,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'components/slider/examples/disabled.example components/slider hell-slider hellField hellFieldLabel',
  },
  {
+ title:'Slider: Forms',
+ path:'/components/slider',
+ detail:'components/slider/examples/forms.example.ts',
+ terms:
+'forms components/slider/examples/forms.example components/slider hell-slider hellField hellFieldLabel formField Signal Forms FormValueControl value model two-way ngModel formControl touched max',
+ },
+ {
  title:'Slider: Thumb visibility and grow',
  path:'/components/slider',
  detail:'components/slider/examples/modes.example.ts',
