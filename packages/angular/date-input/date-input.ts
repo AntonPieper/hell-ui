@@ -5,23 +5,16 @@ import {
   booleanAttribute,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   type Provider,
   type Signal,
 } from '@angular/core';
-import {
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  type AbstractControl,
-  type ControlValueAccessor,
-  type NgControl,
-  type ValidationErrors,
-  type Validator,
-} from '@angular/forms';
+import { type NgControl } from '@angular/forms';
+import { FormField, transformedValue, type FormValueControl } from '@angular/forms/signals';
 import {
   injectFormFieldState,
   ngpFormField,
@@ -40,6 +33,7 @@ import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
+  type HellTypedValueCommitResult,
 } from '@hell-ui/angular/internal/core';
 
 /**
@@ -126,34 +120,47 @@ function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
   return dateDayValue(value);
 }
 
+/**
+ * `FormUiControl` reserves `min`/`max` as `Date | undefined` inputs so Signal
+ * Forms can reflect `minDate()`/`maxDate()` validator metadata into the
+ * control (and clear it with `undefined` again). Property bindings keep
+ * accepting `Date | null`; `null`, `undefined`, and non-`Date` values mean
+ * "unset".
+ */
+function hellDateInputBoundAttribute(value: unknown): Date | undefined {
+  return value instanceof Date ? value : undefined;
+}
+
 let nextDateInputId = 0;
 
 /**
  * Typed date behavior for a real text input. The directive owns draft parsing,
- * validation, controlled state, and forms integration; calendar triggers and
- * Date Picker panels compose separately around the input.
+ * validation state, and forms integration; calendar triggers and Date Picker
+ * panels compose separately around the input.
+ *
+ * The `value` model is the one Control Value Authority for the committed
+ * `Date | null`: bind it one-way (`[value]` plus `(valueChange)`), two-way
+ * (`[(value)]`), or through Angular forms — Signal Forms `[formField]` via the
+ * `FormValueControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability. Draft text stays interaction state:
+ * incomplete or invalid text never commits, and commit attempts report parse
+ * failures through `transformedValue` as `invalidDateInputDraft` errors on the
+ * nearest Signal Forms field.
  */
 @Directive({
   selector: 'input[hellDateInput]',
   exportAs: 'hellDateInput',
   hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
-  providers: [
-    provideFormFieldState({ inherit: false }),
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellDateInput),
-      multi: true,
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => HellDateInput),
-      multi: true,
-    },
-  ],
+  providers: [provideFormFieldState({ inherit: false })],
   host: {
+    // Angular's `ngNoCva` marker: `formControl`/`ngModel` on this native input
+    // must bind the directive's `value` model through Signal Forms custom
+    // control interoperability instead of the string-writing
+    // `DefaultValueAccessor` that otherwise attaches to text inputs.
+    ngNoCva: '',
     '[attr.id]': 'id()',
     '[value]': 'display()',
-    '[disabled]': 'isDisabled()',
+    '[disabled]': 'disabled()',
     '[required]': 'required()',
     '[attr.min]': 'nativeMin()',
     '[attr.max]': 'nativeMax()',
@@ -161,38 +168,61 @@ let nextDateInputId = 0;
     '[attr.aria-describedby]': 'fieldAriaDescribedby()',
     '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
-    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.data-required]': 'required() ? "true" : null',
     '(input)': 'onInput()',
     '(blur)': 'onBlur()',
     '(keydown)': 'onKeydown($event)',
   },
 })
-export class HellDateInput implements ControlValueAccessor, Validator {
+export class HellDateInput implements FormValueControl<Date | null> {
   /** Native input id, generated when the consumer does not author one. */
   readonly id = input(`hell-date-input-${++nextDateInputId}`);
-  /** Forces the invalid presentation and accessibility state. */
+  /** Forces the invalid presentation. Also driven by bound forms. */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /** Disables native input interaction outside forms use. */
+  /** Disables native input interaction. Also driven by bound forms. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Marks null as a required-value validation error. */
+  /** Marks null as visually missing. Also driven by a field's `required()` rule. */
   readonly required = input(false, { transform: booleanAttribute });
-  /** Current controlled date value. */
-  readonly value = input<Date | null>(null);
-  /** Inclusive lower date bound. */
-  readonly min = input<Date | null>(null);
-  /** Inclusive upper date bound. */
-  readonly max = input<Date | null>(null);
+  /**
+   * Committed date value — the one Control Value Authority. User commits on
+   * blur or Enter write it exactly once and emit `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. Invalid
+   * or incomplete draft text never reaches this model.
+   */
+  readonly value = model<Date | null>(null);
+  /**
+   * Inclusive lower date bound. `undefined` (or `null`) means unbounded. Also
+   * driven by a bound Signal Forms field's `minDate()` validator metadata.
+   */
+  readonly min = input(undefined, { transform: hellDateInputBoundAttribute });
+  /**
+   * Inclusive upper date bound. `undefined` (or `null`) means unbounded. Also
+   * driven by a bound Signal Forms field's `maxDate()` validator metadata.
+   */
+  readonly max = input(undefined, { transform: hellDateInputBoundAttribute });
   /** Additional `aria-describedby` ids merged with an enclosing Field. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
   /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  /** Emits each successfully committed date or nullable clear. */
-  readonly valueChange = output<Date | null>();
+  /**
+   * Emits when focus leaves the native input. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
   private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
   private readonly adapter = inject(HELL_DATE_INPUT_ADAPTER);
+  /**
+   * The Signal Forms `FormField` directive bound to this host, when present.
+   * Parse failures are reported only into its field: classic
+   * `formControl`/`ngModel` bindings deliberately receive no directive-owned
+   * errors, because their required and range policy is form-owned too and the
+   * silent parse-error revalidation Angular's interop performs
+   * (`emitEvent: false`) would leave event-driven Field mirrors stale.
+   */
+  private readonly signalFormField = inject(FormField, { self: true, optional: true });
   private readonly inheritedFormField = injectFormFieldState({
     optional: true,
     skipSelf: true,
@@ -201,21 +231,30 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     ngControl: signal<NgControl | undefined>(undefined),
   });
 
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal<Date | null>(null);
-  private readonly controlDisabled = signal(false);
-  private onControlChange: (value: Date | null) => void = () => {};
-  private onControlTouched: () => void = () => {};
-  private onValidatorChange: () => void = () => {};
   private hasExternalSnapshot = false;
   private externalSnapshot: Date | null = null;
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
-    external: () => this.effectiveValue(),
+    external: () => this.value(),
     parseExternal: (value) => this.normalizeValue(value),
     parseText: (text) => this.parseText(text),
     format: (value) => this.adapter.format(value),
     externalChanged: (base, current) => !this.sameValue(base, current),
+  });
+
+  /**
+   * Raw-text commit boundary over the `value` model. Commit attempts write the
+   * committed text here: a valid parse updates the model exactly once, while a
+   * parse failure leaves the model untouched and reports one
+   * `invalidDateInputDraft` error to the nearest Signal Forms field.
+   */
+  private readonly rawCommitText = transformedValue(this.value, {
+    parse: (text: string) => {
+      const parsed = this.parseText(text);
+      if (!parsed.valid) return { error: { kind: 'invalidDateInputDraft' } };
+      return { value: parsed.value };
+    },
+    format: (value) => this.adapter.format(this.normalizeValue(value)),
   });
 
   /** Current committed date, normalized to the adapter's value policy. */
@@ -232,19 +271,17 @@ export class HellDateInput implements ControlValueAccessor, Validator {
   protected readonly requiredMissing = computed(
     () => this.required() && this.current() === null && !this.invalidDraft(),
   );
-  /** Effective invalid state from behavior, Field, or an explicit override. */
+  /** Effective invalid state from behavior, Field, forms, or an explicit override. */
   protected readonly isInvalid = (): boolean =>
     this.invalid() ||
     this.invalidDraft() ||
     this.outOfRange() ||
     this.requiredMissing() ||
     this.inheritedFormField()?.invalid() === true;
-  /** Effective disabled state from the public input or forms API. */
-  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
   /** Native lower-bound attribute using the adapter's stable format. */
-  protected readonly nativeMin = computed(() => this.formatBound(this.min()));
+  protected readonly nativeMin = computed(() => this.formatBound(this.min() ?? null));
   /** Native upper-bound attribute using the adapter's stable format. */
-  protected readonly nativeMax = computed(() => this.formatBound(this.max()));
+  protected readonly nativeMax = computed(() => this.formatBound(this.max() ?? null));
   /** Effective description ids from native attributes and an enclosing Field. */
   protected readonly fieldAriaDescribedby = computed(() =>
     this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
@@ -281,7 +318,7 @@ export class HellDateInput implements ControlValueAccessor, Validator {
     }
 
     effect(() => {
-      const external = this.normalizeValue(this.effectiveValue());
+      const external = this.normalizeValue(this.value());
       if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
         this.valueState.clearDraft();
         this.valueState.clearLocal();
@@ -289,91 +326,42 @@ export class HellDateInput implements ControlValueAccessor, Validator {
       this.externalSnapshot = external;
       this.hasExternalSnapshot = true;
     });
-
-    effect(() => {
-      this.invalidDraft();
-      this.current();
-      this.min();
-      this.max();
-      this.required();
-      this.onValidatorChange();
-    });
-  }
-
-  /** Writes a date from an Angular form without emitting it back. */
-  writeValue(value: Date | null): void {
-    const normalized = this.normalizeValue(value);
-    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
-
-    this.controlMode.set(true);
-    this.controlValue.set(normalized);
-    if (changed) {
-      this.valueState.clearDraft();
-      this.valueState.clearLocal();
-    }
-    this.onValidatorChange();
-  }
-
-  /** Registers the Angular forms change callback. */
-  registerOnChange(fn: (value: Date | null) => void): void {
-    this.onControlChange = fn;
-  }
-
-  /** Registers the Angular forms touched callback. */
-  registerOnTouched(fn: () => void): void {
-    this.onControlTouched = fn;
-  }
-
-  /** Registers the Angular forms validator-change callback. */
-  registerOnValidatorChange(fn: () => void): void {
-    this.onValidatorChange = fn;
-  }
-
-  /** Applies disabled state supplied by Angular forms to the native input. */
-  setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
-  }
-
-  /** Reports malformed drafts, missing required values, and bound violations. */
-  validate(_control: AbstractControl | null): ValidationErrors | null {
-    const errors: ValidationErrors = {};
-
-    if (this.invalidDraft()) {
-      errors['invalidDateInputDraft'] = true;
-    } else if (this.requiredMissing()) {
-      errors['required'] = true;
-    }
-    if (this.outOfRange()) {
-      errors['outOfRangeDate'] = true;
-    }
-
-    return Object.keys(errors).length > 0 ? errors : null;
   }
 
   /** Records the native field value as a draft while preserving the input event. */
   protected onInput(): void {
     this.valueState.writeDraft(this.host.value);
-    this.onValidatorChange();
   }
 
   /** Commits a draft and marks the native field touched on blur. */
   protected onBlur(): void {
-    const result = this.valueState.commitDraft();
-    if (result.committed) this.emitValue(result.value);
-    this.onControlTouched();
-    this.onValidatorChange();
+    const text = this.host.value;
+    this.applyCommit(this.valueState.commitDraft(), text);
+    this.touch.emit();
   }
 
   /** Commits on Enter while preserving the native keyboard event and form behavior. */
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter') return;
-    const result = this.valueState.commitText(this.host.value);
-    if (result.committed) this.emitValue(result.value);
-    this.onValidatorChange();
+    const text = this.host.value;
+    this.applyCommit(this.valueState.commitText(text), text);
   }
 
-  private effectiveValue(): Date | null {
-    return this.controlMode() ? this.controlValue() : this.value();
+  /**
+   * Routes one commit attempt through the raw-text boundary: successful
+   * commits write the model once (after synchronously canonicalizing the
+   * native text so native form submission serializes the stable format), and
+   * invalid commits report their parse failure without touching the model.
+   * Stale and draft-free attempts change nothing.
+   */
+  private applyCommit(result: HellTypedValueCommitResult<Date | null>, text: string): void {
+    if (result.committed) {
+      // Native submission can run before Angular renders the committed display.
+      this.host.value = this.adapter.format(result.value);
+      this.rawCommitText.set(text);
+    } else if (result.reason === 'invalid' && this.signalFormField !== null) {
+      this.rawCommitText.set(text);
+    }
   }
 
   private parseText(text: string): HellTypedValueParseResult<Date> {
@@ -394,8 +382,8 @@ export class HellDateInput implements ControlValueAccessor, Validator {
 
   private isWithinBounds(value: Date | null): boolean {
     return (
-      this.adapter.isWithinBounds?.(value, this.min(), this.max()) ??
-      hellIsDateInputValueWithinBounds(value, this.min(), this.max())
+      this.adapter.isWithinBounds?.(value, this.min() ?? null, this.max() ?? null) ??
+      hellIsDateInputValueWithinBounds(value, this.min() ?? null, this.max() ?? null)
     );
   }
 
@@ -407,14 +395,5 @@ export class HellDateInput implements ControlValueAccessor, Validator {
   private mergeIdRefs(explicit: string | null, fieldIds: readonly string[] | undefined): string | null {
     const ids = hellUniqueIdRefs([explicit, ...(fieldIds ?? [])].filter(Boolean).join(' '));
     return ids.join(' ') || null;
-  }
-
-  private emitValue(value: Date | null): void {
-    // Native submission can run before Angular renders the committed display.
-    this.host.value = this.adapter.format(value);
-    if (this.controlMode()) this.controlValue.set(value);
-    this.valueChange.emit(value);
-    this.onControlChange(value);
-    this.onValidatorChange();
   }
 }

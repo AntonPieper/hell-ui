@@ -11,6 +11,10 @@ import { DateInputBoundsAndValidationExample } from './examples/bounds-and-valid
 import dateInputBoundsAndValidationExampleCodeRaw from './examples/bounds-and-validation.example.ts?raw' with {
   loader: 'text',
 };
+import { DateInputFormsExample } from './examples/forms.example';
+import dateInputFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { DateInputReactiveFormsExample } from './examples/reactive-forms.example';
 import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
@@ -40,6 +44,7 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
     RouterLink,
     DateInputBasicExample,
     DateInputBoundsAndValidationExample,
+    DateInputFormsExample,
     DateInputReactiveFormsExample,
     DateInputSizesExample,
     DateInputStylingExample,
@@ -62,9 +67,11 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <p>
         Apply <code>hellDateInput</code> to an <code>&lt;input&gt;</code>. The native element keeps
         its focus, keyboard, event, attribute, Field, and form semantics while the directive owns
-        the Typed Value Input state machine: drafts, strict parsing, stable formatting, validation,
-        nullable clears, and external synchronization. Bind <code>[value]</code> and listen to
-        <code>(valueChange)</code>; both use <code>Date | null</code>.
+        the Typed Value Input state machine: drafts, strict parsing, stable formatting, validation
+        state, nullable clears, and external synchronization. The <code>value</code> model is the
+        one committed <code>Date | null</code> authority — bind it one-way (<code>[value]</code>
+        plus <code>(valueChange)</code>), two-way (<code>[(value)]</code>), or through Angular
+        forms.
       </p>
       <p>
         The directive reuses the single-host <a routerLink="/components/input">Input</a> styling
@@ -111,10 +118,13 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <h2>Required, bounds, invalid, and disabled</h2>
       <p>
         <code>required</code>, <code>disabled</code>, <code>min</code>, and <code>max</code> are
-        reflected on the native input and participate in Date Input validation. Bounds are
-        inclusive. The <code>invalid</code> input remains an explicit presentation override;
-        malformed drafts, missing required values, and out-of-range committed values become
-        invalid automatically.
+        reflected on the native input and drive Date Input's invalid state. Bounds are inclusive
+        and typed <code>Date | undefined</code> (<code>null</code> bindings still mean unbounded).
+        The <code>invalid</code> input remains an explicit presentation override; malformed
+        drafts, missing required values, and out-of-range committed values become invalid
+        automatically, and bound forms drive the same <code>required</code>,
+        <code>disabled</code>, <code>invalid</code>, <code>min</code>, and <code>max</code>
+        inputs.
       </p>
       <hd-example-tabs
         [code]="dateInputBoundsAndValidationExampleCode"
@@ -123,13 +133,35 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         <app-date-input-bounds-and-validation-example />
       </hd-example-tabs>
 
+      <h2>Signal Forms</h2>
+      <p>
+        Date Input implements Signal Forms' <code>FormValueControl&lt;Date | null&gt;</code>: bind
+        a field via <code>[formField]</code> and the field writes into <code>value</code>, user
+        commits update the field exactly once, and blur emits <code>(touch)</code> to mark it
+        touched. The field's <code>required()</code>, <code>minDate()</code>, and
+        <code>maxDate()</code> rules flow into the matching inputs, so schema bounds and the
+        native <code>min</code>/<code>max</code> attributes stay aligned. Draft text stays
+        interaction state: an unparseable or out-of-range committed draft never becomes a value —
+        instead the commit reports one <code>invalidDateInputDraft</code> parse error to the
+        nearest field through Angular's <code>transformedValue</code> contract, and a later valid
+        or empty commit clears it.
+      </p>
+      <hd-example-tabs [code]="dateInputFormsExampleCode" previewClass="grid max-w-md gap-2">
+        <app-date-input-forms-example />
+      </hd-example-tabs>
+
       <h2>Reactive forms and Field</h2>
       <p>
-        Date Input implements <code>ControlValueAccessor</code> and <code>Validator</code>. Programmatic
-        writes never emit <code>valueChange</code>; user commits update the form before blur marks it
-        touched. Equivalent external writes preserve active typing, while genuinely changed values
-        replace stale drafts. An enclosing <a routerLink="/components/field">Field</a> associates its
-        label, descriptions, and errors with this same native input.
+        <code>formControl</code> and <code>ngModel</code> bind the same <code>value</code> model
+        through Angular's built-in Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore. Programmatic writes never emit
+        <code>valueChange</code>; user commits update the form before blur marks it touched.
+        Validation policy belongs to the form: declare required and range rules on the control
+        itself, while an unparseable committed draft simply never commits and keeps the input's
+        visual invalid state until corrected. Equivalent external writes preserve active typing,
+        while genuinely changed values replace stale drafts. An enclosing
+        <a routerLink="/components/field">Field</a> associates its label, descriptions, and errors
+        with this same native input.
       </p>
       <hd-example-tabs
         [code]="dateInputReactiveFormsExampleCode"
@@ -184,18 +216,29 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
           </tr>
           <tr>
             <td><code>value</code> / <code>valueChange</code></td>
-            <td><code>Date | null</code></td>
-            <td>Controlled committed value and nullable clear output.</td>
+            <td><code>ModelSignal&lt;Date | null&gt;</code></td>
+            <td>
+              One committed value authority: <code>[value]</code>, <code>[(value)]</code>,
+              <code>[formField]</code>, <code>formControl</code>, and <code>ngModel</code>.
+            </td>
           </tr>
           <tr>
             <td><code>required</code>, <code>disabled</code>, <code>invalid</code></td>
             <td><code>boolean</code></td>
-            <td>Native required/disabled state and explicit invalid override.</td>
+            <td>Native required/disabled state and invalid override; also driven by bound forms.</td>
           </tr>
           <tr>
             <td><code>min</code>, <code>max</code></td>
-            <td><code>Date | null</code></td>
-            <td>Inclusive typed bounds, also reflected in stable adapter format.</td>
+            <td><code>Date | undefined</code></td>
+            <td>
+              Inclusive typed bounds in stable adapter format; also driven by a bound field's
+              <code>minDate()</code>/<code>maxDate()</code> metadata.
+            </td>
+          </tr>
+          <tr>
+            <td><code>touch</code></td>
+            <td><code>OutputRef&lt;void&gt;</code></td>
+            <td>Emits on blur; Angular forms use it to mark the field or control touched.</td>
           </tr>
           <tr>
             <td><code>id</code></td>
@@ -214,6 +257,36 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
           </tr>
         </tbody>
       </table>
+
+      <h2>Migration to one Control Value Authority</h2>
+      <ul>
+        <li>
+          <code>value</code> is now a <code>ModelSignal&lt;Date | null&gt;</code>:
+          <code>[value]</code> plus <code>(valueChange)</code> behave as before, and
+          <code>[(value)]</code> two-way binding is new. Model inputs take no static-attribute
+          coercion; a typed <code>Date | null</code> binding was already required.
+        </li>
+        <li>
+          The directive no longer implements <code>ControlValueAccessor</code> or
+          <code>Validator</code>. <code>formControl</code> and <code>ngModel</code> keep working
+          through Angular's Signal Forms interoperability, but the directive writes no errors
+          onto classic controls anymore: <code>invalidDateInputDraft</code>,
+          <code>required</code>, and <code>outOfRangeDate</code> control errors are gone. Parse
+          failures are reported as <code>invalidDateInputDraft</code> field errors in Signal
+          Forms only.
+        </li>
+        <li>
+          Declare required and range policy on the form — <code>Validators.required</code> or
+          your own range validator for classic controls, or
+          <code>required()</code>/<code>minDate()</code>/<code>maxDate()</code> schema rules for
+          Signal Forms — and the input keeps reflecting missing required values, out-of-range
+          committed values, and invalid drafts visually.
+        </li>
+        <li>
+          <code>min</code>/<code>max</code> are typed <code>Date | undefined</code> instead of
+          <code>Date | null</code>; <code>null</code> bindings still mean unbounded.
+        </li>
+      </ul>
 
       <h2>Migration from the owned component</h2>
       <ul>
@@ -275,6 +348,7 @@ export class DateInputPage {
   protected readonly dateInputBasicExampleCode = dateInputBasicExampleCodeRaw;
   protected readonly dateInputBoundsAndValidationExampleCode =
     dateInputBoundsAndValidationExampleCodeRaw;
+  protected readonly dateInputFormsExampleCode = dateInputFormsExampleCodeRaw;
   protected readonly dateInputReactiveFormsExampleCode = dateInputReactiveFormsExampleCodeRaw;
   protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;
   protected readonly dateInputStylingExampleCode = dateInputStylingExampleCodeRaw;

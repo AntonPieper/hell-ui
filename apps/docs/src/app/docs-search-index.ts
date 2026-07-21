@@ -633,11 +633,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'date-input input hellDateInput required min max invalid disabled native attributes bounds invalid draft',
  },
  {
+ title:'Date Input: Forms',
+ path:'/components/date-input',
+ detail:'components/date-input/examples/forms.example.ts',
+ terms:
+'forms components/date-input/examples/forms.example components/date-input input hellDateInput hellField hellFieldLabel formField Signal Forms FormValueControl value model two-way transformedValue parse error invalidDateInputDraft required minDate maxDate touched',
+ },
+ {
  title:'Date Input: Reactive Forms',
  path:'/components/date-input',
  detail:'components/date-input/examples/reactive-forms.example.ts',
  terms:
-'date-input reactive-forms input hellDateInput FormControl ReactiveFormsModule hellField hellFieldLabel hellFieldDescription ControlValueAccessor Validator touched disabled clear',
+'date-input reactive-forms input hellDateInput FormControl ReactiveFormsModule hellField hellFieldLabel hellFieldDescription Signal Forms interop FormValueControl touched disabled clear invalidDateInputDraft',
  },
  {
  title:'Date Input: Sizes',

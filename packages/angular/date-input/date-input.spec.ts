@@ -1,6 +1,19 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormsModule,
+  NgModel,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  FormField,
+  disabled as disabledSchema,
+  form,
+  maxDate,
+  minDate,
+} from '@angular/forms/signals';
 
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import {
@@ -54,6 +67,23 @@ class ControlledHost {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  template: `
+    <input
+      hellDateInput
+      aria-label="Two-way date"
+      [(value)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class TwoWayHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  readonly values: Array<Date | null> = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, HellDateInput],
   template: `
     <input
@@ -67,6 +97,48 @@ class ControlledHost {
 })
 class FormHost {
   readonly control = new FormControl<Date | null>(new Date(2026, 3, 22));
+  readonly values: Array<Date | null> = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, HellDateInput],
+  template: `
+    <input
+      hellDateInput
+      aria-label="Model date"
+      [(ngModel)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class NgModelHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  readonly model = viewChild.required(NgModel);
+  readonly values: Array<Date | null> = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormField, HellDateInput],
+  template: `
+    <input
+      id="signal-date"
+      hellDateInput
+      aria-label="Signal date"
+      [formField]="deliveryForm.date"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class SignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ date: Date | null }>({ date: new Date(2026, 3, 22) });
+  readonly deliveryForm = form(this.model, (path) => {
+    disabledSchema(path.date, () => this.formDisabled());
+    minDate(path.date, new Date(2026, 3, 1));
+    maxDate(path.date, new Date(2026, 3, 30));
+  });
   readonly values: Array<Date | null> = [];
 }
 
@@ -96,7 +168,6 @@ class NativeFormHost {
     <input
       id="validated-date"
       hellDateInput
-      required
       aria-label="Validated date"
       [min]="min()"
       [max]="max()"
@@ -105,7 +176,9 @@ class NativeFormHost {
   `,
 })
 class ValidationHost {
-  readonly control = new FormControl<Date | null>(null);
+  readonly control = new FormControl<Date | null>(null, {
+    validators: [Validators.required],
+  });
   readonly min = signal<Date | null>(new Date(2026, 3, 1));
   readonly max = signal<Date | null>(new Date(2026, 3, 30));
 }
@@ -184,7 +257,10 @@ describe('HellDateInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         ControlledHost,
+        TwoWayHost,
         FormHost,
+        NgModelHost,
+        SignalFormsHost,
         NativeFormHost,
         ValidationHost,
         FieldHost,
@@ -249,6 +325,30 @@ describe('HellDateInput', () => {
 
     expect(formatDate(host.values[0])).toBe('2026-05-06');
     expect(input.value).toBe('2026-05-06');
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(TwoWayHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const input = dateInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set(new Date(2026, 4, 6));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-05-06');
+    expect(host.values).toEqual([]);
+
+    // One user commit updates parent state and emits exactly one event.
+    typeText(input, '2026-06-07');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(formatDate(host.value())).toBe('2026-06-07');
+    expect(host.values.length).toBe(1);
+    expect(formatDate(host.values[0])).toBe('2026-06-07');
+    expect(input.value).toBe('2026-06-07');
   });
 
   it('keeps invalid partial drafts visible and clears invalid state after correction', () => {
@@ -409,7 +509,7 @@ describe('HellDateInput', () => {
     expect(input.getAttribute('data-required')).toBe('true');
   });
 
-  it('integrates with CVA without echoing programmatic writes', async () => {
+  it('integrates with Reactive Forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
@@ -427,10 +527,11 @@ describe('HellDateInput', () => {
     fixture.detectChanges();
     expect(formatDate(host.control.value)).toBe('2026-06-06');
     expect(formatDate(host.values[0])).toBe('2026-06-06');
+    expect(host.values.length).toBe(1);
     expect(host.control.touched).toBe(true);
   });
 
-  it('preserves a form draft across an equivalent CVA write but replaces it on change', async () => {
+  it('preserves a form draft across an equivalent form write but replaces it on change', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
@@ -448,46 +549,187 @@ describe('HellDateInput', () => {
     expect(input.value).toBe('2026-09-12');
   });
 
-  it('propagates disabled state from Angular forms to the native input', () => {
+  it('propagates disabled state from Angular forms to the native input', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
     const input = dateInput(fixture.nativeElement);
 
     host.control.disable();
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(input.disabled).toBe(true);
     expect(input.hasAttribute('data-disabled')).toBe(true);
   });
 
-  it('validates required, min, max, malformed drafts, and correction', () => {
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(NgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+    expect(host.values).toEqual([]);
+
+    // Enter commits without touching; blur marks the model touched.
+    typeText(input, '2026-05-06');
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(formatDate(host.value())).toBe('2026-05-06');
+    expect(host.values.length).toBe(1);
+    expect(host.model().touched).toBe(false);
+
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.model().touched).toBe(true);
+
+    host.value.set(new Date(2026, 8, 12));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-09-12');
+    expect(host.values.length).toBe(1);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', async () => {
+    const fixture = TestBed.createComponent(SignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+    // The field's minDate()/maxDate() validator metadata drives the input's
+    // own bounds, including the stable native attributes.
+    expect(input.getAttribute('min')).toBe('2026-04-01');
+    expect(input.getAttribute('max')).toBe('2026-04-30');
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.deliveryForm.date().value.set(new Date(2026, 3, 25));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-04-25');
+    expect(host.values).toEqual([]);
+    expect(host.deliveryForm.date().dirty()).toBe(false);
+
+    // One user commit updates the field and the model exactly once.
+    typeText(input, '2026-04-28');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(formatDate(host.deliveryForm.date().value())).toBe('2026-04-28');
+    expect(formatDate(host.model().date)).toBe('2026-04-28');
+    expect(host.values.length).toBe(1);
+    expect(host.deliveryForm.date().dirty()).toBe(true);
+    expect(host.deliveryForm.date().touched()).toBe(true);
+  });
+
+  it('reports parse failures to the Signal Forms field through transformedValue', async () => {
+    const fixture = TestBed.createComponent(SignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInput(fixture.nativeElement);
+
+    // A malformed committed draft stays editable and never becomes a value.
+    typeText(input, '2026-02-31');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-02-31');
+    expect(formatDate(host.deliveryForm.date().value())).toBe('2026-04-22');
+    expect(host.values).toEqual([]);
+    expect(errorKinds(host)).toContain('invalidDateInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // Out-of-range typed text is also an invalid draft, not a commit.
+    typeText(input, '2026-05-15');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-05-15');
+    expect(formatDate(host.deliveryForm.date().value())).toBe('2026-04-22');
+    expect(errorKinds(host)).toContain('invalidDateInputDraft');
+
+    // A corrected commit clears the parse error and commits once.
+    typeText(input, '2026-04-29');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(formatDate(host.deliveryForm.date().value())).toBe('2026-04-29');
+    expect(host.values.length).toBe(1);
+    expect(errorKinds(host)).not.toContain('invalidDateInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // An empty commit is a nullable clear through the same authority.
+    typeText(input, '');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.deliveryForm.date().value()).toBeNull();
+    expect(host.model().date).toBeNull();
+    expect(host.values).toEqual([expect.anything(), null]);
+
+    // Field-driven disabled state reaches the native input.
+    host.formDisabled.set(true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.disabled).toBe(true);
+    expect(input.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('keeps classic validation form-owned while drafts stay visual-only invalid state', async () => {
     const fixture = TestBed.createComponent(ValidationHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const host = fixture.componentInstance;
     const input = dateInput(fixture.nativeElement);
 
+    // The control's own required validator drives errors and the reserved
+    // required input, so the missing value is visible on the native host.
     expect(host.control.errors).toEqual({ required: true });
+    expect(input.required).toBe(true);
     expect(input.getAttribute('aria-invalid')).toBe('true');
 
-    host.control.setValue(new Date(2026, 2, 31));
+    // Out-of-range external writes keep the visual invalid contract.
+    host.control.setValue(new Date(2026, 2, 15));
+    await fixture.whenStable();
     fixture.detectChanges();
-    expect(host.control.errors).toEqual({ outOfRangeDate: true });
+    expect(host.control.hasError('required')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
 
     host.control.setValue(new Date(2026, 3, 15));
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(host.control.errors).toBeNull();
+    expect(input.getAttribute('aria-invalid')).toBeNull();
 
+    // A malformed committed draft never commits and stays a visual invalid
+    // state; classic controls receive no directive-owned error for it.
     typeText(input, '2026-02-31');
     input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
     fixture.detectChanges();
-    expect(host.control.errors).toEqual({ invalidDateInputDraft: true });
+    expect(host.control.errors).toBeNull();
+    expect(formatDate(host.control.value)).toBe('2026-04-15');
     expect(input.value).toBe('2026-02-31');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
 
     typeText(input, '2026-04-30');
     input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(host.control.errors).toBeNull();
     expect(formatDate(host.control.value)).toBe('2026-04-30');
+    expect(input.getAttribute('aria-invalid')).toBeNull();
   });
 
   it('wires Field label and description ids on the same native input', () => {
@@ -585,4 +827,11 @@ function formatDate(date: Date | null | undefined): string {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function errorKinds(host: SignalFormsHost): string[] {
+  return host.deliveryForm
+    .date()
+    .errors()
+    .map((error) => error.kind);
 }
