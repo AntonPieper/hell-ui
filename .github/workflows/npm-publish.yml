@@ -15,92 +15,20 @@ concurrency:
 
 env:
   CI: true
+  # Publish-only runtime: the tarball is built by the shared release gate on
+  # the CI Node runtime (release-gate.yml). Node 24 here keeps npm trusted
+  # publishing (OIDC provenance) available for the publish command itself.
   NODE_VERSION: 24
 
 jobs:
   release-gate:
     name: Release gate
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Enable pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install
-        run: pnpm run ci:install
-
-      # The consumer fixture smokes load built consumer apps in headless
-      # chromium (HELL_CONSUMER_FIXTURE_SMOKE=1).
-      - name: Install Playwright chromium
-        run: pnpm run ci:playwright:chromium
-
-      - name: Release dry run
-        run: pnpm run release:dry-run
-
-      - name: Consumer fixtures
-        env:
-          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
-          HELL_CONSUMER_FIXTURE_SMOKE: 1
-        run: pnpm run test:consumer-fixtures
-
-      - name: Build docs
-        run: pnpm run build:docs
-
-  build-package:
-    name: Build audited packages
-    needs: release-gate
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Enable pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install
-        run: pnpm run ci:install
-
-      - name: Build packages
-        run: pnpm run build:lib
-
-      - name: Audit package contents
-        run: pnpm run test:package-pack
-
-      - name: Pack audited package
-        run: |
-          mkdir -p release-package
-          pnpm --dir ./dist/hell pack --pack-destination ../../release-package
-
-      - name: Upload package tarballs
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-package
-          path: release-package/*.tgz
-          if-no-files-found: error
-          retention-days: 30
+    uses: ./.github/workflows/release-gate.yml
 
   publish:
     name: Publish to npm
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.HELL_ENABLE_NPMJS_PUBLISH == 'true'
-    needs: [release-gate, build-package]
+    needs: release-gate
     runs-on: ubuntu-latest
     environment: npm-publish
     timeout-minutes: 10
@@ -108,14 +36,14 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Download package tarballs
-        uses: actions/download-artifact@v4
+      - name: Download package tarball
+        uses: actions/download-artifact@v8
         with:
           name: release-package
           path: release-package
 
       - name: Enable pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 10.33.2
           run_install: false

@@ -438,6 +438,24 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Both registries now release through one shared gate. The reusable
+  `.github/workflows/release-gate.yml` workflow (callable and dispatchable)
+  runs the full release dry run, checks the entrypoint manifests, packs one
+  audited tarball through the same `ci:pack:lib` path CI uses, proves every
+  consumer fixture against that exact tarball, builds the docs, and uploads
+  the `release-package` artifact — built on the CI Node runtime (Node 22, the
+  same runtime `ci.yml` validates). `npm-publish.yml` and
+  `github-packages-publish.yml` both call that gate and only verify and
+  publish the prebuilt artifact on the Node 24 publish runtime; the GitHub
+  Packages mirror no longer rebuilds with weaker checks and instead rewrites
+  only `package.json` `name` and `publishConfig.registry` inside the audited
+  tarball, so both registries ship byte-identical package content aside from
+  that metadata rewrite. Closes #276. Evidence: local pack plus rewrite
+  simulation diffing the two tarballs down to the single `package.json`
+  metadata change, a mirror-tarball `pnpm publish --dry-run` and scratch
+  install, and a consumer fixture run against the packed
+  `artifacts/package` tarball; the tag-run path is exercised by the next
+  tagged release.
 - Package-consumer proof consolidated onto checked-in boundary fixtures. The
   embedded template-string scenario catalog and its hand-maintained CI
   grouping (`tools/check-package-consumer.mjs`, `test:package-consumer`,

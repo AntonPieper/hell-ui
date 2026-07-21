@@ -107,8 +107,9 @@ directory-based: no runner or CI changes are needed. In CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by
-rulesets). The release gate in `.github/workflows/npm-publish.yml` runs the
-whole set serially.
+rulesets). The shared release gate in `.github/workflows/release-gate.yml`
+(called by both publish workflows) runs the whole set serially against the
+audited release tarball.
 
 ## Current fixtures
 

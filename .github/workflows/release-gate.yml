@@ -1,0 +1,86 @@
+# The one release gate for every registry. The gate runs the full release
+# dry run, packs a single audited tarball, proves every consumer fixture
+# against that exact tarball, builds the docs, and uploads the tarball as the
+# `release-package` artifact. The npm and GitHub Packages publish workflows
+# both call this workflow and only verify and upload the prebuilt artifact,
+# applying registry-specific metadata rewrites at publish time, so both
+# registries ship the same audited content through identical gate criteria.
+name: Release gate
+
+on:
+  workflow_call:
+  # Evidence-only manual runs: dispatching exercises the full gate and
+  # produces the audited `release-package` artifact without publishing.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+  # The release tarball is built on the same Node runtime CI validates
+  # (NODE_VERSION in ci.yml). The publish jobs may run a newer Node because
+  # they never build; they only verify and upload this prebuilt artifact.
+  NODE_VERSION: 22
+
+jobs:
+  release-gate:
+    name: Release gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm run ci:install
+
+      # The consumer fixture smokes load built consumer apps in headless
+      # chromium (HELL_CONSUMER_FIXTURE_SMOKE=1).
+      - name: Install Playwright chromium
+        run: pnpm run ci:playwright:chromium
+
+      - name: Assert fresh build outputs
+        run: |
+          test ! -e dist
+          test ! -e artifacts
+
+      - name: Check entrypoint manifests
+        run: pnpm run ci:check:entrypoints
+
+      - name: Release dry run
+        run: pnpm run release:dry-run
+
+      # Pack the audited tarball once; the consumer fixtures below and both
+      # publish workflows use this exact artifact.
+      - name: Audit and pack package tarball
+        run: pnpm run ci:pack:lib
+
+      - name: Consumer fixtures
+        env:
+          HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
+          HELL_CONSUMER_FIXTURE_SMOKE: 1
+        run: pnpm run test:consumer-fixtures
+
+      - name: Build docs
+        run: pnpm run build:docs
+
+      - name: Upload package tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-package
+          path: artifacts/package/*.tgz
+          if-no-files-found: error
+          retention-days: 30
