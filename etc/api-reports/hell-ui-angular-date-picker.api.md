@@ -22,8 +22,10 @@ export class HellDatePicker {
     readonly locale: _angular_core.InputSignal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
-    // Warning: (ae-forgotten-export) The symbol "HellWeekdayLabel" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
-    protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
+    protected readonly weekdayLabels: _angular_core.Signal<{
+        readonly abbr: string;
+        readonly narrow: string;
+    }[]>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDatePicker, "hell-date-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDatePicker; inputs: { "ngpDatePickerDate": "date"; "ngpDatePickerFocusedDate": "focusedDate"; "ngpDatePickerMin": "min"; "ngpDatePickerMax": "max"; "ngpDatePickerDisabled": "disabled"; "ngpDatePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDatePickerDateChange": "dateChange"; "ngpDatePickerFocusedDateChange": "focusedDateChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePicker, never>;
 }
@@ -70,7 +72,10 @@ export class HellDateRangePicker {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     protected readonly rangeComplete: _angular_core.Signal<boolean>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
-    protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
+    protected readonly weekdayLabels: _angular_core.Signal<{
+        readonly abbr: string;
+        readonly narrow: string;
+    }[]>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDateRangePicker, "hell-date-range-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDateRangePicker; inputs: { "ngpDateRangePickerStartDate": "startDate"; "ngpDateRangePickerEndDate": "endDate"; "ngpDateRangePickerFocusedDate": "focusedDate"; "ngpDateRangePickerMin": "min"; "ngpDateRangePickerMax": "max"; "ngpDateRangePickerDisabled": "disabled"; "ngpDateRangePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDateRangePickerStartDateChange": "startDateChange"; "ngpDateRangePickerEndDateChange": "endDateChange"; "ngpDateRangePickerFocusedDateChange": "focusedDateChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateRangePicker, never>;
 }
