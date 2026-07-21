@@ -1,4 +1,12 @@
-name: Publish npm packages
+# The single release workflow for every registry. A tag push runs the shared
+# release gate (release-gate.yml) exactly once, and both registry publish
+# jobs download that same run's audited `release-package` artifact, so
+# cross-registry byte-identity comes from literally sharing one tarball
+# rather than from build determinism across separate gate runs.
+#
+# This file must keep the npm-publish.yml name: the npm trusted-publisher
+# record pins the workflow filename (docs/release/npm-publishing.md).
+name: Publish release
 
 on:
   push:
@@ -10,14 +18,15 @@ permissions:
   contents: read
 
 concurrency:
-  group: npm-publish-${{ github.ref }}
+  group: release-publish-${{ github.ref }}
   cancel-in-progress: false
 
 env:
   CI: true
   # Publish-only runtime: the tarball is built by the shared release gate on
-  # the CI Node runtime (release-gate.yml). Node 24 here keeps npm trusted
-  # publishing (OIDC provenance) available for the publish command itself.
+  # the CI Node runtime (the root .node-version file). Node 24 here keeps npm
+  # trusted publishing (OIDC provenance) available for the publish command
+  # itself; the publish jobs never build or run package scripts.
   NODE_VERSION: 24
 
 jobs:
@@ -25,7 +34,7 @@ jobs:
     name: Release gate
     uses: ./.github/workflows/release-gate.yml
 
-  publish:
+  publish-npm:
     name: Publish to npm
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.HELL_ENABLE_NPMJS_PUBLISH == 'true'
     needs: release-gate
@@ -81,3 +90,104 @@ jobs:
           set -euo pipefail
           echo "Publishing @hell-ui/angular"
           pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks
+
+  publish-github-packages:
+    name: Publish to GitHub Packages
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: release-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download package tarball
+        uses: actions/download-artifact@v8
+        with:
+          name: release-package
+          path: release-package
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+          run_install: false
+
+      - name: Setup Node for GitHub Packages
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://npm.pkg.github.com
+
+      - name: Verify package tarball and tag
+        run: |
+          set -euo pipefail
+          tarball_count="$(find release-package -type f -name '*.tgz' | wc -l | tr -d ' ')"
+          test "$tarball_count" = "1"
+
+          # Absolute path: pnpm publish re-resolves a relative tarball path
+          # from a different working directory and misreads it as a git spec.
+          tarball="$(find "$PWD/release-package" -type f -name '*.tgz' -print -quit)"
+          echo "HELL_RELEASE_TARBALL=${tarball}" >> "$GITHUB_ENV"
+
+          package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
+          package_version="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")"
+          test "${GITHUB_REF_NAME}" = "v${package_version}" || {
+            echo "Tag ${GITHUB_REF_NAME} must match ${package_name} version v${package_version}."
+            exit 1
+          }
+          test "$package_name" = "@hell-ui/angular" || {
+            echo "Unexpected release tarball package: ${package_name}."
+            exit 1
+          }
+          echo "HELL_RELEASE_VERSION=${package_version}" >> "$GITHUB_ENV"
+
+      # GitHub Packages scopes npm packages to the owning GitHub account, and
+      # the @hell-ui GitHub user is unrelated to this repository, so the
+      # GitHub Packages mirror publishes under the repository owner's scope.
+      # The mirror republishes the exact audited release-gate tarball with one
+      # metadata rewrite: package.json name and publishConfig.registry target
+      # GitHub Packages; every other shipped byte comes straight from the
+      # shared artifact. Internal @hell-ui/* peer/import names are untouched;
+      # consumers install the mirror through npm aliases (see
+      # docs/release/npm-publishing.md).
+      - name: Rewrite tarball metadata for GitHub Packages
+        run: |
+          set -euo pipefail
+          rewrite_root="$PWD/ghpr-rewrite"
+          mkdir -p "$rewrite_root"
+          tar -xzf "$HELL_RELEASE_TARBALL" -C "$rewrite_root"
+          test -f "$rewrite_root/package/package.json"
+          node -e '
+            const fs = require("node:fs");
+            const path = process.argv[1];
+            const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
+            pkg.name = "@antonpieper/hell-ui-angular";
+            pkg.publishConfig = { registry: "https://npm.pkg.github.com" };
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + "\n");
+          ' "$rewrite_root/package/package.json"
+          mkdir -p "$PWD/ghpr-package"
+          mirror_tarball="$PWD/ghpr-package/antonpieper-hell-ui-angular-${HELL_RELEASE_VERSION}.tgz"
+          tar -czf "$mirror_tarball" -C "$rewrite_root" package
+          echo "HELL_MIRROR_TARBALL=${mirror_tarball}" >> "$GITHUB_ENV"
+
+      # Forensic record: keep the exact rewritten bytes the mirror publish
+      # shipped (or attempted to ship) available for a short window without
+      # pulling them back out of the registry.
+      - name: Upload mirror tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-package-github-mirror
+          path: ghpr-package/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish packages
+        env:
+          # The mirror publishes under the repository owner's scope, so the
+          # default workflow token has packages:write for the namespace.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "Publishing ${HELL_MIRROR_TARBALL}"
+          pnpm publish "$HELL_MIRROR_TARBALL" --no-git-checks

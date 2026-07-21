@@ -489,6 +489,23 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   install, and a consumer fixture run against the packed
   `artifacts/package` tarball; the tag-run path is exercised by the next
   tagged release.
+- One gate run per tag now feeds both registries. The separate tag-triggered
+  GitHub Packages workflow is merged into the release workflow
+  (`.github/workflows/npm-publish.yml`, filename pinned by the npm
+  trusted-publisher record): a tag push calls the shared release gate exactly
+  once, and the `publish-npm` and `publish-github-packages` jobs both
+  download that same run's `release-package` artifact, so cross-registry
+  byte-identity comes from literally sharing one audited tarball instead of
+  from build determinism across two separate gate runs. The CI/release-gate
+  Node alignment is now mechanical instead of comment-enforced: the root
+  `.node-version` file is the one source of truth every `ci.yml` and
+  `release-gate.yml` setup-node step reads through `node-version-file`. The
+  rewritten GitHub Packages mirror tarball is uploaded again as the 7-day
+  `release-package-github-mirror` artifact before publishing, restoring a
+  forensic record beyond the registry itself. Closes #322. Evidence:
+  actionlint over the touched workflows and the updated
+  `docs/release/npm-publishing.md` contract; the single-run tag path is
+  demonstrated end to end by the next tagged release.
 - Package-consumer proof consolidated onto checked-in boundary fixtures. The
   embedded template-string scenario catalog and its hand-maintained CI
   grouping (`tools/check-package-consumer.mjs`, `test:package-consumer`,
