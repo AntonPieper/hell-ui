@@ -36,7 +36,8 @@ import { HellNativeSelect } from '@hell-ui/angular/select';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
-type ɵHellStrategyCleanup = VoidFunction | void;
+/** Optional teardown returned by ɵHellTanStackBodyStrategy connect hooks. */
+export type ɵHellStrategyCleanup = VoidFunction | void;
 
 const HELL_TANSTACK_FILTER_INPUT_UI = {
   root: 'min-w-[calc(var(--spacing)*44)] max-w-full rounded-hell-sm px-hell-2',
@@ -77,7 +78,12 @@ const HELL_TANSTACK_PAGINATION_SELECT_UI = {
   root: 'min-w-[calc(var(--spacing)*18)] max-[640px]:min-w-[calc(var(--spacing)*20)]',
 } satisfies HellUi<'root'>;
 
-type HellClassValue =
+/**
+ * Class value accepted by the `rowClass` input and the `hell` column meta
+ * (`headerClass`/`cellClass`/`footerClass`): a class string, a class list, or
+ * an `ngClass`-style toggle record.
+ */
+export type HellClassValue =
   | string
   | readonly string[]
   | Readonly<Record<string, boolean | null | undefined>>

@@ -313,11 +313,6 @@ const PICKER_TEMPLATE = `
   </table>
 `;
 
-interface HellWeekdayLabel {
-  readonly abbr: string;
-  readonly narrow: string;
-}
-
 function formatMonthLabel(date: Date, locale: string | null): string {
   return new Intl.DateTimeFormat(locale ?? undefined, {
     month: 'long',
@@ -325,7 +320,12 @@ function formatMonthLabel(date: Date, locale: string | null): string {
   }).format(date);
 }
 
-function formatWeekdayLabels(locale: string | null, firstDayOfWeek: number): HellWeekdayLabel[] {
+// Structural return type: a named module-local interface here would leak
+// through the pickers' protected template members as an ae-forgotten-export.
+function formatWeekdayLabels(
+  locale: string | null,
+  firstDayOfWeek: number,
+): { readonly abbr: string; readonly narrow: string }[] {
   const firstJsDay = firstDayOfWeek === 7 ? 0 : firstDayOfWeek;
   const narrow = new Intl.DateTimeFormat(locale ?? undefined, {
     weekday: 'narrow',

@@ -489,7 +489,7 @@ export class HellAudioPlayer {
   protected readonly muted = this.audioRuntime.muted;
   protected readonly playbackRate = this.audioRuntime.playbackRate;
   protected readonly seekMax = this.audioRuntime.seekMax;
-  protected readonly volumeLevel = this.audioRuntime.volumeLevel;
+  private readonly volumeLevel = this.audioRuntime.volumeLevel;
   // Annotated: ng-packagr's d.ts flattener drops the @angular/core import for
   // types inferred through internal entry points, shipping unbound `Signal`.
   protected readonly transcript: Signal<string> = this.transcriptRuntime.transcript;
