@@ -968,6 +968,39 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellTimeInput` now has one Control Value Authority: `value` is a
+  `ModelSignal<HellTimeValue | null>` implementing Signal Forms'
+  `FormValueControl<HellTimeValue | null>`, and the directive no longer
+  implements `ControlValueAccessor` or `Validator`, registers the
+  `NG_VALUE_ACCESSOR` / `NG_VALIDATORS` providers, or exposes the `writeValue`
+  / `registerOnChange` / `registerOnTouched` / `registerOnValidatorChange` /
+  `setDisabledState` / `validate` methods. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Direct
+  `[value]` binding, new two-way `[(value)]` binding, Signal Forms
+  `[formField]`, Reactive Forms `formControl`, and template-driven `ngModel`
+  all read and write the same model — the native host carries Angular's
+  `ngNoCva` marker so `formControl`/`ngModel` bind through the built-in Signal
+  Forms custom-control interoperability, one user commit (blur or Enter)
+  updates the model exactly once, and external writes never echo
+  `(valueChange)`. Draft text and seconds precision stay interaction state:
+  incomplete, unparseable, or out-of-bounds text remains an editable invalid
+  draft, and commit attempts report one `invalidTimeInputDraft` parse error
+  through Angular's `transformedValue` contract to the bound Signal Forms
+  field. Migration notes: the directive no longer writes any errors onto
+  classic bound controls — the `invalidTimeInputDraft`/`required`/
+  `outOfRangeTime` control errors are gone, so declare required and range
+  policy on the form (`Validators.required` or a range validator for classic
+  controls; `required()` plus a `validate` range rule for Signal Forms —
+  structured times have no `minDate()`/`maxDate()` equivalent, so no schema
+  metadata drives the reserved `min`/`max` inputs) while the input keeps its
+  visual invalid state for missing required values, out-of-range committed
+  values, and invalid drafts; `min`/`max` widen from `HellTimeValue | null` to
+  `HellTimeValue | undefined` (`null` bindings still mean unbounded, and
+  `value` never had static-attribute coercion to lose). A new `(touch)` output
+  marks the bound field or control touched on blur. Evidence:
+  `packages/angular/time-input/time-input.spec.ts`, the styled-controls packed
+  consumer's time-input forms scenario, `e2e/time-input-a11y-contracts.spec.ts`,
+  and the updated time-input API report. Closes #286.
 - BREAKING: `HellNumberInput` now has one Control Value Authority: `value` is a
   `ModelSignal<number | null>` implementing Signal Forms'
   `FormValueControl<number | null>`, and the directive no longer implements

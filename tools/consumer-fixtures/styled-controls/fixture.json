@@ -66,6 +66,10 @@
         "textIncludes": "Number input forms ready 11 22 33 44 55"
       },
       {
+        "selector": "[data-test-id=\"time-input-forms-status\"]",
+        "textIncludes": "Time input forms ready 08:15 09:30 10:45 12:00 13:15"
+      },
+      {
         "selector": "[data-test-id=\"primary-link\"]",
         "computedStyle": {
           "property": "color",

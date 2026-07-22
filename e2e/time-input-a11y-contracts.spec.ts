@@ -15,7 +15,7 @@ async function gotoTimeInput(page: Page): Promise<void> {
 }
 
 test.describe('time input native behavior and composition contracts', () => {
-  test('keeps authored native Field, focus, keyboard, CVA, and nullable-clear semantics', async ({
+  test('keeps authored native Field, focus, keyboard, forms, and nullable-clear semantics', async ({
     page,
   }) => {
     await gotoTimeInput(page);
@@ -107,6 +107,44 @@ test.describe('time input native behavior and composition contracts', () => {
     await expect(disabled).toBeDisabled();
     await expect(disabled).toHaveAttribute('disabled', '');
     await expect(disabled).toHaveAttribute('data-disabled', '');
+  });
+
+  test('binds one Signal Forms field with schema range policy and commit-boundary parse errors', async ({
+    page,
+  }) => {
+    await gotoTimeInput(page);
+
+    const example = page.locator('app-time-input-forms-example');
+    const input = example.getByRole('textbox', { name: 'Start time' });
+    const state = example.locator('[data-time-input-forms-state]');
+
+    await expect(input).toHaveValue('09:30', { timeout: HYDRATION_TIMEOUT });
+    await expect(state).toContainText('touched: false');
+    await expect(state).toContainText('errors: none');
+
+    // A committed unparseable draft stays editable and reports one parse error.
+    await input.fill('25:00');
+    await input.blur();
+    await expect(input).toHaveValue('25:00');
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(state).toContainText('Committed: 09:30');
+    await expect(state).toContainText('touched: true');
+    await expect(state).toContainText('invalidTimeInputDraft');
+
+    // A corrected Enter commit updates the field once and clears the error.
+    await input.fill('17:20');
+    await input.press('Enter');
+    await expect(state).toContainText('Committed: 17:20');
+    await expect(state).toContainText('errors: none');
+    await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+
+    // Range policy is the schema's own validate rule: an out-of-window commit
+    // is a real committed value whose field error re-invalidates the host.
+    await input.fill('19:30');
+    await input.press('Enter');
+    await expect(state).toContainText('Committed: 19:30');
+    await expect(state).toContainText('outOfRangeTime');
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
   });
 
   test('serializes canonical committed text for click and Enter native form submissions', async ({

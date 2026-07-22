@@ -1830,11 +1830,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'time-input input hellTimeInput Control Group hellControlGroup Popover hellPopover Time Picker hell-time-picker explicit Done focus restoration trigger shared FormControl composition recipe',
  },
  {
+ title:'Time Input: Forms',
+ path:'/components/time-input',
+ detail:'components/time-input/examples/forms.example.ts',
+ terms:
+'forms components/time-input/examples/forms.example components/time-input input hellTimeInput hellField hellFieldLabel formField Signal Forms FormValueControl value model two-way transformedValue parse error invalidTimeInputDraft outOfRangeTime required validate touched',
+ },
+ {
  title:'Time Input: Reactive Forms',
  path:'/components/time-input',
  detail:'components/time-input/examples/reactive-forms.example.ts',
  terms:
-'time-input input hellTimeInput native hellField FormControl ReactiveFormsModule ControlValueAccessor Validator HellTimeValue meeting Field CVA',
+'time-input input hellTimeInput native hellField FormControl ReactiveFormsModule Signal Forms interop FormValueControl HellTimeValue meeting Field touched disabled invalidTimeInputDraft',
  },
  {
  title:'Time Input: Seconds, Bounds, And Validation',

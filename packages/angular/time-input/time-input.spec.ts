@@ -1,6 +1,13 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormsModule,
+  NgModel,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { FormField, disabled as disabledSchema, form, validate } from '@angular/forms/signals';
 import { By } from '@angular/platform-browser';
 import { NgpInput } from 'ng-primitives/input';
 
@@ -59,6 +66,23 @@ class ControlledHost {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellTimeInput],
+  template: `
+    <input
+      hellTimeInput
+      aria-label="Two-way time"
+      [(value)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class TwoWayHost {
+  readonly value = signal<HellTimeValue | null>(time(8, 30));
+  readonly values: Array<HellTimeValue | null> = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, HellTimeInput],
   template: `
     <input
@@ -84,6 +108,55 @@ class BlurFormHost {
   readonly control = new FormControl<HellTimeValue | null>(time(8, 30), {
     updateOn: 'blur',
   });
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, HellTimeInput],
+  template: `
+    <input
+      hellTimeInput
+      aria-label="Model time"
+      [(ngModel)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class NgModelHost {
+  readonly value = signal<HellTimeValue | null>(time(8, 30));
+  readonly model = viewChild.required(NgModel);
+  readonly values: Array<HellTimeValue | null> = [];
+}
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormField, HellTimeInput],
+  template: `
+    <input
+      id="signal-time"
+      hellTimeInput
+      aria-label="Signal time"
+      [formField]="scheduleForm.time"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class SignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ time: HellTimeValue | null }>({ time: time(8, 30) });
+  readonly scheduleForm = form(this.model, (path) => {
+    disabledSchema(path.time, () => this.formDisabled());
+    // Structured times have no built-in min()/max() metadata rule, so range
+    // policy is a form-owned schema rule rather than a reserved-input write.
+    validate(path.time, ({ value }) => {
+      const committed = value();
+      if (!committed) return undefined;
+      return committed.hour >= 8 && committed.hour < 18
+        ? undefined
+        : { kind: 'outOfRangeTime' };
+    });
+  });
+  readonly values: Array<HellTimeValue | null> = [];
 }
 
 @Component({
@@ -119,7 +192,6 @@ class NativeFormHost {
     <input
       id="validated-time"
       hellTimeInput
-      required
       aria-label="Validated time"
       [min]="min()"
       [max]="max()"
@@ -128,7 +200,9 @@ class NativeFormHost {
   `,
 })
 class ValidationHost {
-  readonly control = new FormControl<HellTimeValue | null>(null);
+  readonly control = new FormControl<HellTimeValue | null>(null, {
+    validators: [Validators.required],
+  });
   readonly min = signal<HellTimeValue | null>(time(8));
   readonly max = signal<HellTimeValue | null>(time(18));
 }
@@ -218,8 +292,11 @@ describe('HellTimeInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         ControlledHost,
+        TwoWayHost,
         FormHost,
         BlurFormHost,
+        NgModelHost,
+        SignalFormsHost,
         StaticDisabledHost,
         NativeFormHost,
         ValidationHost,
@@ -287,6 +364,30 @@ describe('HellTimeInput', () => {
 
     expect(host.values).toEqual([time(21, 5)]);
     expect(input.value).toBe('21:05');
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(TwoWayHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const input = timeInput(fixture.nativeElement);
+    expect(input.value).toBe('08:30');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set(time(12, 45));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('12:45');
+    expect(host.values).toEqual([]);
+
+    // One user commit updates parent state and emits exactly one event.
+    typeText(input, '13:15');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.value()).toEqual(time(13, 15));
+    expect(host.values.length).toBe(1);
+    expect(host.values[0]).toEqual(time(13, 15));
+    expect(input.value).toBe('13:15');
   });
 
   it('parses separated, compact, and 12-hour default time text', () => {
@@ -505,7 +606,7 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('09:10:11');
   });
 
-  it('integrates with CVA without echoing programmatic writes', async () => {
+  it('integrates with Reactive Forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
@@ -526,7 +627,7 @@ describe('HellTimeInput', () => {
     expect(host.control.touched).toBe(true);
   });
 
-  it('preserves a form draft across an equivalent CVA write but replaces it on change', async () => {
+  it('preserves a form draft across an equivalent form write but replaces it on change', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
@@ -544,7 +645,7 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('12:15');
   });
 
-  it('commits CVA changes before touched state for updateOn blur controls', () => {
+  it('commits form changes before touched state for updateOn blur controls', () => {
     const fixture = TestBed.createComponent(BlurFormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
@@ -559,13 +660,136 @@ describe('HellTimeInput', () => {
     expect(host.control.touched).toBe(true);
   });
 
-  it('propagates disabled state from Angular forms to the native input', () => {
+  it('propagates disabled state from Angular forms to the native input', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
     const host = fixture.componentInstance;
     const input = timeInput(fixture.nativeElement);
 
     host.control.disable();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.disabled).toBe(true);
+    expect(input.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(NgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = timeInput(fixture.nativeElement);
+    expect(input.value).toBe('08:30');
+    expect(host.values).toEqual([]);
+
+    // Enter commits without touching; blur marks the model touched.
+    typeText(input, '09:40');
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(host.value()).toEqual(time(9, 40));
+    expect(host.values.length).toBe(1);
+    expect(host.model().touched).toBe(false);
+
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.model().touched).toBe(true);
+
+    host.value.set(time(12, 15));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('12:15');
+    expect(host.values.length).toBe(1);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', async () => {
+    const fixture = TestBed.createComponent(SignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = timeInput(fixture.nativeElement);
+    expect(input.value).toBe('08:30');
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.scheduleForm.time().value.set(time(9, 15));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('09:15');
+    expect(host.values).toEqual([]);
+    expect(host.scheduleForm.time().dirty()).toBe(false);
+
+    // One user commit updates the field and the model exactly once.
+    typeText(input, '10:45');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.scheduleForm.time().value()).toEqual(time(10, 45));
+    expect(host.model().time).toEqual(time(10, 45));
+    expect(host.values.length).toBe(1);
+    expect(host.scheduleForm.time().dirty()).toBe(true);
+    expect(host.scheduleForm.time().touched()).toBe(true);
+  });
+
+  it('reports parse failures to the Signal Forms field through transformedValue', async () => {
+    const fixture = TestBed.createComponent(SignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = timeInput(fixture.nativeElement);
+
+    // A malformed committed draft stays editable and never becomes a value.
+    typeText(input, '25:00');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('25:00');
+    expect(host.scheduleForm.time().value()).toEqual(time(8, 30));
+    expect(host.values).toEqual([]);
+    expect(errorKinds(host)).toContain('invalidTimeInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // A corrected commit clears the parse error and commits once.
+    typeText(input, '17:20');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.scheduleForm.time().value()).toEqual(time(17, 20));
+    expect(host.values.length).toBe(1);
+    expect(errorKinds(host)).not.toContain('invalidTimeInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // Schema-owned range policy: an out-of-window commit is a real commit whose
+    // field error drives the reserved invalid input back onto the native host.
+    typeText(input, '19:30');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.scheduleForm.time().value()).toEqual(time(19, 30));
+    expect(host.values.length).toBe(2);
+    expect(errorKinds(host)).toEqual(['outOfRangeTime']);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // An empty commit is a nullable clear through the same authority.
+    typeText(input, '');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.scheduleForm.time().value()).toBeNull();
+    expect(host.model().time).toBeNull();
+    expect(host.values).toEqual([expect.anything(), expect.anything(), null]);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // Field-driven disabled state reaches the native input.
+    host.formDisabled.set(true);
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(input.disabled).toBe(true);
     expect(input.hasAttribute('data-disabled')).toBe(true);
@@ -590,34 +814,61 @@ describe('HellTimeInput', () => {
     expect(input.getAttribute('data-disabled')).toBe('');
   });
 
-  it('validates required, min, max, malformed drafts, and correction', () => {
+  it('keeps classic validation form-owned while drafts stay visual-only invalid state', async () => {
     const fixture = TestBed.createComponent(ValidationHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     const host = fixture.componentInstance;
     const input = timeInput(fixture.nativeElement);
 
+    // The control's own required validator drives errors and the reserved
+    // required input, so the missing value is visible on the native host.
     expect(host.control.errors).toEqual({ required: true });
+    expect(input.required).toBe(true);
     expect(input.getAttribute('aria-invalid')).toBe('true');
 
+    // Out-of-range external writes keep the visual invalid contract.
     host.control.setValue(time(7, 59));
+    await fixture.whenStable();
     fixture.detectChanges();
-    expect(host.control.errors).toEqual({ outOfRangeTime: true });
+    expect(host.control.hasError('required')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
 
     host.control.setValue(time(12));
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(host.control.errors).toBeNull();
+    expect(input.getAttribute('aria-invalid')).toBeNull();
 
+    // A malformed committed draft never commits and stays a visual invalid
+    // state; classic controls receive no directive-owned error for it.
     typeText(input, '25:00');
     input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
     fixture.detectChanges();
-    expect(host.control.errors).toEqual({ invalidTimeInputDraft: true });
+    expect(host.control.errors).toBeNull();
+    expect(host.control.value).toEqual(time(12));
     expect(input.value).toBe('25:00');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // Typed text outside the control's own bounds is also an invalid draft.
+    typeText(input, '19:30');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.control.errors).toBeNull();
+    expect(host.control.value).toEqual(time(12));
+    expect(input.value).toBe('19:30');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
 
     typeText(input, '18:00');
     input.dispatchEvent(new Event('blur', { bubbles: true }));
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(host.control.errors).toBeNull();
     expect(host.control.value).toEqual(time(18));
+    expect(input.getAttribute('aria-invalid')).toBeNull();
   });
 
   it('wires Field label and description ids on the same native input', () => {
@@ -727,4 +978,11 @@ function typeText(input: HTMLInputElement, value: string): void {
 
 function time(hour: number, minute = 0, second = 0): HellTimeValue {
   return { hour, minute, second };
+}
+
+function errorKinds(host: SignalFormsHost): string[] {
+  return host.scheduleForm
+    .time()
+    .errors()
+    .map((error) => error.kind);
 }

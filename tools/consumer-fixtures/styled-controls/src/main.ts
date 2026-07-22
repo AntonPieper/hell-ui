@@ -8,6 +8,7 @@ import { NumberInputForms } from './number-input-forms';
 import { ComboboxProjection } from './projection';
 import { SliderForms } from './slider-forms';
 import { StyledTable } from './table';
+import { TimeInputForms } from './time-input-forms';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +19,7 @@ import { StyledTable } from './table';
     SliderForms,
     DateInputForms,
     NumberInputForms,
+    TimeInputForms,
     StyledTable,
   ],
   template: `
@@ -29,6 +31,7 @@ import { StyledTable } from './table';
       <app-slider-forms />
       <app-date-input-forms />
       <app-number-input-forms />
+      <app-time-input-forms />
       <app-styled-table />
     </main>
   `,
