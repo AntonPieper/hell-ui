@@ -173,4 +173,42 @@ test.describe('number input accessibility contract', () => {
     await expect(port).toHaveValue('70000');
     await expect(port).toHaveAttribute('aria-invalid', 'true');
   });
+
+  test('binds one Signal Forms field with metadata bounds and commit-boundary parse errors', async ({
+    page,
+  }) => {
+    await gotoNumberInput(page);
+
+    const example = page.locator('app-number-input-forms-example');
+    const input = example.getByRole('spinbutton', { name: 'Listen port' });
+    const state = example.locator('[data-number-input-forms-state]');
+
+    // The field's min()/max() metadata drives the spinbutton ARIA bounds.
+    await expect(input).toHaveValue('8080');
+    await expect(input).toHaveAttribute('aria-valuemin', '1', { timeout: 15_000 });
+    await expect(input).toHaveAttribute('aria-valuemax', '65535');
+    await expect(state).toContainText('touched: false');
+    await expect(state).toContainText('errors: none');
+
+    // A committed malformed draft stays editable and reports one parse error.
+    await input.fill('80x');
+    await input.blur();
+    await expect(input).toHaveValue('80x');
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(state).toContainText('Committed: 8080');
+    await expect(state).toContainText('touched: true');
+    await expect(state).toContainText('invalidNumberInputDraft');
+
+    // A corrected Enter commit updates the field once and clears the error.
+    await input.fill('8443');
+    await input.press('Enter');
+    await expect(state).toContainText('Committed: 8443');
+    await expect(state).toContainText('errors: none');
+    await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+
+    // Stepping writes the same field authority.
+    const increment = example.getByRole('button', { name: 'Increase Listen port' });
+    await increment.click();
+    await expect(state).toContainText('Committed: 8444');
+  });
 });

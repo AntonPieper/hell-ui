@@ -1906,11 +1906,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  terms:'number-input input hellNumberInput size sm md lg Control Group HellNumberStep control height',
  },
  {
+ title:'Number Input: Forms',
+ path:'/components/number-input',
+ detail:'components/number-input/examples/forms.example.ts',
+ terms:
+'forms components/number-input/examples/forms.example components/number-input input hellNumberInput hellNumberStep hellField hellFieldLabel formField Signal Forms FormValueControl value model two-way transformedValue parse error invalidNumberInputDraft required min max touched stepping',
+ },
+ {
  title:'Number Input: Reactive Forms',
  path:'/components/number-input',
  detail:'components/number-input/examples/reactive-forms.example.ts',
  terms:
-'number-input input hellNumberInput hellNumberStep hellField FormControl ReactiveFormsModule ControlValueAccessor Validator required min max numberInputMalformed number null port',
+'number-input input hellNumberInput hellNumberStep hellField FormControl ReactiveFormsModule Signal Forms interop FormValueControl Validators required min max number null port touched disabled invalidNumberInputDraft',
  },
  {
  title:'Number Input: Styling',
@@ -2286,9 +2293,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Number input forms value',
  path:'/components/number-input',
- detail:'ControlValueAccessor, formControl, number | null',
+ detail:'FormValueControl, formField, formControl, number | null',
  terms:
-'number-input input hellNumberInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms number null required min max numberInputMalformed spinbutton native FormData',
+'number-input input hellNumberInput forms FormValueControl formField Signal Forms formControl ngModel ReactiveFormsModule Angular Forms number null value model two-way required min max invalidNumberInputDraft spinbutton native FormData',
  },
  {
  title:'Table directives',

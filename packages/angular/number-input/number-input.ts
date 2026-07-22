@@ -8,24 +8,17 @@ import {
   booleanAttribute,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   numberAttribute,
   output,
   signal,
   type Provider,
   type Signal,
 } from '@angular/core';
-import {
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  type AbstractControl,
-  type ControlValueAccessor,
-  type NgControl,
-  type ValidationErrors,
-  type Validator,
-} from '@angular/forms';
+import { type NgControl } from '@angular/forms';
+import { FormField, transformedValue, type FormValueControl } from '@angular/forms/signals';
 import {
   injectFormFieldState,
   ngpFormField,
@@ -49,6 +42,7 @@ import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
+  type HellTypedValueCommitResult,
 } from '@hell-ui/angular/internal/core';
 
 /** Built-in accessibility labels owned by the Number Input entry point. */
@@ -138,6 +132,19 @@ export function provideHellNumberInputAdapter(adapter: HellNumberInputAdapter): 
   return { provide: HELL_NUMBER_INPUT_ADAPTER, useValue: adapter };
 }
 
+/**
+ * `FormUiControl` reserves `min`/`max` as `number | undefined` inputs so Signal
+ * Forms can reflect `min()`/`max()` validator metadata into the control (and
+ * clear it with `undefined` again). Property bindings keep accepting
+ * `number | null`; `null`, `undefined`, and non-numeric values mean
+ * "unbounded".
+ */
+function hellNumberInputBoundAttribute(value: unknown): number | undefined {
+  if (value == null) return undefined;
+  const parsed = numberAttribute(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /** Direction selected by a Number Step button. */
 export type HellNumberStepDirection = 'increment' | 'decrement';
 
@@ -166,32 +173,35 @@ const HELL_NUMBER_STEP_RECIPE = {
 let nextNumberInputId = 0;
 
 /**
- * Numeric parsing, validation, stepping, and forms behavior for a real input.
- * Step buttons and suffix content compose separately through consumer markup.
+ * Numeric parsing, validation state, stepping, and forms behavior for a real
+ * input. Step buttons and suffix content compose separately through consumer
+ * markup.
+ *
+ * The `value` model is the one Control Value Authority for the committed
+ * `number | null`: bind it one-way (`[value]` plus `(valueChange)`), two-way
+ * (`[(value)]`), or through Angular forms — Signal Forms `[formField]` via the
+ * `FormValueControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability. Draft text stays interaction state:
+ * malformed text never commits, and commit attempts report parse failures
+ * through `transformedValue` as `invalidNumberInputDraft` errors on the
+ * nearest Signal Forms field.
  */
 @Directive({
   selector: 'input[hellNumberInput]',
   exportAs: 'hellNumberInput',
   hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
-  providers: [
-    provideFormFieldState({ inherit: false }),
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellNumberInput),
-      multi: true,
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => HellNumberInput),
-      multi: true,
-    },
-  ],
+  providers: [provideFormFieldState({ inherit: false })],
   host: {
     type: 'text',
     role: 'spinbutton',
+    // Angular's `ngNoCva` marker: `formControl`/`ngModel` on this native input
+    // must bind the directive's `value` model through Signal Forms custom
+    // control interoperability instead of the string-writing
+    // `DefaultValueAccessor` that otherwise attaches to text inputs.
+    ngNoCva: '',
     '[attr.id]': 'id()',
     '[value]': 'display()',
-    '[disabled]': 'isDisabled()',
+    '[disabled]': 'disabled()',
     '[required]': 'required()',
     '[attr.inputmode]': 'integer() ? "numeric" : "decimal"',
     '[attr.aria-valuenow]': 'current()',
@@ -201,7 +211,7 @@ let nextNumberInputId = 0;
     '[attr.aria-describedby]': 'fieldAriaDescribedby()',
     '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
-    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.data-required]': 'required() ? "true" : null',
     '[attr.data-integer]': 'integer() ? "true" : null',
     '(input)': 'onInput()',
@@ -210,21 +220,34 @@ let nextNumberInputId = 0;
     '(wheel)': 'onWheel($event)',
   },
 })
-export class HellNumberInput implements ControlValueAccessor, Validator {
+export class HellNumberInput implements FormValueControl<number | null> {
   /** Native input id, generated when the consumer does not author one. */
   readonly id = input(`hell-number-input-${++nextNumberInputId}`);
-  /** Forces invalid presentation and accessibility state. */
+  /** Forces invalid presentation and accessibility state. Also driven by bound forms. */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /** Disables native interaction outside forms use. */
+  /** Disables native interaction. Also driven by bound forms. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Marks a nullable clear as a required-value validation error. */
+  /** Marks a nullable clear as visually missing. Also driven by a field's `required()` rule. */
   readonly required = input(false, { transform: booleanAttribute });
-  /** Current controlled numeric value. */
-  readonly value = input<number | null>(null);
-  /** Inclusive lower bound for validation and stepping. */
-  readonly min = input<number | null>(null);
-  /** Inclusive upper bound for validation and stepping. */
-  readonly max = input<number | null>(null);
+  /**
+   * Committed numeric value — the one Control Value Authority. User commits on
+   * blur, Enter, or stepping write it exactly once and emit `(valueChange)`;
+   * external property, two-way, and form writes flow in without re-emitting.
+   * Malformed draft text never reaches this model.
+   */
+  readonly value = model<number | null>(null);
+  /**
+   * Inclusive lower bound for stepping and invalid state. `undefined` (or
+   * `null`) means unbounded. Also driven by a bound Signal Forms field's
+   * `min()` validator metadata.
+   */
+  readonly min = input(undefined, { transform: hellNumberInputBoundAttribute });
+  /**
+   * Inclusive upper bound for stepping and invalid state. `undefined` (or
+   * `null`) means unbounded. Also driven by a bound Signal Forms field's
+   * `max()` validator metadata.
+   */
+  readonly max = input(undefined, { transform: hellNumberInputBoundAttribute });
   /** Amount applied by one arrow or Number Step activation. */
   readonly step = input(1, { transform: numberAttribute });
   /** Multiplier applied by Shift+Arrow and PageUp/PageDown. */
@@ -236,14 +259,27 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
   /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  /** Emits each successfully committed number or nullable clear. */
-  readonly valueChange = output<number | null>();
+  /**
+   * Emits when focus leaves the native input and after each stepping
+   * interaction. Angular forms listen to this output to mark the bound field
+   * or control as touched.
+   */
+  readonly touch = output<void>();
 
   private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
   private readonly renderer = inject(Renderer2);
   private readonly adapter = inject(HELL_NUMBER_INPUT_ADAPTER);
   private readonly labels = inject(HELL_NUMBER_INPUT_LABELS);
   private readonly inputState = injectInputState();
+  /**
+   * The Signal Forms `FormField` directive bound to this host, when present.
+   * Parse failures are reported only into its field: classic
+   * `formControl`/`ngModel` bindings deliberately receive no directive-owned
+   * errors, because their required and range policy is form-owned too and the
+   * silent parse-error revalidation Angular's interop performs
+   * (`emitEvent: false`) would leave event-driven Field mirrors stale.
+   */
+  private readonly signalFormField = inject(FormField, { self: true, optional: true });
   private readonly inheritedFormField = injectFormFieldState({
     optional: true,
     skipSelf: true,
@@ -252,22 +288,31 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     ngControl: signal<NgControl | undefined>(undefined),
   });
 
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal<number | null>(null);
-  private readonly controlDisabled = signal(false);
-  private onControlChange: (value: number | null) => void = () => {};
-  private onControlTouched: () => void = () => {};
-  private onValidatorChange: () => void = () => {};
   private hasExternalSnapshot = false;
   private externalSnapshot: number | null = null;
   private readonly accessibleNameSnapshot = signal<string | null>(null);
 
   private readonly valueState = new HellTypedValueInputState<number, number | null>({
-    external: () => this.effectiveValue(),
+    external: () => this.value(),
     parseExternal: (value) => this.normalizeValue(value),
     parseText: (text) => this.adapter.parseText(text, this.context()),
     format: (value) => this.adapter.format(value, this.context()),
     externalChanged: (base, current) => !this.sameValue(base, current),
+  });
+
+  /**
+   * Raw-text commit boundary over the `value` model. Commit attempts write the
+   * committed text here: a valid parse updates the model exactly once, while a
+   * parse failure leaves the model untouched and reports one
+   * `invalidNumberInputDraft` error to the nearest Signal Forms field.
+   */
+  private readonly rawCommitText = transformedValue(this.value, {
+    parse: (text: string) => {
+      const parsed = this.adapter.parseText(text, this.context());
+      if (!parsed.valid) return { error: { kind: 'invalidNumberInputDraft' } };
+      return { value: parsed.value };
+    },
+    format: (value) => this.adapter.format(this.normalizeValue(value), this.context()),
   });
 
   /** Current committed numeric value. */
@@ -277,20 +322,24 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
   /** Whether the active draft is malformed. */
   protected readonly invalidDraft = this.valueState.invalidDraft;
   /** Whether the committed value falls outside current bounds. */
-  protected readonly outOfRange = computed(() => this.rangeError(this.current()) !== null);
+  protected readonly outOfRange = computed(() => {
+    const value = this.current();
+    if (value === null) return false;
+    const min = this.min();
+    const max = this.max();
+    return (min !== undefined && value < min) || (max !== undefined && value > max);
+  });
   /** Whether a required number is missing. */
   protected readonly requiredMissing = computed(
     () => this.required() && this.current() === null && !this.invalidDraft(),
   );
-  /** Effective invalid state from behavior, Field, or an explicit override. */
+  /** Effective invalid state from behavior, Field, forms, or an explicit override. */
   protected readonly isInvalid = (): boolean =>
     this.invalid() ||
     this.invalidDraft() ||
     this.outOfRange() ||
     this.requiredMissing() ||
     this.inheritedFormField()?.invalid() === true;
-  /** Effective disabled state from the public input or forms API. */
-  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
   /** Effective description ids from native attributes and an enclosing Field. */
   protected readonly fieldAriaDescribedby = computed(() =>
     this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
@@ -312,7 +361,7 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
 
     effect(() => {
-      const disabled = this.isDisabled();
+      const disabled = this.disabled();
       const inputState = this.inputState();
       if (inputState.disabled() !== disabled) inputState.setDisabled(disabled);
       this.formField.disabled.set(disabled);
@@ -345,23 +394,13 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     }
 
     effect(() => {
-      const external = this.normalizeValue(this.effectiveValue());
+      const external = this.normalizeValue(this.value());
       if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
         this.valueState.clearDraft();
         this.valueState.clearLocal();
       }
       this.externalSnapshot = external;
       this.hasExternalSnapshot = true;
-    });
-
-    effect(() => {
-      this.invalidDraft();
-      this.current();
-      this.min();
-      this.max();
-      this.required();
-      this.integer();
-      this.onValidatorChange();
     });
 
     afterEveryRender(() => {
@@ -378,58 +417,15 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     });
   }
 
-  /** Writes a number from Angular forms without emitting it back. */
-  writeValue(value: number | null): void {
-    const normalized = this.normalizeValue(value);
-    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
-
-    this.controlMode.set(true);
-    this.controlValue.set(normalized);
-    if (changed) {
-      this.valueState.clearDraft();
-      this.valueState.clearLocal();
-    }
-    this.onValidatorChange();
-  }
-
-  /** Registers the Angular forms change callback. */
-  registerOnChange(fn: (value: number | null) => void): void {
-    this.onControlChange = fn;
-  }
-
-  /** Registers the Angular forms touched callback. */
-  registerOnTouched(fn: () => void): void {
-    this.onControlTouched = fn;
-  }
-
-  /** Registers the Angular forms validator-change callback. */
-  registerOnValidatorChange(fn: () => void): void {
-    this.onValidatorChange = fn;
-  }
-
-  /** Applies disabled state supplied by Angular forms. */
-  setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
-  }
-
-  /** Reports malformed drafts, missing required values, and bound violations. */
-  validate(_control: AbstractControl | null): ValidationErrors | null {
-    const errors: ValidationErrors = {};
-    if (this.invalidDraft()) errors['numberInputMalformed'] = true;
-    else if (this.requiredMissing()) errors['required'] = true;
-
-    const rangeError = this.rangeError(this.current());
-    if (rangeError) Object.assign(errors, rangeError);
-    return Object.keys(errors).length > 0 ? errors : null;
-  }
-
   private isStepDisabled(direction: HellNumberStepDirection): boolean {
-    if (this.isDisabled()) return true;
+    if (this.disabled()) return true;
     const candidate = this.stepCandidate();
     if (candidate === null) return false;
+    const min = this.min();
+    const max = this.max();
     return direction === 'increment'
-      ? this.max() !== null && candidate >= (this.max() as number)
-      : this.min() !== null && candidate <= (this.min() as number);
+      ? max !== undefined && candidate >= max
+      : min !== undefined && candidate <= min;
   }
 
   private applyStep(direction: HellNumberStepDirection, multiplied = false): void {
@@ -456,27 +452,26 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
   /** Records the native field value as a draft. */
   protected onInput(): void {
     this.valueState.writeDraft(this.host.value);
-    this.onValidatorChange();
   }
 
   /** Commits a draft and marks the native field touched on blur. */
   protected onBlur(): void {
-    const result = this.valueState.commitDraft();
-    if (result.committed) this.emitValue(result.value);
-    this.onControlTouched();
-    this.onValidatorChange();
+    const text = this.host.value;
+    this.applyCommit(this.valueState.commitDraft(), text);
+    this.touch.emit();
   }
 
   /** Handles commit, arrows, multiplier keys, and bounded Home/End jumps. */
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
-      const result = this.valueState.commitText(this.host.value);
-      if (result.committed) this.emitValue(result.value);
-      this.onValidatorChange();
+      const text = this.host.value;
+      this.applyCommit(this.valueState.commitText(text), text);
       return;
     }
 
-    if (this.isDisabled()) return;
+    if (this.disabled()) return;
+    const min = this.min();
+    const max = this.max();
     switch (event.key) {
       case 'ArrowUp':
         event.preventDefault();
@@ -495,15 +490,15 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
         this.applyStep('decrement', true);
         break;
       case 'Home':
-        if (this.min() !== null) {
+        if (min !== undefined) {
           event.preventDefault();
-          this.jumpTo(this.min() as number);
+          this.jumpTo(min);
         }
         break;
       case 'End':
-        if (this.max() !== null) {
+        if (max !== undefined) {
           event.preventDefault();
-          this.jumpTo(this.max() as number);
+          this.jumpTo(max);
         }
         break;
       default:
@@ -516,19 +511,46 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     if (this.host.ownerDocument?.activeElement === this.host) event.preventDefault();
   }
 
+  /**
+   * Routes one blur/Enter commit attempt through the raw-text boundary:
+   * successful commits write the model once (after synchronously
+   * canonicalizing the native text so native form submission serializes the
+   * stable format), and invalid commits report their parse failure without
+   * touching the model. Stale and draft-free attempts change nothing.
+   */
+  private applyCommit(result: HellTypedValueCommitResult<number | null>, text: string): void {
+    if (result.committed) {
+      // Native submission can run before Angular renders the committed display.
+      this.host.value = this.adapter.format(result.value, this.context());
+      this.rawCommitText.set(text);
+    } else if (result.reason === 'invalid' && this.signalFormField !== null) {
+      this.rawCommitText.set(text);
+    }
+  }
+
+  /**
+   * Commits a pending valid draft before a stepping interaction. Unlike the
+   * blur/Enter boundary, a malformed pending draft is not reported: the step
+   * immediately replaces it with a valid committed value.
+   */
   private commitPendingDraft(): void {
     const result = this.valueState.commitDraft();
-    if (result.committed) this.emitValue(result.value);
+    if (!result.committed) return;
+    this.host.value = this.adapter.format(result.value, this.context());
+    this.value.set(result.value);
   }
 
   private jumpTo(target: number): void {
     this.commitPendingDraft();
     const next = this.roundToStep(this.clamp(target));
     const previous = this.current();
-    const result = this.valueState.setValue(next);
-    if (result.committed && next !== previous) this.emitValue(result.value);
-    this.onControlTouched();
-    this.onValidatorChange();
+    this.valueState.setValue(next);
+    if (next !== previous) {
+      // Native submission can run before Angular renders the committed display.
+      this.host.value = this.adapter.format(next, this.context());
+      this.value.set(next);
+    }
+    this.touch.emit();
   }
 
   private stepAnchor(): number {
@@ -544,8 +566,8 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     const min = this.min();
     const max = this.max();
     let next = value;
-    if (min !== null) next = Math.max(next, min);
-    if (max !== null) next = Math.min(next, max);
+    if (min !== undefined) next = Math.max(next, min);
+    if (max !== undefined) next = Math.min(next, max);
     return next;
   }
 
@@ -561,21 +583,8 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     return dot < 0 ? 0 : text.length - dot - 1;
   }
 
-  private rangeError(value: number | null): ValidationErrors | null {
-    if (value === null) return null;
-    const min = this.min();
-    const max = this.max();
-    if (min !== null && value < min) return { min: { min, actual: value } };
-    if (max !== null && value > max) return { max: { max, actual: value } };
-    return null;
-  }
-
   private context(): HellNumberInputAdapterContext {
     return { integer: this.integer() };
-  }
-
-  private effectiveValue(): number | null {
-    return this.controlMode() ? this.controlValue() : this.value();
   }
 
   private normalizeValue(value: number | null | undefined): number | null {
@@ -633,15 +642,6 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
       scope = scope.parentElement;
     }
     return null;
-  }
-
-  private emitValue(value: number | null): void {
-    // Native submission may run before Angular renders the committed display.
-    this.host.value = this.adapter.format(value, this.context());
-    if (this.controlMode()) this.controlValue.set(value);
-    this.valueChange.emit(value);
-    this.onControlChange(value);
-    this.onValidatorChange();
   }
 }
 

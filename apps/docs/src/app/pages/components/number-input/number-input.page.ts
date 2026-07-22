@@ -11,6 +11,10 @@ import { NumberInputDurationSecondsExample } from './examples/duration-seconds.e
 import numberInputDurationSecondsExampleCodeRaw from './examples/duration-seconds.example.ts?raw' with {
   loader: 'text',
 };
+import { NumberInputFormsExample } from './examples/forms.example';
+import numberInputFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { NumberInputReactiveFormsExample } from './examples/reactive-forms.example';
 import numberInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
@@ -32,6 +36,7 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
     RouterLink,
     NumberInputBasicExample,
     NumberInputDurationSecondsExample,
+    NumberInputFormsExample,
     NumberInputReactiveFormsExample,
     NumberInputSizesExample,
     NumberInputStylingExample,
@@ -51,9 +56,12 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
 
       <p>
         Apply <code>hellNumberInput</code> to an authored <code>&lt;input&gt;</code>. The directive
-        owns the Typed Value Input state machine—drafts, parsing, formatting, validation,
-        <code>number | null</code> forms values, and keyboard stepping—while the native element
-        keeps focus, events, attributes, Field association, and form-submission semantics.
+        owns the Typed Value Input state machine—drafts, parsing, formatting, validation state,
+        and keyboard stepping—while the native element keeps focus, events, attributes, Field
+        association, and form-submission semantics. The <code>value</code> model is the one
+        committed <code>number | null</code> authority — bind it one-way (<code>[value]</code>
+        plus <code>(valueChange)</code>), two-way (<code>[(value)]</code>), or through Angular
+        forms.
       </p>
       <p>
         The default adapter deliberately uses a text field with decimal or numeric
@@ -98,13 +106,33 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <app-number-input-sizes-example />
       </hd-example-tabs>
 
+      <h2>Signal Forms</h2>
+      <p>
+        Number Input implements Signal Forms'
+        <code>FormValueControl&lt;number | null&gt;</code>: bind a field via
+        <code>[formField]</code> and the field writes into <code>value</code>, user commits and
+        steps update the field exactly once, and blur or stepping emits <code>(touch)</code> to
+        mark it touched. The field's <code>required()</code>, <code>min()</code>, and
+        <code>max()</code> rules flow into the matching inputs, so schema bounds drive the
+        spinbutton ARIA metadata, Home/End jumps, and stepper disabling. Draft text stays
+        interaction state: a malformed committed draft never becomes a value — instead the commit
+        reports one <code>invalidNumberInputDraft</code> parse error to the nearest field through
+        Angular's <code>transformedValue</code> contract, and a later valid or empty commit
+        clears it.
+      </p>
+      <hd-example-tabs [code]="numberInputFormsExampleCode" previewClass="grid max-w-md gap-2">
+        <app-number-input-forms-example />
+      </hd-example-tabs>
+
       <h2>Reactive forms and validation</h2>
       <p>
-        <code>input[hellNumberInput]</code> implements <code>ControlValueAccessor</code> and
-        <code>Validator</code>. Required clears report <code>required</code>, malformed drafts
-        report <code>numberInputMalformed</code>, and committed bound violations use Angular-style
-        <code>min</code> / <code>max</code> error payloads. Typing never clamps; arrows and step
-        buttons do.
+        <code>formControl</code> and <code>ngModel</code> bind the same <code>value</code> model
+        through Angular's built-in Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore. Programmatic writes never emit
+        <code>valueChange</code>; user commits update the form before blur marks it touched.
+        Validation policy belongs to the form: declare required and range rules on the control
+        itself, while a malformed committed draft simply never commits and keeps the input's
+        visual invalid state until corrected. Typing never clamps; arrows and step buttons do.
       </p>
       <hd-example-tabs
         [code]="numberInputReactiveFormsExampleCode"
@@ -143,11 +171,26 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           </tr>
           <tr>
             <td><code>value</code> / <code>(valueChange)</code></td>
-            <td>Controlled <code>number | null</code>; successful blur or Enter commits emit.</td>
+            <td>
+              One committed <code>ModelSignal&lt;number | null&gt;</code> authority:
+              <code>[value]</code>, <code>[(value)]</code>, <code>[formField]</code>,
+              <code>formControl</code>, and <code>ngModel</code>.
+            </td>
           </tr>
           <tr>
             <td><code>min</code> / <code>max</code></td>
-            <td>Inclusive numeric bounds for validation, ARIA metadata, and stepping.</td>
+            <td>
+              Inclusive <code>number | undefined</code> bounds for invalid state, ARIA metadata,
+              and stepping; also driven by a bound field's <code>min()</code>/<code>max()</code>
+              metadata.
+            </td>
+          </tr>
+          <tr>
+            <td><code>touch</code></td>
+            <td>
+              Emits on blur and after stepping; Angular forms use it to mark the field or control
+              touched.
+            </td>
           </tr>
           <tr>
             <td><code>step</code> / <code>stepMultiplier</code></td>
@@ -231,6 +274,36 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         </li>
       </ul>
 
+      <h2>Migration to one Control Value Authority</h2>
+      <ul>
+        <li>
+          <code>value</code> is now a <code>ModelSignal&lt;number | null&gt;</code>:
+          <code>[value]</code> plus <code>(valueChange)</code> behave as before, and
+          <code>[(value)]</code> two-way binding is new. Model inputs take no static-attribute
+          coercion; a typed <code>number | null</code> binding was already required.
+        </li>
+        <li>
+          The directive no longer implements <code>ControlValueAccessor</code> or
+          <code>Validator</code>. <code>formControl</code> and <code>ngModel</code> keep working
+          through Angular's Signal Forms interoperability, but the directive writes no errors
+          onto classic controls anymore: the <code>numberInputMalformed</code>,
+          <code>required</code>, and <code>min</code>/<code>max</code> control errors are gone.
+          Parse failures are reported as <code>invalidNumberInputDraft</code> field errors in
+          Signal Forms only.
+        </li>
+        <li>
+          Declare required and range policy on the form —
+          <code>Validators.required</code>/<code>Validators.min</code>/<code>Validators.max</code>
+          for classic controls, or <code>required()</code>/<code>min()</code>/<code>max()</code>
+          schema rules for Signal Forms — and the input keeps reflecting missing required values,
+          out-of-range committed values, and malformed drafts visually.
+        </li>
+        <li>
+          <code>min</code>/<code>max</code> are typed <code>number | undefined</code> instead of
+          <code>number | null</code>; <code>null</code> bindings still mean unbounded.
+        </li>
+      </ul>
+
       <h2>Migration from owned anatomy</h2>
       <p>
         Replace the former <code>&lt;hell-number-input&gt;</code> host with a native
@@ -266,7 +339,7 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Keep one controlled value or FormControl on the native Number Input.</li>
+        <li>Keep one value binding or bound form control on the native Number Input.</li>
         <li>Use explicit bounds and a visible label for business quantities.</li>
         <li>Compose only the unit and directional actions the workflow needs.</li>
       </ul>
@@ -284,6 +357,7 @@ export class NumberInputPage {
   protected readonly numberInputBasicExampleCode = numberInputBasicExampleCodeRaw;
   protected readonly numberInputDurationSecondsExampleCode =
     numberInputDurationSecondsExampleCodeRaw;
+  protected readonly numberInputFormsExampleCode = numberInputFormsExampleCodeRaw;
   protected readonly numberInputReactiveFormsExampleCode = numberInputReactiveFormsExampleCodeRaw;
   protected readonly numberInputSizesExampleCode = numberInputSizesExampleCodeRaw;
   protected readonly numberInputStylingExampleCode = numberInputStylingExampleCodeRaw;

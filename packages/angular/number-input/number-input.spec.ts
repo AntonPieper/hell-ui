@@ -1,7 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { By } from '@angular/platform-browser';
+import {
+  FormControl,
+  FormsModule,
+  NgModel,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  FormField,
+  disabled as disabledSchema,
+  form,
+  max as maxSchema,
+  min as minSchema,
+} from '@angular/forms/signals';
 import { vi } from 'vitest';
 
 import { provideHellLabels } from '@hell-ui/angular/core';
@@ -71,6 +83,66 @@ class NumberInputHost {
     this.values.push(value);
     this.value.set(value);
   }
+}
+
+@Component({
+  imports: [HellNumberInput],
+  template: `
+    <input
+      hellNumberInput
+      aria-label="Two-way number"
+      [(value)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class NumberInputTwoWayHost {
+  readonly value = signal<number | null>(10);
+  readonly values: Array<number | null> = [];
+}
+
+@Component({
+  imports: [FormsModule, HellNumberInput],
+  template: `
+    <input
+      hellNumberInput
+      aria-label="Model number"
+      [(ngModel)]="value"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class NumberInputNgModelHost {
+  readonly value = signal<number | null>(10);
+  readonly model = viewChild.required(NgModel);
+  readonly values: Array<number | null> = [];
+}
+
+@Component({
+  imports: [FormField, HellNumberInput, HellNumberStep],
+  template: `
+    <input
+      #number="hellNumberInput"
+      id="signal-number"
+      hellNumberInput
+      aria-label="Signal number"
+      [formField]="portForm.port"
+      (valueChange)="values.push($event)"
+    />
+    <button data-testid="signal-increment" hellNumberStep="increment" [hellNumberStepFor]="number">
+      +
+    </button>
+  `,
+})
+class NumberInputSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ port: number | null }>({ port: 8080 });
+  readonly portForm = form(this.model, (path) => {
+    disabledSchema(path.port, () => this.formDisabled());
+    minSchema(path.port, 1);
+    maxSchema(path.port, 65535);
+  });
+  readonly values: Array<number | null> = [];
 }
 
 @Component({
@@ -164,11 +236,33 @@ class NumberInputFormHost {
 @Component({
   imports: [ReactiveFormsModule, HellNumberInput],
   template: `
-    <input hellNumberInput aria-label="Required number" required [formControl]="control" />
+    <input hellNumberInput aria-label="Required number" [formControl]="control" />
   `,
 })
 class NumberInputRequiredHost {
-  readonly control = new FormControl<number | null>(null);
+  readonly control = new FormControl<number | null>(null, {
+    validators: [Validators.required],
+  });
+}
+
+@Component({
+  imports: [ReactiveFormsModule, HellNumberInput],
+  template: `
+    <input
+      hellNumberInput
+      aria-label="Validated number"
+      [min]="1"
+      [max]="10"
+      [formControl]="control"
+      (valueChange)="values.push($event)"
+    />
+  `,
+})
+class NumberInputValidationHost {
+  readonly control = new FormControl<number | null>(null, {
+    validators: [Validators.required, Validators.min(1), Validators.max(10)],
+  });
+  readonly values: Array<number | null> = [];
 }
 
 @Component({
@@ -249,12 +343,16 @@ describe('HellNumberInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         NumberInputHost,
+        NumberInputTwoWayHost,
+        NumberInputNgModelHost,
+        NumberInputSignalFormsHost,
         NumberInputStyleHost,
         NumberInputFieldHost,
         NumberInputNativeLabelHost,
         NumberInputDynamicNameHost,
         NumberInputFormHost,
         NumberInputRequiredHost,
+        NumberInputValidationHost,
         NumberInputCustomAdapterHost,
         NumberInputFormDataHost,
         NumberInputLabelsHost,
@@ -374,7 +472,7 @@ describe('HellNumberInput', () => {
     expect(numberField(fixture).getAttribute('aria-valuenow')).toBeNull();
   });
 
-  it('commits out-of-range typing without clamping and reports range errors', () => {
+  it('commits out-of-range typing without clamping and keeps the visual invalid state', () => {
     const fixture = createHost();
     fixture.componentInstance.min.set(1);
     fixture.componentInstance.max.set(10);
@@ -386,7 +484,33 @@ describe('HellNumberInput', () => {
     expect(fixture.componentInstance.values).toEqual([12]);
     expect(numberField(fixture).value).toBe('12');
     expect(numberField(fixture).getAttribute('aria-invalid')).toBe('true');
-    expect(numberDirective(fixture).validate(null)).toEqual({ max: { max: 10, actual: 12 } });
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(NumberInputTwoWayHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const input = numberField(fixture);
+    expect(input.value).toBe('10');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set(25);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('25');
+    expect(host.values).toEqual([]);
+
+    // One user commit updates parent state and emits exactly one event.
+    typeText(fixture, '40');
+    blurField(fixture);
+    expect(host.value()).toBe(40);
+    expect(host.values).toEqual([40]);
+    expect(input.value).toBe('40');
+
+    // One keyboard step also writes the same authority exactly once.
+    pressKey(fixture, 'ArrowUp');
+    expect(host.value()).toBe(41);
+    expect(host.values).toEqual([40, 41]);
   });
 
   it('keeps a static spinbutton role and inclusive ARIA bounds while empty', () => {
@@ -556,32 +680,203 @@ describe('HellNumberInput', () => {
     expect(increment.getAttribute('aria-label')).toBe('Increase Fallback retries');
   });
 
-  it('reports malformed, required, below-min, and above-max validator errors', () => {
-    const fixture = createHost();
-    fixture.componentInstance.required.set(true);
-    fixture.componentInstance.min.set(1);
-    fixture.componentInstance.max.set(10);
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(NumberInputNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(numberDirective(fixture).validate(null)).toEqual({ required: true });
+    const host = fixture.componentInstance;
+    const input = numberField(fixture);
+    expect(input.value).toBe('10');
+    expect(host.values).toEqual([]);
 
-    typeText(fixture, 'bad');
-    expect(numberDirective(fixture).validate(null)).toEqual({ numberInputMalformed: true });
+    // Enter commits without touching; blur marks the model touched.
+    typeText(fixture, '25');
+    pressKey(fixture, 'Enter');
+    expect(host.value()).toBe(25);
+    expect(host.values).toEqual([25]);
+    expect(host.model().touched).toBe(false);
 
-    typeText(fixture, '-1');
     blurField(fixture);
-    expect(numberDirective(fixture).validate(null)).toEqual({
-      min: { min: 1, actual: -1 },
-    });
+    expect(host.model().touched).toBe(true);
+
+    // External writes synchronize without echoing an interaction commit.
+    host.value.set(90);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('90');
+    expect(host.values).toEqual([25]);
   });
 
-  it('integrates with reactive forms without echoing programmatic writes', () => {
+  it('participates in Signal Forms as a FormValueControl through formField', async () => {
+    const fixture = TestBed.createComponent(NumberInputSignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = numberField(fixture);
+    expect(input.value).toBe('8080');
+    // The field's min()/max() validator metadata drives the input's own
+    // bounds, including the static spinbutton ARIA metadata.
+    expect(input.getAttribute('aria-valuemin')).toBe('1');
+    expect(input.getAttribute('aria-valuemax')).toBe('65535');
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.portForm.port().value.set(9000);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('9000');
+    expect(host.values).toEqual([]);
+    expect(host.portForm.port().dirty()).toBe(false);
+
+    // One user commit updates the field and the model exactly once.
+    typeText(fixture, '443');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.portForm.port().value()).toBe(443);
+    expect(host.model().port).toBe(443);
+    expect(host.values).toEqual([443]);
+    expect(host.portForm.port().dirty()).toBe(true);
+    expect(host.portForm.port().touched()).toBe(true);
+
+    // Metadata-driven bounds also clamp stepping: End jumps to the field max,
+    // and the increment stepper disables at that bound.
+    pressKey(fixture, 'End');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.portForm.port().value()).toBe(65535);
+    expect(host.values).toEqual([443, 65535]);
+    const increment = fixture.nativeElement.querySelector(
+      '[data-testid="signal-increment"]',
+    ) as HTMLButtonElement;
+    expect(increment.disabled).toBe(true);
+  });
+
+  it('reports parse failures to the Signal Forms field through transformedValue', async () => {
+    const fixture = TestBed.createComponent(NumberInputSignalFormsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = numberField(fixture);
+
+    // A malformed committed draft stays editable and never becomes a value.
+    typeText(fixture, '80x');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('80x');
+    expect(host.portForm.port().value()).toBe(8080);
+    expect(host.values).toEqual([]);
+    expect(errorKinds(host)).toContain('invalidNumberInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // A corrected commit clears the parse error and commits once.
+    typeText(fixture, '8443');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.portForm.port().value()).toBe(8443);
+    expect(host.values).toEqual([8443]);
+    expect(errorKinds(host)).not.toContain('invalidNumberInputDraft');
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // A step commit replacing a reported malformed draft also clears the error.
+    typeText(fixture, '80x');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(errorKinds(host)).toContain('invalidNumberInputDraft');
+    pressKey(fixture, 'ArrowUp');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.portForm.port().value()).toBe(8444);
+    expect(host.values).toEqual([8443, 8444]);
+    expect(errorKinds(host)).not.toContain('invalidNumberInputDraft');
+
+    // An empty commit is a nullable clear through the same authority.
+    typeText(fixture, '');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.portForm.port().value()).toBeNull();
+    expect(host.model().port).toBeNull();
+    expect(host.values).toEqual([8443, 8444, null]);
+
+    // Field-driven disabled state reaches the native input.
+    host.formDisabled.set(true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.disabled).toBe(true);
+    expect(input.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('keeps classic validation form-owned while drafts stay visual-only invalid state', async () => {
+    const fixture = TestBed.createComponent(NumberInputValidationHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const input = numberField(fixture);
+
+    // The control's own required validator drives errors and the reserved
+    // required input, so the missing value is visible on the native host.
+    expect(host.control.errors).toEqual({ required: true });
+    expect(input.required).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // Committed out-of-range values report the control's own range errors and
+    // keep the visual invalid contract without clamping.
+    typeText(fixture, '12');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.control.value).toBe(12);
+    expect(host.control.errors).toEqual({ max: { max: 10, actual: 12 } });
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    typeText(fixture, '5');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.control.errors).toBeNull();
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // A malformed committed draft never commits and stays a visual invalid
+    // state; classic controls receive no directive-owned error for it.
+    typeText(fixture, '5x');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.control.errors).toBeNull();
+    expect(host.control.value).toBe(5);
+    expect(input.value).toBe('5x');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    typeText(fixture, '7');
+    blurField(fixture);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(host.control.errors).toBeNull();
+    expect(host.control.value).toBe(7);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+  });
+
+  it('integrates with reactive forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(NumberInputFormHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(numberField(fixture).value).toBe('8080');
     expect(fixture.componentInstance.values).toEqual([]);
 
     fixture.componentInstance.control.setValue(9000);
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(numberField(fixture).value).toBe('9000');
     expect(fixture.componentInstance.values).toEqual([]);
@@ -590,17 +885,21 @@ describe('HellNumberInput', () => {
     blurField(fixture);
     expect(fixture.componentInstance.control.value).toBe(443);
     expect(fixture.componentInstance.values).toEqual([443]);
+    expect(fixture.componentInstance.control.touched).toBe(true);
   });
 
-  it('reflects reactive-form disabled and required state on the real input', () => {
+  it('reflects reactive-form disabled and required state on the real input', async () => {
     const formFixture = TestBed.createComponent(NumberInputFormHost);
     formFixture.detectChanges();
     formFixture.componentInstance.control.disable();
+    await formFixture.whenStable();
     formFixture.detectChanges();
     expect(numberField(formFixture).disabled).toBe(true);
     expect(numberField(formFixture).hasAttribute('data-disabled')).toBe(true);
 
     const requiredFixture = TestBed.createComponent(NumberInputRequiredHost);
+    requiredFixture.detectChanges();
+    await requiredFixture.whenStable();
     requiredFixture.detectChanges();
     expect(numberField(requiredFixture).required).toBe(true);
     expect(requiredFixture.componentInstance.control.errors).toEqual({ required: true });
@@ -849,10 +1148,11 @@ function numberField(fixture: ComponentFixture<unknown>): HTMLInputElement {
   return field;
 }
 
-function numberDirective(fixture: ComponentFixture<unknown>): HellNumberInput {
-  const debugElement = fixture.debugElement.query(By.directive(HellNumberInput));
-  if (!debugElement) throw new Error('Expected Number Input directive.');
-  return debugElement.injector.get(HellNumberInput);
+function errorKinds(host: NumberInputSignalFormsHost): string[] {
+  return host.portForm
+    .port()
+    .errors()
+    .map((error) => error.kind);
 }
 
 function stepButtons(fixture: ComponentFixture<unknown>): HTMLButtonElement[] {
