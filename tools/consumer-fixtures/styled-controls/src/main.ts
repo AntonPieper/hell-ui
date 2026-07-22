@@ -4,6 +4,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { StyledPrimitives } from './controls';
 import { DateInputForms } from './date-input-forms';
 import { StyledInputs } from './inputs';
+import { NumberInputForms } from './number-input-forms';
 import { ComboboxProjection } from './projection';
 import { SliderForms } from './slider-forms';
 import { StyledTable } from './table';
@@ -16,6 +17,7 @@ import { StyledTable } from './table';
     ComboboxProjection,
     SliderForms,
     DateInputForms,
+    NumberInputForms,
     StyledTable,
   ],
   template: `
@@ -26,6 +28,7 @@ import { StyledTable } from './table';
       <app-combobox-projection />
       <app-slider-forms />
       <app-date-input-forms />
+      <app-number-input-forms />
       <app-styled-table />
     </main>
   `,

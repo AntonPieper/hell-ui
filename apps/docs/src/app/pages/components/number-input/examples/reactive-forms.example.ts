@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { HellControlGroup } from '@hell-ui/angular/control-group';
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
@@ -28,7 +28,6 @@ import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
           id="reactive-port"
           hellNumberInput
           integer
-          required
           [min]="1"
           [max]="65535"
           [formControl]="port"
@@ -44,7 +43,10 @@ import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
           [hellNumberStepFor]="portInput"
         >+</button>
       </div>
-      <div hellFieldDescription>Reactive forms receive a real <code>number | null</code>.</div>
+      <div hellFieldDescription>
+        Reactive forms receive a real <code>number | null</code>; the control's own validators
+        declare required and range policy.
+      </div>
       <div hellFieldError id="reactive-port-required" ngpErrorValidator="required">
         Choose a listen port.
       </div>
@@ -60,7 +62,13 @@ import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
   `,
 })
 export class NumberInputReactiveFormsExample {
-  protected readonly port = new FormControl<number | null>(8080);
+  protected readonly port = new FormControl<number | null>(8080, {
+    validators: [
+      (control) => Validators.required(control),
+      Validators.min(1),
+      Validators.max(65535),
+    ],
+  });
   protected readonly controlUi =
     'h-auto min-h-0 min-w-0 max-w-none flex-1 rounded-none border-0 bg-transparent shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none disabled:bg-transparent data-disabled:bg-transparent';
 }
