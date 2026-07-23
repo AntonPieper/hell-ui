@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
 
 @Component({
   selector: 'app-toggle-styling-example',
@@ -23,7 +23,7 @@ import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angul
     </button>
 
     <!-- HellToggleGroup ("root") wrapping HellToggleGroupItem ("root") refinements. -->
-    <div hellToggleGroup type="single" [value]="align()" (valueChange)="align.set($event)" [ui]="groupUi">
+    <div hellToggleGroup type="single" [(value)]="align" [ui]="groupUi">
       <button hellToggleGroupItem value="left" type="button" [ui]="itemUi">Left</button>
       <button hellToggleGroupItem value="center" type="button" [ui]="itemUi">Center</button>
       <button hellToggleGroupItem value="right" type="button" [ui]="itemUi">Right</button>
@@ -33,7 +33,7 @@ import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angul
 export class ToggleStylingExample {
   protected readonly pill = signal(true);
   protected readonly mapped = signal(false);
-  protected readonly align = signal<string[]>(['left']);
+  protected readonly align = signal<HellToggleGroupValue>('left');
 
   protected readonly toggleUi = {
     root: 'rounded-hell-xs border-hell-border-strong px-hell-6',

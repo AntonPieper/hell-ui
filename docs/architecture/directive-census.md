@@ -463,7 +463,7 @@ the sidenav's `data-collapsed`).
 | Directive | Selector | Kind | Role | Notes |
 | --- | --- | --- | --- | --- |
 | `HellToggle` | `button[hellToggle]` | directive | behavior | Delegates via `hostDirectives`. |
-| `HellToggleGroup` | `[hellToggleGroup]` | directive | behavior | Host listeners (focusout); delegates via `hostDirectives`. |
+| `HellToggleGroup` | `[hellToggleGroup]` | directive | behavior | Host listeners (focusout); outputs (valueChange, touch); delegates via the `ngpToggleGroup` primitive engine. |
 | `HellToggleGroupItem` | `button[hellToggleGroupItem]` | directive | behavior | Delegates via `hostDirectives`. |
 
 ### toolbar

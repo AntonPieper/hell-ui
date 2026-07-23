@@ -1,27 +1,37 @@
 import {
   afterRenderEffect,
-  DestroyRef,
   Directive,
   effect,
   ElementRef,
-  forwardRef,
+  PLATFORM_ID,
+  booleanAttribute,
+  computed,
   inject,
   input,
-  PLATFORM_ID,
+  model,
+  output,
+  signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type FormValueControl } from '@angular/forms/signals';
 import { NgpToggle } from 'ng-primitives/toggle';
 import {
-  NgpToggleGroup,
   NgpToggleGroupItem,
   injectToggleGroupItemState,
+  ngpToggleGroup,
+  provideToggleGroupState,
 } from 'ng-primitives/toggle-group';
+import { ngpRovingFocusGroup, provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
+import { type NgpOrientation } from 'ng-primitives/common';
 import { containsNode } from '@hell-ui/angular/internal/core';
-import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, HellSize, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
-/** Value shape of a `[hellToggleGroup]`: a single value, `null`, or a list of values for multi-select. */
+/**
+ * Canonical value of a `[hellToggleGroup]` — mode-dependent: a plain string or
+ * `null` in `single` mode, a readonly string array in `multiple` mode. Values
+ * the group writes (user commits and shape normalizations) always take the
+ * mode's canonical shape.
+ */
 export type HellToggleGroupValue = string | null | readonly string[];
 
 const HELL_TOGGLE_BASE_RECIPE =
@@ -44,6 +54,12 @@ const HELL_TOGGLE_SIZE_RECIPE: Record<HellSize, string> = {
 const HELL_TOGGLE_GROUP_RECIPE = {
   root: 'inline-flex gap-[2px] rounded-hell-md border border-hell-border bg-hell-surface-muted p-[3px]',
 } satisfies HellRecipe<'root'>;
+
+/** Reads a public value as the item list the toggle-group engine consumes. */
+function hellToggleGroupSelection(value: HellToggleGroupValue): readonly string[] {
+  if (value == null) return [];
+  return typeof value === 'string' ? [value] : value;
+}
 
 /**
  * Single press-toggle button. Adds the on/off state from the toggle primitive.
@@ -83,27 +99,25 @@ export class HellToggle {
   });
 }
 
-/** Groups `[hellToggleGroupItem]` buttons into a single- or multi-select control with Angular Forms support. */
+/**
+ * Groups `[hellToggleGroupItem]` buttons into a single- or multi-select
+ * control.
+ *
+ * The `value` model is the group's one Control Value Authority, with one
+ * canonical mode-dependent shape: `string | null` in `single` mode and a
+ * readonly string array in `multiple` mode. Bind it one-way (`[value]` plus
+ * `(valueChange)`), two-way (`[(value)]`), or through Angular forms — Signal
+ * Forms `[formField]` via the `FormValueControl` contract, and
+ * `formControl`/`ngModel` via Angular's built-in Signal Forms
+ * interoperability. Non-canonical writes are normalized into the mode's
+ * shape (in `single` mode an array keeps its first item; in `multiple` mode
+ * a string becomes a one-item array), a mode change re-normalizes the
+ * current value the same way, and the `null` default reads as an empty
+ * selection in both modes.
+ */
 @Directive({
   selector: '[hellToggleGroup]',
-  hostDirectives: [
-    {
-      directive: NgpToggleGroup,
-      inputs: [
-        'ngpToggleGroupValue:value',
-        'ngpToggleGroupType:type',
-        'ngpToggleGroupDisabled:disabled',
-      ],
-      outputs: ['ngpToggleGroupValueChange:valueChange'],
-    },
-  ],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellToggleGroup),
-      multi: true,
-    },
-  ],
+  providers: [provideToggleGroupState(), provideRovingFocusGroupState({ inherit: true })],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -111,7 +125,7 @@ export class HellToggle {
     role: 'group',
   },
 })
-export class HellToggleGroup implements ControlValueAccessor {
+export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
@@ -121,57 +135,77 @@ export class HellToggleGroup implements ControlValueAccessor {
     recipe: () => HELL_TOGGLE_GROUP_RECIPE,
   });
 
-  private readonly group = inject(NgpToggleGroup);
+  /** Selection mode: `single` keeps at most one item selected, `multiple` any number. Defaults to `single`. */
+  readonly type = input<'single' | 'multiple'>('single');
+
+  /**
+   * Committed selection — the one Control Value Authority. User commits write
+   * it exactly once per interaction and emit `(valueChange)` with the mode's
+   * canonical shape (`string | null` in `single` mode, a readonly string
+   * array in `multiple` mode); external property, two-way, and form writes
+   * flow in without re-emitting a commit. Defaults to `null`, which reads as
+   * an empty selection in both modes.
+   */
+  readonly value = model<HellToggleGroupValue>(null);
+
+  /** Whether the whole group is disabled. Also driven by bound forms. Defaults to `false`. */
+  readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * Emits when focus leaves the group entirely. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
+
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellToggleGroupValue>();
+
+  /** The model's selection as the item list the delegated engine consumes. */
+  private readonly selectedItems = computed(() => [...hellToggleGroupSelection(this.value())]);
+
+  /**
+   * Headless toggle-group state and behavior from `ngpToggleGroup` — the
+   * delegated Interaction State Machine for keyboard, focus, and item
+   * behavior. Its value is controlled by the `value` model, so external
+   * writes never re-emit a commit; one user toggle calls `onValueChange`
+   * exactly once, which writes the model.
+   */
+  protected readonly state = ngpToggleGroup({
+    rovingFocusGroup: ngpRovingFocusGroup({
+      orientation: signal<NgpOrientation>('horizontal'),
+      wrap: signal(true),
+      disabled: this.disabled,
+    }),
+    type: this.type,
+    value: this.selectedItems,
+    disabled: this.disabled,
+    onValueChange: (items) => this.value.set(this.asModeValue(items)),
+  });
 
   constructor() {
-    const valueSub = this.group.valueChange.subscribe((value) => {
-      this.valueAccessor.emitValue(this.asControlValue(value));
+    // Keep the public model in the mode's canonical shape: normalize
+    // non-canonical external writes and re-normalize when the mode changes.
+    // Canonical writes (the common case) never re-enter the model, and the
+    // `null` default stays untouched in both modes (it reads as an empty
+    // selection) so bound forms never observe a startup emission.
+    effect(() => {
+      const value = this.value();
+      const canonical =
+        value === null || (this.type() === 'multiple' ? Array.isArray(value) : typeof value === 'string');
+      if (!canonical) {
+        this.value.set(this.asModeValue(hellToggleGroupSelection(value)));
+      }
     });
-    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 
-  /** Applies a form-driven value to the toggle group. */
-  writeValue(value: HellToggleGroupValue): void {
-    this.group.setValue(this.asGroupValue(value), { emit: false });
+  /** Shapes an item list into the mode's canonical public value. */
+  private asModeValue(items: readonly string[]): HellToggleGroupValue {
+    return this.type() === 'multiple' ? [...items] : items[0] ?? null;
   }
 
-  private asGroupValue(value: HellToggleGroupValue): string[] {
-    if (value == null) return [];
-    if (this.group.type() === 'single') {
-      const next = Array.isArray(value) ? value[0] : value;
-      return next == null ? [] : [next];
-    }
-
-    return Array.isArray(value) ? [...value] : [value as string];
-  }
-
-  private asControlValue(value: readonly string[]): HellToggleGroupValue {
-    return this.group.type() === 'multiple' ? [...value] : value[0] ?? null;
-  }
-
-  /** Registers the callback invoked when the toggle group value changes. */
-  registerOnChange(fn: (value: HellToggleGroupValue) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  /** Registers the callback invoked when the toggle group is touched. */
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  /** Applies a form-driven disabled state to the toggle group. */
-  setDisabledState(isDisabled: boolean): void {
-    this.group.setDisabled(isDisabled);
-  }
-
-  /** Marks the control touched once focus leaves the group entirely. */
+  /** Emits `touch` once focus leaves the group entirely. */
   protected onFocusOut(event: FocusEvent): void {
-    const next = event.relatedTarget;
-    if (!containsNode(this.host.nativeElement, next)) {
-      this.valueAccessor.markTouched();
+    if (!containsNode(this.host.nativeElement, event.relatedTarget)) {
+      this.touch.emit();
     }
   }
 }
@@ -189,7 +223,7 @@ export class HellToggleGroup implements ControlValueAccessor {
  */
 function toggleGroupItemModeAria(): void {
   const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  const group = inject(NgpToggleGroup, { optional: true });
+  const group = inject(HellToggleGroup, { optional: true });
   const item = injectToggleGroupItemState();
 
   const syncModeAria = () => {

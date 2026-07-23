@@ -968,6 +968,40 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellToggleGroup` now has one mode-typed Control Value Authority:
+  `value` is a `ModelSignal<HellToggleGroupValue>` implementing Signal Forms'
+  `FormValueControl<HellToggleGroupValue>`, and the directive no longer
+  implements `ControlValueAccessor`, registers the `NG_VALUE_ACCESSOR`
+  provider, or exposes the `writeValue` / `registerOnChange` /
+  `registerOnTouched` / `setDisabledState` methods. First carried by the next
+  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). The
+  canonical value shape is mode-dependent — a plain string or `null` in
+  `single` mode, a readonly string array in `multiple` mode — and there is no
+  longer an array-shaped template value next to a scalar-shaped form value:
+  direct `[value]` binding, new two-way `[(value)]` binding, Signal Forms
+  `[formField]`, Reactive Forms `formControl`, and template-driven `ngModel`
+  all read and write the same mode-canonical model.
+  `formControl`/`ngModel` keep working through Angular's built-in Signal
+  Forms interoperability, one user toggle commits exactly once, and external
+  writes never echo `(valueChange)`. Migration notes: `[value]` and
+  `(valueChange)` no longer carry a string array in `single` mode — bind and
+  read a plain string or `null` instead (`[value]="'left'"`, not
+  `[value]="['left']"`); non-canonical writes are normalized into the mode's
+  shape and re-emitted (in `single` mode an array keeps its first item, in
+  `multiple` mode a string becomes a one-item array, and a `type` change
+  re-normalizes the current value the same way), while the `null` default
+  reads as an empty selection in both modes; the group host directive
+  delegation moved to the equivalent `ngpToggleGroup` primitive engine, so
+  keyboard, focus, roving tabindex, item selection, and the Hell-corrected
+  mode ARIA semantics (`role="radio"`/`aria-checked` in `single` mode,
+  `aria-pressed` toggle buttons in `multiple` mode, upstream ng-primitives
+  issue 813) are unchanged. A new `(touch)` output marks the bound field or
+  control touched once focus leaves the group entirely, and the new
+  `disabled` input keeps attribute coercion and is also driven by bound
+  forms. Evidence: `packages/angular/toggle/toggle.spec.ts`, the
+  styled-controls packed consumer's toggle-group forms scenario,
+  `e2e/toggle-a11y-contracts.spec.ts`, and the updated toggle API report.
+  Closes #289.
 - BREAKING: `HellRadioGroup` now has one Control Value Authority: `value` is a
   `ModelSignal<T | null>` implementing Signal Forms'
   `FormValueControl<T | null>`, and the directive no longer implements
