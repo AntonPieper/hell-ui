@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { FormField, disabled as disabledSchema, form } from '@angular/forms/signals';
 import type { Extension } from '@codemirror/state';
 
 import type { HellUiInput } from '@hell-ui/angular/core';
@@ -23,10 +24,23 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
   readOnlyStates: boolean[] = [];
   accessibilityStates: HellCodeEditorRuntimeAccessibilityOptions[] = [];
   destroyed = false;
+  private document: string;
 
-  constructor(readonly options: HellCodeEditorRuntimeOptions) {}
+  constructor(readonly options: HellCodeEditorRuntimeOptions) {
+    this.document = options.value;
+  }
+
+  /** Editor-originated edit: updates the live document and echoes the change. */
+  edit(next: string): void {
+    this.document = next;
+    this.options.onValueChange(next);
+  }
 
   setValue(next: string): void {
+    // Mirrors the real runtime port: an external write equal to the live
+    // document resolves to a no-op and records no transaction.
+    if (this.document === next) return;
+    this.document = next;
     this.values.push(next);
   }
 
@@ -54,6 +68,7 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
     [readOnly]="readOnly()"
     [ariaLabel]="ariaLabel()"
     [ui]="ui()"
+    (valueChange)="valueEvents.push($event)"
   />`,
 })
 class CodeEditorHost {
@@ -65,15 +80,51 @@ class CodeEditorHost {
     editor: 'min-h-[12rem]',
   } satisfies HellCodeEditorUi;
   readonly ui = signal<HellUiInput<HellCodeEditorPart>>('max-h-[16rem]');
+  readonly valueEvents: string[] = [];
+}
+
+@Component({
+  imports: [HellCodeEditor],
+  template: `<hell-code-editor [(value)]="value" (valueChange)="valueEvents.push($event)" />`,
+})
+class CodeEditorTwoWayHost {
+  readonly value = signal('alpha');
+  readonly valueEvents: string[] = [];
 }
 
 @Component({
   imports: [ReactiveFormsModule, HellCodeEditor],
-  template: `<hell-code-editor [formControl]="control" (valueChange)="values.push($event)" />`,
+  template: `<hell-code-editor [formControl]="control" (valueChange)="valueEvents.push($event)" />`,
 })
 class CodeEditorFormHost {
   readonly control = new FormControl<string>('alpha', { nonNullable: true });
-  values: string[] = [];
+  readonly valueEvents: string[] = [];
+}
+
+@Component({
+  imports: [FormsModule, HellCodeEditor],
+  template: `<hell-code-editor [(ngModel)]="value" (valueChange)="valueEvents.push($event)" />`,
+})
+class CodeEditorNgModelHost {
+  readonly value = signal('alpha');
+  readonly model = viewChild.required(NgModel);
+  readonly valueEvents: string[] = [];
+}
+
+@Component({
+  imports: [FormField, HellCodeEditor],
+  template: `<hell-code-editor
+    [formField]="scriptForm.source"
+    (valueChange)="valueEvents.push($event)"
+  />`,
+})
+class CodeEditorSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal({ source: 'alpha' });
+  readonly scriptForm = form(this.model, (path) => {
+    disabledSchema(path.source, () => this.formDisabled());
+  });
+  readonly valueEvents: string[] = [];
 }
 
 describe('HellCodeEditor', () => {
@@ -82,7 +133,13 @@ describe('HellCodeEditor', () => {
   beforeEach(async () => {
     runtime = null;
     await TestBed.configureTestingModule({
-      imports: [CodeEditorHost, CodeEditorFormHost],
+      imports: [
+        CodeEditorHost,
+        CodeEditorTwoWayHost,
+        CodeEditorFormHost,
+        CodeEditorNgModelHost,
+        CodeEditorSignalFormsHost,
+      ],
       providers: [
         {
           provide: HELL_CODE_EDITOR_RUNTIME_FACTORY,
@@ -171,6 +228,51 @@ describe('HellCodeEditor', () => {
     });
   });
 
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(CodeEditorTwoWayHost);
+
+    await settle(fixture);
+
+    const host = fixture.componentInstance;
+
+    expect(runtime?.options.value).toBe('alpha');
+
+    // External parent write reconfigures the editor without echoing a change.
+    host.value.set('beta');
+    await settle(fixture);
+
+    expect(runtime?.values).toEqual(['beta']);
+    expect(host.valueEvents).toEqual([]);
+
+    // One editor-originated edit commits exactly once: parent state and one
+    // event, with no duplicate external write destroying editor state.
+    runtime?.edit('gamma');
+    await settle(fixture);
+
+    expect(host.value()).toBe('gamma');
+    expect(host.valueEvents).toEqual(['gamma']);
+    expect(runtime?.values).toEqual(['beta']);
+  });
+
+  it('keeps direct property binding on the same authority without echoing external writes', async () => {
+    const fixture = TestBed.createComponent(CodeEditorHost);
+
+    await settle(fixture);
+
+    const host = fixture.componentInstance;
+
+    host.value.set('beta');
+    await settle(fixture);
+
+    expect(runtime?.values).toEqual(['beta']);
+    expect(host.valueEvents).toEqual([]);
+
+    runtime?.edit('gamma');
+    await settle(fixture);
+
+    expect(host.valueEvents).toEqual(['gamma']);
+  });
+
   it('integrates with reactive forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(CodeEditorFormHost);
 
@@ -182,13 +284,13 @@ describe('HellCodeEditor', () => {
     await settle(fixture);
 
     expect(runtime?.values).toContain('beta');
-    expect(fixture.componentInstance.values).toEqual([]);
+    expect(fixture.componentInstance.valueEvents).toEqual([]);
 
-    runtime?.options.onValueChange('gamma');
+    runtime?.edit('gamma');
     await settle(fixture);
 
     expect(fixture.componentInstance.control.value).toBe('gamma');
-    expect(fixture.componentInstance.values).toEqual(['gamma']);
+    expect(fixture.componentInstance.valueEvents).toEqual(['gamma']);
 
     const host = fixture.nativeElement.querySelector('div') as HTMLDivElement;
     host.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
@@ -206,6 +308,85 @@ describe('HellCodeEditor', () => {
     await settle(fixture);
 
     expect(runtime?.readOnlyStates).toContain(true);
+
+    const root = fixture.nativeElement.querySelector('hell-code-editor') as HTMLElement;
+    expect(root.getAttribute('data-readonly')).toBe('true');
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(CodeEditorNgModelHost);
+
+    await settle(fixture);
+
+    const host = fixture.componentInstance;
+
+    // NgModel's initial null write is coerced to an empty document before the
+    // model value lands asynchronously; no editor commit is echoed for either.
+    expect(runtime?.values).toContain('alpha');
+    expect(host.valueEvents).toEqual([]);
+
+    runtime?.edit('beta');
+    await settle(fixture);
+
+    expect(host.value()).toBe('beta');
+    expect(host.valueEvents).toEqual(['beta']);
+    expect(host.model().touched).toBe(false);
+
+    const editorHost = fixture.nativeElement.querySelector('div') as HTMLDivElement;
+    editorHost.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+
+    host.value.set('gamma');
+    await settle(fixture);
+
+    expect(runtime?.values).toContain('gamma');
+    expect(host.valueEvents).toEqual(['beta']);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', async () => {
+    const fixture = TestBed.createComponent(CodeEditorSignalFormsHost);
+
+    await settle(fixture);
+
+    const host = fixture.componentInstance;
+
+    expect(runtime?.options.value).toBe('alpha');
+
+    // Form-driven writes flow in without echoing an editor commit.
+    host.scriptForm.source().value.set('beta');
+    await settle(fixture);
+
+    expect(runtime?.values).toEqual(['beta']);
+    expect(host.valueEvents).toEqual([]);
+    expect(host.scriptForm.source().dirty()).toBe(false);
+
+    // One editor-originated edit commits exactly once into field and model.
+    runtime?.edit('gamma');
+    await settle(fixture);
+
+    expect(host.scriptForm.source().value()).toBe('gamma');
+    expect(host.model().source).toBe('gamma');
+    expect(host.valueEvents).toEqual(['gamma']);
+    expect(host.scriptForm.source().dirty()).toBe(true);
+    expect(host.scriptForm.source().touched()).toBe(false);
+
+    const editorHost = fixture.nativeElement.querySelector('div') as HTMLDivElement;
+    editorHost.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.scriptForm.source().touched()).toBe(true);
+
+    // Field-driven disabled state maps onto the same read-only editor policy.
+    host.formDisabled.set(true);
+    await settle(fixture);
+
+    expect(runtime?.readOnlyStates).toContain(true);
+    expect(runtime?.accessibilityStates.at(-1)?.readOnly).toBe(true);
+
+    const root = fixture.nativeElement.querySelector('hell-code-editor') as HTMLElement;
+    expect(root.getAttribute('data-readonly')).toBe('true');
   });
 });
 

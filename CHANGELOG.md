@@ -968,6 +968,34 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellCodeEditor` now has one Control Value Authority: `value` is a
+  `ModelSignal<string>` implementing Signal Forms' `FormValueControl<string>`,
+  and the component no longer implements `ControlValueAccessor`, registers
+  the `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
+  `registerOnChange` / `registerOnTouched` / `setDisabledState` methods.
+  First carried by the next `@hell-ui/angular` release after `0.2.0`
+  (currently Unreleased). Direct `[value]` binding, new two-way `[(value)]`
+  binding, Signal Forms `[formField]`, Reactive Forms `formControl`, and
+  template-driven `ngModel` all read and write the same document model —
+  `formControl`/`ngModel` keep working through Angular's built-in Signal
+  Forms interoperability, each editor-originated document change commits
+  exactly once, and external writes replace the document by transaction
+  without echoing `(valueChange)`. The Code Editor Runtime keeps owning
+  editor lifecycle, selection, history, extensions, theme, read-only policy,
+  accessibility attributes, teardown, and late-runtime initialization, and
+  derives document synchronization from the one authority (an external write
+  equal to the live document resolves to a no-op, so the model round-trip of
+  an editor commit never destroys selection or history). Migration notes: a
+  disabled bound form now drives the new `disabled` input (attribute-coerced,
+  mapped onto the same read-only editor policy as `readOnly`) instead of
+  `setDisabledState`; a new `(touch)` output marks the bound field or control
+  touched once focus leaves the editor content; classic `null` form writes
+  (for example `control.reset()`) render as an empty document. `value` never
+  had transform coercion to lose. Evidence:
+  `packages/angular/features/code-editor/code-editor.spec.ts`, the
+  code-editor packed consumer's forms scenario, and the docs Forms example;
+  the entry point stays outside the stable API reports
+  (`tools/check-api-reports.mjs` exclusion). Closes #290.
 - BREAKING: `HellToggleGroup` now has one mode-typed Control Value Authority:
   `value` is a `ModelSignal<HellToggleGroupValue>` implementing Signal Forms'
   `FormValueControl<HellToggleGroupValue>`, and the directive no longer
