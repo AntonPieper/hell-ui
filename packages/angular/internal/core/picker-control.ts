@@ -1,6 +1,5 @@
 import type { DestroyRef } from '@angular/core';
 
-import { HellControlValueAccessorBridge } from './control-value-accessor';
 import { HellFloatingScopeRegistry, hellContainsFloatingTarget } from './floating-scope';
 import type {
   HellPickMultipleValue,
@@ -46,77 +45,63 @@ export function hellNormalizePickValue<T>(
   return value ?? null;
 }
 
+/**
+ * Identity-level pick-value equality: two multiple values are the same when
+ * they hold the same items in the same order, and two single values when they
+ * are the same reference (nullish values all read as an empty selection).
+ * The picker roots use it to keep model-to-engine synchronization from
+ * writing a normalized copy back after the engine itself produced the value,
+ * without treating `compareWith`-equal replacements as no-ops.
+ */
+export function hellSamePickValue<T>(
+  left: HellPickValue<T> | undefined,
+  right: HellPickValue<T> | undefined,
+): boolean {
+  if (left != null && right != null && hellIsPickMultipleValue(left) && hellIsPickMultipleValue(right)) {
+    return (
+      left.length === right.length && left.every((item, index) => Object.is(item, right[index]))
+    );
+  }
+  return Object.is(left ?? null, right ?? null);
+}
+
 /** Structural stream shape shared by the picker engines' outputs. */
 export interface HellPickerEngineStream<TValue> {
   subscribe(next: (value: TValue) => void): { unsubscribe(): void };
 }
 
 /**
- * Adapter one picker engine (ngp select, ngp combobox) presents to the shared
- * control plumbing. `writeValue` must write into the engine without
- * re-emitting, and `host` anchors outside-control checks.
+ * Focus-boundary adapter one picker engine (ngp select, ngp combobox)
+ * presents to the shared touched plumbing. `host` anchors outside-control
+ * checks and `openChanges` gates whether registered dropdowns count as
+ * inside.
  */
-export interface HellPickerEngineAdapter<T> {
+export interface HellPickerFocusScopeAdapter {
   /** Host element that anchors outside-control focus checks. */
   readonly host: () => HTMLElement;
-  /** Whether the engine is currently in multiple mode. */
-  readonly multiple: () => boolean;
-  /**
-   * Engine value emissions, re-emitted to the form after normalization.
-   * The stream carries typed pick output; an engine whose raw emissions are
-   * untyped must decode them into `HellPickValue<T>` before adapting.
-   */
-  readonly valueChanges: HellPickerEngineStream<HellPickValue<T> | undefined>;
   /** Engine open emissions; an open dropdown counts as inside the control. */
   readonly openChanges: HellPickerEngineStream<boolean>;
-  /** Writes a normalized form value into the engine without re-emitting. */
-  readonly writeValue: (value: HellPickValue<T>) => void;
-  /** Writes the form disabled state into the engine. */
-  readonly setDisabled: (disabled: boolean) => void;
 }
 
 /**
- * Shared ControlValueAccessor + dropdown-registration plumbing for the
- * headless picker roots (select root, combobox root). Owns the CVA bridge,
- * the floating-scope registry that makes a portaled dropdown count as
- * "inside", and the mode-aware value normalization, so each picker only
- * supplies its engine adapter.
+ * Shared focus-boundary plumbing for the headless picker roots (select root,
+ * combobox root). Owns the floating-scope registry that makes a portaled
+ * dropdown count as "inside" while the engine reports it open, so each picker
+ * marks its Angular forms touched boundary only when focus truly leaves the
+ * control.
  */
-export class HellPickerControl<T> {
-  private readonly valueAccessor = new HellControlValueAccessorBridge<HellPickValue<T>>();
+export class HellPickerFocusScope {
   private readonly floatingScope = new HellFloatingScopeRegistry();
   private dropdownOpen = false;
 
-  constructor(private readonly engine: HellPickerEngineAdapter<T>) {}
+  constructor(private readonly engine: HellPickerFocusScopeAdapter) {}
 
-  /** Subscribes to the engine streams until `destroyRef` tears down. */
+  /** Subscribes to the engine's open stream until `destroyRef` tears down. */
   connect(destroyRef: DestroyRef): void {
-    const valueSub = this.engine.valueChanges.subscribe((value) => {
-      this.valueAccessor.emitValue(hellNormalizePickValue<T>(value, this.engine.multiple()));
-    });
     const openSub = this.engine.openChanges.subscribe((open) => {
       this.dropdownOpen = open;
     });
-    destroyRef.onDestroy(() => {
-      valueSub.unsubscribe();
-      openSub.unsubscribe();
-    });
-  }
-
-  writeValue(value: HellPickValue<T>): void {
-    this.engine.writeValue(hellNormalizePickValue<T>(value, this.engine.multiple()));
-  }
-
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.engine.setDisabled(isDisabled);
+    destroyRef.onDestroy(() => openSub.unsubscribe());
   }
 
   /** Whether `next` is outside the host and any open, registered dropdown. */
@@ -129,13 +114,6 @@ export class HellPickerControl<T> {
       },
       next,
     );
-  }
-
-  /** Marks the control touched when focus moves outside the control. */
-  markControlTouched(event: FocusEvent): void {
-    if (this.isOutsideControl(event.relatedTarget)) {
-      this.valueAccessor.markTouched();
-    }
   }
 
   /** Registers a portaled dropdown so it counts as inside the control. */

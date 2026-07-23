@@ -138,7 +138,7 @@ the sidenav's `data-collapsed`).
 
 | Directive | Selector | Kind | Role | Notes |
 | --- | --- | --- | --- | --- |
-| `HellCombobox` | `[hellCombobox]` | directive | behavior | Delegates via `hostDirectives`; coordinates through `HellComboboxController`. |
+| `HellCombobox` | `[hellCombobox]` | directive | behavior | Outputs (valueChange, openChange, touch); delegates via `hostDirectives`; coordinates through `HellComboboxController`. |
 | `HellComboboxButton` | `button[hellComboboxButton]` | directive | behavior | Delegates via `hostDirectives`. |
 | `HellComboboxDropdown` | `[hellComboboxDropdown]` | directive | behavior | Delegates via `hostDirectives`; coordinates through `HellComboboxController`. |
 | `HellComboboxEmpty` | `[hellComboboxEmpty]` | directive | styling hook | Empty/no-results surface recipe used by docs status chrome. |
@@ -349,7 +349,7 @@ the sidenav's `data-collapsed`).
 | Directive | Selector | Kind | Role | Notes |
 | --- | --- | --- | --- | --- |
 | `HellNativeSelect` | `select[hellNativeSelect]` | directive | behavior | Delegates via `hostDirectives`. |
-| `HellSelect` | `[hellSelect]` | directive | behavior | Delegates via `hostDirectives`; coordinates through `HellSelectController`. |
+| `HellSelect` | `[hellSelect]` | directive | behavior | Outputs (valueChange, openChange, touch); delegates via `hostDirectives`; coordinates through `HellSelectController`. |
 | `HellSelectDropdown` | `[hellSelectDropdown]` | directive | behavior | Delegates via `hostDirectives`; coordinates through `HellSelectController`. |
 | `HellSelectOption` | `[hellSelectOption]` | directive | behavior | Delegates via `hostDirectives`. |
 | `HellSelectPlaceholder` | `[hellSelectPlaceholder]` | directive | styling hook | Muted, truncating placeholder recipe inside the trigger. |

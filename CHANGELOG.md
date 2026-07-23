@@ -968,6 +968,37 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellSelect` and `HellCombobox` now share one Pick Value Control
+  Value Authority: each `value` is a `ModelSignal<HellPickValue<T>>`
+  implementing Signal Forms' `FormValueControl<HellPickValue<T>>`, and
+  neither directive implements `ControlValueAccessor`, registers the
+  `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
+  `registerOnChange` / `registerOnTouched` / `setDisabledState` methods
+  anymore. First carried by the next `@hell-ui/angular` release after
+  `0.2.0` (currently Unreleased). The documented Pick Value shape is
+  unchanged — `T | null` in single mode, `readonly T[]` in multiple mode —
+  and direct `[value]` binding, new two-way `[(value)]` binding, Signal
+  Forms `[formField]`, Reactive Forms `formControl`, and template-driven
+  `ngModel` all read and write the same model.
+  `formControl`/`ngModel` keep working through Angular's built-in Signal
+  Forms interoperability, one user selection commits exactly once, and
+  external writes never echo `(valueChange)`. Select synchronizes external
+  writes into ng-primitives through its public non-emitting `setValue`
+  setter; Combobox stays within the accepted guarded state adapter with no
+  new private primitive writes; search text, the active option, and the
+  dropdown open state remain interaction state rather than additional
+  committed-value authorities. A new `(touch)` output on each root marks
+  the bound field or control touched once focus leaves the trigger/control
+  and its open dropdown entirely, and each root's own `disabled` input
+  keeps attribute coercion and is also driven by bound forms. The shared
+  internal `HellPickerControl` CVA plumbing contracted to a focus-boundary
+  scope (`HellPickerFocusScope`); `hellNormalizePickValue` and the pick
+  normalization helpers are unchanged. Evidence:
+  `packages/angular/select/select.spec.ts`,
+  `packages/angular/combobox/combobox.spec.ts`, the styled-controls packed
+  consumer's select and combobox forms scenarios,
+  `e2e/menu-select-combobox-keyboard.spec.ts`, and the updated select,
+  combobox, and internal-core API reports. Closes #287.
 - BREAKING: `HellCodeEditor` now has one Control Value Authority: `value` is a
   `ModelSignal<string>` implementing Signal Forms' `FormValueControl<string>`,
   and the component no longer implements `ControlValueAccessor`, registers

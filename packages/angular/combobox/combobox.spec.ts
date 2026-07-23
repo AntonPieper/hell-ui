@@ -1,8 +1,13 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormField,
+  disabled as disabledSchema,
+  form,
+} from '@angular/forms/signals';
 import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
 import { HellControlGroup } from '@hell-ui/angular/control-group';
 import type { HellPickValue } from '@hell-ui/angular/core';
@@ -48,6 +53,70 @@ class ComboboxFormHost {
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
   readonly openStates: boolean[] = [];
+}
+
+@Component({
+  imports: [...HELL_COMBOBOX_IMPORTS],
+  template: `
+    <div hellCombobox [(value)]="value" (valueChange)="events.push($any($event))">
+      <input hellComboboxInput aria-label="Assignee" />
+      <button hellComboboxButton type="button" aria-label="Toggle assignees"></button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxTwoWayHost {
+  readonly value = signal<HellPickValue<string>>(null);
+  readonly events: Array<HellPickValue<string>> = [];
+}
+
+@Component({
+  imports: [FormsModule, ...HELL_COMBOBOX_IMPORTS],
+  template: `
+    <div hellCombobox [(ngModel)]="value" (valueChange)="events.push($any($event))">
+      <input hellComboboxInput aria-label="Assignee" />
+      <button hellComboboxButton type="button" aria-label="Toggle assignees"></button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxNgModelHost {
+  readonly value = signal<string | null>(null);
+  readonly model = viewChild.required(NgModel);
+  readonly events: Array<string | null> = [];
+}
+
+@Component({
+  imports: [FormField, ...HELL_COMBOBOX_IMPORTS],
+  template: `
+    <div
+      hellCombobox
+      multiple
+      [formField]="teamForm.assignees"
+      (valueChange)="events.push($any($event))"
+    >
+      <input hellComboboxInput aria-label="Assignees" />
+      <button hellComboboxButton type="button" aria-label="Toggle assignees"></button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ assignees: readonly string[] }>({ assignees: [] });
+  readonly teamForm = form(this.model, (path) => {
+    disabledSchema(path.assignees, () => this.formDisabled());
+  });
+  readonly events: Array<HellPickValue<string>> = [];
 }
 
 @Component({
@@ -256,6 +325,9 @@ describe('HellCombobox', () => {
     await TestBed.configureTestingModule({
       imports: [
         ComboboxFormHost,
+        ComboboxTwoWayHost,
+        ComboboxNgModelHost,
+        ComboboxSignalFormsHost,
         ComboboxMultipleFormHost,
         ComboboxProjectedHost,
         ComboboxChipInputHost,
@@ -335,12 +407,119 @@ describe('HellCombobox', () => {
     const combobox = debug.injector.get(HellCombobox<readonly string[]>);
     const ngpCombobox = debug.injector.get(NgpCombobox);
     const arrayValue = ['north', 'south'] as const;
-    let emitted: HellPickValue<readonly string[]> | undefined;
 
-    combobox.registerOnChange((value) => (emitted = value));
     ngpCombobox.valueChange.emit(arrayValue);
 
-    expect(emitted).toBe(arrayValue);
+    expect(combobox.value()).toBe(arrayValue);
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(ComboboxTwoWayHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set('nova');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]'));
+    expect(options[1]?.getAttribute('aria-selected')).toBe('true');
+
+    options[0]?.click();
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.value()).toBe('atlas');
+    expect(host.events).toEqual(['atlas']);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(ComboboxNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const combobox = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    host.value.set('nova');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]'));
+    expect(options[1]?.getAttribute('aria-selected')).toBe('true');
+
+    options[0]?.click();
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.value()).toBe('atlas');
+    expect(host.events).toEqual(['atlas']);
+    expect(host.model().touched).toBe(false);
+
+    combobox.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField in multiple mode', async () => {
+    const fixture = TestBed.createComponent(ComboboxSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const combobox = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    // Form-driven writes flow in without echoing a selection commit.
+    host.teamForm.assignees().value.set(['nova']);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+    expect(host.teamForm.assignees().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model,
+    // preserving the multiple-mode array shape.
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[hellComboboxOption]'));
+    expect(options[1]?.getAttribute('aria-selected')).toBe('true');
+
+    options[0]?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.teamForm.assignees().value()).toEqual(['nova', 'atlas']);
+    expect(host.model().assignees).toEqual(['nova', 'atlas']);
+    expect(host.events).toEqual([['nova', 'atlas']]);
+    expect(host.teamForm.assignees().dirty()).toBe(true);
+    expect(host.teamForm.assignees().touched()).toBe(false);
+
+    combobox.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.teamForm.assignees().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(combobox.getAttribute('data-disabled')).toBe('');
+    expect(input.disabled).toBe(true);
   });
 
   it('merges each directive root Part Style Map through the portal', async () => {

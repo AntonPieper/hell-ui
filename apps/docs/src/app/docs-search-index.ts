@@ -542,6 +542,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'components/combobox/examples/basic.example components/combobox HellCombobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_IMPORTS hellSearchResource hellControlGroup domain objects compareWith disabled single-select currency projection first',
  },
  {
+ title:'Combobox: Forms',
+ path:'/components/combobox',
+ detail:'components/combobox/examples/forms.example.ts',
+ terms:
+'forms components/combobox/examples/forms.example components/combobox hellCombobox formField Signal Forms FormValueControl value model Pick Value two-way ngModel formControl touched required search text interaction state hellSearchResource',
+ },
+ {
  title:'Combobox: Chip Input composition',
  path:'/components/combobox',
  detail:'components/combobox/examples/chips.example.ts',
@@ -1492,6 +1499,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/select/examples/basic.example.ts',
  terms:
 'hellSelect HellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_IMPORTS projection placeholder disabled option valueChange single-choice dropdown button',
+ },
+ {
+ title:'Select: Forms',
+ path:'/components/select',
+ detail:'components/select/examples/forms.example.ts',
+ terms:
+'forms components/select/examples/forms.example components/select hellSelect formField Signal Forms FormValueControl value model Pick Value two-way ngModel formControl touched required placeholder',
  },
  {
  title:'Select: Multiple',

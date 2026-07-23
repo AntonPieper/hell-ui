@@ -63,18 +63,18 @@ class RovingFocusGroupStateProbe {
 class RovingFocusGroupStateProbeHost {}
 
 @Directive({
-  selector: '[hellComboboxCvaStateProbe]',
+  selector: '[hellComboboxStateSyncProbe]',
 })
-class ComboboxCvaStateProbe {
+class ComboboxStateSyncProbe {
   readonly state = injectComboboxState<NgpCombobox>();
 }
 
 @Component({
-  imports: [ReactiveFormsModule, ComboboxCvaStateProbe, ...HELL_COMBOBOX_IMPORTS],
+  imports: [ReactiveFormsModule, ComboboxStateSyncProbe, ...HELL_COMBOBOX_IMPORTS],
   template: `
     <div
       hellCombobox
-      hellComboboxCvaStateProbe
+      hellComboboxStateSyncProbe
       [formControl]="control"
       (valueChange)="values.push($any($event))"
     >
@@ -87,7 +87,7 @@ class ComboboxCvaStateProbe {
     </div>
   `,
 })
-class ComboboxCvaContractHost {
+class ComboboxModelContractHost {
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
 }
@@ -192,7 +192,7 @@ describe('ngp form-state compatibility helpers', () => {
       }).compileComponents();
     });
 
-    it('writes combobox CVA updates through public typed State<T> channels', () => {
+    it('writes combobox form updates through public typed State<T> channels', () => {
       const state = probe(ComboboxStateProbeHost, ComboboxStateProbe).state();
       const value = writableValueChannel<unknown>(state);
       const disabled = writableDisabledChannel(state);
@@ -204,7 +204,7 @@ describe('ngp form-state compatibility helpers', () => {
       expect(disabled()).toBe(true);
     });
 
-    it('writes radio-group CVA updates through public typed State<T> channels', () => {
+    it('writes radio-group form updates through public typed State<T> channels', () => {
       const state = probe(RadioGroupStateProbeHost, RadioGroupStateProbe).state();
       const value = writableValueChannel<string | null>(state);
       const disabled = writableDisabledChannel(state);
@@ -229,16 +229,16 @@ describe('ngp form-state compatibility helpers', () => {
   describe('Hell form contracts through the adapter seam', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [ComboboxCvaContractHost, RadioGroupModelContractHost],
+        imports: [ComboboxModelContractHost, RadioGroupModelContractHost],
       }).compileComponents();
     });
 
-    it('syncs combobox CVA value and disabled writes into ng-primitives state', async () => {
-      const fixture = TestBed.createComponent(ComboboxCvaContractHost);
+    it('syncs combobox form value and disabled writes into ng-primitives state', async () => {
+      const fixture = TestBed.createComponent(ComboboxModelContractHost);
       await settle(fixture);
 
       const host = fixture.componentInstance;
-      const state = getDirective(fixture, ComboboxCvaStateProbe).state;
+      const state = getDirective(fixture, ComboboxStateSyncProbe).state;
       const root = fixture.nativeElement as HTMLElement;
       const combobox = root.querySelector<HTMLElement>('[hellCombobox]');
 
