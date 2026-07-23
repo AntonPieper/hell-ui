@@ -10,6 +10,10 @@ import { CheckboxBasicExample } from './examples/basic.example';
 import checkboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { CheckboxFormsExample } from './examples/forms.example';
+import checkboxFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { CheckboxGroupExample } from './examples/group.example';
 import checkboxGroupExampleCodeRaw from './examples/group.example.ts?raw' with {
   loader: 'text',
@@ -35,6 +39,7 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
     RouterLink,
     CheckboxBasicExample,
     CheckboxStatesExample,
+    CheckboxFormsExample,
     CheckboxGroupExample,
     CheckboxNativeExample,
     CheckboxSettingsListExample,
@@ -54,10 +59,13 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
       </hd-page-header>
       <p>
         <code>button[hellCheckbox]</code> is a styled checkbox built on <code>ngpCheckbox</code>
-        from <code>ng-primitives</code>. It forwards <code>checked</code>,
-        <code>indeterminate</code>, <code>disabled</code>, and <code>required</code>, and
-        implements Angular's <code>ControlValueAccessor</code> and <code>Validator</code>, so it
-        drops straight into template-driven or reactive forms.
+        from <code>ng-primitives</code>. Its <code>checked</code> state is one Angular model —
+        bind it directly (<code>[checked]</code> plus <code>(checkedChange)</code>), two-way
+        (<code>[(checked)]</code>), or through forms: it implements Signal Forms'
+        <code>FormCheckboxControl</code> contract for <code>[formField]</code>, and the same
+        model drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability. <code>indeterminate</code>, <code>disabled</code>, and
+        <code>required</code> remain ordinary inputs.
       </p>
       <p>
         Because it renders as <code>role="checkbox"</code> on a native
@@ -85,6 +93,31 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
         <app-checkbox-states-example />
       </hd-example-tabs>
 
+      <h2>Forms</h2>
+      <p>
+        The <code>checked</code> model is the checkbox's single committed-value authority, so all
+        binding styles observe the same boolean. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>checked</code>, each user toggle
+        updates the field exactly once, focus leaving the checkbox marks it touched, and the
+        field's <code>disabled()</code> and <code>required()</code> rules flow into the matching
+        inputs. <code>formControl</code> and <code>[(ngModel)]</code> keep working against the
+        same model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        Because <code>checked</code> is a model input, it no longer coerces static attribute
+        strings: write <code>[checked]="true"</code> (a boolean binding), not a bare
+        <code>checked</code> attribute. Configuration inputs (<code>indeterminate</code>,
+        <code>disabled</code>, <code>required</code>) keep their attribute coercion. Required
+        policy is form-owned: use a <code>required()</code> schema rule with Signal Forms or
+        <code>Validators.requiredTrue</code> with reactive forms — the <code>required</code>
+        input only reflects <code>required</code>/<code>aria-required</code>/
+        <code>data-required</code> for assistive technology.
+      </p>
+      <hd-example-tabs [code]="checkboxFormsExampleCode">
+        <app-checkbox-forms-example />
+      </hd-example-tabs>
+
       <h2>Parent/child group</h2>
       <p>
         A common use of <code>indeterminate</code>: a "select all" checkbox reflects
@@ -99,7 +132,7 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
       <p>
         <code>input[hellNativeCheckbox]</code> is a directive on a real
         <code>&lt;input type="checkbox"&gt;</code>. It leans on browser and Angular Forms semantics
-        directly instead of the custom CVA wiring the button path needs, so use it when native form
+        directly instead of the Hell-owned model the button path uses, so use it when native form
         submission, autofill, or browser-level checkbox behavior matters more than owning the
         markup.
       </p>
@@ -158,24 +191,38 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
       <h2>API</h2>
       <p><code>button[hellCheckbox]</code> (<code>HellCheckbox</code>):</p>
       <ul>
-        <li><code>checked</code>: <code>boolean</code>. Default <code>false</code>.</li>
-        <li><code>indeterminate</code>: <code>boolean</code>. Default <code>false</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
         <li>
-          <code>required</code>: <code>boolean</code>. Default <code>false</code>. Also reflected
-          as the native <code>required</code> attribute and <code>aria-required</code>/
-          <code>data-required</code>, and enforced through the component's
-          <code>Validator</code> implementation.
+          <code>checked</code>: <code>ModelSignal&lt;boolean&gt;</code>. Default
+          <code>false</code>. Supports <code>[checked]</code>, <code>[(checked)]</code>, and
+          <code>(checkedChange)</code>; requires a boolean binding (no static-attribute string
+          coercion).
         </li>
-        <li><code>checkedChange</code>: <code>OutputEmitterRef&lt;boolean&gt;</code>.</li>
+        <li><code>indeterminate</code>: <code>boolean</code>. Default <code>false</code>.</li>
+        <li>
+          <code>disabled</code>: <code>boolean</code>. Default <code>false</code>. Also driven by
+          bound forms.
+        </li>
+        <li>
+          <code>required</code>: <code>boolean</code>. Default <code>false</code>. Reflected as
+          the native <code>required</code> attribute and <code>aria-required</code>/
+          <code>data-required</code>; also driven by a bound Signal Forms field's
+          <code>required()</code> metadata. Required policy itself belongs to the form.
+        </li>
         <li><code>indeterminateChange</code>: <code>OutputEmitterRef&lt;boolean&gt;</code>.</li>
+        <li>
+          <code>(touch)</code>: emits when focus leaves the checkbox; Angular forms use it to
+          mark the control touched.
+        </li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;HellCheckboxPart&gt;</code> — shorthand string
           refines <code>root</code>; a <code>HellCheckboxUi</code> map
           (<code>&#123; root?: string; indicator?: string &#125;</code>) targets parts
           individually.
         </li>
-        <li>Implements Angular's <code>ControlValueAccessor</code> and <code>Validator</code> for forms integration.</li>
+        <li>
+          Implements Signal Forms' <code>FormCheckboxControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
+        </li>
       </ul>
       <p><code>input[type="checkbox"][hellNativeCheckbox]</code> (<code>HellNativeCheckbox</code>):</p>
       <ul>
@@ -193,7 +240,7 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
         </li>
         <li>
           Native <code>checked</code>/<code>disabled</code> and Angular Forms come from the
-          underlying <code>&lt;input&gt;</code> directly — no custom CVA needed.
+          underlying <code>&lt;input&gt;</code> directly — no Hell-owned model involved.
         </li>
       </ul>
       <ul>
@@ -255,6 +302,7 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
 export class CheckboxPage {
   protected readonly checkboxBasicExampleCode = checkboxBasicExampleCodeRaw;
   protected readonly checkboxStatesExampleCode = checkboxStatesExampleCodeRaw;
+  protected readonly checkboxFormsExampleCode = checkboxFormsExampleCodeRaw;
   protected readonly checkboxGroupExampleCode = checkboxGroupExampleCodeRaw;
   protected readonly checkboxNativeExampleCode = checkboxNativeExampleCodeRaw;
   protected readonly checkboxSettingsListExampleCode = checkboxSettingsListExampleCodeRaw;

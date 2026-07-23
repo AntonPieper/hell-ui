@@ -5,16 +5,14 @@ import {
   Directive,
   ElementRef,
   booleanAttribute,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type FormCheckboxControl } from '@angular/forms/signals';
 import { NgpSwitchThumb, ngpSwitch, provideSwitchState } from 'ng-primitives/switch';
-import { HellControlledValueState } from '@hell-ui/angular/internal/core';
-import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 let nextSwitchId = 0;
@@ -38,23 +36,21 @@ const HELL_NATIVE_SWITCH_RECIPE = {
  * Styled switch built on `ngpSwitch`. Use for binary on/off settings where the
  * action is applied immediately (vs. checkbox which is committed on submit).
  *
+ * The `checked` model is the switch's one Control Value Authority: bind it
+ * one-way (`[checked]` plus `(checkedChange)`), two-way (`[(checked)]`), or
+ * through Angular forms — Signal Forms `[formField]` via the
+ * `FormCheckboxControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability.
+ *
  * The host is a real `<button>` so it is natively labelable — wrap it in a
  * `<label>` (or use it inside `hellField`) and label clicks toggle the
- * switch without any combination-aware wiring on our side. It also implements
- * `ControlValueAccessor` for Angular Forms.
+ * switch without any combination-aware wiring on our side.
  */
 @Component({
   selector: 'button[hellSwitch]',
   imports: [NgpSwitchThumb],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    provideSwitchState(),
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSwitch),
-      multi: true,
-    },
-  ],
+  providers: [provideSwitchState()],
   host: {
     type: 'button',
     '[class]': "part('root')",
@@ -63,7 +59,7 @@ const HELL_NATIVE_SWITCH_RECIPE = {
   },
   template: `<span ngpSwitchThumb data-slot="thumb" [class]="part('thumb')"></span>`,
 })
-export class HellSwitch implements ControlValueAccessor {
+export class HellSwitch implements FormCheckboxControl {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellSwitchPart>>(undefined, { alias: 'ui' });
 
@@ -73,72 +69,48 @@ export class HellSwitch implements ControlValueAccessor {
     recipe: () => HELL_SWITCH_RECIPE,
   });
 
-  /** Controlled checked state. Defaults to `false`. */
-  readonly checked = input(false, { transform: booleanAttribute });
-  /** Disables toggling the switch. Defaults to `false`. */
+  /**
+   * Committed checked state — the one Control Value Authority. User toggles
+   * write it exactly once per interaction and emit `(checkedChange)`;
+   * external property, two-way, and form writes flow in without re-emitting.
+   * Expects a `boolean` binding (no static-attribute coercion). Defaults to
+   * `false`.
+   */
+  readonly checked = model(false);
+  /** Disables toggling the switch. Also driven by bound forms. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
-  /** Emits the new checked state whenever the switch is toggled. */
-  readonly checkedChange = output<boolean>();
+  /**
+   * Emits when focus leaves the switch. Angular forms listen to this output
+   * to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
-  private readonly controlledChecked = new HellControlledValueState<boolean>({
-    externalValue: this.checked,
-    externalDisabled: this.disabled,
-    initialValue: false,
-  });
-  private readonly valueAccessor = new HellControlValueAccessorBridge<boolean>();
   private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly switchId = signal(
     this.host.nativeElement.getAttribute('id') ?? `hell-switch-${nextSwitchId++}`,
   );
 
-  private readonly effectiveChecked = this.controlledChecked.value;
-  private readonly effectiveDisabled = this.controlledChecked.disabled;
-
   /** ng-primitives switch state driving checked/disabled and toggle behavior. */
   protected readonly state = ngpSwitch({
     id: this.switchId,
-    checked: this.effectiveChecked,
-    disabled: this.effectiveDisabled,
-    onCheckedChange: (checked) => {
-      this.controlledChecked.acceptUserValue(checked);
-      this.checkedChange.emit(checked);
-      this.valueAccessor.emitValue(checked);
-    },
+    checked: this.checked,
+    disabled: this.disabled,
+    onCheckedChange: (checked) => this.checked.set(checked),
   });
   private readonly installSpaceKeyHandler = this.registerSpaceKeyHandler();
 
-  /** Applies a form-driven value to the switch. */
-  writeValue(value: boolean): void {
-    this.controlledChecked.writeValue(value === true);
-  }
-
-  /** Registers the callback invoked when the switch value changes. */
-  registerOnChange(fn: (value: boolean) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  /** Registers the callback invoked when the switch is touched. */
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  /** Applies a form-driven disabled state to the switch. */
-  setDisabledState(isDisabled: boolean): void {
-    this.controlledChecked.setDisabledState(isDisabled);
-  }
-
-  /** Notifies the form control that the switch has been touched. */
+  /** Emits the `touch` output that marks the switch as touched for Angular forms. */
   protected markControlTouched(): void {
-    this.valueAccessor.markTouched();
+    this.touch.emit();
   }
 
   private onKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented || !this.isSpaceKey(event.key)) return;
 
     event.preventDefault();
-    if (this.effectiveDisabled()) return;
+    if (this.disabled()) return;
 
     this.state.toggle(event);
   }

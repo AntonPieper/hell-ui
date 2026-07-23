@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { FormField, disabled as disabledSchema, form } from '@angular/forms/signals';
 
 import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from './switch';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
@@ -29,6 +30,17 @@ import { expectUiRouting, sortClasses } from '../spec-helpers';
 class SwitchHost {
   readonly checked = signal(false);
   readonly disabled = signal(false);
+  readonly checkedEvents: boolean[] = [];
+}
+
+@Component({
+  imports: [HellSwitch],
+  template: `
+    <button hellSwitch [(checked)]="checked" (checkedChange)="checkedEvents.push($event)"></button>
+  `,
+})
+class SwitchTwoWayHost {
+  readonly checked = signal(false);
   readonly checkedEvents: boolean[] = [];
 }
 
@@ -72,6 +84,37 @@ class LabelledSwitchHost {
 })
 class SwitchFormHost {
   readonly control = new FormControl(false, { nonNullable: true });
+  readonly checkedEvents: boolean[] = [];
+}
+
+@Component({
+  imports: [FormsModule, HellSwitch],
+  template: `
+    <button hellSwitch [(ngModel)]="checked" (checkedChange)="checkedEvents.push($event)"></button>
+  `,
+})
+class SwitchNgModelHost {
+  readonly checked = signal(false);
+  readonly model = viewChild.required(NgModel);
+  readonly checkedEvents: boolean[] = [];
+}
+
+@Component({
+  imports: [FormField, HellSwitch],
+  template: `
+    <button
+      hellSwitch
+      [formField]="settingsForm.notify"
+      (checkedChange)="checkedEvents.push($event)"
+    ></button>
+  `,
+})
+class SwitchSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal({ notify: true });
+  readonly settingsForm = form(this.model, (path) => {
+    disabledSchema(path.notify, () => this.formDisabled());
+  });
   readonly checkedEvents: boolean[] = [];
 }
 
@@ -135,8 +178,11 @@ describe('HellSwitch', () => {
     await TestBed.configureTestingModule({
       imports: [
         SwitchHost,
+        SwitchTwoWayHost,
         LabelledSwitchHost,
         SwitchFormHost,
+        SwitchNgModelHost,
+        SwitchSignalFormsHost,
         NativeSwitchFormHost,
         SwitchPartStyleHost,
       ],
@@ -200,6 +246,31 @@ describe('HellSwitch', () => {
     expect(host.spaceKeydowns).toBe(1);
   });
 
+  it('synchronizes two-way binding through one checked authority without duplicate commits', () => {
+    const fixture = TestBed.createComponent(SwitchTwoWayHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+
+    // External parent write flows in without echoing a change event.
+    host.checked.set(true);
+    fixture.detectChanges();
+
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+    expect(host.checkedEvents).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    sw.click();
+    fixture.detectChanges();
+
+    expect(host.checked()).toBe(false);
+    expect(host.checkedEvents).toEqual([false]);
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+  });
+
   it('integrates with reactive forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(SwitchFormHost);
     fixture.detectChanges();
@@ -226,6 +297,84 @@ describe('HellSwitch', () => {
     fixture.detectChanges();
 
     expect(sw.disabled).toBe(true);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(SwitchNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([]);
+
+    sw.click();
+    fixture.detectChanges();
+
+    expect(host.checked()).toBe(true);
+    expect(host.checkedEvents).toEqual([true]);
+    expect(host.model().touched).toBe(false);
+
+    sw.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+
+    host.checked.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([true]);
+  });
+
+  it('participates in Signal Forms as a FormCheckboxControl through formField', () => {
+    const fixture = TestBed.createComponent(SwitchSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.settingsForm.notify().value.set(false);
+    fixture.detectChanges();
+
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([]);
+    expect(host.settingsForm.notify().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model.
+    sw.click();
+    fixture.detectChanges();
+
+    expect(host.settingsForm.notify().value()).toBe(true);
+    expect(host.model().notify).toBe(true);
+    expect(host.checkedEvents).toEqual([true]);
+    expect(host.settingsForm.notify().dirty()).toBe(true);
+    expect(host.settingsForm.notify().touched()).toBe(false);
+
+    sw.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.settingsForm.notify().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(sw.disabled).toBe(true);
+
+    sw.click();
+    fixture.detectChanges();
+
+    expect(host.settingsForm.notify().value()).toBe(true);
+    expect(host.checkedEvents).toEqual([true]);
   });
 
   it('offers a native switch path with built-in checkbox form semantics', () => {

@@ -8,7 +8,7 @@ import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '@hell-ui/
   template: `
     <div class="inline-flex items-center gap-2">
       <!-- HellCheckbox: root + indicator, both refined through one ui map. -->
-      <button hellCheckbox checked aria-label="Custom checkbox" [ui]="checkboxUi"></button>
+      <button hellCheckbox [checked]="true" aria-label="Custom checkbox" [ui]="checkboxUi"></button>
       <span>Styled checkbox (root + indicator)</span>
     </div>
     <div class="inline-flex items-center gap-2">

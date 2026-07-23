@@ -54,6 +54,14 @@
         "textIncludes": "Styled controls ready"
       },
       {
+        "selector": "[data-test-id=\"checkbox-forms-status\"]",
+        "textIncludes": "Checkbox forms ready true-false-true-false-true"
+      },
+      {
+        "selector": "[data-test-id=\"switch-forms-status\"]",
+        "textIncludes": "Switch forms ready false-true-false-true-false"
+      },
+      {
         "selector": "[data-test-id=\"slider-forms-status\"]",
         "textIncludes": "Slider forms ready 10-20-30-40-50"
       },

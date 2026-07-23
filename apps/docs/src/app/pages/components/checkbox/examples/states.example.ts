@@ -11,7 +11,7 @@ import { HellCheckbox } from '@hell-ui/angular/checkbox';
       <span>Unchecked</span>
     </div>
     <div class="inline-flex items-center gap-2">
-      <button hellCheckbox checked aria-label="Checked"></button>
+      <button hellCheckbox [checked]="true" aria-label="Checked"></button>
       <span>Checked</span>
     </div>
     <div class="inline-flex items-center gap-2">
@@ -23,7 +23,7 @@ import { HellCheckbox } from '@hell-ui/angular/checkbox';
       <span>Disabled</span>
     </div>
     <div class="inline-flex items-center gap-2">
-      <button hellCheckbox checked disabled aria-label="Disabled, checked"></button>
+      <button hellCheckbox [checked]="true" disabled aria-label="Disabled, checked"></button>
       <span>Disabled, checked</span>
     </div>
   `,

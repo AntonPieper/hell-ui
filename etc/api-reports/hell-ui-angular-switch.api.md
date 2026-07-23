@@ -5,7 +5,7 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { FormCheckboxControl } from '@angular/forms/signals';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
@@ -23,19 +23,15 @@ export class HellNativeSwitch {
 }
 
 // @public
-export class HellSwitch implements ControlValueAccessor {
-    readonly checked: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
+export class HellSwitch implements FormCheckboxControl {
+    readonly checked: _angular_core.ModelSignal<boolean>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected markControlTouched(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSwitchPart>;
-    registerOnChange(fn: (value: boolean) => void): void;
-    registerOnTouched(fn: () => void): void;
-    setDisabledState(isDisabled: boolean): void;
     protected readonly state: ng_primitives_switch.NgpSwitchState;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSwitchPart>>;
-    writeValue(value: boolean): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSwitch, "button[hellSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSwitch, "button[hellSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "checked": "checkedChange"; "touch": "touch"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSwitch, never>;
 }
 

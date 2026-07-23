@@ -52,6 +52,32 @@ test.describe('checkbox browser accessibility contract', () => {
     await expect(disabledChecked).toHaveAttribute('aria-checked', 'true');
   });
 
+  test('signal forms checkbox shares one checked state with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await gotoCheckbox(page);
+
+    const example = page.locator('app-checkbox-forms-example');
+    await expect(example).toBeVisible();
+
+    const checkbox = example.getByRole('checkbox', { name: 'Accept the terms of service' });
+    // The field's required() metadata drives the reserved required input.
+    await expect(checkbox).toHaveAttribute('aria-required', 'true');
+    await expect(checkbox).toHaveAttribute('aria-checked', 'false');
+    await expect(example).toContainText('Invalid: true');
+    await expect(example).toContainText('Touched: false');
+
+    await checkbox.focus();
+    await page.keyboard.press('Space');
+    await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+    await expect(example).toContainText('Checked: true');
+    await expect(example).toContainText('Invalid: false');
+    await expect(example).toContainText('Touched: false');
+
+    await page.keyboard.press('Tab');
+    await expect(example).toContainText('Touched: true');
+  });
+
   test('native checkbox keeps browser required validity and indeterminate state', async ({
     page,
   }) => {
