@@ -9,6 +9,10 @@ import { CodeEditorConfigEditorExample } from './examples/config-editor.example'
 import codeEditorConfigEditorExampleCodeRaw from './examples/config-editor.example.ts?raw' with {
   loader: 'text',
 };
+import { CodeEditorFormsExample } from './examples/forms.example';
+import codeEditorFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { CodeEditorLanguageExample } from './examples/language.example';
 import codeEditorLanguageExampleCodeRaw from './examples/language.example.ts?raw' with {
   loader: 'text',
@@ -36,6 +40,7 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
     CodeBlock,
     PageHeader,
     CodeEditorBasicExample,
+    CodeEditorFormsExample,
     CodeEditorReadOnlyExample,
     CodeEditorLanguageExample,
     CodeEditorConfigEditorExample,
@@ -56,12 +61,17 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       </hd-page-header>
       <p>
         <code>hell-code-editor</code> wraps a single CodeMirror 6 <code>EditorView</code> behind a
-        signal-based Angular component. It owns the Code Editor Runtime — bootstrapping the view,
-        syncing external <code>value</code> writes, reconfiguring extensions and read-only state by
-        transaction, and destroying the view on teardown — so cursor, selection, and undo history
-        survive input changes without you touching the imperative API. The hell theme, line
-        numbers, fold gutter, history, and default keymap ship inside; syntax colors map to hell
-        design tokens so light/dark mode stays aligned with the rest of the library.
+        signal-based Angular component. Its document text is one Angular model — bind it directly
+        (<code>[value]</code> plus <code>(valueChange)</code>), two-way (<code>[(value)]</code>),
+        or through forms: it implements Signal Forms' <code>FormValueControl</code> contract for
+        <code>[formField]</code>, and the same model drives <code>formControl</code> and
+        <code>ngModel</code> through Angular's built-in interoperability. The component owns the
+        Code Editor Runtime — bootstrapping the view, syncing external writes, reconfiguring
+        extensions and read-only state by transaction, and destroying the view on teardown — so
+        cursor, selection, and undo history survive input changes without you touching the
+        imperative API. The hell theme, line numbers, fold gutter, history, and default keymap
+        ship inside; syntax colors map to hell design tokens so light/dark mode stays aligned with
+        the rest of the library.
       </p>
       <p>
         Language modes are deliberately excluded. You pass a CodeMirror language extension (for
@@ -97,6 +107,26 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       </p>
       <hd-example-tabs [code]="basicExampleCode" flush>
         <app-code-editor-basic-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the editor's single committed-document authority, so all
+        binding styles observe the same text. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>value</code>, each editor-originated
+        document change updates the field exactly once, focus leaving the editor marks it touched,
+        and the field's <code>disabled()</code> rule maps onto the same read-only editor policy as
+        the <code>readOnly</code> input. <code>formControl</code> and <code>[(ngModel)]</code>
+        keep working against the same model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        External writes (including form resets) replace the document by transaction: the Code
+        Editor Runtime keeps owning editor lifecycle, selection, history, and extensions, so an
+        external write never recreates the view or re-emits <code>(valueChange)</code>.
+      </p>
+      <hd-example-tabs [code]="formsExampleCode" flush>
+        <app-code-editor-forms-example />
       </hd-example-tabs>
 
       <h2>Read-only viewer</h2>
@@ -181,7 +211,12 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
 
       <h2>API</h2>
       <ul>
-        <li><code>value</code>: <code>string</code>. External document text. Default <code>''</code>. Writing it reconfigures the editor without echoing <code>valueChange</code>.</li>
+        <li>
+          <code>value</code>: <code>ModelSignal&lt;string&gt;</code>. Default <code>''</code>. The
+          committed document text; supports <code>[value]</code>, <code>[(value)]</code>, and
+          <code>(valueChange)</code>. External writes reconfigure the editor by transaction
+          without echoing <code>valueChange</code>.
+        </li>
         <li>
           <code>extensions</code>: <code>Extension</code> (CodeMirror). Caller-owned extensions,
           including language support such as <code>javascript()</code>. Default <code>[]</code>.
@@ -189,6 +224,11 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>
           <code>readOnly</code>: <code>boolean</code> (coerced). Disables editing, applies viewer
           styling, and exposes <code>aria-readonly="true"</code>. Default <code>false</code>.
+        </li>
+        <li>
+          <code>disabled</code>: <code>boolean</code> (coerced). Default <code>false</code>. Also
+          driven by bound forms; maps onto the same read-only editor policy as
+          <code>readOnly</code>.
         </li>
         <li><code>ariaLabel</code>: <code>string | null</code>. Accessible name for the focusable content element. Default <code>null</code>.</li>
         <li><code>ariaLabelledby</code>: <code>string | null</code>. ID reference for a visible label; takes precedence over <code>ariaLabel</code>. Default <code>null</code>.</li>
@@ -203,9 +243,12 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           not external <code>value</code> writes.
         </li>
         <li>
-          Also a <code>ControlValueAccessor</code>: works with <code>ngModel</code> /
-          <code>formControlName</code>; <code>setDisabledState</code> maps a disabled control onto
-          the same read-only policy as the <code>readOnly</code> input.
+          <code>(touch)</code>: emits when focus leaves the editor content; Angular forms use it
+          to mark the bound field or control touched.
+        </li>
+        <li>
+          Implements Signal Forms' <code>FormValueControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
         </li>
       </ul>
       <ul>
@@ -271,6 +314,7 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
 })
 export class CodeEditorPage {
   protected readonly basicExampleCode = codeEditorBasicExampleCodeRaw;
+  protected readonly formsExampleCode = codeEditorFormsExampleCodeRaw;
   protected readonly readOnlyExampleCode = codeEditorReadOnlyExampleCodeRaw;
   protected readonly languageExampleCode = codeEditorLanguageExampleCodeRaw;
   protected readonly configEditorExampleCode = codeEditorConfigEditorExampleCodeRaw;

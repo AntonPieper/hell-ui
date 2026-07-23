@@ -16,8 +16,12 @@
   "smoke": {
     "steps": [
       {
-        "selector": "hell-code-editor",
+        "selector": "hell-code-editor[readonly]",
         "textIncludes": "console.log"
+      },
+      {
+        "selector": "[data-test-id=\"code-editor-forms-status\"]",
+        "textIncludes": "Code editor forms ready property-two-way-signal-forms-reactive-template-driven"
       }
     ]
   }

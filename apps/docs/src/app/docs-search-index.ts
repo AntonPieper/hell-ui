@@ -493,6 +493,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'code-editor hell-code-editor value extensions valueChange ariaLabel javascript CodeMirror editable signal min-h-40 feature-flags',
  },
  {
+ title:'Code Editor: Forms',
+ path:'/components/code-editor',
+ detail:'components/code-editor/examples/forms.example.ts',
+ terms:
+'forms components/code-editor/examples/forms.example components/code-editor hell-code-editor formField Signal Forms FormValueControl value model two-way ngModel formControl touched disabled read-only document',
+ },
+ {
  title:'Code Editor: With card, select, and buttons',
  path:'/components/code-editor',
  detail:'components/code-editor/examples/config-editor.example.ts',

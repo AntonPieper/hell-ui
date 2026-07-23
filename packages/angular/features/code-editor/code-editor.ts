@@ -6,15 +6,15 @@ import {
   InjectionToken,
   afterNextRender,
   booleanAttribute,
+  computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type FormValueControl } from '@angular/forms/signals';
 import { type Extension } from '@codemirror/state';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
@@ -60,29 +60,35 @@ export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEdito
  * caller-provided extensions / read-only state / external value by transaction,
  * so cursor, selection, and history are preserved across input changes.
  *
+ * The `value` model is the editor's one Control Value Authority: bind it
+ * one-way (`[value]` plus `(valueChange)`), two-way (`[(value)]`), or through
+ * Angular forms — Signal Forms `[formField]` via the `FormValueControl`
+ * contract, and `formControl`/`ngModel` via Angular's built-in Signal Forms
+ * interoperability. The Code Editor Runtime keeps owning editor lifecycle,
+ * selection, history, extensions, and read-only policy, and derives document
+ * synchronization from that one authority.
+ *
  * @experimental Feature entry point with browser-only CodeMirror runtime seams;
  * app integrations should keep it lazy/client-only until the runtime contract is hardened.
  */
 @Component({
   selector: 'hell-code-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellCodeEditor),
-      multi: true,
-    },
-  ],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-readonly]': 'isReadOnly() ? "true" : null',
   },
   template: `
-    <div #host data-slot="editor" [class]="part('editor')" (focusout)="markTouched()"></div>
+    <div
+      #host
+      data-slot="editor"
+      [class]="part('editor')"
+      (focusout)="markControlTouched()"
+    ></div>
   `,
 })
-export class HellCodeEditor implements ControlValueAccessor {
+export class HellCodeEditor implements FormValueControl<string> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellCodeEditorPart>>(undefined, { alias: 'ui' });
 
@@ -92,19 +98,34 @@ export class HellCodeEditor implements ControlValueAccessor {
     recipe: () => HELL_CODE_EDITOR_RECIPE,
   });
 
-  /** External document text. Updating it reconfigures the editor without echoing `valueChange`. */
-  readonly value = input<string>('');
+  /**
+   * Committed document text — the one Control Value Authority. Editor-originated
+   * edits write it exactly once per document change and emit `(valueChange)`;
+   * external property, two-way, and form writes reconfigure the editor by
+   * transaction without re-emitting, so cursor, selection, and history survive.
+   * Expects a `string` binding (no static-attribute coercion). Defaults to `''`.
+   */
+  readonly value = model('');
   /** Caller-owned CodeMirror extensions, including language support. */
   readonly extensions = input<Extension>([]);
+  /** Read-only viewer policy owned by the consumer. Defaults to `false`. */
   readonly readOnly = input(false, { transform: booleanAttribute });
+  /**
+   * Whether the editor is disabled. Also driven by bound forms; maps onto the
+   * same read-only editor policy as `readOnly`. Defaults to `false`.
+   */
+  readonly disabled = input(false, { transform: booleanAttribute });
   /** Accessible name applied to CodeMirror's focusable content element. */
   readonly ariaLabel = input<string | null>(null);
   /** Visible label relationship applied to CodeMirror's focusable content element. */
   readonly ariaLabelledby = input<string | null>(null);
   /** Supporting description relationship applied to CodeMirror's focusable content element. */
   readonly ariaDescribedby = input<string | null>(null);
-  /** Emits only user/editor document edits, not external `value` writes. */
-  readonly valueChange = output<string>();
+  /**
+   * Emits when focus leaves the editor content. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
   private readonly hostRef = viewChild.required<ElementRef<HTMLDivElement>>('host');
 
@@ -112,12 +133,11 @@ export class HellCodeEditor implements ControlValueAccessor {
     inject(HELL_CODE_EDITOR_RUNTIME_FACTORY, { optional: true }) ??
     ((options: HellCodeEditorRuntimeOptions) => new HellCodeEditorRuntime(options));
 
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal('');
-  private readonly controlDisabled = signal(false);
-  private onControlChange: (value: string) => void = () => {};
-  private onControlTouched: () => void = () => {};
-  protected readonly isReadOnly = () => this.readOnly() || this.controlDisabled();
+  protected readonly isReadOnly = () => this.readOnly() || this.disabled();
+
+  // Classic forms interop can write null through reset()/initial ngModel
+  // state; the editor document itself is always a string.
+  private readonly documentValue = computed(() => this.value() ?? '');
 
   private runtime: HellCodeEditorRuntimePort | null = null;
 
@@ -127,16 +147,19 @@ export class HellCodeEditor implements ControlValueAccessor {
     afterNextRender(() => {
       this.runtime = this.createRuntime({
         host: this.hostRef().nativeElement,
-        value: this.effectiveValue(),
+        value: this.documentValue(),
         extensions: this.extensions(),
         readOnly: this.isReadOnly(),
         accessibility: this.accessibilityOptions(),
-        onValueChange: (value) => this.emitValue(value),
+        onValueChange: (value) => this.value.set(value),
       });
     });
 
+    // The runtime port's setValue compares against the live document, so the
+    // echo of an editor-originated commit resolves to a no-op transaction and
+    // selection/history are never destroyed by the model round-trip.
     effect(() => {
-      const value = this.effectiveValue();
+      const value = this.documentValue();
       this.runtime?.setValue(value);
     });
     effect(() => {
@@ -153,29 +176,9 @@ export class HellCodeEditor implements ControlValueAccessor {
     });
   }
 
-  writeValue(value: string | null): void {
-    this.controlMode.set(true);
-    this.controlValue.set(value ?? '');
-  }
-
-  registerOnChange(fn: (value: string) => void): void {
-    this.onControlChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onControlTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
-  }
-
-  protected markTouched(): void {
-    this.onControlTouched();
-  }
-
-  private effectiveValue(): string {
-    return this.controlMode() ? this.controlValue() : this.value();
+  /** Emits the `touch` output that marks the editor as touched for Angular forms. */
+  protected markControlTouched(): void {
+    this.touch.emit();
   }
 
   private accessibilityOptions(): HellCodeEditorRuntimeAccessibilityOptions {
@@ -186,11 +189,5 @@ export class HellCodeEditor implements ControlValueAccessor {
       ariaDescribedby: this.ariaDescribedby(),
       readOnly,
     };
-  }
-
-  private emitValue(value: string): void {
-    if (this.controlMode()) this.controlValue.set(value);
-    this.valueChange.emit(value);
-    this.onControlChange(value);
   }
 }
