@@ -124,6 +124,46 @@ _Avoid_: Palette combobox, theme combobox.
 **Docs Example**
 A live Angular example plus its raw source code, preview options, and search metadata.
 
+**Consumer Change**
+A package change that affects adopters' code, behavior, styling, dependencies, or migration work and therefore belongs in published release notes. Internal implementation detail and validation evidence are not Consumer Changes.
+_Avoid_: Every merged change, engineering evidence.
+
+**Breaking Consumer Change**
+A Consumer Change that requires an adopter to modify code, styles, package configuration, or release assumptions. Before stable, it remains breaking even when the versioning policy carries it in a minor release.
+_Avoid_: Major change, internal refactor.
+
+**Change Fragment**
+A reviewable release-note record for exactly one coherent Consumer Change, assembled into a published version's changelog. One pull request may produce zero, one, or several Change Fragments.
+_Avoid_: Pull-request summary, commit entry, validation record.
+
+**Release Changelog**
+The checked-in canonical consumer-facing history of published Hell UI versions, assembled from Released Version Notes. Pending Consumer Changes remain fragments and do not appear under an unreleased section.
+_Avoid_: Unreleased ledger, engineering history, validation log.
+
+**Released Version Notes**
+The immutable per-version consumer record assembled from Change Fragments during Release Preparation. It is the authoritative source for that version's entry in the Release Changelog and for every Release Projection.
+_Avoid_: GitHub Release body, generated changelog section, editable release prose.
+
+**Release Projection**
+A publication of Released Version Notes onto another consumer surface without creating a separately authored source. A Release Projection must reproduce its source rather than add independent prose.
+_Avoid_: Changelog copy, separately authored release notes.
+
+**Required Registry**
+A configured package destination whose successful publication is a prerequisite for publishing Release Projections. A disabled optional registry is not a Required Registry; a required publication that is skipped, cancelled, or failed blocks the release.
+_Avoid_: Enabled registry, optional registry, best-effort mirror.
+
+**No Consumer Change**
+An explicit pull-request assertion that the proposed work contains no Consumer Change. It is mutually exclusive with adding Change Fragments or performing Release Preparation and makes their intentional absence reviewable.
+_Avoid_: Changelog skip, missing fragment, internal-change fragment.
+
+**Release Preparation**
+The explicit pull-request state that assembles already reviewed Change Fragments into one published-version candidate. It introduces no new Consumer Change and is valid only when the version, consumed fragments, and generated Release Changelog agree.
+_Avoid_: Consumer Change, direct changelog edit, release publication.
+
+**Release Stage Promotion**
+An explicit decision to strengthen Hell UI's package-level compatibility promise, such as moving from internal beta to public beta or stable. A versioning tool must not infer a Release Stage Promotion from individual Consumer Changes.
+_Avoid_: Automatic major bump, ordinary version bump.
+
 **Package Entry Point**
 A public TypeScript import path exposed by the `hell-ui` package, including the Light Root Entry Point and secondary entry points such as `hell-ui/button`, `hell-ui/app-shell`, `hell-ui/table`, and `hell-ui/features/code-editor`.
 
