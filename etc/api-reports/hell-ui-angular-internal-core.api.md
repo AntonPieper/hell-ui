@@ -46,40 +46,6 @@ export function hellConstrainResizeValue(value: number, sum: number, minA: numbe
 // @public (undocumented)
 export function hellContainsFloatingTarget(options: HellFloatingContainmentOptions, target: EventTarget | Node | null): boolean;
 
-// @public
-export class HellControlledValueState<T> {
-    constructor(options: HellControlledValueStateOptions<T>);
-    // (undocumented)
-    acceptUserValue(value: T): void;
-    // (undocumented)
-    readonly disabled: Signal<boolean>;
-    // (undocumented)
-    setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
-    readonly value: Signal<T>;
-    // (undocumented)
-    writeValue(value: T): void;
-}
-
-// @public
-export type HellControlledValueStateOptions<T> = {
-    externalValue: Signal<T>;
-    externalDisabled: Signal<boolean>;
-    initialValue: T;
-};
-
-// @public
-export class HellControlValueAccessorBridge<T> {
-    // (undocumented)
-    emitValue(value: T): void;
-    // (undocumented)
-    markTouched(): void;
-    // (undocumented)
-    registerOnChange(fn: (value: T) => void): void;
-    // (undocumented)
-    registerOnTouched(fn: () => void): void;
-}
-
 // @public (undocumented)
 export function hellCreateResizePairAdapters<TItem>(pair: HellResizePair<TItem>, adapter: HellResizeItemAdapter<TItem>): HellResizePairAdapters;
 
@@ -664,160 +630,151 @@ export function isNodeLike(target: EventTarget | Node | null | undefined): targe
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-internal-core.d.ts:12:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-internal-core.d.ts:13:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-internal-core.d.ts:14:5 - (ae-undocumented) Missing documentation for "emitValue".
-// types/hell-ui-angular-internal-core.d.ts:15:5 - (ae-undocumented) Missing documentation for "markTouched".
-// types/hell-ui-angular-internal-core.d.ts:41:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:42:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-internal-core.d.ts:44:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-internal-core.d.ts:45:5 - (ae-undocumented) Missing documentation for "acceptUserValue".
-// types/hell-ui-angular-internal-core.d.ts:46:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-internal-core.d.ts:55:1 - (ae-undocumented) Missing documentation for "isElementLike".
-// types/hell-ui-angular-internal-core.d.ts:56:1 - (ae-undocumented) Missing documentation for "containsNode".
-// types/hell-ui-angular-internal-core.d.ts:57:1 - (ae-undocumented) Missing documentation for "isDocumentPositionFollowing".
-// types/hell-ui-angular-internal-core.d.ts:64:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
-// types/hell-ui-angular-internal-core.d.ts:65:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
-// types/hell-ui-angular-internal-core.d.ts:66:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
-// types/hell-ui-angular-internal-core.d.ts:68:1 - (ae-undocumented) Missing documentation for "HellFloatingContainmentOptions".
-// types/hell-ui-angular-internal-core.d.ts:92:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
-// types/hell-ui-angular-internal-core.d.ts:93:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
-// types/hell-ui-angular-internal-core.d.ts:100:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
-// types/hell-ui-angular-internal-core.d.ts:102:1 - (ae-undocumented) Missing documentation for "hellContainsFloatingTarget".
-// types/hell-ui-angular-internal-core.d.ts:103:1 - (ae-undocumented) Missing documentation for "hellFloatingTargetNode".
-// types/hell-ui-angular-internal-core.d.ts:127:1 - (ae-undocumented) Missing documentation for "HellFloatingInsetVars".
-// types/hell-ui-angular-internal-core.d.ts:128:5 - (ae-undocumented) Missing documentation for "top".
-// types/hell-ui-angular-internal-core.d.ts:129:5 - (ae-undocumented) Missing documentation for "right".
-// types/hell-ui-angular-internal-core.d.ts:130:5 - (ae-undocumented) Missing documentation for "bottom".
-// types/hell-ui-angular-internal-core.d.ts:131:5 - (ae-undocumented) Missing documentation for "left".
-// types/hell-ui-angular-internal-core.d.ts:135:5 - (ae-undocumented) Missing documentation for "document".
-// types/hell-ui-angular-internal-core.d.ts:136:5 - (ae-undocumented) Missing documentation for "rootSelector".
-// types/hell-ui-angular-internal-core.d.ts:137:5 - (ae-undocumented) Missing documentation for "variables".
-// types/hell-ui-angular-internal-core.d.ts:138:5 - (ae-undocumented) Missing documentation for "styleTarget".
-// types/hell-ui-angular-internal-core.d.ts:139:5 - (ae-undocumented) Missing documentation for "styleTargets".
-// types/hell-ui-angular-internal-core.d.ts:152:5 - (ae-undocumented) Missing documentation for "primeFromTrigger".
-// types/hell-ui-angular-internal-core.d.ts:153:5 - (ae-undocumented) Missing documentation for "primeRoot".
-// types/hell-ui-angular-internal-core.d.ts:154:5 - (ae-undocumented) Missing documentation for "updateScope".
-// types/hell-ui-angular-internal-core.d.ts:155:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-angular-internal-core.d.ts:161:1 - (ae-undocumented) Missing documentation for "hellFindFloatingScopeRoot".
-// types/hell-ui-angular-internal-core.d.ts:163:1 - (ae-undocumented) Missing documentation for "HellDismissContext".
-// types/hell-ui-angular-internal-core.d.ts:164:5 - (ae-undocumented) Missing documentation for "event".
-// types/hell-ui-angular-internal-core.d.ts:165:5 - (ae-undocumented) Missing documentation for "target".
-// types/hell-ui-angular-internal-core.d.ts:166:5 - (ae-undocumented) Missing documentation for "path".
-// types/hell-ui-angular-internal-core.d.ts:173:1 - (ae-undocumented) Missing documentation for "HellDismissDecision".
-// types/hell-ui-angular-internal-core.d.ts:186:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissEvent".
-// types/hell-ui-angular-internal-core.d.ts:187:5 - (ae-undocumented) Missing documentation for "decision".
-// types/hell-ui-angular-internal-core.d.ts:201:1 - (ae-undocumented) Missing documentation for "HellFloatingFocusTargetChecker".
-// types/hell-ui-angular-internal-core.d.ts:202:5 - (ae-undocumented) Missing documentation for "isFocusable".
-// types/hell-ui-angular-internal-core.d.ts:204:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissOptions".
-// types/hell-ui-angular-internal-core.d.ts:221:5 - (ae-undocumented) Missing documentation for "onDismiss".
-// types/hell-ui-angular-internal-core.d.ts:223:1 - (ae-undocumented) Missing documentation for "HellFloatingInteractionOptions".
-// types/hell-ui-angular-internal-core.d.ts:226:5 - (ae-undocumented) Missing documentation for "root".
-// types/hell-ui-angular-internal-core.d.ts:227:5 - (ae-undocumented) Missing documentation for "inside".
-// types/hell-ui-angular-internal-core.d.ts:228:5 - (ae-undocumented) Missing documentation for "scope".
-// types/hell-ui-angular-internal-core.d.ts:229:5 - (ae-undocumented) Missing documentation for "ownerDocument".
-// types/hell-ui-angular-internal-core.d.ts:244:5 - (ae-undocumented) Missing documentation for "connect".
-// types/hell-ui-angular-internal-core.d.ts:245:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-angular-internal-core.d.ts:246:5 - (ae-undocumented) Missing documentation for "markPointerDownInside".
-// types/hell-ui-angular-internal-core.d.ts:247:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
-// types/hell-ui-angular-internal-core.d.ts:248:5 - (ae-undocumented) Missing documentation for "isInside".
-// types/hell-ui-angular-internal-core.d.ts:268:5 - (ae-undocumented) Missing documentation for "connect".
-// types/hell-ui-angular-internal-core.d.ts:269:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-angular-internal-core.d.ts:270:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
-// types/hell-ui-angular-internal-core.d.ts:271:5 - (ae-undocumented) Missing documentation for "isInside".
-// types/hell-ui-angular-internal-core.d.ts:283:1 - (ae-undocumented) Missing documentation for "hellIdRefs".
-// types/hell-ui-angular-internal-core.d.ts:284:1 - (ae-undocumented) Missing documentation for "hellUniqueIdRefs".
-// types/hell-ui-angular-internal-core.d.ts:295:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-angular-internal-core.d.ts:296:5 - (ae-undocumented) Missing documentation for "nativeButtonDisabled".
-// types/hell-ui-angular-internal-core.d.ts:297:5 - (ae-undocumented) Missing documentation for "anchorAriaDisabled".
-// types/hell-ui-angular-internal-core.d.ts:304:5 - (ae-undocumented) Missing documentation for "preventDisabledAnchor".
-// types/hell-ui-angular-internal-core.d.ts:305:5 - (ae-undocumented) Missing documentation for "preventActionAnchorNavigation".
-// types/hell-ui-angular-internal-core.d.ts:306:5 - (ae-undocumented) Missing documentation for "isButton".
-// types/hell-ui-angular-internal-core.d.ts:307:5 - (ae-undocumented) Missing documentation for "isAnchor".
-// types/hell-ui-angular-internal-core.d.ts:349:5 - (ae-undocumented) Missing documentation for "subscribe".
-// types/hell-ui-angular-internal-core.d.ts:387:15 - (ae-undocumented) Missing documentation for "HELL_RESIZE_KEY_DELTA".
-// types/hell-ui-angular-internal-core.d.ts:388:1 - (ae-undocumented) Missing documentation for "HellResizeOrientation".
-// types/hell-ui-angular-internal-core.d.ts:389:1 - (ae-undocumented) Missing documentation for "HellResizeDirection".
-// types/hell-ui-angular-internal-core.d.ts:390:1 - (ae-undocumented) Missing documentation for "HellResizeKeyIntent".
-// types/hell-ui-angular-internal-core.d.ts:393:5 - (ae-undocumented) Missing documentation for "startA".
-// types/hell-ui-angular-internal-core.d.ts:394:5 - (ae-undocumented) Missing documentation for "startB".
-// types/hell-ui-angular-internal-core.d.ts:395:5 - (ae-undocumented) Missing documentation for "minA".
-// types/hell-ui-angular-internal-core.d.ts:396:5 - (ae-undocumented) Missing documentation for "minB".
-// types/hell-ui-angular-internal-core.d.ts:397:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-angular-internal-core.d.ts:401:5 - (ae-undocumented) Missing documentation for "a".
-// types/hell-ui-angular-internal-core.d.ts:402:5 - (ae-undocumented) Missing documentation for "b".
-// types/hell-ui-angular-internal-core.d.ts:403:5 - (ae-undocumented) Missing documentation for "sum".
-// types/hell-ui-angular-internal-core.d.ts:404:5 - (ae-undocumented) Missing documentation for "ariaValueNow".
-// types/hell-ui-angular-internal-core.d.ts:408:5 - (ae-undocumented) Missing documentation for "measure".
-// types/hell-ui-angular-internal-core.d.ts:409:5 - (ae-undocumented) Missing documentation for "minSize".
-// types/hell-ui-angular-internal-core.d.ts:410:5 - (ae-undocumented) Missing documentation for "setSize".
-// types/hell-ui-angular-internal-core.d.ts:411:5 - (ae-undocumented) Missing documentation for "commitSize".
-// types/hell-ui-angular-internal-core.d.ts:415:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-angular-internal-core.d.ts:416:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-angular-internal-core.d.ts:417:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-internal-core.d.ts:418:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-angular-internal-core.d.ts:419:5 - (ae-undocumented) Missing documentation for "startCoordinate".
-// types/hell-ui-angular-internal-core.d.ts:420:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-angular-internal-core.d.ts:424:5 - (ae-undocumented) Missing documentation for "handle".
-// types/hell-ui-angular-internal-core.d.ts:425:5 - (ae-undocumented) Missing documentation for "ownerWindow".
-// types/hell-ui-angular-internal-core.d.ts:426:5 - (ae-undocumented) Missing documentation for "onActiveChange".
-// types/hell-ui-angular-internal-core.d.ts:427:5 - (ae-undocumented) Missing documentation for "onValueChange".
-// types/hell-ui-angular-internal-core.d.ts:428:5 - (ae-undocumented) Missing documentation for "onCommit".
-// types/hell-ui-angular-internal-core.d.ts:432:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-angular-internal-core.d.ts:433:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-angular-internal-core.d.ts:437:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-angular-internal-core.d.ts:438:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-angular-internal-core.d.ts:442:5 - (ae-undocumented) Missing documentation for "measure".
-// types/hell-ui-angular-internal-core.d.ts:443:5 - (ae-undocumented) Missing documentation for "minSize".
-// types/hell-ui-angular-internal-core.d.ts:444:5 - (ae-undocumented) Missing documentation for "setSize".
-// types/hell-ui-angular-internal-core.d.ts:445:5 - (ae-undocumented) Missing documentation for "commitSize".
-// types/hell-ui-angular-internal-core.d.ts:449:5 - (ae-undocumented) Missing documentation for "pair".
-// types/hell-ui-angular-internal-core.d.ts:450:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-internal-core.d.ts:451:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-angular-internal-core.d.ts:452:5 - (ae-undocumented) Missing documentation for "adapters".
-// types/hell-ui-angular-internal-core.d.ts:453:5 - (ae-undocumented) Missing documentation for "itemAdapter".
-// types/hell-ui-angular-internal-core.d.ts:454:5 - (ae-undocumented) Missing documentation for "startCoordinate".
-// types/hell-ui-angular-internal-core.d.ts:455:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-angular-internal-core.d.ts:463:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-internal-core.d.ts:464:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-angular-internal-core.d.ts:465:5 - (ae-undocumented) Missing documentation for "pair".
-// types/hell-ui-angular-internal-core.d.ts:466:5 - (ae-undocumented) Missing documentation for "adapters".
-// types/hell-ui-angular-internal-core.d.ts:467:5 - (ae-undocumented) Missing documentation for "itemAdapter".
-// types/hell-ui-angular-internal-core.d.ts:468:5 - (ae-undocumented) Missing documentation for "beforeStart".
-// types/hell-ui-angular-internal-core.d.ts:469:5 - (ae-undocumented) Missing documentation for "afterStart".
-// types/hell-ui-angular-internal-core.d.ts:470:5 - (ae-undocumented) Missing documentation for "stopPropagation".
-// types/hell-ui-angular-internal-core.d.ts:471:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-angular-internal-core.d.ts:491:5 - (ae-undocumented) Missing documentation for "sum".
-// types/hell-ui-angular-internal-core.d.ts:493:5 - (ae-undocumented) Missing documentation for "byDelta".
-// types/hell-ui-angular-internal-core.d.ts:494:5 - (ae-undocumented) Missing documentation for "byKey".
-// types/hell-ui-angular-internal-core.d.ts:495:5 - (ae-undocumented) Missing documentation for "toResult".
-// types/hell-ui-angular-internal-core.d.ts:504:5 - (ae-undocumented) Missing documentation for "canResize".
-// types/hell-ui-angular-internal-core.d.ts:505:5 - (ae-undocumented) Missing documentation for "currentResult".
-// types/hell-ui-angular-internal-core.d.ts:506:5 - (ae-undocumented) Missing documentation for "byPointer".
-// types/hell-ui-angular-internal-core.d.ts:510:5 - (ae-undocumented) Missing documentation for "byDelta".
-// types/hell-ui-angular-internal-core.d.ts:511:5 - (ae-undocumented) Missing documentation for "byKey".
-// types/hell-ui-angular-internal-core.d.ts:512:5 - (ae-undocumented) Missing documentation for "commit".
-// types/hell-ui-angular-internal-core.d.ts:515:1 - (ae-undocumented) Missing documentation for "hellCreateResizePairAdapters".
-// types/hell-ui-angular-internal-core.d.ts:523:5 - (ae-undocumented) Missing documentation for "startPointer".
-// types/hell-ui-angular-internal-core.d.ts:524:5 - (ae-undocumented) Missing documentation for "applyKey".
-// types/hell-ui-angular-internal-core.d.ts:525:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-angular-internal-core.d.ts:536:5 - (ae-undocumented) Missing documentation for "startPointer".
-// types/hell-ui-angular-internal-core.d.ts:537:5 - (ae-undocumented) Missing documentation for "applyKey".
-// types/hell-ui-angular-internal-core.d.ts:538:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-angular-internal-core.d.ts:555:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-angular-internal-core.d.ts:556:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:560:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-angular-internal-core.d.ts:569:5 - (ae-undocumented) Missing documentation for "committed".
-// types/hell-ui-angular-internal-core.d.ts:570:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-internal-core.d.ts:571:5 - (ae-undocumented) Missing documentation for "reason".
-// types/hell-ui-angular-internal-core.d.ts:580:5 - (ae-undocumented) Missing documentation for "external".
-// types/hell-ui-angular-internal-core.d.ts:581:5 - (ae-undocumented) Missing documentation for "parseExternal".
-// types/hell-ui-angular-internal-core.d.ts:582:5 - (ae-undocumented) Missing documentation for "parseText".
-// types/hell-ui-angular-internal-core.d.ts:583:5 - (ae-undocumented) Missing documentation for "format".
-// types/hell-ui-angular-internal-core.d.ts:584:5 - (ae-undocumented) Missing documentation for "externalChanged".
-// types/hell-ui-angular-internal-core.d.ts:616:5 - (ae-undocumented) Missing documentation for "current".
-// types/hell-ui-angular-internal-core.d.ts:618:5 - (ae-undocumented) Missing documentation for "invalidDraft".
-// types/hell-ui-angular-internal-core.d.ts:619:5 - (ae-undocumented) Missing documentation for "display".
+// types/hell-ui-angular-internal-core.d.ts:11:1 - (ae-undocumented) Missing documentation for "isElementLike".
+// types/hell-ui-angular-internal-core.d.ts:12:1 - (ae-undocumented) Missing documentation for "containsNode".
+// types/hell-ui-angular-internal-core.d.ts:13:1 - (ae-undocumented) Missing documentation for "isDocumentPositionFollowing".
+// types/hell-ui-angular-internal-core.d.ts:20:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
+// types/hell-ui-angular-internal-core.d.ts:21:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
+// types/hell-ui-angular-internal-core.d.ts:22:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
+// types/hell-ui-angular-internal-core.d.ts:24:1 - (ae-undocumented) Missing documentation for "HellFloatingContainmentOptions".
+// types/hell-ui-angular-internal-core.d.ts:48:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
+// types/hell-ui-angular-internal-core.d.ts:49:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
+// types/hell-ui-angular-internal-core.d.ts:56:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
+// types/hell-ui-angular-internal-core.d.ts:58:1 - (ae-undocumented) Missing documentation for "hellContainsFloatingTarget".
+// types/hell-ui-angular-internal-core.d.ts:59:1 - (ae-undocumented) Missing documentation for "hellFloatingTargetNode".
+// types/hell-ui-angular-internal-core.d.ts:83:1 - (ae-undocumented) Missing documentation for "HellFloatingInsetVars".
+// types/hell-ui-angular-internal-core.d.ts:84:5 - (ae-undocumented) Missing documentation for "top".
+// types/hell-ui-angular-internal-core.d.ts:85:5 - (ae-undocumented) Missing documentation for "right".
+// types/hell-ui-angular-internal-core.d.ts:86:5 - (ae-undocumented) Missing documentation for "bottom".
+// types/hell-ui-angular-internal-core.d.ts:87:5 - (ae-undocumented) Missing documentation for "left".
+// types/hell-ui-angular-internal-core.d.ts:91:5 - (ae-undocumented) Missing documentation for "document".
+// types/hell-ui-angular-internal-core.d.ts:92:5 - (ae-undocumented) Missing documentation for "rootSelector".
+// types/hell-ui-angular-internal-core.d.ts:93:5 - (ae-undocumented) Missing documentation for "variables".
+// types/hell-ui-angular-internal-core.d.ts:94:5 - (ae-undocumented) Missing documentation for "styleTarget".
+// types/hell-ui-angular-internal-core.d.ts:95:5 - (ae-undocumented) Missing documentation for "styleTargets".
+// types/hell-ui-angular-internal-core.d.ts:108:5 - (ae-undocumented) Missing documentation for "primeFromTrigger".
+// types/hell-ui-angular-internal-core.d.ts:109:5 - (ae-undocumented) Missing documentation for "primeRoot".
+// types/hell-ui-angular-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "updateScope".
+// types/hell-ui-angular-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "clear".
+// types/hell-ui-angular-internal-core.d.ts:117:1 - (ae-undocumented) Missing documentation for "hellFindFloatingScopeRoot".
+// types/hell-ui-angular-internal-core.d.ts:119:1 - (ae-undocumented) Missing documentation for "HellDismissContext".
+// types/hell-ui-angular-internal-core.d.ts:120:5 - (ae-undocumented) Missing documentation for "event".
+// types/hell-ui-angular-internal-core.d.ts:121:5 - (ae-undocumented) Missing documentation for "target".
+// types/hell-ui-angular-internal-core.d.ts:122:5 - (ae-undocumented) Missing documentation for "path".
+// types/hell-ui-angular-internal-core.d.ts:129:1 - (ae-undocumented) Missing documentation for "HellDismissDecision".
+// types/hell-ui-angular-internal-core.d.ts:142:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissEvent".
+// types/hell-ui-angular-internal-core.d.ts:143:5 - (ae-undocumented) Missing documentation for "decision".
+// types/hell-ui-angular-internal-core.d.ts:157:1 - (ae-undocumented) Missing documentation for "HellFloatingFocusTargetChecker".
+// types/hell-ui-angular-internal-core.d.ts:158:5 - (ae-undocumented) Missing documentation for "isFocusable".
+// types/hell-ui-angular-internal-core.d.ts:160:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissOptions".
+// types/hell-ui-angular-internal-core.d.ts:177:5 - (ae-undocumented) Missing documentation for "onDismiss".
+// types/hell-ui-angular-internal-core.d.ts:179:1 - (ae-undocumented) Missing documentation for "HellFloatingInteractionOptions".
+// types/hell-ui-angular-internal-core.d.ts:182:5 - (ae-undocumented) Missing documentation for "root".
+// types/hell-ui-angular-internal-core.d.ts:183:5 - (ae-undocumented) Missing documentation for "inside".
+// types/hell-ui-angular-internal-core.d.ts:184:5 - (ae-undocumented) Missing documentation for "scope".
+// types/hell-ui-angular-internal-core.d.ts:185:5 - (ae-undocumented) Missing documentation for "ownerDocument".
+// types/hell-ui-angular-internal-core.d.ts:200:5 - (ae-undocumented) Missing documentation for "connect".
+// types/hell-ui-angular-internal-core.d.ts:201:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-angular-internal-core.d.ts:202:5 - (ae-undocumented) Missing documentation for "markPointerDownInside".
+// types/hell-ui-angular-internal-core.d.ts:203:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
+// types/hell-ui-angular-internal-core.d.ts:204:5 - (ae-undocumented) Missing documentation for "isInside".
+// types/hell-ui-angular-internal-core.d.ts:224:5 - (ae-undocumented) Missing documentation for "connect".
+// types/hell-ui-angular-internal-core.d.ts:225:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-angular-internal-core.d.ts:226:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
+// types/hell-ui-angular-internal-core.d.ts:227:5 - (ae-undocumented) Missing documentation for "isInside".
+// types/hell-ui-angular-internal-core.d.ts:239:1 - (ae-undocumented) Missing documentation for "hellIdRefs".
+// types/hell-ui-angular-internal-core.d.ts:240:1 - (ae-undocumented) Missing documentation for "hellUniqueIdRefs".
+// types/hell-ui-angular-internal-core.d.ts:251:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
+// types/hell-ui-angular-internal-core.d.ts:252:5 - (ae-undocumented) Missing documentation for "nativeButtonDisabled".
+// types/hell-ui-angular-internal-core.d.ts:253:5 - (ae-undocumented) Missing documentation for "anchorAriaDisabled".
+// types/hell-ui-angular-internal-core.d.ts:260:5 - (ae-undocumented) Missing documentation for "preventDisabledAnchor".
+// types/hell-ui-angular-internal-core.d.ts:261:5 - (ae-undocumented) Missing documentation for "preventActionAnchorNavigation".
+// types/hell-ui-angular-internal-core.d.ts:262:5 - (ae-undocumented) Missing documentation for "isButton".
+// types/hell-ui-angular-internal-core.d.ts:263:5 - (ae-undocumented) Missing documentation for "isAnchor".
+// types/hell-ui-angular-internal-core.d.ts:305:5 - (ae-undocumented) Missing documentation for "subscribe".
+// types/hell-ui-angular-internal-core.d.ts:343:15 - (ae-undocumented) Missing documentation for "HELL_RESIZE_KEY_DELTA".
+// types/hell-ui-angular-internal-core.d.ts:344:1 - (ae-undocumented) Missing documentation for "HellResizeOrientation".
+// types/hell-ui-angular-internal-core.d.ts:345:1 - (ae-undocumented) Missing documentation for "HellResizeDirection".
+// types/hell-ui-angular-internal-core.d.ts:346:1 - (ae-undocumented) Missing documentation for "HellResizeKeyIntent".
+// types/hell-ui-angular-internal-core.d.ts:349:5 - (ae-undocumented) Missing documentation for "startA".
+// types/hell-ui-angular-internal-core.d.ts:350:5 - (ae-undocumented) Missing documentation for "startB".
+// types/hell-ui-angular-internal-core.d.ts:351:5 - (ae-undocumented) Missing documentation for "minA".
+// types/hell-ui-angular-internal-core.d.ts:352:5 - (ae-undocumented) Missing documentation for "minB".
+// types/hell-ui-angular-internal-core.d.ts:353:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-angular-internal-core.d.ts:357:5 - (ae-undocumented) Missing documentation for "a".
+// types/hell-ui-angular-internal-core.d.ts:358:5 - (ae-undocumented) Missing documentation for "b".
+// types/hell-ui-angular-internal-core.d.ts:359:5 - (ae-undocumented) Missing documentation for "sum".
+// types/hell-ui-angular-internal-core.d.ts:360:5 - (ae-undocumented) Missing documentation for "ariaValueNow".
+// types/hell-ui-angular-internal-core.d.ts:364:5 - (ae-undocumented) Missing documentation for "measure".
+// types/hell-ui-angular-internal-core.d.ts:365:5 - (ae-undocumented) Missing documentation for "minSize".
+// types/hell-ui-angular-internal-core.d.ts:366:5 - (ae-undocumented) Missing documentation for "setSize".
+// types/hell-ui-angular-internal-core.d.ts:367:5 - (ae-undocumented) Missing documentation for "commitSize".
+// types/hell-ui-angular-internal-core.d.ts:371:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-angular-internal-core.d.ts:372:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-angular-internal-core.d.ts:373:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-angular-internal-core.d.ts:374:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-angular-internal-core.d.ts:375:5 - (ae-undocumented) Missing documentation for "startCoordinate".
+// types/hell-ui-angular-internal-core.d.ts:376:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-angular-internal-core.d.ts:380:5 - (ae-undocumented) Missing documentation for "handle".
+// types/hell-ui-angular-internal-core.d.ts:381:5 - (ae-undocumented) Missing documentation for "ownerWindow".
+// types/hell-ui-angular-internal-core.d.ts:382:5 - (ae-undocumented) Missing documentation for "onActiveChange".
+// types/hell-ui-angular-internal-core.d.ts:383:5 - (ae-undocumented) Missing documentation for "onValueChange".
+// types/hell-ui-angular-internal-core.d.ts:384:5 - (ae-undocumented) Missing documentation for "onCommit".
+// types/hell-ui-angular-internal-core.d.ts:388:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-angular-internal-core.d.ts:389:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-angular-internal-core.d.ts:393:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-angular-internal-core.d.ts:394:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-angular-internal-core.d.ts:398:5 - (ae-undocumented) Missing documentation for "measure".
+// types/hell-ui-angular-internal-core.d.ts:399:5 - (ae-undocumented) Missing documentation for "minSize".
+// types/hell-ui-angular-internal-core.d.ts:400:5 - (ae-undocumented) Missing documentation for "setSize".
+// types/hell-ui-angular-internal-core.d.ts:401:5 - (ae-undocumented) Missing documentation for "commitSize".
+// types/hell-ui-angular-internal-core.d.ts:405:5 - (ae-undocumented) Missing documentation for "pair".
+// types/hell-ui-angular-internal-core.d.ts:406:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-angular-internal-core.d.ts:407:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-angular-internal-core.d.ts:408:5 - (ae-undocumented) Missing documentation for "adapters".
+// types/hell-ui-angular-internal-core.d.ts:409:5 - (ae-undocumented) Missing documentation for "itemAdapter".
+// types/hell-ui-angular-internal-core.d.ts:410:5 - (ae-undocumented) Missing documentation for "startCoordinate".
+// types/hell-ui-angular-internal-core.d.ts:411:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-angular-internal-core.d.ts:419:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-angular-internal-core.d.ts:420:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-angular-internal-core.d.ts:421:5 - (ae-undocumented) Missing documentation for "pair".
+// types/hell-ui-angular-internal-core.d.ts:422:5 - (ae-undocumented) Missing documentation for "adapters".
+// types/hell-ui-angular-internal-core.d.ts:423:5 - (ae-undocumented) Missing documentation for "itemAdapter".
+// types/hell-ui-angular-internal-core.d.ts:424:5 - (ae-undocumented) Missing documentation for "beforeStart".
+// types/hell-ui-angular-internal-core.d.ts:425:5 - (ae-undocumented) Missing documentation for "afterStart".
+// types/hell-ui-angular-internal-core.d.ts:426:5 - (ae-undocumented) Missing documentation for "stopPropagation".
+// types/hell-ui-angular-internal-core.d.ts:427:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-angular-internal-core.d.ts:447:5 - (ae-undocumented) Missing documentation for "sum".
+// types/hell-ui-angular-internal-core.d.ts:449:5 - (ae-undocumented) Missing documentation for "byDelta".
+// types/hell-ui-angular-internal-core.d.ts:450:5 - (ae-undocumented) Missing documentation for "byKey".
+// types/hell-ui-angular-internal-core.d.ts:451:5 - (ae-undocumented) Missing documentation for "toResult".
+// types/hell-ui-angular-internal-core.d.ts:460:5 - (ae-undocumented) Missing documentation for "canResize".
+// types/hell-ui-angular-internal-core.d.ts:461:5 - (ae-undocumented) Missing documentation for "currentResult".
+// types/hell-ui-angular-internal-core.d.ts:462:5 - (ae-undocumented) Missing documentation for "byPointer".
+// types/hell-ui-angular-internal-core.d.ts:466:5 - (ae-undocumented) Missing documentation for "byDelta".
+// types/hell-ui-angular-internal-core.d.ts:467:5 - (ae-undocumented) Missing documentation for "byKey".
+// types/hell-ui-angular-internal-core.d.ts:468:5 - (ae-undocumented) Missing documentation for "commit".
+// types/hell-ui-angular-internal-core.d.ts:471:1 - (ae-undocumented) Missing documentation for "hellCreateResizePairAdapters".
+// types/hell-ui-angular-internal-core.d.ts:479:5 - (ae-undocumented) Missing documentation for "startPointer".
+// types/hell-ui-angular-internal-core.d.ts:480:5 - (ae-undocumented) Missing documentation for "applyKey".
+// types/hell-ui-angular-internal-core.d.ts:481:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-angular-internal-core.d.ts:492:5 - (ae-undocumented) Missing documentation for "startPointer".
+// types/hell-ui-angular-internal-core.d.ts:493:5 - (ae-undocumented) Missing documentation for "applyKey".
+// types/hell-ui-angular-internal-core.d.ts:494:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-angular-internal-core.d.ts:511:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:512:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:516:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-angular-internal-core.d.ts:525:5 - (ae-undocumented) Missing documentation for "committed".
+// types/hell-ui-angular-internal-core.d.ts:526:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-angular-internal-core.d.ts:527:5 - (ae-undocumented) Missing documentation for "reason".
+// types/hell-ui-angular-internal-core.d.ts:536:5 - (ae-undocumented) Missing documentation for "external".
+// types/hell-ui-angular-internal-core.d.ts:537:5 - (ae-undocumented) Missing documentation for "parseExternal".
+// types/hell-ui-angular-internal-core.d.ts:538:5 - (ae-undocumented) Missing documentation for "parseText".
+// types/hell-ui-angular-internal-core.d.ts:539:5 - (ae-undocumented) Missing documentation for "format".
+// types/hell-ui-angular-internal-core.d.ts:540:5 - (ae-undocumented) Missing documentation for "externalChanged".
+// types/hell-ui-angular-internal-core.d.ts:572:5 - (ae-undocumented) Missing documentation for "current".
+// types/hell-ui-angular-internal-core.d.ts:574:5 - (ae-undocumented) Missing documentation for "invalidDraft".
+// types/hell-ui-angular-internal-core.d.ts:575:5 - (ae-undocumented) Missing documentation for "display".
 
 // (No @packageDocumentation comment for this package)
 

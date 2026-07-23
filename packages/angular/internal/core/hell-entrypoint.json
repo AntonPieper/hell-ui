@@ -1,8 +1,6 @@
 {
   "category": "internal",
   "exports": [
-    "./control-value-accessor",
-    "./controlled-value-state",
     "./dom",
     "./floating-dismissal",
     "./floating-scope",

@@ -122,7 +122,12 @@ audited release tarball.
 - `styled-controls` — normal styled controls: the styled primitive, mixed,
   and table-primitive entries with `core` peers plus `tailwindcss`
   (`primitive` peer group), entrypoint CSS sentinels per imported stylesheet,
-  and a runtime semantic-token-override smoke.
+  and a runtime semantic-token-override smoke. It is also the Control Value
+  Authority binding matrix (`docs/adr/0001-control-value-authority.md`): every
+  migrated styled form control — Checkbox, Switch, Radio Group, Slider, Toggle
+  Group, Select, Combobox, Date/Time/Number Input — binds its packed model
+  through direct, two-way, `[formField]`, `[formControl]`, and `[(ngModel)]`
+  paths at once.
 - `overlays-router` — overlays and router boundary: app shell, dialog,
   omnibar, toast, Confirm/HellPrompt flows, time picker, page header,
   resizable + master detail, toolbar, and Filter Builder with the
@@ -136,6 +141,7 @@ audited release tarball.
 - `table-tanstack-virtual` — the optional TanStack Virtual body strategy on
   the shell (`table-tanstack-virtual` peer group).
 - `code-editor` — the kept optional CodeMirror feature entry with the
-  `code-editor` peer group.
+  `code-editor` peer group, binding the packed editor's document `value` model
+  through the same five Control Value Authority paths.
 - `pdf-viewer` — the optional pdf.js feature entry with the `pdf-viewer` peer
   group (exact pdf.js peer plus icon peers).
