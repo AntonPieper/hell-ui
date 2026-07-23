@@ -91,7 +91,11 @@ import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
 import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
 import { HellChip } from '@hell-ui/angular/chip';
 import { HellToaster } from '@hell-ui/angular/toast';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
+import {
+  hellSearchResource,
+  type HellPickValue,
+  type HellSearchField,
+} from '@hell-ui/angular/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
   HD_DOCS_KIND_FILTER_OPTIONS,
@@ -412,8 +416,8 @@ export class App {
     this.writeThemePreference(next);
   }
 
-  protected onThemeChange(value: string | null): void {
-    if (!value) return;
+  protected onThemeChange(value: HellPickValue<string>): void {
+    if (typeof value !== 'string' || !value) return;
     if (!HD_THEMES.some((t) => t.id === value)) return;
     this.themeId.set(value);
     this.writeThemeId(value);

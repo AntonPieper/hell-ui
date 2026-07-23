@@ -3,6 +3,8 @@ import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { SelectBasicExample } from './examples/basic.example';
 import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
+import { SelectFormsExample } from './examples/forms.example';
+import selectFormsExampleCodeRaw from './examples/forms.example.ts?raw' with { loader: 'text' };
 import { SelectRichOptionsExample } from './examples/rich-options.example';
 import selectRichOptionsExampleCodeRaw from './examples/rich-options.example.ts?raw' with {
   loader: 'text',
@@ -29,6 +31,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     ExampleTabs,
     PageHeader,
     SelectBasicExample,
+    SelectFormsExample,
     SelectRichOptionsExample,
     SelectMultipleExample,
     SelectPresetExample,
@@ -52,8 +55,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <code>[hellSelect]</code> is the single rich Select Interaction State Machine. Attach it
         to a native <code>&lt;button&gt;</code>, project the current domain value or a placeholder,
         and render the same domain objects as <code>[hellSelectOption]</code> rows inside a
-        portaled dropdown. Hell owns value, forms, open state, keyboard behavior, focus,
-        dismissal, and ARIA relationships; your template owns presentation.
+        portaled dropdown. The committed selection is one Angular <code>value</code> model — bind
+        it directly (<code>[value]</code> plus <code>(valueChange)</code>), two-way
+        (<code>[(value)]</code>), or through forms: it implements Signal Forms'
+        <code>FormValueControl</code> contract for <code>[formField]</code>, and the same model
+        drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability. ng-primitives keeps open state, keyboard behavior, focus, dismissal,
+        and ARIA relationships; your template owns presentation.
       </p>
       <p>
         Use rich Select for a short-to-medium known list whose options benefit from custom markup.
@@ -71,6 +79,28 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </p>
       <hd-example-tabs [code]="selectBasicExampleCode">
         <app-select-basic-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the select's single committed Pick Value authority —
+        <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode — so all
+        binding styles observe the same selection. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>value</code>, each user selection
+        updates the field exactly once, and focus leaving the trigger and its open dropdown marks
+        it touched. The field's <code>disabled()</code> rule drives the <code>disabled</code>
+        input. <code>formControl</code> and <code>[(ngModel)]</code> keep working against the same
+        model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        External writes (including form resets) synchronize the rendered selection through
+        ng-primitives' public non-emitting setter without re-emitting
+        <code>(valueChange)</code>. Required policy is form-owned: use a <code>required()</code>
+        schema rule with Signal Forms or <code>Validators.required</code> with reactive forms.
+      </p>
+      <hd-example-tabs [code]="selectFormsExampleCode">
+        <app-select-forms-example />
       </hd-example-tabs>
 
       <h2>Rich domain options</h2>
@@ -166,14 +196,23 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         Attach it to a <code>&lt;button type="button"&gt;</code>.
       </p>
       <ul>
-        <li><code>value</code>: <code>HellPickValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
+        <li>
+          <code>value</code>: <code>ModelSignal&lt;HellPickValue&lt;T&gt;&gt;</code> —
+          <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.
+          Default <code>null</code>. Supports <code>[value]</code>, <code>[(value)]</code>, and
+          <code>(valueChange)</code>.
+        </li>
         <li><code>multiple</code>: accumulates selected values into an array and keeps the list open.</li>
-        <li><code>disabled</code>: disables interaction and form participation.</li>
+        <li><code>disabled</code>: disables interaction. Default <code>false</code>. Also driven by bound forms.</li>
         <li><code>compareWith</code>: <code>(a: T, b: T) =&gt; boolean</code> for domain identity; defaults to reference identity.</li>
         <li><code>placement</code>, <code>container</code>, and <code>flip</code>: forwarded floating-position inputs.</li>
         <li><code>options</code>: optional raw value order for virtualized lists; it does not render rows or labels.</li>
-        <li>Outputs: <code>valueChange</code> and <code>openChange</code>.</li>
+        <li>Outputs: <code>valueChange</code>, <code>openChange</code>, and <code>touch</code> (emits when focus leaves the trigger and its open dropdown; Angular forms use it to mark the control touched).</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
+        <li>
+          Implements Signal Forms' <code>FormValueControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
+        </li>
       </ul>
       <p>
         <code>[hellSelectValue]</code> and <code>[hellSelectPlaceholder]</code> style projected
@@ -237,6 +276,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 })
 export class SelectPage {
   protected readonly selectBasicExampleCode = selectBasicExampleCodeRaw;
+  protected readonly selectFormsExampleCode = selectFormsExampleCodeRaw;
   protected readonly selectRichOptionsExampleCode = selectRichOptionsExampleCodeRaw;
   protected readonly selectMultipleExampleCode = selectMultipleExampleCodeRaw;
   protected readonly selectPresetExampleCode = selectPresetExampleCodeRaw;

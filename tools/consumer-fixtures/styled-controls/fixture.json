@@ -66,6 +66,14 @@
         "textIncludes": "Radio forms ready email-sms-push-sms-none"
       },
       {
+        "selector": "[data-test-id=\"select-forms-status\"]",
+        "textIncludes": "Select forms ready low-high-medium-high-low-low+high"
+      },
+      {
+        "selector": "[data-test-id=\"combobox-forms-status\"]",
+        "textIncludes": "Combobox forms ready atlas-nova-lyra-nova-atlas-atlas+nova"
+      },
+      {
         "selector": "[data-test-id=\"slider-forms-status\"]",
         "textIncludes": "Slider forms ready 10-20-30-40-50"
       },

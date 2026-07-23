@@ -5,11 +5,14 @@ import {
   Injectable,
   booleanAttribute,
   computed,
-  forwardRef,
+  effect,
   inject,
   input,
+  model,
+  output,
+  untracked,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type FormValueControl } from '@angular/forms/signals';
 import {
   hellPartStyler,
   type HellPickValue,
@@ -18,7 +21,9 @@ import {
 } from '@hell-ui/angular/core';
 import {
   hellRegisterFloatingHost,
-  HellPickerControl,
+  hellNormalizePickValue,
+  hellSamePickValue,
+  HellPickerFocusScope,
 } from '@hell-ui/angular/internal/core';
 import {
   HELL_FLOATING_POP_IN,
@@ -62,31 +67,28 @@ const HELL_COMBOBOX_EMPTY_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 /**
- * Combobox-local coordination for forms, boundary clamping, and portaled
- * dropdown containment. Projected directives coordinate through DI so none of
- * the registration or containment machinery becomes a public extension API.
+ * Combobox-local coordination for the touched focus boundary, boundary
+ * clamping, and portaled dropdown containment. Projected directives
+ * coordinate through DI so none of the registration or containment machinery
+ * becomes a public extension API.
  */
 @Injectable()
-class HellComboboxController<T = unknown> {
+class HellComboboxController {
   private readonly combobox = inject(NgpCombobox);
-  private readonly comboboxState = injectComboboxState<NgpCombobox>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly control = new HellPickerControl<T>({
+  private readonly scope = new HellPickerFocusScope({
     host: () => this.host.nativeElement,
-    multiple: () => this.combobox.multiple(),
-    valueChanges: this.combobox.valueChange,
     openChanges: this.combobox.openChange,
-    writeValue: (value) => writeComboboxStateValue(this.comboboxState(), value),
-    setDisabled: (disabled) => writeComboboxStateDisabled(this.comboboxState(), disabled),
   });
+  private onTouch: () => void = () => {};
   private readWrapNavigation: () => boolean = () => true;
   private readonly onFocusOut = (event: FocusEvent): void => {
-    this.control.markControlTouched(event);
+    this.markControlTouched(event);
   };
 
   constructor() {
-    this.control.connect(this.destroyRef);
+    this.scope.connect(this.destroyRef);
     this.host.nativeElement.addEventListener('focusout', this.onFocusOut);
     this.host.nativeElement.addEventListener('keydown', this.clampNavigation, {
       capture: true,
@@ -103,32 +105,27 @@ class HellComboboxController<T = unknown> {
     this.readWrapNavigation = readWrapNavigation;
   }
 
-  writeValue(value: HellPickValue<T>): void {
-    this.control.writeValue(value);
-  }
-
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.control.registerOnChange(fn);
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.control.registerOnTouched(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.control.setDisabledState(isDisabled);
+  /** Registers the root's touched notification for the focus boundary. */
+  connectTouch(onTouch: () => void): void {
+    this.onTouch = onTouch;
   }
 
   registerDropdown(dropdown: HTMLElement, destroyRef: DestroyRef): void {
     const onFocusOut = (event: FocusEvent): void => {
-      this.control.markControlTouched(event);
+      this.markControlTouched(event);
     };
-    this.control.registerDropdown(dropdown);
+    this.scope.registerDropdown(dropdown);
     dropdown.addEventListener('focusout', onFocusOut);
     destroyRef.onDestroy(() => {
       dropdown.removeEventListener('focusout', onFocusOut);
-      this.control.unregisterDropdown(dropdown);
+      this.scope.unregisterDropdown(dropdown);
     });
+  }
+
+  private markControlTouched(event: FocusEvent): void {
+    if (this.scope.isOutsideControl(event.relatedTarget)) {
+      this.onTouch();
+    }
   }
 
   private readonly clampNavigation = (event: KeyboardEvent): void => {
@@ -163,6 +160,16 @@ class HellComboboxController<T = unknown> {
  * Rich, projection-first combobox. The consumer owns the editable input,
  * domain option markup, search state, status chrome, and selected-value
  * presentation while ng-primitives owns the combobox interaction semantics.
+ *
+ * The `value` model is the combobox's one Control Value Authority — a shared
+ * Pick Value: `T | null` in single mode, `readonly T[]` in multiple mode.
+ * Bind it one-way (`[value]` plus `(valueChange)`), two-way (`[(value)]`),
+ * or through Angular forms — Signal Forms `[formField]` via the
+ * `FormValueControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability. External writes synchronize into
+ * `ng-primitives` through the accepted guarded state adapter without
+ * re-emitting a selection commit; search text, the active option, and the
+ * overlay open state stay interaction state.
  */
 @Directive({
   selector: '[hellCombobox]',
@@ -171,9 +178,7 @@ class HellComboboxController<T = unknown> {
     {
       directive: NgpCombobox,
       inputs: [
-        'ngpComboboxValue:value',
         'ngpComboboxMultiple:multiple',
-        'ngpComboboxDisabled:disabled',
         'ngpComboboxAllowDeselect:allowDeselect',
         'ngpComboboxCompareWith:compareWith',
         'ngpComboboxDropdownPlacement:placement',
@@ -181,23 +186,16 @@ class HellComboboxController<T = unknown> {
         'ngpComboboxDropdownFlip:flip',
         'ngpComboboxOptions:options',
       ],
-      outputs: ['ngpComboboxValueChange:valueChange', 'ngpComboboxOpenChange:openChange'],
+      outputs: ['ngpComboboxOpenChange:openChange'],
     },
   ],
-  providers: [
-    HellComboboxController,
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellCombobox),
-      multi: true,
-    },
-  ],
+  providers: [HellComboboxController],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
   },
 })
-export class HellCombobox<T = unknown> implements ControlValueAccessor {
+export class HellCombobox<T = unknown> implements FormValueControl<HellPickValue<T>> {
   /** Tailwind class refinements for the root Public Part. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
   /** Whether Arrow Up/Down wrap between the first and last enabled option. */
@@ -209,26 +207,58 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
     recipe: () => HELL_COMBOBOX_RECIPE,
   });
 
-  private readonly controller = inject(HellComboboxController) as HellComboboxController<T>;
+  /**
+   * Committed Pick Value — the one Control Value Authority. User selections
+   * write it exactly once per commit and emit `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. Defaults
+   * to `null` (no selection in single mode, an empty selection in multiple
+   * mode).
+   */
+  readonly value = model<HellPickValue<T>>(null);
+
+  /** Whether the combobox is disabled. Also driven by bound forms. Defaults to `false`. */
+  readonly disabled = input(false, { transform: booleanAttribute });
+
+  /**
+   * Emits when focus leaves the control and its open dropdown entirely.
+   * Angular forms listen to this output to mark the bound field or control
+   * as touched.
+   */
+  readonly touch = output<void>();
+
+  private readonly combobox = inject(NgpCombobox);
+  private readonly comboboxState = injectComboboxState<NgpCombobox>();
+  private readonly controller = inject(HellComboboxController);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     this.controller.configureWrapNavigation(() => this.wrapNavigation());
-  }
+    this.controller.connectTouch(() => this.touch.emit());
 
-  writeValue(value: HellPickValue<T>): void {
-    this.controller.writeValue(value);
-  }
+    // External value writes (property, two-way, form) synchronize into the
+    // primitive through the guarded state adapter; the identity guard keeps
+    // user selections (which the engine already holds) from writing a
+    // normalized copy back.
+    effect(() => {
+      const state = this.comboboxState();
+      const value = hellNormalizePickValue<T>(this.value(), this.combobox.multiple());
+      if (hellSamePickValue<T>(state.value() as HellPickValue<T> | undefined, value)) return;
+      untracked(() => writeComboboxStateValue(state, value));
+    });
 
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.controller.registerOnChange(fn);
-  }
+    effect(() => {
+      const state = this.comboboxState();
+      const disabled = this.disabled();
+      if (state.disabled() === disabled) return;
+      untracked(() => writeComboboxStateDisabled(state, disabled));
+    });
 
-  registerOnTouched(fn: () => void): void {
-    this.controller.registerOnTouched(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.controller.setDisabledState(isDisabled);
+    const valueSub = this.combobox.valueChange.subscribe(
+      (value: HellPickValue<T> | undefined) => {
+        this.value.set(hellNormalizePickValue<T>(value, this.combobox.multiple()));
+      },
+    );
+    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 }
 

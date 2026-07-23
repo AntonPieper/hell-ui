@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ControlValueAccessor } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellPickValue } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
@@ -15,20 +15,15 @@ import * as i1 from 'ng-primitives/combobox';
 export const HELL_COMBOBOX_IMPORTS: readonly [typeof HellCombobox, typeof HellComboboxInput, typeof HellComboboxButton, typeof HellComboboxDropdown, typeof HellComboboxPortal, typeof HellComboboxOption, typeof HellComboboxEmpty];
 
 // @public
-export class HellCombobox<T = unknown> implements ControlValueAccessor {
+export class HellCombobox<T = unknown> implements FormValueControl<HellPickValue<T>> {
     constructor();
+    readonly disabled: i0.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
-    registerOnChange(fn: (value: HellPickValue<T>) => void): void;
-    // (undocumented)
-    registerOnTouched(fn: () => void): void;
-    // (undocumented)
-    setDisabledState(isDisabled: boolean): void;
+    readonly touch: i0.OutputEmitterRef<void>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    readonly value: i0.ModelSignal<HellPickValue<T>>;
     readonly wrapNavigation: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    writeValue(value: HellPickValue<T>): void;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellCombobox<any>, "[hellCombobox]", ["hellCombobox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "wrapNavigation": { "alias": "wrapNavigation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpCombobox; inputs: { "ngpComboboxValue": "value"; "ngpComboboxMultiple": "multiple"; "ngpComboboxDisabled": "disabled"; "ngpComboboxAllowDeselect": "allowDeselect"; "ngpComboboxCompareWith": "compareWith"; "ngpComboboxDropdownPlacement": "placement"; "ngpComboboxDropdownContainer": "container"; "ngpComboboxDropdownFlip": "flip"; "ngpComboboxOptions": "options"; }; outputs: { "ngpComboboxValueChange": "valueChange"; "ngpComboboxOpenChange": "openChange"; }; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellCombobox<any>, "[hellCombobox]", ["hellCombobox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "wrapNavigation": { "alias": "wrapNavigation"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.NgpCombobox; inputs: { "ngpComboboxMultiple": "multiple"; "ngpComboboxAllowDeselect": "allowDeselect"; "ngpComboboxCompareWith": "compareWith"; "ngpComboboxDropdownPlacement": "placement"; "ngpComboboxDropdownContainer": "container"; "ngpComboboxDropdownFlip": "flip"; "ngpComboboxOptions": "options"; }; outputs: { "ngpComboboxOpenChange": "openChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCombobox<any>, never>;
 }
 
@@ -83,11 +78,7 @@ export class HellComboboxPortal {
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-combobox.d.ts:21:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-combobox.d.ts:22:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-combobox.d.ts:23:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-combobox.d.ts:24:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-combobox.d.ts:81:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-combobox.d.ts:106:5 - (ae-undocumented) Missing documentation for "disabled".
 
 // (No @packageDocumentation comment for this package)
 

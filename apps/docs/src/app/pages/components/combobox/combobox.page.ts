@@ -9,6 +9,8 @@ import { ComboboxBasicExample } from './examples/basic.example';
 import comboboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { ComboboxChipsExample } from './examples/chips.example';
 import comboboxChipsExampleCodeRaw from './examples/chips.example.ts?raw' with { loader: 'text' };
+import { ComboboxFormsExample } from './examples/forms.example';
+import comboboxFormsExampleCodeRaw from './examples/forms.example.ts?raw' with { loader: 'text' };
 import { ComboboxMultipleExample } from './examples/multiple.example';
 import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' with {
   loader: 'text',
@@ -32,6 +34,7 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
   imports: [
     ExampleTabs,
     ComboboxBasicExample,
+    ComboboxFormsExample,
     ComboboxMultipleExample,
     ComboboxChipsExample,
     ComboboxWithFieldTagExample,
@@ -59,8 +62,13 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
         <code>hellComboboxButton</code>, <code>hellComboboxDropdown</code>,
         <code>hellComboboxOption</code>, <code>hellComboboxEmpty</code>, and the structural
         <code>*hellComboboxPortal</code>. Project your domain objects directly into option rows;
-        ng-primitives owns selection, active-descendant focus, keyboard navigation, and floating
-        positioning while Hell adds styling, forms integration, and containment-safe dismissal.
+        ng-primitives owns option activation, active-descendant focus, keyboard navigation, and
+        floating positioning while Hell adds styling and containment-safe dismissal. The committed
+        selection is one Angular <code>value</code> model — bind it directly
+        (<code>[value]</code> plus <code>(valueChange)</code>), two-way (<code>[(value)]</code>),
+        or through forms: it implements Signal Forms' <code>FormValueControl</code> contract for
+        <code>[formField]</code>, and the same model drives <code>formControl</code> and
+        <code>ngModel</code> through Angular's built-in interoperability.
       </p>
       <p>
         The consumer owns search data and presentation. Compose
@@ -81,6 +89,29 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
       </p>
       <hd-example-tabs [code]="comboboxBasicExampleCode">
         <app-combobox-basic-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the combobox's single committed Pick Value authority —
+        <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode — so all
+        binding styles observe the same selection. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>value</code>, each option commit
+        updates the field exactly once, and focus leaving the control and its open dropdown marks
+        it touched. The field's <code>disabled()</code> rule drives the <code>disabled</code>
+        input. <code>formControl</code> and <code>[(ngModel)]</code> keep working against the same
+        model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        Only the committed Pick Value is form state. Search text, the active option, and the
+        dropdown's open state stay interaction state that the consumer or ng-primitives owns.
+        External writes (including form resets) synchronize the selection into ng-primitives
+        without re-emitting <code>(valueChange)</code>; required policy is form-owned via a
+        <code>required()</code> schema rule or <code>Validators.required</code>.
+      </p>
+      <hd-example-tabs [code]="comboboxFormsExampleCode">
+        <app-combobox-forms-example />
       </hd-example-tabs>
 
       <h2>Filtering and ranking</h2>
@@ -166,15 +197,23 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
       <h2>API</h2>
       <p><code>HellCombobox</code> / <code>[hellCombobox]</code> is the state-machine root.</p>
       <ul>
-        <li><code>value</code>: <code>HellPickValue&lt;T&gt;</code> — <code>T | null</code> in single mode or <code>readonly T[]</code> in multiple mode.</li>
-        <li><code>multiple</code>, <code>disabled</code>, <code>allowDeselect</code>: boolean primitive inputs.</li>
+        <li>
+          <code>value</code>: <code>ModelSignal&lt;HellPickValue&lt;T&gt;&gt;</code> —
+          <code>T | null</code> in single mode or <code>readonly T[]</code> in multiple mode.
+          Default <code>null</code>. Supports <code>[value]</code>, <code>[(value)]</code>, and
+          <code>(valueChange)</code>.
+        </li>
+        <li><code>multiple</code>, <code>disabled</code>, <code>allowDeselect</code>: boolean primitive inputs. <code>disabled</code> is also driven by bound forms.</li>
         <li><code>compareWith</code>: <code>(left: T, right: T) =&gt; boolean</code> for domain identity.</li>
         <li><code>options</code>: <code>readonly T[]</code>, the ordered domain-object registry used by keyboard navigation.</li>
         <li><code>placement</code>, <code>container</code>, and <code>flip</code>: floating-dropdown inputs.</li>
         <li><code>wrapNavigation</code>: wraps Arrow Up/Down at list boundaries by default; set <code>false</code> to clamp.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.</li>
-        <li>Outputs: <code>valueChange</code> and <code>openChange</code>.</li>
-        <li>Implements <code>ControlValueAccessor</code> for reactive forms and <code>ngModel</code>.</li>
+        <li>Outputs: <code>valueChange</code>, <code>openChange</code>, and <code>touch</code> (emits when focus leaves the control and its open dropdown; Angular forms use it to mark the control touched).</li>
+        <li>
+          Implements Signal Forms' <code>FormValueControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
+        </li>
       </ul>
       <p>
         <code>HellComboboxInput</code>, <code>HellComboboxButton</code>,
@@ -220,6 +259,7 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
 })
 export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
+  protected readonly comboboxFormsExampleCode = comboboxFormsExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
   protected readonly comboboxChipsExampleCode = comboboxChipsExampleCodeRaw;
   protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;

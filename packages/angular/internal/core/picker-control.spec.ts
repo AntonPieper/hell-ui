@@ -2,11 +2,12 @@ import type { DestroyRef } from '@angular/core';
 import type { HellPickValue } from './pick-value';
 
 import {
-  HellPickerControl,
+  HellPickerFocusScope,
   hellNormalizePickMultipleValue,
   hellNormalizePickSingleValue,
   hellNormalizePickValue,
-  type HellPickerEngineAdapter,
+  hellSamePickValue,
+  type HellPickerFocusScopeAdapter,
   type HellPickerEngineStream,
 } from './picker-control';
 
@@ -29,22 +30,11 @@ class FakeStream<TValue> implements HellPickerEngineStream<TValue> {
   }
 }
 
-class FakeEngine implements HellPickerEngineAdapter<string> {
+class FakeEngine implements HellPickerFocusScopeAdapter {
   readonly hostElement = document.createElement('div');
-  readonly valueChanges = new FakeStream<HellPickValue<string> | undefined>();
   readonly openChanges = new FakeStream<boolean>();
-  readonly writes: Array<HellPickValue<string>> = [];
-  readonly disabledWrites: boolean[] = [];
-  multipleMode = false;
 
   readonly host = () => this.hostElement;
-  readonly multiple = () => this.multipleMode;
-  readonly writeValue = (value: HellPickValue<string>) => {
-    this.writes.push(value);
-  };
-  readonly setDisabled = (disabled: boolean) => {
-    this.disabledWrites.push(disabled);
-  };
 }
 
 function fakeDestroyRef(): { destroyRef: DestroyRef; destroy: () => void } {
@@ -56,10 +46,6 @@ function fakeDestroyRef(): { destroyRef: DestroyRef; destroy: () => void } {
     },
   } as DestroyRef;
   return { destroyRef, destroy: () => callbacks.forEach((callback) => callback()) };
-}
-
-function focusEventWithRelatedTarget(relatedTarget: EventTarget | null): FocusEvent {
-  return { relatedTarget } as FocusEvent;
 }
 
 describe('hellNormalizePickValue helpers', () => {
@@ -102,102 +88,91 @@ describe('hellNormalizePickValue helpers', () => {
   });
 });
 
-describe('HellPickerControl', () => {
-  it('re-emits engine value changes to the registered form callback, normalized by mode', () => {
-    const engine = new FakeEngine();
-    const control = new HellPickerControl<string>(engine);
+describe('hellSamePickValue', () => {
+  it('treats every nullish shape as the same empty single selection', () => {
+    expect(hellSamePickValue<string>(null, undefined)).toBe(true);
+    expect(hellSamePickValue<string>(undefined, null)).toBe(true);
+    expect(hellSamePickValue<string>(null, 'a')).toBe(false);
+  });
+
+  it('compares single values by identity', () => {
+    const value = { id: 'a' };
+    expect(hellSamePickValue(value, value)).toBe(true);
+    expect(hellSamePickValue(value, { id: 'a' })).toBe(false);
+  });
+
+  it('compares multiple values by item identity and order', () => {
+    const a = { id: 'a' };
+    const b = { id: 'b' };
+    expect(hellSamePickValue([a, b], [a, b])).toBe(true);
+    expect(hellSamePickValue([a, b], [b, a])).toBe(false);
+    expect(hellSamePickValue([a], [a, b])).toBe(false);
+    expect(hellSamePickValue<{ id: string }>([], [])).toBe(true);
+  });
+
+  it('does not equate an array value with a scalar or nullish value', () => {
+    expect(hellSamePickValue<string>(['a'], 'a')).toBe(false);
+    expect(hellSamePickValue<string>([], null)).toBe(false);
+  });
+});
+
+describe('HellPickerFocusScope', () => {
+  function focusScope(engine: FakeEngine): HellPickerFocusScope {
+    const scope = new HellPickerFocusScope(engine);
     const { destroyRef } = fakeDestroyRef();
-    control.connect(destroyRef);
+    scope.connect(destroyRef);
+    return scope;
+  }
 
-    const received: Array<HellPickValue<string>> = [];
-    control.registerOnChange((value) => received.push(value));
-
-    engine.valueChanges.emit('a');
-    engine.multipleMode = true;
-    engine.valueChanges.emit(null);
-
-    expect(received).toEqual(['a', []]);
-  });
-
-  it('normalizes form writes against the current mode before writing to the engine', () => {
-    const engine = new FakeEngine();
-    const control = new HellPickerControl<string>(engine);
-
-    control.writeValue('a');
-    engine.multipleMode = true;
-    control.writeValue('a');
-    control.writeValue(null);
-
-    expect(engine.writes).toEqual(['a', ['a'], []]);
-  });
-
-  it('delegates disabled state to the engine', () => {
-    const engine = new FakeEngine();
-    const control = new HellPickerControl<string>(engine);
-
-    control.setDisabledState(true);
-    control.setDisabledState(false);
-
-    expect(engine.disabledWrites).toEqual([true, false]);
-  });
-
-  it('marks the control touched only for focus moves that leave the control', () => {
+  it('treats targets inside the host as inside the control', () => {
     const engine = new FakeEngine();
     const inside = document.createElement('button');
     engine.hostElement.appendChild(inside);
     const outside = document.createElement('button');
 
-    const control = new HellPickerControl<string>(engine);
-    let touched = 0;
-    control.registerOnTouched(() => {
-      touched += 1;
-    });
+    const scope = focusScope(engine);
 
-    control.markControlTouched(focusEventWithRelatedTarget(inside));
-    expect(touched).toBe(0);
-
-    control.markControlTouched(focusEventWithRelatedTarget(outside));
-    expect(touched).toBe(1);
+    expect(scope.isOutsideControl(inside)).toBe(false);
+    expect(scope.isOutsideControl(outside)).toBe(true);
+    expect(scope.isOutsideControl(null)).toBe(true);
   });
 
   it('counts a registered dropdown as inside only while the engine reports open', () => {
     const engine = new FakeEngine();
-    const control = new HellPickerControl<string>(engine);
-    const { destroyRef } = fakeDestroyRef();
-    control.connect(destroyRef);
+    const scope = focusScope(engine);
 
     const dropdown = document.createElement('div');
     const option = document.createElement('button');
     dropdown.appendChild(option);
-    control.registerDropdown(dropdown);
+    scope.registerDropdown(dropdown);
 
-    expect(control.isOutsideControl(option)).toBe(true);
+    expect(scope.isOutsideControl(option)).toBe(true);
 
     engine.openChanges.emit(true);
-    expect(control.isOutsideControl(option)).toBe(false);
+    expect(scope.isOutsideControl(option)).toBe(false);
 
     engine.openChanges.emit(false);
-    expect(control.isOutsideControl(option)).toBe(true);
+    expect(scope.isOutsideControl(option)).toBe(true);
 
     engine.openChanges.emit(true);
-    control.unregisterDropdown(dropdown);
-    expect(control.isOutsideControl(option)).toBe(true);
+    scope.unregisterDropdown(dropdown);
+    expect(scope.isOutsideControl(option)).toBe(true);
   });
 
-  it('unsubscribes from engine streams on destroy', () => {
+  it('unsubscribes from the open stream on destroy', () => {
     const engine = new FakeEngine();
-    const control = new HellPickerControl<string>(engine);
+    const scope = new HellPickerFocusScope(engine);
     const { destroyRef, destroy } = fakeDestroyRef();
-    control.connect(destroyRef);
+    scope.connect(destroyRef);
+
+    const dropdown = document.createElement('div');
+    scope.registerDropdown(dropdown);
 
     destroy();
 
-    expect(engine.valueChanges.unsubscribed).toBe(1);
     expect(engine.openChanges.unsubscribed).toBe(1);
 
-    const received: unknown[] = [];
-    control.registerOnChange((value) => received.push(value));
-    engine.valueChanges.emit('a');
-    expect(received).toEqual([]);
+    engine.openChanges.emit(true);
+    expect(scope.isOutsideControl(dropdown)).toBe(true);
   });
 });

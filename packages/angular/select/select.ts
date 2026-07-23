@@ -1,5 +1,18 @@
-import { DestroyRef, Directive, ElementRef, Injectable, booleanAttribute, computed, forwardRef, inject, input } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  Injectable,
+  booleanAttribute,
+  computed,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+  untracked,
+} from '@angular/core';
+import { type FormValueControl } from '@angular/forms/signals';
 import { hellPartStyler, type HellPickValue, type HellRecipe, type HellSize, type HellUiInput } from '@hell-ui/angular/core';
 import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
 import {
@@ -9,7 +22,9 @@ import {
 } from '@hell-ui/angular/internal/floating';
 import {
   hellRegisterFloatingHost,
-  HellPickerControl,
+  hellNormalizePickValue,
+  hellSamePickValue,
+  HellPickerFocusScope,
 } from '@hell-ui/angular/internal/core';
 import {
   NgpSelect,
@@ -39,102 +54,95 @@ const HELL_SELECT_DROPDOWN_RECIPE = {
 const HELL_SELECT_OPTION_RECIPE = hellOptionSurfaceRecipe();
 
 /**
- * Select-local coordination for forms and portaled-dropdown containment.
- * This class is deliberately unexported: projected directives coordinate
- * through DI without adding renderer registration methods to the public root.
+ * Select-local coordination for the touched focus boundary and
+ * portaled-dropdown containment. This class is deliberately unexported:
+ * projected directives coordinate through DI without adding registration
+ * methods to the public root.
  */
 @Injectable()
-class HellSelectController<T = unknown> {
+class HellSelectController {
   private readonly select = inject(NgpSelect);
-  private readonly selectState = injectSelectState<HellPickValue<T>>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly control = new HellPickerControl<T>({
+  private readonly scope = new HellPickerFocusScope({
     host: () => this.host.nativeElement,
-    multiple: () => this.select.multiple(),
-    valueChanges: this.select.valueChange,
     openChanges: this.select.openChange,
-    writeValue: (value) => this.selectState().setValue(value, { emit: false }),
-    setDisabled: (disabled) => this.selectState().setDisabled(disabled),
   });
+  private onTouch: () => void = () => {};
   private readonly onFocusOut = (event: FocusEvent): void => {
-    this.control.markControlTouched(event);
+    this.markControlTouched(event);
   };
 
   constructor() {
-    this.control.connect(this.destroyRef);
+    this.scope.connect(this.destroyRef);
     this.host.nativeElement.addEventListener('focusout', this.onFocusOut);
     this.destroyRef.onDestroy(() => {
       this.host.nativeElement.removeEventListener('focusout', this.onFocusOut);
     });
   }
 
-  writeValue(value: HellPickValue<T>): void {
-    this.control.writeValue(value);
-  }
-
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.control.registerOnChange(fn);
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.control.registerOnTouched(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.control.setDisabledState(isDisabled);
+  /** Registers the root's touched notification for the focus boundary. */
+  connectTouch(onTouch: () => void): void {
+    this.onTouch = onTouch;
   }
 
   registerDropdown(dropdown: HTMLElement, destroyRef: DestroyRef): void {
     const onFocusOut = (event: FocusEvent): void => {
-      this.control.markControlTouched(event);
+      this.markControlTouched(event);
     };
-    this.control.registerDropdown(dropdown);
+    this.scope.registerDropdown(dropdown);
     dropdown.addEventListener('focusout', onFocusOut);
     destroyRef.onDestroy(() => {
       dropdown.removeEventListener('focusout', onFocusOut);
-      this.control.unregisterDropdown(dropdown);
+      this.scope.unregisterDropdown(dropdown);
     });
+  }
+
+  private markControlTouched(event: FocusEvent): void {
+    if (this.scope.isOutsideControl(event.relatedTarget)) {
+      this.onTouch();
+    }
   }
 }
 
-/** Rich, projection-first select. The trigger element is the host of `[hellSelect]`;
- *  project the selected domain value (or a placeholder), pair
- *  with `[hellSelectDropdown]` inside a `*hellSelectPortal`, and emit
- *  `valueChange` to react to selection. For native `<select>` controls,
- *  use `[hellNativeSelect]` instead. */
+/**
+ * Rich, projection-first select. The trigger element is the host of
+ * `[hellSelect]`; project the selected domain value (or a placeholder) and
+ * pair with `[hellSelectDropdown]` inside a `*hellSelectPortal`. For native
+ * `<select>` controls, use `[hellNativeSelect]` instead.
+ *
+ * The `value` model is the select's one Control Value Authority — a shared
+ * Pick Value: `T | null` in single mode, `readonly T[]` in multiple mode.
+ * Bind it one-way (`[value]` plus `(valueChange)`), two-way (`[(value)]`),
+ * or through Angular forms — Signal Forms `[formField]` via the
+ * `FormValueControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability. External writes synchronize into
+ * `ng-primitives` through its public non-emitting `setValue` setter without
+ * re-emitting a selection commit.
+ */
 @Directive({
   selector: '[hellSelect]',
   hostDirectives: [
     {
       directive: NgpSelect,
       inputs: [
-        'ngpSelectValue:value',
         'ngpSelectMultiple:multiple',
-        'ngpSelectDisabled:disabled',
         'ngpSelectCompareWith:compareWith',
         'ngpSelectDropdownPlacement:placement',
         'ngpSelectDropdownContainer:container',
         'ngpSelectDropdownFlip:flip',
         'ngpSelectOptions:options',
       ],
-      outputs: ['ngpSelectValueChange:valueChange', 'ngpSelectOpenChange:openChange'],
+      outputs: ['ngpSelectOpenChange:openChange'],
     },
   ],
-  providers: [
-    HellSelectController,
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellSelect),
-      multi: true,
-    },
-  ],
+  providers: [HellSelectController],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
   },
 })
-export class HellSelect<T = unknown> implements ControlValueAccessor {
+export class HellSelect<T = unknown> implements FormValueControl<HellPickValue<T>> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
@@ -144,22 +152,55 @@ export class HellSelect<T = unknown> implements ControlValueAccessor {
     recipe: () => HELL_SELECT_RECIPE,
   });
 
-  private readonly controller = inject(HellSelectController) as HellSelectController<T>;
+  /**
+   * Committed Pick Value — the one Control Value Authority. User selections
+   * write it exactly once per commit and emit `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. Defaults
+   * to `null` (no selection in single mode, an empty selection in multiple
+   * mode).
+   */
+  readonly value = model<HellPickValue<T>>(null);
 
-  writeValue(value: HellPickValue<T>): void {
-    this.controller.writeValue(value);
-  }
+  /** Whether the select is disabled. Also driven by bound forms. Defaults to `false`. */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
-  registerOnChange(fn: (value: HellPickValue<T>) => void): void {
-    this.controller.registerOnChange(fn);
-  }
+  /**
+   * Emits when focus leaves the trigger and its open dropdown entirely.
+   * Angular forms listen to this output to mark the bound field or control
+   * as touched.
+   */
+  readonly touch = output<void>();
 
-  registerOnTouched(fn: () => void): void {
-    this.controller.registerOnTouched(fn);
-  }
+  private readonly select = inject(NgpSelect);
+  private readonly selectState = injectSelectState<HellPickValue<T>>();
+  private readonly controller = inject(HellSelectController);
+  private readonly destroyRef = inject(DestroyRef);
 
-  setDisabledState(isDisabled: boolean): void {
-    this.controller.setDisabledState(isDisabled);
+  constructor() {
+    this.controller.connectTouch(() => this.touch.emit());
+
+    // External value writes (property, two-way, form) synchronize into the
+    // primitive through its public non-emitting setter; the identity guard
+    // keeps user selections (which the engine already holds) from writing
+    // a normalized copy back.
+    effect(() => {
+      const state = this.selectState();
+      const value = hellNormalizePickValue<T>(this.value(), this.select.multiple());
+      if (hellSamePickValue<T>(state.value(), value)) return;
+      untracked(() => state.setValue(value, { emit: false }));
+    });
+
+    effect(() => {
+      const state = this.selectState();
+      const disabled = this.disabled();
+      if (state.disabled() === disabled) return;
+      untracked(() => state.setDisabled(disabled));
+    });
+
+    const valueSub = this.select.valueChange.subscribe((value: HellPickValue<T> | undefined) => {
+      this.value.set(hellNormalizePickValue<T>(value, this.select.multiple()));
+    });
+    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 }
 

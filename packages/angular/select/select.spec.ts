@@ -1,8 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormField,
+  disabled as disabledSchema,
+  form,
+  required as requiredSchema,
+} from '@angular/forms/signals';
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 
 import { NgpSelect } from 'ng-primitives/select';
@@ -45,6 +51,81 @@ class SelectFormHost {
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
   readonly openStates: boolean[] = [];
+}
+
+@Component({
+  imports: [...HELL_SELECT_IMPORTS],
+  template: `
+    <button
+      hellSelect
+      type="button"
+      aria-label="Priority"
+      [(value)]="value"
+      (valueChange)="events.push($any($event))"
+    >
+      <span hellSelectValue>Selection</span>
+      <div *hellSelectPortal hellSelectDropdown>
+        <div hellSelectOption value="low">Low</div>
+        <div hellSelectOption value="high">High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectTwoWayHost {
+  readonly value = signal<HellPickValue<string>>(null);
+  readonly events: Array<HellPickValue<string>> = [];
+}
+
+@Component({
+  imports: [FormsModule, ...HELL_SELECT_IMPORTS],
+  template: `
+    <button
+      hellSelect
+      type="button"
+      aria-label="Priority"
+      [(ngModel)]="value"
+      (valueChange)="events.push($any($event))"
+    >
+      <span hellSelectValue>Selection</span>
+      <div *hellSelectPortal hellSelectDropdown>
+        <div hellSelectOption value="low">Low</div>
+        <div hellSelectOption value="high">High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectNgModelHost {
+  readonly value = signal<string | null>(null);
+  readonly model = viewChild.required(NgModel);
+  readonly events: Array<string | null> = [];
+}
+
+@Component({
+  imports: [FormField, ...HELL_SELECT_IMPORTS],
+  template: `
+    <button
+      hellSelect
+      type="button"
+      aria-label="Region"
+      [formField]="regionForm.region"
+      (valueChange)="events.push($any($event))"
+    >
+      <span hellSelectValue>Selection</span>
+      <div *hellSelectPortal hellSelectDropdown>
+        <div hellSelectOption value="low">Low</div>
+        <div hellSelectOption value="high">High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ region: string | null }>({ region: null });
+  readonly regionForm = form(this.model, (path) => {
+    requiredSchema(path.region);
+    disabledSchema(path.region, () => this.formDisabled());
+  });
+  readonly events: Array<string | null> = [];
 }
 
 @Component({
@@ -179,7 +260,15 @@ async function defaultSelectClasses(): Promise<
 describe('HellSelect', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectFormHost, SelectMultipleFormHost, SelectProjectedFormHost, SelectUiHost],
+      imports: [
+        SelectFormHost,
+        SelectTwoWayHost,
+        SelectNgModelHost,
+        SelectSignalFormsHost,
+        SelectMultipleFormHost,
+        SelectProjectedFormHost,
+        SelectUiHost,
+      ],
     }).compileComponents();
   });
 
@@ -394,12 +483,119 @@ describe('HellSelect', () => {
     const select = debug.injector.get(HellSelect<readonly string[]>);
     const ngpSelect = debug.injector.get(NgpSelect);
     const arrayValue = ['north', 'south'] as const;
-    let emitted: HellPickValue<readonly string[]> | undefined;
 
-    select.registerOnChange((value) => (emitted = value));
     ngpSelect.valueChange.emit(arrayValue);
 
-    expect(emitted).toBe(arrayValue);
+    expect(select.value()).toBe(arrayValue);
+  });
+
+  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
+    const fixture = TestBed.createComponent(SelectTwoWayHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+
+    // External parent write flows in without echoing a change event.
+    host.value.set('high');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    const dropdown = await openSelectDropdown(fixture, select);
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
+    expect(dropdown.querySelector('[hellSelectOption][value="high"]')?.getAttribute('aria-selected')).toBe(
+      'true',
+    );
+
+    option.click();
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.value()).toBe('low');
+    expect(host.events).toEqual(['low']);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(SelectNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+
+    host.value.set('high');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+
+    const dropdown = await openSelectDropdown(fixture, select);
+    expect(dropdown.querySelector('[hellSelectOption][value="high"]')?.getAttribute('aria-selected')).toBe(
+      'true',
+    );
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
+    option.click();
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.value()).toBe('low');
+    expect(host.events).toEqual(['low']);
+    expect(host.model().touched).toBe(false);
+
+    select.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', async () => {
+    const fixture = TestBed.createComponent(SelectSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+
+    expect(host.regionForm.region().invalid()).toBe(true);
+
+    // Form-driven writes flow in without echoing a selection commit.
+    host.regionForm.region().value.set('high');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.events).toEqual([]);
+    expect(host.regionForm.region().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model.
+    const dropdown = await openSelectDropdown(fixture, select);
+    expect(dropdown.querySelector('[hellSelectOption][value="high"]')?.getAttribute('aria-selected')).toBe(
+      'true',
+    );
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
+    option.click();
+    await waitForDropdownRemoval(fixture);
+
+    expect(host.regionForm.region().value()).toBe('low');
+    expect(host.model().region).toBe('low');
+    expect(host.events).toEqual(['low']);
+    expect(host.regionForm.region().dirty()).toBe(true);
+    expect(host.regionForm.region().invalid()).toBe(false);
+    expect(host.regionForm.region().touched()).toBe(false);
+
+    select.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.regionForm.region().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(select.getAttribute('data-disabled')).toBe('');
+    expect(select.tabIndex).toBe(-1);
   });
 
   it('projects domain options through a form field with stable label and description relationships', () => {

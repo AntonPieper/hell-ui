@@ -227,4 +227,69 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await expect(input).toHaveAttribute('aria-expanded', 'false');
     await expect(input).toBeFocused();
   });
+
+  test('signal forms select shares one value with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await page.goto('/components/select');
+
+    const example = page.locator('app-select-forms-example');
+    await example.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+    );
+    const select = example.getByRole('combobox', { name: 'Deploy environment' });
+
+    // The required() rule keeps the field invalid until a value is committed.
+    await expect(select).toContainText('Choose an environment…');
+    await expect(example).toContainText('Selected: none');
+    await expect(example).toContainText('Invalid: true');
+    await expect(example).toContainText('Touched: false');
+
+    // Keyboard selection keeps focus on the trigger for the whole commit.
+    await select.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(select).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Enter');
+
+    await expect(select).toContainText('Staging');
+    await expect(example).toContainText('Selected: Staging');
+    await expect(example).toContainText('Invalid: false');
+    // Committing without leaving the control does not mark the field touched.
+    await expect(example).toContainText('Touched: false');
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(example).toContainText('Touched: true');
+  });
+
+  test('signal forms combobox commits one pick value while search text stays interaction state', async ({
+    page,
+  }) => {
+    await page.goto('/components/combobox');
+
+    const example = page.locator('app-combobox-forms-example');
+    await example.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+    );
+    const input = example.getByRole('combobox', { name: 'Datacenter region' });
+
+    await expect(example).toContainText('Selected: none');
+    await expect(example).toContainText('Invalid: true');
+    await expect(example).toContainText('Touched: false');
+
+    // Typing filters options without committing a value into the field.
+    await input.fill('ber');
+    await expect(example).toContainText('Selected: none');
+
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Enter');
+
+    await expect(example).toContainText('Selected: Berlin');
+    await expect(example).toContainText('Invalid: false');
+    await expect(input).toHaveValue('Berlin');
+    await expect(example).toContainText('Touched: false');
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(example).toContainText('Touched: true');
+  });
 });
