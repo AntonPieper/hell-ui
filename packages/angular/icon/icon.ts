@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 const HELL_ICON_RECIPE = {
   root: 'inline-flex text-[var(--_hell-icon-color,currentColor)] leading-none',

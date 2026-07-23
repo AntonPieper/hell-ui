@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-popover-with-card-example',

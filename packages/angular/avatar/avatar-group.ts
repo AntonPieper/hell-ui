@@ -5,8 +5,8 @@ import {
   booleanAttribute,
   input,
 } from '@angular/core';
-import { HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { HellSize } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 const HELL_AVATAR_GROUP_RECIPE = {
   root: 'inline-flex items-center [--_hell-av-size:32px] [--_hell-avatar-group-overlap:calc(var(--spacing)*-2)] [--_hell-avatar-group-cutout:var(--color-hell-surface)] [--_hell-avatar-group-ring-width:2px] [--_hell-avatar-group-hover-shadow:0_0_0_var(--_hell-avatar-group-ring-width)_var(--_hell-avatar-group-cutout),0_2px_6px_rgb(0_0_0_/_0.12)] data-[size=xs]:[--_hell-av-size:20px] data-[size=xs]:[--_hell-avatar-group-overlap:calc(var(--spacing)*-1.5)] data-[size=sm]:[--_hell-av-size:26px] data-[size=sm]:[--_hell-avatar-group-overlap:calc(var(--spacing)*-1.75)] data-[size=md]:[--_hell-av-size:32px] data-[size=lg]:[--_hell-av-size:40px] data-[size=lg]:[--_hell-avatar-group-overlap:calc(var(--spacing)*-2.5)] data-[size=xl]:[--_hell-av-size:56px] data-[size=xl]:[--_hell-avatar-group-overlap:calc(var(--spacing)*-3)]',

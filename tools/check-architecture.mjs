@@ -36,14 +36,14 @@ const docsHeavyLazyRoutePolicies = [
     label: 'PDF viewer docs examples',
     routePath: '/components/pdf-viewer',
     boundary: 'components/pdf-viewer',
-    packageSpecifiers: ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'],
+    packageSpecifiers: ['hell-ui/features/pdf-viewer', 'pdfjs-dist'],
     sourceFragments: [
-      '@hell-ui/angular/features/pdf-viewer/styles.css',
+      'hell-ui/features/pdf-viewer/styles.css',
       'hell-ui/pdf-viewer/styles/styles.css',
       'pdfjs/pdf_viewer.css',
     ],
     forbiddenComponentStyleFragments: [
-      '@hell-ui/angular/features/pdf-viewer/styles.css',
+      'hell-ui/features/pdf-viewer/styles.css',
       '@hell-ui/pdf-viewer/styles',
     ],
   },
@@ -52,8 +52,8 @@ const docsHeavyLazyRoutePolicies = [
     label: 'Code editor docs examples',
     routePath: '/components/code-editor',
     boundary: 'components/code-editor',
-    packageSpecifiers: ['@hell-ui/angular/features/code-editor', '@codemirror/'],
-    sourceFragments: ['@hell-ui/angular/features/code-editor/styles.css'],
+    packageSpecifiers: ['hell-ui/features/code-editor', '@codemirror/'],
+    sourceFragments: ['hell-ui/features/code-editor/styles.css'],
   },
   {
     id: 'audio-player-docs',
@@ -61,8 +61,8 @@ const docsHeavyLazyRoutePolicies = [
     routePath: '/components/audio-player',
     boundary: 'components/audio-player',
     packageSpecifiers: [
-      '@hell-ui/angular/audio-player',
-      '@hell-ui/angular/features/audio-transcript',
+      'hell-ui/audio-player',
+      'hell-ui/features/audio-transcript',
     ],
     sourceFragments: [],
   },
@@ -890,9 +890,9 @@ function checkEntrypointManifestIntegrity() {
 
   const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
   const supportedTableSpecifiers = [
-    '@hell-ui/angular/table',
-    '@hell-ui/angular/table-tanstack',
-    '@hell-ui/angular/table-tanstack/virtual',
+    'hell-ui/table',
+    'hell-ui/table-tanstack',
+    'hell-ui/table-tanstack/virtual',
   ];
   for (const specifier of supportedTableSpecifiers) {
     if (!manifestSpecifiers.has(specifier))
@@ -935,7 +935,7 @@ function checkPackageOutputIntegrity() {
   const angularSourceRoot = angularWorkspace.projects?.hell?.sourceRoot;
   if (angularSourceRoot !== '.') {
     failures.push(
-      `@hell-ui/angular Angular project sourceRoot must be "." for import-path-first package layout; found ${angularSourceRoot ?? 'missing'}`,
+      `hell-ui Angular project sourceRoot must be "." for import-path-first package layout; found ${angularSourceRoot ?? 'missing'}`,
     );
   }
   for (const entrypoint of publicApiFiles) {
@@ -983,7 +983,7 @@ function checkAudioTranscriptRuntimeIsolationContract() {
       if (term.pattern.test(source)) {
         failures.push(
           `Audio Transcript runtime isolation ${rel} references ${term.label}; ` +
-            'browser transcript runtime must stay inside @hell-ui/angular/features/audio-transcript.',
+            'browser transcript runtime must stay inside hell-ui/features/audio-transcript.',
         );
       }
     }
@@ -1213,7 +1213,7 @@ function checkTokenSubstrateDoesNotOwnComponentSkins() {
     }
 
     failures.push(
-      `${tokensPath} must not contain component-specific skin selector "${selector.replace(/\s+/g, ' ')}"; move it to @hell-ui/angular/themes/*.css`,
+      `${tokensPath} must not contain component-specific skin selector "${selector.replace(/\s+/g, ' ')}"; move it to hell-ui/themes/*.css`,
     );
   }
 }
@@ -1433,13 +1433,13 @@ function decoratedClassModules(source) {
 
 function checkTooltipVocabularyContract() {
   const tooltipEntrypoint = entrypointPublicApiFiles().find(
-    (entrypoint) => entrypoint.specifier === '@hell-ui/angular/tooltip',
+    (entrypoint) => entrypoint.specifier === 'hell-ui/tooltip',
   );
   if (!tooltipEntrypoint) {
-    failures.push('Entrypoint metadata is missing @hell-ui/angular/tooltip');
+    failures.push('Entrypoint metadata is missing hell-ui/tooltip');
   } else if (tooltipEntrypoint.category !== entrypointCategories.MIXED_ENTRYPOINT) {
     failures.push(
-      '@hell-ui/angular/tooltip must stay classified as a Mixed Entry Point: ' +
+      'hell-ui/tooltip must stay classified as a Mixed Entry Point: ' +
         'its string convenience surface and consumer-authored surface share one Interaction State Machine (#238)',
     );
   }

@@ -5,7 +5,7 @@ import {
   HellToggleGroup,
   HellToggleGroupItem,
   type HellToggleGroupValue,
-} from '@hell-ui/angular/toggle';
+} from 'hell-ui/toggle';
 
 /**
  * Toggle Group Control Value Authority boundary coverage (#289): the packed

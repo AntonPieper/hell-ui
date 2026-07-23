@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { HellFilePicker } from '@hell-ui/angular/file-picker';
+import { HellFilePicker } from 'hell-ui/file-picker';
 
 @Component({
   selector: 'app-file-picker-styling-example',

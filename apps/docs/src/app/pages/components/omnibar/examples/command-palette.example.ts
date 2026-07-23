@@ -8,10 +8,10 @@ import {
   faSolidPlus,
   faSolidUserPlus,
 } from '@ng-icons/font-awesome/solid';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
-import { HellKbd } from '@hell-ui/angular/chip';
+import { hellSearchResource, type HellSearchField } from 'hell-ui/core';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
+import { HellKbd } from 'hell-ui/chip';
 
 interface Command {
   readonly id: string;

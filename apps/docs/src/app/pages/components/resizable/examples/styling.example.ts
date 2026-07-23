@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   HELL_RESIZABLE_IMPORTS,
   type HellResizableHandleUi,
-} from '@hell-ui/angular/resizable';
+} from 'hell-ui/resizable';
 
 @Component({
   selector: 'app-resizable-styling-example',

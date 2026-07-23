@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-styling-example',

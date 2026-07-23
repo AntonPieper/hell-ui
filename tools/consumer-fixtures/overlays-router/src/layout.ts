@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
-import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
-import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
-import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi } from '@hell-ui/angular/resizable';
-import { HellToolbar, HellToolbarItem } from '@hell-ui/angular/toolbar';
+import { HELL_MASTER_DETAIL_IMPORTS } from 'hell-ui/master-detail';
+import { HellPageLink, HellPagination } from 'hell-ui/pagination';
+import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi } from 'hell-ui/resizable';
+import { HellToolbar, HellToolbarItem } from 'hell-ui/toolbar';
 
 // Projection-first Master Detail controller composing external Resizable,
 // Toolbar, and Pagination entries from the packed tarball.

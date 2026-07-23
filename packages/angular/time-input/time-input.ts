@@ -30,16 +30,16 @@ import {
   type HellTimeValue,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
-} from '@hell-ui/angular/core';
-import { HellInput } from '@hell-ui/angular/input';
+} from 'hell-ui/core';
+import { HellInput } from 'hell-ui/input';
 import {
   HellTypedValueInputState,
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
   type HellTypedValueCommitResult,
-} from '@hell-ui/angular/internal/core';
-export type { HellTimeValue } from '@hell-ui/angular/core';
+} from 'hell-ui/internal/core';
+export type { HellTimeValue } from 'hell-ui/core';
 
 /** Contextual precision passed to time adapter hooks. */
 export interface HellTimeInputAdapterContext {

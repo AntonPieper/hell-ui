@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-progress-with-job-status-card-example',

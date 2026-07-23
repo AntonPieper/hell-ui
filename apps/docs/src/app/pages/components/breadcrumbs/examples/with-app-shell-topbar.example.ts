@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGauge, faSolidHouse } from '@ng-icons/font-awesome/solid';
-import { HellAppShell, HellAppContent, HellAppTopbar } from '@hell-ui/angular/app-shell';
-import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellAppShell, HellAppContent, HellAppTopbar } from 'hell-ui/app-shell';
+import { HELL_BREADCRUMBS_IMPORTS } from 'hell-ui/breadcrumbs';
+import { HellIcon } from 'hell-ui/icon';
 
 const HD_BREADCRUMBS_APP_SHELL_TOPBAR_ICONS = {
   faSolidFolderOpen,

@@ -8,7 +8,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
 
 import type { HellFilter, HellFilterFieldDescriptor } from './filter-builder.state';
 

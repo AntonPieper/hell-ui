@@ -45,8 +45,8 @@ import { PageHeader } from '../../../shared/page-header';
         title="Card"
         icon="faSolidIdCard"
         category="Styled primitive"
-        importPath="@hell-ui/angular/card"
-        stylesPath="@hell-ui/angular/card/styles.css"
+        importPath="hell-ui/card"
+        stylesPath="hell-ui/card/styles.css"
       >
         A bordered surface with header, body, and footer regions for grouping one idea, object, or
         workflow.
@@ -101,7 +101,7 @@ import { PageHeader } from '../../../shared/page-header';
       <p>
         <code>hellCardFooter</code> right-aligns its content by default, which fits a
         cancel/confirm action row. Pair it with <code>hellButton</code> (narrow entry point
-        <code>@hell-ui/angular/button</code>).
+        <code>hell-ui/button</code>).
       </p>
       <hd-example-tabs [code]="cardWithFooterExampleCode">
         <app-card-with-footer-example />

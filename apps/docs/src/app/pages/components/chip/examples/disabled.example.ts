@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
+import { HellChip, HellChipRemove, HellChipSet } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-chip-disabled-example',

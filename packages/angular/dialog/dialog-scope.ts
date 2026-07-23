@@ -3,7 +3,7 @@ import {
   HellFloatingScopedInsetsRuntime,
   hellFindFloatingScopeRoot,
   type HellFloatingInsetVars,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 
 export const HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE = 'data-hell-dialog-scope-root';
 const HELL_DIALOG_SCOPE_ROOT_SELECTOR = `[${HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE}="true"]`;

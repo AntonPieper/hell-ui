@@ -1,7 +1,7 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgpAvatar, NgpAvatarFallback, NgpAvatarImage } from 'ng-primitives/avatar';
-import { HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellSize } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 
 /** Public parts of the HellAvatar module, styleable through its Part Style Map. */
 export type HellAvatarPart = 'root' | 'image' | 'fallback';

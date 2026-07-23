@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
-import { HellCodeEditor, type HellCodeEditorUi } from '@hell-ui/angular/features/code-editor';
+import { HellCodeEditor, type HellCodeEditorUi } from 'hell-ui/features/code-editor';
 
 @Component({
   selector: 'app-code-editor-styling-example',

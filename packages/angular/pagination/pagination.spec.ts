@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
-import { provideHellLabels } from '@hell-ui/angular/core';
-import { HellNativeSelect } from '@hell-ui/angular/select';
+import { provideHellLabels } from 'hell-ui/core';
+import { HellNativeSelect } from 'hell-ui/select';
 import { TestBed } from '@angular/core/testing';
 
 import { HellPageLink, HellPagination, HellPaginationStrip, type HellPaginationStripUi, HELL_PAGINATION_LABELS } from './pagination';

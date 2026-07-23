@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-field-all-parts-styling-example',

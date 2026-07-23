@@ -5,7 +5,7 @@ import {
   HELL_FLOATING_SCOPE,
   containsNode,
   type HellFloatingScope,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 
 import { HellPopover, HellPopoverTrigger } from './popover';
 

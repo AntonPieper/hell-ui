@@ -3,7 +3,7 @@ import {
   HELL_TABLE_UTILITIES_IMPORTS,
   HellTableRowIgnore,
   type HellTableResizeHandleUi,
-} from '@hell-ui/angular/table';
+} from 'hell-ui/table';
 
 // Table primitives are part of the plain styled boundary: core peers plus
 // tailwindcss, no optional table-engine peers.

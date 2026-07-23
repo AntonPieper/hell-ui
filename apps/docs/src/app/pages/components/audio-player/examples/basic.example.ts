@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
+import { HellAudioPlayer } from 'hell-ui/audio-player';
 
 @Component({
   selector: 'app-audio-player-basic-example',

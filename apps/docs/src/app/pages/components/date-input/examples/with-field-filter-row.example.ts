@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidXmark } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellButton } from 'hell-ui/button';
+import { HellDateInput } from 'hell-ui/date-input';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-date-input-with-field-filter-row-example',

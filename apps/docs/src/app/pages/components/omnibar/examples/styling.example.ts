@@ -9,10 +9,10 @@ import {
   hellSearchResource,
   type HellSearchField,
   type HellSearchResourceSource,
-} from '@hell-ui/angular/core';
-import { HellChip, HellChipRemove } from '@hell-ui/angular/chip';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
+} from 'hell-ui/core';
+import { HellChip, HellChipRemove } from 'hell-ui/chip';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
 
 interface Runbook {
   readonly id: string;

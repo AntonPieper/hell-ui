@@ -11,7 +11,7 @@ import { FormField, disabled as disabledSchema, form, validate } from '@angular/
 import { By } from '@angular/platform-browser';
 import { NgpInput } from 'ng-primitives/input';
 
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 import {
   HELL_DEFAULT_TIME_INPUT_ADAPTER,
   HellTimeInput,

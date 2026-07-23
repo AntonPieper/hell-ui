@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
+import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { hellSearchResource, type HellPickValue } from 'hell-ui/core';
 
 interface Group {
   readonly id: string;

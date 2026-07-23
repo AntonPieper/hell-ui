@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
-import { HellButton } from '@hell-ui/angular/button';
+import { HELL_ALERT_IMPORTS } from 'hell-ui/alert';
+import { HellButton } from 'hell-ui/button';
 
 @Component({
   selector: 'app-alert-dismissible-example',

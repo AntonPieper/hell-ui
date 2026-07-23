@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput } from '@hell-ui/angular/input';
+import { HellSaveBar } from 'hell-ui/save-bar';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-save-bar-form-submit-example',

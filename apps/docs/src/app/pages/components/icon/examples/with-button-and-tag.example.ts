@@ -5,9 +5,9 @@ import {
   faSolidPhone,
   faSolidTriangleExclamation,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellChip } from 'hell-ui/chip';
 
 const WITH_BUTTON_AND_TAG_EXAMPLE_ICONS = {
   faSolidCircleCheck,

@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
-import { HellButton } from '@hell-ui/angular/button';
+import { HELL_ALERT_IMPORTS } from 'hell-ui/alert';
+import { HellButton } from 'hell-ui/button';
 import {
   HellFilePicker,
   type HellFileRejection,
   type HellFileSelection,
   type HellFileValidator,
-} from '@hell-ui/angular/file-picker';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
+} from 'hell-ui/file-picker';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 
 type UploadStatus = 'pending' | 'uploading' | 'done' | 'error';
 

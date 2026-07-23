@@ -3,7 +3,7 @@ import {
   HellTimePicker,
   type HellTimePickerUi,
   type HellTimeValue,
-} from '@hell-ui/angular/time-picker';
+} from 'hell-ui/time-picker';
 
 @Component({
   selector: 'app-time-picker-styling-example',

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellKbd } from '@hell-ui/angular/chip';
+import { HellKbd } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-chip-keyboard-hint-example',

@@ -8,9 +8,9 @@ import {
   faSolidTableColumns,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
 
 interface Member {
   readonly name: string;

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendarDays } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellDateRangePicker } from '@hell-ui/angular/date-picker';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HellButton } from 'hell-ui/button';
+import { HellDateRangePicker } from 'hell-ui/date-picker';
+import { HellIcon } from 'hell-ui/icon';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 
 @Component({
   selector: 'app-date-picker-with-popover-example',

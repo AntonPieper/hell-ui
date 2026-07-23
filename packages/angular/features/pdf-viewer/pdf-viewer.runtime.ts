@@ -1,4 +1,4 @@
-import { containsNode, isElementLike } from '@hell-ui/angular/internal/core';
+import { containsNode, isElementLike } from 'hell-ui/internal/core';
 import {
   clampZoomScale,
   getCtrlWheelScaleFactor,

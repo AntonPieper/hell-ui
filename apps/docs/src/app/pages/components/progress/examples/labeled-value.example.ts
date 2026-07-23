@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
+import { HellButton } from 'hell-ui/button';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 
 @Component({
   selector: 'app-progress-labeled-value-example',

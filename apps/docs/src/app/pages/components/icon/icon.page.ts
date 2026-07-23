@@ -38,8 +38,8 @@ import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.e
         title="Icon"
         icon="faSolidStar"
         category="Styled primitive"
-        importPath="@hell-ui/angular/icon"
-        stylesPath="@hell-ui/angular/icon/styles.css"
+        importPath="hell-ui/icon"
+        stylesPath="hell-ui/icon/styles.css"
       >
         Renders a registered SVG glyph that scales and colors with the surrounding text.
       </hd-page-header>
@@ -98,7 +98,7 @@ import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.e
 
       <h2>Styling</h2>
       <p>
-        <code>@hell-ui/angular/icon</code> exports one module, <code>HellIcon</code>, with one
+        <code>hell-ui/icon</code> exports one module, <code>HellIcon</code>, with one
         Public Part.
       </p>
       <table class="hd-doc-table">

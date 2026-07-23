@@ -7,11 +7,11 @@ import {
   faSolidPlus,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellIcon } from 'hell-ui/icon';
 import {
   HELL_TOOLBAR_IMPORTS,
   type HellOverflowToolbarUi,
-} from '@hell-ui/angular/toolbar';
+} from 'hell-ui/toolbar';
 
 @Component({
   selector: 'app-toolbar-styling-example',

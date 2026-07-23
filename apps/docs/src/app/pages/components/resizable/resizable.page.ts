@@ -51,8 +51,8 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           title="Resizable"
           icon="faSolidLeftRight"
           category="Composite"
-          importPath="@hell-ui/angular/resizable"
-          stylesPath="@hell-ui/angular/resizable/styles.css"
+          importPath="hell-ui/resizable"
+          stylesPath="hell-ui/resizable/styles.css"
         >
           Split a region into panes a user can drag or keyboard-resize, with per-pane minimums and
           automatic rebalancing when the container changes size.

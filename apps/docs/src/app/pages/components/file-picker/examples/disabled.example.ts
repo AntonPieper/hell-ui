@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-import { HellButton } from '@hell-ui/angular/button';
-import { HellFilePicker } from '@hell-ui/angular/file-picker';
+import { HellButton } from 'hell-ui/button';
+import { HellFilePicker } from 'hell-ui/file-picker';
 
 @Component({
   selector: 'app-file-picker-disabled-example',

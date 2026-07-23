@@ -8,9 +8,9 @@ import {
   disabled as disabledSchema,
   form,
 } from '@angular/forms/signals';
-import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
-import { HellControlGroup } from '@hell-ui/angular/control-group';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
+import { HellControlGroup } from 'hell-ui/control-group';
+import type { HellPickValue } from 'hell-ui/core';
 import { NgpCombobox } from 'ng-primitives/combobox';
 
 import { HellCombobox, HELL_COMBOBOX_IMPORTS } from './combobox';

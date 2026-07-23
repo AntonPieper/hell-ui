@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidStar } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
 
 const MENU_STYLING_ICONS = { faSolidStar };
 

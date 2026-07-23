@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ALERT_IMPORTS, type HellAlertUi } from '@hell-ui/angular/alert';
+import { HELL_ALERT_IMPORTS, type HellAlertUi } from 'hell-ui/alert';
 
 @Component({
   selector: 'app-alert-styling-example',

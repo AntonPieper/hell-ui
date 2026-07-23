@@ -5,15 +5,15 @@ import {
   type HellConfirmLabels,
   type HellPrompt,
   type HellPromptAction,
-} from '@hell-ui/angular/confirm';
-import { provideHellLabels } from '@hell-ui/angular/core';
+} from 'hell-ui/confirm';
+import { provideHellLabels } from 'hell-ui/core';
 import {
   HELL_TIME_PICKER_LABELS,
   HellTimePicker,
   type HellTimePickerLabels,
   type HellTimePickerUi,
   type HellTimeValue,
-} from '@hell-ui/angular/time-picker';
+} from 'hell-ui/time-picker';
 
 type Decision = 'save' | 'discard' | 'stay';
 

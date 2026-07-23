@@ -1,4 +1,4 @@
-import { type HellRecipe, type HellSize } from '@hell-ui/angular/core';
+import { type HellRecipe, type HellSize } from 'hell-ui/core';
 
 type HellChipPresentationPart = 'root';
 

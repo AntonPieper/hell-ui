@@ -10,8 +10,8 @@ import {
   input,
   type InjectionToken,
 } from '@angular/core';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 
 import {
   ɵHELL_TOAST_STACK_OWNER,

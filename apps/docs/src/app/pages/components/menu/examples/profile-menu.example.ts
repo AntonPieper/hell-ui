@@ -5,9 +5,9 @@ import {
   faSolidRightFromBracket,
   faSolidUser,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HellIcon } from 'hell-ui/icon';
 
 const MENU_PROFILE_ICONS = {
   faSolidGear,

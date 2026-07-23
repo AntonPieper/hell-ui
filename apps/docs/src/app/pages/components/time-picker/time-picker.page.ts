@@ -30,8 +30,8 @@ import timePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         title="Time picker"
         icon="faSolidClock"
         category="Composite"
-        importPath="@hell-ui/angular/time-picker"
-        stylesPath="@hell-ui/angular/time-picker/styles.css"
+        importPath="hell-ui/time-picker"
+        stylesPath="hell-ui/time-picker/styles.css"
       >
         A compact segmented picker for structured hour, minute, and optional second selection.
       </hd-page-header>
@@ -133,7 +133,7 @@ import timePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <code class="break-all whitespace-normal"
           >provideHellLabels(HELL_TIME_PICKER_LABELS, overrides)</code
         > from
-        <code>&#64;hell-ui/angular/core</code>. The fields are <code>hours</code>,
+        <code>hell-ui/core</code>. The fields are <code>hours</code>,
         <code>minutes</code>, <code>seconds</code>, <code>selectedTime</code>,
         <code>decreaseUnit</code>, <code>increaseUnit</code>, <code>minutePresets</code>, and
         <code>minutePreset</code>.

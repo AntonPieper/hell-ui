@@ -14,12 +14,12 @@ import {
   faSolidSliders,
   faSolidUser,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
-import { HellTableRowRadio } from '@hell-ui/angular/table';
+import { HellButton } from 'hell-ui/button';
+import { hellSearchResource, type HellSearchField } from 'hell-ui/core';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
+import { HellTableRowRadio } from 'hell-ui/table';
 import {
   HellTableShellCell,
   HellTableShellEmpty,
@@ -28,8 +28,8 @@ import {
   HellTableShellToolbar,
   HellTableStatus,
   HellTanStackTable,
-} from '@hell-ui/angular/table-tanstack';
-import { HellTanStackVirtualRows } from '@hell-ui/angular/table-tanstack/virtual';
+} from 'hell-ui/table-tanstack';
+import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
   createAngularTable,
   getCoreRowModel,

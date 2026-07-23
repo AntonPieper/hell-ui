@@ -52,8 +52,8 @@ import popoverNonModalExampleCodeRaw from './examples/non-modal.example.ts?raw' 
         title="Popover"
         icon="faSolidMessage"
         category="Styled primitive"
-        importPath="@hell-ui/angular/popover"
-        stylesPath="@hell-ui/angular/popover/styles.css"
+        importPath="hell-ui/popover"
+        stylesPath="hell-ui/popover/styles.css"
       >
         A focus-trapping anchored surface for interactive content — richer than a tooltip,
         lighter than a dialog.
@@ -131,7 +131,7 @@ import popoverNonModalExampleCodeRaw from './examples/non-modal.example.ts?raw' 
       <h2>With card</h2>
       <p>
         A link-styled trigger opens a profile summary built from <code>hellCard</code> (narrow
-        entry point <code>@hell-ui/angular/card</code>), <code>hell-avatar</code>, and
+        entry point <code>hell-ui/card</code>), <code>hell-avatar</code>, and
         <code>hellChip</code>. The popover surface itself stays an unpadded frame — its own
         <code>ui</code> refinement removes padding and constrains width — while the nested card
         owns its own Public Parts and visual chrome. This is the shape most "click a name to see

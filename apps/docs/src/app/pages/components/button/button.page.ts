@@ -50,8 +50,8 @@ import buttonVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wi
         title="Button"
         icon="faSolidHandPointer"
         category="Styled primitive"
-        importPath="@hell-ui/angular/button"
-        stylesPath="@hell-ui/angular/button/styles.css"
+        importPath="hell-ui/button"
+        stylesPath="hell-ui/button/styles.css"
       >
         Triggers an action or navigation with guarded disabled semantics on both buttons and anchors.
       </hd-page-header>

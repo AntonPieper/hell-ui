@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPdfViewer, type HellPdfWorkerSource } from '@hell-ui/angular/features/pdf-viewer';
+import { HellPdfViewer, type HellPdfWorkerSource } from 'hell-ui/features/pdf-viewer';
 
 // PDF/browser feature boundary: the optional pdf.js feature entry compiles
 // only with the exact pdf.js peer plus icon peers; the app owns the worker.

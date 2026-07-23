@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HellButton } from 'hell-ui/button';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 import type { NgpPopoverPlacement } from 'ng-primitives/popover';
 
 const PLACEMENTS: NgpPopoverPlacement[] = ['top', 'right', 'bottom', 'left'];

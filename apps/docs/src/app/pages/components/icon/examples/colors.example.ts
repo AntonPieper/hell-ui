@@ -6,7 +6,7 @@ import {
   faSolidTriangleExclamation,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellIcon } from 'hell-ui/icon';
 
 const ICON_COLORS_EXAMPLE_ICONS = {
   faSolidCircleCheck,

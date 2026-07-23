@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component, signal, type WritableSignal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
+import { HellButton } from 'hell-ui/button';
 import {
   HELL_TABLE_UTILITIES_IMPORTS,
   type HellTableResizeAdapter,
   type HellTableResizeEvent,
   type HellTableResizeItem,
-} from '@hell-ui/angular/table';
+} from 'hell-ui/table';
 import {
   HellTableShellCell,
   HellTableShellEmpty,
   HellTableShellExpandedRow,
   HellTanStackTable,
-} from '@hell-ui/angular/table-tanstack';
+} from 'hell-ui/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,

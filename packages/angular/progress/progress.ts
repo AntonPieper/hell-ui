@@ -1,6 +1,6 @@
 import { Directive, input } from '@angular/core';
 import { NgpProgress, NgpProgressIndicator } from 'ng-primitives/progress';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 const HELL_PROGRESS_RECIPE = {
   root: 'relative block h-[calc(var(--spacing)*1.5)] w-full overflow-hidden rounded-full bg-hell-surface-muted',

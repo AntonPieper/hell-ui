@@ -4,7 +4,7 @@ import {
   HellFilePicker,
   type HellFileSelection,
   type HellFileValidator,
-} from '@hell-ui/angular/file-picker';
+} from 'hell-ui/file-picker';
 
 @Component({
   selector: 'app-file-picker-validation-example',

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidEllipsisVertical } from '@ng-icons/font-awesome/solid';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellIcon } from 'hell-ui/icon';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-card-entity-summary-example',

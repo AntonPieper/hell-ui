@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from '@hell-ui/angular/switch';
+import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from 'hell-ui/switch';
 
 @Component({
   selector: 'app-switch-all-parts-styling-example',

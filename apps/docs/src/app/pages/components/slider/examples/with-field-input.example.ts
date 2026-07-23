@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput } from '@hell-ui/angular/input';
-import { HellSlider } from '@hell-ui/angular/slider';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput } from 'hell-ui/input';
+import { HellSlider } from 'hell-ui/slider';
 
 @Component({
   selector: 'app-slider-with-field-input-example',

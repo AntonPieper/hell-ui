@@ -238,9 +238,6 @@ importers:
       '@floating-ui/dom':
         specifier: 'catalog:'
         version: 1.7.6
-      '@hell-ui/angular':
-        specifier: workspace:*
-        version: link:../../packages/angular
       '@lezer/highlight':
         specifier: 'catalog:'
         version: 1.2.3
@@ -256,6 +253,9 @@ importers:
       '@tanstack/virtual-core':
         specifier: 'catalog:'
         version: 3.17.0
+      hell-ui:
+        specifier: workspace:*
+        version: link:../../packages/angular
       ng-primitives:
         specifier: 'catalog:'
         version: 0.123.0(2d92e22ef8f64707773e19771a48aacc)

@@ -22,7 +22,7 @@ export interface HellAudioTranscriptRuntime {
 export type HellAudioTranscriptRuntimeFactory = () => HellAudioTranscriptRuntime;
 
 const audioTranscriptRuntimeFactoryTokenKey = Symbol.for(
-  '@hell-ui/angular/audio-transcript/runtime-factory-token',
+  'hell-ui/audio-transcript/runtime-factory-token',
 );
 const globalAudioTranscriptTokens = globalThis as typeof globalThis & Record<symbol, unknown>;
 

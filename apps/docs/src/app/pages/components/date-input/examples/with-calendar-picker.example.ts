@@ -10,12 +10,12 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendarDays } from '@ng-icons/font-awesome/solid';
 
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HellDatePicker } from '@hell-ui/angular/date-picker';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { HellDateInput } from 'hell-ui/date-input';
+import { HellDatePicker } from 'hell-ui/date-picker';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellIcon } from 'hell-ui/icon';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 
 @Component({
   selector: 'app-date-input-with-calendar-picker-example',

@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
-import { HellDatePicker, HellDateRangePicker } from '@hell-ui/angular/date-picker';
-import { provideHellAudioTranscript } from '@hell-ui/angular/features/audio-transcript';
-import { HellDialpad, type HellDialpadUi } from '@hell-ui/angular/features/dialpad';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellAudioPlayer } from 'hell-ui/audio-player';
+import { HellDatePicker, HellDateRangePicker } from 'hell-ui/date-picker';
+import { provideHellAudioTranscript } from 'hell-ui/features/audio-transcript';
+import { HellDialpad, type HellDialpadUi } from 'hell-ui/features/dialpad';
+import { HellIcon } from 'hell-ui/icon';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck } from '@ng-icons/font-awesome/solid';
 

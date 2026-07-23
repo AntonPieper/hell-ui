@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import { HellChip } from 'hell-ui/chip';
 
 const PERMISSIONS = ['Read', 'Comment', 'Write', 'Manage', 'Admin'];
 

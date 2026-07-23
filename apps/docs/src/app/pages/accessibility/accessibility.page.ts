@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
 
 import { PageHeader } from '../../shared/page-header';
 
@@ -157,7 +157,7 @@ const ACCESSIBILITY_OWNERSHIP: readonly AccessibilityOwnership[] = [
       <div class="hd-prose">
         <h2>Motion preferences</h2>
         <p>
-          Importing <code>@hell-ui/angular/tokens.css</code> makes Hell's semantic duration tokens
+          Importing <code>hell-ui/tokens.css</code> makes Hell's semantic duration tokens
           collapse to 1 ms under <code>prefers-reduced-motion: reduce</code>, preserving lifecycle
           events while making token-driven transitions and entrances effectively instant.
           Entrypoints with hardcoded keyframes — currently Spinner, Skeleton, and Audio Player —

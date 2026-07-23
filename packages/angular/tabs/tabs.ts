@@ -1,6 +1,6 @@
 import { Directive, input } from '@angular/core';
 import { NgpTabset, NgpTabList, NgpTabButton, NgpTabPanel } from 'ng-primitives/tabs';
-import { hellPartStyler, HellOrientation, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, HellOrientation, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 const HELL_TABSET_RECIPE = {
   root: 'flex min-w-0 flex-col data-[orientation=vertical]:flex-row data-[orientation=vertical]:items-start data-[orientation=vertical]:gap-hell-4 max-[640px]:data-[orientation=vertical]:flex-col max-[640px]:data-[orientation=vertical]:items-stretch',

@@ -1,6 +1,6 @@
 # Directive census
 
-All public directives and components exported by `@hell-ui/angular` entry
+All public directives and components exported by `hell-ui` entry
 points, classified by the role that justifies their existence as a directive
 class. Kept current alongside API reports: when a PR adds, removes, or
 repurposes a public directive, update its row here. Established by #261.
@@ -227,7 +227,7 @@ the sidenav's `data-collapsed`).
 | `HellSearchClear` | `button[hellSearchClear]` | directive | behavior | Delegates via `hostDirectives`. |
 | `HellTextarea` | `textarea[hellTextarea]` | directive | behavior | Delegates via `hostDirectives`. |
 
-### internal/core (`@hell-ui/angular/internal/core`)
+### internal/core (`hell-ui/internal/core`)
 
 | Directive | Selector | Kind | Role | Notes |
 | --- | --- | --- | --- | --- |

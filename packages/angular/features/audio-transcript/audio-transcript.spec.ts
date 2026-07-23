@@ -3,7 +3,7 @@ import {
   hellAudioSpeechSupported,
   provideHellAudioTranscript,
 } from './audio-transcript';
-import { type HellAudioTranscriptRuntime } from '@hell-ui/angular/internal/audio-transcript';
+import { type HellAudioTranscriptRuntime } from 'hell-ui/internal/audio-transcript';
 
 describe('HellAudioSpeechTranscriptRuntime', () => {
   const nativeSpeechRecognition = (window as unknown as { SpeechRecognition?: unknown })

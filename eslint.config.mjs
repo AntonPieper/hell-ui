@@ -131,9 +131,9 @@ export default tseslint.config(
         {
           paths: [
             {
-              name: '@hell-ui/angular',
+              name: 'hell-ui',
               message:
-                'Docs must demonstrate narrow import-path entry points; import @hell-ui/angular/<entrypoint> instead of the root entry point.',
+                'Docs must demonstrate narrow import-path entry points; import hell-ui/<entrypoint> instead of the root entry point.',
             },
           ],
         },

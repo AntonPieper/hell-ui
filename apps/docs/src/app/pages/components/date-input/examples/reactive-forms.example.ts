@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellDateInput } from 'hell-ui/date-input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-date-input-reactive-forms-example',

@@ -45,8 +45,8 @@ import { PageHeader } from '../../../shared/page-header';
         title="Empty state"
         icon="faSolidBoxOpen"
         category="Mixed entry point"
-        importPath="@hell-ui/angular/empty-state"
-        stylesPath="@hell-ui/angular/empty-state/styles.css"
+        importPath="hell-ui/empty-state"
+        stylesPath="hell-ui/empty-state/styles.css"
       >
         A centered media, title, description, and actions presentation for any region that has
         nothing to show — with ready-made glyphs, reusable copy, and calls to action so blank screens still move the user
@@ -64,7 +64,7 @@ import { PageHeader } from '../../../shared/page-header';
         Reach for it whenever a list, table, dashboard card, or whole route would otherwise render
         empty: a feature the user has not used yet, a filter that matched nothing, a failed load, or
         a screen they lack permission for. Pair it with a <code>hellButton</code> (narrow entry
-        point <code>&#64;hell-ui/angular/button</code>) so the empty state offers the obvious next
+        point <code>hell-ui/button</code>) so the empty state offers the obvious next
         step.
       </p>
 

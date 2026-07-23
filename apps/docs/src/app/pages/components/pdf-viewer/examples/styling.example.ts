@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellPdfViewer, type HellPdfViewerUi } from '@hell-ui/angular/features/pdf-viewer';
+import { HellPdfViewer, type HellPdfViewerUi } from 'hell-ui/features/pdf-viewer';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
 @Component({

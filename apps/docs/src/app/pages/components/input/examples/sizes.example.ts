@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellInput } from '@hell-ui/angular/input';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-input-sizes-example',

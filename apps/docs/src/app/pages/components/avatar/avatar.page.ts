@@ -45,8 +45,8 @@ import avatarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         title="Avatar"
         icon="faSolidUser"
         category="Styled primitive"
-        importPath="@hell-ui/angular/avatar"
-        stylesPath="@hell-ui/angular/avatar/styles.css"
+        importPath="hell-ui/avatar"
+        stylesPath="hell-ui/avatar/styles.css"
       >
         Identifies a person or entity with a photo, falling back to initials the instant the image is
         missing or fails to load.
@@ -103,7 +103,7 @@ import avatarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <h2>With card and tag</h2>
       <p>
         Avatars rarely stand alone in product UI. Pairing one with
-        <code>@hell-ui/angular/card</code> and <code>@hell-ui/angular/chip</code> builds a compact
+        <code>hell-ui/card</code> and <code>hell-ui/chip</code> builds a compact
         profile header for a settings page, a people directory, or a detail panel.
       </p>
       <hd-example-tabs [code]="avatarWithCardProfileExampleCode" previewClass="flex">

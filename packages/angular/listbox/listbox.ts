@@ -1,9 +1,9 @@
 import { Directive, inject, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import {
   HELL_OPTION_SURFACE_METRICS,
   HELL_OPTION_SURFACE_SELECTED_STATES,
-} from '@hell-ui/angular/internal/option';
+} from 'hell-ui/internal/option';
 import {
   NgpListbox,
   NgpListboxHeader,

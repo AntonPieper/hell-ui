@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import { HellChip } from 'hell-ui/chip';
 
 interface Ticket {
   readonly id: string;

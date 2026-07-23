@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/radio';
+import { HellRadio, HellRadioGroup, HellRadioIndicator } from 'hell-ui/radio';
 
 @Component({
   selector: 'app-radio-basic-example',

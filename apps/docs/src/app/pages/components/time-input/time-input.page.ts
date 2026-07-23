@@ -58,8 +58,8 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         title="Time input"
         icon="faSolidClock"
         category="Styled primitive"
-        importPath="@hell-ui/angular/time-input"
-        stylesPath="@hell-ui/angular/time-input/styles.css"
+        importPath="hell-ui/time-input"
+        stylesPath="hell-ui/time-input/styles.css"
       >
         Time parsing, formatting, validation, and forms behavior on a real native input.
       </hd-page-header>
@@ -209,7 +209,7 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         root map, so a string or <code>{{ '{ root: "…" }' }}</code> refines the native input only.
         Style a composed Control Group, action, Popover, Icon, and Time Picker at each primitive's
         own local Part Style Map. Import
-        <code>&#64;hell-ui/angular/time-picker/styles.css</code> separately when rendering the picker;
+        <code>hell-ui/time-picker/styles.css</code> separately when rendering the picker;
         Time Input's stylesheet no longer includes it.
       </p>
       <hd-example-tabs [code]="timeInputStylingExampleCode" previewClass="grid max-w-sm gap-2">
@@ -331,7 +331,7 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
           the owned anatomy.
         </li>
         <li>
-          Add <code>&#64;hell-ui/angular/time-picker/styles.css</code> when composing Time Picker;
+          Add <code>hell-ui/time-picker/styles.css</code> when composing Time Picker;
           <code>time-input/styles.css</code> now ships only the native input recipe source.
         </li>
       </ul>

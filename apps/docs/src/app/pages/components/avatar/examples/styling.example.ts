@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellAvatar, type HellAvatarUi } from '@hell-ui/angular/avatar';
+import { HellAvatar, type HellAvatarUi } from 'hell-ui/avatar';
 
 @Component({
   selector: 'app-avatar-styling-example',

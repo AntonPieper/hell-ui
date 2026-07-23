@@ -49,8 +49,8 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
         title="Combobox"
         icon="faSolidKeyboard"
         category="Styled primitive"
-        importPath="@hell-ui/angular/combobox"
-        stylesPath="@hell-ui/angular/combobox/styles.css"
+        importPath="hell-ui/combobox"
+        stylesPath="hell-ui/combobox/styles.css"
       >
         One projection-first interaction state machine for an editable input and a
         keyboard-navigable option list.
@@ -225,7 +225,7 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
       </p>
       <p>
         Search Resource and <code>HellPickValue</code> live in
-        <code>&#64;hell-ui/angular/core</code>. Control Group, Chip Set, and Chip Input keep their own
+        <code>hell-ui/core</code>. Control Group, Chip Set, and Chip Input keep their own
         public contracts and stylesheets; import them only when the composition needs them.
       </p>
 

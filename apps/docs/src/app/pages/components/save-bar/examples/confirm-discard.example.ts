@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { injectHellPrompt } from '@hell-ui/angular/confirm';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput } from '@hell-ui/angular/input';
-import { HellSaveBar } from '@hell-ui/angular/save-bar';
+import { injectHellPrompt } from 'hell-ui/confirm';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput } from 'hell-ui/input';
+import { HellSaveBar } from 'hell-ui/save-bar';
 
 @Component({
   selector: 'app-save-bar-confirm-discard-example',

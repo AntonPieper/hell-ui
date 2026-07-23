@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   HellDateRangePicker,
   type HellDateRangePickerUi,
-} from '@hell-ui/angular/date-picker';
+} from 'hell-ui/date-picker';
 
 @Component({
   selector: 'app-date-picker-styling-example',

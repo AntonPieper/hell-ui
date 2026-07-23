@@ -1,4 +1,4 @@
-import { hellSearchKey } from '@hell-ui/angular/core';
+import { hellSearchKey } from 'hell-ui/core';
 import { HD_DOCS_SECTIONS, hdDocsSectionForPath, type DocsSearchItem, type DocsSearchKind } from './docs-catalog';
 
 interface DocsSearchSeed {
@@ -1155,14 +1155,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/omnibar',
  detail:'components/omnibar/examples/command-palette.example.ts',
  terms:
-'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/chip hotkey mod+k query submit hellSearchResource HellSearchField hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hell-icon HellIcon topbar grouped commands shortcut chips composite',
+'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd hell-ui/chip hotkey mod+k query submit hellSearchResource HellSearchField hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hell-icon HellIcon topbar grouped commands shortcut chips composite',
  },
  {
  title:'Omnibar: Global hotkey',
  path:'/components/omnibar',
  detail:'components/omnibar/examples/hotkey.example.ts',
  terms:
-'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut query hellSearchResource HellSearchField hellOmnibarTrailing hellKbd kbd @hell-ui/angular/chip hellOmnibarGroup hellOmnibarItem command palette editable target protection',
+'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut query hellSearchResource HellSearchField hellOmnibarTrailing hellKbd kbd hell-ui/chip hellOmnibarGroup hellOmnibarItem command palette editable target protection',
  },
  {
  title:'Omnibar: Sizes',
@@ -1806,7 +1806,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'components/table/examples/tanstack-virtual.example.ts',
  terms:
-'tanstack components/table/examples/tanstack-virtual.example components/table @hell-ui/angular/table-tanstack/virtual hellTanStackVirtualRows virtualEstimateRowSize virtualOverscan hellTableShellExpandedRow hellTableShellCell hellTableShellToolbar hell-tanstack-table hell-omnibar hellMenu expanded',
+'tanstack components/table/examples/tanstack-virtual.example components/table hell-ui/table-tanstack/virtual hellTanStackVirtualRows virtualEstimateRowSize virtualOverscan hellTableShellExpandedRow hellTableShellCell hellTableShellToolbar hell-tanstack-table hell-omnibar hellMenu expanded',
  },
  {
  title:'Tabs: Basic',

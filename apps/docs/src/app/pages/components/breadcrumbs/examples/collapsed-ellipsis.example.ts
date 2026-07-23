@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
+import { HELL_BREADCRUMBS_IMPORTS } from 'hell-ui/breadcrumbs';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
 
 @Component({
   selector: 'app-breadcrumbs-collapsed-ellipsis-example',

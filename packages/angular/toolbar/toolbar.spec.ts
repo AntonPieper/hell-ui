@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
-import { HellButton } from '@hell-ui/angular/button';
-import { provideHellLabels } from '@hell-ui/angular/core';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import { HellButton } from 'hell-ui/button';
+import { provideHellLabels } from 'hell-ui/core';
+import { HellTooltip, HellTooltipSurface } from 'hell-ui/tooltip';
 
 import {
   HELL_OVERFLOW_TOOLBAR_LABELS,

@@ -9,10 +9,10 @@ import {
   faSolidSwatchbook,
   faSolidUniversalAccess,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellChip } from 'hell-ui/chip';
 
 const HD_OVERVIEW_ICONS = {
   faSolidBolt,

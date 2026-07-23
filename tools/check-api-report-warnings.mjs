@@ -46,8 +46,8 @@ const forgottenExportAllowlist = new Map();
  */
 const classifiedInternalContracts = [
   {
-    report: '@hell-ui/angular/core',
-    from: '@hell-ui/angular/internal/core',
+    report: 'hell-ui/core',
+    from: 'hell-ui/internal/core',
     symbols: [
       'HellFloatingElement',
       'hellInvalidTypedValue',
@@ -63,8 +63,8 @@ const classifiedInternalContracts = [
       'core deliberately re-exports the stable value, pick, and floating-element contracts whose definitions live behind the guarded internal/core baseline',
   },
   {
-    report: '@hell-ui/angular',
-    from: '@hell-ui/angular/internal/core',
+    report: 'hell-ui',
+    from: 'hell-ui/internal/core',
     symbols: [
       'HellFloatingElement',
       'hellInvalidTypedValue',
@@ -80,22 +80,22 @@ const classifiedInternalContracts = [
       'the root entry point re-exports the core surface, including the stable contracts defined behind the guarded internal/core baseline',
   },
   {
-    report: '@hell-ui/angular/dialog',
-    from: '@hell-ui/angular/internal/core',
+    report: 'hell-ui/dialog',
+    from: 'hell-ui/internal/core',
     symbols: ['HellNativeInteractiveDisabledGuard'],
     reason:
       'HellDialogTrigger extends the shared native-interactive disabled-state guard owned by the guarded internal/core baseline',
   },
   {
-    report: '@hell-ui/angular/menu',
-    from: '@hell-ui/angular/internal/core',
+    report: 'hell-ui/menu',
+    from: 'hell-ui/internal/core',
     symbols: ['HellNativeInteractiveDisabledGuard'],
     reason:
       'the menu trigger extends the shared native-interactive disabled-state guard owned by the guarded internal/core baseline',
   },
   {
-    report: '@hell-ui/angular/popover',
-    from: '@hell-ui/angular/internal/core',
+    report: 'hell-ui/popover',
+    from: 'hell-ui/internal/core',
     symbols: ['HellNativeInteractiveDisabledGuard'],
     reason:
       'the popover trigger extends the shared native-interactive disabled-state guard owned by the guarded internal/core baseline',
@@ -109,7 +109,7 @@ const missingGetterPattern =
   /\(ae-missing-getter\) The property "([^"]+)" has a setter but no getter/g;
 const namedImportPattern = /^import \{ ([^}]+) \} from '([^']+)';$/gm;
 const namespaceImportPattern = /^import \* as \S+ from '([^']+)';$/gm;
-const internalSpecifierPattern = /^@hell-ui\/angular\/internal\//;
+const internalSpecifierPattern = /^hell-ui\/internal\//;
 
 /**
  * Scan one generated report's text for release-blocking analysis warnings.
@@ -266,7 +266,7 @@ export function validateWarningGateConfiguration(reportSpecifiers) {
 
 /** Self-check with synthetic report texts; runs before the real gate. */
 export function checkApiReportWarningGateFixture() {
-  const specifier = '@hell-ui/angular/fixture';
+  const specifier = 'hell-ui/fixture';
   const leakReport = [
     '// Warning: (ae-forgotten-export) The symbol "ModuleLocalLeak" needs to be exported by the entry point fixture.d.ts',
     '// fixture.d.ts:2:1 - (ae-forgotten-export) The symbol "ModuleLocalLeak" needs to be exported by the entry point fixture.d.ts',
@@ -313,9 +313,9 @@ export function checkApiReportWarningGateFixture() {
   assert.match(missingGetterFailures[0], /"setterOnly"/, 'the failure must name the property');
 
   const internalImportReport = [
-    "import { FixtureContract } from '@hell-ui/angular/internal/fixture';",
+    "import { FixtureContract } from 'hell-ui/internal/fixture';",
     "import { Signal } from '@angular/core';",
-    "import { HellPublicSibling } from '@hell-ui/angular/core';",
+    "import { HellPublicSibling } from 'hell-ui/core';",
   ].join('\n');
   assert.match(
     scanInternalContractImports({
@@ -329,7 +329,7 @@ export function checkApiReportWarningGateFixture() {
   const classification = [
     {
       report: specifier,
-      from: '@hell-ui/angular/internal/fixture',
+      from: 'hell-ui/internal/fixture',
       symbols: ['FixtureContract'],
       reason: 'fixture rationale',
     },
@@ -347,7 +347,7 @@ export function checkApiReportWarningGateFixture() {
   assert.match(
     scanInternalContractImports({
       specifier,
-      reportText: "import * as fixture from '@hell-ui/angular/internal/fixture';",
+      reportText: "import * as fixture from 'hell-ui/internal/fixture';",
       classification,
     })[0],
     /namespace import/,
@@ -355,7 +355,7 @@ export function checkApiReportWarningGateFixture() {
   );
   assert.deepEqual(
     scanInternalContractImports({
-      specifier: '@hell-ui/angular/internal/fixture-sibling',
+      specifier: 'hell-ui/internal/fixture-sibling',
       reportText: internalImportReport,
       classification: [],
     }),

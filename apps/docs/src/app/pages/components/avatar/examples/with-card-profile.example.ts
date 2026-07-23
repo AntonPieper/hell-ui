@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-avatar-with-card-profile-example',

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
-import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_SEARCH_IMPORTS, HellInput } from 'hell-ui/input';
+import { HELL_LISTBOX_IMPORTS } from 'hell-ui/listbox';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import { HellChip } from 'hell-ui/chip';
 
 type InvoiceStatus = 'Paid' | 'Open' | 'Overdue';
 

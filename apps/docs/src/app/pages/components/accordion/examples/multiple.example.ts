@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
+import { HELL_ACCORDION_IMPORTS } from 'hell-ui/accordion';
 
 @Component({
   selector: 'app-accordion-multiple-example',

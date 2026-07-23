@@ -39,8 +39,8 @@ import {
   type NgpShift,
   type NgpShiftInput,
 } from 'ng-primitives/portal';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
-import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import { hellRegisterFloatingHost } from 'hell-ui/internal/core';
 
 const HELL_TOOLTIP_RECIPE = {
   root: 'pointer-events-auto absolute max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))] rounded-hell-sm bg-[#1c222a] px-2 py-1 text-xs font-medium leading-[var(--text-xs--line-height)] text-white shadow-hell-md [overflow-wrap:anywhere] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)] motion-reduce:animate-none',

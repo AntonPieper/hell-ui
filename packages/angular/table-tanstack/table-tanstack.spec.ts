@@ -26,8 +26,8 @@ import {
   HellTableShellLoading,
   HellTableShellToolbar,
 } from './table-tanstack';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellTanStackVirtualRows } from '@hell-ui/angular/table-tanstack/virtual';
+import { HellButton } from 'hell-ui/button';
+import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 interface Person {

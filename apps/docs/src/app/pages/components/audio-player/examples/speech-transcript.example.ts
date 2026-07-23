@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
-import { provideHellAudioTranscript } from '@hell-ui/angular/features/audio-transcript';
+import { HellAudioPlayer } from 'hell-ui/audio-player';
+import { provideHellAudioTranscript } from 'hell-ui/features/audio-transcript';
 
 @Component({
   selector: 'app-audio-player-speech-transcript-example',

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellToggle } from '@hell-ui/angular/toggle';
+import { HellIcon } from 'hell-ui/icon';
+import { HellToggle } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-basic-example',

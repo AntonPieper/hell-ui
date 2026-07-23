@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { hellSearchResource } from '@hell-ui/angular/core';
+import { hellSearchResource } from 'hell-ui/core';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
   type HellFilter,
   type HellFilterBuilderEditorContext,
   type HellFilterBuilderUi,
   type HellFilterFieldDescriptor,
-} from '@hell-ui/angular/features/filter-builder';
+} from 'hell-ui/features/filter-builder';
 
 interface IdentifiedFilter<TField extends string, TOperator extends string, TValue>
   extends HellFilter<TField, TOperator, TValue> {

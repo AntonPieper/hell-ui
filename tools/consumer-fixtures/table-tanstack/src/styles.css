@@ -1,7 +1,7 @@
 @import 'tailwindcss';
-@import '@hell-ui/angular/tokens.css';
-@import '@hell-ui/angular/button/styles.css';
-@import '@hell-ui/angular/checkbox/styles.css';
-@import '@hell-ui/angular/input/styles.css';
-@import '@hell-ui/angular/radio/styles.css';
-@import '@hell-ui/angular/table-tanstack/styles.css';
+@import 'hell-ui/tokens.css';
+@import 'hell-ui/button/styles.css';
+@import 'hell-ui/checkbox/styles.css';
+@import 'hell-ui/input/styles.css';
+@import 'hell-ui/radio/styles.css';
+@import 'hell-ui/table-tanstack/styles.css';

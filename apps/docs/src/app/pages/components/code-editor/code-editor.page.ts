@@ -32,7 +32,7 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import '@hell-ui/angular/features/code-editor/styles.css';
+      @import 'hell-ui/features/code-editor/styles.css';
     `,
   ],
   imports: [
@@ -53,8 +53,8 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         icon="faSolidCode"
         category="Feature"
         status="Experimental"
-        importPath="@hell-ui/angular/features/code-editor"
-        stylesPath="@hell-ui/angular/features/code-editor/styles.css"
+        importPath="hell-ui/features/code-editor"
+        stylesPath="hell-ui/features/code-editor/styles.css"
       >
         A CodeMirror 6 editor with signal-driven value sync, read-only viewer mode, and the hell
         theme baked in — you bring the language extensions.

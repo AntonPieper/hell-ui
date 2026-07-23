@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellCheckbox } from '@hell-ui/angular/checkbox';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellCheckbox } from 'hell-ui/checkbox';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-checkbox-basic-example',

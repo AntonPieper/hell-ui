@@ -27,9 +27,9 @@ import {
   type NgpDismissGuardInput,
 } from 'ng-primitives/portal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
-import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import type { HellSize } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 import {
   HELL_DIALOG_SCOPE_ROOT,
   HellDialogScopedOverlayAdapter,

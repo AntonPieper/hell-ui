@@ -8,4 +8,4 @@ export type {
   HellPickSingleValue,
   HellPickMultipleValue,
   HellPickValue,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';

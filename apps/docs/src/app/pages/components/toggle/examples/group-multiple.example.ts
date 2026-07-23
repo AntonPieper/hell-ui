@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-group-multiple-example',

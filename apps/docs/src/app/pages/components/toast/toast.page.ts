@@ -50,8 +50,8 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
         title="Toast"
         icon="faSolidBell"
         category="Composite"
-        importPath="@hell-ui/angular/toast"
-        stylesPath="@hell-ui/angular/toast/styles.css"
+        importPath="hell-ui/toast"
+        stylesPath="hell-ui/toast/styles.css"
       >
         Non-blocking notifications driven by a service and one global toaster, with a Sonner-style
         stack that fans out on hover and pauses its timers while you read.

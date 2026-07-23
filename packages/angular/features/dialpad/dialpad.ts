@@ -11,8 +11,8 @@ import { ChangeDetectionStrategy,
   signal, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the dialpad entry point. */

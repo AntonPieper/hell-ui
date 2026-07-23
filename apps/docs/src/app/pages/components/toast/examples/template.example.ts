@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, TemplateRef, inject, viewChild } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellToastService, type HellToastRef } from '@hell-ui/angular/toast';
+import { HellButton } from 'hell-ui/button';
+import { HellToastService, type HellToastRef } from 'hell-ui/toast';
 
 @Component({
   selector: 'app-toast-template-example',

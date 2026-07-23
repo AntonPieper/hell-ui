@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-chip-variants-example',

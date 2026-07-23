@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+import { HellCodeEditor } from 'hell-ui/features/code-editor';
 
 /**
  * Code Editor Control Value Authority boundary coverage (#290): the packed

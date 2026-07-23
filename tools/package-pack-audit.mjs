@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const angularPackageName = '@hell-ui/angular';
+const angularPackageName = 'hell-ui';
 
 // The packed .ts recipe sources ship so consumer Tailwind builds can scan the
 // Part Recipe class strings. Their list is owned by the asset entries in
@@ -311,7 +311,7 @@ function checkApfPackageJson(packageJson, fileSet, tarball, failures) {
     }
 
     if (packageJson.name === angularPackageName && (key === './styles' || key.startsWith('./styles/'))) {
-      failures.push(`@hell-ui/angular must not include legacy category style export ${key}`);
+      failures.push(`hell-ui must not include legacy category style export ${key}`);
       continue;
     }
 
@@ -424,15 +424,15 @@ function checkPackagePeers(packageJson, failures) {
     ...packagePeerGroups.pdfViewer,
   ];
   const expectedPeers = [...packagePeerGroups.core, ...expectedOptionalPeers];
-  assertSameSet('@hell-ui/angular peerDependencies', expectedPeers, peerNames, failures);
+  assertSameSet('hell-ui peerDependencies', expectedPeers, peerNames, failures);
   assertSameSet(
-    '@hell-ui/angular required peerDependencies',
+    'hell-ui required peerDependencies',
     packagePeerGroups.core,
     requiredPeerNames(packageJson),
     failures,
   );
   assertSameSet(
-    '@hell-ui/angular optional peerDependenciesMeta',
+    'hell-ui optional peerDependenciesMeta',
     expectedOptionalPeers,
     [...optionalPeers],
     failures,
@@ -441,7 +441,7 @@ function checkPackagePeers(packageJson, failures) {
   const workspaceCatalog = readWorkspaceCatalog();
   if (peers['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
     failures.push(
-      `@hell-ui/angular must pin the pdfjs-dist optional peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+      `hell-ui must pin the pdfjs-dist optional peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
     );
   }
 }

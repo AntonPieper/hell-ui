@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellSwitch } from '@hell-ui/angular/switch';
+import { HellSwitch } from 'hell-ui/switch';
 
 @Component({
   selector: 'app-switch-basic-example',

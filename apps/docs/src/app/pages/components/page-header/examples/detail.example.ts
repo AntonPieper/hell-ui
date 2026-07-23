@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidPenToSquare, faSolidShareNodes, faSolidTrash } from '@ng-icons/font-awesome/solid';
-import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_PAGE_HEADER_IMPORTS } from '@hell-ui/angular/page-header';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
+import { HELL_BREADCRUMBS_IMPORTS } from 'hell-ui/breadcrumbs';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_PAGE_HEADER_IMPORTS } from 'hell-ui/page-header';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
 
 @Component({
   selector: 'app-page-header-detail-example',

@@ -7,10 +7,10 @@ import {
   faSolidBold,
   faSolidItalic,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
-import { HellTooltip } from '@hell-ui/angular/tooltip';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
+import { HellTooltip } from 'hell-ui/tooltip';
 
 @Component({
   selector: 'app-toolbar-icon-only-example',

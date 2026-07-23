@@ -1,7 +1,7 @@
 import { Directive, inject, input } from '@angular/core';
-import type { HellSize } from '@hell-ui/angular/core';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import type { HellSize } from 'hell-ui/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the spinner entry point. */

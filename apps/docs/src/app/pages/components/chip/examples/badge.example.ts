@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellBadge } from '@hell-ui/angular/chip';
+import { HellBadge } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-chip-badge-example',

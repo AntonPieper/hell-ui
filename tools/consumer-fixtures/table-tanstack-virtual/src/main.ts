@@ -4,8 +4,8 @@ import {
   HellTableShellEmpty,
   HellTableShellExpandedRow,
   HellTanStackTable,
-} from '@hell-ui/angular/table-tanstack';
-import { HellTanStackVirtualRows } from '@hell-ui/angular/table-tanstack/virtual';
+} from 'hell-ui/table-tanstack';
+import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
   createAngularTable,
   getCoreRowModel,

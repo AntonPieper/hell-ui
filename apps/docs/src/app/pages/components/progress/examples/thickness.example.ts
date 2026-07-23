@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 
 @Component({
   selector: 'app-progress-thickness-example',

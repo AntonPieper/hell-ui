@@ -1,8 +1,8 @@
 @import 'tailwindcss';
-@import '@hell-ui/angular/tokens.css';
-@import '@hell-ui/angular/audio-player/styles.css';
-@import '@hell-ui/angular/button/styles.css';
-@import '@hell-ui/angular/date-picker/styles.css';
-@import '@hell-ui/angular/icon/styles.css';
-@import '@hell-ui/angular/slider/styles.css';
-@import '@hell-ui/angular/features/dialpad/styles.css';
+@import 'hell-ui/tokens.css';
+@import 'hell-ui/audio-player/styles.css';
+@import 'hell-ui/button/styles.css';
+@import 'hell-ui/date-picker/styles.css';
+@import 'hell-ui/icon/styles.css';
+@import 'hell-ui/slider/styles.css';
+@import 'hell-ui/features/dialpad/styles.css';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellDialpad } from '@hell-ui/angular/features/dialpad';
-import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
+import { HellDialpad } from 'hell-ui/features/dialpad';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-dialpad-states-example',

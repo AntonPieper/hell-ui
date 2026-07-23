@@ -1,8 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import type { HellPickValue } from 'hell-ui/core';
 
 /**
  * Select Pick Value Control Value Authority boundary coverage (#287): the

@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellDateInput } from '@hell-ui/angular/date-input';
+import { HellDateInput } from 'hell-ui/date-input';
 
 function formatDay(value: Date | null): string {
   if (!value) return 'null';

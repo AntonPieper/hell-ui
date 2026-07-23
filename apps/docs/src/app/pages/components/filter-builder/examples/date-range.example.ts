@@ -6,7 +6,7 @@ import {
 import {
   HELL_FILTER_BUILDER_IMPORTS,
   type HellFilterFieldDescriptor,
-} from '@hell-ui/angular/features/filter-builder';
+} from 'hell-ui/features/filter-builder';
 
 import {
   FilterBuilderDateRangeEditor,

@@ -42,8 +42,8 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
         title="Skeleton"
         icon="faSolidBarsStaggered"
         category="Styled primitive"
-        importPath="@hell-ui/angular/skeleton"
-        stylesPath="@hell-ui/angular/skeleton/styles.css"
+        importPath="hell-ui/skeleton"
+        stylesPath="hell-ui/skeleton/styles.css"
       >
         A layout-shaped placeholder that reserves the exact footprint of content still loading, so
         the page never jumps when it arrives.
@@ -58,7 +58,7 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
         Reach for <code>hellSkeleton</code> when you know the shape of the content that is coming
         — a line of text, an avatar, a card — and want to reserve its space. Reach for
         <a routerLink="/components/spinner">Spinner</a> (its own entry point,
-        <code>@hell-ui/angular/spinner</code>) for short, unquantifiable waits such as a submit
+        <code>hell-ui/spinner</code>) for short, unquantifiable waits such as a submit
         button or a refresh icon, where there is no layout to preserve.
       </p>
 
@@ -90,7 +90,7 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
       <h2>With card and avatar</h2>
       <p>
         A realistic loading state: <code>hellCard</code> (narrow entry point
-        <code>@hell-ui/angular/card</code>) supplies the surface, and its header/body swap between
+        <code>hell-ui/card</code>) supplies the surface, and its header/body swap between
         <code>hellSkeleton</code> placeholders and the real <code>hell-avatar</code> and copy once
         data arrives. The card also sets <code>aria-busy</code> while loading so assistive tech gets
         one region-level signal instead of one per placeholder.

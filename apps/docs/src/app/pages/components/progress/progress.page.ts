@@ -45,8 +45,8 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
         title="Progress"
         icon="faSolidBarsProgress"
         category="Styled primitive"
-        importPath="@hell-ui/angular/progress"
-        stylesPath="@hell-ui/angular/progress/styles.css"
+        importPath="hell-ui/progress"
+        stylesPath="hell-ui/progress/styles.css"
       >
         A determinate track-and-fill bar for tasks whose completion percentage you already know.
       </hd-page-header>

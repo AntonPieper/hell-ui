@@ -13,19 +13,19 @@ import {
   untracked,
 } from '@angular/core';
 import { type FormValueControl } from '@angular/forms/signals';
-import { hellPartStyler, type HellPickValue, type HellRecipe, type HellSize, type HellUiInput } from '@hell-ui/angular/core';
-import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
+import { hellPartStyler, type HellPickValue, type HellRecipe, type HellSize, type HellUiInput } from 'hell-ui/core';
+import { hellOptionSurfaceRecipe } from 'hell-ui/internal/option';
 import {
   HELL_FLOATING_POP_IN,
   HELL_FLOATING_SURFACE,
   HELL_FLOATING_Z_POPOVER,
-} from '@hell-ui/angular/internal/floating';
+} from 'hell-ui/internal/floating';
 import {
   hellRegisterFloatingHost,
   hellNormalizePickValue,
   hellSamePickValue,
   HellPickerFocusScope,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 import {
   NgpSelect,
   NgpSelectDropdown,

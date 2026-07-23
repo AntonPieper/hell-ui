@@ -9,12 +9,12 @@ import {
   faSolidUser,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { hellSearchResource, type HellSearchField } from 'hell-ui/core';
+import { HELL_APP_SHELL_IMPORTS } from 'hell-ui/app-shell';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HellIcon } from 'hell-ui/icon';
 
 interface Page {
   readonly id: string;

@@ -35,8 +35,8 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
         title="Dialpad"
         icon="faSolidPhone"
         category="Feature"
-        importPath="@hell-ui/angular/features/dialpad"
-        stylesPath="@hell-ui/angular/features/dialpad/styles.css"
+        importPath="hell-ui/features/dialpad"
+        stylesPath="hell-ui/features/dialpad/styles.css"
       >
         A phone-style keypad for entering and calling a number, with owned display, key, and
         action anatomy end to end.
@@ -57,7 +57,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
       </p>
       <p>
         Like the code editor and PDF viewer, the dialpad ships behind an optional feature entry
-        point (<code>&#64;hell-ui/angular/features/dialpad</code>), so telephony markup only travels
+        point (<code>hell-ui/features/dialpad</code>), so telephony markup only travels
         with the apps that opt into it rather than the core import surface.
       </p>
 

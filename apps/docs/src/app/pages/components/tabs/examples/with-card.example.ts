@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellChip } from '@hell-ui/angular/chip';
-import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellChip } from 'hell-ui/chip';
+import { HELL_TABS_IMPORTS } from 'hell-ui/tabs';
 
 @Component({
   selector: 'app-tabs-with-card-example',

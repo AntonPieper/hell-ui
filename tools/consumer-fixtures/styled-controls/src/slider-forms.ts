@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellSlider } from '@hell-ui/angular/slider';
+import { HellSlider } from 'hell-ui/slider';
 
 /**
  * Slider Control Value Authority boundary coverage (#277): the packed

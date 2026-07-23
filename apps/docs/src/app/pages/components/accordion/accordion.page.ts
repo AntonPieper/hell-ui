@@ -40,8 +40,8 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
         title="Accordion"
         icon="faSolidLayerGroup"
         category="Styled primitive"
-        importPath="@hell-ui/angular/accordion"
-        stylesPath="@hell-ui/angular/accordion/styles.css"
+        importPath="hell-ui/accordion"
+        stylesPath="hell-ui/accordion/styles.css"
       >
         Vertically stacked disclosure sections that reveal one panel — or several — at a time
         without leaving the page.
@@ -92,8 +92,8 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
       <h2>With settings panel</h2>
       <p>
         Nest an accordion inside <code>hellCard</code> (narrow entry point
-        <code>@hell-ui/angular/card</code>) for a grouped settings surface, and lead each trigger
-        with a <code>hell-icon</code> (narrow entry point <code>@hell-ui/angular/icon</code>) so
+        <code>hell-ui/card</code>) for a grouped settings surface, and lead each trigger
+        with a <code>hell-icon</code> (narrow entry point <code>hell-ui/icon</code>) so
         sections are scannable at a glance. Flatten the card body's padding and the accordion's own
         border with <code>ui</code> so the two components read as one surface.
       </p>

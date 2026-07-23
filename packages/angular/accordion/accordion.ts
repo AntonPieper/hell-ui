@@ -1,5 +1,5 @@
 import { computed, Directive, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import {
   NgpAccordion,
   NgpAccordionItem,

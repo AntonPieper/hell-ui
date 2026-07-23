@@ -1,10 +1,10 @@
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import {
   HellResizePairInteractionController,
   hellResizePairAriaValue,
   type HellResizeDirection,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 import {
   hellTableResizeAdapterCanResize,
   hellTableResizeEvent,

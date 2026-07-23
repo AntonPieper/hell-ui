@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellDatePicker } from '@hell-ui/angular/date-picker';
+import { HellDatePicker } from 'hell-ui/date-picker';
 
 @Component({
   selector: 'app-date-picker-basic-example',

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-icon-styling-example',

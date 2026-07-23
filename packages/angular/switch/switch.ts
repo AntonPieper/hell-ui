@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { type FormCheckboxControl } from '@angular/forms/signals';
 import { NgpSwitchThumb, ngpSwitch, provideSwitchState } from 'ng-primitives/switch';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 
 let nextSwitchId = 0;
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { injectHellPrompt } from '@hell-ui/angular/confirm';
-import { HellInput } from '@hell-ui/angular/input';
+import { HellButton } from 'hell-ui/button';
+import { injectHellPrompt } from 'hell-ui/confirm';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-confirm-choice-unsaved-changes-example',

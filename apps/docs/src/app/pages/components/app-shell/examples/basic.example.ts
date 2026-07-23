@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGauge, faSolidUsers } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_APP_SHELL_IMPORTS } from 'hell-ui/app-shell';
+import { HellIcon } from 'hell-ui/icon';
 
 const HD_APP_SHELL_BASIC_ICONS = {
   faSolidFolderOpen,

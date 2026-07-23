@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellCheckbox } from '@hell-ui/angular/checkbox';
+import { HellCheckbox } from 'hell-ui/checkbox';
 
 @Component({
   selector: 'app-checkbox-states-example',

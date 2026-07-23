@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-import { HellControlGroup } from '@hell-ui/angular/control-group';
-import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
+import { HellControlGroup } from 'hell-ui/control-group';
+import { HELL_NUMBER_INPUT_IMPORTS } from 'hell-ui/number-input';
 
 @Component({
   selector: 'app-number-input-sizes-example',

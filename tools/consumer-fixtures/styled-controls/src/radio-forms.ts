@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellRadio, HellRadioGroup } from '@hell-ui/angular/radio';
+import { HellRadio, HellRadioGroup } from 'hell-ui/radio';
 
 /**
  * Radio Group Control Value Authority boundary coverage (#288): the packed

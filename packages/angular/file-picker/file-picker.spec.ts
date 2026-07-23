@@ -2,7 +2,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
+import { provideHellLabels } from 'hell-ui/core';
 
 import {
   HellFilePicker,

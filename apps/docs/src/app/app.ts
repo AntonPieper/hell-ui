@@ -83,19 +83,19 @@ import {
   HellAppSecondaryBody,
   HellSidenavToggle,
   HellSecondaryToggle,
-} from '@hell-ui/angular/app-shell';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import { HellChip } from '@hell-ui/angular/chip';
-import { HellToaster } from '@hell-ui/angular/toast';
+} from 'hell-ui/app-shell';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import { HellChip } from 'hell-ui/chip';
+import { HellToaster } from 'hell-ui/toast';
 import {
   hellSearchResource,
   type HellPickValue,
   type HellSearchField,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
   HD_DOCS_KIND_FILTER_OPTIONS,

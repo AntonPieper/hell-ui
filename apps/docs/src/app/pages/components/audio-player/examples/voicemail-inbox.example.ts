@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellAudioPlayer } from 'hell-ui/audio-player';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellChip } from 'hell-ui/chip';
 
 interface Voicemail {
   readonly caller: string;

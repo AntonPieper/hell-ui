@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellTextarea } from '@hell-ui/angular/input';
+import { HellTextarea } from 'hell-ui/input';
 
 @Component({
   selector: 'app-input-textarea-example',

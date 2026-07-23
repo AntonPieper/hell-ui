@@ -40,8 +40,8 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         title="Audio player"
         icon="faSolidPlay"
         category="Composite"
-        importPath="@hell-ui/angular/audio-player"
-        stylesPath="@hell-ui/angular/audio-player/styles.css"
+        importPath="hell-ui/audio-player"
+        stylesPath="hell-ui/audio-player/styles.css"
       >
         A compact player for recorded audio — play/pause, seek, mute, volume, and optional download —
         with a title/date meta row and an opt-in, best-effort browser speech transcript.
@@ -91,7 +91,7 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
       <h2>Speech transcript</h2>
       <p>
         Import <code>provideHellAudioTranscript()</code> from
-        <code>@hell-ui/angular/features/audio-transcript</code> and set
+        <code>hell-ui/features/audio-transcript</code> and set
         <code>[allowSpeechTranscript]="true"</code> to expose the transcript toggle. The toggle only
         appears when the provider is present <em>and</em> the browser exposes
         <code>SpeechRecognition</code> plus <code>HTMLMediaElement.captureStream()</code> — currently

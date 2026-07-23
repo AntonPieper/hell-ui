@@ -40,8 +40,8 @@ import confirmDangerExampleCodeRaw from './examples/danger.example.ts?raw' with 
         title="Confirm"
         icon="faSolidSquareCheck"
         category="Composite"
-        importPath="@hell-ui/angular/confirm"
-        stylesPath="@hell-ui/angular/confirm/styles.css"
+        importPath="hell-ui/confirm"
+        stylesPath="hell-ui/confirm/styles.css"
       >
         One promise-based Prompt Interface for modal and anchored decisions: ask a question,
         offer typed actions, and await the answer inline.
@@ -216,7 +216,7 @@ export class ConfirmPage {
 
   protected readonly routeGuardRecipe = `import { Component } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';
-import { injectHellPrompt } from '@hell-ui/angular/confirm';
+import { injectHellPrompt } from 'hell-ui/confirm';
 
 @Component({ selector: 'app-editor-page', template: '' })
 export class EditorPage {

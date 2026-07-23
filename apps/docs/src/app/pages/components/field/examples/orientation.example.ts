@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellCheckbox } from '@hell-ui/angular/checkbox';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellCheckbox } from 'hell-ui/checkbox';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-field-orientation-example',

@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellCheckbox } from '@hell-ui/angular/checkbox';
+import { HellCheckbox } from 'hell-ui/checkbox';
 
 /**
  * Checkbox Control Value Authority boundary coverage (#283): the packed

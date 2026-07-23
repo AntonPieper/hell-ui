@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 const ENVIRONMENTS = ['Production', 'Staging', 'Preview', 'Local'] as const;
 

@@ -1,15 +1,15 @@
 # npm trusted publishing
 
-Hell UI publishes `@hell-ui/angular` from the public `AntonPieper/hell-ui`
+Hell UI publishes `hell-ui` from the public `AntonPieper/hell-ui`
 GitHub repository with npm trusted publishing. Normal releases must not use a
 long-lived publish token.
 
 ## npm package settings
 
-Configure these settings on npm for `@hell-ui/angular` before the first
+Configure these settings on npm for `hell-ui` before the first
 automated publish:
 
-1. Open the `@hell-ui/angular` package on npm and add a trusted publisher.
+1. Open the `hell-ui` package on npm and add a trusted publisher.
 2. Provider: GitHub Actions.
 3. Organization or user: `AntonPieper`.
 4. Repository: `hell-ui`.
@@ -52,7 +52,7 @@ instead of relying on build determinism across separate runs.
   built on the exact runtime CI validates and the alignment cannot drift
   through an edit to either workflow alone. The publish-only jobs run Node 24
   for the publish command itself; they never build or run package scripts.
-- The release publishes `@hell-ui/angular`; the tag must match the package version.
+- The release publishes `hell-ui`; the tag must match the package version.
 - Both publish jobs have `needs: release-gate`, so they only run when the whole gate passed.
 - The npm publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
@@ -77,11 +77,10 @@ Tagged releases also publish an owner-scope mirror of the package to the
 GitHub Packages npm registry through the `publish-github-packages` job of the
 same release workflow (`.github/workflows/npm-publish.yml`):
 
-- GitHub Packages scopes npm packages to the owning GitHub account, and the
-  `@hell-ui` GitHub username belongs to an unrelated account, so the canonical
-  `@hell-ui/*` names can never publish there from this repository. The mirror
-  publishes as `@antonpieper/hell-ui-angular` instead, which the default
-  workflow `GITHUB_TOKEN` can write. The canonical `@hell-ui/*` names remain
+- GitHub Packages only hosts npm packages scoped to the owning GitHub
+  account, so the unscoped canonical `hell-ui` name can never publish there.
+  The mirror publishes as `@antonpieper/hell-ui` instead, which the default
+  workflow `GITHUB_TOKEN` can write. The canonical `hell-ui` name remains
   reserved for the npmjs trusted-publishing path above.
 - The mirror publish job downloads the same run's `release-package` artifact
   as the npmjs job — one gate run per tag feeds both registries, so the
@@ -91,19 +90,19 @@ same release workflow (`.github/workflows/npm-publish.yml`):
 - The publish job rewrites only the audited tarball's `package.json` `name`
   and `publishConfig.registry` before republishing it, so both registries
   ship byte-identical package content aside from that metadata rewrite; the
-  source manifests keep the `@hell-ui/*` names and
+  source manifests keep the `hell-ui` name and
   `https://registry.npmjs.org/` as required by the CI contract. Internal
   entry points, peer names, and import paths are untouched.
 - Before publishing, the job uploads the rewritten mirror tarball as the
   `release-package-github-mirror` artifact with a 7-day retention, so every
   mirror publish (including a failed attempt) leaves a short-lived forensic
   record of the exact bytes outside the registry itself.
-- Consumers install the mirror through npm aliases so `@hell-ui/*` import
+- Consumers install the mirror through an npm alias so `hell-ui` import
   paths and peer resolution keep working:
 
   ```jsonc
   // package.json dependencies
-  "@hell-ui/angular": "npm:@antonpieper/hell-ui-angular@0.2.0"
+  "hell-ui": "npm:@antonpieper/hell-ui@<version>"
   ```
 
   plus an `.npmrc` entry `@antonpieper:registry=https://npm.pkg.github.com`

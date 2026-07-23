@@ -50,8 +50,8 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         title="Toggle"
         icon="faSolidToggleOn"
         category="Styled primitive"
-        importPath="@hell-ui/angular/toggle"
-        stylesPath="@hell-ui/angular/toggle/styles.css"
+        importPath="hell-ui/toggle"
+        stylesPath="hell-ui/toggle/styles.css"
       >
         A pressed/unpressed button for a single binary choice, or a peer group of them for
         single- or multi-select tool rows.
@@ -121,7 +121,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <h2>With tooltip</h2>
       <p>
         Icon-only toggle group items carry no visible label, so pair each one with a string
-        <code>hellTooltip</code> from <code>@hell-ui/angular/tooltip</code> and an
+        <code>hellTooltip</code> from <code>hell-ui/tooltip</code> and an
         <code>aria-label</code> — a common shape for a compact formatting toolbar, with no
         template ceremony per item.
       </p>

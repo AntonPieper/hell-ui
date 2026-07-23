@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { hellSearchResource, type HellPickValue } from 'hell-ui/core';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 interface Reviewer {
   readonly id: string;

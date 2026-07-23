@@ -29,7 +29,7 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import '@hell-ui/angular/features/filter-builder/styles.css';
+      @import 'hell-ui/features/filter-builder/styles.css';
 
       @media (max-width: 639px) {
         hd-filter-builder .hd-prose li code {
@@ -56,8 +56,8 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
         icon="faSolidFilter"
         category="Feature"
         status="Experimental"
-        importPath="@hell-ui/angular/features/filter-builder"
-        stylesPath="@hell-ui/angular/features/filter-builder/styles.css"
+        importPath="hell-ui/features/filter-builder"
+        stylesPath="hell-ui/features/filter-builder/styles.css"
       >
         A controlled token surface for domain-neutral expressions, with typed application-projected
         editors for every field.
@@ -172,8 +172,8 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
         </li>
         <li>
           Import the feature and its stylesheet from
-          <code>@hell-ui/angular/features/filter-builder</code>; the removed
-          <code>@hell-ui/angular/filter-bar</code> entry point has no compatibility alias.
+          <code>hell-ui/features/filter-builder</code>; the removed
+          <code>hell-ui/filter-bar</code> entry point has no compatibility alias.
         </li>
       </ul>
 

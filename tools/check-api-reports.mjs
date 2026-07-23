@@ -46,8 +46,8 @@ const apiReportExclusions = new Map([
 const declarationEntrypoints = entrypointPublicApiFiles().map((entrypoint) => {
   const flattened =
     entrypoint.id === 'root'
-      ? 'hell-ui-angular'
-      : `hell-ui-angular-${entrypoint.id.replaceAll('/', '-')}`;
+      ? 'hell-ui'
+      : `hell-ui-${entrypoint.id.replaceAll('/', '-')}`;
   return {
     id: entrypoint.id,
     specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,

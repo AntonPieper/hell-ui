@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
 
 interface Invoice {
   readonly id: string;

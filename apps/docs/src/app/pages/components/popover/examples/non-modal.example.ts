@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellSlider } from '@hell-ui/angular/slider';
+import { HellButton } from 'hell-ui/button';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
+import { HellSlider } from 'hell-ui/slider';
 
 @Component({
   selector: 'app-popover-non-modal-example',

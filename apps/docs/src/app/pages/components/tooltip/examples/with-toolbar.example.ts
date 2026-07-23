@@ -5,14 +5,14 @@ import {
   faSolidItalic,
   faSolidUnderline,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellKbd } from '@hell-ui/angular/chip';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellKbd } from 'hell-ui/chip';
 import {
   HellTooltip,
   HellTooltipSurface,
   provideHellTooltipDefaults,
-} from '@hell-ui/angular/tooltip';
+} from 'hell-ui/tooltip';
 
 const TOOLBAR_ICONS = { faSolidBold, faSolidItalic, faSolidUnderline };
 

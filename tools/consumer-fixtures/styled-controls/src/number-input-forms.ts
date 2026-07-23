@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellNumberInput } from '@hell-ui/angular/number-input';
+import { HellNumberInput } from 'hell-ui/number-input';
 
 function formatNumber(value: number | null): string {
   return value === null ? 'null' : String(value);

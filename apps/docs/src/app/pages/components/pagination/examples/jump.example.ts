@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
-import { HellNativeSelect } from '@hell-ui/angular/select';
+import { HellPageLink, HellPagination } from 'hell-ui/pagination';
+import { HellNativeSelect } from 'hell-ui/select';
 
 @Component({
   selector: 'app-pagination-jump-example',

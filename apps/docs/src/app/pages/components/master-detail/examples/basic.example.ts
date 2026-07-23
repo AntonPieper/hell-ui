@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
+import { HellButton } from 'hell-ui/button';
+import { HELL_MASTER_DETAIL_IMPORTS } from 'hell-ui/master-detail';
 
 @Component({
   selector: 'app-master-detail-basic-example',

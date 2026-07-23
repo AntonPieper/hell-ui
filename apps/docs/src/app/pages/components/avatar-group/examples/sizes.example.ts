@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HELL_AVATAR_GROUP_IMPORTS } from '@hell-ui/angular/avatar';
-import { HellSize } from '@hell-ui/angular/core';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HELL_AVATAR_GROUP_IMPORTS } from 'hell-ui/avatar';
+import { HellSize } from 'hell-ui/core';
 
 interface TeamMember {
   name: string;

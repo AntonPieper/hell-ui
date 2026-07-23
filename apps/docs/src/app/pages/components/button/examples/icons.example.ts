@@ -9,8 +9,8 @@ import {
   faSolidUpload,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
 
 const BUTTON_ICONS_EXAMPLE_ICONS = {
   faSolidChevronDown,

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellToggleGroup, HellToggleGroupItem } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-forms-example',

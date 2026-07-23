@@ -1,15 +1,15 @@
 import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { hellRankLocalSearch } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { hellRankLocalSearch } from 'hell-ui/core';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
   type HellFilter,
   type HellFilterBuilderEditorContext,
   type HellFilterFieldDescriptor,
-} from '@hell-ui/angular/features/filter-builder';
-import { HellInput } from '@hell-ui/angular/input';
+} from 'hell-ui/features/filter-builder';
+import { HellInput } from 'hell-ui/input';
 
 interface IdentifiedFilter<
   TField extends string,

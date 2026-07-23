@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormField, disabled, form } from '@angular/forms/signals';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellSwitch } from '@hell-ui/angular/switch';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellSwitch } from 'hell-ui/switch';
 
 @Component({
   selector: 'app-switch-forms-example',

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell, faSolidEnvelope, faSolidLock } from '@ng-icons/font-awesome/solid';
-import { HellCheckbox } from '@hell-ui/angular/checkbox';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellCheckbox } from 'hell-ui/checkbox';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-checkbox-settings-list-example',

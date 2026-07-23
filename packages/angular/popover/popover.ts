@@ -30,7 +30,7 @@ import {
   type NgpOverlay,
   type NgpOverlayContent,
 } from 'ng-primitives/portal';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
@@ -38,12 +38,12 @@ import {
   hellResolveElementTarget,
   HellNativeInteractiveDisabledGuard,
   type HellFloatingScope,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 import {
   HELL_FLOATING_POP_IN,
   HELL_FLOATING_SURFACE,
   HELL_FLOATING_Z_POPOVER,
-} from '@hell-ui/angular/internal/floating';
+} from 'hell-ui/internal/floating';
 
 const HELL_POPOVER_RECIPE = {
   root: `absolute ${HELL_FLOATING_Z_POPOVER} max-w-[320px] ${HELL_FLOATING_SURFACE} p-hell-4 text-[13px] text-hell-foreground ${HELL_FLOATING_POP_IN}`,

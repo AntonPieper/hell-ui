@@ -56,8 +56,8 @@ const HD_APP_SHELL_PAGE_ICONS = {
         title="App shell"
         icon="faSolidWindowMaximize"
         category="Composite"
-        importPath="@hell-ui/angular/app-shell"
-        stylesPath="@hell-ui/angular/app-shell/styles.css"
+        importPath="hell-ui/app-shell"
+        stylesPath="hell-ui/app-shell/styles.css"
       >
         The full application frame — topbar, collapsible sidenav, scrolling content, and an optional
         secondary panel — assembled from slot directives that share one CSS-grid layout.
@@ -245,7 +245,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
         <li>
           Localize built-in toggle labels with <code>provideHellLabels(HELL_APP_SHELL_LABELS, &#123; … &#125;)</code>
-          from <code>@hell-ui/angular/app-shell</code>. Import the whole suite via
+          from <code>hell-ui/app-shell</code>. Import the whole suite via
           <code>HELL_APP_SHELL_IMPORTS</code>.
         </li>
       </ul>

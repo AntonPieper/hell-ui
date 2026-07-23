@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormField, form, required } from '@angular/forms/signals';
-import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/radio';
+import { HellRadio, HellRadioGroup, HellRadioIndicator } from 'hell-ui/radio';
 
 @Component({
   selector: 'app-radio-forms-example',

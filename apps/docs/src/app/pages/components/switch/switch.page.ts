@@ -47,8 +47,8 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
         title="Switch"
         icon="faSolidToggleOff"
         category="Styled primitive"
-        importPath="@hell-ui/angular/switch"
-        stylesPath="@hell-ui/angular/switch/styles.css"
+        importPath="hell-ui/switch"
+        stylesPath="hell-ui/switch/styles.css"
       >
         A binary on/off control whose effect applies immediately — no submit step.
       </hd-page-header>

@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBell, faSolidFileInvoice, faSolidSliders } from '@ng-icons/font-awesome/solid';
-import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_ACCORDION_IMPORTS } from 'hell-ui/accordion';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-accordion-with-settings-panel-example',
