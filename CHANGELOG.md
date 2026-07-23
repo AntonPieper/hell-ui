@@ -821,6 +821,29 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- The Control Value Authority migration (spec #282) is contracted: the
+  internal `hell-ui/internal/core` helpers `HellControlValueAccessorBridge`
+  (the shared CVA callback holder) and `HellControlledValueState` (the
+  controlled/form-mode value state) are deleted with zero remaining usage —
+  no migrated custom form control implements `ControlValueAccessor` or
+  registers `NG_VALUE_ACCESSOR`, and no transitional compatibility seam
+  remains. The permanent `one-forms-contract` architecture guard now pins the
+  whole retired contract family: any library class that implements
+  `ControlValueAccessor` or references `NG_VALUE_ACCESSOR` fails, as does a
+  class implementing both Signal Forms control contracts or a Signal Forms
+  control declaring an explicit `valueChange`/`checkedChange` member next to
+  its model's implicit change output — native platform controls and the
+  accepted guarded ng-primitives state-adapter seams pass without exemptions.
+  Consumer guidance caught up: the first-beta migration guide's
+  Date/Time/Number Input sections and the docs search index now describe the
+  migrated one-model contract (value/checked bindings, built-in Signal Forms
+  interoperability for `formControl`/`ngModel`, typed parse errors, and
+  form-declared required/range policy) instead of the retired CVA wording.
+  Evidence: the strengthened `tools/check-architecture.mjs` guard (verified
+  to reject every retired shape), the shrunk internal-core API report, and
+  the packed styled-controls and code-editor consumer matrices binding every
+  migrated value family through direct, two-way, `formField`, `formControl`,
+  and `ngModel` paths. Closes #291.
 - BREAKING: `hellResolveToolbarOverflow` and its
   `HellToolbarOverflowItem`/`Metrics`/`Result` types leave the public API.
   The pure overflow policy is the toolbar's internal measurement core —

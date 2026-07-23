@@ -189,8 +189,8 @@ pipeline.
 
 The owned `<hell-date-input>` component and its embedded calendar are removed.
 Apply `hellDateInput` to the real input, rename `date` / `dateChange` to the
-controlled `value` / `valueChange` pair, and author native element attributes
-directly:
+`value` model (`[value]` / `(valueChange)`, or two-way `[(value)]`), and
+author native element attributes directly:
 
 ```html
 <!-- Before -->
@@ -213,11 +213,20 @@ directly:
 />
 ```
 
-The directive keeps CVA, required and inclusive `min` / `max` validation,
-adapter overrides, invalid drafts, external synchronization, and nullable clear
-commits. Its `ui` refines the reused Input root only. The removed `root`,
-`input`, `trigger`, `triggerIcon`, and `pickerPanel` Date Input parts do not have
-aliases.
+The directive's committed `value` is one `Date | null` model — its Control
+Value Authority. Direct `[value]`, two-way `[(value)]`, Signal Forms
+`[formField]`, Reactive Forms `formControl`, and template-driven `ngModel` all
+read and write the same model through Angular's built-in Signal Forms
+interoperability; there is no `ControlValueAccessor` and no directive-owned
+control errors. Declare required and range policy on the form
+(`Validators.required` for classic controls, or `required()` /
+`minDate()` / `maxDate()` schema rules whose metadata drives the reserved
+`required` / `min` / `max` inputs); the directive keeps adapter overrides,
+editable invalid drafts (commit attempts report `invalidDateInputDraft` to a
+bound Signal Forms field), visual invalid state, external synchronization, and
+nullable clear commits. Its `ui` refines the reused Input root only. The
+removed `root`, `input`, `trigger`, `triggerIcon`, and `pickerPanel` Date
+Input parts do not have aliases.
 
 When a calendar is useful, compose a Control Group containing the Date Input
 and an accessible action, then open Date Picker in Popover. Keep one controlled
@@ -257,11 +266,19 @@ attributes directly:
 />
 ```
 
-The directive keeps `HellTimeValue | null`, CVA, required and inclusive
-same-day `min` / `max` validation, optional seconds, adapter overrides, invalid
-drafts, external synchronization, and nullable clear commits. Bounds are a
-linear time-of-day interval; a `min` later than `max` is not an overnight
-range. Hidden seconds normalize to zero. Keep the input as text when the
+The directive's committed `value` is one `HellTimeValue | null` model — its
+Control Value Authority. Direct `[value]`, two-way `[(value)]`, Signal Forms
+`[formField]`, Reactive Forms `formControl`, and template-driven `ngModel` all
+read and write the same model through Angular's built-in Signal Forms
+interoperability; there is no `ControlValueAccessor` and no directive-owned
+control errors. Declare required and range policy on the form (structured
+times have no `minDate()`/`maxDate()` schema equivalent, so bind the reserved
+`min` / `max` inputs directly when bounds apply); the directive keeps optional
+seconds, adapter overrides, editable invalid drafts (commit attempts report
+`invalidTimeInputDraft` to a bound Signal Forms field), visual invalid state,
+external synchronization, and nullable clear commits. Bounds are a linear
+time-of-day interval; a `min` later than `max` is not an overnight range.
+Hidden seconds normalize to zero. Keep the input as text when the
 default compact/12-hour parser, visible invalid drafts, or a custom textual
 adapter is required; consumers may author `type="time"` when native browser
 sanitization and picker UI are deliberate. The directive never changes the
@@ -318,12 +335,22 @@ workflow needs:
 </div>
 ```
 
-The directive keeps `number | null`, CVA, required/integer/bounds validation,
-adapter overrides, malformed drafts, external synchronization, keyboard and
-wheel behavior, and synchronous native form submission. It deliberately owns
-a text input so invalid drafts are not sanitized; `integer` selects numeric
-input-mode metadata while decimal mode selects decimal metadata. Typing may
-commit an out-of-range value and report validation; stepping clamps to bounds.
+The directive's committed `value` is one `number | null` model — its Control
+Value Authority. Direct `[value]`, two-way `[(value)]`, Signal Forms
+`[formField]`, Reactive Forms `formControl`, and template-driven `ngModel` all
+read and write the same model through Angular's built-in Signal Forms
+interoperability; there is no `ControlValueAccessor` and no directive-owned
+control errors. Declare required and range policy on the form
+(`Validators.required` / `Validators.min` / `Validators.max` for classic
+controls, or `required()` / `min()` / `max()` schema rules whose metadata
+drives the reserved `required` / `min` / `max` inputs); the directive keeps
+adapter overrides, editable malformed drafts (commit attempts report
+`invalidNumberInputDraft` to a bound Signal Forms field), visual invalid
+state, external synchronization, keyboard and wheel behavior, and synchronous
+native form submission. It deliberately owns a text input so invalid drafts
+are not sanitized; `integer` selects numeric input-mode metadata while decimal
+mode selects decimal metadata. Typing may commit an out-of-range value and
+report validation; stepping clamps to bounds.
 
 Each `button[hellNumberStep]` requires an `increment` or `decrement` direction
 and an explicit `hellNumberStepFor` controller. It derives an accessible label
@@ -608,9 +635,11 @@ The [`root-core`](../../tools/consumer-fixtures/README.md) consumer fixture
 proves the typed Button `ui` path without Tailwind or Hell CSS. The
 [`styled-controls`](../../tools/consumer-fixtures/README.md) fixture proves
 compiled recipe CSS and semantic token runtime theming for the styled
-controls, including the native Date/Time/Number Input directives with their
-forms, controlled, and adapter contracts and reused Input-root CSS without
-picker or icon peers. The
+controls, and binds every migrated form control — Checkbox, Switch, Radio
+Group, Slider, Toggle Group, Select, Combobox, and the native Date/Time/Number
+Input directives — through direct, two-way, `formField`, `formControl`, and
+`ngModel` paths at once, with reused Input-root CSS and adapter contracts and
+without picker or icon peers. The
 [`overlays-router`](../../tools/consumer-fixtures/README.md),
 [`icon-audio`](../../tools/consumer-fixtures/README.md), and feature fixtures
 widen that proof across migrated primitive, floating/list directive-suite,

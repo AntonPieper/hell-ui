@@ -2286,9 +2286,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Date input forms value',
  path:'/components/date-input',
- detail:'ControlValueAccessor, formControl, Date | null',
+ detail:'FormValueControl, formField, formControl, Date | null',
  terms:
-'date-input input hellDateInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms Date null native form submission validation drafts clear external synchronization',
+'date-input input hellDateInput forms FormValueControl formField Signal Forms formControl ngModel ReactiveFormsModule Angular Forms Date null value model two-way required minDate maxDate invalidDateInputDraft native form submission drafts clear external synchronization',
  },
  {
  title:'Omnibar directives',
@@ -2335,9 +2335,9 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  {
  title:'Time input forms value',
  path:'/components/time-input',
- detail:'ControlValueAccessor, formControl, HellTimeValue | null',
+ detail:'FormValueControl, formField, formControl, HellTimeValue | null',
  terms:
-'time-input input hellTimeInput forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation Field',
+'time-input input hellTimeInput forms FormValueControl formField Signal Forms formControl ngModel ReactiveFormsModule Angular Forms HellTimeValue null value model two-way required min max invalidTimeInputDraft native form submission Field',
  },
  {
  title:'Number input adapter',
