@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellCheckbox, type HellCheckboxUi, HellNativeCheckbox } from './checkbox';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Checkbox specs assert behavior, forms integration, and state attributes.
@@ -423,25 +424,7 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   return element;
 }
 
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
 function classAttr(element: Element): string {
   return element.getAttribute('class') ?? '';
 }
 
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}

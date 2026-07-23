@@ -15,6 +15,7 @@ import type {
   HellCodeEditorRuntimeOptions,
   HellCodeEditorRuntimePort,
 } from './code-editor.runtime';
+import { sortClasses } from '../../spec-helpers';
 
 class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
   values: string[] = [];
@@ -160,8 +161,6 @@ describe('HellCodeEditor', () => {
       await settle(fixture);
 
       const root = fixture.nativeElement.querySelector('hell-code-editor') as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
 
       expect({
         root: sortClasses(root.className),

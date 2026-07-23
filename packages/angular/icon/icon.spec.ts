@@ -4,6 +4,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleInfo } from '@ng-icons/font-awesome/solid';
 
 import { HellIcon } from './icon';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Icon specs assert behavior, labels, and state attributes. Part-Class Pipeline
@@ -122,25 +123,6 @@ describe('HellIcon', () => {
     });
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}
 
 async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
   fixture.detectChanges();

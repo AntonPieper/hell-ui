@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { hellTableInferredRoleForHost } from './table-role-inference';
 import { HELL_TABLE_UTILITIES_IMPORTS, type HellTableResizeHandleUi } from './table';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   standalone: true,
@@ -208,8 +209,6 @@ describe('host-agnostic Hell table primitives', () => {
       fixture.detectChanges();
       uiFixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const plainResizer = byId(uiFixture.nativeElement as HTMLElement, 'plain-resizer');
 
       expect({

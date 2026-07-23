@@ -9,6 +9,7 @@ import type {
   HellPdfRuntimePort,
   HellPdfSource,
 } from './pdf-viewer.runtime';
+import { sortClasses } from '../../spec-helpers';
 
 class FakePdfRuntime implements HellPdfRuntimePort {
   hasDocument = false;
@@ -308,8 +309,6 @@ describe('HellPdfViewer', () => {
       await settle(fixture);
 
       const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (slot: string): string[] =>
         sortClasses(viewer.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 

@@ -9,6 +9,7 @@ import {
   type HellFilterBuilderEditorContext,
   type HellFilterFieldDescriptor,
 } from './filter-builder';
+import { sortClasses } from '../../spec-helpers';
 
 interface IdentifiedFilter<
   TField extends string,
@@ -270,8 +271,6 @@ describe('HellFilterBuilder', () => {
       await settle(fixture);
 
       const host = fixture.nativeElement as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (slot: string): string[] =>
         sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 

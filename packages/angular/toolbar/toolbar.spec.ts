@@ -13,6 +13,7 @@ import {
   type HellOverflowToolbarUi,
 } from './toolbar';
 import { hellResolveToolbarOverflow, type HellToolbarOverflowItem } from './toolbar-overflow';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 describe('hellResolveToolbarOverflow', () => {
   const item = (
@@ -254,22 +255,6 @@ describe('HellToolbar', () => {
     while (mounted.length) mounted.pop()?.remove();
     cleanupPortaledTestElements('[hellTooltipSurface]');
   });
-
-  /**
-   * Proves consumer ui classes reach the part through the Part-Class
-   * Pipeline: every ui class renders, and nothing outside the default render
-   * plus the consumer's ui appears. Merge conflict semantics are owned
-   * centrally by `core/part-class-pipeline.spec.ts`.
-   */
-  function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-    const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
-    const custom = sortClasses(customClassName);
-    const ownUi = sortClasses(ui);
-    const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-    expect(custom).toEqual(expect.arrayContaining(ownUi));
-    expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-  }
 
   const create = async () => {
     const fixture = TestBed.createComponent(PlainToolbarHost);
@@ -661,8 +646,6 @@ describe('HellOverflowToolbar', () => {
       triggerFixture.detectChanges();
       drive(triggerFixture, 1000);
 
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const trigger = triggerFixture.nativeElement.querySelector('[data-slot="overflowTrigger"]');
 
       expect({

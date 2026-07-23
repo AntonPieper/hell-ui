@@ -8,6 +8,7 @@ import {
   type HellEmptyStateHeadingLevel,
   type HellEmptyStateUi,
 } from './empty-state';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [...HELL_EMPTY_STATE_IMPORTS],
@@ -157,25 +158,6 @@ describe('HellEmptyState', () => {
     });
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}
 
 function query(root: HTMLElement, selector: string): HTMLElement {
   const element = root.querySelector(selector);

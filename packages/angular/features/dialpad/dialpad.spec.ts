@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellDialpad, HELL_DIALPAD_LABELS, type HellDialpadUi } from './dialpad';
+import { expectUiRouting, sortClasses } from '../../spec-helpers';
 
 @Component({
   selector: 'app-dialpad-host',
@@ -181,8 +182,6 @@ describe('HellDialpad labels', () => {
       const fixture = TestBed.createComponent(DialpadHost);
       fixture.detectChanges();
       const host = fixture.nativeElement as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (slot: string): string[] =>
         sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 
@@ -455,22 +454,6 @@ describe('HellDialpad labels', () => {
     expect(backspace.getAttribute('disabled')).toBe('');
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);
