@@ -10,6 +10,10 @@ import { SwitchBasicExample } from './examples/basic.example';
 import switchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { SwitchFormsExample } from './examples/forms.example';
+import switchFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { SwitchNativeExample } from './examples/native.example';
 import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
   loader: 'text',
@@ -31,6 +35,7 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
     RouterLink,
     SwitchBasicExample,
     SwitchStatesExample,
+    SwitchFormsExample,
     SwitchNativeExample,
     SwitchSettingsListExample,
     SwitchAllPartsStylingExample,
@@ -49,11 +54,13 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
       </hd-page-header>
       <p>
         <code>button[hellSwitch]</code> is a styled switch built on <code>ngpSwitch</code> from
-        <code>ng-primitives</code>. The host is a real <code>&lt;button&gt;</code> that implements
-        Angular's <code>ControlValueAccessor</code>, so it drops into template-driven or reactive
-        forms and forwards <code>checked</code> / <code>disabled</code> like any other bound
-        control. Because the host is a native button, it is labelable out of the box — wrap it in a
-        <code>&lt;label&gt;</code> or pair it with <code>hellFieldLabel</code> via
+        <code>ng-primitives</code>. Its <code>checked</code> state is one Angular model — bind it
+        directly (<code>[checked]</code> plus <code>(checkedChange)</code>), two-way
+        (<code>[(checked)]</code>), or through forms: it implements Signal Forms'
+        <code>FormCheckboxControl</code> contract for <code>[formField]</code>, and the same
+        model drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability. Because the host is a native button, it is labelable out of the box —
+        wrap it in a <code>&lt;label&gt;</code> or pair it with <code>hellFieldLabel</code> via
         <code>for</code>/<code>id</code>, and clicking the label toggles the switch with no
         extra wiring.
       </p>
@@ -79,6 +86,27 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
       </p>
       <hd-example-tabs [code]="switchStatesExampleCode" previewClass="grid gap-2">
         <app-switch-states-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>checked</code> model is the switch's single committed-value authority, so all
+        binding styles observe the same boolean. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>checked</code>, each user toggle
+        updates the field exactly once, focus leaving the switch marks it touched, and the field's
+        <code>disabled()</code> rules flow into the <code>disabled</code> input.
+        <code>formControl</code> and <code>[(ngModel)]</code> keep working against the same model
+        through Angular's Signal Forms interoperability — no <code>ControlValueAccessor</code> is
+        involved anymore.
+      </p>
+      <p>
+        Because <code>checked</code> is a model input, it no longer coerces static attribute
+        strings: write <code>[checked]="true"</code> (a boolean binding), not a bare
+        <code>checked</code> attribute. The <code>disabled</code> configuration input keeps its
+        attribute coercion.
+      </p>
+      <hd-example-tabs [code]="switchFormsExampleCode">
+        <app-switch-forms-example />
       </hd-example-tabs>
 
       <h2>Native path</h2>
@@ -146,15 +174,29 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
       <h2>API</h2>
       <p><code>button[hellSwitch]</code> (<code>HellSwitch</code>):</p>
       <ul>
-        <li><code>checked</code>: <code>boolean</code>. Default <code>false</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
-        <li><code>checkedChange</code>: <code>OutputEmitterRef&lt;boolean&gt;</code>, emitted whenever the switch is toggled.</li>
+        <li>
+          <code>checked</code>: <code>ModelSignal&lt;boolean&gt;</code>. Default
+          <code>false</code>. Supports <code>[checked]</code>, <code>[(checked)]</code>, and
+          <code>(checkedChange)</code>; requires a boolean binding (no static-attribute string
+          coercion).
+        </li>
+        <li>
+          <code>disabled</code>: <code>boolean</code>. Default <code>false</code>. Also driven by
+          bound forms.
+        </li>
+        <li>
+          <code>(touch)</code>: emits when focus leaves the switch; Angular forms use it to mark
+          the control touched.
+        </li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;HellSwitchPart&gt;</code> — shorthand string
           refines <code>root</code>; a <code>HellSwitchUi</code> map
           (<code>&#123; root?: string; thumb?: string &#125;</code>) targets parts individually.
         </li>
-        <li>Implements Angular's <code>ControlValueAccessor</code> for forms integration.</li>
+        <li>
+          Implements Signal Forms' <code>FormCheckboxControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
+        </li>
       </ul>
       <p><code>input[type="checkbox"][hellNativeSwitch]</code> (<code>HellNativeSwitch</code>):</p>
       <ul>
@@ -170,7 +212,7 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
         </li>
         <li>
           Native <code>checked</code>/<code>disabled</code> and Angular Forms come from the
-          underlying <code>&lt;input&gt;</code> directly — no custom CVA needed.
+          underlying <code>&lt;input&gt;</code> directly — no Hell-owned model involved.
         </li>
       </ul>
       <ul>
@@ -229,6 +271,7 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
 export class SwitchPage {
   protected readonly switchBasicExampleCode = switchBasicExampleCodeRaw;
   protected readonly switchStatesExampleCode = switchStatesExampleCodeRaw;
+  protected readonly switchFormsExampleCode = switchFormsExampleCodeRaw;
   protected readonly switchNativeExampleCode = switchNativeExampleCodeRaw;
   protected readonly switchSettingsListExampleCode = switchSettingsListExampleCodeRaw;
   protected readonly switchAllPartsStylingExampleCode = switchAllPartsStylingExampleCodeRaw;

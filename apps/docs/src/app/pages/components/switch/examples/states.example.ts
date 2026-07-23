@@ -11,7 +11,7 @@ import { HellSwitch } from '@hell-ui/angular/switch';
       <span>Off</span>
     </div>
     <div class="inline-flex items-center gap-2">
-      <button hellSwitch checked aria-label="On"></button>
+      <button hellSwitch [checked]="true" aria-label="On"></button>
       <span>On</span>
     </div>
     <div class="inline-flex items-center gap-2">
@@ -19,7 +19,7 @@ import { HellSwitch } from '@hell-ui/angular/switch';
       <span>Disabled</span>
     </div>
     <div class="inline-flex items-center gap-2">
-      <button hellSwitch checked disabled aria-label="Disabled, on"></button>
+      <button hellSwitch [checked]="true" disabled aria-label="Disabled, on"></button>
       <span>Disabled, on</span>
     </div>
   `,

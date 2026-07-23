@@ -44,7 +44,7 @@ import { HellIcon } from '@hell-ui/angular/icon';
         </div>
 
         <div hellField orientation="horizontal">
-          <button id="notify-security" hellCheckbox checked disabled></button>
+          <button id="notify-security" hellCheckbox [checked]="true" disabled></button>
           <label hellFieldLabel for="notify-security">
             <hell-icon name="faSolidLock" ui="text-hell-foreground-muted" />
             Security alerts

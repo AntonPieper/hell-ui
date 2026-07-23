@@ -44,7 +44,7 @@ import { HellIcon } from '@hell-ui/angular/icon';
         </div>
 
         <div hellField orientation="horizontal">
-          <button id="setting-focus" hellSwitch checked disabled></button>
+          <button id="setting-focus" hellSwitch [checked]="true" disabled></button>
           <label hellFieldLabel for="setting-focus">
             <hell-icon name="faSolidMoon" ui="text-hell-foreground-muted" />
             Focus mode

@@ -4,36 +4,26 @@
 
 ```ts
 
-import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { FormCheckboxControl } from '@angular/forms/signals';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellUi } from '@hell-ui/angular/core';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as ng_primitives_checkbox from 'ng-primitives/checkbox';
-import { ValidationErrors } from '@angular/forms';
-import { Validator } from '@angular/forms';
 
 // @public
-export class HellCheckbox implements ControlValueAccessor, Validator {
-    constructor();
-    readonly checked: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
+export class HellCheckbox implements FormCheckboxControl {
+    readonly checked: _angular_core.ModelSignal<boolean>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
     protected markControlTouched(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellCheckboxPart>;
-    registerOnChange(fn: (value: boolean) => void): void;
-    registerOnTouched(fn: () => void): void;
-    registerOnValidatorChange(fn: () => void): void;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    setDisabledState(isDisabled: boolean): void;
     protected readonly state: ng_primitives_checkbox.NgpCheckboxState;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellCheckboxPart>>;
-    validate(control: AbstractControl | null): ValidationErrors | null;
-    writeValue(value: boolean): void;
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCheckbox, "button[hellCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCheckbox, "button[hellCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checked": "checkedChange"; "indeterminateChange": "indeterminateChange"; "touch": "touch"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellCheckbox, never>;
 }
 

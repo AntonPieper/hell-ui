@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormField, disabled as disabledSchema, form, required as requiredSchema } from '@angular/forms/signals';
 
 import { HellCheckbox, type HellCheckboxUi, HellNativeCheckbox } from './checkbox';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
@@ -41,6 +41,22 @@ class CheckboxHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-two-way-host',
+  imports: [HellCheckbox],
+  template: `
+    <button
+      hellCheckbox
+      [(checked)]="checked"
+      (checkedChange)="checkedEvents.push($event)"
+    ></button>
+  `,
+})
+class CheckboxTwoWayHost {
+  readonly checked = signal(false);
+  readonly checkedEvents: boolean[] = [];
+}
+
+@Component({
   selector: 'hell-checkbox-unbound-host',
   imports: [HellCheckbox],
   template: `
@@ -77,26 +93,52 @@ class CheckboxFormHost {
   selector: 'hell-checkbox-required-form-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
-    <button
-      hellCheckbox
-      [required]="true"
-      [formControl]="control"
-    ></button>
+    <button hellCheckbox [formControl]="control"></button>
   `,
 })
 class CheckboxRequiredFormHost {
-  readonly control = new FormControl(false);
+  readonly control = new FormControl(false, {
+    nonNullable: true,
+    validators: Validators.requiredTrue,
+  });
 }
 
 @Component({
-  selector: 'hell-checkbox-disabled-required-host',
-  imports: [ReactiveFormsModule, HellCheckbox],
+  selector: 'hell-checkbox-ng-model-host',
+  imports: [FormsModule, HellCheckbox],
   template: `
-    <button hellCheckbox [required]="true" [formControl]="control"></button>
+    <button
+      hellCheckbox
+      [(ngModel)]="checked"
+      (checkedChange)="checkedEvents.push($event)"
+    ></button>
   `,
 })
-class CheckboxDisabledRequiredHost {
-  readonly control = new FormControl(false);
+class CheckboxNgModelHost {
+  readonly checked = signal(false);
+  readonly model = viewChild.required(NgModel);
+  readonly checkedEvents: boolean[] = [];
+}
+
+@Component({
+  selector: 'hell-checkbox-signal-forms-host',
+  imports: [FormField, HellCheckbox],
+  template: `
+    <button
+      hellCheckbox
+      [formField]="consentForm.agree"
+      (checkedChange)="checkedEvents.push($event)"
+    ></button>
+  `,
+})
+class CheckboxSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal({ agree: false });
+  readonly consentForm = form(this.model, (path) => {
+    requiredSchema(path.agree);
+    disabledSchema(path.agree, () => this.formDisabled());
+  });
+  readonly checkedEvents: boolean[] = [];
 }
 
 @Component({
@@ -176,10 +218,12 @@ describe('HellCheckbox', () => {
     await TestBed.configureTestingModule({
       imports: [
         CheckboxHost,
+        CheckboxTwoWayHost,
         CheckboxUnboundHost,
         CheckboxFormHost,
         CheckboxRequiredFormHost,
-        CheckboxDisabledRequiredHost,
+        CheckboxNgModelHost,
+        CheckboxSignalFormsHost,
         NativeCheckboxFormHost,
         CheckboxPartStyleHost,
       ],
@@ -242,6 +286,31 @@ describe('HellCheckbox', () => {
     expect(host.checkedEvents).toEqual([true, false]);
   });
 
+  it('synchronizes two-way binding through one checked authority without duplicate commits', () => {
+    const fixture = TestBed.createComponent(CheckboxTwoWayHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+
+    // External parent write flows in without echoing a change event.
+    host.checked.set(true);
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(host.checkedEvents).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.checked()).toBe(false);
+    expect(host.checkedEvents).toEqual([false]);
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+  });
+
   it('integrates with reactive forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(CheckboxFormHost);
     fixture.detectChanges();
@@ -270,24 +339,7 @@ describe('HellCheckbox', () => {
     expect(checkbox.disabled).toBe(true);
   });
 
-  it('validates required through its Validator implementation', () => {
-    const fixture = TestBed.createComponent(CheckboxHost);
-    const host = fixture.componentInstance;
-    host.required.set(true);
-    fixture.detectChanges();
-
-    const checkbox = fixture.debugElement.query(By.directive(HellCheckbox)).componentInstance as HellCheckbox;
-
-    expect(checkbox.validate(new FormControl(false))).toEqual({ required: true });
-    expect(checkbox.validate(new FormControl(true))).toBeNull();
-
-    host.disabled.set(true);
-    fixture.detectChanges();
-
-    expect(checkbox.validate(new FormControl(false))).toBeNull();
-  });
-
-  it('validates required with reactive forms via built-in required semantics', () => {
+  it('validates required with reactive forms via form-owned requiredTrue', () => {
     const fixture = TestBed.createComponent(CheckboxRequiredFormHost);
     fixture.detectChanges();
 
@@ -303,6 +355,100 @@ describe('HellCheckbox', () => {
     expect(host.control.valid).toBe(true);
     expect(host.control.value).toBe(true);
     expect(host.control.getError('required')).toBeNull();
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(host.control.invalid).toBe(false);
+    expect(host.control.disabled).toBe(true);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(CheckboxNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([]);
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.checked()).toBe(true);
+    expect(host.checkedEvents).toEqual([true]);
+    expect(host.model().touched).toBe(false);
+
+    checkbox.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+
+    host.checked.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([true]);
+  });
+
+  it('participates in Signal Forms as a FormCheckboxControl through formField', () => {
+    const fixture = TestBed.createComponent(CheckboxSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    // The field's required() metadata drives the reserved required input.
+    expect(checkbox.getAttribute('aria-required')).toBe('true');
+    expect(host.consentForm.agree().invalid()).toBe(true);
+
+    // Form-driven writes flow in without echoing an interaction commit.
+    host.consentForm.agree().value.set(true);
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(host.checkedEvents).toEqual([]);
+    expect(host.consentForm.agree().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model.
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.consentForm.agree().value()).toBe(false);
+    expect(host.model().agree).toBe(false);
+    expect(host.checkedEvents).toEqual([false]);
+    expect(host.consentForm.agree().dirty()).toBe(true);
+    expect(host.consentForm.agree().invalid()).toBe(true);
+    expect(host.consentForm.agree().touched()).toBe(false);
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.consentForm.agree().value()).toBe(true);
+    expect(host.consentForm.agree().invalid()).toBe(false);
+
+    checkbox.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.consentForm.agree().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(checkbox.disabled).toBe(true);
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.consentForm.agree().value()).toBe(true);
+    expect(host.checkedEvents).toEqual([false, true]);
   });
 
   it('offers a native checkbox path with built-in form semantics', () => {
@@ -402,19 +548,6 @@ describe('HellCheckbox', () => {
         nativeRoot: sortClasses(classAttr(query(fixture.nativeElement, '[data-testid="default-native"]'))),
       }).toMatchSnapshot('checkbox');
     });
-  });
-
-  it('does not report required when control is disabled', () => {
-    const fixture = TestBed.createComponent(CheckboxDisabledRequiredHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-
-    host.control.disable();
-    fixture.detectChanges();
-
-    expect(host.control.invalid).toBe(false);
-    expect(host.control.disabled).toBe(true);
   });
 });
 

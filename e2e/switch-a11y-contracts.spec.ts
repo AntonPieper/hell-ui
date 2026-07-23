@@ -57,6 +57,34 @@ test.describe('switch browser accessibility contract', () => {
     await expectSwitchThumbSide(disabledOn, 'right');
   });
 
+  test('signal forms switch shares one checked state with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await gotoSwitch(page);
+
+    const example = page.locator('app-switch-forms-example');
+    await expect(example).toBeVisible();
+
+    const digest = example.getByRole('switch', { name: 'Email digest' });
+    const realtime = example.getByRole('switch', { name: 'Realtime alerts' });
+
+    await expect(digest).toHaveAttribute('aria-checked', 'false');
+    // The schema's disabled() rule locks the dependent switch while the digest is off.
+    await expect(realtime).toBeDisabled();
+    await expect(example).toContainText('Digest: false');
+    await expect(example).toContainText('Touched: false');
+
+    await digest.focus();
+    await page.keyboard.press('Space');
+    await expect(digest).toHaveAttribute('aria-checked', 'true');
+    await expect(example).toContainText('Digest: true');
+    await expect(realtime).toBeEnabled();
+    await expect(example).toContainText('Touched: false');
+
+    await page.keyboard.press('Tab');
+    await expect(example).toContainText('Touched: true');
+  });
+
   test('native switch keeps checkbox semantics with visible label and Space key behavior', async ({
     page,
   }) => {

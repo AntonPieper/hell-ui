@@ -968,6 +968,37 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellCheckbox` and `HellSwitch` now have one Control Value
+  Authority each: `checked` is a `ModelSignal<boolean>` implementing Signal
+  Forms' `FormCheckboxControl`, and neither component still implements
+  `ControlValueAccessor` (or, for the checkbox, `Validator`), registers the
+  `NG_VALUE_ACCESSOR` / `NG_VALIDATORS` providers, or exposes the
+  `writeValue` / `registerOnChange` / `registerOnTouched` /
+  `registerOnValidatorChange` / `setDisabledState` / `validate` methods. First
+  carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+  Unreleased). Direct `[checked]` binding, new two-way `[(checked)]` binding,
+  Signal Forms `[formField]`, Reactive Forms `formControl`, and
+  template-driven `ngModel` all read and write the same model —
+  `formControl`/`ngModel` keep working through Angular's built-in Signal Forms
+  interoperability, one user toggle commits exactly once, and external writes
+  never echo `(checkedChange)`. Checkbox `indeterminate` stays a visual-only
+  input/output pair, not a second checked authority. Migration notes: model
+  inputs do not support input transforms, so `checked` lost its
+  static-attribute boolean coercion — replace a bare `checked` attribute with
+  the typed binding `[checked]="true"` (`indeterminate`, `disabled`, and
+  `required` keep their attribute coercion); the checkbox's directive-owned
+  required validation is gone — declare required policy on the form
+  (`Validators.requiredTrue` for classic controls, a `required()` schema rule
+  for Signal Forms, whose metadata now drives the reserved `required` input)
+  while the `required` input keeps reflecting
+  `required`/`aria-required`/`data-required`. A new `(touch)` output marks the
+  bound field or control touched on blur. `HellNativeCheckbox` and
+  `HellNativeSwitch` stay platform-owned native controls and are unchanged.
+  Evidence: `packages/angular/checkbox/checkbox.spec.ts`,
+  `packages/angular/switch/switch.spec.ts`, the styled-controls packed
+  consumer's checkbox and switch forms scenarios,
+  `e2e/checkbox-a11y-contracts.spec.ts`, `e2e/switch-a11y-contracts.spec.ts`,
+  and the updated checkbox and switch API reports. Closes #283.
 - BREAKING: `HellTimeInput` now has one Control Value Authority: `value` is a
   `ModelSignal<HellTimeValue | null>` implementing Signal Forms'
   `FormValueControl<HellTimeValue | null>`, and the directive no longer

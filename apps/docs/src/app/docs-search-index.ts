@@ -409,6 +409,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'components/checkbox/examples/basic.example components/checkbox hellCheckbox hellField hellFieldLabel checked checkedChange minimal usage',
  },
  {
+ title:'Checkbox: Forms',
+ path:'/components/checkbox',
+ detail:'components/checkbox/examples/forms.example.ts',
+ terms:
+'forms components/checkbox/examples/forms.example components/checkbox hellCheckbox hellField hellFieldLabel formField Signal Forms FormCheckboxControl checked model two-way ngModel formControl touched required aria-required',
+ },
+ {
  title:'Checkbox: Parent/child group',
  path:'/components/checkbox',
  detail:'components/checkbox/examples/group.example.ts',
@@ -1709,6 +1716,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/switch/examples/basic.example.ts',
  terms:
 'hellSwitch button checked checkedChange label notifications toggle immediate',
+ },
+ {
+ title:'Switch: Forms',
+ path:'/components/switch',
+ detail:'components/switch/examples/forms.example.ts',
+ terms:
+'forms components/switch/examples/forms.example components/switch hellSwitch hellField hellFieldLabel formField Signal Forms FormCheckboxControl checked model two-way ngModel formControl touched disabled',
  },
  {
  title:'Switch: Native path',

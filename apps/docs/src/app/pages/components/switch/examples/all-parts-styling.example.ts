@@ -8,7 +8,7 @@ import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from '@hell-ui/angula
   template: `
     <div class="inline-flex items-center gap-2">
       <!-- HellSwitch: root + thumb, both refined through one ui map. -->
-      <button hellSwitch checked aria-label="Custom switch" [ui]="switchUi"></button>
+      <button hellSwitch [checked]="true" aria-label="Custom switch" [ui]="switchUi"></button>
       <span>Styled switch (root + thumb)</span>
     </div>
     <div class="inline-flex items-center gap-2">
