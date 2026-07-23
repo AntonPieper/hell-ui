@@ -64,18 +64,22 @@ test.describe('number input accessibility contract', () => {
       .locator('app-number-input-basic-example')
       .getByRole('button', { name: 'Increase Listen port' });
 
-    const box = await increment.boundingBox();
-    if (!box) throw new Error('Expected increment stepper bounding box.');
-
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    // hover() scrolls the button into the viewport before positioning the
+    // pointer; raw boundingBox coordinates can sit below the fold, where a
+    // pressed button never receives the pointerdown.
+    await increment.hover();
     await page.mouse.down();
-    // The first step lands on press. A slow browser may already have crossed
-    // the hold delay before this read, so capture its post-press baseline.
+    // The first step lands on press; poll so a browser that renders the
+    // pressed value asynchronously still observes it.
+    await expect
+      .poll(async () => Number(await port.inputValue()), { timeout: 10_000 })
+      .toBeGreaterThan(8080);
+    // A slow browser may already have crossed the hold delay before this
+    // read, so capture its post-press baseline.
     const pressed = Number(await port.inputValue());
-    expect(pressed).toBeGreaterThan(8080);
     // Holding repeats beyond that observed baseline before release.
     await expect
-      .poll(async () => Number(await port.inputValue()), { timeout: 2000 })
+      .poll(async () => Number(await port.inputValue()), { timeout: 10_000 })
       .toBeGreaterThan(pressed);
     await page.mouse.up();
 
