@@ -40,11 +40,11 @@ import {
 } from 'ng-primitives/combobox';
 
 const HELL_COMBOBOX_RECIPE = {
-  root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
+  root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[family-name:inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
 const HELL_COMBOBOX_INPUT_RECIPE = {
-  root: 'h-full min-w-0 flex-auto border-0 bg-transparent p-0 font-[inherit] text-[inherit] text-current outline-none placeholder:text-hell-foreground-muted',
+  root: 'h-full min-w-0 flex-auto border-0 bg-transparent p-0 font-[family-name:inherit] text-[inherit] text-current outline-none placeholder:text-hell-foreground-muted',
 } satisfies HellRecipe<'root'>;
 
 const HELL_COMBOBOX_BUTTON_RECIPE = {

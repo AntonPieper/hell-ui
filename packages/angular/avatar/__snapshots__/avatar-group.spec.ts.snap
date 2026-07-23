@@ -53,6 +53,7 @@ exports[`HellAvatarGroup Part Style Map > recipes > keeps the default part class
     "data-open:text-hell-foreground",
     "duration-[var(--hell-duration-fast)]",
     "ease-[var(--ease-hell-out)]",
+    "font-[family-name:inherit]",
     "font-semibold",
     "h-[var(--_hell-av-size,32px)]",
     "inline-flex",

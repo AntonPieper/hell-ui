@@ -32,7 +32,7 @@ exports[`HellOmnibar command interaction runtime > recipes > keeps the default p
     "data-selected:text-hell-primary-soft-foreground",
     "flex",
     "focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "gap-hell-3",
     "items-center",
     "outline-none",

@@ -17,7 +17,7 @@ const HELL_ACCORDION_ITEM_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_ACCORDION_TRIGGER_RECIPE = {
-  root: 'flex w-full cursor-pointer items-center justify-between gap-hell-4 border-0 border-solid bg-transparent px-hell-5 py-hell-4 text-start font-[inherit] text-[13px] font-semibold text-hell-foreground transition-[background-color] duration-[var(--hell-duration-fast)] ease-hell-out data-hover:bg-hell-surface-subtle data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-[-2px]',
+  root: 'flex w-full cursor-pointer items-center justify-between gap-hell-4 border-0 border-solid bg-transparent px-hell-5 py-hell-4 text-start font-[family-name:inherit] text-[13px] font-semibold text-hell-foreground transition-[background-color] duration-[var(--hell-duration-fast)] ease-hell-out data-hover:bg-hell-surface-subtle data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-[-2px]',
 } satisfies HellRecipe<'root'>;
 
 const HELL_ACCORDION_CONTENT_RECIPE = {

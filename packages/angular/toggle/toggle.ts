@@ -25,7 +25,7 @@ import { hellPartStyler, HellSize, type HellRecipe, type HellUiInput } from '@he
 export type HellToggleGroupValue = string | null | readonly string[];
 
 const HELL_TOGGLE_BASE_RECIPE =
-  'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-transparent bg-transparent font-[inherit] font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65]';
+  'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-transparent bg-transparent font-[family-name:inherit] font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65]';
 
 const HELL_TOGGLE_SELECTED_RECIPE =
   'data-selected:border-hell-primary data-selected:bg-hell-primary data-selected:text-hell-primary-foreground data-[selected][data-hover]:border-hell-primary-hover data-[selected][data-hover]:bg-hell-primary-hover';

@@ -101,7 +101,7 @@ exports[`Hell TanStack table shell > styles TanStack filter inputs through the H
     "ease-hell-out",
     "focus:border-hell-border-focus",
     "focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)]",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "h-hell-control-md",
     "inline-flex",
     "invalid:!border-hell-danger",
