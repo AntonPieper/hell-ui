@@ -48,7 +48,7 @@ const HELL_NATIVE_RADIO_GROUP_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_RADIO_RECIPE = {
-  root: 'inline-flex cursor-pointer items-center gap-hell-3 rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-[13px] text-hell-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
+  root: 'inline-flex cursor-pointer items-center gap-hell-3 rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-[13px] text-hell-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
 } satisfies HellRecipe<'root'>;
 
 const HELL_NATIVE_RADIO_RECIPE = {

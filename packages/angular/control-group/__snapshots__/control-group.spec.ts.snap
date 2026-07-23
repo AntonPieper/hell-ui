@@ -20,6 +20,7 @@ exports[`HellControlGroup > recipes > keeps the default part classes stable > co
     "focus-visible:outline-offset-[-2px]",
     "focus-visible:relative",
     "focus-visible:z-[1]",
+    "font-[family-name:inherit]",
     "font-medium",
     "hover:bg-hell-surface-muted",
     "hover:text-hell-foreground",

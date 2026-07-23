@@ -37,7 +37,7 @@ const HELL_BREADCRUMB_ITEM_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_LINK_RECIPE = {
-  root: 'inline-flex max-w-[24ch] cursor-pointer items-center gap-hell-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-inherit no-underline transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:text-hell-foreground hover:underline hover:underline-offset-[3px] data-hover:text-hell-foreground data-hover:underline data-hover:underline-offset-[3px] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
+  root: 'inline-flex max-w-[24ch] cursor-pointer items-center gap-hell-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-inherit no-underline transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:text-hell-foreground hover:underline hover:underline-offset-[3px] data-hover:text-hell-foreground data-hover:underline data-hover:underline-offset-[3px] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
 } satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_PAGE_RECIPE = {
@@ -49,7 +49,7 @@ const HELL_BREADCRUMB_SEPARATOR_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_BREADCRUMB_ELLIPSIS_RECIPE = {
-  root: 'inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-hell-foreground-subtle transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-subtle hover:text-hell-foreground data-hover:bg-hell-surface-subtle data-hover:text-hell-foreground data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1',
+  root: 'inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-hell-foreground-subtle transition-colors duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-subtle hover:text-hell-foreground data-hover:bg-hell-surface-subtle data-hover:text-hell-foreground data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1',
 } satisfies HellRecipe<'root'>;
 
 /**

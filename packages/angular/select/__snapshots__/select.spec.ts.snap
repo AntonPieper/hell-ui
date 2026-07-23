@@ -58,7 +58,7 @@ exports[`HellSelect > recipes > keeps the default part classes stable > select 1
     "data-invalid:border-hell-danger",
     "duration-[var(--hell-duration-fast)]",
     "ease-[var(--ease-hell-out)]",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "gap-hell-3",
     "h-hell-control-md",
     "inline-flex",

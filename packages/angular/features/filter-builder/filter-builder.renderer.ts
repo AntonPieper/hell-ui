@@ -67,7 +67,7 @@ const HELL_FILTER_BUILDER_RECIPE = {
   root: 'relative flex w-full min-w-0 items-start gap-hell-2',
   tokens: 'flex min-w-0 flex-1 flex-wrap items-center gap-hell-2',
   token: '',
-  tokenLabel: 'border-0 bg-transparent p-0 font-[inherit] text-inherit outline-none',
+  tokenLabel: 'border-0 bg-transparent p-0 font-[family-name:inherit] text-inherit outline-none',
   control: 'min-w-[180px] flex-1',
   panel: 'z-[var(--hell-z-popover,60)] max-h-[280px] shadow-hell-lg',
   fieldOption: 'data-[active]:bg-hell-surface-muted',

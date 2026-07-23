@@ -21,6 +21,7 @@ exports[`HellAudioPlayer > recipes > keeps the default part classes stable > aud
     "data-press:bg-hell-surface-muted",
     "duration-[var(--hell-duration-fast)]",
     "ease-[var(--ease-hell-out)]",
+    "font-[family-name:inherit]",
     "font-medium",
     "gap-hell-2",
     "h-hell-control-md",

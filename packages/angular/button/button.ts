@@ -4,7 +4,7 @@ import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angu
 import { HellButtonVariant, HellSize } from '@hell-ui/angular/core';
 
 const HELL_BUTTON_BASE_RECIPE =
-  'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-solid font-[inherit] font-medium leading-none shadow-hell-xs transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:shadow-none data-disabled:saturate-[0.65]';
+  'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-solid font-[family-name:inherit] font-medium leading-none shadow-hell-xs transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:shadow-none data-disabled:saturate-[0.65]';
 
 const HELL_BUTTON_VARIANT_RECIPE: Record<HellButtonVariant, string> = {
   default:

@@ -167,7 +167,7 @@ function numberInputStepController(target: HellNumberInput): HellNumberInputStep
 }
 
 const HELL_NUMBER_STEP_RECIPE = {
-  root: 'inline-flex min-w-hell-control-sm flex-none cursor-pointer select-none items-center justify-center border-0 border-s border-hell-border bg-transparent px-hell-2 font-[inherit] font-medium text-hell-foreground-muted transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
+  root: 'inline-flex min-w-hell-control-sm flex-none cursor-pointer select-none items-center justify-center border-0 border-s border-hell-border bg-transparent px-hell-2 font-[family-name:inherit] font-medium text-hell-foreground-muted transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
 } satisfies HellRecipe<'root'>;
 
 let nextNumberInputId = 0;
