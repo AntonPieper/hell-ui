@@ -1,0 +1,61 @@
+/*
+ * hell-ui/styles.css — Default Style Bundle.
+ *
+ * Generated from entrypoint styleBundle metadata by
+ * tools/generate-entrypoint-manifests.mjs; do not edit by hand.
+ * Run `pnpm run generate:entrypoints` after changing entrypoint metadata.
+ *
+ * The Shared Style Substrate (tokens.css) comes first, followed by every
+ * standard component stylesheet in deterministic order. Heavy Feature
+ * Stylesheets and Theme Adapter Stylesheets stay explicit opt-ins and are
+ * never included here.
+ */
+
+@import './tokens.css';
+@import './accordion/styles.css';
+@import './alert/styles.css';
+@import './app-shell/styles.css';
+@import './audio-player/styles.css';
+@import './avatar/styles.css';
+@import './breadcrumbs/styles.css';
+@import './button/styles.css';
+@import './card/styles.css';
+@import './checkbox/styles.css';
+@import './chip/styles.css';
+@import './combobox/styles.css';
+@import './confirm/styles.css';
+@import './control-group/styles.css';
+@import './date-input/styles.css';
+@import './date-picker/styles.css';
+@import './dialog/styles.css';
+@import './empty-state/styles.css';
+@import './field/styles.css';
+@import './file-picker/styles.css';
+@import './icon/styles.css';
+@import './input/styles.css';
+@import './listbox/styles.css';
+@import './master-detail/styles.css';
+@import './menu/styles.css';
+@import './number-input/styles.css';
+@import './omnibar/styles.css';
+@import './page-header/styles.css';
+@import './pagination/styles.css';
+@import './popover/styles.css';
+@import './progress/styles.css';
+@import './radio/styles.css';
+@import './resizable/styles.css';
+@import './save-bar/styles.css';
+@import './select/styles.css';
+@import './separator/styles.css';
+@import './skeleton/styles.css';
+@import './slider/styles.css';
+@import './spinner/styles.css';
+@import './switch/styles.css';
+@import './table/styles.css';
+@import './tabs/styles.css';
+@import './time-input/styles.css';
+@import './time-picker/styles.css';
+@import './toast/styles.css';
+@import './toggle/styles.css';
+@import './toolbar/styles.css';
+@import './tooltip/styles.css';

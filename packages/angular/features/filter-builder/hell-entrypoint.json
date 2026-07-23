@@ -1,5 +1,6 @@
 {
   "category": "feature",
+  "styleBundle": "opt-in",
   "header": [
     "/**",
     " * @experimental Optional projected-editor Filter Builder feature entry point. Applications own field schemas, editor rendering, and Search Resources.",

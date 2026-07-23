@@ -1,5 +1,6 @@
 {
   "category": "styled-primitive",
+  "styleBundle": "default",
   "exports": ["./avatar"],
   "extraExports": [
     "export {",

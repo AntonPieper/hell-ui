@@ -1,0 +1,30 @@
+{
+  "name": "hell-consumer-fixture-styles-granular",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "ng build consumer --configuration production"
+  },
+  "dependencies": {
+    "@angular/cdk": "*",
+    "@angular/common": "*",
+    "@angular/compiler": "*",
+    "@angular/core": "*",
+    "@angular/forms": "*",
+    "@angular/platform-browser": "*",
+    "@floating-ui/dom": "*",
+    "hell-ui": "*",
+    "ng-primitives": "*",
+    "rxjs": "*",
+    "tailwindcss": "*",
+    "tslib": "*"
+  },
+  "devDependencies": {
+    "@angular/build": "*",
+    "@angular/cli": "*",
+    "@angular/compiler-cli": "*",
+    "@tailwindcss/postcss": "*",
+    "postcss": "*",
+    "typescript": "*"
+  }
+}

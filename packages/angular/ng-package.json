@@ -16,6 +16,11 @@
       "output": "."
     },
     {
+      "glob": "styles.css",
+      "input": ".",
+      "output": "."
+    },
+    {
       "glob": "*/styles.css",
       "input": ".",
       "output": "."

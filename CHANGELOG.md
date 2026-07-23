@@ -7,6 +7,20 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Added
 
+- Added the recommended `hell-ui/styles.css` Default Style Bundle. The export
+  is generated deterministically from explicit per-entrypoint `styleBundle`
+  metadata and contains the Shared Style Substrate (`hell-ui/tokens.css`)
+  followed by every standard component stylesheet; existing
+  `hell-ui/<entrypoint>/styles.css` exports remain available as the advanced
+  Granular Style Mode. Choose one standard-style mode — combining both
+  duplicates the same CSS. Heavy Feature Stylesheets (Code Editor, PDF Viewer,
+  TanStack table shell) and Theme Adapter Stylesheets stay explicit opt-ins
+  that can be added to either mode. Packed-tarball aggregate and granular
+  consumer fixtures build through the supported Tailwind/PostCSS production
+  path and assert byte-identical browser computed styles on representative
+  primitive, composite, and overlay surfaces; pack-audit and architecture
+  gates prove the aggregate export, metadata completeness, deterministic
+  ordering, and heavy-style exclusions. Closes #312.
 - Every public Angular directive tuple now has an accurately named
   `HELL_*_IMPORTS` export. Temporary deprecated `HELL_*_DIRECTIVES` identity
   aliases supported the in-repo migration without changing tuple contents or

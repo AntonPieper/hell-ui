@@ -1,5 +1,6 @@
 {
   "category": "tanstack-table-body-strategy",
+  "styleBundle": "none",
   "exports": [
     "./virtual-rows"
   ],

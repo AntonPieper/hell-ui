@@ -1,5 +1,6 @@
 {
   "category": "root",
+  "styleBundle": "none",
   "exports": [
     "./core/public-api"
   ],

@@ -3,7 +3,11 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-manifest.mjs';
+import {
+  defaultStyleBundleImportSpecifiers,
+  entrypointPublicApiFiles,
+  entrypointStyleExports,
+} from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const angularPackageName = 'hell-ui';
@@ -174,6 +178,7 @@ export function auditPackedPackage({ tarball, logger = console, verbose = false 
   checkPackageMetadata(packageJson, failures);
   checkPackagePeers(packageJson, failures);
   checkPackedFileAccounting(packageJson, tarball, files, fileSet, failures);
+  checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures);
 
   if (failures.length) {
     throw new Error(['Package pack audit failed:', ...failures.map((failure) => `- ${failure}`)].join('\n'));
@@ -672,6 +677,43 @@ function expectedExplicitPackedFiles(packageName) {
     return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
   }
   return [];
+}
+
+// The packed Default Style Bundle must reproduce the entrypoint styleBundle
+// metadata exactly: the Shared Style Substrate first, then every standard
+// component stylesheet, and never a Heavy Feature Stylesheet or Theme Adapter
+// Stylesheet.
+function checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures) {
+  if (packageJson.name !== angularPackageName) return;
+
+  const bundleFile = 'styles.css';
+  if (!fileSet.has(bundleFile)) {
+    failures.push(`Packed package is missing Default Style Bundle ${bundleFile}`);
+    return;
+  }
+
+  let source;
+  try {
+    source = packedTextFile(tarball, bundleFile);
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+    return;
+  }
+
+  const imports = cssImportSpecifiers(source);
+  const expected = defaultStyleBundleImportSpecifiers();
+  if (JSON.stringify(imports) !== JSON.stringify(expected)) {
+    failures.push(
+      `Packed Default Style Bundle ${bundleFile} imports must match entrypoint styleBundle metadata; expected [${expected.join(', ')}], found [${imports.join(', ')}]`,
+    );
+  }
+  for (const specifier of imports) {
+    if (/^\.\/(features\/|table-tanstack|themes\/)/.test(specifier)) {
+      failures.push(
+        `Packed Default Style Bundle ${bundleFile} must not import heavy or Theme Adapter stylesheet ${specifier}`,
+      );
+    }
+  }
 }
 
 function addCssImportClosure(tarball, allowed, fileSet, failures) {

@@ -1,5 +1,6 @@
 {
   "category": "tanstack-table-shell",
+  "styleBundle": "opt-in",
   "header": [
     "/**",
     " * @experimental Hell-styled TanStack Table shell entry point.",

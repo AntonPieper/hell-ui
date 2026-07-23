@@ -1,5 +1,6 @@
 {
   "category": "table-primitives",
+  "styleBundle": "default",
   "exports": ["./table", "./table-utilities"],
   "header": [
     "/**",

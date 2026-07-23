@@ -1,5 +1,6 @@
 {
   "category": "core",
+  "styleBundle": "none",
   "exports": [
     "./types",
     "./pick-value",

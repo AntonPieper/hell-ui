@@ -1,5 +1,6 @@
 {
   "category": "internal",
+  "styleBundle": "none",
   "header": [
     "/**",
     " * @internal Shared listener owner for Hell-owned packages only.",

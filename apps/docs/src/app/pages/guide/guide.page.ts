@@ -7,7 +7,14 @@ const ENTRYPOINT_IMPORTS_CODE = `// TypeScript: one narrow entry point per surfa
 import { HellButton } from 'hell-ui/button';
 import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
-// CSS: shared tokens once, then one stylesheet per entry point you render.
+// CSS (recommended): the generated Default Style Bundle — tokens plus every
+// standard component stylesheet in one import.
+// styles.css
+// @import 'tailwindcss';
+// @import 'hell-ui/styles.css';
+
+// CSS (advanced, Granular Style Mode): shared tokens once, then one
+// stylesheet per entry point you render. Pick one mode — never both.
 // styles.css
 // @import 'tailwindcss';
 // @import 'hell-ui/tokens.css';
@@ -108,9 +115,13 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       <p>
         The root <code>hell-ui</code> export is deliberately light: stable core only
         (Part Style Map types, labels, search core). Everything visual lives behind a narrow entry
-        point whose import path matches its source directory. CSS follows the same rule: a shared
-        token substrate at <code>hell-ui/tokens.css</code>, one
-        <code>&lt;entrypoint&gt;/styles.css</code> per surface, and no category aggregate paths.
+        point whose import path matches its source directory. CSS is deliberately simpler than
+        TypeScript: the recommended <code>hell-ui/styles.css</code> Default Style Bundle carries
+        the shared token substrate plus every standard component stylesheet, generated from
+        entrypoint metadata. Granular Style Mode remains the advanced alternative —
+        <code>hell-ui/tokens.css</code> once, then one <code>&lt;entrypoint&gt;/styles.css</code>
+        per surface. Choose one standard-style mode; heavy feature CSS and theme adapters are
+        explicit opt-ins in either, and category aggregate paths stay prohibited.
       </p>
       <hd-code-block [code]="entrypointImportsCode" />
       <p>

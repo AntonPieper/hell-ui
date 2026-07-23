@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   entrypointPublicApiFiles,
   libraryRoot,
+  renderDefaultStyleBundleFile,
   renderNgPackageFile,
   renderPackageJsonFile,
   renderPublicApiFile,
@@ -23,6 +24,8 @@ for (const entrypoint of entrypointPublicApiFiles()) {
 for (const entrypoint of secondaryPackageEntrypoints()) {
   writeOrCheck(entrypoint.packagePath, renderNgPackageFile(entrypoint));
 }
+
+writeOrCheck(`${libraryRoot}/styles.css`, renderDefaultStyleBundleFile());
 
 const angularPackageJsonPath = `${libraryRoot}/package.json`;
 writeOrCheck(
