@@ -86,6 +86,10 @@ version, regenerates the root changelog, and runs the narrow changelog checks.
 It does not commit, tag, push, publish, or silently roll back a failed
 generation.
 
+A release-preparation check regenerates `CHANGELOG.md` from the committed
+Changie records and requires byte-for-byte equality. It also proves that the
+single new version file accounts for the consumed fragments.
+
 A `release-preparation` pull request may change only:
 
 - `CHANGELOG.md`;
