@@ -21,6 +21,10 @@ import { ToggleWithTooltipExample } from './examples/with-tooltip.example';
 import toggleWithTooltipExampleCodeRaw from './examples/with-tooltip.example.ts?raw' with {
   loader: 'text',
 };
+import { ToggleFormsExample } from './examples/forms.example';
+import toggleFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { ToggleStylingExample } from './examples/styling.example';
 import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
@@ -36,6 +40,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     ToggleGroupSingleExample,
     ToggleGroupMultipleExample,
     ToggleWithTooltipExample,
+    ToggleFormsExample,
     ToggleStylingExample,
     PageHeader,
   ],
@@ -55,9 +60,14 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <code>hellToggle</code> is a directive for a standalone press-toggle button, built on the
         <code>NgpToggle</code> primitive from <code>ng-primitives</code> for the
         <code>selected</code>/<code>aria-pressed</code> state machine. <code>hellToggleGroup</code>
-        and <code>hellToggleGroupItem</code> build on <code>NgpToggleGroup</code> to turn a row of
-        toggle buttons into one single- or multi-select control, complete with an Angular Forms
-        <code>ControlValueAccessor</code> on the group.
+        and <code>hellToggleGroupItem</code> build on the <code>ng-primitives</code> toggle-group
+        primitive to turn a row of toggle buttons into one single- or multi-select control. The
+        group's <code>value</code> is one Angular model with a mode-dependent canonical type —
+        bind it directly (<code>[value]</code> plus <code>(valueChange)</code>), two-way
+        (<code>[(value)]</code>), or through forms: it implements Signal Forms'
+        <code>FormValueControl</code> contract for <code>[formField]</code>, and the same model
+        drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability.
       </p>
       <p>
         Reach for a standalone toggle for one binary setting rendered as a button, like a mute or
@@ -87,12 +97,11 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Toggle group: single-select</h2>
       <p>
-        <code>type="single"</code> keeps at most one item selected at a time. The
-        <code>[value]</code>/<code>(valueChange)</code> template bindings still carry a one-item
-        (or empty) string array — only an Angular Forms control bound with
-        <code>formControlName</code>/<code>[(ngModel)]</code> sees a plain string or
-        <code>null</code>, via the directive's own <code>ControlValueAccessor</code>. Items render
-        native radio semantics under the hood.
+        <code>type="single"</code> keeps at most one item selected at a time, and its canonical
+        value is a plain string — or <code>null</code> once the selected item is deselected. Every
+        binding style shares that same value: <code>[(value)]</code>, <code>[formField]</code>,
+        <code>formControl</code>, and <code>ngModel</code>. Items render native radio semantics
+        under the hood.
       </p>
       <hd-example-tabs [code]="toggleGroupSingleExampleCode">
         <app-toggle-group-single-example />
@@ -100,10 +109,10 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Toggle group: multiple-select</h2>
       <p>
-        <code>type="multiple"</code> allows any number of items selected at once and binds
-        <code>value</code> to a string array. Items keep native toggle-button semantics
-        (<code>aria-pressed</code>) instead of radio semantics, since none of them are mutually
-        exclusive.
+        <code>type="multiple"</code> allows any number of items selected at once, and its
+        canonical value is a readonly string array (empty when nothing is selected). Items keep
+        native toggle-button semantics (<code>aria-pressed</code>) instead of radio semantics,
+        since none of them are mutually exclusive.
       </p>
       <hd-example-tabs [code]="toggleGroupMultipleExampleCode">
         <app-toggle-group-multiple-example />
@@ -118,6 +127,31 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </p>
       <hd-example-tabs [code]="toggleWithTooltipExampleCode">
         <app-toggle-with-tooltip-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the group's single committed-value authority, so all
+        binding styles observe the same mode-canonical value: <code>string | null</code> in
+        <code>single</code> mode, a readonly string array in <code>multiple</code> mode. With
+        Signal Forms, bind a field via <code>[formField]</code>: the field writes into
+        <code>value</code>, one user toggle updates the field exactly once, focus leaving the
+        group marks it touched, and the field's <code>disabled</code> rule flows into the group's
+        <code>disabled</code> input. <code>formControl</code> and <code>[(ngModel)]</code> keep
+        working against the same model through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        Non-canonical writes are normalized into the mode's shape and re-emitted through
+        <code>(valueChange)</code>: in <code>single</code> mode an array keeps its first item, in
+        <code>multiple</code> mode a string becomes a one-item array, and changing
+        <code>type</code> re-normalizes the current value the same way. The <code>null</code>
+        default reads as an empty selection in both modes, so bind the mode-appropriate type —
+        <code>string | null</code> or <code>readonly string[]</code> — for a normalization-free
+        contract.
+      </p>
+      <hd-example-tabs [code]="toggleFormsExampleCode">
+        <app-toggle-forms-example />
       </hd-example-tabs>
 
       <h2>Styling</h2>
@@ -179,19 +213,24 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         </li>
         <li>
           <code>hellToggleGroup</code> (any host, typically a <code>div</code>):
-          <code>type</code>: <code>'single' | 'multiple'</code>.
-          <code>value</code>: <code>HellToggleGroupValue</code> (<code>string | null | readonly string[]</code>) —
-          a plain string or <code>null</code> in <code>single</code> mode, a string array in
-          <code>multiple</code> mode.
-          <code>valueChange</code>: <code>EventEmitter&lt;readonly string[]&gt;</code> (always an
-          array; the Hell wrapper's own <code>ControlValueAccessor</code> is what maps to/from a
-          scalar for <code>single</code> forms — see below).
-          <code>disabled</code>: <code>boolean</code>, default <code>false</code>.
+          <code>type</code>: <code>'single' | 'multiple'</code>, default <code>single</code>.
+          <code>value</code>: model of <code>HellToggleGroupValue</code>
+          (<code>string | null | readonly string[]</code>) — canonically a plain string or
+          <code>null</code> in <code>single</code> mode and a readonly string array in
+          <code>multiple</code> mode; supports <code>[(value)]</code> and defaults to
+          <code>null</code> (empty selection). No static-attribute coercion — bind the exact
+          typed value.
+          <code>valueChange</code>: emits the mode-canonical value once per user commit or
+          normalization.
+          <code>disabled</code>: <code>boolean</code>, default <code>false</code>; also driven by
+          bound forms.
+          <code>touch</code>: emits when focus leaves the group entirely; Angular forms use it to
+          mark the control touched.
           <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code>.
-          Implements Angular's <code>ControlValueAccessor</code>: bind
-          <code>[(ngModel)]</code> or <code>formControlName</code> with a plain string
-          (<code>single</code>) or string array (<code>multiple</code>) as the control's value
-          type.
+          Implements Signal Forms' <code>FormValueControl&lt;HellToggleGroupValue&gt;</code>:
+          bind <code>[formField]</code>, <code>formControl</code>, or <code>[(ngModel)]</code>
+          with a plain string or <code>null</code> (<code>single</code>) or a string array
+          (<code>multiple</code>) as the control's value type.
         </li>
         <li>
           <code>hellToggleGroupItem</code> (<code>button[hellToggleGroupItem]</code>, inside a
@@ -248,6 +287,7 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
   `,
 })
 export class TogglePage {
+  protected readonly toggleFormsExampleCode = toggleFormsExampleCodeRaw;
   protected readonly toggleBasicExampleCode = toggleBasicExampleCodeRaw;
   protected readonly toggleSizesExampleCode = toggleSizesExampleCodeRaw;
   protected readonly toggleGroupSingleExampleCode = toggleGroupSingleExampleCodeRaw;

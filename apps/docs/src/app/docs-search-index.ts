@@ -2011,18 +2011,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellToggle standalone mute notify bell icon selected selectedChange aria-label press-toggle',
  },
  {
+ title:'Toggle: Forms',
+ path:'/components/toggle',
+ detail:'components/toggle/examples/forms.example.ts',
+ terms:
+'forms components/toggle/examples/forms.example components/toggle hellToggleGroup hellToggleGroupItem hellField hellFieldLabel formField Signal Forms FormValueControl value model two-way ngModel formControl touched disabled single multiple HellToggleGroupValue',
+ },
+ {
  title:'Toggle: Group Multiple',
  path:'/components/toggle',
  detail:'components/toggle/examples/group-multiple.example.ts',
  terms:
-'hellToggleGroup hellToggleGroupItem type bold italic underline formatting aria-pressed',
+'hellToggleGroup hellToggleGroupItem type bold italic underline formatting aria-pressed readonly string array value two-way',
  },
  {
  title:'Toggle: Group Single',
  path:'/components/toggle',
  detail:'components/toggle/examples/group-single.example.ts',
  terms:
-'hellToggleGroup hellToggleGroupItem type align text alignment radio role aria-checked icon faSolidAlignLeft faSolidAlignCenter faSolidAlignRight',
+'hellToggleGroup hellToggleGroupItem type align text alignment radio role aria-checked icon faSolidAlignLeft faSolidAlignCenter faSolidAlignRight string null value two-way',
  },
  {
  title:'Toggle: Sizes',

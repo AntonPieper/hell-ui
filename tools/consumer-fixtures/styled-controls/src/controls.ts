@@ -133,7 +133,7 @@ interface MenuChannel {
     <input type="checkbox" hellNativeSwitch aria-label="Native switch" [ui]="nativeSwitchUi" checked />
     <hell-slider aria-label="Volume" [value]="42" [ui]="sliderUi" />
     <button hellToggle type="button" [selected]="true" [ui]="toggleUi">Bold</button>
-    <div hellToggleGroup type="single" [value]="['left']" [ui]="toggleGroupUi">
+    <div hellToggleGroup type="single" [value]="'left'" [ui]="toggleGroupUi">
       <button hellToggleGroupItem value="left" type="button" [ui]="toggleGroupItemUi">Left</button>
       <button hellToggleGroupItem value="right" type="button">Right</button>
     </div>

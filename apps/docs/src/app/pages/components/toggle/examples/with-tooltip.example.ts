@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBold, faSolidItalic, faSolidUnderline } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
 import { HellTooltip } from '@hell-ui/angular/tooltip';
 
 @Component({
@@ -11,7 +11,7 @@ import { HellTooltip } from '@hell-ui/angular/tooltip';
   imports: [HellToggleGroup, HellToggleGroupItem, HellIcon, HellTooltip],
   providers: [provideIcons({ faSolidBold, faSolidItalic, faSolidUnderline })],
   template: `
-    <div hellToggleGroup type="multiple" [value]="tools()" (valueChange)="tools.set($event)" aria-label="Text formatting">
+    <div hellToggleGroup type="multiple" [(value)]="tools" aria-label="Text formatting">
       <button hellToggleGroupItem value="bold" type="button" hellTooltip="Bold (Ctrl+B)" aria-label="Bold">
         <hell-icon name="faSolidBold" />
       </button>
@@ -31,5 +31,5 @@ import { HellTooltip } from '@hell-ui/angular/tooltip';
   `,
 })
 export class ToggleWithTooltipExample {
-  protected readonly tools = signal<string[]>(['bold']);
+  protected readonly tools = signal<HellToggleGroupValue>(['bold']);
 }

@@ -120,6 +120,42 @@ test.describe('toggle browser accessibility contract', () => {
     await expectPressedItem(bold);
     await expect(example).toContainText('bold, italic');
   });
+
+  test('signal forms toggle group shares one value with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await gotoToggle(page);
+
+    const example = page.locator('app-toggle-forms-example');
+    await expect(example).toBeVisible();
+
+    const left = example.getByRole('radio', { name: 'Left' });
+    const center = example.getByRole('radio', { name: 'Center' });
+    await expect(left).toHaveAttribute('aria-checked', 'true');
+    await expect(example).toContainText('Align: left');
+    await expect(example).toContainText('Dirty: false');
+    await expect(example).toContainText('Touched: false');
+
+    await left.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(center).toBeFocused();
+    await page.keyboard.press('Enter');
+
+    // One user commit updates the bound field's value and dirty state.
+    await expect(center).toHaveAttribute('aria-checked', 'true');
+    await expect(left).toHaveAttribute('aria-checked', 'false');
+    await expect(example).toContainText('Align: center');
+    await expect(example).toContainText('Dirty: true');
+    await expect(example).toContainText('Touched: false');
+
+    // Deselecting the selected item empties the single-mode value to null.
+    await page.keyboard.press('Enter');
+    await expect(center).toHaveAttribute('aria-checked', 'false');
+    await expect(example).toContainText('Align: null');
+
+    await page.keyboard.press('Tab');
+    await expect(example).toContainText('Touched: true');
+  });
 });
 
 async function expectSelectedItem(item: Locator): Promise<void> {

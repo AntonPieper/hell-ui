@@ -12,6 +12,7 @@ import { SliderForms } from './slider-forms';
 import { SwitchForms } from './switch-forms';
 import { StyledTable } from './table';
 import { TimeInputForms } from './time-input-forms';
+import { ToggleGroupForms } from './toggle-group-forms';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +27,7 @@ import { TimeInputForms } from './time-input-forms';
     DateInputForms,
     NumberInputForms,
     TimeInputForms,
+    ToggleGroupForms,
     StyledTable,
   ],
   template: `
@@ -41,6 +43,7 @@ import { TimeInputForms } from './time-input-forms';
       <app-date-input-forms />
       <app-number-input-forms />
       <app-time-input-forms />
+      <app-toggle-group-forms />
       <app-styled-table />
     </main>
   `,

@@ -82,6 +82,10 @@
         "textIncludes": "Time input forms ready 08:15 09:30 10:45 12:00 13:15"
       },
       {
+        "selector": "[data-test-id=\"toggle-group-forms-status\"]",
+        "textIncludes": "Toggle group forms ready left-right-left-right-left-bold+italic"
+      },
+      {
         "selector": "[data-test-id=\"primary-link\"]",
         "computedStyle": {
           "property": "color",

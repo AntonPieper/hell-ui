@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidAlignCenter, faSolidAlignLeft, faSolidAlignRight } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
 
 @Component({
   selector: 'app-toggle-group-single-example',
@@ -10,7 +10,7 @@ import { HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
   imports: [HellToggleGroup, HellToggleGroupItem, HellIcon],
   providers: [provideIcons({ faSolidAlignCenter, faSolidAlignLeft, faSolidAlignRight })],
   template: `
-    <div hellToggleGroup type="single" [value]="align()" (valueChange)="align.set($event)" aria-label="Text align">
+    <div hellToggleGroup type="single" [(value)]="align" aria-label="Text align">
       <button hellToggleGroupItem value="left" type="button" aria-label="Align left">
         <hell-icon name="faSolidAlignLeft" />
       </button>
@@ -22,13 +22,13 @@ import { HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
       </button>
     </div>
     <p class="mt-2 text-sm text-hell-foreground-muted">
-      Aligned: <code>{{ align().join(', ') || 'none' }}</code>
+      Aligned: <code>{{ align() ?? 'none' }}</code>
     </p>
   `,
 })
 export class ToggleGroupSingleExample {
-  // The raw [value]/(valueChange) template bindings always carry a string
-  // array, even in type="single" mode (see the API section) — only the
-  // Angular Forms ControlValueAccessor maps single mode to a scalar string.
-  protected readonly align = signal<string[]>(['left']);
+  // In type="single" mode the group commits a plain string, or null once the
+  // selected item is deselected. Typing the signal as the canonical
+  // HellToggleGroupValue union keeps [(value)] direct.
+  protected readonly align = signal<HellToggleGroupValue>('left');
 }
