@@ -1347,6 +1347,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellRadioGroup hellRadio HellRadioIndicator ngpRadioIndicator digest frequency simplest usage exclusive choice',
  },
  {
+ title:'Radio: Forms',
+ path:'/components/radio',
+ detail:'components/radio/examples/forms.example.ts',
+ terms:
+'forms components/radio/examples/forms.example components/radio hellRadioGroup hellRadio formField Signal Forms FormValueControl value model two-way ngModel formControl touched required aria-required',
+ },
+ {
  title:'Radio: Orientation and Disabled Options',
  path:'/components/radio',
  detail:'components/radio/examples/horizontal.example.ts',

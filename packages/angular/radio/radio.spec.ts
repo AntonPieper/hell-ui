@@ -1,7 +1,12 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormField,
+  disabled as disabledSchema,
+  form,
+  required as requiredSchema,
+} from '@angular/forms/signals';
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from './radio';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
@@ -46,31 +51,83 @@ class RadioFormHost {
 }
 
 @Component({
+  selector: 'hell-radio-two-way-host',
+  imports: [HellRadioGroup, HellRadio],
+  template: `
+    <div
+      hellRadioGroup
+      [(value)]="value"
+      orientation="horizontal"
+      (valueChange)="events.push($any($event))"
+    >
+      <button hellRadio type="button" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioTwoWayHost {
+  readonly value = signal<string | null>(null);
+  readonly events: Array<string | null> = [];
+}
+
+@Component({
   selector: 'hell-radio-required-form-host',
   imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
   template: `
-    <div hellRadioGroup [required]="true" [formControl]="control" orientation="horizontal">
+    <div hellRadioGroup [formControl]="control" orientation="horizontal">
       <button hellRadio type="button" value="a">A</button>
       <button hellRadio type="button" value="b">B</button>
     </div>
   `,
 })
 class RadioRequiredFormHost {
-  readonly control = new FormControl<string | null>(null);
+  readonly control = new FormControl<string | null>(null, Validators.required);
 }
 
 @Component({
-  selector: 'hell-radio-disabled-required-host',
-  imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
+  selector: 'hell-radio-ng-model-host',
+  imports: [FormsModule, HellRadioGroup, HellRadio],
   template: `
-    <div hellRadioGroup [required]="true" [formControl]="control" orientation="horizontal">
+    <div
+      hellRadioGroup
+      [(ngModel)]="value"
+      orientation="horizontal"
+      (valueChange)="events.push($any($event))"
+    >
       <button hellRadio type="button" value="a">A</button>
       <button hellRadio type="button" value="b">B</button>
     </div>
   `,
 })
-class RadioDisabledRequiredHost {
-  readonly control = new FormControl<string | null>(null);
+class RadioNgModelHost {
+  readonly value = signal<string | null>(null);
+  readonly model = viewChild.required(NgModel);
+  readonly events: Array<string | null> = [];
+}
+
+@Component({
+  selector: 'hell-radio-signal-forms-host',
+  imports: [FormField, HellRadioGroup, HellRadio],
+  template: `
+    <div
+      hellRadioGroup
+      [formField]="planForm.plan"
+      orientation="horizontal"
+      (valueChange)="events.push($any($event))"
+    >
+      <button hellRadio type="button" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioSignalFormsHost {
+  readonly formDisabled = signal(false);
+  readonly model = signal<{ plan: string | null }>({ plan: null });
+  readonly planForm = form(this.model, (path) => {
+    requiredSchema(path.plan);
+    disabledSchema(path.plan, () => this.formDisabled());
+  });
+  readonly events: Array<string | null> = [];
 }
 
 @Component({
@@ -210,9 +267,11 @@ describe('HellRadio', () => {
     await TestBed.configureTestingModule({
       imports: [
         RadioHost,
+        RadioTwoWayHost,
         RadioFormHost,
         RadioRequiredFormHost,
-        RadioDisabledRequiredHost,
+        RadioNgModelHost,
+        RadioSignalFormsHost,
         RadioKeyboardHost,
         RadioCheckedTabStopHost,
         RadioItemDisabledHost,
@@ -281,27 +340,36 @@ describe('HellRadio', () => {
     expect(items[1].disabled).toBe(true);
   });
 
-  it('validates required through its Validator implementation', () => {
-    const fixture = TestBed.createComponent(RadioRequiredFormHost);
+  it('synchronizes two-way binding through one value authority without duplicate commits', () => {
+    const fixture = TestBed.createComponent(RadioTwoWayHost);
     fixture.detectChanges();
 
-    const hostElement = query<HTMLElement>(fixture.nativeElement, '[hellRadioGroup]');
-    const group = fixture.debugElement
-      .query(By.css('[hellRadioGroup]'))
-      .injector.get(HellRadioGroup);
+    const host = fixture.componentInstance;
+    const items = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      'button[hellRadio]',
+    );
 
-    expect(hostElement.getAttribute('aria-required')).toBe('true');
-    expect(hostElement.getAttribute('data-required')).toBe('true');
-    expect(group.validate(new FormControl(null))).toEqual({ required: true });
-    expect(group.validate(new FormControl(''))).toEqual({ required: true });
-    expect(group.validate(new FormControl('a'))).toBeNull();
+    expect(items[0].getAttribute('aria-checked')).toBe('false');
+    expect(items[1].getAttribute('aria-checked')).toBe('false');
 
-    const disabledControl = new FormControl(null);
-    disabledControl.disable();
-    expect(group.validate(disabledControl)).toBeNull();
+    // External parent write flows in without echoing a change event.
+    host.value.set('b');
+    fixture.detectChanges();
+
+    expect(items[1].getAttribute('aria-checked')).toBe('true');
+    expect(host.events).toEqual([]);
+
+    // One user interaction commits exactly once: parent state and one event.
+    items[0].click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBe('a');
+    expect(host.events).toEqual(['a']);
+    expect(items[0].getAttribute('aria-checked')).toBe('true');
+    expect(items[1].getAttribute('aria-checked')).toBe('false');
   });
 
-  it('validates required for reactive forms when no selection is made', () => {
+  it('validates required with reactive forms via form-owned required', () => {
     const fixture = TestBed.createComponent(RadioRequiredFormHost);
     fixture.detectChanges();
 
@@ -320,23 +388,101 @@ describe('HellRadio', () => {
     expect(host.control.valid).toBe(true);
     expect(host.control.getError('required')).toBeNull();
 
-    host.control.setValue('');
-    fixture.detectChanges();
-    expect(host.control.invalid).toBe(true);
-    expect(host.control.getError('required')).toBe(true);
-  });
-
-  it('does not report required when control is disabled', () => {
-    const fixture = TestBed.createComponent(RadioDisabledRequiredHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-
     host.control.disable();
     fixture.detectChanges();
 
     expect(host.control.invalid).toBe(false);
     expect(host.control.disabled).toBe(true);
+  });
+
+  it('integrates with template-driven forms through ngModel', async () => {
+    const fixture = TestBed.createComponent(RadioNgModelHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const group = query<HTMLElement>(fixture.nativeElement, '[hellRadioGroup]');
+    const items = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      'button[hellRadio]',
+    );
+
+    expect(items[0].getAttribute('aria-checked')).toBe('false');
+    expect(host.events).toEqual([]);
+
+    items[1].click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBe('b');
+    expect(host.events).toEqual(['b']);
+    expect(host.model().touched).toBe(false);
+
+    group.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.model().touched).toBe(true);
+
+    host.value.set('a');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(items[0].getAttribute('aria-checked')).toBe('true');
+    expect(items[1].getAttribute('aria-checked')).toBe('false');
+    expect(host.events).toEqual(['b']);
+  });
+
+  it('participates in Signal Forms as a FormValueControl through formField', () => {
+    const fixture = TestBed.createComponent(RadioSignalFormsHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const group = query<HTMLElement>(fixture.nativeElement, '[hellRadioGroup]');
+    const items = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      'button[hellRadio]',
+    );
+
+    // The field's required() metadata drives the reserved required input.
+    expect(group.getAttribute('aria-required')).toBe('true');
+    expect(group.getAttribute('data-required')).toBe('true');
+    expect(host.planForm.plan().invalid()).toBe(true);
+
+    // Form-driven writes flow in without echoing a selection commit.
+    host.planForm.plan().value.set('b');
+    fixture.detectChanges();
+
+    expect(items[1].getAttribute('aria-checked')).toBe('true');
+    expect(host.events).toEqual([]);
+    expect(host.planForm.plan().dirty()).toBe(false);
+
+    // One user interaction commits exactly once into the field and the model.
+    items[0].click();
+    fixture.detectChanges();
+
+    expect(host.planForm.plan().value()).toBe('a');
+    expect(host.model().plan).toBe('a');
+    expect(host.events).toEqual(['a']);
+    expect(host.planForm.plan().dirty()).toBe(true);
+    expect(host.planForm.plan().invalid()).toBe(false);
+    expect(host.planForm.plan().touched()).toBe(false);
+
+    group.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+
+    expect(host.planForm.plan().touched()).toBe(true);
+
+    // Field-driven disabled state reaches interaction and accessibility state.
+    host.formDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(items[0].disabled).toBe(true);
+    expect(items[1].disabled).toBe(true);
+
+    items[1].click();
+    fixture.detectChanges();
+
+    expect(host.planForm.plan().value()).toBe('a');
+    expect(host.events).toEqual(['a']);
   });
 
   it('moves custom radio keyboard focus by orientation and skips disabled items', () => {

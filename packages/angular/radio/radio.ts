@@ -5,21 +5,14 @@ import {
   booleanAttribute,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   untracked,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  type AbstractControl,
-  type ValidationErrors,
-  type Validator,
-} from '@angular/forms';
+import { type FormValueControl } from '@angular/forms/signals';
 import {
   NgpRadioGroup,
   NgpRadioItem,
@@ -36,7 +29,6 @@ import {
   writeRovingFocusActiveItem,
 } from '@hell-ui/angular/internal/ng-primitives';
 import { containsNode } from '@hell-ui/angular/internal/core';
-import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, HellOrientation, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
 
 const HELL_RADIO_GROUP_RECIPE = {
@@ -76,8 +68,14 @@ class HellRadioRovingRegistry {
 
 /**
  * Roving-focus radio group built on `ng-primitives/radio`. Manages the
- * checked value, keyboard navigation between `HellRadio` items, and
- * `ControlValueAccessor`/`Validator` integration for reactive forms.
+ * checked value and keyboard navigation between `HellRadio` items.
+ *
+ * The `value` model is the group's one Control Value Authority: bind it
+ * one-way (`[value]` plus `(valueChange)`), two-way (`[(value)]`), or through
+ * Angular forms — Signal Forms `[formField]` via the `FormValueControl`
+ * contract, and `formControl`/`ngModel` via Angular's built-in Signal Forms
+ * interoperability. External writes synchronize into `ng-primitives` through
+ * the guarded state adapter without re-emitting a selection commit.
  */
 @Directive({
   selector: '[hellRadioGroup]',
@@ -85,27 +83,12 @@ class HellRadioRovingRegistry {
     {
       directive: NgpRadioGroup,
       inputs: [
-        'ngpRadioGroupValue:value',
-        'ngpRadioGroupDisabled:disabled',
         'ngpRadioGroupOrientation:orientation',
         'ngpRadioGroupCompareWith:compareWith',
       ],
-      outputs: ['ngpRadioGroupValueChange:valueChange'],
     },
   ],
-  providers: [
-    HellRadioRovingRegistry,
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellRadioGroup),
-      multi: true,
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => HellRadioGroup),
-      multi: true,
-    },
-  ],
+  providers: [HellRadioRovingRegistry],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -115,7 +98,7 @@ class HellRadioRovingRegistry {
     '(focusout)': 'onFocusOut($event)',
   },
 })
-export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Validator {
+export class HellRadioGroup<T = unknown> implements FormValueControl<T | null> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<'root'>>(undefined, { alias: 'ui' });
 
@@ -125,10 +108,30 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     recipe: () => HELL_RADIO_GROUP_RECIPE,
   });
 
+  /**
+   * Committed selected value — the one Control Value Authority. User
+   * selections write it exactly once per change and emit `(valueChange)`;
+   * external property, two-way, and form writes flow in without re-emitting.
+   * Defaults to `null` (no selection).
+   */
+  readonly value = model<T | null>(null);
   /** Layout axis for the group's roving focus and Tailwind data attribute. Defaults to `vertical`. */
   readonly orientation = input<HellOrientation>('vertical');
-  /** Whether a value must be selected for the group to be valid. Defaults to `false`. */
+  /** Whether the whole group is disabled. Also driven by bound forms. Defaults to `false`. */
+  readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Whether the group is marked required for assistive technology. Reflected
+   * as `aria-required`/`data-required`; also driven by a bound Signal Forms
+   * field's `required()` metadata. Required policy itself belongs to the form
+   * (`required()` schema rule or `Validators.required`). Defaults to `false`.
+   */
   readonly required = input(false, { transform: booleanAttribute });
+
+  /**
+   * Emits when focus leaves the group entirely. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
   private readonly group = inject(NgpRadioGroup<T>);
   private readonly groupState = injectRadioGroupState<T>();
@@ -136,15 +139,24 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
   private readonly rovingRegistry = inject(HellRadioRovingRegistry);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly valueAccessor = new HellControlValueAccessorBridge<T | null>();
-  private onValidatorChange: () => void = () => {};
-  private readonly disabled = computed(() => this.groupState().disabled());
+  private readonly groupDisabled = computed(() => this.groupState().disabled());
 
   constructor() {
+    // External value writes (property, two-way, form) synchronize into the
+    // primitive through the guarded adapter; the equality guard keeps user
+    // selections (which already updated the primitive) from writing back.
     effect(() => {
-      this.required();
-      this.disabled();
-      this.onValidatorChange();
+      const state = this.groupState();
+      const value = this.value();
+      if (Object.is(state.value(), value)) return;
+      untracked(() => writeRadioGroupStateValue(state, value));
+    });
+
+    effect(() => {
+      const state = this.groupState();
+      const disabled = this.disabled();
+      if (state.disabled() === disabled) return;
+      untracked(() => writeRadioGroupStateDisabled(state, disabled));
     });
 
     effect(() => {
@@ -155,7 +167,7 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     });
 
     const valueSub = this.group.valueChange.subscribe((value) => {
-      this.valueAccessor.emitValue(value);
+      this.value.set(value);
     });
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
 
@@ -167,54 +179,17 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     );
   }
 
-  /** Writes a value from the form model into the radio group state. */
-  writeValue(value: T | null): void {
-    writeRadioGroupStateValue(this.groupState(), value);
-  }
-
-  /** Registers the callback invoked when the checked value changes. */
-  registerOnChange(fn: (value: T | null) => void): void {
-    this.valueAccessor.registerOnChange(fn);
-  }
-
-  /** Registers the callback invoked when the group is touched. */
-  registerOnTouched(fn: () => void): void {
-    this.valueAccessor.registerOnTouched(fn);
-  }
-
-  /** Registers the callback invoked when validator-relevant state changes. */
-  registerOnValidatorChange(fn: () => void): void {
-    this.onValidatorChange = fn;
-  }
-
-  /** Applies the disabled state pushed down from the form model. */
-  setDisabledState(isDisabled: boolean): void {
-    writeRadioGroupStateDisabled(this.groupState(), isDisabled);
-    this.onValidatorChange();
-  }
-
-  /** Returns a `required` validation error when `required` is set and no value is selected. */
-  validate(control: AbstractControl | null): ValidationErrors | null {
-    if (!this.required() || control?.disabled || this.disabled()) return null;
-    const value = control ? control.value : this.groupState().value();
-    return this.isEmptyValue(value) ? { required: true } : null;
-  }
-
-  private isEmptyValue(value: T | null): boolean {
-    return value == null || value === '';
-  }
-
-  /** Marks the group as touched once focus leaves the group entirely. */
+  /** Emits the `touch` output once focus leaves the group entirely. */
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
     if (!containsNode(this.host.nativeElement, next)) {
-      this.valueAccessor.markTouched();
+      this.touch.emit();
     }
   }
 
   private onKeydown(event: KeyboardEvent): void {
     const target = event.target;
-    if (event.defaultPrevented || this.disabled() || !(target instanceof HTMLElement)) return;
+    if (event.defaultPrevented || this.groupDisabled() || !(target instanceof HTMLElement)) return;
     if (target.closest('[hellRadioGroup]') !== this.host.nativeElement) return;
 
     const movement = this.keyboardMovement(event.key);
@@ -261,7 +236,7 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
   }
 
   private rovingTabStopItemId(): string | null {
-    if (this.disabled()) return null;
+    if (this.groupDisabled()) return null;
 
     const items = this.sortedRadioItems().filter((item) => !item.disabled());
     const checked = items.find((item) => item.checked());

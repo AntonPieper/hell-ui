@@ -968,6 +968,40 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: `HellRadioGroup` now has one Control Value Authority: `value` is a
+  `ModelSignal<T | null>` implementing Signal Forms'
+  `FormValueControl<T | null>`, and the directive no longer implements
+  `ControlValueAccessor` or `Validator`, registers the `NG_VALUE_ACCESSOR` /
+  `NG_VALIDATORS` providers, or exposes the `writeValue` / `registerOnChange`
+  / `registerOnTouched` / `registerOnValidatorChange` / `setDisabledState` /
+  `validate` methods. First carried by the next `@hell-ui/angular` release
+  after `0.2.0` (currently Unreleased). Direct `[value]` binding, new two-way
+  `[(value)]` binding, Signal Forms `[formField]`, Reactive Forms
+  `formControl`, and template-driven `ngModel` all read and write the same
+  model — `formControl`/`ngModel` keep working through Angular's built-in
+  Signal Forms interoperability, one user selection commits exactly once, and
+  external writes synchronize the checked item without echoing
+  `(valueChange)` or moving DOM focus. ng-primitives keeps selection, roving
+  focus, keyboard, and ARIA ownership; external value, disabled, and
+  non-focusing roving-tab-stop writes keep flowing through the accepted
+  guarded state adapter (`docs/adr/ng-primitives-state-adapter.md`) with no
+  new private primitive access. Migration notes: the group's directive-owned
+  required validation is gone — declare required policy on the form
+  (`Validators.required` for classic controls, a `required()` schema rule for
+  Signal Forms, whose metadata now drives the reserved `required` input)
+  while the `required` input keeps reflecting
+  `aria-required`/`data-required`; `value` and `disabled` are no longer
+  forwarded `ngpRadioGroup` inputs but Hell-owned bindings with identical
+  template syntax (`value` never had transform coercion to lose, `disabled`
+  keeps its boolean-attribute coercion). A new `(touch)` output marks the
+  bound field or control touched once focus leaves the group entirely.
+  `HellRadio`, `HellNativeRadio`, and `HellNativeRadioGroup` are unchanged;
+  the native pair stays platform-owned. Evidence:
+  `packages/angular/radio/radio.spec.ts`,
+  `packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts`, the
+  styled-controls packed consumer's radio forms scenario,
+  `e2e/radio-a11y-contracts.spec.ts`, and the updated radio API report.
+  Closes #288.
 - BREAKING: `HellCheckbox` and `HellSwitch` now have one Control Value
   Authority each: `checked` is a `ModelSignal<boolean>` implementing Signal
   Forms' `FormCheckboxControl`, and neither component still implements

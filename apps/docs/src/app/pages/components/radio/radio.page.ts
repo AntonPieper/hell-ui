@@ -10,6 +10,10 @@ import { RadioBasicExample } from './examples/basic.example';
 import radioBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { RadioFormsExample } from './examples/forms.example';
+import radioFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { RadioHorizontalExample } from './examples/horizontal.example';
 import radioHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw' with {
   loader: 'text',
@@ -30,6 +34,7 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
     ExampleTabs,
     RouterLink,
     RadioBasicExample,
+    RadioFormsExample,
     RadioHorizontalExample,
     RadioNativeExample,
     RadioPlanPickerExample,
@@ -50,11 +55,14 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
       <p>
         <code>[hellRadioGroup]</code> and <code>button[hellRadio]</code> build a custom radio group
         on top of <code>ngpRadioGroup</code>/<code>ngpRadioItem</code> from
-        <code>ng-primitives</code>. The group owns roving <code>tabindex</code>, Arrow/Home/End
-        keyboard movement between items, and Angular's <code>ControlValueAccessor</code> and
-        <code>Validator</code>, so it drops into template-driven or reactive forms without extra
-        wiring. Hell layers a compatibility bridge on top so form writes stay in sync with
-        <code>ng-primitives</code> until upstream exposes public setters for its signal state.
+        <code>ng-primitives</code>. The group owns roving <code>tabindex</code> and Arrow/Home/End
+        keyboard movement between items, and its selected <code>value</code> is one Angular model —
+        bind it directly (<code>[value]</code> plus <code>(valueChange)</code>), two-way
+        (<code>[(value)]</code>), or through forms: it implements Signal Forms'
+        <code>FormValueControl</code> contract for <code>[formField]</code>, and the same model
+        drives <code>formControl</code> and <code>ngModel</code> through Angular's built-in
+        interoperability. Form writes stay in sync with <code>ng-primitives</code> through a
+        guarded adapter until upstream exposes public setters for its signal state.
       </p>
       <p>
         Because each item renders as <code>role="radio"</code> on a native
@@ -76,6 +84,29 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
       <h2>Basic</h2>
       <hd-example-tabs [code]="radioBasicExampleCode">
         <app-radio-basic-example />
+      </hd-example-tabs>
+
+      <h2>Forms</h2>
+      <p>
+        The <code>value</code> model is the group's single committed-value authority, so all
+        binding styles observe the same selection. With Signal Forms, bind a field via
+        <code>[formField]</code>: the field writes into <code>value</code>, each user selection
+        updates the field exactly once, focus leaving the group marks it touched, and the field's
+        <code>disabled()</code> and <code>required()</code> rules flow into the matching inputs.
+        <code>formControl</code> and <code>[(ngModel)]</code> keep working against the same model
+        through Angular's Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore.
+      </p>
+      <p>
+        Required policy is form-owned: use a <code>required()</code> schema rule with Signal Forms
+        or <code>Validators.required</code> with reactive forms — the group's
+        <code>required</code> input only reflects <code>aria-required</code>/
+        <code>data-required</code> for assistive technology. External writes (including form
+        resets) synchronize the checked item without moving focus or re-emitting
+        <code>(valueChange)</code>.
+      </p>
+      <hd-example-tabs [code]="radioFormsExampleCode">
+        <app-radio-forms-example />
       </hd-example-tabs>
 
       <h2>Orientation and disabled options</h2>
@@ -108,7 +139,7 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
         A plan chooser combines <code>hellCard</code> for the container,
         <code>hellField</code> in horizontal orientation to pair each radio with its label and
         description, and a <code>hellChip</code> to call out the recommended tier. The
-        <code>required</code> input keeps the group invalid until a plan is picked.
+        <code>required</code> input marks the group required for assistive technology.
       </p>
       <hd-example-tabs [code]="radioPlanPickerExampleCode">
         <app-radio-plan-picker-example />
@@ -169,21 +200,35 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
       <h2>API</h2>
       <p><code>[hellRadioGroup]</code> (<code>HellRadioGroup&lt;T&gt;</code>):</p>
       <ul>
-        <li><code>value</code>: <code>T | null</code>. The selected item's value.</li>
-        <li><code>valueChange</code>: <code>OutputEmitterRef&lt;T&gt;</code>, emitted when selection changes.</li>
+        <li>
+          <code>value</code>: <code>ModelSignal&lt;T | null&gt;</code>. Default <code>null</code>.
+          The selected item's value; supports <code>[value]</code>, <code>[(value)]</code>, and
+          <code>(valueChange)</code>.
+        </li>
         <li><code>orientation</code>: <code>HellOrientation</code> — <code>'vertical' | 'horizontal'</code>. Default <code>'vertical'</code>.</li>
-        <li><code>disabled</code>: <code>boolean</code>. Disables the whole group. Default <code>false</code>.</li>
+        <li>
+          <code>disabled</code>: <code>boolean</code>. Disables the whole group. Default
+          <code>false</code>. Also driven by bound forms.
+        </li>
         <li><code>compareWith</code>: <code>(a: T, b: T) =&gt; boolean</code>, forwarded from <code>ngpRadioGroup</code> for non-primitive values.</li>
         <li>
           <code>required</code>: <code>boolean</code>. Default <code>false</code>. Reflected as
-          <code>aria-required</code>/<code>data-required</code> and enforced through the
-          directive's <code>Validator</code> implementation (a <code>{{ '{ required: true }' }}</code> error when unset).
+          <code>aria-required</code>/<code>data-required</code>; also driven by a bound Signal
+          Forms field's <code>required()</code> metadata. Required policy itself belongs to the
+          form.
+        </li>
+        <li>
+          <code>(touch)</code>: emits when focus leaves the group entirely; Angular forms use it
+          to mark the control touched.
         </li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or
           <code>&#123; root?: string &#125;</code> map (<code>{{ '{ root?: string }' }}</code>).
         </li>
-        <li>Implements Angular's <code>ControlValueAccessor</code> and <code>Validator</code> for forms integration.</li>
+        <li>
+          Implements Signal Forms' <code>FormValueControl</code>; <code>formControl</code> and
+          <code>ngModel</code> bind through Angular's built-in interoperability.
+        </li>
       </ul>
       <p><code>button[hellRadio]</code> (<code>HellRadio</code>):</p>
       <ul>
@@ -271,6 +316,7 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
 })
 export class RadioPage {
   protected readonly radioBasicExampleCode = radioBasicExampleCodeRaw;
+  protected readonly radioFormsExampleCode = radioFormsExampleCodeRaw;
   protected readonly radioHorizontalExampleCode = radioHorizontalExampleCodeRaw;
   protected readonly radioNativeExampleCode = radioNativeExampleCodeRaw;
   protected readonly radioPlanPickerExampleCode = radioPlanPickerExampleCodeRaw;

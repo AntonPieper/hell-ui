@@ -1686,18 +1686,24 @@ function checkNgpStateWriterContract() {
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]activeItem['"]\]\.set\(/,
     },
   ];
+  // `(?!this\b)` keeps the receiver an actual state holder: a bare
+  // `this.value.set(...)` is the component writing its own `value`
+  // ModelSignal (the Control Value Authority), not an ng-primitives
+  // State<T> channel — the channel container would have to be `this`
+  // itself. `this.<holder>.value.set(...)` and `<holder>().value.set(...)`
+  // still match.
   const directStateChannelWritePatterns = [
     {
       token: 'State<T>.value.set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.value\.set\(/,
+      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.value\.set\(/,
     },
     {
       token: 'State<T>.disabled.set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.disabled\.set\(/,
+      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.disabled\.set\(/,
     },
     {
       token: 'State<T>.activeItem.set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.activeItem\.set\(/,
+      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.activeItem\.set\(/,
     },
     {
       token: 'State<T>[\'value\'].set(...) or State<T>["value"].set(...)',
