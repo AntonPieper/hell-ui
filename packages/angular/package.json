@@ -277,6 +277,11 @@
       "style": "./tokens.css",
       "default": "./tokens.css"
     },
+    "./styles.css": {
+      "@heinrich/source": "./styles.css",
+      "style": "./styles.css",
+      "default": "./styles.css"
+    },
     "./table/styles.css": {
       "@heinrich/source": "./table/styles.css",
       "style": "./table/styles.css",

@@ -1,5 +1,6 @@
 {
   "category": "internal",
+  "styleBundle": "none",
   "exports": [
     "./chip-presentation",
     "./chip-set-controller"

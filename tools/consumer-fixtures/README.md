@@ -40,6 +40,7 @@ app. Two rules keep fixtures honest:
   "peerGroup": "core",
   "forbiddenDependencies": ["@tanstack/angular-table"],
   "cssSentinels": ["table-layout:fixed"],
+  "forbiddenCssSentinels": ["hell-code-editor"],
   "smoke": {
     "steps": [
       { "selector": "app-root p", "textIncludes": "expected text" },
@@ -69,11 +70,21 @@ app. Two rules keep fixtures honest:
   sentinel — a broken export path already fails the build. Note that the
   production minifier collapses `::before`/`::after` to `:before`/`:after` and
   drops quotes in attribute selectors.
+- `forbiddenCssSentinels` (optional) — distinctive fragments that must NOT
+  appear in the built CSS, compared the same way as `cssSentinels`. Use them
+  for heavy/optional stylesheet markers (Code Editor, PDF Viewer, Theme
+  Adapter Stylesheets) that a standard-style fixture must never pick up
+  implicitly.
 - `smoke` (optional) — one runtime smoke: the runner serves the production
   build and loads it in headless Chromium. A step either polls `selector`
   until its text contains `textIncludes`, or asserts one resolved
   `computedStyle` (`property` equals `equals`) — the computed form proves
-  semantic token overrides survive the packed build. Runs only when
+  semantic token overrides survive the packed build. Steps come inline
+  (`smoke.steps`) or from a shared JSON array file (`smoke.stepsFile`,
+  resolved against the fixture directory but staying inside
+  `tools/consumer-fixtures/`); a shared steps file lets two fixtures assert
+  byte-identical expectations, which is how the aggregate and granular
+  style-mode fixtures prove computed-style equivalence. Runs only when
   `HELL_CONSUMER_FIXTURE_SMOKE=1` (or `--smoke`) because it needs an installed
   Playwright Chromium.
 
@@ -128,6 +139,19 @@ audited release tarball.
   Group, Select, Combobox, Date/Time/Number Input — binds its packed model
   through direct, two-way, `[formField]`, `[formControl]`, and `[(ngModel)]`
   paths at once.
+- `styles-aggregate` — Default Style Bundle mode: one `hell-ui/styles.css`
+  import through the Tailwind/PostCSS production path with the `composite`
+  peer group. Renders representative primitive (button, card), composite
+  (page header, toolbar), and overlay (popover) surfaces, proves unused
+  standard styles ship in the bundle via CSS sentinels, and proves heavy
+  markers and peers stay absent. Its computed-style smoke steps are shared
+  with `styles-granular` through `style-modes-smoke.steps.json`, so both
+  standard-style modes must render identically.
+- `styles-granular` — Granular Style Mode: `hell-ui/tokens.css` plus only the
+  Entrypoint-Scoped Stylesheets the app imports, rendering the same surfaces
+  as `styles-aggregate` and asserting the same shared computed-style steps.
+  Forbidden sentinels prove unselected standard styles (skeleton, table) and
+  heavy markers stay out of the granular build.
 - `overlays-router` — overlays and router boundary: app shell, dialog,
   omnibar, toast, Confirm/HellPrompt flows, time picker, page header,
   resizable + master detail, toolbar, and Filter Builder with the

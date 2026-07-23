@@ -5,17 +5,20 @@ import { fileURLToPath } from 'node:url';
 
 import {
   componentEntrypoints,
+  defaultStyleBundleImportSpecifiers,
   entrypointCategories,
   entrypointMetadataFileName,
   entrypointPublicApiFiles,
   entrypointStyleExports,
   libraryRoot,
   packageExportPath,
+  renderDefaultStyleBundleFile,
   renderNgPackageFile,
   renderPackageJsonExports,
   renderPublicApiFile,
   secondaryPackageEntrypoints,
   sourcePackageCondition,
+  styleBundlePolicies,
 } from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -130,6 +133,17 @@ const architectureCheckManifest = [
     run: checkOptionalPeerIsolationContract,
   },
   { name: 'style-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkStyleEntryPoints },
+  {
+    // Default Style Bundle contract (docs/adr/0002-public-package-and-
+    // stylesheet-surface.md, #312): hell-ui/styles.css is generated from
+    // explicit entrypoint styleBundle metadata, orders the Shared Style
+    // Substrate before standard component styles, and never includes Heavy
+    // Feature Stylesheets or Theme Adapter Stylesheets.
+    name: 'default-style-bundle',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkDefaultStyleBundle,
+  },
   { name: 'component-contract', kind: 'permanent', owner: '@AntonPieper', run: checkComponentContract },
   {
     // Pins the native Number Input adoption (#250) until the release ships.
@@ -1197,6 +1211,60 @@ function checkStyleEntryPoints() {
   }
 
   checkTokenSubstrateDoesNotOwnComponentSkins();
+}
+
+function checkDefaultStyleBundle() {
+  const heavyCategories = new Set([
+    entrypointCategories.FEATURE,
+    entrypointCategories.TANSTACK_TABLE_SHELL,
+    entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+  ]);
+  for (const entrypoint of entrypointPublicApiFiles()) {
+    if (
+      heavyCategories.has(entrypoint.category) &&
+      entrypoint.styleBundle === styleBundlePolicies.DEFAULT
+    ) {
+      failures.push(
+        `Default Style Bundle must not include heavy/optional surface ${entrypoint.specifier}; declare styleBundle "opt-in" in ${entrypoint.metadataPath}`,
+      );
+    }
+  }
+
+  const bundlePath = `${libraryRoot}/styles.css`;
+  if (!existsSync(join(root, bundlePath))) {
+    failures.push(
+      `Default Style Bundle is missing ${bundlePath} (run pnpm run generate:entrypoints)`,
+    );
+    return;
+  }
+
+  const bundle = readFile(join(root, bundlePath));
+  if (bundle !== renderDefaultStyleBundleFile()) {
+    failures.push(
+      `Default Style Bundle is stale: ${bundlePath} (run pnpm run generate:entrypoints)`,
+    );
+  }
+
+  const imports = [...bundle.matchAll(/@import\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
+  if (imports[0] !== './tokens.css') {
+    failures.push(
+      `Default Style Bundle ${bundlePath} must import the Shared Style Substrate ./tokens.css before component styles`,
+    );
+  }
+  for (const specifier of imports) {
+    if (/^\.\/(features\/|table-tanstack|themes\/)/.test(specifier)) {
+      failures.push(
+        `Default Style Bundle ${bundlePath} must not import heavy or Theme Adapter stylesheet ${specifier}`,
+      );
+    }
+  }
+
+  const expectedImports = defaultStyleBundleImportSpecifiers();
+  if (JSON.stringify(imports) !== JSON.stringify(expectedImports)) {
+    failures.push(
+      `Default Style Bundle ${bundlePath} imports must match entrypoint styleBundle metadata exactly (run pnpm run generate:entrypoints)`,
+    );
+  }
 }
 
 function checkTokenSubstrateDoesNotOwnComponentSkins() {

@@ -1,5 +1,6 @@
 {
   "category": "feature",
+  "styleBundle": "opt-in",
   "header": [
     "/**",
     " * @experimental Optional pdf.js feature entry point. Apps own worker/browser compatibility; keep behind lazy/client-only browser boundaries.",

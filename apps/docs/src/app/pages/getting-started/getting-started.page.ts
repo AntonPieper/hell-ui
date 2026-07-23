@@ -6,6 +6,7 @@ import { GettingStartedButtonDemo } from './examples/button-demo.example';
 import buttonDemoCodeRaw from './examples/button-demo.example.ts?raw' with { loader: 'text' };
 import installCodeRaw from './examples/install.example.sh?raw' with { loader: 'text' };
 import postcssCodeRaw from './examples/postcss.example.json?raw' with { loader: 'text' };
+import granularStylesCodeRaw from './examples/granular-styles.example.css?raw' with { loader: 'text' };
 import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'text' };
 
 @Component({
@@ -47,12 +48,27 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>3. Import the styles</h2>
       <p>
-        Import Tailwind first, then the narrow Hell style entry points you need. The library exposes
-        Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
-        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. CSS follows
-        import paths: shared tokens first, then each component or feature stylesheet you use.
+        Import Tailwind first, then the recommended Default Style Bundle
+        <code>hell-ui/styles.css</code>. It is generated from entrypoint metadata and contains the
+        shared token substrate followed by every standard component stylesheet, so one import
+        styles everything except heavy features. The library exposes Tailwind-facing CSS variables
+        such as <code>bg-hell-surface</code>, <code>text-hell-foreground</code>, and
+        <code>border-hell-border</code>.
       </p>
       <hd-code-block [code]="stylesCode" />
+      <p>
+        Advanced consumers can use Granular Style Mode instead: import
+        <code>hell-ui/tokens.css</code> once, then only the entrypoint stylesheets the app uses.
+        Pick one standard-style mode — combining <code>hell-ui/styles.css</code> with granular
+        <code>&lt;entrypoint&gt;/styles.css</code> imports duplicates the same standard CSS.
+      </p>
+      <hd-code-block [code]="granularStylesCode" />
+      <p>
+        Heavy Feature Stylesheets (the Code Editor, PDF Viewer, and TanStack table shell styles
+        under their feature entry points) and Theme Adapter Stylesheets, such as
+        <code>hell-ui/themes/glass.css</code>, are excluded from the Default Style Bundle. Add
+        them explicitly, in either mode, after the standard CSS.
+      </p>
 
       <h2>4. Configure built-in labels</h2>
       <p>
@@ -88,6 +104,7 @@ export class GettingStartedPage {
   protected readonly installCode = installCodeRaw;
   protected readonly postcssCode = postcssCodeRaw;
   protected readonly stylesCode = stylesCodeRaw;
+  protected readonly granularStylesCode = granularStylesCodeRaw;
   protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { HELL_SPINNER_LABELS } from 'hell-ui/spinner';\nimport { provideHellPaginationLabels } from 'hell-ui/pagination';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' }),\n    provideHellPaginationLabels({\n      navigation: 'Seitennavigation',\n      nextPage: 'Nächste Seite',\n      page: (page) => 'Seite ' + page,\n    }),\n  ],\n};\n`;
   protected readonly buttonDemoCode = buttonDemoCodeRaw;
 }

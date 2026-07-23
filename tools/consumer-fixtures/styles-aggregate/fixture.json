@@ -1,0 +1,27 @@
+{
+  "description": "Default Style Bundle mode: one hell-ui/styles.css import through the Tailwind/PostCSS production path with composite peers only",
+  "peerGroup": "composite",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "@keyframes hell-pop-in",
+    "animation:hell-shimmer 1.6s linear infinite",
+    "table-layout:fixed",
+    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)"
+  ],
+  "forbiddenCssSentinels": [
+    "hell-code-editor",
+    "hell-pdf-viewer",
+    "[data-hell-skin=glass]hell-toaster"
+  ],
+  "smoke": {
+    "stepsFile": "../style-modes-smoke.steps.json"
+  }
+}

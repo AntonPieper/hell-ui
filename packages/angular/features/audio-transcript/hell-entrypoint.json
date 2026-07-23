@@ -1,5 +1,6 @@
 {
   "category": "feature",
+  "styleBundle": "none",
   "header": [
     "/**",
     " * @experimental Optional browser transcript provider for hell-ui/audio-player.",

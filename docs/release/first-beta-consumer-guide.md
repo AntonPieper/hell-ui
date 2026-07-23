@@ -141,26 +141,31 @@ Use `hell-ui` for stable core exports only. Use `/table`, `/table-tanstack`, `/f
 
 Hell CSS entry points use Tailwind v4 theme features. Install `tailwindcss` and configure `@tailwindcss/postcss` whenever you import Hell CSS.
 
-Preferred primitive imports:
+Recommended: the Default Style Bundle — one generated import carrying the
+token substrate plus every standard component stylesheet:
+
+```css
+@import 'tailwindcss';
+@import 'hell-ui/styles.css';
+```
+
+Advanced alternative (Granular Style Mode): import `hell-ui/tokens.css` once,
+then only the entrypoint CSS needed by the entry points the app imports. Pick
+one standard-style mode; combining the bundle with granular standard imports
+duplicates the same CSS.
 
 ```css
 @import 'tailwindcss';
 @import 'hell-ui/tokens.css';
 @import 'hell-ui/button/styles.css';
-@import 'hell-ui/date-input/styles.css';
-@import 'hell-ui/input/styles.css';
-@import 'hell-ui/time-input/styles.css';
-@import 'hell-ui/number-input/styles.css';
+@import 'hell-ui/app-shell/styles.css';
+@import 'hell-ui/table/styles.css';
 ```
 
-Add only the extra entrypoint CSS needed by the entry points the app imports:
+Heavy Feature Stylesheets stay excluded from the Default Style Bundle; add
+them explicitly, in either mode, when the app imports their entry points:
 
 ```css
-@import 'hell-ui/app-shell/styles.css';
-@import 'hell-ui/resizable/styles.css';
-@import 'hell-ui/master-detail/styles.css';
-@import 'hell-ui/time-picker/styles.css';
-@import 'hell-ui/table/styles.css';
 @import 'hell-ui/features/code-editor/styles.css';
 @import 'hell-ui/features/pdf-viewer/styles.css';
 ```

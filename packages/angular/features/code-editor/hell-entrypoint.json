@@ -1,5 +1,6 @@
 {
   "category": "feature",
+  "styleBundle": "opt-in",
   "header": [
     "/**",
     " * @experimental Kept optional CodeMirror feature entry point. Keep behind lazy/client-only browser boundaries.",

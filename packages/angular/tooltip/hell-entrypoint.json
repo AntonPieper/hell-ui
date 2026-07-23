@@ -1,3 +1,4 @@
 {
-  "category": "mixed-entrypoint"
+  "category": "mixed-entrypoint",
+  "styleBundle": "default"
 }

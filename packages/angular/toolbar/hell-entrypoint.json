@@ -1,5 +1,6 @@
 {
   "category": "composite",
+  "styleBundle": "default",
   "exports": [],
   "extraExports": [
     "export {",

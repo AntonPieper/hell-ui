@@ -1,5 +1,6 @@
 {
   "category": "internal",
+  "styleBundle": "none",
   "exports": [
     "./option-presentation"
   ],

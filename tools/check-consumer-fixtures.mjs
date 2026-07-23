@@ -297,10 +297,13 @@ function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
 // CSS sentinels are one or two distinctive fragments per imported stylesheet
 // export. They prove the stylesheet resolved from the packed tarball and
 // shipped compiled output; exhaustive fragment lists belong to unit tests,
-// not the packaging boundary.
+// not the packaging boundary. Forbidden CSS sentinels are the inverse:
+// distinctive markers of heavy/optional stylesheets that must never reach the
+// built CSS unless the fixture selected them explicitly.
 function assertFixtureCssSentinels(fixture, workspace, label) {
   const sentinels = fixture.manifest.cssSentinels ?? [];
-  if (!sentinels.length) return;
+  const forbiddenSentinels = fixture.manifest.forbiddenCssSentinels ?? [];
+  if (!sentinels.length && !forbiddenSentinels.length) return;
 
   const distRoot = join(workspace, 'dist');
   const cssFiles = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
@@ -317,8 +320,23 @@ function assertFixtureCssSentinels(fixture, workspace, label) {
       `Fixture ${fixture.name} built CSS is missing sentinel(s): ${missing.join(' | ')}`,
     );
   }
+  if (sentinels.length) {
+    console.log(`[${label}] ok: ${sentinels.length} CSS sentinel(s) found in built CSS`);
+  }
 
-  console.log(`[${label}] ok: ${sentinels.length} CSS sentinel(s) found in built CSS`);
+  const present = forbiddenSentinels.filter((sentinel) =>
+    builtCss.includes(normalizeCssForSentinels(sentinel)),
+  );
+  if (present.length) {
+    fail(
+      `Fixture ${fixture.name} built CSS contains forbidden sentinel(s): ${present.join(' | ')}`,
+    );
+  }
+  if (forbiddenSentinels.length) {
+    console.log(
+      `[${label}] ok: ${forbiddenSentinels.length} forbidden CSS sentinel(s) absent from built CSS`,
+    );
+  }
 }
 
 function normalizeCssForSentinels(css) {
@@ -333,7 +351,7 @@ async function runFixtureSmoke(fixture, workspace, label) {
     return;
   }
 
-  const steps = smoke.steps ?? [];
+  const steps = resolveSmokeSteps(fixture, smoke);
   if (!steps.length) fail(`Fixture ${fixture.name} smoke declares no steps`);
 
   let chromium;
@@ -367,6 +385,32 @@ async function runFixtureSmoke(fixture, workspace, label) {
     if (browser) await browser.close();
     await server.close();
   }
+}
+
+// Smoke steps come inline (smoke.steps) or from a shared JSON file
+// (smoke.stepsFile, resolved against the fixture directory). A shared steps
+// file lets two fixtures assert byte-identical expectations — the aggregate
+// and granular style-mode fixtures use one file so their computed-style
+// equivalence is single-sourced rather than hand-duplicated.
+function resolveSmokeSteps(fixture, smoke) {
+  if (smoke.steps && smoke.stepsFile) {
+    fail(`Fixture ${fixture.name} smoke must declare steps or stepsFile, not both`);
+  }
+  if (smoke.stepsFile) {
+    const stepsPath = resolve(fixture.dir, smoke.stepsFile);
+    if (!stepsPath.startsWith(`${fixturesRoot}${sep}`)) {
+      fail(`Fixture ${fixture.name} smoke stepsFile must stay inside ${fixturesRoot}`);
+    }
+    if (!existsSync(stepsPath)) {
+      fail(`Fixture ${fixture.name} smoke stepsFile is missing: ${stepsPath}`);
+    }
+    const steps = JSON.parse(readFileSync(stepsPath, 'utf8'));
+    if (!Array.isArray(steps)) {
+      fail(`Fixture ${fixture.name} smoke stepsFile must contain a JSON array of steps`);
+    }
+    return steps;
+  }
+  return smoke.steps ?? [];
 }
 
 // A smoke step asserts either projected text ({ selector, textIncludes }) or a

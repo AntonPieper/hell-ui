@@ -115,19 +115,22 @@ CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers remain optional a
 Hell's shipped CSS uses Tailwind v4 theme features, so Tailwind and the
 Tailwind v4 PostCSS plugin are required whenever an app imports Hell style
 entry points. Add a workspace `.postcssrc.json` with `@tailwindcss/postcss`,
-then prefer fine-grained imports for production:
+then import the recommended Default Style Bundle — tokens plus every standard
+component stylesheet in one generated file:
 
 ```css
 @import 'tailwindcss';
-@import 'hell-ui/tokens.css';
-@import 'hell-ui/button/styles.css';
-@import 'hell-ui/input/styles.css';
+@import 'hell-ui/styles.css';
 ```
 
-CSS follows the same import-path-first rule as TypeScript: import shared tokens
-once, then import each entry point's `styles.css`.
+Advanced consumers can use Granular Style Mode instead: import shared tokens
+once, then only the entry-point stylesheets the app uses. Heavy Feature
+Stylesheets (Code Editor, PDF Viewer, TanStack) and Theme Adapter Stylesheets
+are explicit opt-ins in either mode; never combine the Default Style Bundle
+with granular standard imports, because that duplicates the same CSS.
 
 ```css
+@import 'tailwindcss';
 @import 'hell-ui/tokens.css';
 @import 'hell-ui/app-shell/styles.css';
 @import 'hell-ui/table/styles.css';

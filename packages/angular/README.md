@@ -110,35 +110,54 @@ import { HellButtonHarness } from 'hell-ui/testing';
 
 ## CSS Imports
 
-Hell style entry points require Tailwind v4. Prefer fine-grained imports for production:
+Hell style entry points require Tailwind v4. The recommended setup is the
+Default Style Bundle — one import that carries the Shared Style Substrate
+(`tokens.css`) plus every standard component stylesheet:
 
 ```css
 @import "tailwindcss";
-@import "hell-ui/tokens.css";
-@import "hell-ui/button/styles.css";
+@import "hell-ui/styles.css";
 ```
 
-Add only the extra entrypoint styles the app imports:
+The bundle is generated deterministically from entrypoint metadata. Heavy
+Feature Stylesheets (Code Editor, PDF Viewer, TanStack table shell) and Theme
+Adapter Stylesheets are never part of it; add them explicitly when you import
+those entry points:
 
 ```css
+@import "tailwindcss";
+@import "hell-ui/styles.css";
+@import "hell-ui/features/code-editor/styles.css";
+```
+
+Advanced consumers can use Granular Style Mode instead: import the token
+substrate once, then only the entrypoint stylesheets the app uses:
+
+```css
+@import "tailwindcss";
 @import "hell-ui/tokens.css";
 @import "hell-ui/app-shell/styles.css";
 @import "hell-ui/resizable/styles.css";
 @import "hell-ui/master-detail/styles.css";
 @import "hell-ui/table/styles.css";
-@import "hell-ui/features/code-editor/styles.css";
 ```
 
-Optional Theme Adapter Stylesheets come after the entrypoint CSS they adapt:
+Choose one standard-style mode. Do not combine `hell-ui/styles.css` with
+entrypoint `styles.css` imports for standard component CSS — that duplicates
+the same styles in your build.
+
+Optional Theme Adapter Stylesheets may be added to either mode, after the
+standard CSS they adapt:
 
 ```css
-@import "hell-ui/card/styles.css";
-@import "hell-ui/dialog/styles.css";
-@import "hell-ui/menu/styles.css";
+@import "tailwindcss";
+@import "hell-ui/styles.css";
 @import "hell-ui/themes/glass.css";
 ```
 
-Old category-level style paths are not public package contracts.
+Old category-level style paths are not public package contracts; the one
+package-level `hell-ui/styles.css` bundle is the deliberate exception to the
+import-path-first CSS rule.
 
 ## Part Style Maps
 

@@ -1,3 +1,4 @@
 {
-  "category": "styled-primitive"
+  "category": "styled-primitive",
+  "styleBundle": "default"
 }

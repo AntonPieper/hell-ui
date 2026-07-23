@@ -1,0 +1,26 @@
+{
+  "description": "Granular Style Mode: tokens plus only the Entrypoint-Scoped Stylesheets the app imports, rendering the same surfaces as the aggregate fixture",
+  "peerGroup": "composite",
+  "forbiddenDependencies": [
+    "@ng-icons/core",
+    "@ng-icons/font-awesome",
+    "@tanstack/angular-table",
+    "@tanstack/virtual-core",
+    "@codemirror/view",
+    "pdfjs-dist"
+  ],
+  "cssSentinels": [
+    "--color-hell-surface-muted:",
+    "@keyframes hell-pop-in"
+  ],
+  "forbiddenCssSentinels": [
+    "hell-code-editor",
+    "hell-pdf-viewer",
+    "[data-hell-skin=glass]hell-toaster",
+    "animation:hell-shimmer 1.6s linear infinite",
+    "table-layout:fixed"
+  ],
+  "smoke": {
+    "stepsFile": "../style-modes-smoke.steps.json"
+  }
+}

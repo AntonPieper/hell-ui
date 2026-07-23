@@ -1,0 +1,54 @@
+[
+  {
+    "selector": "[data-test-id=\"style-mode-status\"]",
+    "textIncludes": "Style mode surfaces ready"
+  },
+  {
+    "selector": "[data-test-id=\"mode-button\"]",
+    "computedStyle": { "property": "background-color", "equals": "rgb(49, 58, 70)" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-button\"]",
+    "computedStyle": { "property": "border-radius", "equals": "6px" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-button\"]",
+    "computedStyle": { "property": "height", "equals": "34px" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-card\"]",
+    "computedStyle": { "property": "background-color", "equals": "rgb(255, 255, 255)" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-card\"]",
+    "computedStyle": { "property": "border-radius", "equals": "8px" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-card\"]",
+    "computedStyle": { "property": "border-top-color", "equals": "rgb(227, 230, 236)" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-page-header-title\"]",
+    "computedStyle": { "property": "font-weight", "equals": "600" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-page-header-title\"]",
+    "computedStyle": { "property": "font-size", "equals": "17.5px" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-toolbar\"]",
+    "computedStyle": { "property": "display", "equals": "flex" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-popover\"]",
+    "computedStyle": { "property": "background-color", "equals": "rgb(255, 255, 255)" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-popover\"]",
+    "computedStyle": { "property": "border-radius", "equals": "6px" }
+  },
+  {
+    "selector": "[data-test-id=\"mode-popover\"]",
+    "computedStyle": { "property": "padding-top", "equals": "12px" }
+  }
+]

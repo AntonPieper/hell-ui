@@ -1,5 +1,6 @@
 {
   "category": "testing",
+  "styleBundle": "none",
   "exports": [
     "./button-harness",
     "./dialog-harness",
