@@ -39,7 +39,7 @@ const HELL_MENU_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_MENU_ITEM_RECIPE =
-  'relative isolate flex cursor-pointer items-center gap-hell-3 border-0 bg-transparent py-[calc(var(--spacing)*1.5)] pe-[calc(var(--spacing)*2.5+var(--spacing-hell-2)+1px)] ps-[calc(var(--spacing)*2.5+var(--spacing-hell-2)+1px)] text-start font-[inherit] text-[13px] text-hell-foreground outline-none disabled:cursor-not-allowed data-disabled:cursor-not-allowed data-disabled:opacity-50';
+  'relative isolate flex cursor-pointer items-center gap-hell-3 border-0 bg-transparent py-[calc(var(--spacing)*1.5)] pe-[calc(var(--spacing)*2.5+var(--spacing-hell-2)+1px)] ps-[calc(var(--spacing)*2.5+var(--spacing-hell-2)+1px)] text-start font-[family-name:inherit] text-[13px] text-hell-foreground outline-none disabled:cursor-not-allowed data-disabled:cursor-not-allowed data-disabled:opacity-50';
 
 const HELL_MENU_ITEM_CHECKABLE_RECIPE = `${HELL_MENU_ITEM_RECIPE} data-[checked]:text-hell-foreground aria-checked:text-hell-foreground`;
 

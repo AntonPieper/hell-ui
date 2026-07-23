@@ -19,6 +19,7 @@ exports[`HellFilterBuilder > recipes > keeps the default part classes stable > f
     "data-press:bg-hell-surface-muted",
     "duration-[var(--hell-duration-fast)]",
     "ease-[var(--ease-hell-out)]",
+    "font-[family-name:inherit]",
     "font-medium",
     "gap-hell-2",
     "h-hell-control-sm",
@@ -121,7 +122,7 @@ exports[`HellFilterBuilder > recipes > keeps the default part classes stable > f
   "tokenLabel": [
     "bg-transparent",
     "border-0",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "outline-none",
     "p-0",
     "text-inherit",

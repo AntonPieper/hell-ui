@@ -28,7 +28,7 @@ const HELL_CONTROL_GROUP_SUFFIX_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_CONTROL_GROUP_ACTION_RECIPE = {
-  root: 'inline-flex flex-none cursor-pointer items-center justify-center border-0 border-s border-hell-border bg-transparent px-hell-3 font-[inherit] font-medium text-hell-foreground-muted transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] data-[size=sm]:px-hell-2 data-[size=lg]:px-hell-4 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
+  root: 'inline-flex flex-none cursor-pointer items-center justify-center border-0 border-s border-hell-border bg-transparent px-hell-3 font-[family-name:inherit] font-medium text-hell-foreground-muted transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:relative focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-[-2px] data-[size=sm]:px-hell-2 data-[size=lg]:px-hell-4 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
 } satisfies HellRecipe<'root'>;
 
 /**

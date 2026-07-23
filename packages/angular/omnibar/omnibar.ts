@@ -132,7 +132,7 @@ const HELL_OMNIBAR_ITEM_RECIPE = {
   // The shared option surface (metrics + active/selected treatment) keeps
   // omnibar items visually in family with select/combobox/listbox options;
   // width/reset atoms are the button-host specifics.
-  root: `flex w-full items-center gap-hell-3 border-0 text-start font-[inherit] ${HELL_OPTION_SURFACE_METRICS} ${HELL_OPTION_SURFACE_SELECTED_STATES} focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]`,
+  root: `flex w-full items-center gap-hell-3 border-0 text-start font-[family-name:inherit] ${HELL_OPTION_SURFACE_METRICS} ${HELL_OPTION_SURFACE_SELECTED_STATES} focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {

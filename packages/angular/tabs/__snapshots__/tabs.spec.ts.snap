@@ -74,6 +74,7 @@ exports[`HellTabs > recipes > keeps the default part classes stable > tabs 1`] =
     "duration-[var(--hell-duration-fast)]",
     "ease-hell-out",
     "flex-[0_0_auto]",
+    "font-[family-name:inherit]",
     "font-medium",
     "gap-hell-2",
     "h-9",

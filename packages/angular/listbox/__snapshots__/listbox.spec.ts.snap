@@ -44,7 +44,7 @@ exports[`HellListbox Part Style Map > recipes > keeps the default part classes s
     "data-selected:bg-hell-primary-soft",
     "data-selected:font-medium",
     "data-selected:text-hell-primary-soft-foreground",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "gap-0.5",
     "grid",
     "hover:bg-hell-surface-muted",

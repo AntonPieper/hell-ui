@@ -40,6 +40,7 @@ exports[`HellAccordion > recipes > keeps the default part classes stable > accor
     "duration-[var(--hell-duration-fast)]",
     "ease-hell-out",
     "flex",
+    "font-[family-name:inherit]",
     "font-semibold",
     "gap-hell-4",
     "items-center",

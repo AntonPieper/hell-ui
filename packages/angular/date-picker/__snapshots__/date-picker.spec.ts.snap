@@ -33,7 +33,7 @@ exports[`HellDatePicker > recipes > keeps the default part classes stable > date
     "data-[today]:text-hell-primary",
     "duration-[var(--hell-duration-fast)]",
     "ease-hell-out",
-    "font-[inherit]",
+    "font-[family-name:inherit]",
     "grid",
     "h-auto",
     "p-0",

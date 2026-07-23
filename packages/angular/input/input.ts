@@ -12,11 +12,11 @@ const HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES =
   'placeholder:text-hell-foreground-subtle disabled:placeholder:text-hell-foreground-subtle disabled:placeholder:opacity-70 data-disabled:placeholder:text-hell-foreground-subtle data-disabled:placeholder:opacity-70';
 
 const HELL_INPUT_RECIPE = {
-  root: `inline-flex h-hell-control-md w-full rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 font-[inherit] text-[13px] text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:h-hell-control-sm data-[size=sm]:px-hell-3 data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:px-hell-5 data-[size=lg]:text-sm`,
+  root: `inline-flex h-hell-control-md w-full rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 font-[family-name:inherit] text-[13px] text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:h-hell-control-sm data-[size=sm]:px-hell-3 data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:px-hell-5 data-[size=lg]:text-sm`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_TEXTAREA_RECIPE = {
-  root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm data-auto-grow:field-sizing-content data-auto-grow:resize-none`,
+  root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[family-name:inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm data-auto-grow:field-sizing-content data-auto-grow:resize-none`,
 } satisfies HellRecipe<'root'>;
 
 /** Styled text input built on `NgpInput`. Sizes via `size`; error styling via `invalid`. */

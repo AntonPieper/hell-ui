@@ -40,7 +40,7 @@ interface Assignee {
             hellChipInput
             aria-label="Add assignee"
             placeholder="Add assignee…"
-            class="min-w-[8rem] flex-1 border-0 bg-transparent px-hell-1 py-hell-1 font-[inherit] text-[13px] text-hell-foreground outline-none placeholder:text-hell-foreground-subtle"
+            class="min-w-[8rem] flex-1 border-0 bg-transparent px-hell-1 py-hell-1 font-[family-name:inherit] text-[13px] text-hell-foreground outline-none placeholder:text-hell-foreground-subtle"
             (keydown.enter)="add($event)"
           />
         </div>

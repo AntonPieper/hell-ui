@@ -760,6 +760,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Fixed
 
+- Part Recipes now spell font-family inheritance as
+  `font-[family-name:inherit]` instead of the ambiguous `font-[inherit]`, which
+  tailwind-merge classifies into the font-weight group and silently drops next
+  to weight utilities such as `font-medium`. Buttons and the other affected
+  form/navigation controls now actually render their intended font-family
+  inheritance in the class surface; the compiled CSS declaration
+  (`font-family: inherit`) is unchanged. Evidence:
+  `packages/angular/core/part-class-pipeline.spec.ts` and the rendered-surface
+  recipe snapshots. Closes #317.
 - Code editor line-number and fold gutters now use the muted foreground token
   instead of the subtle one, meeting WCAG AA 4.5:1 contrast on the gutter
   background (surfaced by the axe smoke suite once a docs page rendered a

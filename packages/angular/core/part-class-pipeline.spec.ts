@@ -58,6 +58,19 @@ describe('Part-Class Pipeline', () => {
       ).toBe('data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px bg-hell-danger');
     });
 
+    it('keeps font-family inheritance independent of font-weight utilities', () => {
+      // Recipes spell font-family inheritance as `font-[family-name:inherit]`:
+      // the bare `font-[inherit]` form is classified into the font-weight
+      // group and silently dropped next to `font-medium` (#317).
+      expect(hellTwMerge('font-[family-name:inherit] font-medium')).toBe(
+        'font-[family-name:inherit] font-medium',
+      );
+      expect(hellTwMerge('font-[family-name:inherit] font-medium', 'font-semibold')).toBe(
+        'font-[family-name:inherit] font-semibold',
+      );
+      expect(hellTwMerge('font-[family-name:inherit]', 'font-sans')).toBe('font-sans');
+    });
+
     it('deduplicates repeated classes in favor of the last occurrence', () => {
       expect(hellTwMerge('flex', 'flex')).toBe('flex');
       expect(hellTwMerge('px-hell-4 flex px-hell-4')).toBe('flex px-hell-4');

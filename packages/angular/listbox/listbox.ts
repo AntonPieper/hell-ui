@@ -17,7 +17,7 @@ const HELL_LISTBOX_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_LISTBOX_OPTION_RECIPE = {
-  root: `grid gap-0.5 border-0 text-start font-[inherit] ${HELL_OPTION_SURFACE_METRICS} hover:bg-hell-surface-muted ${HELL_OPTION_SURFACE_SELECTED_STATES} aria-selected:bg-hell-primary-soft aria-selected:font-medium aria-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-50`,
+  root: `grid gap-0.5 border-0 text-start font-[family-name:inherit] ${HELL_OPTION_SURFACE_METRICS} hover:bg-hell-surface-muted ${HELL_OPTION_SURFACE_SELECTED_STATES} aria-selected:bg-hell-primary-soft aria-selected:font-medium aria-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-50`,
 } satisfies HellRecipe<'root'>;
 
 const HELL_LISTBOX_SECTION_RECIPE = {

@@ -106,7 +106,7 @@ const HELL_TABLE_ROW_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_ROW_ACTION_RECIPE = {
-  root: 'inline-flex h-hell-control-xs cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-transparent bg-transparent px-hell-2 font-[inherit] text-xs font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
+  root: 'inline-flex h-hell-control-xs cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-transparent bg-transparent px-hell-2 font-[family-name:inherit] text-xs font-medium leading-none text-hell-foreground shadow-none transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
 } satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_SELECTION_CELL_RECIPE = {
@@ -126,7 +126,7 @@ const HELL_TABLE_HEADER_CELL_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_SORT_TRIGGER_RECIPE = {
-  root: 'inline-flex items-center gap-[calc(var(--spacing)*1.5)] rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-inherit shadow-none disabled:cursor-default enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
+  root: 'inline-flex items-center gap-[calc(var(--spacing)*1.5)] rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-inherit shadow-none disabled:cursor-default enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
 } satisfies HellRecipe<'root'>;
 
 const HELL_TABLE_CELL_RECIPE = {
