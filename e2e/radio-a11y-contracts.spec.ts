@@ -79,6 +79,41 @@ test.describe('radio browser accessibility contract', () => {
     await expect(example).toContainText('Selected: starter');
   });
 
+  test('signal forms radio group shares one value with the field and reports touched on blur', async ({
+    page,
+  }) => {
+    await gotoRadio(page);
+
+    const example = page.locator('app-radio-forms-example');
+    await expect(example).toBeVisible();
+
+    const group = example.getByRole('radiogroup', { name: 'Delivery speed' });
+    const standard = group.getByRole('radio', { name: 'Standard' });
+    const express = group.getByRole('radio', { name: 'Express' });
+
+    // The field's required() metadata drives the reserved required input.
+    await expect(group).toHaveAttribute('aria-required', 'true');
+    await expect(standard).toHaveAttribute('aria-checked', 'false');
+    await expect(example).toContainText('Selected: none');
+    await expect(example).toContainText('Invalid: true');
+    await expect(example).toContainText('Touched: false');
+
+    await standard.click();
+    await expect(standard).toHaveAttribute('aria-checked', 'true');
+    await expect(example).toContainText('Selected: standard');
+    await expect(example).toContainText('Invalid: false');
+
+    await standard.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(express).toBeFocused();
+    await expect(express).toHaveAttribute('aria-checked', 'true');
+    await expect(example).toContainText('Selected: express');
+    await expect(example).toContainText('Touched: false');
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(example).toContainText('Touched: true');
+  });
+
   test('custom horizontal group follows horizontal arrow key traversal', async ({ page }) => {
     await gotoRadio(page);
 

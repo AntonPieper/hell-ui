@@ -7,6 +7,7 @@ import { DateInputForms } from './date-input-forms';
 import { StyledInputs } from './inputs';
 import { NumberInputForms } from './number-input-forms';
 import { ComboboxProjection } from './projection';
+import { RadioForms } from './radio-forms';
 import { SliderForms } from './slider-forms';
 import { SwitchForms } from './switch-forms';
 import { StyledTable } from './table';
@@ -20,6 +21,7 @@ import { TimeInputForms } from './time-input-forms';
     ComboboxProjection,
     CheckboxForms,
     SwitchForms,
+    RadioForms,
     SliderForms,
     DateInputForms,
     NumberInputForms,
@@ -34,6 +36,7 @@ import { TimeInputForms } from './time-input-forms';
       <app-combobox-projection />
       <app-checkbox-forms />
       <app-switch-forms />
+      <app-radio-forms />
       <app-slider-forms />
       <app-date-input-forms />
       <app-number-input-forms />

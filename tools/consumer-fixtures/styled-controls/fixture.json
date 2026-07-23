@@ -62,6 +62,10 @@
         "textIncludes": "Switch forms ready false-true-false-true-false"
       },
       {
+        "selector": "[data-test-id=\"radio-forms-status\"]",
+        "textIncludes": "Radio forms ready email-sms-push-sms-none"
+      },
+      {
         "selector": "[data-test-id=\"slider-forms-status\"]",
         "textIncludes": "Slider forms ready 10-20-30-40-50"
       },

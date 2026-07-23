@@ -4,16 +4,13 @@
 
 ```ts
 
-import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import * as _hell_ui_angular_core from '@hell-ui/angular/core';
 import { HellOrientation } from '@hell-ui/angular/core';
 import { NgpRadioIndicator as HellRadioIndicator } from 'ng-primitives/radio';
 import { HellUiInput } from '@hell-ui/angular/core';
 import * as i1 from 'ng-primitives/radio';
-import { ValidationErrors } from '@angular/forms';
-import { Validator } from '@angular/forms';
 
 // @public
 export class HellNativeRadio {
@@ -48,20 +45,17 @@ export class HellRadio {
 }
 
 // @public
-export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Validator {
+export class HellRadioGroup<T = unknown> implements FormValueControl<T | null> {
     constructor();
+    readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected onFocusOut(event: FocusEvent): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    registerOnChange(fn: (value: T | null) => void): void;
-    registerOnTouched(fn: () => void): void;
-    registerOnValidatorChange(fn: () => void): void;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    setDisabledState(isDisabled: boolean): void;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    validate(control: AbstractControl | null): ValidationErrors | null;
-    writeValue(value: T | null): void;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellRadioGroup<any>, "[hellRadioGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpRadioGroup; inputs: { "ngpRadioGroupValue": "value"; "ngpRadioGroupDisabled": "disabled"; "ngpRadioGroupOrientation": "orientation"; "ngpRadioGroupCompareWith": "compareWith"; }; outputs: { "ngpRadioGroupValueChange": "valueChange"; }; }]>;
+    readonly value: _angular_core.ModelSignal<T | null>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellRadioGroup<any>, "[hellRadioGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.NgpRadioGroup; inputs: { "ngpRadioGroupOrientation": "orientation"; "ngpRadioGroupCompareWith": "compareWith"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellRadioGroup<any>, never>;
 }
 

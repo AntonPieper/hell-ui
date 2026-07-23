@@ -93,18 +93,18 @@ class ComboboxCvaContractHost {
 }
 
 @Directive({
-  selector: '[hellRadioGroupCvaStateProbe]',
+  selector: '[hellRadioGroupStateSyncProbe]',
 })
-class RadioGroupCvaStateProbe {
+class RadioGroupStateSyncProbe {
   readonly state = injectRadioGroupState<string>();
 }
 
 @Component({
-  imports: [ReactiveFormsModule, RadioGroupCvaStateProbe, HellRadioGroup, HellRadio],
+  imports: [ReactiveFormsModule, RadioGroupStateSyncProbe, HellRadioGroup, HellRadio],
   template: `
     <div
       hellRadioGroup
-      hellRadioGroupCvaStateProbe
+      hellRadioGroupStateSyncProbe
       [formControl]="control"
       orientation="horizontal"
       (valueChange)="values.push($any($event))"
@@ -114,7 +114,7 @@ class RadioGroupCvaStateProbe {
     </div>
   `,
 })
-class RadioGroupCvaContractHost {
+class RadioGroupModelContractHost {
   readonly control = new FormControl<string | null>(null);
   readonly values: Array<string | null> = [];
 }
@@ -226,10 +226,10 @@ describe('ngp form-state compatibility helpers', () => {
     });
   });
 
-  describe('Hell CVA contract through the adapter seam', () => {
+  describe('Hell form contracts through the adapter seam', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [ComboboxCvaContractHost, RadioGroupCvaContractHost],
+        imports: [ComboboxCvaContractHost, RadioGroupModelContractHost],
       }).compileComponents();
     });
 
@@ -256,12 +256,12 @@ describe('ngp form-state compatibility helpers', () => {
       expect(combobox?.tabIndex).toBe(-1);
     });
 
-    it('syncs radio CVA value and disabled writes into ng-primitives state', async () => {
-      const fixture = TestBed.createComponent(RadioGroupCvaContractHost);
+    it('syncs radio form value and disabled writes into ng-primitives state', async () => {
+      const fixture = TestBed.createComponent(RadioGroupModelContractHost);
       await settle(fixture);
 
       const host = fixture.componentInstance;
-      const state = getDirective(fixture, RadioGroupCvaStateProbe).state;
+      const state = getDirective(fixture, RadioGroupStateSyncProbe).state;
       const root = fixture.nativeElement as HTMLElement;
       const radios = root.querySelectorAll<HTMLButtonElement>('button[hellRadio]');
 
