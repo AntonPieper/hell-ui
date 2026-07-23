@@ -58,8 +58,8 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         title="Date input"
         icon="faSolidCalendarDay"
         category="Styled primitive"
-        importPath="@hell-ui/angular/date-input"
-        stylesPath="@hell-ui/angular/date-input/styles.css"
+        importPath="hell-ui/date-input"
+        stylesPath="hell-ui/date-input/styles.css"
       >
         Date parsing, formatting, validation, and forms behavior on a real native input.
       </hd-page-header>

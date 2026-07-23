@@ -47,8 +47,8 @@ import toolbarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
             title="Toolbar"
             icon="faSolidSliders"
             category="Composite"
-            importPath="@hell-ui/angular/toolbar"
-            stylesPath="@hell-ui/angular/toolbar/styles.css"
+            importPath="hell-ui/toolbar"
+            stylesPath="hell-ui/toolbar/styles.css"
           >
             Two focused Interfaces: a plain directive Toolbar for consumer-owned controls, and an
             Overflow Toolbar Composite for measured action placement.

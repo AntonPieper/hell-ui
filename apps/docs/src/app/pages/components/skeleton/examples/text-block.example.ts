@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSkeleton } from '@hell-ui/angular/skeleton';
+import { HellSkeleton } from 'hell-ui/skeleton';
 
 @Component({
   selector: 'app-skeleton-text-block-example',

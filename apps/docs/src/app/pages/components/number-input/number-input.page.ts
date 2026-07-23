@@ -48,8 +48,8 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         title="Number input"
         icon="faSolidHashtag"
         category="Styled primitive"
-        importPath="@hell-ui/angular/number-input"
-        stylesPath="@hell-ui/angular/number-input/styles.css"
+        importPath="hell-ui/number-input"
+        stylesPath="hell-ui/number-input/styles.css"
       >
         Numeric parsing, validation, stepping, and forms behavior on a real native input.
       </hd-page-header>

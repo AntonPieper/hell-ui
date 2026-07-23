@@ -28,13 +28,13 @@ import {
   type RowData,
   type Table,
 } from '@tanstack/angular-table';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_EMPTY_STATE_COPY, HellEmptyState } from '@hell-ui/angular/empty-state';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
-import { HellInput, HELL_SEARCH_IMPORTS } from '@hell-ui/angular/input';
-import { HellNativeSelect } from '@hell-ui/angular/select';
-import { HellPaginationStrip } from '@hell-ui/angular/pagination';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { HELL_EMPTY_STATE_COPY, HellEmptyState } from 'hell-ui/empty-state';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import { HellInput, HELL_SEARCH_IMPORTS } from 'hell-ui/input';
+import { HellNativeSelect } from 'hell-ui/select';
+import { HellPaginationStrip } from 'hell-ui/pagination';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 
 /** Optional teardown returned by ɵHellTanStackBodyStrategy connect hooks. */
 export type ɵHellStrategyCleanup = VoidFunction | void;

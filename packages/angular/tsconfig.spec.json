@@ -3,10 +3,10 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
     "paths": {
-      "@hell-ui/angular": [
+      "hell-ui": [
         "./public-api.ts"
       ],
-      "@hell-ui/angular/*": [
+      "hell-ui/*": [
         "./*/public-api.ts"
       ]
     },

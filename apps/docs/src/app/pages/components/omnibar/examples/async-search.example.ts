@@ -6,13 +6,13 @@ import {
   faSolidUser,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
 import {
   hellSearchResource,
   type HellSearchField,
   type HellSearchResourceSource,
-} from '@hell-ui/angular/core';
-import { HellIcon } from '@hell-ui/angular/icon';
+} from 'hell-ui/core';
+import { HellIcon } from 'hell-ui/icon';
 
 interface Person {
   readonly id: number;

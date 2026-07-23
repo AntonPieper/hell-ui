@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellPaginationStrip } from '@hell-ui/angular/pagination';
+import { HellPaginationStrip } from 'hell-ui/pagination';
 
 @Component({
   selector: 'app-pagination-basic-example',

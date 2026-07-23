@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { EditorView } from '@codemirror/view';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+import { HellCodeEditor } from 'hell-ui/features/code-editor';
 
 /**
  * Docs example sources are TypeScript with inline Angular templates; the
@@ -24,7 +24,7 @@ type DocsCodeViewerVariant = 'example' | 'block';
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import '@hell-ui/angular/features/code-editor/styles.css';
+      @import 'hell-ui/features/code-editor/styles.css';
 
       .hd-code-viewer[data-slot='root'] {
         border-top-left-radius: 0;

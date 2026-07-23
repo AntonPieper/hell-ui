@@ -2,7 +2,7 @@ import { Component, inject, signal, viewChild, type TemplateRef } from '@angular
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
-import type { HellUiInput } from '@hell-ui/angular/core';
+import type { HellUiInput } from 'hell-ui/core';
 import {
   HellToastService,
   HellToaster,

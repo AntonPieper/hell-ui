@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormField, form, required, validate } from '@angular/forms/signals';
 
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellTimeInput, type HellTimeValue } from 'hell-ui/time-input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-time-input-forms-example',

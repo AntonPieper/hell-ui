@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_OMNIBAR_IMPORTS } from '@hell-ui/angular/omnibar';
-import { HellKbd } from '@hell-ui/angular/chip';
+import { hellSearchResource, type HellSearchField } from 'hell-ui/core';
+import { HELL_OMNIBAR_IMPORTS } from 'hell-ui/omnibar';
+import { HellKbd } from 'hell-ui/chip';
 
 interface Command {
   readonly id: string;

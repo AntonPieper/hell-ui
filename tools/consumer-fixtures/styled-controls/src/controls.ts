@@ -1,34 +1,34 @@
 import { Component } from '@angular/core';
-import { HELL_ACCORDION_IMPORTS } from '@hell-ui/angular/accordion';
-import { HellAvatar, type HellAvatarUi } from '@hell-ui/angular/avatar';
-import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from '@hell-ui/angular/checkbox';
-import { HellBadge, HellChip, HellKbd } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput, HellSearch, HellSearchClear } from '@hell-ui/angular/input';
-import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HELL_PAGINATION_IMPORTS, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
+import { HELL_ACCORDION_IMPORTS } from 'hell-ui/accordion';
+import { HellAvatar, type HellAvatarUi } from 'hell-ui/avatar';
+import { HELL_BREADCRUMBS_IMPORTS } from 'hell-ui/breadcrumbs';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from 'hell-ui/checkbox';
+import { HellBadge, HellChip, HellKbd } from 'hell-ui/chip';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput, HellSearch, HellSearchClear } from 'hell-ui/input';
+import { HELL_LISTBOX_IMPORTS } from 'hell-ui/listbox';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HELL_PAGINATION_IMPORTS, type HellPaginationStripUi } from 'hell-ui/pagination';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 import {
   HellNativeRadio,
   HellNativeRadioGroup,
   HellRadio,
   HellRadioGroup,
-} from '@hell-ui/angular/radio';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import { HellSeparator } from '@hell-ui/angular/separator';
-import { HellSkeleton } from '@hell-ui/angular/skeleton';
-import { HellSlider, type HellSliderUi } from '@hell-ui/angular/slider';
-import { HellSpinner } from '@hell-ui/angular/spinner';
-import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from '@hell-ui/angular/switch';
-import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
-import { HellToggle, HellToggleGroup, HellToggleGroupItem } from '@hell-ui/angular/toggle';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+} from 'hell-ui/radio';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import { HellSeparator } from 'hell-ui/separator';
+import { HellSkeleton } from 'hell-ui/skeleton';
+import { HellSlider, type HellSliderUi } from 'hell-ui/slider';
+import { HellSpinner } from 'hell-ui/spinner';
+import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from 'hell-ui/switch';
+import { HELL_TABS_IMPORTS } from 'hell-ui/tabs';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem } from 'hell-ui/toggle';
+import { HellTooltip, HellTooltipSurface } from 'hell-ui/tooltip';
 
 interface SelectPriority {
   readonly id: string;

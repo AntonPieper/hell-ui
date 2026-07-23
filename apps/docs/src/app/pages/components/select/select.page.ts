@@ -44,8 +44,8 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         title="Select"
         icon="faSolidCaretDown"
         category="Styled primitive"
-        importPath="@hell-ui/angular/select"
-        stylesPath="@hell-ui/angular/select/styles.css"
+        importPath="hell-ui/select"
+        stylesPath="hell-ui/select/styles.css"
       >
         A projection-first rich dropdown for choosing one domain value (or several) from a short,
         known list.
@@ -235,7 +235,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p>
         Import <code>HELL_SELECT_IMPORTS</code> for the complete projected suite. Pick values
         use <code>HellPickSingleValue</code>, <code>HellPickMultipleValue</code>, and
-        <code>HellPickValue</code> from <code>@hell-ui/angular/core</code>.
+        <code>HellPickValue</code> from <code>hell-ui/core</code>.
       </p>
 
       <h2>Migration from the owned renderer</h2>

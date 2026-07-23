@@ -1,4 +1,4 @@
-import type { HellRecipe } from '@hell-ui/angular/core';
+import type { HellRecipe } from 'hell-ui/core';
 
 /**
  * Shared option-surface presentation for Hell's list modules.

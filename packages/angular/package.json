@@ -1,5 +1,5 @@
 {
-  "name": "@hell-ui/angular",
+  "name": "hell-ui",
   "version": "0.2.0",
   "description": "Heinrich Element Library — opinionated Angular component set built on ng-primitives + Tailwind v4.",
   "license": "MIT",

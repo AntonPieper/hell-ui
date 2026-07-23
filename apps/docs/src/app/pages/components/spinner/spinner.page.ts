@@ -47,8 +47,8 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
         title="Spinner"
         icon="faSolidSpinner"
         category="Styled primitive"
-        importPath="@hell-ui/angular/spinner"
-        stylesPath="@hell-ui/angular/spinner/styles.css"
+        importPath="hell-ui/spinner"
+        stylesPath="hell-ui/spinner/styles.css"
       >
         An indeterminate activity indicator for short, unquantifiable waits — it has no notion of
         progress, only that something is happening.
@@ -115,7 +115,7 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
       <h2>With card</h2>
       <p>
         A realistic pending action: <code>hellCard</code> (narrow entry point
-        <code>@hell-ui/angular/card</code>) frames a confirmation, and its primary
+        <code>hell-ui/card</code>) frames a confirmation, and its primary
         <code>hellButton</code> swaps in a <code>hellSpinner</code> and a busy label for the
         duration of the request. Both buttons disable while pending so the click can't fire twice.
       </p>

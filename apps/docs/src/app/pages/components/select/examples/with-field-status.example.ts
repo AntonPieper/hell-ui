@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { type HellChipVariant } from '@hell-ui/angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellButton } from 'hell-ui/button';
+import { type HellChipVariant } from 'hell-ui/core';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import { HellChip } from 'hell-ui/chip';
 
 type Decision = 'Approved' | 'Changes requested' | 'Rejected';
 

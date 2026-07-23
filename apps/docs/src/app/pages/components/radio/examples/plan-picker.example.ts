@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/radio';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellRadio, HellRadioGroup, HellRadioIndicator } from 'hell-ui/radio';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellChip } from 'hell-ui/chip';
 
 type Plan = 'starter' | 'team' | 'enterprise';
 

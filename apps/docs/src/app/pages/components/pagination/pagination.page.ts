@@ -45,8 +45,8 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         title="Pagination"
         icon="faSolidAnglesRight"
         category="Mixed entry point"
-        importPath="@hell-ui/angular/pagination"
-        stylesPath="@hell-ui/angular/pagination/styles.css"
+        importPath="hell-ui/pagination"
+        stylesPath="hell-ui/pagination/styles.css"
       >
         Page navigation as a composable button directive or a ready-made numbered strip, with
         compact previous/next and page-jump forms as documented recipes.

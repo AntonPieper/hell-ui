@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidMoon, faSolidVolumeHigh, faSolidWifi } from '@ng-icons/font-awesome/solid';
-import { HellSwitch } from '@hell-ui/angular/switch';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellSwitch } from 'hell-ui/switch';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-switch-settings-list-example',

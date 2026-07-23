@@ -6,9 +6,9 @@ filtering, resizing, virtual rows, or table package work.
 ## Supported Paths
 
 - Hell supports exactly two table paths:
-  `@hell-ui/angular/table` for native-table primitives and
-  `@hell-ui/angular/table-tanstack` for the TanStack Table Shell.
-- Do not add `@hell-ui/angular/data-table`, `table-virtual`, `table-cdk`, a
+  `hell-ui/table` for native-table primitives and
+  `hell-ui/table-tanstack` for the TanStack Table Shell.
+- Do not add `hell-ui/data-table`, `table-virtual`, `table-cdk`, a
   normalized Hell table model, grid mode, row draft controller, column
   definition DSL, column visibility panel, or first-party data-table renderer.
 

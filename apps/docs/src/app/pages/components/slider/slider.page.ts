@@ -55,8 +55,8 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         title="Slider"
         icon="faSolidSliders"
         category="Styled primitive"
-        importPath="@hell-ui/angular/slider"
-        stylesPath="@hell-ui/angular/slider/styles.css"
+        importPath="hell-ui/slider"
+        stylesPath="hell-ui/slider/styles.css"
       >
         A draggable single-value control for approximate numeric input in a fixed range.
       </hd-page-header>

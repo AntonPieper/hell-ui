@@ -20,7 +20,7 @@ import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-fi
 };
 
 const SEARCH_RESOURCE_CODE = `import { signal } from '@angular/core';
-import { hellSearchResource } from '@hell-ui/angular/core';
+import { hellSearchResource } from 'hell-ui/core';
 
 readonly query = signal('');
 readonly countries = signal<readonly Country[]>(initialCountries);
@@ -60,7 +60,7 @@ readonly peopleSearch = hellSearchResource<Person>({
         title="Search"
         icon="faSolidMagnifyingGlass"
         category="Styled primitive"
-        importPath="@hell-ui/angular/input"
+        importPath="hell-ui/input"
       >
         Wires a search input to a clear affordance and an empty-state signal — you own the input,
         the results, and the filtering logic.
@@ -87,7 +87,7 @@ readonly peopleSearch = hellSearchResource<Person>({
       <p>
         When ranking or asynchronous retrieval should be reusable outside one renderer, create a
         UI-independent <code>hellSearchResource</code> from
-        <code>&#64;hell-ui/angular/core</code>. It exposes the caller-owned <code>query</code> plus
+        <code>hell-ui/core</code>. It exposes the caller-owned <code>query</code> plus
         <code>items</code>, <code>status</code>, and <code>error</code> signals. Local resources use
         the configured <code>provideHellSearchRanker</code> strategy; asynchronous resources own
         debounce, cancellation, and stale-result protection while forwarding an

@@ -43,10 +43,10 @@ Angular Package Format artifacts.
   root scripts delegating through pnpm filters.
 - Architecture, CI-contract, package-consumer, release, and docs tooling must
   stop assuming `projects/*` source roots.
-- `@hell-ui/angular` entrypoint metadata now lives with each entrypoint under
+- `hell-ui` entrypoint metadata now lives with each entrypoint under
   `packages/angular` as `hell-entrypoint.json`; generated manifests are derived
   from those sidecars.
 - Amendment (2026-07-08): the PDF viewer was folded back into
-  `@hell-ui/angular` as `packages/angular/features/pdf-viewer` (see the heavy
+  `hell-ui` as `packages/angular/features/pdf-viewer` (see the heavy
   feature package boundary ADR amendment); `packages/pdf-viewer` and the
   `hell-pdf-viewer` project no longer exist.

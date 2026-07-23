@@ -17,7 +17,7 @@
     "@codemirror/state": "*",
     "@codemirror/view": "*",
     "@floating-ui/dom": "*",
-    "@hell-ui/angular": "*",
+    "hell-ui": "*",
     "@lezer/highlight": "*",
     "ng-primitives": "*",
     "rxjs": "*",

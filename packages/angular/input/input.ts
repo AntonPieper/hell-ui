@@ -2,8 +2,8 @@ import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
 import { NgpTextarea } from 'ng-primitives/textarea';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
-import { HellSize } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import { HellSize } from 'hell-ui/core';
 
 const HELL_FORM_CONTROL_STATE_CLASSES =
   'outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] focus:border-hell-border-focus focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] disabled:cursor-not-allowed disabled:border-hell-border disabled:bg-hell-surface-subtle disabled:text-hell-foreground-muted data-disabled:cursor-not-allowed data-disabled:border-hell-border data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted aria-invalid:!border-hell-danger invalid:!border-hell-danger';

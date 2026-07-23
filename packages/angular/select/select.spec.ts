@@ -9,12 +9,12 @@ import {
   form,
   required as requiredSchema,
 } from '@angular/forms/signals';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 import { NgpSelect } from 'ng-primitives/select';
 
 import { HellSelect, HELL_SELECT_IMPORTS } from './select';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import type { HellPickValue } from 'hell-ui/core';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 interface Region {

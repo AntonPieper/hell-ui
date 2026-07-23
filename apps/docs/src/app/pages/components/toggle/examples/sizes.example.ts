@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellToggle } from '@hell-ui/angular/toggle';
+import { HellToggle } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-sizes-example',

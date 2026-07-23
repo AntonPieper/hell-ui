@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Directive, computed, contentChild, contentChildren, inject, input, output } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { hellCreateLabels, type HellLabels, hellPartStyler, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellUi, type HellUiInput } from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 import { HELL_PAGE_HEADER_BACK_RECIPE, HELL_PAGE_HEADER_LAYOUT_CLASSES, HELL_PAGE_HEADER_RECIPE } from './page-header.recipes';

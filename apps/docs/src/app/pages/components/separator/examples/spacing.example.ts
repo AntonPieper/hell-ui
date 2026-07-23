@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSeparator } from '@hell-ui/angular/separator';
-import type { HellSize } from '@hell-ui/angular/core';
+import { HellSeparator } from 'hell-ui/separator';
+import type { HellSize } from 'hell-ui/core';
 
 const SPACING_OPTIONS: Array<HellSize | 'none'> = ['none', 'xs', 'sm', 'md', 'lg', 'xl'];
 

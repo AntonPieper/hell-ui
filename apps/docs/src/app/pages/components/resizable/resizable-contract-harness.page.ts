@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
+import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
 
 @Component({
   selector: 'hd-resizable-contract-harness',

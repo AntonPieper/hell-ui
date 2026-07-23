@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidAlignCenter, faSolidAlignLeft, faSolidAlignRight } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
+import { HellIcon } from 'hell-ui/icon';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from 'hell-ui/toggle';
 
 @Component({
   selector: 'app-toggle-group-single-example',

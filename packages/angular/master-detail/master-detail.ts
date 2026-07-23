@@ -11,7 +11,7 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 const HELL_MASTER_DETAIL_RECIPE = {
   root: '',

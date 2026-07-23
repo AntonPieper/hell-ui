@@ -25,7 +25,7 @@ import {
   ɵHellDomWriter,
   type ɵHellTanStackBodyItem,
   type ɵHellTanStackBodyStrategy,
-} from '@hell-ui/angular/table-tanstack';
+} from 'hell-ui/table-tanstack';
 
 interface HellVirtualBodyItem<TData extends RowData> extends ɵHellTanStackBodyItem<TData> {
   readonly virtualIndex: number;

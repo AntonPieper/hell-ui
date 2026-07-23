@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput, HellTextarea } from '@hell-ui/angular/input';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_DIALOG_IMPORTS } from 'hell-ui/dialog';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput, HellTextarea } from 'hell-ui/input';
 
 interface Customer {
   name: string;

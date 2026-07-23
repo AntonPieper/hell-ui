@@ -35,15 +35,15 @@ import {
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
   type HellUiInput,
-} from '@hell-ui/angular/core';
-import { HellInput } from '@hell-ui/angular/input';
+} from 'hell-ui/core';
+import { HellInput } from 'hell-ui/input';
 import {
   HellTypedValueInputState,
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
   type HellTypedValueCommitResult,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 
 /** Built-in accessibility labels owned by the Number Input entry point. */
 export interface HellNumberInputLabels {

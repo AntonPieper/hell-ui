@@ -1,7 +1,7 @@
 import { Directive, input } from '@angular/core';
 import { NgpSeparator } from 'ng-primitives/separator';
-import type { HellOrientation, HellSize } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import type { HellOrientation, HellSize } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 /** Default part recipe for `hellSeparator`; pinned by the separator recipe snapshot. */
 export const HELL_SEPARATOR_RECIPE: HellRecipe<'root'> = {

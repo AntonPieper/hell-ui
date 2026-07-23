@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellButton } from '@hell-ui/angular/button';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HellButton } from 'hell-ui/button';
 
 interface ProjectColumn {
   readonly id: string;

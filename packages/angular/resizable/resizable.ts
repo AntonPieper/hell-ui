@@ -15,15 +15,15 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
-import { hellPartStyler, hellCreateLabels, type HellLabels, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, hellCreateLabels, type HellLabels, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
   hellResizePairAriaValue,
   type HellResizeDirection,
-} from '@hell-ui/angular/internal/core';
-import { isDocumentPositionFollowing } from '@hell-ui/angular/internal/core';
-import { HellOrientation } from '@hell-ui/angular/core';
+} from 'hell-ui/internal/core';
+import { isDocumentPositionFollowing } from 'hell-ui/internal/core';
+import { HellOrientation } from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the resizable entry point. */

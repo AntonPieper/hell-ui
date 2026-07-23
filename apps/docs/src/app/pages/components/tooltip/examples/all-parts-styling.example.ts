@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellTooltip, HellTooltipSurface } from '@hell-ui/angular/tooltip';
+import { HellButton } from 'hell-ui/button';
+import { HellTooltip, HellTooltipSurface } from 'hell-ui/tooltip';
 
 @Component({
   selector: 'app-tooltip-all-parts-styling-example',

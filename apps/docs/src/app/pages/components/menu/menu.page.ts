@@ -41,8 +41,8 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         title="Menu"
         icon="faSolidEllipsisVertical"
         category="Styled primitive"
-        importPath="@hell-ui/angular/menu"
-        stylesPath="@hell-ui/angular/menu/styles.css"
+        importPath="hell-ui/menu"
+        stylesPath="hell-ui/menu/styles.css"
       >
         A floating list of actions anchored to a button or anchor trigger, with sections, checkable
         items, radio groups, icons, and submenus.

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBold, faSolidItalic, faSolidUnderline } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from '@hell-ui/angular/toggle';
-import { HellTooltip } from '@hell-ui/angular/tooltip';
+import { HellIcon } from 'hell-ui/icon';
+import { HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from 'hell-ui/toggle';
+import { HellTooltip } from 'hell-ui/tooltip';
 
 @Component({
   selector: 'app-toggle-with-tooltip-example',

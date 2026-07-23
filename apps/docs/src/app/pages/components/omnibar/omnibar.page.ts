@@ -45,8 +45,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         title="Omnibar"
         icon="faSolidTerminal"
         category="Composite"
-        importPath="@hell-ui/angular/omnibar"
-        stylesPath="@hell-ui/angular/omnibar/styles.css"
+        importPath="hell-ui/omnibar"
+        stylesPath="hell-ui/omnibar/styles.css"
       >
         A command-interaction composite that coordinates query/open state, keyboard navigation,
         hotkeys, activation, and a floating panel while consumers own search and status policy.
@@ -122,7 +122,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         A realistic command palette mounted in a product top bar: an icon-led searchbox with a
         <code>hellKbd</code> shortcut hint in the trailing slot, grouped commands, and per-command
         shortcut chips in each item's trailing slot. <code>hellKbd</code> comes from the narrow
-        <code>&#64;hell-ui/angular/chip</code> entry point, and the <code>faSolid*</code> icons render
+        <code>hell-ui/chip</code> entry point, and the <code>faSolid*</code> icons render
         through <code>hell-icon</code>.
       </p>
       <hd-example-tabs [code]="commandPaletteCode" previewClass="min-h-[160px]">

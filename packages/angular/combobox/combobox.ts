@@ -18,22 +18,22 @@ import {
   type HellPickValue,
   type HellRecipe,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import {
   hellRegisterFloatingHost,
   hellNormalizePickValue,
   hellSamePickValue,
   HellPickerFocusScope,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 import {
   HELL_FLOATING_POP_IN,
   HELL_FLOATING_SURFACE,
-} from '@hell-ui/angular/internal/floating';
+} from 'hell-ui/internal/floating';
 import {
   writeComboboxStateDisabled,
   writeComboboxStateValue,
-} from '@hell-ui/angular/internal/ng-primitives';
-import { hellOptionSurfaceRecipe } from '@hell-ui/angular/internal/option';
+} from 'hell-ui/internal/ng-primitives';
+import { hellOptionSurfaceRecipe } from 'hell-ui/internal/option';
 import {
   NgpCombobox,
   NgpComboboxButton,

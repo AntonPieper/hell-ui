@@ -53,8 +53,8 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         title="Alert"
         icon="faSolidTriangleExclamation"
         category="Styled primitive"
-        importPath="@hell-ui/angular/alert"
-        stylesPath="@hell-ui/angular/alert/styles.css"
+        importPath="hell-ui/alert"
+        stylesPath="hell-ui/alert/styles.css"
       >
         A persistent inline message for contextual notices — info, success, warning, and danger
         severities, an optional title, a default per-variant glyph, an actions region, an opt-in

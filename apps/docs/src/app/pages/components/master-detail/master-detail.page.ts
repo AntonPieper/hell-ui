@@ -31,8 +31,8 @@ import masterDetailResizableExampleCodeRaw from './examples/resizable.example.ts
           title="Master Detail"
           icon="faSolidTableColumns"
           category="Composite"
-          importPath="@hell-ui/angular/master-detail"
-          stylesPath="@hell-ui/angular/master-detail/styles.css"
+          importPath="hell-ui/master-detail"
+          stylesPath="hell-ui/master-detail/styles.css"
         >
           A projection-first responsive controller for consumer-owned master and detail panes.
         </hd-page-header>
@@ -154,9 +154,9 @@ import masterDetailResizableExampleCodeRaw from './examples/resizable.example.ts
           </thead>
           <tbody>
             <tr>
-              <td><code>@hell-ui/angular/split-view</code></td>
+              <td><code>hell-ui/split-view</code></td>
               <td>
-                Import controller semantics from <code>@hell-ui/angular/master-detail</code>; import
+                Import controller semantics from <code>hell-ui/master-detail</code>; import
                 Resizable, Toolbar, and Pagination separately only when the consumer uses them.
               </td>
             </tr>
@@ -222,9 +222,9 @@ import masterDetailResizableExampleCodeRaw from './examples/resizable.example.ts
               <td>Use <code>HELL_MASTER_DETAIL_IMPORTS</code>.</td>
             </tr>
             <tr>
-              <td><code>@hell-ui/angular/split-view/styles.css</code></td>
+              <td><code>hell-ui/split-view/styles.css</code></td>
               <td>
-                Use <code>@hell-ui/angular/master-detail/styles.css</code> for the root recipe plus
+                Use <code>hell-ui/master-detail/styles.css</code> for the root recipe plus
                 the stylesheets of explicitly composed Resizable, Toolbar, Pagination, and Button
                 entry points.
               </td>

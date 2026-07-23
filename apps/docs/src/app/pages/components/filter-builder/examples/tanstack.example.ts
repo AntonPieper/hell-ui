@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
+import { HellButton } from 'hell-ui/button';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
   type HellFilter,
   type HellFilterBuilderEditorContext,
   type HellFilterFieldDescriptor,
-} from '@hell-ui/angular/features/filter-builder';
-import { HellInput } from '@hell-ui/angular/input';
-import { HellTableShellToolbar, HellTanStackTable } from '@hell-ui/angular/table-tanstack';
+} from 'hell-ui/features/filter-builder';
+import { HellInput } from 'hell-ui/input';
+import { HellTableShellToolbar, HellTanStackTable } from 'hell-ui/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,

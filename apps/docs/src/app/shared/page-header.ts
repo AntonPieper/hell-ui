@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellChip } from 'hell-ui/chip';
 import { hdCopyTextToClipboard } from './code-tools';
 
 const PAGE_HEADER_ICONS = { faSolidCheck, faSolidCopy };

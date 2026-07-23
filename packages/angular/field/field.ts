@@ -1,5 +1,5 @@
 import { Directive, inject, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import { NgpFormField, NgpDescription, NgpError, NgpLabel } from 'ng-primitives/form-field';
 
 const HELL_FIELD_RECIPE = {

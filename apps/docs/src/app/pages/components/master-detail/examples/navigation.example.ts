@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
-import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
-import { HellToolbar, HellToolbarItem } from '@hell-ui/angular/toolbar';
+import { HellButton } from 'hell-ui/button';
+import { HELL_MASTER_DETAIL_IMPORTS } from 'hell-ui/master-detail';
+import { HellPageLink, HellPagination } from 'hell-ui/pagination';
+import { HellToolbar, HellToolbarItem } from 'hell-ui/toolbar';
 
 interface Message {
   readonly id: string;

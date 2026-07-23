@@ -1,10 +1,10 @@
-import { provideHellLabels } from '@hell-ui/angular/core';
+import { provideHellLabels } from 'hell-ui/core';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { HellButton } from '@hell-ui/angular/button';
-import { HellInput } from '@hell-ui/angular/input';
+import { HellButton } from 'hell-ui/button';
+import { HellInput } from 'hell-ui/input';
 import { HELL_TABLE_UTILITIES_IMPORTS, HellTable, HellTableCell, HellTableHeaderCell, HellTableRow, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
 import { sortClasses } from '../spec-helpers';
 

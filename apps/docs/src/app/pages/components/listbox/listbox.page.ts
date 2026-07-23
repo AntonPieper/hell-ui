@@ -40,8 +40,8 @@ import listboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         title="Listbox"
         icon="faSolidListUl"
         category="Styled primitive"
-        importPath="@hell-ui/angular/listbox"
-        stylesPath="@hell-ui/angular/listbox/styles.css"
+        importPath="hell-ui/listbox"
+        stylesPath="hell-ui/listbox/styles.css"
       >
         An ARIA listbox for choosing from options that are already on screen — single or
         multiple, with sections, disabled rows, and typeahead built in.

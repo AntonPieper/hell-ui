@@ -28,7 +28,7 @@ export function checkApiReportCrossEntrypoint() {
   mkdirSync(fixtureFolder, { recursive: true });
   writeFileSync(
     packageJsonFullPath,
-    `${JSON.stringify({ name: '@hell-ui/angular', version: '0.0.0' }, null, 2)}\n`,
+    `${JSON.stringify({ name: 'hell-ui', version: '0.0.0' }, null, 2)}\n`,
   );
   writeFileSync(join(fixtureFolder, 'internal-core.d.ts'), internalCoreDeclarationFixture);
   writeFileSync(
@@ -40,21 +40,21 @@ export function checkApiReportCrossEntrypoint() {
 
   const declarationEntrypoints = [
     {
-      specifier: '@hell-ui/angular/internal/core',
+      specifier: 'hell-ui/internal/core',
       declarationFilePath: join(fixtureFolder, 'internal-core.d.ts'),
       reportFileName: internalCoreReportFileName,
     },
     {
-      specifier: '@hell-ui/angular/internal/excluded',
+      specifier: 'hell-ui/internal/excluded',
       declarationFilePath: join(fixtureFolder, 'excluded-internal.d.ts'),
     },
     {
-      specifier: '@hell-ui/angular/core',
+      specifier: 'hell-ui/core',
       declarationFilePath: join(fixtureFolder, 'core.d.ts'),
       reportFileName: coreReportFileName,
     },
     {
-      specifier: '@hell-ui/angular/narrow',
+      specifier: 'hell-ui/narrow',
       declarationFilePath: join(fixtureFolder, 'narrow.d.ts'),
       reportFileName: narrowReportFileName,
     },
@@ -64,12 +64,12 @@ export function checkApiReportCrossEntrypoint() {
   );
   const mirroredDeclarations = createApiReportDeclarationMirror({
     mirrorFolder: join(outputFolder, 'declaration-mirror'),
-    packageName: '@hell-ui/angular',
+    packageName: 'hell-ui',
     packageJsonFullPath,
     entrypoints: reportEntrypoints,
   });
   assert.equal(
-    mirroredDeclarations.has('@hell-ui/angular/internal/excluded'),
+    mirroredDeclarations.has('hell-ui/internal/excluded'),
     false,
     'an excluded internal sibling must not be externalized without a report',
   );
@@ -82,9 +82,9 @@ export function checkApiReportCrossEntrypoint() {
         reportEntrypoints,
         mirroredDeclarations,
         localSiblingPaths:
-          entrypoint.specifier === '@hell-ui/angular/narrow'
+          entrypoint.specifier === 'hell-ui/narrow'
             ? {
-                '@hell-ui/angular/internal/excluded': [
+                'hell-ui/internal/excluded': [
                   toTsconfigPath(join(fixtureFolder, 'excluded-internal.d.ts')),
                 ],
               }
@@ -92,19 +92,19 @@ export function checkApiReportCrossEntrypoint() {
       }),
     ]),
   );
-  const narrowReport = reports.get('@hell-ui/angular/narrow');
-  const internalCoreReport = reports.get('@hell-ui/angular/internal/core');
+  const narrowReport = reports.get('hell-ui/narrow');
+  const internalCoreReport = reports.get('hell-ui/internal/core');
   assert.ok(narrowReport, 'the narrow fixture report should exist');
   assert.ok(internalCoreReport, 'the internal core fixture report should exist');
 
   assert.match(
     narrowReport,
-    /from '@hell-ui\/angular\/core'/,
+    /from 'hell-ui\/core'/,
     'the shared core contract should remain an external entrypoint import',
   );
   assert.match(
     narrowReport,
-    /from '@hell-ui\/angular\/internal\/core'/,
+    /from 'hell-ui\/internal\/core'/,
     'the guarded internal contract should remain an explicit entrypoint import',
   );
   assert.doesNotMatch(
@@ -210,9 +210,9 @@ function extractFixtureReport({
 }
 
 const coreDeclarationFixture = `import { WritableSignal } from '@angular/core';
-import { InternalStableContract } from '@hell-ui/angular/internal/core';
+import { InternalStableContract } from 'hell-ui/internal/core';
 
-export { InternalStableContract } from '@hell-ui/angular/internal/core';
+export { InternalStableContract } from 'hell-ui/internal/core';
 
 /** Shared contract exported by the core entrypoint. */
 export interface SharedCoreContract {
@@ -222,9 +222,9 @@ export interface SharedCoreContract {
 `;
 
 const narrowDeclarationFixture = `import { Signal } from '@angular/core';
-import { SharedCoreContract } from '@hell-ui/angular/core';
-import { InternalStableContract } from '@hell-ui/angular/internal/core';
-import { ExcludedInternalContract } from '@hell-ui/angular/internal/excluded';
+import { SharedCoreContract } from 'hell-ui/core';
+import { InternalStableContract } from 'hell-ui/internal/core';
+import { ExcludedInternalContract } from 'hell-ui/internal/excluded';
 
 interface ModuleLocalLeak {
   readonly internal: true;

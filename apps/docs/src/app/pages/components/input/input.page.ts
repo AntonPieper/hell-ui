@@ -50,8 +50,8 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
         title="Input, Select &amp; Textarea"
         icon="faSolidICursor"
         category="Styled primitive"
-        importPath="@hell-ui/angular/input"
-        stylesPath="@hell-ui/angular/input/styles.css"
+        importPath="hell-ui/input"
+        stylesPath="hell-ui/input/styles.css"
       >
         <code>hellInput</code> and <code>hellTextarea</code> style native text controls without
         hiding them behind a component; the search-field pair
@@ -62,7 +62,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
         This entry point styles native form controls in place instead of wrapping them: attach
         <code>hellInput</code> to a native <code>&lt;input&gt;</code> and
         <code>hellTextarea</code> to a <code>&lt;textarea&gt;</code>;
-        <code>hellNativeSelect</code> (imported from <code>&#64;hell-ui/angular/select</code>,
+        <code>hellNativeSelect</code> (imported from <code>hell-ui/select</code>,
         shown here for the shared field styling) does the same for a <code>&lt;select&gt;</code>. Each is a thin directive over the matching
         <code>ng-primitives</code> primitive (<code>NgpInput</code> or <code>NgpTextarea</code>) —
         you keep the real element, so native behavior like autofill, IME composition, spellcheck,
@@ -216,7 +216,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
         </li>
         <li>
           <code>select[hellNativeSelect]</code> — exported from
-          <code>&#64;hell-ui/angular/select</code>; host directive <code>NgpInput</code> (forwards
+          <code>hell-ui/select</code>; host directive <code>NgpInput</code> (forwards
           <code>disabled</code>, <code>id</code>).
           <ul>
             <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>

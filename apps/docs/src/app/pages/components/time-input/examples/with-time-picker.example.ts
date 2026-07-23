@@ -9,13 +9,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
 
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HellTimePicker } from '@hell-ui/angular/time-picker';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellIcon } from 'hell-ui/icon';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
+import { HellTimeInput, type HellTimeValue } from 'hell-ui/time-input';
+import { HellTimePicker } from 'hell-ui/time-picker';
 
 @Component({
   selector: 'app-time-input-with-time-picker-example',

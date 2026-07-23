@@ -43,8 +43,8 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         title="Avatar group"
         icon="faSolidUsers"
         category="Composite"
-        importPath="@hell-ui/angular/avatar"
-        stylesPath="@hell-ui/angular/avatar/styles.css"
+        importPath="hell-ui/avatar"
+        stylesPath="hell-ui/avatar/styles.css"
       >
         Overlaps avatars into a single stack with a shared size scale and an overflow slot for
         whoever doesn't fit.

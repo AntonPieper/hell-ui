@@ -22,17 +22,17 @@ import {
   faSolidVolumeLow,
   faSolidVolumeXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellSlider } from '@hell-ui/angular/slider';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellSlider } from 'hell-ui/slider';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   HellAudioTranscriptUnavailableRuntime,
   type HellAudioTranscriptRuntimeFactory,
-} from '@hell-ui/angular/internal/audio-transcript';
+} from 'hell-ui/internal/audio-transcript';
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingInteractionController,
@@ -42,7 +42,7 @@ import {
   hellOutsideFocus,
   hellWithDismissEffect,
   type HellFloatingScope,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import type { InjectionToken } from '@angular/core';
 
@@ -191,7 +191,7 @@ function parseIsoDateOnly(value: string): Date | null {
  * Compact audio player with seek bar, play/pause, mute, volume slider,
  * download button and an opt-in speech-transcript strip. Browser transcript
  * capture is available only when the optional
- * `@hell-ui/angular/features/audio-transcript` provider is imported. The toggle
+ * `hell-ui/features/audio-transcript` provider is imported. The toggle
  * is hidden unless enabled and the provider reports support for the media.
  *
  * @experimental Browser speech transcripts are best-effort convenience text,

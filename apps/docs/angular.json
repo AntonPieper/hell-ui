@@ -51,7 +51,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/@hell-ui/angular/assets",
+                "input": "node_modules/hell-ui/assets",
                 "output": "assets"
               },
               {
@@ -61,12 +61,12 @@
               },
               {
                 "glob": "styles.css",
-                "input": "node_modules/@hell-ui/angular/features/pdf-viewer",
+                "input": "node_modules/hell-ui/features/pdf-viewer",
                 "output": "hell-ui/pdf-viewer/styles"
               },
               {
                 "glob": "*.css",
-                "input": "node_modules/@hell-ui/angular/themes",
+                "input": "node_modules/hell-ui/themes",
                 "output": "hell-ui/themes"
               },
               {
@@ -125,7 +125,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "prebundle": {
-              "exclude": ["@hell-ui/angular"]
+              "exclude": ["hell-ui"]
             }
           },
           "configurations": {

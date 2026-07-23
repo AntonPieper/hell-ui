@@ -48,14 +48,14 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             icon="faSolidTable"
             category="Table primitives"
             status="Beta"
-            importPath="@hell-ui/angular/table"
-            stylesPath="@hell-ui/angular/table/styles.css"
+            importPath="hell-ui/table"
+            stylesPath="hell-ui/table/styles.css"
           >
             Semantic native-table directives that add Hell styling, sorting, resize, and selection
             hooks to markup you own — never a data-table model.
           </hd-page-header>
           <p>
-            Hell supports two table paths. <code>@hell-ui/angular/table</code> is a suite of
+            Hell supports two table paths. <code>hell-ui/table</code> is a suite of
             directives you attach to native <code>&lt;table&gt;</code> markup. Each element stays
             yours — Hell only adds the dense typography and border treatment, stateful
             <code>data-*</code> hooks, sortable header triggers, keyboard-operable resize handles,
@@ -65,7 +65,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <p>
             When you already have a TanStack <code>Table&lt;T&gt;</code> and want standard chrome
             around it — toolbar, sticky header, pinned columns, status views, pagination — reach for
-            the companion shell in <code>@hell-ui/angular/table-tanstack</code>. It renders your
+            the companion shell in <code>hell-ui/table-tanstack</code>. It renders your
             caller-owned table instance with these primitives, keeping TanStack as the engine.
             TanStack owns columns, rows, sorting, filtering, pagination, selection, pinning, sizing,
             expansion, virtualization math, and state; Hell owns the reusable chrome around it. Use
@@ -111,7 +111,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         <div class="hd-prose">
           <h2>With TanStack, search, filters, and pagination</h2>
           <p>
-            A full data table built on the shell in <code>@hell-ui/angular/table-tanstack</code>.
+            A full data table built on the shell in <code>hell-ui/table-tanstack</code>.
             The component owns a TanStack <code>Table&lt;T&gt;</code> in manual mode — sorting,
             filtering, pagination, and selection are driven by simulated server queries — and
             <code>hell-tanstack-table</code> renders it with Hell chrome. Column definitions are the
@@ -138,7 +138,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <p>
             Virtualization is an optional body strategy on the same shell. Add
             <code>hellTanStackVirtualRows</code> from
-            <code>@hell-ui/angular/table-tanstack/virtual</code> to render only the visible rows via
+            <code>hell-ui/table-tanstack/virtual</code> to render only the visible rows via
             TanStack Virtual, tuning <code>virtualEstimateRowSize</code> and
             <code>virtualOverscan</code> as needed. The shell chrome, projected templates, and
             styling contract are unchanged; expanded rows still come from TanStack expansion state
@@ -163,7 +163,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             a refinement must beat a recipe utility.
           </p>
 
-          <h3>Primitive parts (<code>@hell-ui/angular/table</code>)</h3>
+          <h3>Primitive parts (<code>hell-ui/table</code>)</h3>
           <table class="hd-doc-table">
             <thead>
               <tr>
@@ -251,7 +251,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             </tbody>
           </table>
 
-          <h3>Shell parts (<code>@hell-ui/angular/table-tanstack</code>)</h3>
+          <h3>Shell parts (<code>hell-ui/table-tanstack</code>)</h3>
           <table class="hd-doc-table">
             <thead>
               <tr>
@@ -309,7 +309,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
 
         <div class="hd-prose">
           <h2>API</h2>
-          <h3>Primitives — <code>@hell-ui/angular/table</code></h3>
+          <h3>Primitives — <code>hell-ui/table</code></h3>
           <ul>
             <li>
               <code>HELL_TABLE_UTILITIES_IMPORTS</code>: the standalone import list for the whole
@@ -374,7 +374,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             </li>
           </ul>
 
-          <h3>TanStack shell — <code>@hell-ui/angular/table-tanstack</code></h3>
+          <h3>TanStack shell — <code>hell-ui/table-tanstack</code></h3>
           <ul>
             <li>
               <code>hell-tanstack-table</code> (<code>HellTanStackTable&lt;T&gt;</code>):
@@ -414,7 +414,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               building renderers outside the shell.
             </li>
             <li>
-              <b>Virtual</b> (<code>@hell-ui/angular/table-tanstack/virtual</code>):
+              <b>Virtual</b> (<code>hell-ui/table-tanstack/virtual</code>):
               <code>hellTanStackVirtualRows</code> (<code>boolean</code>, default <code>true</code>),
               <code>virtualEstimateRowSize</code> (<code>number</code>, default <code>44</code>),
               <code>virtualOverscan</code> (<code>number</code>, default <code>6</code>).

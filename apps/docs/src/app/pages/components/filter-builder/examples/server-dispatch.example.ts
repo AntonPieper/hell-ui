@@ -6,15 +6,15 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { hellSearchResource } from '@hell-ui/angular/core';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { hellSearchResource } from 'hell-ui/core';
 import {
   HELL_FILTER_BUILDER_IMPORTS,
   type HellFilter,
   type HellFilterBuilderEditorContext,
   type HellFilterFieldDescriptor,
-} from '@hell-ui/angular/features/filter-builder';
+} from 'hell-ui/features/filter-builder';
 
 import {
   FilterBuilderDateRangeEditor,

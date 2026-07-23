@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { FormField, disabled as disabledSchema, form, max } from '@angular/forms/signals';
 
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { type HellSize } from '@hell-ui/angular/core';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { type HellSize } from 'hell-ui/core';
 import { HellSlider, type HellSliderUi } from './slider';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 

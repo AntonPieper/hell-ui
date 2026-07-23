@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellSize } from '@hell-ui/angular/core';
-import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellSize } from 'hell-ui/core';
+import { HELL_DIALOG_IMPORTS } from 'hell-ui/dialog';
 
 @Component({
   selector: 'app-dialog-sizes-example',

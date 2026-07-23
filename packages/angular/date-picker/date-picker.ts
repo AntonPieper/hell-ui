@@ -29,9 +29,9 @@ import {
   injectDateRangePickerState,
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellIcon } from 'hell-ui/icon';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the date picker entry point. */

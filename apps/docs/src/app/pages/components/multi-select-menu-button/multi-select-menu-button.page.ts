@@ -27,8 +27,8 @@ import { PageHeader } from '../../../shared/page-header';
         title="Multi-select menu button"
         icon="faSolidListCheck"
         category="Recipe"
-        importPath="@hell-ui/angular/menu"
-        stylesPath="@hell-ui/angular/menu/styles.css"
+        importPath="hell-ui/menu"
+        stylesPath="hell-ui/menu/styles.css"
       >
         A button that opens a menu of checkable options and reflects the selected count on its
         trigger — built from the button and menu entry points, not a dedicated component.
@@ -43,7 +43,7 @@ import { PageHeader } from '../../../shared/page-header';
         rearrange.
       </p>
       <p>
-        The former <code>&#64;hell-ui/angular/multi-select-menu-button</code> entry point shipped
+        The former <code>hell-ui/multi-select-menu-button</code> entry point shipped
         this exact composition as a component; it was removed in favor of this recipe, which is the
         migration target.
       </p>

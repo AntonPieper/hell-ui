@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellDateInput } from 'hell-ui/date-input';
+import { HellTimeInput, type HellTimeValue } from 'hell-ui/time-input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-time-input-with-field-schedule-row-example',

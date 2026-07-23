@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { HellSwitch } from '@hell-ui/angular/switch';
+import { HellButton } from 'hell-ui/button';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
+import { HellSwitch } from 'hell-ui/switch';
 
 @Component({
   selector: 'app-popover-dismissal-example',

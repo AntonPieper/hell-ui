@@ -18,7 +18,7 @@ Hell exposes:
 - Composites: higher-level recipes that may own useful structure.
 - Features: heavier modules behind feature-specific entry points.
 
-The root package `@hell-ui/angular` export is limited to stable core only.
+The root package `hell-ui` export is limited to stable core only.
 UI surfaces live behind narrow import-path entry points such as `/button`,
 `/select`, `/app-shell`, `/features/code-editor`, and `/features/pdf-viewer`;
 kept features remain behind scoped entry points.
@@ -26,7 +26,7 @@ kept features remain behind scoped entry points.
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom rxjs tailwindcss
+pnpm add hell-ui @angular/forms ng-primitives @angular/cdk @floating-ui/dom rxjs tailwindcss
 # add @ng-icons/core and @ng-icons/font-awesome when you use icon-backed entries such as date-picker
 ```
 
@@ -36,11 +36,11 @@ Feature peers remain optional at runtime, but package peer metadata is package-w
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, or table scenarios. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, TanStack Virtual behind `@hell-ui/angular/table-tanstack/virtual`, and pdf.js behind `@hell-ui/angular/features/pdf-viewer`.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, or table scenarios. TanStack Table is isolated behind `hell-ui/table-tanstack`, TanStack Virtual behind `hell-ui/table-tanstack/virtual`, and pdf.js behind `hell-ui/features/pdf-viewer`.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
-| Core | `@hell-ui/angular`, `/core`, `/testing`; `core`, `testing`, plus the `root-core` consumer fixture | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `ng-primitives`, `rxjs` |
+| Core | `hell-ui`, `/core`, `/testing`; `core`, `testing`, plus the `root-core` consumer fixture | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed entries. |
 | Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/master-detail`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `master-detail`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/core` and `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
@@ -67,7 +67,7 @@ The API report gate is manifest-driven: every entry point is guarded unless it
 appears in `apiReportExclusions` in `tools/check-api-reports.mjs`. Report
 coverage includes root, `/core`, `/testing`, narrow primitive, composite, and
 table entry points, plus shared internal entry points whose declarations cross
-guarded boundaries. In particular, `@hell-ui/angular/internal/core` has its own
+guarded boundaries. In particular, `hell-ui/internal/core` has its own
 baseline because stable root/core exports and narrow runtime contracts reference
 its shapes. Guarding an Internal, Beta, or Experimental entry point detects
 shape drift; it does not promote that surface to Stable or make it a supported
@@ -83,29 +83,29 @@ guarded report remains locally visible.
 
 | Surface | Category | Browser/SSR notes |
 |---|---|---|
-| Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
+| Root/core (`hell-ui`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
 | Report-guarded narrow primitives | Stable | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
-| Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
-| TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
-| Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
-| PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only pdf.js runtime; apps own the worker source; keep behind a lazy route |
-| Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
-| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
-| Removed table aliases and row-as-control APIs | Removed before beta | Use `@hell-ui/angular/table` for primitives or `@hell-ui/angular/table-tanstack` for a TanStack-owned table shell |
+| Table primitives (`hell-ui/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
+| TanStack table shell (`hell-ui/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
+| Code editor (`hell-ui/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
+| PDF viewer (`hell-ui/features/pdf-viewer`) | Experimental | Browser-only pdf.js runtime; apps own the worker source; keep behind a lazy route |
+| Testing harnesses (`hell-ui/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
+| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `hell-ui/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
+| Removed table aliases and row-as-control APIs | Removed before beta | Use `hell-ui/table` for primitives or `hell-ui/table-tanstack` for a TanStack-owned table shell |
 
 ## Angular Imports
 
 Prefer the narrowest entry point that contains the API you use:
 
 ```ts
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
-import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
-import { HELL_RESIZABLE_IMPORTS } from '@hell-ui/angular/resizable';
-import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
-import { HellButtonHarness } from '@hell-ui/angular/testing';
+import { HellButton } from 'hell-ui/button';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
+import { HELL_APP_SHELL_IMPORTS } from 'hell-ui/app-shell';
+import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
+import { HELL_MASTER_DETAIL_IMPORTS } from 'hell-ui/master-detail';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import { HellButtonHarness } from 'hell-ui/testing';
 ```
 
 ## CSS Imports
@@ -114,28 +114,28 @@ Hell style entry points require Tailwind v4. Prefer fine-grained imports for pro
 
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/tokens.css";
-@import "@hell-ui/angular/button/styles.css";
+@import "hell-ui/tokens.css";
+@import "hell-ui/button/styles.css";
 ```
 
 Add only the extra entrypoint styles the app imports:
 
 ```css
-@import "@hell-ui/angular/tokens.css";
-@import "@hell-ui/angular/app-shell/styles.css";
-@import "@hell-ui/angular/resizable/styles.css";
-@import "@hell-ui/angular/master-detail/styles.css";
-@import "@hell-ui/angular/table/styles.css";
-@import "@hell-ui/angular/features/code-editor/styles.css";
+@import "hell-ui/tokens.css";
+@import "hell-ui/app-shell/styles.css";
+@import "hell-ui/resizable/styles.css";
+@import "hell-ui/master-detail/styles.css";
+@import "hell-ui/table/styles.css";
+@import "hell-ui/features/code-editor/styles.css";
 ```
 
 Optional Theme Adapter Stylesheets come after the entrypoint CSS they adapt:
 
 ```css
-@import "@hell-ui/angular/card/styles.css";
-@import "@hell-ui/angular/dialog/styles.css";
-@import "@hell-ui/angular/menu/styles.css";
-@import "@hell-ui/angular/themes/glass.css";
+@import "hell-ui/card/styles.css";
+@import "hell-ui/dialog/styles.css";
+@import "hell-ui/menu/styles.css";
+@import "hell-ui/themes/glass.css";
 ```
 
 Old category-level style paths are not public package contracts.

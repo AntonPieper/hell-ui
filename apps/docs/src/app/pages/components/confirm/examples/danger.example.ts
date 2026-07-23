@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { injectHellPrompt } from '@hell-ui/angular/confirm';
+import { HellButton } from 'hell-ui/button';
+import { injectHellPrompt } from 'hell-ui/confirm';
 
 @Component({
   selector: 'app-confirm-danger-example',

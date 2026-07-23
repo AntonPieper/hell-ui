@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellNativeSelect } from '@hell-ui/angular/select';
-import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HellNativeSelect } from 'hell-ui/select';
+import { HellPageLink, HellPagination } from 'hell-ui/pagination';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
 
 interface Invoice {
   readonly id: string;

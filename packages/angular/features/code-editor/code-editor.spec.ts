@@ -4,7 +4,7 @@ import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular
 import { FormField, disabled as disabledSchema, form } from '@angular/forms/signals';
 import type { Extension } from '@codemirror/state';
 
-import type { HellUiInput } from '@hell-ui/angular/core';
+import type { HellUiInput } from 'hell-ui/core';
 import {
   HELL_CODE_EDITOR_RUNTIME_FACTORY,
   HellCodeEditor,

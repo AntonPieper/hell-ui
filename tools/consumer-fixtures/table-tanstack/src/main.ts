@@ -9,7 +9,7 @@ import {
   HellTanStackGlobalFilter,
   HellTanStackPagination,
   HellTanStackTable,
-} from '@hell-ui/angular/table-tanstack';
+} from 'hell-ui/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,

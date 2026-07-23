@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellCodeEditor } from 'hell-ui/features/code-editor';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 type ConfigLanguage = 'TypeScript' | 'JavaScript' | 'JSX';
 

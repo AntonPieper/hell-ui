@@ -40,8 +40,8 @@ import tabsWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' wit
         title="Tabs"
         icon="faSolidFolderOpen"
         category="Styled primitive"
-        importPath="@hell-ui/angular/tabs"
-        stylesPath="@hell-ui/angular/tabs/styles.css"
+        importPath="hell-ui/tabs"
+        stylesPath="hell-ui/tabs/styles.css"
       >
         Split one region into peer panels behind a roving-focus tab list, with disabled tabs and
         automatic ARIA wiring handled for you.

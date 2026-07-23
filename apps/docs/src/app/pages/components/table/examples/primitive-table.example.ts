@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TABLE_UTILITIES_IMPORTS } from '@hell-ui/angular/table';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
 
 interface Person {
   readonly id: string;

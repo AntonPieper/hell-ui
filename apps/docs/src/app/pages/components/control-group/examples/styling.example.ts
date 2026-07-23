@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-control-group-styling-example',

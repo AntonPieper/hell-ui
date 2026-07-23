@@ -16,8 +16,8 @@ import {
 } from '@angular/forms/signals';
 import { vi } from 'vitest';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { provideHellLabels } from 'hell-ui/core';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 import {
   HELL_DEFAULT_NUMBER_INPUT_ADAPTER,

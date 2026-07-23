@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCloudArrowUp } from '@ng-icons/font-awesome/solid';
-import { HELL_EMPTY_STATE_IMPORTS } from '@hell-ui/angular/empty-state';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_EMPTY_STATE_IMPORTS } from 'hell-ui/empty-state';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-empty-state-custom-content-example',

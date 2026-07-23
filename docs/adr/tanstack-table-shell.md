@@ -22,10 +22,10 @@ TanStack Table remains the intended table engine. Its Angular adapter and featur
 
 Hell supports exactly two table paths:
 
-1. `@hell-ui/angular/table` — native-table primitives for semantics, accessibility, styling hooks, sort affordances, resize affordances, row action hooks, selection-control hooks, and primitive-level measurement. This path must not export a normalized table model, row/column state channels, column definition DSL, row draft controller, column visibility panel, grid mode, or first-party data-table renderer.
-2. `@hell-ui/angular/table-tanstack` — the only high-level table engine path. It provides a reusable Hell-styled TanStack table shell and TanStack-aware controls while requiring callers to create and pass a TanStack `Table<T>` instance. TanStack column definitions and table state remain the source of truth.
+1. `hell-ui/table` — native-table primitives for semantics, accessibility, styling hooks, sort affordances, resize affordances, row action hooks, selection-control hooks, and primitive-level measurement. This path must not export a normalized table model, row/column state channels, column definition DSL, row draft controller, column visibility panel, grid mode, or first-party data-table renderer.
+2. `hell-ui/table-tanstack` — the only high-level table engine path. It provides a reusable Hell-styled TanStack table shell and TanStack-aware controls while requiring callers to create and pass a TanStack `Table<T>` instance. TanStack column definitions and table state remain the source of truth.
 
-Remove `@hell-ui/angular/data-table`, `@hell-ui/angular/table-virtual`, and `@hell-ui/angular/table-cdk` outright before beta. Do not keep deprecated aliases. Do not document CDK table skinning, a Hell data-table component, or a separate virtual-table path.
+Remove `hell-ui/data-table`, `hell-ui/table-virtual`, and `hell-ui/table-cdk` outright before beta. Do not keep deprecated aliases. Do not document CDK table skinning, a Hell data-table component, or a separate virtual-table path.
 
 ## TanStack shell contract
 
@@ -53,7 +53,7 @@ The shell receives one external status value:
 The shell has no automatic hidden fallback UI for loading, error, or empty states. It renders state chrome only from local templates or an explicitly mounted status-view provider such as `provideHellTableStatusViews(...)`. Local templates override provider views. If a required state has no local template and no provider view, dev mode should fail clearly.
 
 Shell regions are repeatable markers such as `hellTableShellToolbar` and `hellTableShellFooter`; children render in template order. Avoid shorthand props such as `pagination`, `filtering`, or `toolbarFilters`. Reusable TanStack-aware controls such as `hell-tanstack-pagination` and filter controls are placed into shell regions and talk directly to the caller-owned TanStack table instance.
-Convenience import bundles may be exported, but they must preserve optional dependency isolation. A base bundle may include the shell, region/template directives, TanStack-aware controls, and FlexRender integration, but it must not include virtual directives if doing so imports `@tanstack/virtual-core`. Virtual directives may live in the nested `@hell-ui/angular/table-tanstack/virtual` entrypoint so the base shell stays free of TanStack Virtual.
+Convenience import bundles may be exported, but they must preserve optional dependency isolation. A base bundle may include the shell, region/template directives, TanStack-aware controls, and FlexRender integration, but it must not include virtual directives if doing so imports `@tanstack/virtual-core`. Virtual directives may live in the nested `hell-ui/table-tanstack/virtual` entrypoint so the base shell stays free of TanStack Virtual.
 
 Sticky headers are shell-owned presentation and may be enabled with shell chrome inputs. Column pinning comes entirely from TanStack column pinning state; the shell reflects it with stable Hell classes, data attributes, and namespaced CSS variables such as pinned start/end offsets. CSS owns the actual sticky positioning rules. The shell must not expose parallel pinning inputs or write raw inline fixed `left`/`right` styles.
 

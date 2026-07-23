@@ -8,7 +8,7 @@ work.
 - Workspace shape: `packages/angular` is the Angular library and `apps/docs`
   is the docs app. The root package orchestrates through pnpm filters;
   app/package workspaces own their local `angular.json` files.
-- Root `@hell-ui/angular` stays light and core-only. Primitives, composites,
+- Root `hell-ui` stays light and core-only. Primitives, composites,
   table primitives, TanStack shell, optional features, and PDF use narrow
   entrypoints.
 - Public entrypoints are entrypoint-sidecar-driven. Edit the entrypoint's local
@@ -41,9 +41,9 @@ work.
 
 ## Heavy Feature Boundary
 
-- CodeMirror stays behind `@hell-ui/angular/features/code-editor`.
-- TanStack Table stays behind `@hell-ui/angular/table-tanstack`.
-- TanStack Virtual stays behind `@hell-ui/angular/table-tanstack/virtual`.
-- pdf.js stays behind `@hell-ui/angular/features/pdf-viewer`.
+- CodeMirror stays behind `hell-ui/features/code-editor`.
+- TanStack Table stays behind `hell-ui/table-tanstack`.
+- TanStack Virtual stays behind `hell-ui/table-tanstack/virtual`.
+- pdf.js stays behind `hell-ui/features/pdf-viewer`.
 - Consumer docs and README claims should match the consumer fixtures and
   pack-audit evidence, not workspace intuition.

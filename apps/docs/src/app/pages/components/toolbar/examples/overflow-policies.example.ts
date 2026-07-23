@@ -9,8 +9,8 @@ import {
   faSolidPenToSquare,
   faSolidPlus,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
 
 @Component({
   selector: 'app-toolbar-overflow-policies-example',

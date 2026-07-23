@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellInput } from '@hell-ui/angular/input';
+import { HellInput } from 'hell-ui/input';
 import { HELL_FIELD_IMPORTS } from './field';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 

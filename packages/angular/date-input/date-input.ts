@@ -26,15 +26,15 @@ import {
   hellTypedValue,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
-} from '@hell-ui/angular/core';
-import { HellInput } from '@hell-ui/angular/input';
+} from 'hell-ui/core';
+import { HellInput } from 'hell-ui/input';
 import {
   HellTypedValueInputState,
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
   type HellTypedValueCommitResult,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 
 /**
  * Strategy for parsing, formatting, normalizing, and bounds-checking dates.

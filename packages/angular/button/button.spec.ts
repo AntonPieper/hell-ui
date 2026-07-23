@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import type { HellButtonVariant, HellSize } from '@hell-ui/angular/core';
+import type { HellButtonVariant, HellSize } from 'hell-ui/core';
 
 import { HellButton } from './button';
 import { expectUiRouting, sortClasses } from '../spec-helpers';

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidXmark } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_SEARCH_IMPORTS, HellInput } from '@hell-ui/angular/input';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_SEARCH_IMPORTS, HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-search-empty-state-example',

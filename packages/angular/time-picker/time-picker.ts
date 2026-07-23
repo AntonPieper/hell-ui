@@ -15,13 +15,13 @@ import {
   type HellTimeValue,
   type HellUi,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import {
   hellTimePickerMaxValue,
   hellTimePickerNextValue,
 } from './time-picker-navigation';
 
-export type { HellTimeValue } from '@hell-ui/angular/core';
+export type { HellTimeValue } from 'hell-ui/core';
 
 /** Built-in accessibility labels owned by the time picker entry point. */
 export interface HellTimePickerLabels {

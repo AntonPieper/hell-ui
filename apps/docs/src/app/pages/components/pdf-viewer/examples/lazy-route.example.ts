@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet, type Routes } from '@angular/router';
-import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
+import { HellPdfViewer } from 'hell-ui/features/pdf-viewer';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
 @Component({
@@ -17,7 +17,7 @@ import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer
 })
 export class PdfViewerLazyRouteExample {}
 
-// A feature route that pulls in @hell-ui/angular/features/pdf-viewer and pdfjs-dist only when the
+// A feature route that pulls in hell-ui/features/pdf-viewer and pdfjs-dist only when the
 // user navigates to it. Put a route like this in your feature router so the
 // heavy PDF stack never lands in your app's initial bundle.
 export const PDF_FEATURE_ROUTES: Routes = [

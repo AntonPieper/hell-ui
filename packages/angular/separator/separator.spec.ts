@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { hellTwMerge } from '@hell-ui/angular/core';
+import { hellTwMerge } from 'hell-ui/core';
 
 import { HELL_SEPARATOR_RECIPE, HellSeparator } from './separator';
 import { sortClasses } from '../spec-helpers';

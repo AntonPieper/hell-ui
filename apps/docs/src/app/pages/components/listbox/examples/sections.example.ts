@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_LISTBOX_IMPORTS } from '@hell-ui/angular/listbox';
+import { HELL_LISTBOX_IMPORTS } from 'hell-ui/listbox';
 
 @Component({
   selector: 'app-listbox-sections-example',

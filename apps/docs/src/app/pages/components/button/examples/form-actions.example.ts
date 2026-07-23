@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellInput } from '@hell-ui/angular/input';
+import { HellButton } from 'hell-ui/button';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-button-form-actions-example',

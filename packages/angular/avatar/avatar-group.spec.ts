@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HellAvatar } from '@hell-ui/angular/avatar';
+import { HellAvatar } from 'hell-ui/avatar';
 
 import { HELL_AVATAR_GROUP_IMPORTS } from './avatar-group';
 import { expectUiRouting, sortClasses } from '../spec-helpers';

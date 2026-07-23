@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { HellControlGroup } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
+import { HellControlGroup } from 'hell-ui/control-group';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HELL_NUMBER_INPUT_IMPORTS } from 'hell-ui/number-input';
 
 @Component({
   selector: 'app-number-input-reactive-forms-example',

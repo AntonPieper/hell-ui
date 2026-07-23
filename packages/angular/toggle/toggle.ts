@@ -23,8 +23,8 @@ import {
 } from 'ng-primitives/toggle-group';
 import { ngpRovingFocusGroup, provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
 import { type NgpOrientation } from 'ng-primitives/common';
-import { containsNode } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, HellSize, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { containsNode } from 'hell-ui/internal/core';
+import { hellPartStyler, HellSize, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 /**
  * Canonical value of a `[hellToggleGroup]` — mode-dependent: a plain string or

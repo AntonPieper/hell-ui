@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import type { HellUiInput } from '@hell-ui/angular/core';
+import type { HellUiInput } from 'hell-ui/core';
 import { HellAudioPlayer, type HellAudioPlayerPart, type HellAudioPlayerUi } from './audio-player';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   type HellAudioTranscriptRuntime,
-} from '@hell-ui/angular/internal/audio-transcript';
+} from 'hell-ui/internal/audio-transcript';
 import { sortClasses } from '../spec-helpers';
 
 class FakeTranscriptRuntime implements HellAudioTranscriptRuntime {

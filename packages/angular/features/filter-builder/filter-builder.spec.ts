@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 
 import {
   HELL_FILTER_BUILDER_IMPORTS,

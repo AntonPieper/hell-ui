@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellSlider } from '@hell-ui/angular/slider';
+import { HellSlider } from 'hell-ui/slider';
 
 @Component({
   selector: 'app-slider-sizes-example',

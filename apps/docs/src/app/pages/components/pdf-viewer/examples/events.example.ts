@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
-import { HellButton } from '@hell-ui/angular/button';
+import { HellPdfViewer } from 'hell-ui/features/pdf-viewer';
+import { HellButton } from 'hell-ui/button';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
 @Component({

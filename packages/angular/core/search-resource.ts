@@ -8,7 +8,7 @@ import {
   type Signal,
   type WritableSignal,
 } from '@angular/core';
-import { HellAsyncResourceLifecycle } from '@hell-ui/angular/internal/core';
+import { HellAsyncResourceLifecycle } from 'hell-ui/internal/core';
 
 import {
   HellSearchService,

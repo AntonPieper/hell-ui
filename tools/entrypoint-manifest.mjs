@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const packageName = '@hell-ui/angular';
+export const packageName = 'hell-ui';
 export const libraryRoot = 'packages/angular';
 export const sourcePackageCondition = '@heinrich/source';
 export const entrypointMetadataFileName = 'hell-entrypoint.json';

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HellIcon } from 'hell-ui/icon';
 import {
   HELL_TABLE_UTILITIES_IMPORTS,
   type HellTableResizeHandleUi,
-} from '@hell-ui/angular/table';
+} from 'hell-ui/table';
 
 interface Release {
   readonly id: string;

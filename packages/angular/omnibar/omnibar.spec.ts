@@ -1,10 +1,10 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HellChip, HellChipRemove } from '@hell-ui/angular/chip';
-import { hellSearchResource, provideHellLabels, type HellUiInput } from '@hell-ui/angular/core';
-import { HellGlobalKeydownService } from '@hell-ui/angular/internal/hotkeys';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
+import { HellChip, HellChipRemove } from 'hell-ui/chip';
+import { hellSearchResource, provideHellLabels, type HellUiInput } from 'hell-ui/core';
+import { HellGlobalKeydownService } from 'hell-ui/internal/hotkeys';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
 
 import {
   HELL_OMNIBAR_IMPORTS,

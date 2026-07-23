@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidPlus } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from '@hell-ui/angular/page-header';
-import { HellChip } from '@hell-ui/angular/chip';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from 'hell-ui/page-header';
+import { HellChip } from 'hell-ui/chip';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
 
 @Component({
   selector: 'app-page-header-styling-example',

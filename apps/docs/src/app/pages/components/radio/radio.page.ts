@@ -47,8 +47,8 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
         title="Radio"
         icon="faSolidCircleDot"
         category="Styled primitive"
-        importPath="@hell-ui/angular/radio"
-        stylesPath="@hell-ui/angular/radio/styles.css"
+        importPath="hell-ui/radio"
+        stylesPath="hell-ui/radio/styles.css"
       >
         Exactly one choice from a visible set of options, as roving-focus buttons or native inputs.
       </hd-page-header>

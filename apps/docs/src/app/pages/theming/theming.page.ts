@@ -65,7 +65,7 @@ import themeAdapterCodeRaw from './examples/theme-adapter.example.css?raw' with 
       <h2>Theme adapters</h2>
       <p>
         Tokens define theme-wide primitives only. Skin-specific component decisions live in optional
-        adapter stylesheets such as <code>@hell-ui/angular/themes/glass.css</code>. Import an
+        adapter stylesheets such as <code>hell-ui/themes/glass.css</code>. Import an
         adapter after the entrypoint CSS it adapts; components not covered by that adapter keep their
         default recipes.
       </p>

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_BREADCRUMBS_IMPORTS } from '@hell-ui/angular/breadcrumbs';
+import { HELL_BREADCRUMBS_IMPORTS } from 'hell-ui/breadcrumbs';
 
 @Component({
   selector: 'app-breadcrumbs-basic-example',

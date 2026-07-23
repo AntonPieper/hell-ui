@@ -5,12 +5,12 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellDateInput } from '@hell-ui/angular/date-input';
+import { HellButton } from 'hell-ui/button';
+import { HellDateInput } from 'hell-ui/date-input';
 import type {
   HellFilter,
   HellFilterBuilderEditorContext,
-} from '@hell-ui/angular/features/filter-builder';
+} from 'hell-ui/features/filter-builder';
 
 interface DateRange {
   readonly from: string | null;

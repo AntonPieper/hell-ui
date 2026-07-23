@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { type FormCheckboxControl } from '@angular/forms/signals';
 import { ngpCheckbox } from 'ng-primitives/checkbox';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 
 /** Public parts of the HellCheckbox module, styleable through its Part Style Map. */
 export type HellCheckboxPart = 'root' | 'indicator';

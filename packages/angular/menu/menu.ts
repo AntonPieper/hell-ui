@@ -23,14 +23,14 @@ import {
   injectMenuTriggerState,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
-import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
+import { hellRegisterFloatingHost } from 'hell-ui/internal/core';
 import {
   hellPartStyler,
   type HellRecipe,
   type HellUiInput,
-} from '@hell-ui/angular/core';
-import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from '@hell-ui/angular/internal/floating';
-import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+} from 'hell-ui/core';
+import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from 'hell-ui/internal/floating';
+import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 
 // Shares the elevated surface and pop-in but keeps its own `--hell-z-menu`
 // stacking variable local so menus can promote above popover-based overlays.

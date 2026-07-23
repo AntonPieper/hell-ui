@@ -1,34 +1,34 @@
 import { Component, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
+import { HELL_ALERT_IMPORTS } from 'hell-ui/alert';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
 import {
   HELL_DEFAULT_DATE_INPUT_ADAPTER,
   HellDateInput,
   provideHellDateInputAdapter,
-} from '@hell-ui/angular/date-input';
+} from 'hell-ui/date-input';
 import {
   HellFilePicker,
   type HellFileRejection,
   type HellFileSelection,
   type HellFileValidator,
-} from '@hell-ui/angular/file-picker';
-import { HellInput } from '@hell-ui/angular/input';
+} from 'hell-ui/file-picker';
+import { HellInput } from 'hell-ui/input';
 import {
   HELL_DEFAULT_NUMBER_INPUT_ADAPTER,
   HELL_NUMBER_INPUT_IMPORTS,
   provideHellNumberInputAdapter,
   type HellNumberInputAdapter,
-} from '@hell-ui/angular/number-input';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
+} from 'hell-ui/number-input';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 import {
   HELL_DEFAULT_TIME_INPUT_ADAPTER,
   HellTimeInput,
   provideHellTimeInputAdapter,
   type HellTimeInputAdapter,
   type HellTimeValue,
-} from '@hell-ui/angular/time-input';
+} from 'hell-ui/time-input';
 
 const consumerTimeAdapter: HellTimeInputAdapter = {
   ...HELL_DEFAULT_TIME_INPUT_ADAPTER,

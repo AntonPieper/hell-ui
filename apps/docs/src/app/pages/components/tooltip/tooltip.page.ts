@@ -47,8 +47,8 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         title="Tooltip"
         icon="faSolidCircleQuestion"
         category="Styled primitive"
-        importPath="@hell-ui/angular/tooltip"
-        stylesPath="@hell-ui/angular/tooltip/styles.css"
+        importPath="hell-ui/tooltip"
+        stylesPath="hell-ui/tooltip/styles.css"
       >
         A short, hover- and focus-triggered hint anchored to its trigger — for names and
         shortcuts, never for content the user actually needs.
@@ -137,9 +137,9 @@ import tooltipWithToolbarExampleCodeRaw from './examples/with-toolbar.example.ts
         When a hint outgrows plain text, bind <code>[hellTooltip]</code> to an
         <code>ng-template</code> containing your own <code>hellTooltipSurface</code> — the one
         case that earns a template. A common toolbar shape: icon-only <code>hellButton</code>s
-        (narrow entry point <code>@hell-ui/angular/button</code>) with <code>hell-icon</code>s
-        (<code>@hell-ui/angular/icon</code>) for glyphs, and <code>hellKbd</code>
-        (<code>@hell-ui/angular/chip</code>) inside each surface to spell out the shortcut next to
+        (narrow entry point <code>hell-ui/button</code>) with <code>hell-icon</code>s
+        (<code>hell-ui/icon</code>) for glyphs, and <code>hellKbd</code>
+        (<code>hell-ui/chip</code>) inside each surface to spell out the shortcut next to
         the action name, while <code>provideHellTooltipDefaults</code> gives the whole toolbar one
         eager show delay. Icon-only buttons still need their own <code>aria-label</code> — the
         tooltip is a supplementary hint on top, not the button's accessible name.

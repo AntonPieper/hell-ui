@@ -1,7 +1,7 @@
 import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellFloatingElement } from '@hell-ui/angular/core';
+import { HellFloatingElement } from 'hell-ui/core';
 
 import { containsNode } from './dom';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from './floating-scope';

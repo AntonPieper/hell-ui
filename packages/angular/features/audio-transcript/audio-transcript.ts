@@ -2,7 +2,7 @@ import { type Provider, signal } from '@angular/core';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   type HellAudioTranscriptRuntime,
-} from '@hell-ui/angular/internal/audio-transcript';
+} from 'hell-ui/internal/audio-transcript';
 
 interface SpeechRecognitionAlternativeLike {
   readonly transcript: string;
@@ -67,7 +67,7 @@ function getSpeechRecognition(): SpeechRecognitionCtor | null {
 
 /**
  * @experimental Optional provider that enables the browser speech transcript runtime for
- * `HellAudioPlayer`. Import it from `@hell-ui/angular/features/audio-transcript` only in
+ * `HellAudioPlayer`. Import it from `hell-ui/features/audio-transcript` only in
  * apps/routes that deliberately opt into best-effort transcript capture.
  */
 export function provideHellAudioTranscript(): Provider[] {

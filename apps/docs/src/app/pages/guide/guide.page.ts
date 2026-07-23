@@ -4,15 +4,15 @@ import { RouterLink } from '@angular/router';
 import { CodeBlock } from '../../shared/code-block';
 
 const ENTRYPOINT_IMPORTS_CODE = `// TypeScript: one narrow entry point per surface you use.
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HellButton } from 'hell-ui/button';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 // CSS: shared tokens once, then one stylesheet per entry point you render.
 // styles.css
 // @import 'tailwindcss';
-// @import '@hell-ui/angular/tokens.css';
-// @import '@hell-ui/angular/button/styles.css';
-// @import '@hell-ui/angular/select/styles.css';
+// @import 'hell-ui/tokens.css';
+// @import 'hell-ui/button/styles.css';
+// @import 'hell-ui/select/styles.css';
 `;
 
 const PART_STYLE_MAP_CODE = `<!-- String shorthand refines the component's default Public Part. -->
@@ -36,7 +36,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
 }
 
 /* Optional curated skins ship as Theme Adapter Stylesheets. */
-@import '@hell-ui/angular/themes/glass.css';`;
+@import 'hell-ui/themes/glass.css';`;
 
 @Component({
   selector: 'hd-guide',
@@ -72,7 +72,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       <p>
         Each entry point declares a Module Category that describes its public contract. The
         category never appears in import paths — imports stay import-path-first, such as
-        <code>@hell-ui/angular/button</code> — but it tells you what to expect:
+        <code>hell-ui/button</code> — but it tells you what to expect:
       </p>
       <ul>
         <li>
@@ -93,8 +93,8 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
         </li>
         <li>
           <strong>Tables</strong> come in exactly two supported paths:
-          <code>@hell-ui/angular/table</code> for semantic native-table primitives, and
-          <code>@hell-ui/angular/table-tanstack</code> for a hell-styled shell around a
+          <code>hell-ui/table</code> for semantic native-table primitives, and
+          <code>hell-ui/table-tanstack</code> for a hell-styled shell around a
           caller-owned TanStack Table. hell never owns row models, sorting, or selection state.
         </li>
         <li>
@@ -106,10 +106,10 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
 
       <h2>Package Entry Points</h2>
       <p>
-        The root <code>@hell-ui/angular</code> export is deliberately light: stable core only
+        The root <code>hell-ui</code> export is deliberately light: stable core only
         (Part Style Map types, labels, search core). Everything visual lives behind a narrow entry
         point whose import path matches its source directory. CSS follows the same rule: a shared
-        token substrate at <code>@hell-ui/angular/tokens.css</code>, one
+        token substrate at <code>hell-ui/tokens.css</code>, one
         <code>&lt;entrypoint&gt;/styles.css</code> per surface, and no category aggregate paths.
       </p>
       <hd-code-block [code]="entrypointImportsCode" />
@@ -160,7 +160,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
         <code>--color-hell-surface-elevated</code>. Components never expose their own public color
         variable families, so a theme is a token override, not a component-by-component hunt.
         Curated skins ship as optional Theme Adapter Stylesheets under
-        <code>@hell-ui/angular/themes/*.css</code>, imported after the entrypoint CSS they adapt.
+        <code>hell-ui/themes/*.css</code>, imported after the entrypoint CSS they adapt.
       </p>
       <hd-code-block [code]="themeCode" />
       <p>Beyond visuals, the Customization Surface is deliberately explicit:</p>

@@ -2,9 +2,9 @@ import { NgTemplateOutlet } from '@angular/common';
 // eslint-disable-next-line no-restricted-imports -- A private HostBinding keeps the root Part Styler out of the public component declaration.
 import { HostBinding } from '@angular/core';
 import { ChangeDetectionStrategy, Component, DestroyRef, Directive, ElementRef, InjectionToken, NO_ERRORS_SCHEMA, NgZone, Renderer2, TemplateRef, afterNextRender, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, forwardRef, inject, input, output, signal, viewChild, type Signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { hellCreateLabels, type HellLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { hellCreateLabels, type HellLabels, hellPartStyler, type HellButtonVariant, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from 'hell-ui/core';
 import { NgpRovingFocusItem } from 'ng-primitives/roving-focus';
 import { NgpToolbar } from 'ng-primitives/toolbar';
 import {

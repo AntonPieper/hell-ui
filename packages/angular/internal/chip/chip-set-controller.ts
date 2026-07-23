@@ -1,5 +1,5 @@
 import { DestroyRef, ElementRef, Injectable, computed, inject, signal } from '@angular/core';
-import { type HellOrientation } from '@hell-ui/angular/core';
+import { type HellOrientation } from 'hell-ui/core';
 
 /** One chip's private registration with its enclosing behavior controller. */
 interface HellChipRegistration {

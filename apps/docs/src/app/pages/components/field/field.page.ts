@@ -40,8 +40,8 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
         title="Field"
         icon="faSolidRectangleList"
         category="Styled primitive"
-        importPath="@hell-ui/angular/field"
-        stylesPath="@hell-ui/angular/field/styles.css"
+        importPath="hell-ui/field"
+        stylesPath="hell-ui/field/styles.css"
       >
         Wires a label, description, and error message to one control with correct ids and
         <code>aria-describedby</code> — no manual wiring.
@@ -95,7 +95,7 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
       <h2>With a form section</h2>
       <p>
         A small "invite a teammate" form: a <code>hellCard</code> (narrow entry point
-        <code>@hell-ui/angular/card</code>) holding a text input, a native select, and a
+        <code>hell-ui/card</code>) holding a text input, a native select, and a
         horizontal checkbox field — each wrapped in its own <code>hellField</code>. This is the
         shape most business-app forms take: stack vertical fields for the primary inputs, then
         drop to a horizontal field for a trailing opt-in checkbox.

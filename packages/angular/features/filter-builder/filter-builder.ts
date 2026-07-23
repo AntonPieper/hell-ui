@@ -8,7 +8,7 @@ import {
 import {
   type HellUi,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 
 import {
   HellFilterBuilderEditor,

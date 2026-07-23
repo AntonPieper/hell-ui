@@ -1,8 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import type { HellPickValue } from '@hell-ui/angular/core';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import type { HellPickValue } from 'hell-ui/core';
 
 /**
  * Combobox Pick Value Control Value Authority boundary coverage (#287): the

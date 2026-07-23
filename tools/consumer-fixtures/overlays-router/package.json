@@ -14,7 +14,7 @@
     "@angular/platform-browser": "*",
     "@angular/router": "*",
     "@floating-ui/dom": "*",
-    "@hell-ui/angular": "*",
+    "hell-ui": "*",
     "ng-primitives": "*",
     "rxjs": "*",
     "tailwindcss": "*",

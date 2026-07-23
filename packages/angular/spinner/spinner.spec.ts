@@ -1,4 +1,4 @@
-import { provideHellLabels } from '@hell-ui/angular/core';
+import { provideHellLabels } from 'hell-ui/core';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 

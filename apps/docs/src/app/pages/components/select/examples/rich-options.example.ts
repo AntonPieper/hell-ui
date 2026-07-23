@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidCircleHalfStroke, faSolidCircleXmark } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 interface EnvStatus {
   readonly id: string;

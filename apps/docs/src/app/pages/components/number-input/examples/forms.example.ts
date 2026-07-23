@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormField, form, max, min, required } from '@angular/forms/signals';
 
-import { HellControlGroup } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HELL_NUMBER_INPUT_IMPORTS } from '@hell-ui/angular/number-input';
+import { HellControlGroup } from 'hell-ui/control-group';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HELL_NUMBER_INPUT_IMPORTS } from 'hell-ui/number-input';
 
 @Component({
   selector: 'app-number-input-forms-example',

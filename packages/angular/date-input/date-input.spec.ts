@@ -15,7 +15,7 @@ import {
   minDate,
 } from '@angular/forms/signals';
 
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 import {
   HELL_DEFAULT_DATE_INPUT_ADAPTER,
   HellDateInput,

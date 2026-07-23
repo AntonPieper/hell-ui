@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { hellSearchResource, type HellPickValue } from '@hell-ui/angular/core';
+import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { hellSearchResource, type HellPickValue } from 'hell-ui/core';
 
 interface IssueLabel {
   readonly id: string;

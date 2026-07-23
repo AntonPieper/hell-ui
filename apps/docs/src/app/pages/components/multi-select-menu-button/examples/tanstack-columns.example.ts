@@ -5,9 +5,9 @@ import {
   signal,
   type WritableSignal,
 } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_MENU_IMPORTS } from '@hell-ui/angular/menu';
-import { HellTableShellToolbar, HellTanStackTable } from '@hell-ui/angular/table-tanstack';
+import { HellButton } from 'hell-ui/button';
+import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
+import { HellTableShellToolbar, HellTanStackTable } from 'hell-ui/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,

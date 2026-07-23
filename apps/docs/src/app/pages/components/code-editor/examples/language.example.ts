@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+import { HellButton } from 'hell-ui/button';
+import { HellCodeEditor } from 'hell-ui/features/code-editor';
 
 type EditorMode = 'javascript' | 'typescript' | 'tsx';
 

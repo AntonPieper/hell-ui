@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormField, form, max } from '@angular/forms/signals';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellSlider } from '@hell-ui/angular/slider';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellSlider } from 'hell-ui/slider';
 
 @Component({
   selector: 'app-slider-forms-example',

@@ -1,17 +1,17 @@
 import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
-import { HELL_APP_SHELL_IMPORTS } from '@hell-ui/angular/app-shell';
-import { hellSearchResource, type HellSearchField } from '@hell-ui/angular/core';
-import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
-import { HELL_OMNIBAR_IMPORTS, type HellOmnibarUi } from '@hell-ui/angular/omnibar';
-import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from '@hell-ui/angular/page-header';
+import { HELL_APP_SHELL_IMPORTS } from 'hell-ui/app-shell';
+import { hellSearchResource, type HellSearchField } from 'hell-ui/core';
+import { HELL_DIALOG_IMPORTS } from 'hell-ui/dialog';
+import { HELL_OMNIBAR_IMPORTS, type HellOmnibarUi } from 'hell-ui/omnibar';
+import { HELL_PAGE_HEADER_IMPORTS, type HellPageHeaderUi } from 'hell-ui/page-header';
 import {
   HELL_TOAST_IMPORTS,
   HellToastService,
   type HellToastRef,
   type HellToastUpdate,
   type HellToasterUi,
-} from '@hell-ui/angular/toast';
-import { HELL_TOOLBAR_IMPORTS, type HellOverflowToolbarUi } from '@hell-ui/angular/toolbar';
+} from 'hell-ui/toast';
+import { HELL_TOOLBAR_IMPORTS, type HellOverflowToolbarUi } from 'hell-ui/toolbar';
 
 interface SearchItem {
   readonly label: string;

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSeparator } from '@hell-ui/angular/separator';
+import { HellSeparator } from 'hell-ui/separator';
 
 @Component({
   selector: 'app-separator-orientation-example',

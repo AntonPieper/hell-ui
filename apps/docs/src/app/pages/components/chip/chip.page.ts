@@ -49,8 +49,8 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         title="Chip"
         icon="faSolidTags"
         category="Mixed entry point"
-        importPath="@hell-ui/angular/chip"
-        stylesPath="@hell-ui/angular/chip/styles.css"
+        importPath="hell-ui/chip"
+        stylesPath="hell-ui/chip/styles.css"
       >
         One pill module: token-shaped chips — static or interactive, with an optional remove
         button, roving-focus chip sets, and an optional editable Chip Input — plus compact numeric
@@ -58,7 +58,7 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
       </hd-page-header>
 
       <p>
-        <code>@hell-ui/angular/chip</code> is the home for every pill-shaped token.
+        <code>hell-ui/chip</code> is the home for every pill-shaped token.
         <code>hellChip</code> is the chip host (a <code>&lt;span&gt;</code>,
         <code>&lt;button&gt;</code>, or <code>&lt;a&gt;</code>): on a plain <code>&lt;span&gt;</code>
         it is a static, non-interactive label; add a sibling <code>hellChipRemove</code> button or
@@ -75,12 +75,12 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         drift apart visually.
       </p>
       <p class="hd-note">
-        <strong>Migrating from Tag.</strong> The former <code>@hell-ui/angular/tag</code> entry point
+        <strong>Migrating from Tag.</strong> The former <code>hell-ui/tag</code> entry point
         has been folded into this one. Replace a <code>hellTag</code> with a static
         <code>&lt;span hellChip&gt;</code> — the six <code>variant</code> values
         (<code>default</code>, <code>primary</code>, <code>info</code>, <code>success</code>,
         <code>warning</code>, <code>danger</code>) are unchanged — and import
-        <code>HellBadge</code> and <code>HellKbd</code> from <code>@hell-ui/angular/chip</code>
+        <code>HellBadge</code> and <code>HellKbd</code> from <code>hell-ui/chip</code>
         instead of the old tag path.
       </p>
 

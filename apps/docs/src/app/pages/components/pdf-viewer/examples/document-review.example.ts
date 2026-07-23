@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidFilePdf } from '@ng-icons/font-awesome/solid';
-import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MASTER_DETAIL_IMPORTS } from '@hell-ui/angular/master-detail';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HellPdfViewer } from 'hell-ui/features/pdf-viewer';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_MASTER_DETAIL_IMPORTS } from 'hell-ui/master-detail';
+import { HellChip } from 'hell-ui/chip';
 import { PDF_WORKER_URL, SAMPLE_PDF_URL, usePdfViewerStyles } from './pdf-viewer-styles';
 
 interface ReviewDoc {

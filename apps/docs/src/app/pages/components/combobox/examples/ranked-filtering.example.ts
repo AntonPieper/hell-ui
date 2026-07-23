@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
 import {
   hellRankLocalSearch,
   hellSearchResource,
   provideHellSearchRanker,
   type HellSearchRanker,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 
 interface Station {
   readonly id: string;

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, TemplateRef, inject, signal, viewChild } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
-import { HellToastService, type HellToastRef } from '@hell-ui/angular/toast';
+import { HellButton } from 'hell-ui/button';
+import { HellProgress, HellProgressBar } from 'hell-ui/progress';
+import { HellToastService, type HellToastRef } from 'hell-ui/toast';
 
 @Component({
   selector: 'app-toast-with-upload-progress-example',

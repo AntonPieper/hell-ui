@@ -1,6 +1,6 @@
 # Consumer fixtures
 
-Checked-in consumer projects that prove `@hell-ui/angular` works when installed
+Checked-in consumer projects that prove `hell-ui` works when installed
 from the packed npm tarball. Each fixture sits on one real dependency and
 packaging boundary (a strict-peer install set plus the entry points it
 unlocks), not on one component: the fixture count tracks packaging boundaries
@@ -28,7 +28,7 @@ app. Two rules keep fixtures honest:
 - Dependency versions are always `"*"`. The runner pins each dependency to the
   repo's tested version (installed version, else `pnpm-workspace.yaml` catalog,
   else root `package.json`), so fixtures cannot drift onto untested versions.
-- `@hell-ui/angular` is declared like any other dependency and is replaced at
+- `hell-ui` is declared like any other dependency and is replaced at
   run time with the packed tarball. Fixtures never install workspace links, and
   they never commit lockfiles.
 
@@ -113,7 +113,7 @@ audited release tarball.
 
 ## Current fixtures
 
-- `root-core` — foundation without CSS: the root entry (`@hell-ui/angular`)
+- `root-core` — foundation without CSS: the root entry (`hell-ui`)
   and `/core` plus behavior-only Part Style Map controls (Button `ui`, Chip
   Input bridge) compile and boot with only the package-wide light peers
   (`core` peer group), no CSS or Tailwind.

@@ -1,7 +1,7 @@
 import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { HellButton } from '@hell-ui/angular/button';
-import { provideHellLabels } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { provideHellLabels } from 'hell-ui/core';
 
 import {
   HELL_FLOATING_SCOPE,

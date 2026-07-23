@@ -13,9 +13,9 @@ export {
   type HellTypedValueValidParse,
   type HellTypedValueInvalidParse,
   type HellTypedValueParseResult,
-} from '@hell-ui/angular/internal/core';
+} from 'hell-ui/internal/core';
 
-import type { HellTypedValueParseResult } from '@hell-ui/angular/internal/core';
+import type { HellTypedValueParseResult } from 'hell-ui/internal/core';
 
 /**
  * Strategy shared by text-backed Typed Value Inputs (date, time, number) for

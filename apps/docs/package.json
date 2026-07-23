@@ -7,7 +7,7 @@
     "build": "ng build hell-docs"
   },
   "dependencies": {
-    "@hell-ui/angular": "workspace:*",
+    "hell-ui": "workspace:*",
     "@angular/cdk": "catalog:",
     "@angular/common": "catalog:",
     "@angular/compiler": "catalog:",

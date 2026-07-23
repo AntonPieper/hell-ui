@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABS_IMPORTS } from '@hell-ui/angular/tabs';
+import { HELL_TABS_IMPORTS } from 'hell-ui/tabs';
 
 @Component({
   selector: 'app-tabs-disabled-example',

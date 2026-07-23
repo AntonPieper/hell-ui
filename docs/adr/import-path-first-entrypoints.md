@@ -20,11 +20,11 @@ category CSS paths remain prohibited.
 
 ## Context
 
-At the time of the original decision, `@hell-ui/angular` had many secondary
+At the time of the original decision, `hell-ui` had many secondary
 entrypoints. The previous source layout mixed real package entrypoint
 directories with implementation directories under category folders below the
 old library source root. That made files harder to find: a consumer import such
-as `@hell-ui/angular/button` did not point at the source directory a maintainer
+as `hell-ui/button` did not point at the source directory a maintainer
 should open first.
 
 Angular Package Format still requires real secondary-entrypoint package

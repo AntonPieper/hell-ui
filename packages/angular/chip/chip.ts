@@ -21,12 +21,12 @@ import {
   HellSize,
   type HellRecipe,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import {
   HellChipSetController,
   hellChipPresentationRecipe,
   hellChipRemovePresentationRecipe,
-} from '@hell-ui/angular/internal/chip';
+} from 'hell-ui/internal/chip';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the chip entry point. */

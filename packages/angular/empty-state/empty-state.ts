@@ -11,7 +11,7 @@ import {
   type HellRecipe,
   type HellUi,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 
 /** Built-in dependency-free glyphs the empty state can render in its `media` part. */
 export type HellEmptyStateGlyph = 'noData' | 'noResults' | 'error' | 'forbidden';

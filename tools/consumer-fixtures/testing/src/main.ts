@@ -10,7 +10,7 @@ import {
   HellSelectHarness,
   HellTableHarness,
   HellTimeInputHarness,
-} from '@hell-ui/angular/testing';
+} from 'hell-ui/testing';
 
 @Component({
   selector: 'app-root',

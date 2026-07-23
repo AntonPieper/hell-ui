@@ -1,5 +1,5 @@
 import { Directive, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 
 /** Default part recipe for `hellCard`; pinned by the card recipe snapshot. */
 export const HELL_CARD_RECIPE: HellRecipe<'root'> = {

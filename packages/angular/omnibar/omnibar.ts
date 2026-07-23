@@ -30,28 +30,28 @@ import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
   type HellFloatingScope,
-} from '@hell-ui/angular/internal/core';
-import { HellChipSetController } from '@hell-ui/angular/internal/chip';
-import { HellFloatingDismissController, hellOutsideFocus } from '@hell-ui/angular/internal/core';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
+} from 'hell-ui/internal/core';
+import { HellChipSetController } from 'hell-ui/internal/chip';
+import { HellFloatingDismissController, hellOutsideFocus } from 'hell-ui/internal/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
 import { NgpInput } from 'ng-primitives/input';
-import { HellChipInput } from '@hell-ui/angular/chip';
-import { HellSearch, HellSearchClear } from '@hell-ui/angular/input';
+import { HellChipInput } from 'hell-ui/chip';
+import { HellSearch, HellSearchClear } from 'hell-ui/input';
 import {
   HellGlobalKeydownService,
   hellShouldHandleGlobalHotkey,
   matchHotkey,
-} from '@hell-ui/angular/internal/hotkeys';
+} from 'hell-ui/internal/hotkeys';
 import {
   HellOmnibarRuntime,
   type HellOmnibarActionRegistration,
   type HellOmnibarItemRegistration,
 } from './omnibar.runtime';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
 import {
   HELL_OPTION_SURFACE_METRICS,
   HELL_OPTION_SURFACE_SELECTED_STATES,
-} from '@hell-ui/angular/internal/option';
+} from 'hell-ui/internal/option';
 import type { InjectionToken } from '@angular/core';
 
 /** Built-in accessibility labels owned by the omnibar entry point. */

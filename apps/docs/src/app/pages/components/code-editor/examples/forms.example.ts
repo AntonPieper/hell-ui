@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
 import { FormField, disabled, form } from '@angular/forms/signals';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HellNativeCheckbox } from '@hell-ui/angular/checkbox';
+import { HellCodeEditor } from 'hell-ui/features/code-editor';
+import { HellNativeCheckbox } from 'hell-ui/checkbox';
 
 @Component({
   selector: 'app-code-editor-forms-example',

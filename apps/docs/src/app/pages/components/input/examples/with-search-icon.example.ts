@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidMagnifyingGlass, faSolidXmark } from '@ng-icons/font-awesome/solid';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput } from '@hell-ui/angular/input';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellIcon } from 'hell-ui/icon';
+import { HellInput } from 'hell-ui/input';
 
 @Component({
   selector: 'app-input-with-search-icon-example',

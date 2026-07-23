@@ -1,7 +1,7 @@
 import {
   Directive, ElementRef, inject, input } from '@angular/core';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from '@hell-ui/angular/core';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
 import {
   NgpBreadcrumbs,
   NgpBreadcrumbList,

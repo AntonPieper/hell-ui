@@ -10,19 +10,19 @@ import {
   type HellSize,
   type HellUi,
   type HellUiInput,
-} from '@hell-ui/angular';
-import { HellButton } from '@hell-ui/angular/button';
+} from 'hell-ui';
+import { HellButton } from 'hell-ui/button';
 import {
   HELL_CHIP_IMPORTS,
   HellChip,
   HellChipInput,
   HellChipRemove,
   HellChipSet,
-} from '@hell-ui/angular/chip';
+} from 'hell-ui/chip';
 import {
   hellSearchResource as hellCoreSearchResource,
   hellTwMerge as hellCoreTwMerge,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 
 interface SearchItem {
   readonly label: string;

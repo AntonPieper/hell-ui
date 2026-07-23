@@ -50,8 +50,8 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         title="Date picker"
         icon="faSolidCalendarDays"
         category="Composite"
-        importPath="@hell-ui/angular/date-picker"
-        stylesPath="@hell-ui/angular/date-picker/styles.css"
+        importPath="hell-ui/date-picker"
+        stylesPath="hell-ui/date-picker/styles.css"
       >
         An inline calendar for picking a single date or a start/end range, with min/max bounds and
         locale-aware labels.

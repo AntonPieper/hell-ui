@@ -16,21 +16,21 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CHIP_IMPORTS } from '@hell-ui/angular/chip';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { HELL_CONTROL_GROUP_IMPORTS } from '@hell-ui/angular/control-group';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
 import {
   hellPartStyler,
   hellRankLocalSearch,
   type HellRecipe,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
-} from '@hell-ui/angular/internal/core';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+} from 'hell-ui/internal/core';
+import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 
 import {
   HELL_FILTER_BUILDER_LABELS,

@@ -31,22 +31,22 @@ import {
   faSolidTableColumns,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput } from '@hell-ui/angular/input';
-import { HellNativeSelect } from '@hell-ui/angular/select';
-import { HellPageLink, HellPagination } from '@hell-ui/angular/pagination';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HellInput } from 'hell-ui/input';
+import { HellNativeSelect } from 'hell-ui/select';
+import { HellPageLink, HellPagination } from 'hell-ui/pagination';
 import {
   hellPartStyler,
   type HellRecipe,
   type HellUi,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import { HELL_PDF_VIEWER_LABELS, type HellPdfViewerLabels } from './pdf-viewer-labels';
 import {
   HellGlobalKeydownService,
   HellGlobalPointerdownService,
-} from '@hell-ui/angular/internal/hotkeys';
+} from 'hell-ui/internal/hotkeys';
 import {
   HellPdfRuntime,
   HellPdfViewerInteractionScope,

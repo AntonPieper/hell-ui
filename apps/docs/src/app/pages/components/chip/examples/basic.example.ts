@@ -4,8 +4,8 @@ import {
   HellChipInput,
   HellChipRemove,
   HellChipSet,
-} from '@hell-ui/angular/chip';
-import { HellControlGroup } from '@hell-ui/angular/control-group';
+} from 'hell-ui/chip';
+import { HellControlGroup } from 'hell-ui/control-group';
 
 interface Assignee {
   readonly id: number;

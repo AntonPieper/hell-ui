@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellSlider, type HellSliderUi } from '@hell-ui/angular/slider';
+import { HellSlider, type HellSliderUi } from 'hell-ui/slider';
 
 @Component({
   selector: 'app-slider-styling-example',

@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormField, form } from '@angular/forms/signals';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
+import { HellTimeInput, type HellTimeValue } from 'hell-ui/time-input';
 
 function formatTime(value: HellTimeValue | null): string {
   if (!value) return 'null';

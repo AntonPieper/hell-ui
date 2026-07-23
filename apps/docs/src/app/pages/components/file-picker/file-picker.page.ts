@@ -41,8 +41,8 @@ import filePickerValidationExampleCodeRaw from './examples/validation.example.ts
         title="File Picker"
         icon="faSolidUpload"
         category="Styled primitive"
-        importPath="@hell-ui/angular/file-picker"
-        stylesPath="@hell-ui/angular/file-picker/styles.css"
+        importPath="hell-ui/file-picker"
+        stylesPath="hell-ui/file-picker/styles.css"
       >
         One directive-first Interface for drop and native browse acquisition, synchronous
         validation, and structured per-batch results.
@@ -117,7 +117,7 @@ interface HellFileRejection &#123;
         <code>File</code>; queue capacity issues, progress timers, retry/removal actions,
         completion state, server errors, and lifecycle announcements all belong to the example
         application. None of that workflow is exported by
-        <code>@hell-ui/angular/file-picker</code>.
+        <code>hell-ui/file-picker</code>.
       </p>
       <p>
         Replace the mock timer with the application's transport and cancellation mechanism. Keep

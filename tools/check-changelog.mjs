@@ -34,7 +34,7 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`Changelog ok: @hell-ui/angular ${currentVersion} has a changelog entry.`);
+console.log(`Changelog ok: hell-ui ${currentVersion} has a changelog entry.`);
 
 function readPackageVersion(path) {
   const content = readRequiredFile(path);

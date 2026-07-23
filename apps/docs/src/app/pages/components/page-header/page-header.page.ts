@@ -31,8 +31,8 @@ import pageHeaderStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           title="Page header"
           icon="faSolidHeading"
           category="Composite"
-          importPath="@hell-ui/angular/page-header"
-          stylesPath="@hell-ui/angular/page-header/styles.css"
+          importPath="hell-ui/page-header"
+          stylesPath="hell-ui/page-header/styles.css"
         >
           Slot-based page chrome: compose a leading region, a configurable heading with meta badges,
           a description, and a toolbar from projected content — one header anatomy for every screen.

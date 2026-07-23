@@ -52,8 +52,8 @@ import checkboxStatesExampleCodeRaw from './examples/states.example.ts?raw' with
         title="Checkbox"
         icon="faSolidSquareCheck"
         category="Styled primitive"
-        importPath="@hell-ui/angular/checkbox"
-        stylesPath="@hell-ui/angular/checkbox/styles.css"
+        importPath="hell-ui/checkbox"
+        stylesPath="hell-ui/checkbox/styles.css"
       >
         A two- or three-state boolean control, as a styled ARIA button or a native form input.
       </hd-page-header>

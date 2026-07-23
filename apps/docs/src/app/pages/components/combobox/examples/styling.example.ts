@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_IMPORTS } from '@hell-ui/angular/combobox';
-import { hellSearchResource } from '@hell-ui/angular/core';
+import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
+import { hellSearchResource } from 'hell-ui/core';
 
 interface Priority {
   readonly id: string;

@@ -8,9 +8,9 @@ import {
   faSolidPlus,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_TOOLBAR_IMPORTS } from '@hell-ui/angular/toolbar';
+import { HellButton } from 'hell-ui/button';
+import { HellIcon } from 'hell-ui/icon';
+import { HELL_TOOLBAR_IMPORTS } from 'hell-ui/toolbar';
 
 @Component({
   selector: 'app-toolbar-basic-example',

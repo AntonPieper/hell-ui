@@ -47,8 +47,8 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         title="Dialog"
         icon="faSolidWindowRestore"
         category="Styled primitive"
-        importPath="@hell-ui/angular/dialog"
-        stylesPath="@hell-ui/angular/dialog/styles.css"
+        importPath="hell-ui/dialog"
+        stylesPath="hell-ui/dialog/styles.css"
       >
         A modal surface for short, focused decisions and edit tasks — with an optional scoped mode
         that blocks one content region while the surrounding shell stays live.

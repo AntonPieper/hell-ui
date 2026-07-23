@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidBullhorn } from '@ng-icons/font-awesome/solid';
-import { HELL_ALERT_IMPORTS } from '@hell-ui/angular/alert';
-import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_ALERT_IMPORTS } from 'hell-ui/alert';
+import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-alert-icon-example',

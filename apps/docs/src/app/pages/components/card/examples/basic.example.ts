@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
 
 @Component({
   selector: 'app-card-basic-example',

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellAvatar } from '@hell-ui/angular/avatar';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellSkeleton } from '@hell-ui/angular/skeleton';
+import { HellAvatar } from 'hell-ui/avatar';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellSkeleton } from 'hell-ui/skeleton';
 
 @Component({
   selector: 'app-skeleton-with-card-avatar-example',

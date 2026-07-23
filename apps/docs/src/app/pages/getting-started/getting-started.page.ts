@@ -65,8 +65,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <h2>5. Use a directive</h2>
       <p>
         Import only the standalone building blocks your component template uses. Prefer narrow
-        primitive and composite entry points, such as <code>@hell-ui/angular/button</code> or
-        <code>@hell-ui/angular/app-shell</code>, over aggregate entry points when a component only
+        primitive and composite entry points, such as <code>hell-ui/button</code> or
+        <code>hell-ui/app-shell</code>, over aggregate entry points when a component only
         needs one family. The same file is rendered below and loaded raw for the code tab.
       </p>
       <hd-example-tabs [code]="buttonDemoCode" previewClass="flex items-center gap-2">
@@ -88,6 +88,6 @@ export class GettingStartedPage {
   protected readonly installCode = installCodeRaw;
   protected readonly postcssCode = postcssCodeRaw;
   protected readonly stylesCode = stylesCodeRaw;
-  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { HELL_SPINNER_LABELS } from '@hell-ui/angular/spinner';\nimport { provideHellPaginationLabels } from '@hell-ui/angular/pagination';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' }),\n    provideHellPaginationLabels({\n      navigation: 'Seitennavigation',\n      nextPage: 'Nächste Seite',\n      page: (page) => 'Seite ' + page,\n    }),\n  ],\n};\n`;
+  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { HELL_SPINNER_LABELS } from 'hell-ui/spinner';\nimport { provideHellPaginationLabels } from 'hell-ui/pagination';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels(HELL_SPINNER_LABELS, { loading: 'Wird geladen' }),\n    provideHellPaginationLabels({\n      navigation: 'Seitennavigation',\n      nextPage: 'Nächste Seite',\n      page: (page) => 'Seite ' + page,\n    }),\n  ],\n};\n`;
   protected readonly buttonDemoCode = buttonDemoCodeRaw;
 }

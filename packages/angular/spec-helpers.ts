@@ -1,6 +1,6 @@
 // Shared spec-only assertion helpers. Imported by component specs alongside
 // `test-setup.ts`; deliberately not exported from any public entry point
-// (including `@hell-ui/angular/testing`).
+// (including `hell-ui/testing`).
 import { expect } from 'vitest';
 
 /**

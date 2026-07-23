@@ -1,7 +1,7 @@
 # Changelog
 
 Hell UI uses the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) shape plus the stage-specific SemVer rules in `docs/release/semver-policy.md`.
-Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` section, and each version section cites the issue, pull request, or local evidence that explains the change.
+Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and each version section cites the issue, pull request, or local evidence that explains the change.
 
 ## [Unreleased]
 
@@ -13,7 +13,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   runtime behavior; see Breaking changes for their removal before the next
   release. API reports, architecture checks, and a packed consumer protect the
   canonical contract. Closes #208.
-- Added the directive-first `@hell-ui/angular/file-picker` Styled Primitive.
+- Added the directive-first `hell-ui/file-picker` Styled Primitive.
   `[hellFilePicker]` acquires files through drop or one internal native browse
   action, then emits one `HellFileSelection` with accepted files and structured
   `type`, `size`, `count`, or `custom` rejections. Extension, exact MIME,
@@ -25,7 +25,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   internal same-file-safe chooser. Focused unit/harness and cross-browser/axe
   contracts, docs, API reports, pack auditing, and an isolated packed consumer
   cover the boundary. Closes #191.
-- Added the narrow `@hell-ui/angular/time-picker` Composite Module Entry Point.
+- Added the narrow `hell-ui/time-picker` Composite Module Entry Point.
   `hell-time-picker` owns structured `HellTimeValue | null` selection, optional
   seconds, fixed clock bounds, segmented keyboard navigation, minute presets,
   accessibility labels, and an eleven-part Part Style Map without taking on
@@ -33,7 +33,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   native Time Input, Control Group action, and Popover when segmented selection
   is useful. Focused unit, cross-browser/axe, docs, API-report, and isolated
   packed-consumer coverage protect the standalone entry point. Closes #197.
-- Added the optional `@hell-ui/angular/features/filter-builder` Feature Package
+- Added the optional `hell-ui/features/filter-builder` Feature Package
   Entry Point. `hell-filter-builder` accepts generic readonly
   `HellFilter<TField, TOperator, TValue>` expressions and application-owned
   typed field descriptors, then binds each descriptor to one projected editor
@@ -61,7 +61,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   existing focus and removal behavior. Public host tests, cross-browser focus
   contracts, docs, and a packed consumer scenario cover the composed contract.
   Closes #186.
-- Added the directive-first `@hell-ui/angular/control-group` Package Entry Point.
+- Added the directive-first `hell-ui/control-group` Package Entry Point.
   `[hellControlGroup]` composes a consumer-owned input or trigger with local
   prefix, suffix, and native button-action surfaces while the shared frame
   reflects `data-focus-within`, size, invalid, and disabled state. Every
@@ -171,7 +171,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   Docs add a simulated server-dispatch recipe; unit, browser, package-consumer,
   API-report, and axe contracts cover the widened public seam. Closes #118
   (spec #100).
-- Added the `@hell-ui/angular/filter-bar` Package Entry Point (Composite): a
+- Added the `hell-ui/filter-bar` Package Entry Point (Composite): a
   keyboard-first `hell-filter-bar` for declared `text` and fixed `options`
   fields plus first-class free text on the reserved `$text` key. The complete
   `{ key, operator: 'eq', value }[]` is controlled and serializable; the bar
@@ -193,7 +193,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/filter-bar-contracts.spec.ts`, the docs page at
   `/components/filter-bar`, and its axe WCAG A/AA smoke coverage. Closes #117
   (spec #100).
-- Added the `@hell-ui/angular/page-header` Package Entry Point (Composite): a
+- Added the `hell-ui/page-header` Package Entry Point (Composite): a
   `hell-page-header` slot-based page chrome with `root`, `leading`, `titleGroup`,
   `title`, `meta`, `description`, and `toolbar` Public Parts. Everything is
   content projection of real Hell components — no config-array API. The title is
@@ -206,12 +206,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   page-header Label Contract (`provideHellPageHeaderLabels`), and emits a `back`
   event only — routing stays with the app. Breadcrumbs and the back button
   compose into the responsive `leading` region. Refine the parts through the Part
-  Style Map and import `@hell-ui/angular/page-header/styles.css` for the default
+  Style Map and import `hell-ui/page-header/styles.css` for the default
   layout. Evidence: `packages/angular/page-header/page-header.spec.ts`,
   `e2e/page-header-contracts.spec.ts`, the docs page at `/components/page-header`
   (list-screen and detail-screen anatomies), and its axe WCAG A/AA smoke
   coverage. Closes #116 (spec #96).
-- Added the `@hell-ui/angular/multi-select-menu-button` Package Entry Point
+- Added the `hell-ui/multi-select-menu-button` Package Entry Point
   (Composite): `hell-multi-select-menu-button` is a button that opens a menu of
   checkable options and reflects the selected count on its trigger. Selection is
   controlled — the consumer binds `options` (`{ value, label, disabled? }[]`)
@@ -225,7 +225,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`provideHellMultiSelectMenuButtonLabels`). The trigger reflects state through
   the `count` badge part and `data-selection-count` / `data-has-selection`
   attributes; refine the `root`, `trigger`, and `count` parts through the Part
-  Style Map, and import `@hell-ui/angular/multi-select-menu-button/styles.css`
+  Style Map, and import `hell-ui/multi-select-menu-button/styles.css`
   for the default visuals. Docs ship a TanStack Table Shell column-visibility
   recipe (respecting `enableHiding`) with a localStorage persistence snippet.
   The composed menu also restores its documented printable-key typeahead while
@@ -235,15 +235,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/multi-select-menu-button-contracts.spec.ts`, the docs page at
   `/components/multi-select-menu-button`, and its axe WCAG A/AA smoke coverage.
   Closes #109 (spec #98).
-- Added `HELL_CHIP_IMPORTS` to `@hell-ui/angular/chip` (array of
+- Added `HELL_CHIP_IMPORTS` to `hell-ui/chip` (array of
   `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and
   "Conditional content" docs sections on the alert and empty-state pages that
   document the `@if` + `ngProjectAs` content-projection recipe. See #135.
-- Added a chips presentation to the `@hell-ui/angular/combobox` Package Entry
+- Added a chips presentation to the `hell-ui/combobox` Package Entry
   Point: a `hellComboboxChips` directive, placed inside the control before
   `hellComboboxInput`, that renders each multiple-mode selection as a removable
-  chip composed from the `@hell-ui/angular/chip` primitive (`hellChip` /
+  chip composed from the `hell-ui/chip` primitive (`hellChip` /
   `hellChipRemove` / `HellChipSet`), cementing the combobox → chip dependency
   direction. The selected chips form one roving tab stop with Arrow/Home/End
   navigation, Delete/Backspace removal, and focus continuity after removal.
@@ -256,7 +256,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   Style Map (each chip's remove button ships the chip primitive's built-in `×`
   glyph and derives its `Remove {label}` name from the chip's text). The
   combobox stylesheet carries the composed chip stylesheet, so a packed
-  consumer importing only `@hell-ui/angular/combobox/styles.css` gets the chip
+  consumer importing only `hell-ui/combobox/styles.css` gets the chip
   recipe and built-in glyph. `HELL_COMBOBOX_IMPORTS` now includes
   `hellComboboxChips`, and the entry point exports `HellComboboxChipsPart` /
   `HellComboboxChipsUi`. Existing non-chips combobox behavior is unchanged.
@@ -264,7 +264,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `e2e/combobox-chips-a11y-contracts.spec.ts`, the assign-groups example on the
   docs page at `/components/combobox`, and its axe WCAG A/AA smoke coverage.
   Closes #114 (spec #95).
-- Added an `autoGrow` opt-in to `HellTextarea` in the `@hell-ui/angular/input`
+- Added an `autoGrow` opt-in to `HellTextarea` in the `hell-ui/input`
   Package Entry Point: the native `<textarea>` grows with its content via CSS
   `field-sizing: content` — no resize observers, no per-keystroke JavaScript
   measurement, no animated height. It reflects `data-auto-grow` and disables the
@@ -276,7 +276,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   JavaScript polyfill. Evidence: `packages/angular/input/input.spec.ts`, the
   docs page at `/components/input` (Auto-grow example), and its axe WCAG A/AA
   smoke coverage. Closes #112 (spec #101).
-- Added the `@hell-ui/angular/alert` Package Entry Point (Styled Primitive): a
+- Added the `hell-ui/alert` Package Entry Point (Styled Primitive): a
   persistent inline messaging surface with `info`/`success`/`warning`/`danger`
   variants reflected as `data-variant` and colored via Semantic Theme Tokens, a
   default per-variant glyph that is replaceable via a projected `hellAlertIcon`
@@ -288,11 +288,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`provideHellAlertLabels`). Alerts carry no live-region semantics by default;
   async insertions pair with an explicit `role` or the toast announcer.
   Refine the `root`, `icon`, and `content` parts through the Part Style Map, and
-  import `@hell-ui/angular/alert/styles.css` for the default visuals. Evidence:
+  import `hell-ui/alert/styles.css` for the default visuals. Evidence:
   `packages/angular/alert/alert.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
   the docs page at `/components/alert`, and its axe WCAG A/AA smoke coverage
   (issues #91, #102).
-- Added the `@hell-ui/angular/confirm` Package Entry Point (Composite) on the
+- Added the `hell-ui/confirm` Package Entry Point (Composite) on the
   prompt + action model: `injectHellConfirm()` returns
   `(prompt, action?, cancelAction?) => Promise<boolean>`, opening one accessible
   modal on the dialog primitive, and `injectHellChoice()` returns a typed N-way
@@ -313,8 +313,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`provideHellConfirmLabels`). Docs cover basic, destructive, countdown, and
   `choice()` unsaved-changes examples plus a `choice()`-based unsaved-changes
   route-guard recipe, all under axe WCAG A/AA smoke coverage. Ships
-  `@hell-ui/angular/confirm/styles.css`. See #104 and #131 (spec #93).
-- Added the `@hell-ui/angular/empty-state` Package Entry Point: a
+  `hell-ui/confirm/styles.css`. See #104 and #131 (spec #93).
+- Added the `hell-ui/empty-state` Package Entry Point: a
   `hell-empty-state` owned-anatomy component with `root`, `media`, `title`,
   `description`, and `actions` Public Parts. A `preset`
   (`noData | noResults | error | forbidden`) supplies a default glyph and Label
@@ -323,7 +323,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   heading via `headingLevel`, and the component owns container-filling centering.
   The TanStack Table Shell's default empty chrome (`HellDefaultTableEmptyState`)
   now recomposes this component. Closes #103.
-- Added the `@hell-ui/angular/chip` Package Entry Point (Mixed Entry Point):
+- Added the `hell-ui/chip` Package Entry Point (Mixed Entry Point):
   `hellChip` (span/button/anchor host with interactive semantics only on
   interactive hosts, `variant`/`size` aligned with `hellTag`, `data-variant`/
   `data-size`/`data-disabled`, and a `(remove)` output), `hellChipRemove` (a
@@ -332,7 +332,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   arrow/Home/End focus, `Delete`/`Backspace` removal, and focus continuity to a
   neighbouring chip or the set after removal). Removal is event-only; the
   consumer owns the collection. See issue #106 (spec #95).
-- Added an imperative popconfirm to `@hell-ui/angular/confirm`:
+- Added an imperative popconfirm to `hell-ui/confirm`:
   `injectHellPopconfirm()` returns
   `(anchor, prompt, action?) => Promise<boolean>` for anchored, in-context
   confirmations such as a row delete — the same linear control flow as
@@ -348,7 +348,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   example under `/components/confirm` with axe WCAG A/AA smoke coverage.
   Evidence: `packages/angular/confirm/popconfirm.spec.ts` and
   `e2e/confirm-a11y-contracts.spec.ts`. See #113 and #131 (spec #93).
-- Added the `@hell-ui/angular/number-input` Package Entry Point (Styled
+- Added the `hell-ui/number-input` Package Entry Point (Styled
   Primitive), joining the Typed Value Input family alongside date and time
   input. `input[hellNumberInput]` binds a real `number | null` through
   `ControlValueAccessor` + `Validator` on the consumer's native text field
@@ -379,7 +379,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   gone. Evidence: part assertions in each entrypoint's spec and
   `pnpm run test:architecture`.
 
-- Added the `@hell-ui/angular/save-bar` Package Entry Point (Composite): a
+- Added the `hell-ui/save-bar` Package Entry Point (Composite): a
   save/discard action bar for edit surfaces with no form coupling — state flows
   in through `dirty`/`busy`/`disabled` inputs (one-line reactive-form binding:
   dirty/invalid/pending) and actions flow out through `saved`/`discarded`
@@ -400,14 +400,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   Label Contract (`provideHellSaveBarLabels`), and the unsaved-changes `message`
   can be overridden per instance.
   Refine the `root`, `message`, `actions`, `save`, and `discard` parts through
-  the Part Style Map, and import `@hell-ui/angular/save-bar/styles.css` (which
+  the Part Style Map, and import `hell-ui/save-bar/styles.css` (which
   carries the button primitive styles it composes) for the default visuals.
   Evidence: `packages/angular/save-bar/save-bar.spec.ts`,
   `e2e/save-bar-a11y-contracts.spec.ts`, the docs page at
   `/components/save-bar` (including app-shell placement and confirm-service
   discard recipes), and its axe WCAG A/AA smoke coverage. Closes #108
   (spec #97).
-- New `@hell-ui/angular/toolbar` Composite entry point: an APG-toolbar-pattern
+- New `hell-ui/toolbar` Composite entry point: an APG-toolbar-pattern
   action bar where actions are declared once as `hellToolbarAction` templates
   (label, optional icon, `disabled`, `priority` of `primary`/`default`/
   `overflowOnly`, an `iconOnly` inline rendering whose accessible name and
@@ -537,7 +537,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   packed page-header consumer scenario asserting recipe and structural
   wrapper CSS, the pack audit, and the page-header API report.
 - The breaking Tooltip redesign (#238) is sealed as one release-ready package
-  contract. The `@hell-ui/angular/tooltip` entry point is pinned as a Mixed
+  contract. The `hell-ui/tooltip` entry point is pinned as a Mixed
   Entry Point through manifest-aware architecture checks that also reject the
   retired trigger/surface vocabulary, the retired `disabled` and
   `hoverableContent` inputs, host-restricted trigger selectors, and any
@@ -748,12 +748,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   deliberately loose values that would make type-aware lint mostly noise.
 - The omnibar's `[hellOmnibarChip]` / `button[hellOmnibarChipRemove]` scope
   pills now use the same presentation implementation as the public
-  `@hell-ui/angular/chip` primitive instead of private recipes and CSS. The
+  `hell-ui/chip` primitive instead of private recipes and CSS. The
   composition stays behind the existing omnibar `ui` inputs, so the public
   omnibar API is unchanged; chip-only `variant`, `size`, `disabled`, and
   `label` inputs do not leak into the Composite. The remove button keeps the
   omnibar tab rule: it leaves the tab order while the panel is open and rejoins
-  it when closed. `@hell-ui/angular/omnibar/styles.css` imports the chip styles
+  it when closed. `hell-ui/omnibar/styles.css` imports the chip styles
   so omnibar-only consumers still get the shared visuals. Evidence:
   `packages/angular/omnibar/omnibar.spec.ts` and
   `e2e/omnibar-a11y-contracts.spec.ts`. Closes #115 (spec #95).
@@ -794,7 +794,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   empty button (mirroring the breadcrumb-separator mechanism), keyed off a new
   `--hell-icon-close` token; projecting any content into the button drops the
   `:empty` match and replaces the default glyph. Import
-  `@hell-ui/angular/alert/styles.css` / `@hell-ui/angular/chip/styles.css` for
+  `hell-ui/alert/styles.css` / `hell-ui/chip/styles.css` for
   the glyph. Evidence: `packages/angular/alert/alert.spec.ts`,
   `packages/angular/chip/chip.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
   `e2e/chip-a11y-contracts.spec.ts`. Closes #135 (specs #91, #95).
@@ -852,13 +852,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   API report shrinks by four symbols.
 - BREAKING: the avatar-group entry point folds into avatar. Import
   `HellAvatarGroup`, `HellAvatarGroupItem`, `HellAvatarGroupOverflow`, and
-  `HELL_AVATAR_GROUP_IMPORTS` from `@hell-ui/angular/avatar`, and its
-  stylesheet from `@hell-ui/angular/avatar/styles.css` — the
-  `@hell-ui/angular/avatar-group` import path and stylesheet are gone.
+  `HELL_AVATAR_GROUP_IMPORTS` from `hell-ui/avatar`, and its
+  stylesheet from `hell-ui/avatar/styles.css` — the
+  `hell-ui/avatar-group` import path and stylesheet are gone.
   One avatar family, one entry point. Closes #178. Evidence: avatar and
   avatar-group unit suites green from the merged entry point, migrated
   docs imports.
-- BREAKING: the flyout entry point is retired. `@hell-ui/angular/flyout`,
+- BREAKING: the flyout entry point is retired. `hell-ui/flyout`,
   its stylesheet, `HellFlyout`, and `HellFlyoutTrigger` are gone — a
   popover with `[trapFocus]="false"` is the anchored, non-modal,
   light-dismiss surface, with `anchor`, `boundary`, a reactive `open`
@@ -877,7 +877,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   the flyout docs page replaced by the popover "Non-modal" section and
   overlays guide updates.
 - Removed duplicate public pass-throughs from
-  `@hell-ui/angular/table-tanstack`: import TanStack's FlexRender helpers
+  `hell-ui/table-tanstack`: import TanStack's FlexRender helpers
   directly from `@tanstack/angular-table`. Internal PDF/toast/tooling exports
   with no callers and unused workspace catalog entries are gone as well.
 - Removed dead dependency and test-artifact surface. Knip is now the standard
@@ -964,7 +964,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   mirrors (experimental JSDoc phrases, category badge strings, README heading
   pins). Mutation-tested: the derived checks still fail on rogue `data-slot`
   literals, removed Part-union members, and hardcoded labels.
-- Deleted the dead `@hell-ui/angular/internal/input` entry point (its last
+- Deleted the dead `hell-ui/internal/input` entry point (its last
   real consumer left in June 2026; only its own spec read
   `HELL_EMBEDDED_INPUT_UI`) and the empty `internal/ng-primitives/adapters.ts`
   marker file.
@@ -991,13 +991,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- BREAKING: The published package is renamed from `@hell-ui/angular` to
+  `hell-ui` as one atomic break with no compatibility package, alias package,
+  dual-name export, or migration shim. Update the install dependency to
+  `hell-ui` and replace every `@hell-ui/angular` prefix in TypeScript imports
+  and stylesheet imports with `hell-ui` — logical entrypoints keep their
+  paths, for example `hell-ui/button`, `hell-ui/dialog`,
+  `hell-ui/table/styles.css`, and `hell-ui/tokens.css`. The root `hell-ui`
+  entry point stays core-only, `/internal/*` subpaths stay private, shipped
+  CSS stays side-effectful while TypeScript remains ESM-tree-shakeable, and
+  the GitHub Packages owner-scope mirror publishes as `@antonpieper/hell-ui`.
+  Closes #311; decided by the accepted public package and stylesheet surface
+  ADR (#260, spec #310).
 - BREAKING: `HellSelect` and `HellCombobox` now share one Pick Value Control
   Value Authority: each `value` is a `ModelSignal<HellPickValue<T>>`
   implementing Signal Forms' `FormValueControl<HellPickValue<T>>`, and
   neither directive implements `ControlValueAccessor`, registers the
   `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
   `registerOnChange` / `registerOnTouched` / `setDisabledState` methods
-  anymore. First carried by the next `@hell-ui/angular` release after
+  anymore. First carried by the next `hell-ui` release after
   `0.2.0` (currently Unreleased). The documented Pick Value shape is
   unchanged — `T | null` in single mode, `readonly T[]` in multiple mode —
   and direct `[value]` binding, new two-way `[(value)]` binding, Signal
@@ -1027,7 +1039,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   and the component no longer implements `ControlValueAccessor`, registers
   the `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
   `registerOnChange` / `registerOnTouched` / `setDisabledState` methods.
-  First carried by the next `@hell-ui/angular` release after `0.2.0`
+  First carried by the next `hell-ui` release after `0.2.0`
   (currently Unreleased). Direct `[value]` binding, new two-way `[(value)]`
   binding, Signal Forms `[formField]`, Reactive Forms `formControl`, and
   template-driven `ngModel` all read and write the same document model —
@@ -1056,7 +1068,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   implements `ControlValueAccessor`, registers the `NG_VALUE_ACCESSOR`
   provider, or exposes the `writeValue` / `registerOnChange` /
   `registerOnTouched` / `setDisabledState` methods. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). The
+  `hell-ui` release after `0.2.0` (currently Unreleased). The
   canonical value shape is mode-dependent — a plain string or `null` in
   `single` mode, a readonly string array in `multiple` mode — and there is no
   longer an array-shaped template value next to a scalar-shaped form value:
@@ -1090,7 +1102,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `ControlValueAccessor` or `Validator`, registers the `NG_VALUE_ACCESSOR` /
   `NG_VALIDATORS` providers, or exposes the `writeValue` / `registerOnChange`
   / `registerOnTouched` / `registerOnValidatorChange` / `setDisabledState` /
-  `validate` methods. First carried by the next `@hell-ui/angular` release
+  `validate` methods. First carried by the next `hell-ui` release
   after `0.2.0` (currently Unreleased). Direct `[value]` binding, new two-way
   `[(value)]` binding, Signal Forms `[formField]`, Reactive Forms
   `formControl`, and template-driven `ngModel` all read and write the same
@@ -1125,7 +1137,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `NG_VALUE_ACCESSOR` / `NG_VALIDATORS` providers, or exposes the
   `writeValue` / `registerOnChange` / `registerOnTouched` /
   `registerOnValidatorChange` / `setDisabledState` / `validate` methods. First
-  carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+  carried by the next `hell-ui` release after `0.2.0` (currently
   Unreleased). Direct `[checked]` binding, new two-way `[(checked)]` binding,
   Signal Forms `[formField]`, Reactive Forms `formControl`, and
   template-driven `ngModel` all read and write the same model —
@@ -1156,7 +1168,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `NG_VALUE_ACCESSOR` / `NG_VALIDATORS` providers, or exposes the `writeValue`
   / `registerOnChange` / `registerOnTouched` / `registerOnValidatorChange` /
   `setDisabledState` / `validate` methods. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Direct
+  `hell-ui` release after `0.2.0` (currently Unreleased). Direct
   `[value]` binding, new two-way `[(value)]` binding, Signal Forms
   `[formField]`, Reactive Forms `formControl`, and template-driven `ngModel`
   all read and write the same model — the native host carries Angular's
@@ -1188,7 +1200,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `ControlValueAccessor` or `Validator`, registers the `NG_VALUE_ACCESSOR` /
   `NG_VALIDATORS` providers, or exposes the `writeValue` / `registerOnChange` /
   `registerOnTouched` / `registerOnValidatorChange` / `setDisabledState` /
-  `validate` methods. First carried by the next `@hell-ui/angular` release
+  `validate` methods. First carried by the next `hell-ui` release
   after `0.2.0` (currently Unreleased). Direct `[value]` binding, new two-way
   `[(value)]` binding, Signal Forms `[formField]`, Reactive Forms
   `formControl`, and template-driven `ngModel` all read and write the same
@@ -1222,7 +1234,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `ControlValueAccessor` or `Validator`, registers the `NG_VALUE_ACCESSOR` /
   `NG_VALIDATORS` providers, or exposes the `writeValue` / `registerOnChange` /
   `registerOnTouched` / `registerOnValidatorChange` / `setDisabledState` /
-  `validate` methods. First carried by the next `@hell-ui/angular` release
+  `validate` methods. First carried by the next `hell-ui` release
   after `0.2.0` (currently Unreleased). Direct `[value]` binding, new two-way
   `[(value)]` binding, Signal Forms `[formField]`, Reactive Forms
   `formControl`, and template-driven `ngModel` all read and write the same
@@ -1255,7 +1267,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   and the component no longer implements `ControlValueAccessor`, registers the
   `NG_VALUE_ACCESSOR` provider, or exposes the `writeValue` /
   `registerOnChange` / `registerOnTouched` / `setDisabledState` methods. First
-  carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+  carried by the next `hell-ui` release after `0.2.0` (currently
   Unreleased). Direct `[value]` binding, new two-way `[(value)]` binding,
   Signal Forms `[formField]`, Reactive Forms `formControl`, and
   template-driven `ngModel` all read and write the same model —
@@ -1281,7 +1293,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`[hellNavItemTrailing]`), `HellNavSection` (`[hellNavSection]`),
   `HellNavSectionToggle` (`button[hellNavSectionToggle]`), and
   `HellNavSectionItems` (`[hellNavSectionItems]`), plus their entrypoint
-  stylesheet rules. First carried by the next `@hell-ui/angular` release
+  stylesheet rules. First carried by the next `hell-ui` release
   after `0.2.0` (currently Unreleased). The app-shell entry point now
   exports only shell layout regions, responsive state, and toggle behavior;
   `HELL_APP_SHELL_IMPORTS` contains the eight remaining shell directives.
@@ -1313,7 +1325,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (`[hellOmnibarItemIcon]`), `HellOmnibarItemText` (`[hellOmnibarItemText]`),
   `HellOmnibarItemSubtext` (`[hellOmnibarItemSubtext]`), and
   `HellOmnibarItemTrailing` (`[hellOmnibarItemTrailing]`), plus their
-  entrypoint stylesheet rules. First carried by the next `@hell-ui/angular`
+  entrypoint stylesheet rules. First carried by the next `hell-ui`
   release after `0.2.0` (currently Unreleased). The checked-in directive
   census (`docs/architecture/directive-census.md`) verified none of the five
   serves a content-query or behavior role: each only wrote default classes
@@ -1333,7 +1345,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   and the updated omnibar API report. Closes #261.
 - BREAKING: `provideHellLabels` now rejects tokens that `hellCreateLabels` did
   not create at compile time instead of throwing at runtime. First carried by
-  the next `@hell-ui/angular` release after `0.2.0` (currently Unreleased).
+  the next `hell-ui` release after `0.2.0` (currently Unreleased).
   `hellCreateLabels` returns the branded `HellLabelToken<T>` — an
   `InjectionToken<HellLabels<T>>` whose value type carries a compile-time-only
   brand — and `provideHellLabels` accepts only branded tokens through the new
@@ -1347,7 +1359,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   API reports. Closes #257.
 - BREAKING: The omnibar item payload input `value` on
   `button[hellOmnibarItem]` is now required. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Omitting
+  `hell-ui` release after `0.2.0` (currently Unreleased). Omitting
   the binding is now a template type-checking error (NG8008) instead of
   silently carrying an undefined payload into the item's `(select)` output
   and the parent `(submit)` event; both emit exactly the bound payload with
@@ -1356,7 +1368,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   report protect the required contract. Closes #253.
 - BREAKING: The core Search Resource no longer exposes `clear()`, which
   implicitly wrote `''` into the caller-owned query signal while emptying
-  results. First carried by the next `@hell-ui/angular` release after `0.2.0`
+  results. First carried by the next `hell-ui` release after `0.2.0`
   (currently Unreleased). Use the split contract instead: `clearResults()`
   cancels work and empties items, status, and error while leaving the
   caller-owned query signal untouched, and `reset()` is `clearResults()` plus
@@ -1376,7 +1388,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   partial `HellTooltipDefaults` per injector scope. Nested providers merge
   over the nearest ancestor policy instead of resetting unspecified values,
   and a local trigger input wins over every provider. First carried by the
-  next `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Hell
+  next `hell-ui` release after `0.2.0` (currently Unreleased). Hell
   now guarantees a 500 ms show delay, 0 ms hide delay, and 300 ms cooldown
   when nothing overrides them (previously the trigger defaulted to a 0 ms
   show delay and a 500 ms hide delay). The `hoverableContent` input and the
@@ -1400,7 +1412,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   transitions) update presentation inside the open overlay without a false
   close/open lifecycle transition, and `null`, `undefined`, and the empty
   string close and disable the interaction. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). The trigger
+  `hell-ui` release after `0.2.0` (currently Unreleased). The trigger
   now attaches to any host (`[hellTooltip]` instead of
   `button[hellTooltip], a[hellTooltip]`) without adding focusability, deriving
   an accessible name, or mutating the host, and it no longer opens on a
@@ -1418,7 +1430,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   a[hellTooltip]`, exported as `hellTooltip`), and the consumer-authored
   surface previously named `HellTooltip` (`[hellTooltip]`) is now
   `HellTooltipSurface` (`[hellTooltipSurface]`). First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Bind
+  `hell-ui` release after `0.2.0` (currently Unreleased). Bind
   `[hellTooltip]` to the tooltip template on the trigger and mark the rendered
   surface element with `hellTooltipSurface`; template-backed behavior, trigger
   inputs and `openChange`, `open()` / `show()` / `hide()`, and the surface's
@@ -1431,14 +1443,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `input`, `listbox`, `menu`, `omnibar`, `page-header`, `pagination`,
   `resizable`, `select`, `table`, `table-tanstack`,
   `table-tanstack/virtual`, `tabs`, `toast`, and `toolbar`. First carried by
-  the next `@hell-ui/angular` release after `0.2.0` (currently Unreleased).
+  the next `hell-ui` release after `0.2.0` (currently Unreleased).
   Replace each removed name one-for-one with the same entry point's canonical
   `HELL_*_IMPORTS` export; for example, replace `HELL_TOOLBAR_DIRECTIVES` with
   `HELL_TOOLBAR_IMPORTS`. Tuple contents and runtime behavior are unchanged.
   The first-beta consumer guide lists every exact mapping. Closes #211.
-- BREAKING: Replaced the owned `@hell-ui/angular/split-view` Composite and
-  stylesheet with the projection-first `@hell-ui/angular/master-detail`
-  controller. First carried by the next `@hell-ui/angular` release after
+- BREAKING: Replaced the owned `hell-ui/split-view` Composite and
+  stylesheet with the projection-first `hell-ui/master-detail`
+  controller. First carried by the next `hell-ui` release after
   `0.2.0` (currently Unreleased). Replace `HELL_SPLIT_VIEW_DIRECTIVES` and
   `<hell-split-view>` plus `ng-template[hellSplitPrimary]` /
   `ng-template[hellSplitDetail]` with `HELL_MASTER_DETAIL_IMPORTS`, a
@@ -1455,12 +1467,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `itemNavigation`, its label and disabled inputs, and `previousItem` /
   `nextItem` outputs with ordinary Toolbar or Pagination controls bound to
   application-owned selection state. Import
-  `@hell-ui/angular/master-detail/styles.css` plus only the stylesheets for
+  `hell-ui/master-detail/styles.css` plus only the stylesheets for
   composed primitives; the old entry point, stylesheet, selectors, exports,
   parts, inputs, and outputs have no compatibility aliases. Closes #207.
 - BREAKING: Date Input is now date parsing, formatting, validation, and forms
   behavior on the authored native `input[hellDateInput]` instead of the owned
-  `<hell-date-input>` component. First carried by the next `@hell-ui/angular`
+  `<hell-date-input>` component. First carried by the next `hell-ui`
   release after `0.2.0` (currently Unreleased). Replace `[date]` /
   `(dateChange)` with the controlled `[value]` / `(valueChange)` pair; keep
   `Date | null`, CVA, required and inclusive `min` / `max` validation, adapter
@@ -1480,7 +1492,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - BREAKING: Time Input is now time parsing, formatting, validation, and forms
   behavior on the authored native `input[hellTimeInput]` instead of the owned
   `<hell-time-input>` component. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Keep the
+  `hell-ui` release after `0.2.0` (currently Unreleased). Keep the
   controlled `value` / `valueChange` pair, `HellTimeValue | null`, CVA,
   required and inclusive same-day `min` / `max` validation, optional seconds,
   adapter overrides, invalid drafts, external synchronization, and nullable
@@ -1499,7 +1511,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - BREAKING: Number Input is now numeric parsing, formatting, validation,
   stepping, and forms behavior on the authored native
   `input[hellNumberInput]` instead of the owned `<hell-number-input>`
-  component. First carried by the next `@hell-ui/angular` release after
+  component. First carried by the next `hell-ui` release after
   `0.2.0` (currently Unreleased). Keep the controlled `value` / `valueChange`
   pair, `number | null`, CVA, required/integer/bounds validation, adapter
   overrides, invalid drafts, external synchronization, wheel prevention, and
@@ -1520,7 +1532,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   state, and the deliberate `toggleSidenav()`, `toggleSecondary()`, and
   `closeMobilePanels()` actions while removing presentation and renderer
   coordination from the public Interface. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Remove
+  `hell-ui` release after `0.2.0` (currently Unreleased). Remove
   `HellSidenavToggle.appearance` and `HellSecondaryToggle.appearance`; the
   shipped stylesheet now derives the leading, secondary-header, and collapsed
   rail treatments from direct placement in `hellAppTopbar`,
@@ -1535,11 +1547,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   read or persist state. Panel registration and ARIA ids are internal. Docs,
   API reports, package-consumer, mobile/desktop browser, and visual contracts
   cover the slimmer Composite. Closes #205.
-- BREAKING: Removed the `@hell-ui/angular/drop-zone` and
-  `@hell-ui/angular/file-upload` Package Entry Points and their stylesheets.
-  First carried by the next `@hell-ui/angular` release after `0.2.0` (currently
+- BREAKING: Removed the `hell-ui/drop-zone` and
+  `hell-ui/file-upload` Package Entry Points and their stylesheets.
+  First carried by the next `hell-ui` release after `0.2.0` (currently
   Unreleased). Migrate `HellDropZone` / `[hellDropzone]` to `HellFilePicker` /
-  `[hellFilePicker]` from `@hell-ui/angular/file-picker`: replace `(files)` with
+  `[hellFilePicker]` from `hell-ui/file-picker`: replace `(files)` with
   `(selection)` and consume its accepted files plus structured `type`, `size`,
   `count`, and `custom` rejections; use `open()` for a separate browse action
   instead of binding `nativeInput`, and replace the Drop Zone `data-active`
@@ -1549,15 +1561,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   application-owned queue, total-capacity, progress, retry, removal,
   completion, server-error, focus, and announcement state composed with Button,
   Progress, Alert, lists, and status regions. Replace the removed Drop Zone and
-  File Upload CSS imports with `@hell-ui/angular/file-picker/styles.css` plus
+  File Upload CSS imports with `hell-ui/file-picker/styles.css` plus
   the narrow stylesheets for primitives the application recipe uses.
   `HellDropZoneHarness` is removed; `HellFilePickerHarness` covers the retained
   acquisition contract. No compatibility aliases or replacement upload
   workflow are exported. Closes #204.
-- BREAKING: Removed the temporary `@hell-ui/angular/internal/search` Package
-  Entry Point. First carried by the next `@hell-ui/angular` release after
+- BREAKING: Removed the temporary `hell-ui/internal/search` Package
+  Entry Point. First carried by the next `hell-ui` release after
   `0.2.0` (currently Unreleased). Migrate `HellSearchOrchestrator` to
-  `hellSearchResource` from `@hell-ui/angular/core`: replace construction plus
+  `hellSearchResource` from `hell-ui/core`: replace construction plus
   `connect()` with resource creation in an Angular injection context and pass a
   caller-owned writable `query` signal; configure its options and `debounce`
   once, then set `query` instead of calling `scheduleSearch()`; call
@@ -1568,14 +1580,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `clear()`, and `cancel()` with `cancel()`. Lifecycle teardown is automatic
   when the resource's Angular injection context is destroyed. No compatibility
   path or duplicate Search Orchestration remains. Closes #203.
-- BREAKING: Removed the closed `@hell-ui/angular/filter-bar` Composite Package
+- BREAKING: Removed the closed `hell-ui/filter-bar` Composite Package
   Entry Point and its stylesheet. First carried by the next
-  `@hell-ui/angular` release after `0.2.0` (currently Unreleased). Migrate
+  `hell-ui` release after `0.2.0` (currently Unreleased). Migrate
   `HellFilterField` kind declarations and `HellFilterToken` values to
   application-owned `HellFilter` unions, typed `HellFilterFieldDescriptor`
   declarations, stable `[identify]` ids, and projected
   `hellFilterBuilderEditor` templates from
-  `@hell-ui/angular/features/filter-builder`. Text, fixed options, entities,
+  `hell-ui/features/filter-builder`. Text, fixed options, entities,
   and date ranges are recipes rather than built-in kinds; replace the
   equality-only operator with domain operators. Move entity source, debounce,
   cancellation, loading, empty, and error policy into an application-owned
@@ -1583,7 +1595,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   or generic mode flags. The migrated docs retain TanStack filter controls and
   server dispatch without moving table or request policy into the Feature.
   Closes #202.
-- BREAKING: `@hell-ui/angular/toolbar` now separates ordinary roving-focus
+- BREAKING: `hell-ui/toolbar` now separates ordinary roving-focus
   toolbars from measured overflow. The former `hell-toolbar` / `HellToolbar`
   composite is `hell-overflow-toolbar` / `HellOverflowToolbar`; its
   `HellToolbarPart` / `HellToolbarUi` and `HellToolbarLabels` /
@@ -1599,7 +1611,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   widgets under `<hell-overflow-toolbar>` when responsive measurement is
   required. Renderer, measurement, and item-kind models are no longer public.
   Closes #192.
-- BREAKING: `@hell-ui/angular/resizable` no longer exposes the root registry,
+- BREAKING: `hell-ui/resizable` no longer exposes the root registry,
   measurement, constraint, and sizing methods (`registerPane()`,
   `unregisterPane()`, `getPanes()`, `indexOf()`, `getAvailableSize()`,
   `isConstrained()`, `fitPanesToAvailableSize()`, and `markUserSized()`) or the
@@ -1623,8 +1635,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   coordination remain private. Closes #189. Evidence: focused Toast unit and
   Chromium behavior/axe contracts, packed composite consumer compilation,
   live docs QA, and the contracted Toast API report.
-- BREAKING: `@hell-ui/angular/confirm` now exposes one Prompt Interface through
-  `injectHellPrompt()`. First carried by the next `@hell-ui/angular` release
+- BREAKING: `hell-ui/confirm` now exposes one Prompt Interface through
+  `injectHellPrompt()`. First carried by the next `hell-ui` release
   after `0.2.0` (currently Unreleased). Migrate `injectHellConfirm()` to
   `injectHellPrompt().confirm()`, `injectHellChoice()` to
   `injectHellPrompt().choose<TValue>()`, and `injectHellPopconfirm()` to
@@ -1647,14 +1659,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   labels unit test, migrated docs examples.
 - The pick-value model is one core family: `HellPickSingleValue<T>`
   (`T | null`), `HellPickMultipleValue<T>` (`readonly T[]`), and their union
-  `HellPickValue<T>` export from `@hell-ui/angular/core`, and the select and
+  `HellPickValue<T>` export from `hell-ui/core`, and the select and
   combobox entry points no longer export per-module twins. Migration is a
   rename: `HellSelectSingleValue` → `HellPickSingleValue`,
   `HellSelectMultipleValue` → `HellPickMultipleValue`, `HellSelectFormValue` →
   `HellPickValue`, `HellComboboxSingleValue` → `HellPickSingleValue`,
   `HellComboboxMultipleValue` → `HellPickMultipleValue`, and
   `HellComboboxValue` → `HellPickValue`, importing from
-  `@hell-ui/angular/core`. Behavior, inputs, and outputs are unchanged.
+  `hell-ui/core`. Behavior, inputs, and outputs are unchanged.
   Closes #163. Evidence: select/combobox unit suites, refreshed API reports,
   migrated docs examples.
 - Adopted the selector convention (attribute selector = headless behavior
@@ -1675,7 +1687,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - The typed-value adapter parse-result contract is now one public core seam:
   `hellTypedValue`, `hellInvalidTypedValue`, `HellTypedValueParseResult`,
   `HellTypedValueValidParse`, and `HellTypedValueInvalidParse` export from
-  `@hell-ui/angular/core`. The number-input, time-input, and date-input entry
+  `hell-ui/core`. The number-input, time-input, and date-input entry
   points no longer export their standalone parse/format/normalize/compare
   helper functions or per-entry-point `Hell*InputParseResult` aliases — build
   custom adapters with the core constructors and register them with the kept
@@ -1685,22 +1697,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   rewritten input suites, migrated filter-bar serialization paths.
 - Dialpad moved behind a feature entry point. Import `HellDialpad`, its
   Part Style Map types, `HellDialpadLabels`, and `HELL_DIALPAD_LABELS` from
-  `@hell-ui/angular/features/dialpad` (styles from
-  `@hell-ui/angular/features/dialpad/styles.css`) instead of
-  `@hell-ui/angular/dialpad`. The component itself is unchanged; the core
+  `hell-ui/features/dialpad` (styles from
+  `hell-ui/features/dialpad/styles.css`) instead of
+  `hell-ui/dialpad`. The component itself is unchanged; the core
   component set stays domain-agnostic, matching the code editor and PDF
   viewer feature entry points. No re-export from the old path. Closes #161.
 - Moved two directive homes so entry points match their semantics.
-  `HellNativeSelect` now exports from `@hell-ui/angular/select` (the entry
-  point whose docs already pointed at it) instead of `@hell-ui/angular/input`.
-  The `@hell-ui/angular/search` entry point is removed: `HellSearch`,
+  `HellNativeSelect` now exports from `hell-ui/select` (the entry
+  point whose docs already pointed at it) instead of `hell-ui/input`.
+  The `hell-ui/search` entry point is removed: `HellSearch`,
   `HellSearchClear`, and `HELL_SEARCH_IMPORTS` now export from
-  `@hell-ui/angular/input`, so "search" in Hell unambiguously means core's
+  `hell-ui/input`, so "search" in Hell unambiguously means core's
   `HellSearchService`/ranker infrastructure. Selectors, behavior, recipes, and
   `data-slot` contracts are unchanged — only import paths move. Closes #157.
   Evidence: migrated omnibar/table-tanstack/pagination/pdf-viewer consumers,
   input and search unit suites, docs pages.
-- Collapsed the five `@hell-ui/angular/pagination` nav-button directives
+- Collapsed the five `hell-ui/pagination` nav-button directives
   (`HellPaginationFirst`, `HellPaginationPrev`, `HellPaginationNext`,
   `HellPaginationLast`, `HellPaginationButton`) into one `HellPageLink`
   directive on `button[hellPageLink], a[hellPageLink]`. The target is the
@@ -1715,16 +1727,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   workaround with anchor guards all carry over; `HellPaginationStrip` and
   `HELL_PAGINATION_LABELS` are unchanged. Closes #153. Evidence: rewritten
   pagination unit suite; strip, pdf-viewer, and split-view consumers migrated.
-- Removed the `@hell-ui/angular/tag` entry point and folded it into
-  `@hell-ui/angular/chip`: one pill module. `HellTag` is gone — use a static
+- Removed the `hell-ui/tag` entry point and folded it into
+  `hell-ui/chip`: one pill module. `HellTag` is gone — use a static
   `<span hellChip variant="…">` for non-interactive pills (the six variants
   are unchanged); `HellBadge` and `HellKbd` now import from
-  `@hell-ui/angular/chip` with identical behavior, recipes, and `data-slot`
+  `hell-ui/chip` with identical behavior, recipes, and `data-slot`
   contracts; the core type `HellTagVariant` renames to `HellChipVariant`; and
-  `@hell-ui/angular/tag/styles.css` imports repoint to the chip stylesheet.
+  `hell-ui/tag/styles.css` imports repoint to the chip stylesheet.
   No deprecated aliases are provided. Closes #152. Evidence: chip unit suite
   including the ported tag assertions, migrated docs and theme skins.
-- Removed the `@hell-ui/angular/multi-select-menu-button` Package Entry Point.
+- Removed the `hell-ui/multi-select-menu-button` Package Entry Point.
   The composite is now a documented recipe: `hellButton` + `[hellMenu]` +
   `hell-menu-options`, with the count badge as consumer markup, the reset item
   as an ordinary menu item, and the selection floor expressed by disabling
@@ -1737,7 +1749,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - The select and combobox presets now consume the shared core option contract:
   `hell-select-basic` and `hell-combobox-basic` take
   `options: readonly HellOption<T>[]` (`{ value, label, disabled? }`, exported
-  from `@hell-ui/angular/core` with `HellOptionDisplayWith` and
+  from `hell-ui/core` with `HellOptionDisplayWith` and
   `HellOptionCompareWith`) instead of raw value arrays. Display text defaults
   to each option's `label`; `displayWith` becomes a nullable override that also
   labels selected values missing from `options`; combobox filtering matches
@@ -1751,7 +1763,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Removed the 278 information-free single-part Part Style Map aliases
   (`Hell<Module>Part = 'root'` and their `Hell<Module>Ui = HellUi<...>`
   counterparts) from every entry point. Single-part modules now type their
-  `ui` input as `HellUiInput<'root'>` from `@hell-ui/angular/core` directly;
+  `ui` input as `HellUiInput<'root'>` from `hell-ui/core` directly;
   multi-part unions such as `HellToasterPart` or `HellDatePickerPart` and
   their `Ui` maps remain exported. Migrate `HellXUi` annotations on single-part
   modules to `HellUi<'root'>` (or drop the annotation). Evidence: API reports
@@ -1759,31 +1771,31 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   unchanged per the untouched unit and e2e suites.
 - Consolidated the 26 per-entry-point `provideHell<Module>Labels` functions
   into one generic `provideHellLabels(token, overrides)` exported from
-  `@hell-ui/angular/core`. `hellCreateLabels` now returns the `InjectionToken`
+  `hell-ui/core`. `hellCreateLabels` now returns the `InjectionToken`
   itself and registers its defaults for the generic provider; the
   `HellLabelContract` type is gone. Migrate
   `provideHellAlertLabels({ dismiss: '…' })` to
   `provideHellLabels(HELL_ALERT_LABELS, { dismiss: '…' })`; the label
   interfaces and `HELL_*_LABELS` tokens are unchanged. Evidence: migrated
   spec coverage across all label-owning entry points.
-- `@hell-ui/angular/table-tanstack` no longer re-exports
+- `hell-ui/table-tanstack` no longer re-exports
   `FlexRenderDirective`/`FlexRender` or the other TanStack FlexRender helpers;
   import them from `@tanstack/angular-table`. TanStack shell behavior is
   unchanged.
-- Folded the split `@hell-ui/pdf-viewer` package back into `@hell-ui/angular`
-  as the optional feature entry point `@hell-ui/angular/features/pdf-viewer`,
+- Folded the split `@hell-ui/pdf-viewer` package back into `hell-ui`
+  as the optional feature entry point `hell-ui/features/pdf-viewer`,
   reversing the pre-beta package split (see the amended heavy feature boundary
   ADR in `docs/adr/hell-heavy-features.md`). The standalone package is no
   longer published; running a second release train (build, pack audit,
-  provenance, registry mirror, exact-version peer on `@hell-ui/angular`) cost
+  provenance, registry mirror, exact-version peer on `hell-ui`) cost
   more than the one benefit of keeping `pdfjs-dist` out of the main package
   metadata — the same trade already accepted for the CodeMirror peers.
   Migration: replace `@hell-ui/pdf-viewer` imports with
-  `@hell-ui/angular/features/pdf-viewer`, replace the
+  `hell-ui/features/pdf-viewer`, replace the
   `@hell-ui/pdf-viewer/styles` CSS import with
-  `@hell-ui/angular/features/pdf-viewer/styles.css`, drop the
+  `hell-ui/features/pdf-viewer/styles.css`, drop the
   `@hell-ui/pdf-viewer` dependency, and keep the exact `pdfjs-dist@5.6.205`
-  peer (now optional in `@hell-ui/angular`). Component selectors, parts,
+  peer (now optional in `hell-ui`). Component selectors, parts,
   labels, worker inputs, and runtime behavior are unchanged; the PDF specs now
   run inside the main unit suite. Evidence:
   `packages/angular/features/pdf-viewer/*.spec.ts`, the `pdf-viewer`
@@ -1809,8 +1821,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   should pick `sm`/`lg`; rendered output is unchanged. Evidence:
   `etc/api-reports/hell-ui-angular-slider.api.md` and the `data-size`
   assertions in `packages/angular/slider/slider.spec.ts`.
-- Moved `HellSpinner` out of `@hell-ui/angular/skeleton` into its own
-  `@hell-ui/angular/spinner` entry point, per the Light Root Entry Point and
+- Moved `HellSpinner` out of `hell-ui/skeleton` into its own
+  `hell-ui/spinner` entry point, per the Light Root Entry Point and
   import-path-first layout rules: the two modules solve different problems and
   each already had its own docs page. The spinner's Label Contract moves with
   it and is renamed to match its owning entry point — `HellSkeletonLabels`,
@@ -1819,11 +1831,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (the `loading` label was only ever consumed by `hellSpinner`;
   `hellSkeleton` is `aria-hidden` and owns no text, so the skeleton entry
   point no longer exports a label contract). Spinner visuals also move to
-  `@hell-ui/angular/spinner/styles.css`. Migration: import `HellSpinner`,
+  `hell-ui/spinner/styles.css`. Migration: import `HellSpinner`,
   `HellSpinnerPart`, `HellSpinnerUi`, and `HellSpinnerVariant` from
-  `@hell-ui/angular/spinner`; rename label overrides to
+  `hell-ui/spinner`; rename label overrides to
   `provideHellSpinnerLabels({ loading })` from the same entry point; and add
-  `@import '@hell-ui/angular/spinner/styles.css'` wherever the skeleton
+  `@import 'hell-ui/spinner/styles.css'` wherever the skeleton
   stylesheet previously covered spinners. No selectors, data attributes,
   parts, keyframes, or runtime behavior changed. Evidence:
   `packages/angular/spinner/spinner.spec.ts`,
@@ -1831,7 +1843,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `pnpm run test:architecture`.
 - Migrated the last two Style Opt-Out surfaces to typed Part Style Maps and
   removed the legacy `HellStyleable` base (and its `unstyled` input) from
-  `@hell-ui/angular/core`. `HellAvatarGroup`, `HellAvatarGroupItem`, and
+  `hell-ui/core`. `HellAvatarGroup`, `HellAvatarGroupItem`, and
   `HellAvatarGroupOverflow` now expose `ui` inputs with `root` Public Parts and
   `data-slot`-keyed entrypoint styles; `HellPdfViewer` exposes a
   `HellPdfViewerPart` anatomy (`root`, `toolbar`, `toolbarGroup`, `divider`,
@@ -1859,8 +1871,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Removed the pre-beta deprecated compatibility aliases: the
   `allowLiveCaptions` input on `HellAudioPlayer` (use `allowSpeechTranscript`
   plus `provideHellAudioTranscript()`), the `hellAudioSpeechSupported`
-  re-export from `@hell-ui/angular/audio-player` (import it from
-  `@hell-ui/angular/features/audio-transcript`; the removed alias always
+  re-export from `hell-ui/audio-player` (import it from
+  `hell-ui/features/audio-transcript`; the removed alias always
   returned `false`), the browser-global `hellCodeEditorSetup` constant (use
   `hellCodeEditorSetupFactory(ownerDocument)`), and the legacy
   `data-dialog-root` scope attribute that `hellDialogScope` and
@@ -1871,7 +1883,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/dialog/dialog.spec.ts`, and
   `pnpm run test:architecture`.
 - Removed the dead `.hell-button` legacy helper rule from
-  `@hell-ui/angular/button/styles.css`. It was documented as a stopgap for
+  `hell-ui/button/styles.css`. It was documented as a stopgap for
   primitives that had not migrated to Part Style Map; the migration is
   complete and no component, docs page, or example has applied the class
   since. Consumers who added `class="hell-button"` to their own markup must

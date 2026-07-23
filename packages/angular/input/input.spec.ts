@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HellNativeSelect } from '@hell-ui/angular/select';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HellNativeSelect } from 'hell-ui/select';
 import { HellInput, HellTextarea } from './input';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
-import { type HellSize } from '@hell-ui/angular/core';
+import { type HellSize } from 'hell-ui/core';
 import { HELL_DIALOG_IMPORTS } from './dialog';
 import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
 import { sortClasses } from '../spec-helpers';

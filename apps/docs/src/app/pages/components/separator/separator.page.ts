@@ -40,8 +40,8 @@ import separatorWithCardExampleCodeRaw from './examples/with-card.example.ts?raw
         title="Separator"
         icon="faSolidGripLines"
         category="Styled primitive"
-        importPath="@hell-ui/angular/separator"
-        stylesPath="@hell-ui/angular/separator/styles.css"
+        importPath="hell-ui/separator"
+        stylesPath="hell-ui/separator/styles.css"
       >
         A thin, ARIA-correct rule that divides content without borrowing margin from its neighbours.
       </hd-page-header>

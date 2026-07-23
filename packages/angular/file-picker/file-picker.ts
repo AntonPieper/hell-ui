@@ -17,7 +17,7 @@ import {
   hellPartStyler,
   type HellRecipe,
   type HellUiInput,
-} from '@hell-ui/angular/core';
+} from 'hell-ui/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Why one acquired file was rejected. */

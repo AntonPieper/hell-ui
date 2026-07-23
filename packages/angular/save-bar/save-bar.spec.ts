@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { provideHellLabels } from '@hell-ui/angular/core';
+import { provideHellLabels } from 'hell-ui/core';
 import { TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { HellSaveBar, HELL_SAVE_BAR_LABELS, type HellSaveBarMode, type HellSaveBarSaveType, type HellSaveBarUi } from './save-bar';
-import type { HellSize } from '@hell-ui/angular/core';
+import type { HellSize } from 'hell-ui/core';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 const liveAnnounce = vi.fn(() => Promise.resolve());

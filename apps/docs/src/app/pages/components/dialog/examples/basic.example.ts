@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HELL_DIALOG_IMPORTS } from '@hell-ui/angular/dialog';
+import { HellButton } from 'hell-ui/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HELL_DIALOG_IMPORTS } from 'hell-ui/dialog';
 
 @Component({
   selector: 'app-dialog-basic-example',

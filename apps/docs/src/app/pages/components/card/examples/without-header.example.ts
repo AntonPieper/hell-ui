@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellButton } from '@hell-ui/angular/button';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellButton } from 'hell-ui/button';
 
 @Component({
   selector: 'app-card-without-header-example',

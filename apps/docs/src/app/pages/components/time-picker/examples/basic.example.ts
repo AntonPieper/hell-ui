@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellTimePicker, type HellTimeValue } from '@hell-ui/angular/time-picker';
+import { HellTimePicker, type HellTimeValue } from 'hell-ui/time-picker';
 
 @Component({
   selector: 'app-time-picker-basic-example',

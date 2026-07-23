@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormField, form, maxDate, minDate, required } from '@angular/forms/signals';
 
-import { HellDateInput } from '@hell-ui/angular/date-input';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
+import { HellDateInput } from 'hell-ui/date-input';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 @Component({
   selector: 'app-date-input-forms-example',

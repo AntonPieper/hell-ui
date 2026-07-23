@@ -48,8 +48,8 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
         title="Breadcrumbs"
         icon="faSolidSignsPost"
         category="Styled primitive"
-        importPath="@hell-ui/angular/breadcrumbs"
-        stylesPath="@hell-ui/angular/breadcrumbs/styles.css"
+        importPath="hell-ui/breadcrumbs"
+        stylesPath="hell-ui/breadcrumbs/styles.css"
       >
         A hierarchical location trail — links back up the path, a non-link marker for the current
         page, and an optional collapsed-middle for deep hierarchies.
@@ -89,7 +89,7 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
       <p>
         For deep trails, collapse the middle crumbs behind <code>hellBreadcrumbEllipsis</code> and
         pair it with <code>hellMenuTrigger</code>/<code>hellMenu</code> (narrow entry point
-        <code>@hell-ui/angular/menu</code>) so the hidden levels stay reachable. Applying the
+        <code>hell-ui/menu</code>) so the hidden levels stay reachable. Applying the
         directive to a <code>button</code> automatically wires an accessible label from the
         breadcrumbs Label Contract.
       </p>
@@ -109,7 +109,7 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
       <h2>With app shell topbar</h2>
       <p>
         Breadcrumbs read naturally inside <code>hellAppTopbar</code> (narrow entry point
-        <code>@hell-ui/angular/app-shell</code>), reporting the current location without repeating
+        <code>hell-ui/app-shell</code>), reporting the current location without repeating
         the sidenav's own navigation.
       </p>
       <hd-example-tabs [code]="breadcrumbsWithAppShellTopbarExampleCode">

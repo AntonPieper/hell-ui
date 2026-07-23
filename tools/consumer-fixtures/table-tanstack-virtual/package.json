@@ -13,7 +13,7 @@
     "@angular/forms": "*",
     "@angular/platform-browser": "*",
     "@floating-ui/dom": "*",
-    "@hell-ui/angular": "*",
+    "hell-ui": "*",
     "@tanstack/angular-table": "*",
     "@tanstack/virtual-core": "*",
     "ng-primitives": "*",

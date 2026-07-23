@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 interface Region {
   readonly id: string;

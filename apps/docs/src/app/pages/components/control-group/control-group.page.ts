@@ -31,8 +31,8 @@ import controlGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw
         title="Control Group"
         icon="faSolidLayerGroup"
         category="Styled primitive"
-        importPath="@hell-ui/angular/control-group"
-        stylesPath="@hell-ui/angular/control-group/styles.css"
+        importPath="hell-ui/control-group"
+        stylesPath="hell-ui/control-group/styles.css"
       >
         <code>hellControlGroup</code> gives a consumer-owned input or trigger one shared visual
         frame with prefix, suffix, and button-action surfaces.

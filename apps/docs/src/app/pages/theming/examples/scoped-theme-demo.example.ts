@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { HELL_CARD_IMPORTS } from '@hell-ui/angular/card';
-import { HellButton } from '@hell-ui/angular/button';
-import { HellChip } from '@hell-ui/angular/chip';
+import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { HellButton } from 'hell-ui/button';
+import { HellChip } from 'hell-ui/chip';
 
 @Component({
   selector: 'app-themed-panel-demo',

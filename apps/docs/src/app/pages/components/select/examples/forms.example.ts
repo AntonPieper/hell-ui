@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormField, form, required } from '@angular/forms/signals';
-import { HELL_SELECT_IMPORTS } from '@hell-ui/angular/select';
+import { HELL_SELECT_IMPORTS } from 'hell-ui/select';
 
 const ENVIRONMENTS = ['Staging', 'Preview', 'Production'];
 

@@ -16,16 +16,16 @@ import {
   viewChildren,
 } from '@angular/core';
 import type { Signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
-import { hellCreateLabels, type HellLabels } from '@hell-ui/angular/core';
-import type { HellButtonVariant } from '@hell-ui/angular/core';
+import { HellButton } from 'hell-ui/button';
+import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
+import type { HellButtonVariant } from 'hell-ui/core';
 import {
   HellDialog,
   HellDialogDescription,
   HellDialogOverlay,
   HellDialogTitle,
-} from '@hell-ui/angular/dialog';
-import { HellPopover } from '@hell-ui/angular/popover';
+} from 'hell-ui/dialog';
+import { HellPopover } from 'hell-ui/popover';
 import { NgpDialogManager, injectDialogRef } from 'ng-primitives/dialog';
 import type { NgpDialogRef } from 'ng-primitives/dialog';
 import { createOverlay } from 'ng-primitives/portal';

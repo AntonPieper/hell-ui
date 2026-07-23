@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_EMPTY_STATE_IMPORTS } from '@hell-ui/angular/empty-state';
-import { HellButton } from '@hell-ui/angular/button';
+import { HELL_EMPTY_STATE_IMPORTS } from 'hell-ui/empty-state';
+import { HellButton } from 'hell-ui/button';
 
 @Component({
   selector: 'app-empty-state-no-data-example',

@@ -42,8 +42,8 @@ import { PageHeader } from '../../../shared/page-header';
         title="Save bar"
         icon="faSolidFloppyDisk"
         category="Composite"
-        importPath="@hell-ui/angular/save-bar"
-        stylesPath="@hell-ui/angular/save-bar/styles.css"
+        importPath="hell-ui/save-bar"
+        stylesPath="hell-ui/save-bar/styles.css"
       >
         A contextual unsaved-changes action bar: hidden until the form is dirty, then a message
         plus Discard and Save docked to the bottom of the scroll container — with a persistent
