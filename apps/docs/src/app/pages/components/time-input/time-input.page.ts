@@ -7,6 +7,10 @@ import { TimeInputBasicExample } from './examples/basic.example';
 import timeInputBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { TimeInputFormsExample } from './examples/forms.example';
+import timeInputFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
+  loader: 'text',
+};
 import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example';
 import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
@@ -39,6 +43,7 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
     ExampleTabs,
     RouterLink,
     TimeInputBasicExample,
+    TimeInputFormsExample,
     TimeInputReactiveFormsExample,
     TimeInputSecondsAndValidationExample,
     TimeInputSizesExample,
@@ -63,9 +68,10 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         Apply <code>hellTimeInput</code> to an <code>&lt;input&gt;</code>. The native element keeps
         its focus, keyboard, event, attribute, Field, and form-submission semantics while the
         directive owns the Typed Value Input state machine: drafts, strict parsing, stable
-        formatting, validation, nullable clears, and external synchronization. Bind
-        <code>[value]</code> and listen to <code>(valueChange)</code>; both use
-        <code>HellTimeValue | null</code>.
+        formatting, validation state, nullable clears, and external synchronization. The
+        <code>value</code> model is the one committed <code>HellTimeValue | null</code> authority
+        — bind it one-way (<code>[value]</code> plus <code>(valueChange)</code>), two-way
+        (<code>[(value)]</code>), or through Angular forms.
       </p>
       <p>
         The directive reuses the single-host <a routerLink="/components/input">Input</a> styling
@@ -122,9 +128,11 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         Add <code>seconds</code> to parse and format <code>HH:mm:ss</code> and reflect a native
         <code>step</code> of <code>1</code>; the default minute precision reflects
         <code>60</code>. <code>min</code> and <code>max</code> are inclusive structured same-day
-        bounds. <code>required</code>, <code>disabled</code>, and the explicit
-        <code>invalid</code> presentation override all reflect on the native input. Malformed drafts,
-        missing required values, and out-of-range values become invalid automatically.
+        bounds typed <code>HellTimeValue | undefined</code> (<code>null</code> bindings still
+        mean unbounded). <code>required</code>, <code>disabled</code>, and the explicit
+        <code>invalid</code> presentation override all reflect on the native input and are also
+        driven by bound forms. Malformed drafts, missing required values, and out-of-range values
+        become invalid automatically.
       </p>
       <hd-example-tabs
         [code]="timeInputSecondsAndValidationExampleCode"
@@ -133,12 +141,35 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         <app-time-input-seconds-and-validation-example />
       </hd-example-tabs>
 
+      <h2>Signal Forms</h2>
+      <p>
+        Time Input implements Signal Forms'
+        <code>FormValueControl&lt;HellTimeValue | null&gt;</code>: bind a field via
+        <code>[formField]</code> and the field writes into <code>value</code>, user commits update
+        the field exactly once, and blur emits <code>(touch)</code> to mark it touched. The
+        field's <code>required()</code> and <code>disabled()</code> rules flow into the matching
+        inputs. Structured times have no <code>minDate()</code>/<code>maxDate()</code>
+        equivalent, so range policy stays a schema-owned <code>validate</code> rule; the field's
+        errors still drive the reserved <code>invalid</code> input back onto the native host.
+        Draft text stays interaction state: an unparseable committed draft never becomes a value —
+        instead the commit reports one <code>invalidTimeInputDraft</code> parse error to the
+        nearest field through Angular's <code>transformedValue</code> contract, and a later valid
+        or empty commit clears it.
+      </p>
+      <hd-example-tabs [code]="timeInputFormsExampleCode" previewClass="grid max-w-md gap-2">
+        <app-time-input-forms-example />
+      </hd-example-tabs>
+
       <h2>Reactive forms and Field</h2>
       <p>
-        Time Input implements <code>ControlValueAccessor</code> and <code>Validator</code>.
-        Programmatic writes never emit <code>valueChange</code>; user commits update the form before
-        blur marks it touched. Equivalent external writes preserve active typing, while genuinely
-        changed values replace stale drafts. An enclosing
+        <code>formControl</code> and <code>ngModel</code> bind the same <code>value</code> model
+        through Angular's built-in Signal Forms interoperability — no
+        <code>ControlValueAccessor</code> is involved anymore. Programmatic writes never emit
+        <code>valueChange</code>; user commits update the form before blur marks it touched.
+        Validation policy belongs to the form: declare required and range rules on the control
+        itself, while an unparseable or out-of-bounds committed draft simply never commits and
+        keeps the input's visual invalid state until corrected. Equivalent external writes
+        preserve active typing, while genuinely changed values replace stale drafts. An enclosing
         <a routerLink="/components/field">Field</a> associates its label, descriptions, and errors
         with this same native input.
       </p>
@@ -198,18 +229,26 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
           </tr>
           <tr>
             <td><code>value</code> / <code>valueChange</code></td>
-            <td><code>HellTimeValue | null</code></td>
-            <td>Controlled committed value and nullable clear output.</td>
+            <td><code>ModelSignal&lt;HellTimeValue | null&gt;</code></td>
+            <td>
+              One committed value authority: <code>[value]</code>, <code>[(value)]</code>,
+              <code>[formField]</code>, <code>formControl</code>, and <code>ngModel</code>.
+            </td>
           </tr>
           <tr>
             <td><code>required</code>, <code>disabled</code>, <code>invalid</code></td>
             <td><code>boolean</code></td>
-            <td>Native required/disabled state and explicit invalid override.</td>
+            <td>Native required/disabled state and invalid override; also driven by bound forms.</td>
           </tr>
           <tr>
             <td><code>min</code>, <code>max</code></td>
-            <td><code>HellTimeValue | null</code></td>
+            <td><code>HellTimeValue | undefined</code></td>
             <td>Inclusive same-day bounds, also reflected in stable adapter format.</td>
+          </tr>
+          <tr>
+            <td><code>touch</code></td>
+            <td><code>OutputRef&lt;void&gt;</code></td>
+            <td>Emits on blur; Angular forms use it to mark the field or control touched.</td>
           </tr>
           <tr>
             <td><code>seconds</code></td>
@@ -234,11 +273,40 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
         </tbody>
       </table>
       <p>
-        The validator reports <code>invalidTimeInputDraft</code>, <code>required</code>, and
-        <code>outOfRangeTime</code> errors. Native attributes such as <code>name</code>,
-        <code>placeholder</code>, <code>autocomplete</code>, and <code>aria-label</code> stay
-        consumer-authored on the host; a named input participates in native form serialization.
+        Native attributes such as <code>name</code>, <code>placeholder</code>,
+        <code>autocomplete</code>, and <code>aria-label</code> stay consumer-authored on the
+        host; a named input participates in native form serialization.
       </p>
+
+      <h2>Migration to one Control Value Authority</h2>
+      <ul>
+        <li>
+          <code>value</code> is now a <code>ModelSignal&lt;HellTimeValue | null&gt;</code>:
+          <code>[value]</code> plus <code>(valueChange)</code> behave as before, and
+          <code>[(value)]</code> two-way binding is new. Model inputs take no static-attribute
+          coercion; a typed <code>HellTimeValue | null</code> binding was already required.
+        </li>
+        <li>
+          The directive no longer implements <code>ControlValueAccessor</code> or
+          <code>Validator</code>. <code>formControl</code> and <code>ngModel</code> keep working
+          through Angular's Signal Forms interoperability, but the directive writes no errors
+          onto classic controls anymore: <code>invalidTimeInputDraft</code>,
+          <code>required</code>, and <code>outOfRangeTime</code> control errors are gone. Parse
+          failures are reported as <code>invalidTimeInputDraft</code> field errors in Signal
+          Forms only.
+        </li>
+        <li>
+          Declare required and range policy on the form — <code>Validators.required</code> or
+          your own range validator for classic controls, or <code>required()</code> and a
+          <code>validate</code> range rule for Signal Forms — and the input keeps reflecting
+          missing required values, out-of-range committed values, and invalid drafts visually.
+        </li>
+        <li>
+          <code>min</code>/<code>max</code> are typed <code>HellTimeValue | undefined</code>
+          instead of <code>HellTimeValue | null</code>; <code>null</code> bindings still mean
+          unbounded.
+        </li>
+      </ul>
 
       <h2>Migration from the owned component</h2>
       <ul>
@@ -304,6 +372,7 @@ import timeInputWithTimePickerExampleCodeRaw from './examples/with-time-picker.e
 })
 export class TimeInputPage {
   protected readonly timeInputBasicExampleCode = timeInputBasicExampleCodeRaw;
+  protected readonly timeInputFormsExampleCode = timeInputFormsExampleCodeRaw;
   protected readonly timeInputReactiveFormsExampleCode = timeInputReactiveFormsExampleCodeRaw;
   protected readonly timeInputSecondsAndValidationExampleCode =
     timeInputSecondsAndValidationExampleCodeRaw;

@@ -4,17 +4,14 @@
 
 ```ts
 
-import { AbstractControl } from '@angular/forms';
 import * as _angular_core from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import { HellTimeValue } from '@hell-ui/angular/core';
 import { HellTypedInputAdapter } from '@hell-ui/angular/core';
 import * as i1 from '@hell-ui/angular/input';
 import { InjectionToken } from '@angular/core';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import { ValidationErrors } from '@angular/forms';
-import { Validator } from '@angular/forms';
 
 // @public
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter;
@@ -23,7 +20,7 @@ export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter;
 export const HELL_TIME_INPUT_ADAPTER: InjectionToken<HellTimeInputAdapter>;
 
 // @public
-export class HellTimeInput implements ControlValueAccessor, Validator {
+export class HellTimeInput implements FormValueControl<HellTimeValue | null> {
     constructor();
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
@@ -35,10 +32,9 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
-    protected readonly isDisabled: () => boolean;
     protected readonly isInvalid: () => boolean;
-    readonly max: _angular_core.InputSignal<HellTimeValue | null>;
-    readonly min: _angular_core.InputSignal<HellTimeValue | null>;
+    readonly max: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
+    readonly min: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
     protected readonly nativeMax: Signal<string | null>;
     protected readonly nativeMin: Signal<string | null>;
     protected readonly nativeStep: Signal<"1" | "60">;
@@ -46,18 +42,12 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     protected onInput(): void;
     protected onKeydown(event: KeyboardEvent): void;
     protected readonly outOfRange: Signal<boolean>;
-    registerOnChange(fn: (value: HellTimeValue | null) => void): void;
-    registerOnTouched(fn: () => void): void;
-    registerOnValidatorChange(fn: () => void): void;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly requiredMissing: Signal<boolean>;
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    setDisabledState(isDisabled: boolean): void;
-    validate(_control: AbstractControl | null): ValidationErrors | null;
-    readonly value: _angular_core.InputSignal<HellTimeValue | null>;
-    readonly valueChange: _angular_core.OutputEmitterRef<HellTimeValue | null>;
-    writeValue(value: HellTimeValue | null): void;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTimeInput, "input[hellTimeInput]", ["hellTimeInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
+    readonly value: _angular_core.ModelSignal<HellTimeValue | null>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTimeInput, "input[hellTimeInput]", ["hellTimeInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
 }
 

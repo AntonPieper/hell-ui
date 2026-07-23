@@ -7,23 +7,16 @@ import {
   booleanAttribute,
   computed,
   effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
   type Provider,
   type Signal,
 } from '@angular/core';
-import {
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  type AbstractControl,
-  type ControlValueAccessor,
-  type NgControl,
-  type ValidationErrors,
-  type Validator,
-} from '@angular/forms';
+import { type NgControl } from '@angular/forms';
+import { FormField, transformedValue, type FormValueControl } from '@angular/forms/signals';
 import {
   injectFormFieldState,
   ngpFormField,
@@ -44,6 +37,7 @@ import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
+  type HellTypedValueCommitResult,
 } from '@hell-ui/angular/internal/core';
 export type { HellTimeValue } from '@hell-ui/angular/core';
 
@@ -160,19 +154,14 @@ function parsedTimeValue(
   return normalized ? hellTypedValue(normalized) : hellInvalidTypedValue();
 }
 
-function isValidTime(value: HellTimeValue | null | undefined): value is HellTimeValue {
-  return (
-    !!value &&
-    Number.isInteger(value.hour) &&
-    Number.isInteger(value.minute) &&
-    Number.isInteger(value.second) &&
-    value.hour >= 0 &&
-    value.hour <= 23 &&
-    value.minute >= 0 &&
-    value.minute <= 59 &&
-    value.second >= 0 &&
-    value.second <= 59
-  );
+function isValidTime(value: unknown): value is HellTimeValue {
+  if (typeof value !== 'object' || value === null) return false;
+  const { hour, minute, second } = value as Partial<HellTimeValue>;
+  return isTimeUnit(hour, 23) && isTimeUnit(minute, 59) && isTimeUnit(second, 59);
+}
+
+function isTimeUnit(value: unknown, max: number): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= max;
 }
 
 function timeValueSeconds(value: HellTimeValue): number {
@@ -207,33 +196,47 @@ function hellSameTimeInputValue(
   );
 }
 
+/**
+ * `FormUiControl` reserves `min`/`max` as `HellTimeValue | undefined` inputs so
+ * bound forms can write and clear the control's bounds through the reserved
+ * names. Property bindings keep accepting `HellTimeValue | null`; `null`,
+ * `undefined`, and non-time values mean "unset".
+ */
+function hellTimeInputBoundAttribute(value: unknown): HellTimeValue | undefined {
+  return isValidTime(value) ? value : undefined;
+}
+
 let nextTimeInputId = 0;
 
 /**
- * Typed time behavior for a real input. Parsing, validation, and forms live on
- * the native field; picker triggers and Time Picker panels compose separately.
+ * Typed time behavior for a real input. Parsing, validation state, and forms
+ * integration live on the native field; picker triggers and Time Picker panels
+ * compose separately.
+ *
+ * The `value` model is the one Control Value Authority for the committed
+ * `HellTimeValue | null`: bind it one-way (`[value]` plus `(valueChange)`),
+ * two-way (`[(value)]`), or through Angular forms — Signal Forms
+ * `[formField]` via the `FormValueControl` contract, and
+ * `formControl`/`ngModel` via Angular's built-in Signal Forms
+ * interoperability. Draft text stays interaction state: incomplete or invalid
+ * text never commits, and commit attempts report parse failures through
+ * `transformedValue` as `invalidTimeInputDraft` errors on the nearest Signal
+ * Forms field.
  */
 @Directive({
   selector: 'input[hellTimeInput]',
   exportAs: 'hellTimeInput',
   hostDirectives: [{ directive: HellInput, inputs: ['size', 'ui'] }],
-  providers: [
-    provideFormFieldState({ inherit: false }),
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => HellTimeInput),
-      multi: true,
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => HellTimeInput),
-      multi: true,
-    },
-  ],
+  providers: [provideFormFieldState({ inherit: false })],
   host: {
+    // Angular's `ngNoCva` marker: `formControl`/`ngModel` on this native input
+    // must bind the directive's `value` model through Signal Forms custom
+    // control interoperability instead of the string-writing
+    // `DefaultValueAccessor` that otherwise attaches to text inputs.
+    ngNoCva: '',
     '[attr.id]': 'id()',
     '[value]': 'display()',
-    '[disabled]': 'isDisabled()',
+    '[disabled]': 'disabled()',
     '[required]': 'required()',
     '[attr.step]': 'nativeStep()',
     '[attr.min]': 'nativeMin()',
@@ -242,28 +245,39 @@ let nextTimeInputId = 0;
     '[attr.aria-describedby]': 'fieldAriaDescribedby()',
     '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
-    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.data-required]': 'required() ? "true" : null',
     '(input)': 'onInput()',
     '(blur)': 'onBlur()',
     '(keydown)': 'onKeydown($event)',
   },
 })
-export class HellTimeInput implements ControlValueAccessor, Validator {
+export class HellTimeInput implements FormValueControl<HellTimeValue | null> {
   /** Native input id, generated when the consumer does not author one. */
   readonly id = input(`hell-time-input-${++nextTimeInputId}`);
-  /** Forces invalid presentation and accessibility state. */
+  /** Forces the invalid presentation. Also driven by bound forms. */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /** Disables native interaction outside forms use. */
+  /** Disables native interaction. Also driven by bound forms. */
   readonly disabled = input(false, { transform: booleanAttribute });
-  /** Marks a nullable clear as a required-value validation error. */
+  /** Marks null as visually missing. Also driven by a field's `required()` rule. */
   readonly required = input(false, { transform: booleanAttribute });
-  /** Current controlled time value. */
-  readonly value = input<HellTimeValue | null>(null);
-  /** Inclusive lower same-day time bound. */
-  readonly min = input<HellTimeValue | null>(null);
-  /** Inclusive upper same-day time bound. */
-  readonly max = input<HellTimeValue | null>(null);
+  /**
+   * Committed time value — the one Control Value Authority. User commits on
+   * blur or Enter write it exactly once and emit `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. Invalid
+   * or incomplete draft text never reaches this model.
+   */
+  readonly value = model<HellTimeValue | null>(null);
+  /**
+   * Inclusive lower same-day time bound. `undefined` (or `null`) means
+   * unbounded. Also writable by bound forms through the reserved input.
+   */
+  readonly min = input(undefined, { transform: hellTimeInputBoundAttribute });
+  /**
+   * Inclusive upper same-day time bound. `undefined` (or `null`) means
+   * unbounded. Also writable by bound forms through the reserved input.
+   */
+  readonly max = input(undefined, { transform: hellTimeInputBoundAttribute });
   /** Includes seconds in parsing, formatting, bounds, and native step metadata. */
   readonly seconds = input(false, { transform: booleanAttribute });
   /** Additional `aria-describedby` ids merged with an enclosing Field. */
@@ -271,13 +285,25 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   /** Additional `aria-labelledby` ids merged with an enclosing Field. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
-  /** Emits each successfully committed time or nullable clear. */
-  readonly valueChange = output<HellTimeValue | null>();
+  /**
+   * Emits when focus leaves the native input. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
 
   private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
   private readonly renderer = inject(Renderer2);
   private readonly adapter = inject(HELL_TIME_INPUT_ADAPTER);
   private readonly inputState = injectInputState();
+  /**
+   * The Signal Forms `FormField` directive bound to this host, when present.
+   * Parse failures are reported only into its field: classic
+   * `formControl`/`ngModel` bindings deliberately receive no directive-owned
+   * errors, because their required and range policy is form-owned too and the
+   * silent parse-error revalidation Angular's interop performs
+   * (`emitEvent: false`) would leave event-driven Field mirrors stale.
+   */
+  private readonly signalFormField = inject(FormField, { self: true, optional: true });
   private readonly inheritedFormField = injectFormFieldState({
     optional: true,
     skipSelf: true,
@@ -286,12 +312,6 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     ngControl: signal<NgControl | undefined>(undefined),
   });
 
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal<HellTimeValue | null>(null);
-  private readonly controlDisabled = signal(false);
-  private onControlChange: (value: HellTimeValue | null) => void = () => {};
-  private onControlTouched: () => void = () => {};
-  private onValidatorChange: () => void = () => {};
   private hasExternalSnapshot = false;
   private externalSnapshot: HellTimeValue | null = null;
 
@@ -299,11 +319,26 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     HellTimeValue,
     HellTimeValue | null
   >({
-    external: () => this.effectiveValue(),
+    external: () => this.value(),
     parseExternal: (value) => this.normalizeValue(value),
     parseText: (text) => this.parseText(text),
     format: (value) => this.adapter.format(value, this.context()),
     externalChanged: (base, current) => !this.sameValue(base, current),
+  });
+
+  /**
+   * Raw-text commit boundary over the `value` model. Commit attempts write the
+   * committed text here: a valid parse updates the model exactly once, while a
+   * parse failure leaves the model untouched and reports one
+   * `invalidTimeInputDraft` error to the nearest Signal Forms field.
+   */
+  private readonly rawCommitText = transformedValue(this.value, {
+    parse: (text: string) => {
+      const parsed = this.parseText(text);
+      if (!parsed.valid) return { error: { kind: 'invalidTimeInputDraft' } };
+      return { value: parsed.value };
+    },
+    format: (value) => this.adapter.format(this.normalizeValue(value), this.context()),
   });
 
   /** Current committed time normalized to visible precision. */
@@ -320,21 +355,19 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   protected readonly requiredMissing = computed(
     () => this.required() && this.current() === null && !this.invalidDraft(),
   );
-  /** Effective invalid state from behavior, Field, or an explicit override. */
+  /** Effective invalid state from behavior, Field, forms, or an explicit override. */
   protected readonly isInvalid = (): boolean =>
     this.invalid() ||
     this.invalidDraft() ||
     this.outOfRange() ||
     this.requiredMissing() ||
     this.inheritedFormField()?.invalid() === true;
-  /** Effective disabled state from the public input or forms API. */
-  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
   /** Native step metadata matching visible precision. */
   protected readonly nativeStep = computed(() => (this.seconds() ? '1' : '60'));
   /** Native lower-bound metadata using the active adapter. */
-  protected readonly nativeMin = computed(() => this.formatBound(this.min()));
+  protected readonly nativeMin = computed(() => this.formatBound(this.min() ?? null));
   /** Native upper-bound metadata using the active adapter. */
-  protected readonly nativeMax = computed(() => this.formatBound(this.max()));
+  protected readonly nativeMax = computed(() => this.formatBound(this.max() ?? null));
   /** Effective description ids from native attributes and an enclosing Field. */
   protected readonly fieldAriaDescribedby = computed(() =>
     this.mergeIdRefs(this.ariaDescribedby(), this.inheritedFormField()?.descriptions()),
@@ -349,7 +382,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
 
     effect(() => {
-      const disabled = this.isDisabled();
+      const disabled = this.disabled();
       const inputState = this.inputState();
       if (inputState.disabled() !== disabled) inputState.setDisabled(disabled);
       this.formField.disabled.set(disabled);
@@ -382,23 +415,13 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     }
 
     effect(() => {
-      const external = this.normalizeValue(this.effectiveValue());
+      const external = this.normalizeValue(this.value());
       if (this.hasExternalSnapshot && !this.sameValue(this.externalSnapshot, external)) {
         this.valueState.clearDraft();
         this.valueState.clearLocal();
       }
       this.externalSnapshot = external;
       this.hasExternalSnapshot = true;
-    });
-
-    effect(() => {
-      this.invalidDraft();
-      this.current();
-      this.min();
-      this.max();
-      this.required();
-      this.seconds();
-      this.onValidatorChange();
     });
 
     afterRenderEffect(() => {
@@ -409,77 +432,47 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     });
   }
 
-  /** Writes a time from Angular forms without emitting it back. */
-  writeValue(value: HellTimeValue | null): void {
-    const normalized = this.normalizeValue(value);
-    const changed = !this.controlMode() || !this.sameValue(this.controlValue(), normalized);
-
-    this.controlMode.set(true);
-    this.controlValue.set(normalized);
-    if (changed) {
-      this.valueState.clearDraft();
-      this.valueState.clearLocal();
-    }
-    this.onValidatorChange();
-  }
-
-  /** Registers the Angular forms change callback. */
-  registerOnChange(fn: (value: HellTimeValue | null) => void): void {
-    this.onControlChange = fn;
-  }
-
-  /** Registers the Angular forms touched callback. */
-  registerOnTouched(fn: () => void): void {
-    this.onControlTouched = fn;
-  }
-
-  /** Registers the Angular forms validator-change callback. */
-  registerOnValidatorChange(fn: () => void): void {
-    this.onValidatorChange = fn;
-  }
-
-  /** Applies disabled state supplied by Angular forms. */
-  setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
-  }
-
-  /** Reports malformed drafts, missing required values, and bound violations. */
-  validate(_control: AbstractControl | null): ValidationErrors | null {
-    const errors: ValidationErrors = {};
-    if (this.invalidDraft()) errors['invalidTimeInputDraft'] = true;
-    else if (this.requiredMissing()) errors['required'] = true;
-    if (this.outOfRange()) errors['outOfRangeTime'] = true;
-    return Object.keys(errors).length > 0 ? errors : null;
-  }
-
   /** Records the native field value as a draft. */
   protected onInput(): void {
     this.valueState.writeDraft(this.host.value);
-    this.onValidatorChange();
   }
 
   /** Commits a draft and marks the native field touched on blur. */
   protected onBlur(): void {
-    const result = this.valueState.commitDraft();
-    if (result.committed) this.emitValue(result.value);
-    this.onControlTouched();
-    this.onValidatorChange();
+    const text = this.host.value;
+    this.applyCommit(this.valueState.commitDraft(), text);
+    this.touch.emit();
   }
 
   /** Commits on Enter without cancelling native form submission. */
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter') return;
-    const result = this.valueState.commitText(this.host.value);
-    if (result.committed) this.emitValue(result.value);
-    this.onValidatorChange();
+    const text = this.host.value;
+    this.applyCommit(this.valueState.commitText(text), text);
+  }
+
+  /**
+   * Routes one commit attempt through the raw-text boundary: successful
+   * commits write the model once (after synchronously canonicalizing the
+   * native text so native form submission serializes the stable format), and
+   * invalid commits report their parse failure without touching the model.
+   * Stale and draft-free attempts change nothing.
+   */
+  private applyCommit(
+    result: HellTypedValueCommitResult<HellTimeValue | null>,
+    text: string,
+  ): void {
+    if (result.committed) {
+      // Native submission may run before Angular renders the committed display.
+      this.host.value = this.adapter.format(result.value, this.context());
+      this.rawCommitText.set(text);
+    } else if (result.reason === 'invalid' && this.signalFormField !== null) {
+      this.rawCommitText.set(text);
+    }
   }
 
   private context(): HellTimeInputAdapterContext {
     return { seconds: this.seconds() };
-  }
-
-  private effectiveValue(): HellTimeValue | null {
-    return this.controlMode() ? this.controlValue() : this.value();
   }
 
   private parseText(text: string): HellTypedValueParseResult<HellTimeValue> {
@@ -499,9 +492,11 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   }
 
   private isWithinBounds(value: HellTimeValue | null): boolean {
+    const min = this.min() ?? null;
+    const max = this.max() ?? null;
     return (
-      this.adapter.isWithinBounds?.(value, this.min(), this.max(), this.context()) ??
-      hellIsTimeInputValueWithinBounds(value, this.min(), this.max(), this.context())
+      this.adapter.isWithinBounds?.(value, min, max, this.context()) ??
+      hellIsTimeInputValueWithinBounds(value, min, max, this.context())
     );
   }
 
@@ -513,14 +508,5 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
   private mergeIdRefs(explicit: string | null, fieldIds: readonly string[] | undefined): string | null {
     const ids = hellUniqueIdRefs([explicit, ...(fieldIds ?? [])].filter(Boolean).join(' '));
     return ids.join(' ') || null;
-  }
-
-  private emitValue(value: HellTimeValue | null): void {
-    // Native submission may run before Angular renders the committed display.
-    this.host.value = this.adapter.format(value, this.context());
-    if (this.controlMode()) this.controlValue.set(value);
-    this.valueChange.emit(value);
-    this.onControlChange(value);
-    this.onValidatorChange();
   }
 }
