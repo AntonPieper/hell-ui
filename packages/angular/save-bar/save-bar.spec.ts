@@ -5,6 +5,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { HellSaveBar, HELL_SAVE_BAR_LABELS, type HellSaveBarMode, type HellSaveBarSaveType, type HellSaveBarUi } from './save-bar';
 import type { HellSize } from '@hell-ui/angular/core';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 const liveAnnounce = vi.fn(() => Promise.resolve());
 
@@ -367,25 +368,6 @@ describe('HellSaveBar', () => {
     });
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

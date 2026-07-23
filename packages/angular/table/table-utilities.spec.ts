@@ -6,6 +6,7 @@ import { By } from '@angular/platform-browser';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
 import { HELL_TABLE_UTILITIES_IMPORTS, HellTable, HellTableCell, HellTableHeaderCell, HellTableRow, type HellTableResizeHandleUi, type HellTableResizeAdapter, type HellTableResizeEvent, type HellTableResizeItem, HELL_TABLE_UTILITIES_LABELS } from './table-utilities';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [HellButton, HellInput, ...HELL_TABLE_UTILITIES_IMPORTS],
@@ -585,8 +586,6 @@ describe('Hell table utilities directives', () => {
       const fixture = TestBed.createComponent(TableUtilitiesHost);
       fixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (selector: string): string[] => {
         const element = root.querySelector(selector);
         return sortClasses(element?.getAttribute('class') ?? '');

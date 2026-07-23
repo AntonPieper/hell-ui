@@ -7,6 +7,7 @@ import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   type HellAudioTranscriptRuntime,
 } from '@hell-ui/angular/internal/audio-transcript';
+import { sortClasses } from '../spec-helpers';
 
 class FakeTranscriptRuntime implements HellAudioTranscriptRuntime {
   readonly transcript = signal('');
@@ -208,8 +209,6 @@ describe('HellAudioPlayer', () => {
       captionToggle.click();
       fixture.detectChanges();
 
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (slot: string): string[] =>
         sortClasses(root.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 

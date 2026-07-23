@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_TABS_IMPORTS } from './tabs';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Tabs specs assert behavior, roles, and state attributes. Part-Class
@@ -129,25 +130,6 @@ function defaultTabClasses(): Record<'tabset' | 'list' | 'tab' | 'panel', string
     tab: query<HTMLElement>(root, 'button[hellTab]').className,
     panel: query<HTMLElement>(root, '[hellTabPanel]').className,
   };
-}
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {

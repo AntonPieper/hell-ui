@@ -6,6 +6,7 @@ import { NgpDialogManager } from 'ng-primitives/dialog';
 import { type HellSize } from '@hell-ui/angular/core';
 import { HELL_DIALOG_IMPORTS } from './dialog';
 import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [...HELL_DIALOG_IMPORTS],
@@ -504,10 +505,6 @@ describe('HellDialogTrigger scoped overlays', () => {
     });
   });
 });
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}
 
 describe('HellDialogScopedOverlayAdapter', () => {
   afterEach(() => {

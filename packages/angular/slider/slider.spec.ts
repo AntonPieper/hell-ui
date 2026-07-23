@@ -6,6 +6,7 @@ import { FormField, disabled as disabledSchema, form, max } from '@angular/forms
 import { HELL_FIELD_IMPORTS } from '@hell-ui/angular/field';
 import { type HellSize } from '@hell-ui/angular/core';
 import { HellSlider, type HellSliderUi } from './slider';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [HellSlider],
@@ -124,22 +125,6 @@ class SliderUiHost {
   };
 }
 
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
 describe('HellSlider', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -193,8 +178,6 @@ describe('HellSlider', () => {
       const fixture = TestBed.createComponent(SliderUiHost);
       fixture.detectChanges();
       const slider = fixture.nativeElement.querySelector('#slider-default') as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (slot: string): string[] =>
         sortClasses(slider.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 

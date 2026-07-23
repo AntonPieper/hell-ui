@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgpMenuTrigger } from 'ng-primitives/menu';
 
 import { HELL_MENU_IMPORTS, HellMenuTrigger } from './menu';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [...HELL_MENU_IMPORTS],
@@ -581,10 +582,6 @@ async function nextFrame(): Promise<void> {
 
 function queryOptional<T extends HTMLElement>(root: ParentNode, selector: string): T | null {
   return root.querySelector<T>(selector);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {

@@ -11,6 +11,7 @@ import {
   HellKbd,
   HELL_CHIP_LABELS,
 } from './chip';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Chip specs assert behavior and state attributes. Part-Class Pipeline merge
@@ -722,25 +723,6 @@ describe('HellChip static pill, Badge, and Kbd Part Style Maps', () => {
     });
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
-}
 
 function query<T extends HTMLElement>(fixture: { nativeElement: HTMLElement }, selector: string): T {
   const element = fixture.nativeElement.querySelector<T>(selector);

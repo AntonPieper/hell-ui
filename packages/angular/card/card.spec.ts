@@ -9,6 +9,7 @@ import {
   HELL_CARD_IMPORTS,
   HELL_CARD_RECIPE,
 } from './card';
+import { sortClasses } from '../spec-helpers';
 
 /**
  * Card specs assert behavior and state attributes. Part-Class Pipeline merge
@@ -152,10 +153,6 @@ function classesByPart(recipe: Readonly<Record<string, string>>): Record<string,
 /** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
 function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {
   return sortClasses(query(fixture.nativeElement, selector).className);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function query(root: HTMLElement, selector: string): HTMLElement {

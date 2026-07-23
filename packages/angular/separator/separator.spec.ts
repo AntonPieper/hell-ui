@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { hellTwMerge } from '@hell-ui/angular/core';
 
 import { HELL_SEPARATOR_RECIPE, HellSeparator } from './separator';
+import { sortClasses } from '../spec-helpers';
 
 /**
  * Separator specs assert behavior and state attributes. Part-Class Pipeline
@@ -107,10 +108,6 @@ function classesByPart(recipe: Readonly<Record<string, string>>): Record<string,
 /** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
 function renderedClasses(fixture: { nativeElement: HTMLElement }, id: string): string[] {
   return sortClasses(byId(fixture.nativeElement, id).className);
-}
-
-function sortClasses(value: string): string[] {
-  return value.split(/\s+/).filter(Boolean).sort();
 }
 
 function byId(root: HTMLElement, id: string): HTMLElement {

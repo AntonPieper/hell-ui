@@ -7,6 +7,7 @@ import {
   type HellDatePickerUi,
   type HellDateRangePickerUi,
 } from './date-picker';
+import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [HellDatePicker],
@@ -129,9 +130,6 @@ describe('HellDatePicker', () => {
       const fixture = TestBed.createComponent(DatePickerHost);
       fixture.detectChanges();
 
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
-
       expect({
         root: sortClasses(datePicker(fixture.nativeElement).className),
         navButton: sortClasses(button(fixture.nativeElement, 'Previous year').className),
@@ -200,22 +198,6 @@ describe('HellDatePicker', () => {
     expect(picker.hasAttribute('data-range-complete')).toBe(false);
   });
 });
-
-/**
- * Proves consumer ui classes reach the part through the Part-Class Pipeline:
- * every ui class renders, and nothing outside the default render plus the
- * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
- */
-function expectUiRouting(defaultClassName: string, customClassName: string, ui: string): void {
-  const sortClasses = (value: string): string[] => value.split(/\s+/).filter(Boolean).sort();
-  const custom = sortClasses(customClassName);
-  const ownUi = sortClasses(ui);
-  const allowed = new Set([...sortClasses(defaultClassName), ...ownUi]);
-
-  expect(custom).toEqual(expect.arrayContaining(ownUi));
-  expect(custom.filter((candidate) => !allowed.has(candidate))).toEqual([]);
-}
 
 function label(root: HTMLElement): string {
   const element = labelElement(root);

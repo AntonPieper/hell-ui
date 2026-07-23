@@ -13,6 +13,7 @@ import {
   type HellOmnibarSubmitEvent,
   type HellOmnibarUi,
 } from './omnibar';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [...HELL_OMNIBAR_IMPORTS, ...HELL_MENU_IMPORTS],
@@ -563,8 +564,6 @@ describe('HellOmnibar command interaction runtime', () => {
       const chipFixture = TestBed.createComponent(OmnibarChipCompositionHost);
       chipFixture.detectChanges();
 
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const panel = query<HTMLElement>(overlayRoot(), '[data-slot="panel"]');
 
       expect({

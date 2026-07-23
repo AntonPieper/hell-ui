@@ -4,6 +4,7 @@ import { BreakpointObserver, type BreakpointState } from '@angular/cdk/layout';
 import { ReplaySubject } from 'rxjs';
 
 import { HELL_APP_SHELL_IMPORTS, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
+import { sortClasses } from '../spec-helpers';
 
 @Component({
   imports: [...HELL_APP_SHELL_IMPORTS],
@@ -388,8 +389,6 @@ describe('HellAppShell secondary panel', () => {
       const fixture = TestBed.createComponent(TestHost);
       fixture.detectChanges();
       const root = fixture.nativeElement as HTMLElement;
-      const sortClasses = (value: string): string[] =>
-        value.split(/\s+/).filter(Boolean).sort();
       const partClasses = (selector: string): string[] =>
         sortClasses(root.querySelector(selector)?.getAttribute('class') ?? '');
 
