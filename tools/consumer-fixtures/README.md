@@ -75,6 +75,16 @@ app. Two rules keep fixtures honest:
   for heavy/optional stylesheet markers (Code Editor, PDF Viewer, Theme
   Adapter Stylesheets) that a standard-style fixture must never pick up
   implicitly.
+- `styleBundleBudget` (optional) — path to a checked-in size budget file,
+  resolved against the fixture directory but staying inside
+  `tools/consumer-fixtures/`. The runner measures every CSS byte the
+  fixture's production build emitted (compiled and minified, nothing
+  filtered), prints deterministic per-file and total raw/gzip byte counts,
+  and fails when the file's `budget` limits are exceeded. The file also
+  records the accepted `baseline` (package revision, measurement command,
+  measured bytes) the budget is derived from. `styles-aggregate` uses
+  `style-bundle-budget.json` as the Default Style Bundle release gate; see
+  `docs/release/style-bundle-budget.md` for the review and update process.
 - `smoke` (optional) — one runtime smoke: the runner serves the production
   build and loads it in headless Chromium. A step either polls `selector`
   until its text contains `textIncludes`, or asserts one resolved
@@ -105,8 +115,9 @@ app. Two rules keep fixtures honest:
    `pnpm install --strict-peer-dependencies --ignore-scripts`.
 4. Asserts the library resolved to the packed tarball (never the repo
    checkout) and that forbidden dependencies are absent.
-5. Runs the fixture's own `build` script, asserts the CSS sentinels, and,
-   when enabled, the smoke.
+5. Runs the fixture's own `build` script, asserts the CSS sentinels,
+   enforces the fixture's style bundle size budget when one is declared, and,
+   when enabled, runs the smoke.
 
 `HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging.
 
@@ -146,7 +157,10 @@ audited release tarball.
   standard styles ship in the bundle via CSS sentinels, and proves heavy
   markers and peers stay absent. Its computed-style smoke steps are shared
   with `styles-granular` through `style-modes-smoke.steps.json`, so both
-  standard-style modes must render identically.
+  standard-style modes must render identically. It is also the release-size
+  measurement surface: its compiled CSS is benchmarked against
+  `style-bundle-budget.json` (`pnpm run benchmark:style-bundle`; see
+  `docs/release/style-bundle-budget.md`).
 - `styles-granular` — Granular Style Mode: `hell-ui/tokens.css` plus only the
   Entrypoint-Scoped Stylesheets the app imports, rendering the same surfaces
   as `styles-aggregate` and asserting the same shared computed-style steps.

@@ -226,7 +226,7 @@ afterAll(() => {
 /**
  * Select specs assert behavior, forms integration, and ARIA relationships.
  * Part-Class Pipeline merge semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
+ * `internal/core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
  * classes reach each part and that nothing outside the default render and the
  * consumer's ui appears, instead of asserting individual recipe classes. Part
  * Recipes stay package-private per ADR 0002, so the recipe snapshot below

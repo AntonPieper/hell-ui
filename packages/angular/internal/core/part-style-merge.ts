@@ -1,6 +1,13 @@
 import { extendTailwindMerge } from 'tailwind-merge';
 
-/** Merge Tailwind classes with Hell design-token class groups. */
+/**
+ * Merge Tailwind classes with Hell design-token class groups.
+ *
+ * This is the package-internal merge configuration of the Part-Class
+ * Pipeline; it is not a consumer API. Consumers refine Public Parts through
+ * the public `ui` Part Style Map contract instead of merging classes
+ * themselves.
+ */
 export const hellTwMerge = extendTailwindMerge({
   extend: {
     theme: {

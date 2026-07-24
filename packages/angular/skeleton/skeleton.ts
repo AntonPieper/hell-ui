@@ -1,5 +1,6 @@
 import { Directive, input } from '@angular/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import type { HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 
 const HELL_SKELETON_RECIPE = {
   root: 'block animate-[hell-shimmer_1.6s_linear_infinite] rounded-sm bg-hell-surface-muted bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--color-hell-surface)_70%,transparent)_50%,transparent_100%)] bg-[length:200%_100%] bg-no-repeat motion-reduce:animate-none motion-reduce:bg-none data-[shape=circle]:rounded-full data-[shape=rect]:rounded-hell-md',

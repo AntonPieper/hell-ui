@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormCheckboxControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as ng_primitives_switch from 'ng-primitives/switch';
@@ -15,7 +14,7 @@ import * as ng_primitives_switch from 'ng-primitives/switch';
 export class HellNativeSwitch {
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSwitch, "input[type=\"checkbox\"][hellNativeSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
@@ -27,7 +26,7 @@ export class HellSwitch implements FormCheckboxControl {
     readonly checked: _angular_core.ModelSignal<boolean>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected markControlTouched(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellSwitchPart>;
+    protected readonly part: (part: HellSwitchPart) => string;
     protected readonly state: ng_primitives_switch.NgpSwitchState;
     readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSwitchPart>>;

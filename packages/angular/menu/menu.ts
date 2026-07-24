@@ -23,12 +23,8 @@ import {
   injectMenuTriggerState,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
-import { hellRegisterFloatingHost } from 'hell-ui/internal/core';
-import {
-  hellPartStyler,
-  type HellRecipe,
-  type HellUiInput,
-} from 'hell-ui/core';
+import { hellRegisterFloatingHost, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
+import type { HellUiInput } from 'hell-ui/core';
 import { HELL_FLOATING_POP_IN, HELL_FLOATING_SURFACE } from 'hell-ui/internal/floating';
 import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 

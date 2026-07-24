@@ -26,7 +26,7 @@ import { HellButton } from 'hell-ui/button';
 import { HellIcon } from 'hell-ui/icon';
 import { HellSlider } from 'hell-ui/slider';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
@@ -42,6 +42,8 @@ import {
   hellOutsideFocus,
   hellWithDismissEffect,
   type HellFloatingScope,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import type { InjectionToken } from '@angular/core';

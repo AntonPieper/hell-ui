@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -19,7 +18,7 @@ export class HellAvatar {
     readonly alt: _angular_core.InputSignal<string | null>;
     readonly fallback: _angular_core.InputSignal<string>;
     readonly image: _angular_core.InputSignal<string | null>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellAvatarPart>;
+    protected readonly part: (part: HellAvatarPart) => string;
     readonly shape: _angular_core.InputSignal<"round" | "square">;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellAvatarPart>>;
@@ -29,7 +28,7 @@ export class HellAvatar {
 
 // @public
 export class HellAvatarGroup {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellAvatarGroup, "hell-avatar-group", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, ["*"], true, never>;
@@ -38,7 +37,7 @@ export class HellAvatarGroup {
 
 // @public
 export class HellAvatarGroupItem {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly selected: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAvatarGroupItem, "[hellAvatarGroupItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "selected": { "alias": "selected"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -47,7 +46,7 @@ export class HellAvatarGroupItem {
 
 // @public
 export class HellAvatarGroupOverflow {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellAvatarGroupOverflow, "[hellAvatarGroupOverflow]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAvatarGroupOverflow, never>;

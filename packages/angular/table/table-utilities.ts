@@ -1,9 +1,11 @@
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
 import {
   HellResizePairInteractionController,
   hellResizePairAriaValue,
   type HellResizeDirection,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import {
   hellTableResizeAdapterCanResize,

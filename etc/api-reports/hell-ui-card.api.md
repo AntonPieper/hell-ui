@@ -4,30 +4,16 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
-import { HellRecipe } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
-
-// @public
-export const HELL_CARD_BODY_RECIPE: HellRecipe<'root'>;
-
-// @public
-export const HELL_CARD_FOOTER_RECIPE: HellRecipe<'root'>;
-
-// @public
-export const HELL_CARD_HEADER_RECIPE: HellRecipe<'root'>;
 
 // @public
 export const HELL_CARD_IMPORTS: readonly [typeof HellCard, typeof HellCardHeader, typeof HellCardBody, typeof HellCardFooter];
 
 // @public
-export const HELL_CARD_RECIPE: HellRecipe<'root'>;
-
-// @public
 export class HellCard {
     readonly elevation: i0.InputSignal<0 | 1 | 2 | 3>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCard, "[hellCard]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "elevation": { "alias": "elevation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCard, never>;
@@ -35,7 +21,7 @@ export class HellCard {
 
 // @public
 export class HellCardBody {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardBody, "[hellCardBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardBody, never>;
@@ -43,7 +29,7 @@ export class HellCardBody {
 
 // @public
 export class HellCardFooter {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardFooter, "[hellCardFooter]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardFooter, never>;
@@ -51,7 +37,7 @@ export class HellCardFooter {
 
 // @public
 export class HellCardHeader {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardHeader, "[hellCardHeader]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardHeader, never>;

@@ -63,6 +63,78 @@ test.describe('Control Group browser contract', () => {
     await expect(disabled.getByRole('button', { name: 'Test' })).toBeDisabled();
   });
 
+  test('keeps a very long unbroken value inside the frame with inner scroll', async ({ page }) => {
+    await gotoControlGroup(page);
+
+    const example = page.locator('app-control-group-overflow-example');
+    const group = example.getByRole('group', { name: 'Webhook endpoint controls' });
+    const input = group.getByRole('textbox');
+    const suffix = group.locator('[hellControlGroupSuffix]');
+    const action = group.getByRole('button', { name: 'Copy' });
+
+    const groupBox = await group.boundingBox();
+    const parentBox = await group.locator('..').boundingBox();
+    if (!groupBox || !parentBox) throw new Error('Expected rendered group geometry.');
+
+    // The frame never grows for content: it stays bounded by its container.
+    expect(groupBox.width).toBeLessThanOrEqual(parentBox.width + 1);
+
+    // The long unbroken value scrolls inside the control instead of pushing the frame.
+    const overflow = await input.evaluate((element) => ({
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+    }));
+    expect(overflow.scrollWidth).toBeGreaterThan(overflow.clientWidth);
+
+    // Static affixes and the action survive the long value untouched.
+    for (const surface of [suffix, action]) {
+      const box = await surface.boundingBox();
+      if (!box) throw new Error('Expected rendered surface geometry.');
+      expect(box.x).toBeGreaterThanOrEqual(groupBox.x - 1);
+      expect(box.x + box.width).toBeLessThanOrEqual(groupBox.x + groupBox.width + 1);
+    }
+    await expect(suffix).toHaveText('.hell.app');
+
+    // Growing the value further never widens the frame.
+    await input.fill(`${'workspace-'.repeat(40)}end`);
+    const grownBox = await group.boundingBox();
+    if (!grownBox) throw new Error('Expected rendered group geometry.');
+    expect(Math.abs(grownBox.width - groupBox.width)).toBeLessThanOrEqual(1);
+  });
+
+  test('truncates static affixes with an ellipsis in an over-constrained frame', async ({
+    page,
+  }) => {
+    await gotoControlGroup(page);
+
+    const example = page.locator('app-control-group-overflow-example');
+    const group = example.getByRole('group', { name: 'Cluster endpoint controls' });
+    const prefix = group.locator('[hellControlGroupPrefix]');
+    const suffix = group.locator('[hellControlGroupSuffix]');
+
+    // The pinned prefix keeps its full text.
+    const prefixOverflow = await prefix.evaluate((element) => ({
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+    }));
+    expect(prefixOverflow.scrollWidth).toBeLessThanOrEqual(prefixOverflow.clientWidth);
+
+    // The long static suffix gives way with an ellipsis instead of clipping the frame.
+    const suffixOverflow = await suffix.evaluate((element) => ({
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+      textOverflow: getComputedStyle(element).textOverflow,
+    }));
+    expect(suffixOverflow.scrollWidth).toBeGreaterThan(suffixOverflow.clientWidth);
+    expect(suffixOverflow.textOverflow).toBe('ellipsis');
+
+    // The control keeps a readable floor instead of collapsing to nothing.
+    const input = group.getByRole('textbox');
+    const inputBox = await input.boundingBox();
+    if (!inputBox) throw new Error('Expected rendered input geometry.');
+    expect(inputBox.width).toBeGreaterThanOrEqual(48);
+  });
+
   test('keeps the documented composition axe-clean', async ({ page }) => {
     await gotoControlGroup(page);
 

@@ -13,11 +13,14 @@ import {
 } from '@angular/core';
 
 import {
-  hellCreateLabels, type HellLabels,
-  hellPartStyler,
-  type HellRecipe,
+  hellCreateLabels,
+  type HellLabels,
   type HellUiInput,
 } from 'hell-ui/core';
+import {
+  hellPartStyler,
+  type HellRecipe,
+} from 'hell-ui/internal/core';
 import type { InjectionToken } from '@angular/core';
 
 /** Why one acquired file was rejected. */

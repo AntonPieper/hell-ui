@@ -5,7 +5,6 @@
 ```ts
 
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellPickValue } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -18,7 +17,7 @@ export const HELL_COMBOBOX_IMPORTS: readonly [typeof HellCombobox, typeof HellCo
 export class HellCombobox<T = unknown> implements FormValueControl<HellPickValue<T>> {
     constructor();
     readonly disabled: i0.InputSignalWithTransform<boolean, unknown>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly touch: i0.OutputEmitterRef<void>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     readonly value: i0.ModelSignal<HellPickValue<T>>;
@@ -29,7 +28,7 @@ export class HellCombobox<T = unknown> implements FormValueControl<HellPickValue
 
 // @public
 export class HellComboboxButton {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellComboboxButton, "button[hellComboboxButton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpComboboxButton; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellComboboxButton, never>;
@@ -38,7 +37,7 @@ export class HellComboboxButton {
 // @public
 export class HellComboboxDropdown {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellComboboxDropdown, "[hellComboboxDropdown]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpComboboxDropdown; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellComboboxDropdown, never>;
@@ -46,7 +45,7 @@ export class HellComboboxDropdown {
 
 // @public
 export class HellComboboxEmpty {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellComboboxEmpty, "[hellComboboxEmpty]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellComboboxEmpty, never>;
@@ -54,7 +53,7 @@ export class HellComboboxEmpty {
 
 // @public
 export class HellComboboxInput {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellComboboxInput, "input[hellComboboxInput]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpComboboxInput; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellComboboxInput, never>;
@@ -64,7 +63,7 @@ export class HellComboboxInput {
 export class HellComboboxOption {
     // (undocumented)
     protected readonly disabled: i0.Signal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellComboboxOption, "[hellComboboxOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpComboboxOption; inputs: { "ngpComboboxOptionValue": "value"; "ngpComboboxOptionDisabled": "disabled"; "ngpComboboxOptionIndex": "index"; }; outputs: { "ngpComboboxOptionActivated": "activated"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellComboboxOption, never>;
@@ -78,7 +77,7 @@ export class HellComboboxPortal {
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-combobox.d.ts:106:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-combobox.d.ts:105:5 - (ae-undocumented) Missing documentation for "disabled".
 
 // (No @packageDocumentation comment for this package)
 

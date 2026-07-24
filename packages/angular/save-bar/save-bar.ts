@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, booleanAttribute, computed, effect, inject, input, output } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { hellCreateLabels, type HellLabels, hellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from 'hell-ui/core';
+import {
+  hellCreateLabels,
+  type HellLabels,
+  type HellSize,
+  type HellUi,
+  type HellUiInput,
+} from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellButton } from 'hell-ui/button';
 import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 

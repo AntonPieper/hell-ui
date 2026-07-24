@@ -4,7 +4,7 @@
 
 ```ts
 
-import { HellRecipe } from 'hell-ui/core';
+import { HellRecipe } from 'hell-ui/internal/core';
 
 // @public
 export const HELL_OPTION_SURFACE_DISABLED = "data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted";
