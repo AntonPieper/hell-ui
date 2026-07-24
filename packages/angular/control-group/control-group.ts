@@ -20,11 +20,11 @@ const HELL_CONTROL_GROUP_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_CONTROL_GROUP_PREFIX_RECIPE = {
-  root: 'inline-flex flex-none select-none items-center px-hell-3 text-hell-foreground-muted data-[size=sm]:px-hell-2 data-[size=lg]:px-hell-4 data-[disabled=true]:opacity-70',
+  root: 'block min-w-0 select-none self-center overflow-hidden text-ellipsis whitespace-nowrap ps-hell-3 text-hell-foreground-muted data-[size=sm]:ps-hell-2 data-[size=lg]:ps-hell-4 data-[disabled=true]:opacity-70',
 } satisfies HellRecipe<'root'>;
 
 const HELL_CONTROL_GROUP_SUFFIX_RECIPE = {
-  root: 'inline-flex flex-none select-none items-center px-hell-3 text-hell-foreground-muted data-[size=sm]:px-hell-2 data-[size=lg]:px-hell-4 data-[disabled=true]:opacity-70',
+  root: 'block min-w-0 select-none self-center overflow-hidden text-ellipsis whitespace-nowrap pe-hell-3 text-hell-foreground-muted data-[size=sm]:pe-hell-2 data-[size=lg]:pe-hell-4 data-[disabled=true]:opacity-70',
 } satisfies HellRecipe<'root'>;
 
 const HELL_CONTROL_GROUP_ACTION_RECIPE = {
@@ -34,6 +34,18 @@ const HELL_CONTROL_GROUP_ACTION_RECIPE = {
 /**
  * Shared visual frame for a field-like control with prefix, suffix, and action
  * content. The consumer keeps ownership of the control and its value model.
+ *
+ * Overflow contract: the frame never grows or wraps for content. The grouped
+ * control is the only flexible surface — give it `flex-1 min-w-0` so a long
+ * unbroken value scrolls natively inside the control — while prefix and suffix
+ * hold their intrinsic size and truncate with an ellipsis once the frame is too
+ * narrow for them; actions never shrink.
+ *
+ * Padding rhythm: one step per size (`hell-2` at `sm`, `hell-3` at `md`,
+ * `hell-4` at `lg`). Prefix and suffix pad only their outer edge; the grouped
+ * control supplies one step of horizontal padding per side, which is both the
+ * inner gap and the clip buffer for a scrolled value; actions pad one step on
+ * both sides of their divider border.
  */
 @Directive({
   selector: '[hellControlGroup]',
@@ -84,7 +96,12 @@ export class HellControlGroup {
   }
 }
 
-/** Leading non-interactive content inside a Control Group. */
+/**
+ * Leading non-interactive content inside a Control Group. Pads only its outer
+ * (start) edge — the grouped control's own padding supplies the inner gap —
+ * and truncates with an ellipsis instead of clipping when the frame is too
+ * narrow; pin a must-read prefix with `ui="shrink-0"`.
+ */
 @Directive({
   selector: '[hellControlGroupPrefix]',
   host: {
@@ -109,7 +126,12 @@ export class HellControlGroupPrefix {
   protected readonly group = inject(HellControlGroup);
 }
 
-/** Trailing non-interactive content inside a Control Group. */
+/**
+ * Trailing non-interactive content inside a Control Group. Pads only its outer
+ * (end) edge — the grouped control's own padding supplies the inner gap — and
+ * truncates with an ellipsis instead of clipping when the frame is too narrow;
+ * pin a must-read suffix with `ui="shrink-0"`.
+ */
 @Directive({
   selector: '[hellControlGroupSuffix]',
   host: {
