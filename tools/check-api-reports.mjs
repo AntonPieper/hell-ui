@@ -13,7 +13,11 @@ import {
   scanInternalContractImports,
   validateWarningGateConfiguration,
 } from './check-api-report-warnings.mjs';
-import { entrypointPublicApiFiles, packageName } from './entrypoint-manifest.mjs';
+import {
+  entrypointCategories,
+  entrypointPublicApiFiles,
+  packageName,
+} from './entrypoint-manifest.mjs';
 
 const require = createRequire(import.meta.url);
 const { ConsoleMessageId, Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
@@ -50,6 +54,7 @@ const declarationEntrypoints = entrypointPublicApiFiles().map((entrypoint) => {
       : `hell-ui-${entrypoint.id.replaceAll('/', '-')}`;
   return {
     id: entrypoint.id,
+    category: entrypoint.category,
     specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,
     mainEntryPointFilePath: `dist/hell/types/${flattened}.d.ts`,
     reportFileName: `${flattened}.api.md`,
@@ -60,7 +65,12 @@ const apiReportEntrypoints = declarationEntrypoints.filter(
 );
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Public API stability reports live in etc/api-reports. Guarded Internal
+// Package Path baselines are drift guards for cross-entrypoint seams, not
+// consumer stability promises (#272), so they live apart under
+// etc/api-reports/internal and never sit beside the supported surface.
 const reportFolder = join(root, 'etc/api-reports');
+const internalReportFolder = join(reportFolder, 'internal');
 const reportTempFolder = join(root, 'tmp/api-reports');
 const declarationMirrorFolder = join(root, 'tmp/api-report-declaration-mirror');
 const packageJsonFullPath = join(root, 'dist/hell/package.json');
@@ -74,6 +84,7 @@ if (missingInputs.length) {
 }
 
 mkdirSync(reportFolder, { recursive: true });
+mkdirSync(internalReportFolder, { recursive: true });
 mkdirSync(reportTempFolder, { recursive: true });
 
 annotateCompilerGeneratedStatics();
@@ -93,6 +104,7 @@ let failed = false;
 const warningGateFailures = validateWarningGateConfiguration(
   apiReportEntrypoints.map((entrypoint) => entrypoint.specifier),
 );
+warningGateFailures.push(...validateInternalReportSeparation());
 
 for (const entrypoint of apiReportEntrypoints) {
   console.log(`[api-report] ${localBuild ? 'updating' : 'checking'} ${entrypoint.specifier}`);
@@ -197,7 +209,7 @@ function apiExtractorConfig(entrypoint) {
     },
     apiReport: {
       enabled: true,
-      reportFolder,
+      reportFolder: reportFolderFor(entrypoint),
       reportTempFolder,
       reportFileName: entrypoint.reportFileName,
     },
@@ -272,6 +284,58 @@ function apiExtractorTsconfig(entrypoint) {
 
 function mainEntryPointPath(entrypoint) {
   return join(root, entrypoint.mainEntryPointFilePath);
+}
+
+function isInternalEntrypoint(entrypoint) {
+  return entrypoint.category === entrypointCategories.INTERNAL;
+}
+
+function reportFolderFor(entrypoint) {
+  return isInternalEntrypoint(entrypoint) ? internalReportFolder : reportFolder;
+}
+
+// Internal Package Paths are excluded from public API stability reports
+// (#272): every guarded internal baseline lives under etc/api-reports/internal,
+// no internal baseline sits beside the supported surface, no public report
+// hides in the internal folder, excluded entrypoints have no report file at
+// all, and every report exclusion still names a real entrypoint so a stale
+// entry cannot silently drop a guard.
+function validateInternalReportSeparation() {
+  const failures = [];
+  const manifestIds = new Set(declarationEntrypoints.map((entrypoint) => entrypoint.id));
+
+  for (const excludedId of apiReportExclusions.keys()) {
+    if (!manifestIds.has(excludedId)) {
+      failures.push(
+        `apiReportExclusions names unknown entrypoint '${excludedId}' in tools/check-api-reports.mjs; delete the stale entry`,
+      );
+    }
+  }
+
+  for (const entrypoint of declarationEntrypoints) {
+    if (apiReportExclusions.has(entrypoint.id)) {
+      for (const folder of [reportFolder, internalReportFolder]) {
+        const stalePath = join(folder, entrypoint.reportFileName);
+        if (!existsSync(stalePath)) continue;
+        failures.push(
+          `${entrypoint.specifier}: excluded entrypoint has a stale report file ${relativeToRoot(stalePath)}; delete it or remove the apiReportExclusions entry`,
+        );
+      }
+      continue;
+    }
+
+    const misplacedFolder = isInternalEntrypoint(entrypoint) ? reportFolder : internalReportFolder;
+    const misplacedPath = join(misplacedFolder, entrypoint.reportFileName);
+    if (!existsSync(misplacedPath)) continue;
+
+    failures.push(
+      isInternalEntrypoint(entrypoint)
+        ? `${entrypoint.specifier}: internal baseline ${entrypoint.reportFileName} sits in the public report folder ${relativeToRoot(reportFolder)}; move it to ${relativeToRoot(internalReportFolder)} — Internal Package Paths carry no public API stability report`
+        : `${entrypoint.specifier}: public report ${entrypoint.reportFileName} sits in the internal baseline folder ${relativeToRoot(internalReportFolder)}; move it to ${relativeToRoot(reportFolder)}`,
+    );
+  }
+
+  return failures;
 }
 
 function relativeToRoot(path) {
