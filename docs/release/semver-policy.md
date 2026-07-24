@@ -43,7 +43,11 @@ Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
 - Breaking changes get a dedicated `### Breaking changes` section with affected entrypoints, migration steps, and the first version carrying the break.
 - Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy and the production-readiness checklist.
 
-`pnpm release:dry-run` and the release workflow run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails if the current package version lacks a matching changelog section.
+New Consumer Changes are authored as Change Fragments with `pnpm change`
+instead of hand-editing the `## [Unreleased]` ledger; see
+[`change-fragments.md`](./change-fragments.md) and ADR 0003.
+
+`pnpm release:dry-run` and the release workflow run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails if the current package version lacks a matching changelog section; it also validates every pending Change Fragment and proves the fragment tooling against isolated repository fixtures.
 
 ## Promotion rules
 
