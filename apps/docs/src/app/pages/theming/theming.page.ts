@@ -79,6 +79,16 @@ import themeAdapterCodeRaw from './examples/theme-adapter.example.css?raw' with 
       </p>
       <hd-code-block [code]="themeAttributeCode" />
 
+      <p>
+        Neutral text tokens — <code>--color-hell-foreground</code>,
+        <code>--color-hell-foreground-muted</code>, and
+        <code>--color-hell-foreground-subtle</code> — are owned by this light/dark axis: each
+        scheme re-tunes them, and a skin may remap them (high contrast collapses muted text into
+        the full foreground). Palettes intentionally leave them untouched, so switching accent
+        variants within one scheme does not shift secondary copy. If muted text looks static while
+        you try curated themes, toggle light/dark to see it adapt.
+      </p>
+
       <h2>Overriding tokens</h2>
       <p>
         Override tokens at the narrowest scope that owns the visual decision. This keeps product

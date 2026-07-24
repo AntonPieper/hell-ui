@@ -214,6 +214,36 @@ test.describe('component visual polish regressions', () => {
     expect(pressed.transform).toBe(idle.transform);
   });
 
+  test('listbox secondary muted text rethemes with the color scheme and keeps AA contrast', async ({
+    page,
+  }) => {
+    // The muted foreground Semantic Theme Token is scheme-owned: the dark
+    // theme re-tunes it while palettes deliberately leave neutral text alone
+    // (#344). Pin both halves — the token reacts to `data-hell-theme`, and the
+    // Listbox secondary line keeps WCAG AA contrast in each scheme.
+    await page.emulateMedia({ colorScheme: 'light' });
+    await gotoDocsPage(page, '/components/listbox', 'Listbox');
+
+    const example = page.locator('app-listbox-basic-example');
+    const listbox = example.getByRole('listbox', { name: 'Assign owner' });
+    await expect(listbox).toBeVisible();
+    await listbox.scrollIntoViewIfNeeded();
+    await expect(page.locator('html')).toHaveAttribute('data-hell-theme', 'light');
+
+    const light = await listboxOptionTextColors(example);
+    expect(light.mutedColor).not.toBe(light.primaryColor);
+    expect(contrastRatio(light.mutedColor, light.surfaceColor)).toBeGreaterThanOrEqual(4.5);
+
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-hell-theme', 'dark');
+
+    const dark = await listboxOptionTextColors(example);
+    expect(dark.surfaceColor).not.toBe(light.surfaceColor);
+    expect(dark.mutedColor).not.toBe(light.mutedColor);
+    expect(dark.mutedColor).not.toBe(dark.primaryColor);
+    expect(contrastRatio(dark.mutedColor, dark.surfaceColor)).toBeGreaterThanOrEqual(4.5);
+  });
+
   test('avatar overflow trigger behaves like a group member and keeps menu keyboard access', async ({
     page,
   }) => {
@@ -365,6 +395,54 @@ test.describe('component visual polish regressions', () => {
     expect(chipRows).toBe(1);
   });
 });
+
+/**
+ * Reads the settled text colors of an unselected listbox option (primary line
+ * and muted secondary line) plus the opaque listbox surface behind them.
+ */
+async function listboxOptionTextColors(example: Locator): Promise<{
+  surfaceColor: string;
+  primaryColor: string;
+  mutedColor: string;
+}> {
+  return example.evaluate((element) => {
+    const listbox = element.querySelector('[hellListbox]');
+    const option = element.querySelector('[hellListboxOption][aria-selected="false"]');
+    const [name, team] = Array.from(option?.querySelectorAll('span') ?? []);
+    if (!listbox || !option || !name || !team) {
+      throw new Error('Expected a listbox with an unselected two-line option.');
+    }
+    return {
+      surfaceColor: getComputedStyle(listbox).backgroundColor,
+      primaryColor: getComputedStyle(name).color,
+      mutedColor: getComputedStyle(team).color,
+    };
+  });
+}
+
+/** Parses an opaque `rgb()`/`rgba()` computed color into its channels. */
+function parseOpaqueRgb(color: string): [number, number, number] {
+  const match = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(color);
+  if (!match || (match[4] !== undefined && Number(match[4]) < 1)) {
+    throw new Error(`Expected an opaque rgb color, got "${color}".`);
+  }
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+/** WCAG 2.x contrast ratio between two opaque computed colors. */
+function contrastRatio(foreground: string, background: string): number {
+  const luminance = (channels: [number, number, number]): number => {
+    const [r, g, b] = channels.map((value) => {
+      const scaled = value / 255;
+      return scaled <= 0.04045 ? scaled / 12.92 : ((scaled + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const first = luminance(parseOpaqueRgb(foreground));
+  const second = luminance(parseOpaqueRgb(background));
+  const [lighter, darker] = first > second ? [first, second] : [second, first];
+  return (lighter + 0.05) / (darker + 0.05);
+}
 
 function hasNoVisibleShadow(boxShadow: string): boolean {
   if (boxShadow === 'none') return true;
