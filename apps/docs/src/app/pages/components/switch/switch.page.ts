@@ -138,8 +138,9 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
         Both modules follow Hell's Part Style Map contract: pass <code>ui</code> as a string
         shorthand to refine the default <code>root</code> part, or pass a <code>[ui]</code> map to
         target named parts individually. Refinements merge on top of the default recipe through
-        Hell's Tailwind merge, so a conflicting utility such as <code>bg-hell-danger</code> wins
-        deterministically over the recipe's own <code>bg-hell-border-strong</code>.
+        Hell's Tailwind merge, so a conflicting utility such as
+        <code>data-checked:bg-hell-success</code> wins deterministically over the recipe's own
+        <code>data-checked:bg-hell-primary</code>.
       </p>
       <table class="hd-doc-table">
         <thead>
@@ -167,7 +168,7 @@ import switchStatesExampleCodeRaw from './examples/states.example.ts?raw' with {
           </tr>
         </tbody>
       </table>
-      <hd-example-tabs [code]="switchAllPartsStylingExampleCode">
+      <hd-example-tabs [code]="switchAllPartsStylingExampleCode" previewClass="grid gap-3">
         <app-switch-all-parts-styling-example />
       </hd-example-tabs>
 
