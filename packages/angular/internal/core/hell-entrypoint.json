@@ -8,6 +8,8 @@
     "./form-field-idrefs",
     "./idrefs",
     "./native-interactive-disabled",
+    "./part-class-pipeline",
+    "./part-style-merge",
     "./pick-value",
     "./picker-control",
     "./resize-behavior",

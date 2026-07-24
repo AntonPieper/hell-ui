@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellButtonVariant } from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
@@ -50,7 +49,7 @@ export class HellToolbar {
     readonly label: _angular_core.InputSignal<string>;
     readonly labelledBy: _angular_core.InputSignal<string>;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToolbar, "[hellToolbar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "labelledBy": { "alias": "labelledBy"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpToolbar; inputs: { "ngpToolbarOrientation": "orientation"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellToolbar, never>;

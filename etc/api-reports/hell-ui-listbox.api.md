@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/listbox';
@@ -15,7 +14,7 @@ export const HELL_LISTBOX_IMPORTS: readonly [typeof HellListbox, typeof HellList
 
 // @public
 export class HellListbox {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListbox, "[hellListbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListbox; inputs: { "id": "id"; "ngpListboxMode": "mode"; "ngpListboxValue": "value"; "ngpListboxDisabled": "disabled"; "ngpListboxCompareWith": "compareWith"; }; outputs: { "ngpListboxValueChange": "valueChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListbox, never>;
@@ -23,7 +22,7 @@ export class HellListbox {
 
 // @public
 export class HellListboxHeader {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxHeader, "[hellListboxHeader]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxHeader; inputs: { "id": "id"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxHeader, never>;
@@ -32,7 +31,7 @@ export class HellListboxHeader {
 // @public
 export class HellListboxOption {
     protected readonly option: NgpListboxOption<any>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxOption, "[hellListboxOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxOption; inputs: { "id": "id"; "ngpListboxOptionValue": "value"; "ngpListboxOptionDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxOption, never>;
@@ -40,7 +39,7 @@ export class HellListboxOption {
 
 // @public
 export class HellListboxSection {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxSection, "[hellListboxSection]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxSection; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxSection, never>;

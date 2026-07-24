@@ -548,7 +548,7 @@ describe('HellOmnibar command interaction runtime', () => {
 
   describe('recipes', () => {
     // Part-Class Pipeline merge semantics are owned centrally by
-    // `core/part-class-pipeline.spec.ts`; the snapshots pin the default part
+    // `internal/core/part-class-pipeline.spec.ts`; the snapshots pin the default part
     // classes — including the chip-composed host, whose omnibar recipe must
     // keep the control on one row (no wrap, no gap) — without asserting
     // individual utilities elsewhere.

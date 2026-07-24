@@ -32,6 +32,16 @@
   Pipeline plumbing are package internals. The `[ui]` input name remains
   unchanged. `data-slot="root"` is reserved for a genuine single-host Public
   Part and is omitted from behavior-only or no-public-root hosts.
+- Amended: 2026-07-24 — the narrowed surface is implemented (#271). The
+  Part-Class Pipeline modules (`hellPartStyler`, `HellPartStylerOptions`,
+  `HellRecipe`, and the configured `hellTwMerge`) live behind the private
+  `hell-ui/internal/core` seam; the public core seam keeps only `HellUi` and
+  `HellUiInput` in `core/part-style-map.ts`. The styler factory returns a
+  structural `(part: Part) => string` so component declaration files do not
+  reference the internal seam. Card and Separator move their Part Recipe
+  constants into sibling `<entrypoint>.recipes.ts` modules: the recipe-module
+  split also applies to non-composite entrypoints whose recipes would
+  otherwise leak through their public API `export *`.
 
 ## Context
 

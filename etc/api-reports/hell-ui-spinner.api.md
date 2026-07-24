@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -18,7 +17,7 @@ export const HELL_SPINNER_LABELS: InjectionToken<HellLabels<HellSpinnerLabels>>;
 export class HellSpinner {
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
     protected readonly labels: HellLabels<HellSpinnerLabels>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly variant: _angular_core.InputSignal<HellSpinnerVariant>;

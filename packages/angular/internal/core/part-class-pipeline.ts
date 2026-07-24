@@ -1,16 +1,18 @@
 import { hellTwMerge } from './part-style-merge';
 
-/** Consumer-provided Tailwind class refinements keyed by a component's public parts. */
-export type HellUi<Part extends string> = Partial<Record<Part, string>>;
-
-/** Either shorthand classes for the default public part or an explicit part map. */
-export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
+/**
+ * Package-internal Part-Class Pipeline (docs/adr/part-style-map.md,
+ * docs/adr/0002-public-package-and-stylesheet-surface.md).
+ *
+ * The consumer styling contract is the Part Style Map: the public `HellUi`
+ * and `HellUiInput` types exported by `hell-ui/core` plus each module's `ui`
+ * input. Part Recipes, the styler factory, and the configured Tailwind merge
+ * below are shared implementation details for Hell-owned entry points only
+ * and must not be re-exported from a public entry point.
+ */
 
 /** Component-owned default Tailwind classes keyed by the same public parts exposed through `ui`. */
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
-
-/** One module's Part-Class Pipeline: returns the merged classes for one public part. */
-export type HellPartStyler<Part extends string> = (part: Part) => string;
 
 /** Configuration for one module's Part-Class Pipeline. */
 export interface HellPartStylerOptions<Part extends string> {
@@ -30,19 +32,25 @@ export interface HellPartStylerOptions<Part extends string> {
  * default recipe classes plus the consumer's matching Part Style Map entry,
  * merged deterministically through the configured `hellTwMerge`.
  *
+ * The `ui` parameter and the returned styler are typed structurally (the
+ * parameter shape matches the public `HellUiInput<Part>` contract from
+ * `hell-ui/core`) so component declaration files describe their protected
+ * styler member as a plain `(part: Part) => string` function instead of
+ * referencing this internal seam.
+ *
  * This is a composition seam, not a base class: modules own their inputs and
  * host bindings, and no inheritance contract leaks into component
  * declarations.
  */
 export function hellPartStyler<Part extends string>(
-  ui: () => HellUiInput<Part>,
+  ui: () => string | Partial<Record<Part, string>> | null | undefined,
   options: HellPartStylerOptions<Part>,
-): HellPartStyler<Part> {
+): (part: Part) => string {
   return (part) => hellTwMerge(options.recipe()[part], uiClassForPart(ui(), part, options.defaultPart));
 }
 
 function uiClassForPart<Part extends string>(
-  ui: HellUiInput<Part>,
+  ui: string | Partial<Record<Part, string>> | null | undefined,
   part: Part,
   defaultPart: Part,
 ): string | undefined {

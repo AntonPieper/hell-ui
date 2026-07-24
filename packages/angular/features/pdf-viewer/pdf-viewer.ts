@@ -36,12 +36,14 @@ import { HellIcon } from 'hell-ui/icon';
 import { HellInput } from 'hell-ui/input';
 import { HellNativeSelect } from 'hell-ui/select';
 import { HellPageLink, HellPagination } from 'hell-ui/pagination';
+import type {
+  HellUi,
+  HellUiInput,
+} from 'hell-ui/core';
 import {
   hellPartStyler,
   type HellRecipe,
-  type HellUi,
-  type HellUiInput,
-} from 'hell-ui/core';
+} from 'hell-ui/internal/core';
 import { HELL_PDF_VIEWER_LABELS, type HellPdfViewerLabels } from './pdf-viewer-labels';
 import {
   HellGlobalKeydownService,

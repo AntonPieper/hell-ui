@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 
 // @public
@@ -14,7 +13,7 @@ export class HellIcon {
     readonly color: _angular_core.InputSignal<string | null>;
     readonly decorative: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly name: _angular_core.InputSignal<string>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<string>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellIcon, "hell-icon", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": true; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "color": { "alias": "color"; "required": false; "isSignal": true; }; "decorative": { "alias": "decorative"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

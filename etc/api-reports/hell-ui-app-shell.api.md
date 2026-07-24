@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -28,7 +27,7 @@ export const HELL_APP_SHELL_MOBILE_MEDIA = "(max-width: 767px)";
 
 // @public
 export class HellAppContent {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppContent, "[hellAppContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAppContent, never>;
@@ -37,7 +36,7 @@ export class HellAppContent {
 // @public
 export class HellAppSecondary {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSecondary, "[hellAppSecondary]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSecondary, never>;
@@ -45,7 +44,7 @@ export class HellAppSecondary {
 
 // @public
 export class HellAppSecondaryBody {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSecondaryBody, "[hellAppSecondaryBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSecondaryBody, never>;
@@ -56,7 +55,7 @@ export class HellAppShell implements OnDestroy {
     constructor();
     closeMobilePanels(): void;
     ngOnDestroy(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly secondaryHidden: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
     readonly secondaryHiddenChange: i0.OutputEmitterRef<boolean>;
     readonly sidenavCollapsed: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
@@ -79,7 +78,7 @@ export interface HellAppShellLabels {
 // @public
 export class HellAppSidenav {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppSidenav, "[hellAppSidenav]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAppSidenav, never>;
@@ -87,7 +86,7 @@ export class HellAppSidenav {
 
 // @public
 export class HellAppTopbar {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAppTopbar, "[hellAppTopbar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAppTopbar, never>;
@@ -96,7 +95,7 @@ export class HellAppTopbar {
 // @public
 export class HellSecondaryToggle {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected toggle(): void;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSecondaryToggle, "button[hellSecondaryToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -106,7 +105,7 @@ export class HellSecondaryToggle {
 // @public
 export class HellSidenavToggle {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected toggle(): void;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSidenavToggle, "button[hellSidenavToggle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

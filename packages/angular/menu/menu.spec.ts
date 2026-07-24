@@ -316,7 +316,7 @@ describe('HellMenuItem', () => {
 
   describe('recipes', () => {
     // Part-Class Pipeline merge semantics are owned centrally by
-    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // `internal/core/part-class-pipeline.spec.ts`; the snapshot pins the default part
     // classes without asserting individual utilities elsewhere.
     it('keeps the default part classes stable', async () => {
       const fixture = TestBed.createComponent(CheckableMenuHost);

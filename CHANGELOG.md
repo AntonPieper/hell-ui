@@ -1005,6 +1005,26 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Breaking changes
 
+- BREAKING: The public Part Style Map surface is slimmed to the consumer
+  contracts needed to author `ui` values. `hell-ui` and `hell-ui/core` no
+  longer export the Part-Class Pipeline plumbing — the `hellPartStyler`
+  styler factory, its `HellPartStyler` and `HellPartStylerOptions` types, the
+  `HellRecipe` recipe type, and the configured `hellTwMerge` Tailwind merge —
+  and `hell-ui/input` no longer re-exports any of them (including its
+  accidental `HellUi`/`HellUiInput` re-exports). `hell-ui/card` and
+  `hell-ui/separator` no longer export their `HELL_CARD_RECIPE`,
+  `HELL_CARD_HEADER_RECIPE`, `HELL_CARD_BODY_RECIPE`,
+  `HELL_CARD_FOOTER_RECIPE`, and `HELL_SEPARATOR_RECIPE` Part Recipe
+  constants; recipes, merge configuration, and styler factories are package
+  internals that now live behind the private `hell-ui/internal/core` seam.
+  Migration: keep authoring `ui` values with the public `HellUi<Part>` and
+  `HellUiInput<Part>` types from `hell-ui` or `hell-ui/core` (the `ui` input
+  name and every component part union and `Hell<Component>Ui` type are
+  unchanged); replace removed recipe-constant reads with your own class
+  strings or the rendered `data-slot` element's classes; and if you need a
+  Tailwind class merge, configure `tailwind-merge` in your app — Hell's merge
+  configuration is not a public API. Closes #271; decided by the accepted
+  public package and stylesheet surface ADR (#260, spec #310).
 - BREAKING: The published package is renamed from `@hell-ui/angular` to
   `hell-ui` as one atomic break with no compatibility package, alias package,
   dual-name export, or migration shim. Update the install dependency to

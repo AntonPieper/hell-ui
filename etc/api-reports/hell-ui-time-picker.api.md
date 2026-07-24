@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellTimeValue } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
@@ -26,7 +25,7 @@ export class HellTimePicker {
     protected readonly minutePresets: readonly [0, 15, 30, 45];
     protected onSpinKeydown(event: KeyboardEvent, unit: keyof HellTimeValue): void;
     protected pad(value: number): string;
-    protected readonly part: hell_ui_core.HellPartStyler<HellTimePickerPart>;
+    protected readonly part: (part: HellTimePickerPart) => string;
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected selectedTimeLabel(): string;
     protected setUnit(unit: keyof HellTimeValue, nextUnitValue: number): void;

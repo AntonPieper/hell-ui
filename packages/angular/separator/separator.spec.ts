@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { hellTwMerge } from 'hell-ui/core';
+import { hellTwMerge } from 'hell-ui/internal/core';
 
-import { HELL_SEPARATOR_RECIPE, HellSeparator } from './separator';
+import { HellSeparator } from './separator';
+import { HELL_SEPARATOR_RECIPE } from './separator.recipes';
 import { sortClasses } from '../spec-helpers';
 
 /**
  * Separator specs assert behavior and state attributes. Part-Class Pipeline
- * merge semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
- * rendered classes are compared against the shared pipeline output for the
- * exported recipe instead of asserting individual utility classes, and the
- * recipe snapshot below pins the default classes without bootstrapping.
+ * merge semantics are owned centrally by
+ * `internal/core/part-class-pipeline.spec.ts`; rendered classes are compared
+ * against the shared pipeline output for the package-internal recipe module
+ * instead of asserting individual utility classes, and the recipe snapshot
+ * below pins the default classes without bootstrapping.
  */
 const SEPARATOR_UI_SHORTHAND = 'bg-hell-danger';
 

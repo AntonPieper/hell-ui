@@ -7,7 +7,6 @@
 import { AfterContentInit } from '@angular/core';
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
@@ -25,7 +24,7 @@ export class HellResizable implements AfterContentInit {
     constructor();
     ngAfterContentInit(): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly rescaleOnResize: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizable, "[hellResizable]", ["hellResizable"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "rescaleOnResize": { "alias": "rescaleOnResize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -45,7 +44,7 @@ export class HellResizableHandle implements AfterViewInit {
     ngAfterViewInit(): void;
     protected onKey(e: KeyboardEvent): void;
     protected onPointerDown(e: PointerEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellResizableHandlePart>;
+    protected readonly part: (part: HellResizableHandlePart) => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellResizableHandlePart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellResizableHandle, "[hellResizableHandle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "appearance": { "alias": "appearance"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaControls": { "alias": "aria-controls"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizableHandle, never>;
@@ -67,7 +66,7 @@ export class HellResizablePane {
     constructor();
     readonly initialFlex: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly minSize: _angular_core.InputSignalWithTransform<number, unknown>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizablePane, "[hellResizablePane]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "initialFlex": { "alias": "initialFlex"; "required": false; "isSignal": true; }; "minSize": { "alias": "minSize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizablePane, never>;
