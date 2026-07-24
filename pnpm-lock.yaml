@@ -172,6 +172,9 @@ importers:
       angular-eslint:
         specifier: 'catalog:'
         version: 22.0.0(@angular/cli@22.0.5(chokidar@5.0.0))(chokidar@5.0.0)(eslint@10.3.0(jiti@2.7.0))(typescript-eslint@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(typescript@6.0.3)
+      changie:
+        specifier: ^1.25.1
+        version: 1.25.1
       eslint:
         specifier: 'catalog:'
         version: 10.3.0(jiti@2.7.0)
@@ -196,6 +199,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.5(@vitest/coverage-v8@4.1.5)(jsdom@29.0.2)(vite@7.3.5(jiti@2.7.0)(less@4.6.4)(lightningcss@1.32.0)(sass@1.99.0)(yaml@2.9.0))
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
 
   apps/docs:
     dependencies:
@@ -2557,6 +2563,10 @@ packages:
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
+  changie@1.25.1:
+    resolution: {integrity: sha512-0ZMNZUmKo0kD8ONywL3AB8yuihVm1jXsnKL+inCV/ZgmyZTb2Eoot18I4MiRNH0k1Vcm5M+2qm6M+iPABTZi4A==}
+    hasBin: true
 
   chardet@2.1.1:
     resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
@@ -6351,6 +6361,8 @@ snapshots:
   chai@6.2.2: {}
 
   chalk@5.6.2: {}
+
+  changie@1.25.1: {}
 
   chardet@2.1.1: {}
 

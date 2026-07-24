@@ -1,0 +1,45 @@
+# Change Fragment source configuration (ADR 0003).
+#
+# `pnpm change` is the only contributor-facing fragment creation command.
+# Changie's batch/merge primitives stay private to Release Preparation
+# tooling; nothing here commits, tags, pushes, or publishes.
+#
+# The five-kind Consumer Change schema is deliberately closed: removals are
+# recorded as Breaking and deprecations as Changed. Concision is an authoring
+# and review responsibility, so prompts keep minLength 1 and no hard character
+# limits. Fragments carry no issue, pull-request, author, component, project,
+# or validation-evidence fields.
+changesDir: .changes
+unreleasedDir: unreleased
+headerPath: header.tpl.md
+changelogPath: CHANGELOG.md
+versionExt: md
+versionFormat: '## [{{.Version}}] - {{.Time.Format "2006-01-02"}}'
+kindFormat: '### {{.Kind}}'
+changeFormat: '- {{.Body}}'
+body:
+  minLength: 1
+kinds:
+  # Breaking and Added select a minor release before 1.0.0; Changed, Fixed,
+  # and Security select a patch release. Release Stage Promotion (for example
+  # 1.0.0) is always an explicit decision, never inferred from a fragment.
+  - label: Breaking
+    format: '### Breaking changes'
+    auto: minor
+    changeFormat: |-
+      - {{.Body}}
+
+        Migration: {{.Custom.migration}}
+    additionalChoices:
+      - key: migration
+        type: string
+        label: Migration
+        minLength: 1
+  - label: Added
+    auto: minor
+  - label: Changed
+    auto: patch
+  - label: Fixed
+    auto: patch
+  - label: Security
+    auto: patch
