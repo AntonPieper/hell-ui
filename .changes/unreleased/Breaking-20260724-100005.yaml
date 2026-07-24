@@ -1,0 +1,21 @@
+kind: Breaking
+body: >-
+  Select is one projection-first interaction state machine. The owned
+  `<hell-select-basic>` renderer and its options/`displayWith` rendering model
+  are removed; consumers project domain values through the `[hellSelect]`
+  trigger, `[hellSelectValue]`, `[hellSelectPlaceholder]`,
+  `[hellSelectOption]`, and the portaled `[hellSelectDropdown]` paired through
+  `*hellSelectPortal`. Forms, comparison, multiple selection, open state,
+  keyboard behavior, dismissal, and ARIA relationships stay delegated to the
+  directive suite; the native `select[hellNativeSelect]` control remains a
+  separate product.
+time: 2026-07-24T10:00:05.000Z
+custom:
+  migration: >-
+    Replace `<hell-select-basic [options]="...">` with the directive suite and
+    one projected `[hellSelectOption]` per domain object. Replace the removed
+    `HellSelectPart`/`HellSelectUi` anatomy with each directive's single-root
+    `ui` input, and rename the per-module value types to core's Pick Value
+    family: `HellSelectSingleValue` → `HellPickSingleValue`,
+    `HellSelectMultipleValue` → `HellPickMultipleValue`, and
+    `HellSelectFormValue` → `HellPickValue` from `hell-ui/core`.

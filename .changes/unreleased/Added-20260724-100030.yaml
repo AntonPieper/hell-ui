@@ -1,0 +1,10 @@
+kind: Added
+body: >-
+  The directive-first `hell-ui/file-picker` Styled Primitive:
+  `[hellFilePicker]` acquires files through drop or one internal native browse
+  action and emits one `HellFileSelection` with accepted files and structured
+  `type`, `size`, `count`, or `custom` rejections. Extension, MIME,
+  `maxBytes`, synchronous custom, and `maxFiles` validation share one path,
+  and the root exposes `open()`, a Label Contract, a local Part Style Map, and
+  stable drag/disabled attributes.
+time: 2026-07-24T10:00:30.000Z

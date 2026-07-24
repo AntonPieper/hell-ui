@@ -1,0 +1,20 @@
+kind: Breaking
+body: >-
+  Omnibar now owns only difficult command-interaction coordination behind
+  controlled `query`/`queryChange` and `open`/`openChange` models; results and
+  loading, error, and empty chrome are projected from a consumer-owned Search
+  Resource. The former `value` model, built-in search source, fields, limits,
+  debounce, status templates and messages, search outputs, imperative
+  open/close/value methods, the decoration-only panel and item
+  icon/text/subtext/trailing directives, and the omnibar-specific chip
+  directives are removed, and the `value` input on `button[hellOmnibarItem]`
+  is now required. Hotkeys, keyboard navigation, activation, dismissal, focus
+  restoration, and scroll anchoring remain omnibar-owned.
+time: 2026-07-24T10:00:13.000Z
+custom:
+  migration: >-
+    Bind the controlled query and open models, drive results with
+    `hellSearchResource`, and bind `[value]` on every omnibar item. Replace
+    the removed decoration directives with plain elements and classes, and
+    compose the public Chip Set, Chip, and Chip Remove primitives for editable
+    scope tokens.

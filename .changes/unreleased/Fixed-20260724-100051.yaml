@@ -1,0 +1,5 @@
+kind: Fixed
+body: >-
+  TanStack column filters no longer render object-valued state as the literal
+  text `[object Object]`; only scalar filter values are shown in the input.
+time: 2026-07-24T10:00:51.000Z

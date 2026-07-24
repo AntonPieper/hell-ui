@@ -1,0 +1,8 @@
+kind: Changed
+body: >-
+  Field label, description, and error text now render at the design scale's
+  13px control-label size instead of 12px. The label keeps its semibold weight
+  above the regular control text, the muted description stays below both, and
+  the description and error pin `leading-normal` so wrapped helper text keeps
+  a steady rhythm across skins.
+time: 2026-07-24T10:00:47.000Z

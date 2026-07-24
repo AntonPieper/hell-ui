@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  Label overrides consolidate on one generic core provider:
+  `provideHellLabels(token, overrides)` replaces the per-entry-point
+  `provideHell<Module>Labels` functions, and `hellCreateLabels` returns a
+  branded `HellLabelToken` so foreign tokens are rejected at compile time
+  instead of at runtime. Label interfaces and the `HELL_*_LABELS` tokens are
+  unchanged.
+time: 2026-07-24T10:00:18.000Z
+custom:
+  migration: >-
+    Replace each `provideHell<Module>Labels({...})` call with
+    `provideHellLabels(HELL_<MODULE>_LABELS, {...})` from `hell-ui/core`, and
+    import label interfaces from their owning entry points.

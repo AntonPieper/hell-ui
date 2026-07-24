@@ -1,0 +1,8 @@
+kind: Fixed
+body: >-
+  Every documented `hell-toaster` placement now positions, stacks, and
+  animates correctly instead of only `bottom-right`: top placements no longer
+  peek or fan upward off-screen, exit animations slide toward the nearest side
+  or anchored edge, and the dismiss-all toolbar no longer renders slightly
+  shifted and shrunken.
+time: 2026-07-24T10:00:48.000Z

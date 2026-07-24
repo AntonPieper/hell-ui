@@ -1,0 +1,13 @@
+kind: Breaking
+body: >-
+  The `hell-ui/tag` entry point folds into `hell-ui/chip`: one pill module.
+  `HellTag` is gone — a static chip host renders non-interactive pills with
+  the six unchanged variants — `HellBadge` and `HellKbd` now export from
+  `hell-ui/chip` with identical behavior, and the core type `HellTagVariant`
+  renames to `HellChipVariant`.
+time: 2026-07-24T10:00:20.000Z
+custom:
+  migration: >-
+    Replace `hellTag` hosts with `<span hellChip variant="...">`, import Badge
+    and Kbd from `hell-ui/chip`, rename `HellTagVariant` to `HellChipVariant`,
+    and repoint `hell-ui/tag/styles.css` imports to the chip stylesheet.

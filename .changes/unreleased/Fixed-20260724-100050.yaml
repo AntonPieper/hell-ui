@@ -1,0 +1,6 @@
+kind: Fixed
+body: >-
+  Code editor line-number and fold gutters now use the muted foreground token
+  instead of the subtle one, meeting WCAG AA 4.5:1 contrast on the gutter
+  background.
+time: 2026-07-24T10:00:50.000Z

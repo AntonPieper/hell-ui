@@ -1,0 +1,20 @@
+kind: Breaking
+body: >-
+  Date Input is now date parsing, formatting, validation, and forms behavior
+  on a consumer-authored native `input[hellDateInput]` instead of the owned
+  `<hell-date-input>` component. The former Date Input Label Contract,
+  embedded picker trigger, and multi-part anatomy are removed; `ui` refines
+  the reused single-root Input contract.
+time: 2026-07-24T10:00:07.000Z
+custom:
+  migration: >-
+    Author a real `<input hellDateInput>` and replace `[date]`/`(dateChange)`
+    with the controlled `[value]`/`(valueChange)` pair — `Date | null`,
+    adapter overrides, invalid drafts, external synchronization, and nullable
+    clears carry over. Move `inputId`, `name`, `placeholder`, and other native
+    attributes onto the real input, and compose an accessible Control Group
+    action or Button, Popover, and Date Picker explicitly when a calendar is
+    useful. `HellDateInputHarness` targets the native input: migrate
+    `getInputValue()`/`setInputValue()` to `getValue()`/`setValue()`, commit
+    through `blur()` when required, and drop `openPicker()` in favor of
+    harnessing the consumer-owned composition.

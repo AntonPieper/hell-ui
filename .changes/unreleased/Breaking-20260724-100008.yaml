@@ -1,0 +1,20 @@
+kind: Breaking
+body: >-
+  Time Input is now time parsing, formatting, validation, and forms behavior
+  on a consumer-authored native `input[hellTimeInput]` instead of the owned
+  `<hell-time-input>` component. The former Time Input Label Contract,
+  embedded trigger and picker, and fifteen-part anatomy are removed; `ui`
+  refines the reused single-root Input contract.
+time: 2026-07-24T10:00:08.000Z
+custom:
+  migration: >-
+    Author a real `<input hellTimeInput>` and keep the controlled
+    `value`/`valueChange` pair — `HellTimeValue | null`, optional seconds,
+    adapter overrides, invalid drafts, external synchronization, and nullable
+    clears carry over. Move `inputId`, `name`, `placeholder`, and other native
+    attributes onto the real input, and compose an accessible Control Group
+    action or Button, Popover, and the standalone `hell-time-picker`
+    explicitly when segmented selection is useful. `HellTimeInputHarness`
+    targets the native input: migrate `getInputValue()`/`setInputValue()` to
+    `getValue()`/`setValue()`, commit through `blur()` when required, and
+    replace `openPicker()` with harnesses for the consumer-owned composition.

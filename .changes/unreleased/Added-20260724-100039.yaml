@@ -1,0 +1,11 @@
+kind: Added
+body: >-
+  The `hell-ui/number-input` Styled Primitive joins the Typed Value Input
+  family: `input[hellNumberInput]` binds `number | null` on a
+  consumer-authored native text field with spinbutton semantics,
+  Arrow/Page/Home/End stepping, explicit hold-to-repeat
+  `button[hellNumberStep]` controls bound through `hellNumberStepFor`, integer
+  mode, and a pluggable locale parse/format adapter. Stepping clamps into
+  bounds and steps from a pending typed draft; typing never clamps live —
+  out-of-range values commit but fail validation.
+time: 2026-07-24T10:00:39.000Z

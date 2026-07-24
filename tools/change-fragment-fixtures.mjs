@@ -1,13 +1,18 @@
-// Isolated repository fixtures for Change Fragment authoring (ADR 0003).
+// Isolated repository fixtures for Change Fragment authoring and Release
+// Changelog regeneration (ADR 0003).
 //
 // Every fixture copies the repository's real .changie.yaml and .changes
-// skeleton into a fresh temporary Git repository, drives the real Changie
-// binary exactly as `pnpm change` would, and asserts the objective validator's
-// verdict. Fixtures prove authoring behavior only: nothing batches, merges,
-// commits, tags, pushes, or publishes.
+// records into a fresh temporary Git repository and drives the real Changie
+// binary. Authoring fixtures run `changie new` exactly as `pnpm change` would
+// and assert the objective validator's verdict; merge fixtures prove that the
+// committed Released Version Notes regenerate CHANGELOG.md byte-for-byte and
+// that record edits change the aggregate. Nothing here batches a version,
+// commits, tags, pushes, or publishes, and the repository itself is never
+// touched.
 
 import { spawnSync } from 'node:child_process';
 import {
+  appendFileSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -24,6 +29,11 @@ import {
   collectUnreleasedFragmentErrors,
   listUnreleasedFragments,
 } from './change-fragments.mjs';
+import {
+  changelogBaselineVersion,
+  listReleasedVersionFiles,
+  resolveChangieBinary,
+} from './release-changelog.mjs';
 
 const changieTimeoutMs = 30_000;
 const promptConfirm = '\r';
@@ -35,6 +45,11 @@ const fixtures = [
   { name: 'changie rejects unknown kinds', run: fixtureChangieRejectsUnknownKinds },
   { name: 'validator rejects malformed fragments', run: fixtureValidatorRejectsMalformedFragments },
   { name: 'validator accepts multiline prose', run: fixtureValidatorAcceptsMultilineProse },
+  {
+    name: 'merge regenerates the committed release changelog byte-for-byte',
+    run: fixtureMergeReproducesCommittedChangelog,
+  },
+  { name: 'merge tracks released-record edits', run: fixtureMergeTracksReleasedRecordEdits },
 ];
 
 export function runChangeFragmentFixtures({ root }) {
@@ -74,10 +89,14 @@ function createFixtureContext(root, binary, workspace) {
   copyFileSync(join(root, '.changie.yaml'), join(workspace, '.changie.yaml'));
   mkdirSync(unreleasedDir, { recursive: true });
   copyFileSync(join(root, '.changes', 'header.tpl.md'), join(workspace, '.changes', 'header.tpl.md'));
+  for (const name of listReleasedVersionFiles(join(root, '.changes'))) {
+    copyFileSync(join(root, '.changes', name), join(workspace, '.changes', name));
+  }
   writeFileSync(join(unreleasedDir, '.gitkeep'), '');
 
   const failures = [];
   const context = {
+    root,
     workspace,
     unreleasedDir,
     failures,
@@ -149,6 +168,7 @@ function expectNoValidatorErrors(context, label) {
 
 function fixtureAuthorsOnePendingFragment(context) {
   const baselineHead = gitOrThrow(context, ['rev-parse', 'HEAD']).stdout.trim();
+  const changesEntriesBefore = readdirSync(join(context.workspace, '.changes')).sort().join(',');
   const result = context.changie(['new', '-k', 'Added', '-b', 'Added the example entry point.']);
   if (!expectChangieSuccess(context, result, 'changie new -k Added')) return;
 
@@ -159,9 +179,12 @@ function fixtureAuthorsOnePendingFragment(context) {
   }
   expectNoValidatorErrors(context, 'valid Added fragment');
 
-  const changesEntries = readdirSync(join(context.workspace, '.changes')).sort();
-  if (changesEntries.join(',') !== 'header.tpl.md,unreleased') {
-    context.fail(`authoring must not batch a version file; .changes contains ${changesEntries.join(', ')}`);
+  const changesEntriesAfter = readdirSync(join(context.workspace, '.changes')).sort().join(',');
+  if (changesEntriesAfter !== changesEntriesBefore) {
+    context.fail(
+      'authoring must not batch a version file or touch released records; ' +
+        `.changes changed from ${changesEntriesBefore} to ${changesEntriesAfter}`,
+    );
   }
   if (existsSync(join(context.workspace, 'CHANGELOG.md'))) {
     context.fail('authoring must not merge or write a changelog.');
@@ -325,14 +348,39 @@ function fixtureValidatorAcceptsMultilineProse(context) {
   expectNoValidatorErrors(context, 'multiline prose');
 }
 
-function resolveChangieBinary(root) {
-  const extension = process.platform === 'win32' ? '.exe' : '';
-  return join(
-    root,
-    'node_modules',
-    'changie',
-    'npm',
-    'dist',
-    `${process.platform}-${process.arch}${extension}`,
+function fixtureMergeReproducesCommittedChangelog(context) {
+  const result = context.changie(['merge']);
+  if (!expectChangieSuccess(context, result, 'changie merge')) return;
+
+  const generatedPath = join(context.workspace, 'CHANGELOG.md');
+  if (!existsSync(generatedPath)) {
+    context.fail('changie merge must generate a CHANGELOG.md from the released records.');
+    return;
+  }
+  const generated = readFileSync(generatedPath, 'utf8');
+  const committed = readFileSync(join(context.root, 'CHANGELOG.md'), 'utf8');
+  if (generated !== committed) {
+    context.fail(
+      'changie merge over the committed Released Version Notes must reproduce CHANGELOG.md ' +
+        'byte-for-byte; regenerate the aggregate from the records instead of editing it by hand.',
+    );
+  }
+}
+
+function fixtureMergeTracksReleasedRecordEdits(context) {
+  appendFileSync(
+    join(context.workspace, '.changes', `${changelogBaselineVersion}.md`),
+    '\n### Fixed\n\n- Sentinel released-record edit.\n',
   );
+  const result = context.changie(['merge']);
+  if (!expectChangieSuccess(context, result, 'changie merge after a record edit')) return;
+
+  const generated = readFileSync(join(context.workspace, 'CHANGELOG.md'), 'utf8');
+  if (!generated.includes('Sentinel released-record edit.')) {
+    context.fail('the merged aggregate must be derived from the released records.');
+  }
+  const committed = readFileSync(join(context.root, 'CHANGELOG.md'), 'utf8');
+  if (generated === committed) {
+    context.fail('an edited released record must change the regenerated aggregate so drift is detectable.');
+  }
 }

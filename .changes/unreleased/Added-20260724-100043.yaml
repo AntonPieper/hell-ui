@@ -1,0 +1,9 @@
+kind: Added
+body: >-
+  `HellTextarea` gains an `autoGrow` opt-in: the native textarea grows with
+  its content through CSS `field-sizing: content` with no resize observers or
+  per-keystroke measurement, reflects `data-auto-grow`, and disables the
+  native resize handle while active. Bound the growth in CSS with
+  `min-block-size` and `max-block-size` plus `overflow-y: auto`; browsers
+  without `field-sizing` degrade to a normal fixed-size textarea.
+time: 2026-07-24T10:00:43.000Z

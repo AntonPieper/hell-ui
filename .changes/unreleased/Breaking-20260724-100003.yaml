@@ -1,0 +1,12 @@
+kind: Breaking
+body: >-
+  Every public directive-tuple export is renamed from `HELL_*_DIRECTIVES` to
+  `HELL_*_IMPORTS` with no compatibility aliases. Tuple contents and runtime
+  behavior are unchanged.
+time: 2026-07-24T10:00:03.000Z
+custom:
+  migration: >-
+    Replace each removed name one-for-one with the same entry point's
+    canonical `HELL_*_IMPORTS` export, for example `HELL_MENU_DIRECTIVES`
+    becomes `HELL_MENU_IMPORTS`. The first-beta consumer guide lists every
+    exact mapping.

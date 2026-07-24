@@ -1,0 +1,18 @@
+kind: Breaking
+body: >-
+  The three typed-input adapter contracts are one shape: core exports
+  `HellTypedInputAdapter<TValue, TContext>` plus the shared parse-result seam
+  (`hellTypedValue`, `hellInvalidTypedValue`, `HellTypedValueParseResult`,
+  `HellTypedValueValidParse`, and `HellTypedValueInvalidParse`), and the date,
+  time, and number adapters are its instantiations. The per-entry-point
+  standalone parse/format/normalize helper exports and `Hell*InputParseResult`
+  aliases are removed.
+time: 2026-07-24T10:00:09.000Z
+custom:
+  migration: >-
+    Rename a custom date adapter's `coerce` hook to `normalize`, null-guard
+    the time adapter's `format` (it now receives `HellTimeValue | null`;
+    return an empty string for `null`), and build parse results with the core
+    constructors. Keep registering adapters through the unchanged
+    `provideHell<X>InputAdapter` functions and reuse built-in behavior through
+    the exported `HELL_DEFAULT_<X>_INPUT_ADAPTER` objects.

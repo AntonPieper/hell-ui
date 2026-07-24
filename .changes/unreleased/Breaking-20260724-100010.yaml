@@ -1,0 +1,21 @@
+kind: Breaking
+body: >-
+  App Shell now owns only its four-region layout, responsive overlay
+  transitions, focus trapping and restoration, dismissal, controlled root
+  state, and the deliberate toggle actions. The `HellNavItem`/`HellNavSection`
+  navigation mini-family and its stylesheet rules are retired in favor of
+  documented recipes over stable shell state attributes, the toggle
+  `appearance` inputs and `HellAppContent.maxWidth` are removed, and duplicate
+  child state plus public panel-id coordination moved behind the shell.
+time: 2026-07-24T10:00:10.000Z
+custom:
+  migration: >-
+    Build navigation as consumer markup keyed off the stable
+    `data-sidenav-collapsed`, `data-mobile-layout`, and `data-collapsed`
+    attributes; the app-shell docs page demonstrates the anchor and
+    collapsible-group recipes. Style toggles through their local `ui` Part
+    Style Maps, set content width with `--hell-app-content-max-width` through
+    `HellAppContent`'s `ui`, and bind
+    `sidenavCollapsed`/`sidenavCollapsedChange` and
+    `secondaryHidden`/`secondaryHiddenChange` when application code needs to
+    read or persist shell state.

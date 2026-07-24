@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  The pre-beta deprecated compatibility aliases are removed: the
+  `allowLiveCaptions` input on `HellAudioPlayer`, the
+  `hellAudioSpeechSupported` re-export from `hell-ui/audio-player`, the
+  browser-global `hellCodeEditorSetup` constant, and the legacy
+  `data-dialog-root` scope attribute.
+time: 2026-07-24T10:00:27.000Z
+custom:
+  migration: >-
+    Use `allowSpeechTranscript` plus `provideHellAudioTranscript()`, import
+    `hellAudioSpeechSupported` from `hell-ui/features/audio-transcript`, call
+    `hellCodeEditorSetupFactory(ownerDocument)`, and target
+    `data-hell-dialog-scope-root` in styles and tests.

@@ -1,0 +1,11 @@
+kind: Added
+body: >-
+  Core exports `hellSearchResource`, a UI-independent signal resource for
+  local ranking and asynchronous search: it observes a caller-owned query
+  signal, publishes domain items plus idle/loading/success/error state,
+  debounces remote sources, forwards an `AbortSignal`, and prevents superseded
+  responses from replacing current state. `refresh()` bypasses debounce,
+  `cancel()` preserves settled results, `clearResults()` empties results while
+  leaving the caller-owned query untouched, and `reset()` also clears the
+  query without dispatching an empty-query request.
+time: 2026-07-24T10:00:35.000Z

@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  The avatar family is one entry point: avatar-group folds into
+  `hell-ui/avatar`, and the `hell-ui/avatar-group` import path and stylesheet
+  are gone. `HellAvatar` initials typography also moved from the `root` recipe
+  to the `fallback` part.
+time: 2026-07-24T10:00:19.000Z
+custom:
+  migration: >-
+    Import `HellAvatarGroup`, `HellAvatarGroupItem`,
+    `HellAvatarGroupOverflow`, and `HELL_AVATAR_GROUP_IMPORTS` from
+    `hell-ui/avatar` and its styles from `hell-ui/avatar/styles.css`. Retarget
+    initials refinements from root shorthand to the `fallback` part, for
+    example `[ui]="{ fallback: 'font-bold' }"`.

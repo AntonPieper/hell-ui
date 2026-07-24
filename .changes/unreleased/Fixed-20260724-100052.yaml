@@ -1,0 +1,8 @@
+kind: Fixed
+body: >-
+  Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`
+  and `aria-checked`; they are native toggle buttons announcing selection
+  through `aria-pressed`, matching the WAI-ARIA toggle-button pattern and
+  working around ng-primitives hardcoding radio semantics in both selection
+  modes. Single-select groups keep radio items.
+time: 2026-07-24T10:00:52.000Z

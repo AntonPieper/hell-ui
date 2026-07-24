@@ -1,0 +1,7 @@
+kind: Fixed
+body: >-
+  The table utilities' attribute inputs (`contentWidth`, `active`, `selected`,
+  `sort`, `sortable`, `columnId`, `align`, and `space`) are readable
+  getter/setter pairs instead of write-only setters, so reading them reflects
+  the bound state instead of `undefined`.
+time: 2026-07-24T10:00:55.000Z

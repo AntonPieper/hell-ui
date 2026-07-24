@@ -1,0 +1,8 @@
+kind: Changed
+body: >-
+  Hell's duration-token-driven transitions and entrance animations now
+  collapse under `prefers-reduced-motion: reduce`, and Spinner, Skeleton, and
+  Audio Player disable their keyframe motion locally. The shared token
+  stylesheet deliberately leaves consumer and third-party `[data-slot]`
+  elements untouched.
+time: 2026-07-24T10:00:46.000Z

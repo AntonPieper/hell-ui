@@ -1,0 +1,9 @@
+kind: Added
+body: >-
+  The `hell-ui/empty-state` entry point: an owned-anatomy `hell-empty-state`
+  with `root`, `media`, `title`, `description`, and `actions` Public Parts,
+  `glyph`/`title`/`description` inputs, projected override directives, heading
+  promotion through `headingLevel`, and container-filling centering.
+  `HELL_EMPTY_STATE_COPY` ships ready-made no-data, no-results, error, and
+  forbidden copy as plain data that localizes with app strings.
+time: 2026-07-24T10:00:38.000Z

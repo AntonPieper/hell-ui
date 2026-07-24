@@ -1,0 +1,11 @@
+kind: Breaking
+body: >-
+  `size` inputs narrowed to exactly the sizes their recipes style:
+  `HellDialog` accepts `'sm' | 'md' | 'lg' | 'xl'` and `HellSlider` accepts
+  `'sm' | 'md' | 'lg'`. The removed values previously type-checked but
+  silently rendered the base `md` visuals.
+time: 2026-07-24T10:00:26.000Z
+custom:
+  migration: >-
+    Replace `size="xs"` on dialogs with `sm`, and `size="xs"`/`size="xl"` on
+    sliders with `sm`/`lg`; rendered output is unchanged.

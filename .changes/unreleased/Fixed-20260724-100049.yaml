@@ -1,0 +1,8 @@
+kind: Fixed
+body: >-
+  Part Recipes now spell font-family inheritance as
+  `font-[family-name:inherit]`, so buttons and the other affected form and
+  navigation controls actually render their intended font-family inheritance.
+  The ambiguous `font-[inherit]` was classified into the font-weight group by
+  the configured Tailwind merge and silently dropped next to weight utilities.
+time: 2026-07-24T10:00:49.000Z

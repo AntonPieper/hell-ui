@@ -1,0 +1,7 @@
+kind: Fixed
+body: >-
+  Interactive `[hellBreadcrumbEllipsis]` buttons no longer carry
+  `role="presentation"` and `aria-hidden="true"`, so a focusable ellipsis
+  button is announced instead of violating the `aria-hidden-focus` rule; span
+  hosts stay decorative.
+time: 2026-07-24T10:00:53.000Z

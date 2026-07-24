@@ -1,0 +1,19 @@
+kind: Breaking
+body: >-
+  Pagination is the numbered strip plus one nav-link directive. The five
+  nav-button directives collapse into `HellPageLink` (`button[hellPageLink],
+  a[hellPageLink]` with a required `'first' | 'previous' | 'next' | 'last' |
+  number` target), and the strip's `mode` input, `HellPaginationMode` type,
+  and the `status`/`jump` part family are gone — compact and page-jump forms
+  are documented recipes composed from `[hellPagination]`, `hellPageLink`, and
+  `hellNativeSelect` with app-owned copy. Boundary-aware disabled state,
+  numbered `aria-current`, the pagination Label Contract, and keyboard
+  activation carry over.
+time: 2026-07-24T10:00:21.000Z
+custom:
+  migration: >-
+    Migrate `hellPaginationFirst` → `hellPageLink="first"`,
+    `hellPaginationPrev` → `hellPageLink="previous"`, `hellPaginationNext` →
+    `hellPageLink="next"`, `hellPaginationLast` → `hellPageLink="last"`, and
+    `hellPaginationButton [page]="p"` → `[hellPageLink]="p"`, then rebuild
+    compact, status, and jump layouts from the documented recipes.
