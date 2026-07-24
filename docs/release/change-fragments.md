@@ -11,8 +11,9 @@ it deterministically from the Released Version Notes records under
 `.changes/`, newest first, starting at the `0.2.0` internal-beta baseline.
 Never edit the aggregate by hand — record new Consumer Changes as pending
 fragments with `pnpm change`; they stay under `.changes/unreleased/` (there is
-no unreleased changelog section) until Release Preparation tooling assembles
-them into the next version's Released Version Notes in follow-up work.
+no unreleased changelog section) until `pnpm release:prepare` assembles them
+into the next version's Released Version Notes (see
+[`release-preparation.md`](./release-preparation.md)).
 
 ## Commands
 
