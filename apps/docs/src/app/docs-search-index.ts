@@ -591,6 +591,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'control-group basic composition hellControlGroup hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction HELL_CONTROL_GROUP_IMPORTS hellInput hellField prefix suffix action copy workspace url projection consumer-owned',
  },
  {
+ title:'Control Group: Overflow',
+ path:'/components/control-group',
+ detail:'components/control-group/examples/overflow.example.ts',
+ terms:
+'control-group overflow long unbroken value inner scroll ellipsis truncate prefix suffix shrink-0 min-w-16 padding rhythm clip buffer narrow frame hellControlGroupPrefix hellControlGroupSuffix hellControlGroupAction',
+ },
+ {
  title:'Control Group: Sizes and states',
  path:'/components/control-group',
  detail:'components/control-group/examples/states.example.ts',
