@@ -452,6 +452,14 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Changed
 
+- Field label, description, and error text now render at the design scale's
+  13px control-label size instead of 12px, so form text is comfortably
+  readable in every composition that wires a control through Field. The
+  label keeps its semibold weight above the regular control text, the muted
+  description stays below both, and the description and error pin
+  `leading-normal` so wrapped helper text keeps a steady rhythm across
+  skins. The error grows with the description because both occupy the same
+  helper-text slot under the control. Closes #338.
 - Setter-only public members are gone and the category is now release
   blocking. The table utilities' `contentWidth`, `active`, `selected`,
   `sort`, `sortable`, `columnId`, `align`, and `space` attribute inputs

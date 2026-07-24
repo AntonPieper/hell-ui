@@ -7,15 +7,15 @@ const HELL_FIELD_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_FIELD_LABEL_RECIPE = {
-  root: 'inline-flex items-center gap-hell-2 text-xs font-semibold tracking-normal text-hell-foreground',
+  root: 'inline-flex items-center gap-hell-2 text-[13px] font-semibold tracking-normal text-hell-foreground',
 } satisfies HellRecipe<'root'>;
 
 const HELL_FIELD_DESCRIPTION_RECIPE = {
-  root: 'text-xs text-hell-foreground-muted data-[orientation=horizontal]:basis-full',
+  root: 'text-[13px] leading-normal text-hell-foreground-muted data-[orientation=horizontal]:basis-full',
 } satisfies HellRecipe<'root'>;
 
 const HELL_FIELD_ERROR_RECIPE = {
-  root: 'text-xs text-hell-danger data-[orientation=horizontal]:basis-full',
+  root: 'text-[13px] leading-normal text-hell-danger data-[orientation=horizontal]:basis-full',
 } satisfies HellRecipe<'root'>;
 
 /**
