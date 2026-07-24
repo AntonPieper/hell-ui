@@ -8,7 +8,7 @@ import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
   template: `
     <!-- Each handle rebalances only its two adjacent panes; minSize keeps every -->
     <!-- pane usable. Dragging never collapses a neighbour below its minimum. -->
-    <div hellResizable class="h-64">
+    <div hellResizable ui="h-64">
       <div hellResizablePane [initialFlex]="1" [minSize]="140" class="hd-surface-elevated p-hell-4 text-sm">
         Sidebar
       </div>

@@ -29,7 +29,7 @@ const tickets: readonly Ticket[] = [
   template: `
     <!-- List / inspector split: a table of tickets on the left, a detail card -->
     <!-- on the right. aria-controls names the two panes the handle resizes. -->
-    <div hellResizable class="h-[22rem]" ui="overflow-clip rounded-hell-lg border border-hell-border">
+    <div hellResizable ui="h-[22rem] overflow-clip rounded-hell-lg border border-hell-border">
       <div id="ticket-list-pane" hellResizablePane [initialFlex]="3" [minSize]="260">
         <div hellTableContainer ui="rounded-none border-0">
           <table hellTableRoot>
