@@ -156,6 +156,13 @@ import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.exampl
         removes it. Arrow keys, Home, End, Delete, and each remove button follow the Chip Set
         contract.
       </p>
+      <p>
+        Inside a Control Group the Chip Set carries the inner spacing itself
+        (<code>data-in-control-group</code>): chips and the inline input keep breathing room from
+        the frame on every wrapped row, and the input rides the chip flow. Keep the toggle button
+        and the dropdown portal outside the set so the chevron hugs the frame edge instead of
+        wrapping with the chips.
+      </p>
       <hd-example-tabs [code]="comboboxChipsExampleCode">
         <app-combobox-chips-example />
       </hd-example-tabs>
