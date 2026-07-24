@@ -20,6 +20,7 @@
     "test:architecture": "node tools/check-architecture.mjs",
     "test:api-report": "node tools/check-api-reports.mjs",
     "test:changelog": "node tools/check-changelog.mjs",
+    "release:prepare": "node tools/release-prepare.mjs",
     "api-report:update": "node tools/check-api-reports.mjs --local",
     "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report && pnpm run benchmark:style-bundle --skip-build",
     "benchmark:style-bundle": "node tools/check-consumer-fixtures.mjs styles-aggregate",

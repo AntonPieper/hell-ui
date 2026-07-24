@@ -20,8 +20,11 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { collectUnreleasedFragmentErrors, listUnreleasedFragments } from './change-fragments.mjs';
 
 export const changelogBaselineVersion = '0.2.0';
+
+export const packageManifestPath = 'packages/angular/package.json';
 
 const changieTimeoutMs = 30_000;
 
@@ -121,6 +124,98 @@ function validateReleasedRecord(content, version, label) {
   return errors;
 }
 
+// The narrow changelog contract shared by `pnpm test:changelog` and Release
+// Preparation: the published package manifest names a released SemVer version,
+// every Released Version Notes record is well formed, the pending Change
+// Fragments satisfy the objective validator, and CHANGELOG.md reproduces the
+// aggregate regenerated from the committed records byte-for-byte.
+export function collectChangelogContractErrors({ root, changieBinary, describePath = (path) => path }) {
+  const errors = [];
+  let pendingFragmentCount = 0;
+
+  const currentVersion = readPackageVersion(root, errors);
+  if (currentVersion !== null) {
+    if (!isSemVer(currentVersion)) {
+      errors.push(`${packageManifestPath} version must be valid SemVer; found ${currentVersion}.`);
+    } else {
+      const versionRecord = join(root, '.changes', `${currentVersion}.md`);
+      if (!existsSync(versionRecord)) {
+        errors.push(
+          `Missing ${describePath(versionRecord)}; the current package version needs a ` +
+            'Released Version Notes record (created by Release Preparation, never by hand-editing the changelog).',
+        );
+      }
+    }
+  }
+
+  errors.push(...collectReleasedVersionNotesErrors(root, describePath));
+
+  let changelog = null;
+  if (!existsSync(join(root, 'CHANGELOG.md'))) {
+    errors.push('Missing CHANGELOG.md.');
+  } else {
+    changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+    if (!changelog.startsWith('# Changelog\n\n## [')) {
+      errors.push(
+        'CHANGELOG.md must start with `# Changelog` and proceed directly to the newest release ' +
+          'with no introduction.',
+      );
+    }
+    if (changelog.includes('[Unreleased]')) {
+      errors.push(
+        'CHANGELOG.md must not carry an unreleased section; pending Consumer Changes stay in ' +
+          '.changes/unreleased/ Change Fragments until Release Preparation.',
+      );
+    }
+  }
+
+  if (!existsSync(join(root, '.changie.yaml'))) {
+    errors.push('Missing .changie.yaml; Change Fragment authoring requires the Changie configuration.');
+  } else {
+    const unreleasedDir = join(root, '.changes', 'unreleased');
+    errors.push(...collectUnreleasedFragmentErrors(unreleasedDir, describePath));
+    if (existsSync(unreleasedDir)) pendingFragmentCount = listUnreleasedFragments(unreleasedDir).length;
+  }
+
+  if (!existsSync(changieBinary)) {
+    errors.push(`Missing Changie binary at ${changieBinary}; run pnpm install first.`);
+  } else if (changelog !== null) {
+    const regenerated = regenerateReleaseChangelog({ root, changieBinary });
+    errors.push(...regenerated.failures);
+    if (regenerated.content !== null && regenerated.content !== changelog) {
+      errors.push(
+        'CHANGELOG.md does not reproduce the aggregate regenerated from the committed ' +
+          `.changes/ Released Version Notes (${describeFirstDifference(regenerated.content, changelog)}). ` +
+          'Edit the version records and regenerate; the aggregate is never edited by hand.',
+      );
+    }
+  }
+
+  return { errors, pendingFragmentCount };
+}
+
+function readPackageVersion(root, errors) {
+  const manifestAbsolute = join(root, packageManifestPath);
+  if (!existsSync(manifestAbsolute)) {
+    errors.push(`Missing ${packageManifestPath}.`);
+    return null;
+  }
+
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(manifestAbsolute, 'utf8'));
+  } catch (error) {
+    errors.push(`${packageManifestPath} must be valid JSON: ${error.message}`);
+    return null;
+  }
+
+  if (typeof manifest.version !== 'string') {
+    errors.push(`${packageManifestPath} must include a version.`);
+    return null;
+  }
+  return manifest.version;
+}
+
 // Copies the committed Changie configuration and records into a fresh
 // isolated workspace, runs the real `changie merge` there, and returns the
 // regenerated aggregate. `mutateWorkspace` lets fixtures edit the copied
@@ -166,7 +261,7 @@ export function regenerateReleaseChangelog({ root, changieBinary, mutateWorkspac
   }
 }
 
-export function describeFirstDifference(expected, actual) {
+function describeFirstDifference(expected, actual) {
   const expectedLines = expected.split('\n');
   const actualLines = actual.split('\n');
   const length = Math.max(expectedLines.length, actualLines.length);
@@ -189,6 +284,52 @@ export function isSemVer(value) {
   return /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(
     value,
   );
+}
+
+// SemVer 2.0.0 precedence: numeric core first, then prerelease identifiers
+// (numeric before alphanumeric, missing identifiers first, a release above
+// its prereleases). Build metadata is ignored.
+export function compareSemVer(left, right) {
+  const a = parseSemVer(left);
+  const b = parseSemVer(right);
+  for (const part of ['major', 'minor', 'patch']) {
+    if (a[part] !== b[part]) return a[part] < b[part] ? -1 : 1;
+  }
+
+  if (a.prerelease.length === 0 || b.prerelease.length === 0) {
+    if (a.prerelease.length === b.prerelease.length) return 0;
+    return a.prerelease.length === 0 ? 1 : -1;
+  }
+  const length = Math.max(a.prerelease.length, b.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftId = a.prerelease[index];
+    const rightId = b.prerelease[index];
+    if (leftId === undefined) return -1;
+    if (rightId === undefined) return 1;
+    const leftNumeric = /^\d+$/.test(leftId);
+    const rightNumeric = /^\d+$/.test(rightId);
+    if (leftNumeric && rightNumeric) {
+      if (Number(leftId) !== Number(rightId)) return Number(leftId) < Number(rightId) ? -1 : 1;
+    } else if (leftNumeric !== rightNumeric) {
+      return leftNumeric ? -1 : 1;
+    } else if (leftId !== rightId) {
+      return leftId < rightId ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
+export function parseSemVer(value) {
+  const match = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.exec(
+    String(value),
+  );
+  if (!match) throw new Error(`Not a SemVer version: ${value}`);
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+    prerelease: match[4] ? match[4].split('.') : [],
+  };
 }
 
 function escapeRegExp(value) {
