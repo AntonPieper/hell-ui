@@ -1997,6 +1997,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hell HellToastService svc.success duration description smallest usage notification feedback',
  },
  {
+ title:'Toast: Placement',
+ path:'/components/toast',
+ detail:'components/toast/examples/placement.example.ts',
+ terms:
+'hell-toaster HellToaster HellToastService HellToastPosition position placement anchor corner edge top-left top-center top-right bottom-left bottom-center bottom-right stack direction enter exit scoped service',
+ },
+ {
  title:'Toast: Stacking',
  path:'/components/toast',
  detail:'components/toast/examples/stacking.example.ts',
