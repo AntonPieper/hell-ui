@@ -1067,11 +1067,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'hellButton hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItemCheckbox hellMenuItemRadioGroup hellMenuItemRadio hellMenuItemIndicator hellMenuSeparator checkbox radio group preferences toggle multi-select single-choice checked valueChange',
  },
  {
- title:'Menu: Consumer-owned options',
+ title:'Menu: Multi-select menu button',
  path:'/components/menu',
- detail:'components/menu/examples/options.example.ts',
+ detail:'components/menu/examples/multi-select.example.ts',
  terms:
-'options components/menu/examples/options.example components/menu hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator domain objects checked checkedChange disabled selection floor consumer owned column visibility menuitemcheckbox',
+'multi-select menu button recipe components/menu/examples/multi-select.example components/menu hellButton hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator domain objects selected checked checkedChange reset count badge data-selection-count data-has-selection consumer owned checkable menuitemcheckbox choose subset channels disabled selection floor',
+ },
+ {
+ title:'Menu: TanStack column visibility',
+ path:'/components/menu',
+ detail:'components/menu/examples/tanstack-columns.example.ts',
+ terms:
+'multi-select menu button recipe tanstack-columns components/menu/examples/tanstack-columns.example components/menu hellButton hellMenu hellMenuItemCheckbox hellMenuItemIndicator TanStack Column columnVisibility getCanHide getIsVisible toggleVisibility enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
  },
  {
  title:'Menu: With avatar (account menu)',
@@ -1128,20 +1135,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/filter-builder/examples/date-range.example.ts',
  terms:
 'filter builder filter-builder date range structured value projected editor HellDateInput input hellDateInput native keyboard Escape focus restoration local date from to',
- },
- {
- title:'Multi-Select Menu Button: Basic',
- path:'/components/multi-select-menu-button',
- detail:'components/multi-select-menu-button/examples/basic.example.ts',
- terms:
-'multi-select-menu-button recipe basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hellButton hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator domain objects selected checked checkedChange reset count badge data-selection-count data-has-selection consumer owned checkable menuitemcheckbox choose subset channels disabled selection floor',
- },
- {
- title:'Multi-Select Menu Button: TanStack column visibility',
- path:'/components/multi-select-menu-button',
- detail:'components/multi-select-menu-button/examples/tanstack-columns.example.ts',
- terms:
-'multi-select-menu-button recipe tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hellButton hellMenu hellMenuItemCheckbox hellMenuItemIndicator TanStack Column columnVisibility getCanHide getIsVisible toggleVisibility enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns selection floor reset',
  },
  {
  title:'Omnibar: Async search',

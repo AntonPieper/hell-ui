@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { MenuBasicExample } from './examples/basic.example';
@@ -11,8 +12,14 @@ import { MenuCheckableExample } from './examples/checkable.example';
 import menuCheckableExampleCodeRaw from './examples/checkable.example.ts?raw' with {
   loader: 'text',
 };
-import { MenuOptionsExample } from './examples/options.example';
-import menuOptionsExampleCodeRaw from './examples/options.example.ts?raw' with { loader: 'text' };
+import { MenuMultiSelectExample } from './examples/multi-select.example';
+import menuMultiSelectExampleCodeRaw from './examples/multi-select.example.ts?raw' with {
+  loader: 'text',
+};
+import { MenuTanStackColumnsExample } from './examples/tanstack-columns.example';
+import menuTanStackColumnsExampleCodeRaw from './examples/tanstack-columns.example.ts?raw' with {
+  loader: 'text',
+};
 import { MenuProfileMenuExample } from './examples/profile-menu.example';
 import menuProfileMenuExampleCodeRaw from './examples/profile-menu.example.ts?raw' with {
   loader: 'text',
@@ -26,12 +33,14 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   selector: 'hd-menu',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CodeBlock,
     ExampleTabs,
     PageHeader,
     MenuBasicExample,
     MenuSectionsExample,
     MenuCheckableExample,
-    MenuOptionsExample,
+    MenuMultiSelectExample,
+    MenuTanStackColumnsExample,
     MenuProfileMenuExample,
     MenuStylingExample,
   ],
@@ -97,19 +106,58 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <app-menu-checkable-example />
       </hd-example-tabs>
 
-      <h2>Consumer-owned options</h2>
+      <h2>Multi-select menu button</h2>
       <p>
-        Iterate your domain objects directly and render one
-        <code>button[hellMenuItemCheckbox]</code> per row. Bind <code>checked</code>,
-        <code>disabled</code>, and <code>(checkedChange)</code> to your own collection state, then
-        project an ordinary <code>[hellMenuItemIndicator]</code> and label. This example keeps real
-        column objects as its selected values and disables only the last visible column, so the
-        collection can never become empty. Menu still owns roving focus, checkbox semantics,
-        typeahead, and dismissal; the caller owns data, policy, and rendering.
+        A button that opens a menu of checkable options and reflects the selected count on its
+        trigger. This is a <strong>recipe</strong>, not a dedicated component: compose
+        <code>hellButton</code>, a <code>[hellMenu]</code> panel, and an explicit loop of
+        <code>button[hellMenuItemCheckbox]</code> rows. Iterate real domain objects, bind each
+        row's <code>checked</code> and <code>disabled</code> state, and update your own collection
+        from <code>(checkedChange)</code>. Toggling keeps the menu open — adjusting several choices
+        is one visit, not five. Menu still owns roving focus, checkbox semantics, typeahead, and
+        dismissal; the caller owns data, policy, and rendering, so nothing here is private API. The
+        former <code>hell-ui/multi-select-menu-button</code> entry point shipped this exact
+        composition as a component; it was removed in favor of this recipe, which is the migration
+        target.
       </p>
-      <hd-example-tabs [code]="menuOptionsExampleCode">
-        <app-menu-options-example />
+      <p>
+        The trigger shows a count while anything is selected (the recipe reflects
+        <code>data-selection-count</code> / <code>data-has-selection</code> for styling); keep the
+        count badge decorative (<code>aria-hidden</code>) and announce the count through visually
+        hidden text, as the example does. The selection floor is caller policy: when the collection
+        is at the minimum, disable only its still-selected rows (native <code>disabled</code>) so
+        the collection can never drop below it. The reset item is an ordinary
+        <code>hellMenuItem</code> after a separator — you restore your own defaults; no component
+        holds a notion of a default for you. Give the menu an <code>aria-label</code> matching the
+        trigger text.
+      </p>
+      <hd-example-tabs [code]="menuMultiSelectExampleCode">
+        <app-menu-multi-select-example />
       </hd-example-tabs>
+      <p>The core of the recipe is one trigger and one explicit checkbox loop:</p>
+      <hd-code-block [code]="multiSelectBindingRecipe" />
+      <h3>TanStack column visibility</h3>
+      <p>
+        The same recipe drives a caller-owned TanStack table: iterate the table's real
+        <code>Column</code> objects and route each toggle through
+        <code>column.toggleVisibility()</code>. The rows are the columns TanStack reports as
+        hideable via <code>column.getCanHide()</code>, so a column marked
+        <code>enableHiding: false</code> — the identity column here — never appears in the menu.
+        The floor keeps at least one toggleable column on, and the reset item restores every
+        column. This keeps the table boundary intact — TanStack still owns the state, and Hell UI
+        owns none of it.
+      </p>
+      <hd-example-tabs [code]="menuTanStackColumnsExampleCode">
+        <app-menu-tanstack-columns-example />
+      </hd-example-tabs>
+      <p>
+        Persistence is a caller concern. The example writes the whole visibility map to
+        <code>localStorage</code> on every change through the table's
+        <code>onColumnVisibilityChange</code> and reads it back on init — the app owns the storage
+        key and its version, exactly as it owns page size. Drop the same
+        <code>hellTableShellToolbar</code>-projected composition into any TanStack Table Shell
+        toolbar alongside filter and pagination controls.
+      </p>
 
       <h2>With avatar (account menu)</h2>
       <p>
@@ -342,6 +390,8 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <li>Group destructive or secondary actions with a separator and, when helpful, a section label.</li>
         <li>Add a submenu only when it genuinely reduces scanning cost.</li>
         <li>Use checkbox/radio items for preference toggles that belong in the menu model.</li>
+        <li>Iterate real domain objects in multi-select recipes and update your collection from <code>(checkedChange)</code>.</li>
+        <li>Disable still-selected options when an empty selection would be a broken state.</li>
         <li>Refine each part through its own <code>ui</code>; target the highlight with <code>data-hover</code>/<code>data-focus-visible</code>.</li>
       </ul>
 
@@ -350,6 +400,8 @@ import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
         <li>Don't put form fields inside a menu — use a dialog or popover instead.</li>
         <li>Don't use menus for primary navigation when tabs or nav links fit better.</li>
         <li>Don't style menu rows from <code>[hellMenu]</code>'s <code>ui</code>; each row and slot owns its own part.</li>
+        <li>Don't introduce a parallel option schema just to render labels and disabled state.</li>
+        <li>Don't reach into the menu to force it closed on checkbox toggle — staying open is the point.</li>
         <li>Don't rely on a <code>data-active</code> attribute for highlight styling — it isn't emitted.</li>
       </ul>
     </article>
@@ -359,7 +411,28 @@ export class MenuPage {
   protected readonly menuBasicExampleCode = menuBasicExampleCodeRaw;
   protected readonly menuSectionsExampleCode = menuSectionsExampleCodeRaw;
   protected readonly menuCheckableExampleCode = menuCheckableExampleCodeRaw;
-  protected readonly menuOptionsExampleCode = menuOptionsExampleCodeRaw;
+  protected readonly menuMultiSelectExampleCode = menuMultiSelectExampleCodeRaw;
+  protected readonly menuTanStackColumnsExampleCode = menuTanStackColumnsExampleCodeRaw;
   protected readonly menuProfileMenuExampleCode = menuProfileMenuExampleCodeRaw;
   protected readonly menuStylingExampleCode = menuStylingExampleCodeRaw;
+
+  protected readonly multiSelectBindingRecipe = `<button hellButton type="button" [hellMenuTrigger]="menu">
+  Columns ({{ visibleColumns().length }})
+</button>
+<ng-template #menu>
+  <div hellMenu aria-label="Columns">
+    @for (column of columns; track column.id) {
+      <button
+        hellMenuItemCheckbox
+        type="button"
+        [checked]="isVisible(column)"
+        [disabled]="isLastVisible(column)"
+        (checkedChange)="setVisible(column, $event)"
+      >
+        <span hellMenuItemIndicator></span>
+        <span>{{ column.name }}</span>
+      </button>
+    }
+  </div>
+</ng-template>`;
 }
