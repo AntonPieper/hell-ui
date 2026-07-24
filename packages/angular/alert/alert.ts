@@ -33,23 +33,33 @@ export type HellAlertPart = 'root' | 'icon' | 'content';
 /** Part Style Map accepted by the HellAlert `ui` input. */
 export type HellAlertUi = HellUi<HellAlertPart>;
 
+/*
+ * Alert visual language: a soft tinted surface, a border of the same accent
+ * mixed toward transparency (a full-strength accent border reads like a
+ * Bootstrap sticker), a chromatic base-accent glyph, and a strong-accent
+ * title over neutral muted body copy. Three private vars carry the scheme:
+ * `--_hell-alert-surface` (soft), `--_hell-alert-accent` (base; glyph, border
+ * mix, dismiss hover tint), and `--_hell-alert-strong` (strong; title text).
+ * The default glyphs are filled shapes: crisper than strokes at 16px and even
+ * in visual weight across variants.
+ */
 const HELL_ALERT_RECIPE = {
   root:
-    'flex items-start gap-hell-3 rounded-hell-md border border-solid border-[var(--_hell-alert-border)] bg-[var(--_hell-alert-surface)] p-hell-4 text-sm leading-normal text-hell-foreground ' +
-    '[--_hell-alert-surface:var(--color-hell-info-soft)] [--_hell-alert-border:var(--color-hell-info)] [--_hell-alert-accent:var(--color-hell-info-strong)] ' +
-    'data-[variant=success]:[--_hell-alert-surface:var(--color-hell-success-soft)] data-[variant=success]:[--_hell-alert-border:var(--color-hell-success)] data-[variant=success]:[--_hell-alert-accent:var(--color-hell-success-strong)] ' +
-    'data-[variant=warning]:[--_hell-alert-surface:var(--color-hell-warning-soft)] data-[variant=warning]:[--_hell-alert-border:var(--color-hell-warning)] data-[variant=warning]:[--_hell-alert-accent:var(--color-hell-warning-strong)] ' +
-    'data-[variant=danger]:[--_hell-alert-surface:var(--color-hell-danger-soft)] data-[variant=danger]:[--_hell-alert-border:var(--color-hell-danger)] data-[variant=danger]:[--_hell-alert-accent:var(--color-hell-danger-strong)]',
-  icon: 'mt-px flex h-5 w-5 flex-none items-center justify-center text-[var(--_hell-alert-accent)] [&>svg]:h-full [&>svg]:w-full',
+    'flex items-start gap-hell-3 rounded-hell-lg border border-solid border-[color-mix(in_oklab,var(--_hell-alert-accent)_35%,transparent)] bg-[var(--_hell-alert-surface)] p-hell-4 text-sm leading-normal text-hell-foreground ' +
+    '[--_hell-alert-surface:var(--color-hell-info-soft)] [--_hell-alert-accent:var(--color-hell-info)] [--_hell-alert-strong:var(--color-hell-info-strong)] ' +
+    'data-[variant=success]:[--_hell-alert-surface:var(--color-hell-success-soft)] data-[variant=success]:[--_hell-alert-accent:var(--color-hell-success)] data-[variant=success]:[--_hell-alert-strong:var(--color-hell-success-strong)] ' +
+    'data-[variant=warning]:[--_hell-alert-surface:var(--color-hell-warning-soft)] data-[variant=warning]:[--_hell-alert-accent:var(--color-hell-warning)] data-[variant=warning]:[--_hell-alert-strong:var(--color-hell-warning-strong)] ' +
+    'data-[variant=danger]:[--_hell-alert-surface:var(--color-hell-danger-soft)] data-[variant=danger]:[--_hell-alert-accent:var(--color-hell-danger)] data-[variant=danger]:[--_hell-alert-strong:var(--color-hell-danger-strong)]',
+  icon: 'mt-[2px] flex h-4 w-4 flex-none items-center justify-center text-[var(--_hell-alert-accent)] [&>svg]:h-full [&>svg]:w-full',
   content: 'flex min-w-0 flex-1 flex-col gap-hell-1',
 } satisfies HellRecipe<HellAlertPart>;
 
 const HELL_ALERT_TITLE_RECIPE = {
-  root: 'm-0 text-sm font-semibold text-hell-foreground',
+  root: 'm-0 text-sm font-semibold leading-[1.45] text-[var(--_hell-alert-strong)]',
 } satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_DESCRIPTION_RECIPE = {
-  root: 'm-0 text-sm text-hell-foreground-muted',
+  root: 'm-0 text-[13px] leading-[1.45] text-hell-foreground-muted',
 } satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_ACTIONS_RECIPE = {
@@ -57,7 +67,7 @@ const HELL_ALERT_ACTIONS_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 const HELL_ALERT_DISMISS_RECIPE = {
-  root: '-me-hell-1 -mt-hell-1 ms-auto inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 text-hell-foreground-subtle transition-[color,background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1',
+  root: '-me-hell-1 -mt-hell-1 ms-auto inline-flex h-hell-6 w-hell-6 flex-none cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 text-hell-foreground-subtle transition-[color,background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-[color-mix(in_oklab,var(--_hell-alert-accent)_15%,transparent)] hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1',
 } satisfies HellRecipe<'root'>;
 
 /**
@@ -100,27 +110,35 @@ export class HellAlertIcon {}
         @if (!hasCustomIcon()) {
           @switch (variant()) {
             @case ('success') {
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="8" cy="8" r="6.5" />
-                <path d="M5 8.5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round" />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm3.28 5.28a.75.75 0 0 0-1.06-1.06L7.25 8.19 5.78 6.72a.75.75 0 0 0-1.06 1.06l2 2c.3.3.77.3 1.06 0l3.5-3.5Z"
+                />
               </svg>
             }
             @case ('warning') {
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 1.5L15 14H1L8 1.5z" stroke-linejoin="round" />
-                <path d="M8 6v3.5M8 11.8v.4" stroke-linecap="round" />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M6.63 2.29c.6-1.05 2.14-1.05 2.74 0l5.64 9.8c.6 1.05-.16 2.36-1.37 2.36H2.36c-1.21 0-1.97-1.31-1.37-2.35L6.63 2.29ZM8 5.5a1 1 0 0 1 1 1v2.4a1 1 0 1 1-2 0V6.5a1 1 0 0 1 1-1Zm0 5.55a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"
+                />
               </svg>
             }
             @case ('danger') {
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="8" cy="8" r="6.5" />
-                <path d="M8 4.5v4M8 11.1v.4" stroke-linecap="round" />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 2.85a1.05 1.05 0 0 1 1.05 1.05v3.05a1.05 1.05 0 1 1-2.1 0V4.9A1.05 1.05 0 0 1 8 3.85Zm0 6.3a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1Z"
+                />
               </svg>
             }
             @default {
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="8" cy="8" r="6.5" />
-                <path d="M8 7v4M8 4.6v.4" stroke-linecap="round" />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 2.85a1.05 1.05 0 1 0 0 2.1 1.05 1.05 0 0 0 0-2.1Zm0 3.1c.58 0 1.05.47 1.05 1.05v3.05a1.05 1.05 0 1 1-2.1 0V8c0-.58.47-1.05 1.05-1.05Z"
+                />
               </svg>
             }
           }

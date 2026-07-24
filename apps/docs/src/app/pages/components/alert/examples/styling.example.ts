@@ -17,7 +17,7 @@ import { HELL_ALERT_IMPORTS, type HellAlertUi } from 'hell-ui/alert';
 export class AlertStylingExample {
   protected readonly compactUi: HellAlertUi = {
     root: 'gap-hell-2 rounded-hell-sm p-hell-2',
-    icon: 'h-4 w-4',
+    icon: 'mt-px h-3.5 w-3.5',
     content: 'gap-0',
   };
 }
