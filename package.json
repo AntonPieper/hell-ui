@@ -9,6 +9,7 @@
     "build:lib": "pnpm --filter hell-ui build",
     "build:docs": "pnpm --filter hell-docs build",
     "watch": "pnpm --filter hell-ui watch",
+    "change": "changie new",
     "test:unit": "pnpm --filter hell-ui exec ng test hell --watch=false --progress=false --runner-config ../../vitest.config.ts",
     "test:coverage": "pnpm --filter hell-ui exec ng test hell --watch=false --progress=false --runner-config ../../vitest.config.ts --coverage",
     "test": "pnpm run test:unit && pnpm run test:dead-code && pnpm run test:architecture",
@@ -43,6 +44,7 @@
     "@playwright/test": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "angular-eslint": "catalog:",
+    "changie": "^1.25.1",
     "eslint": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
@@ -50,6 +52,7 @@
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "^7.3.5",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "^2.9.0"
   }
 }
