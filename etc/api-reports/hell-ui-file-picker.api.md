@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import { InjectionToken } from '@angular/core';
@@ -31,7 +30,7 @@ export class HellFilePicker implements OnDestroy {
     protected onHostClick(event: MouseEvent): void;
     protected onHostKeydown(event: KeyboardEvent): void;
     open(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly selection: _angular_core.OutputEmitterRef<HellFileSelection>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly validate: _angular_core.InputSignal<HellFileValidator | null>;

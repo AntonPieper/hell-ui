@@ -2,7 +2,8 @@ import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
 import { NgpTextarea } from 'ng-primitives/textarea';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import type { HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellSize } from 'hell-ui/core';
 
 const HELL_FORM_CONTROL_STATE_CLASSES =

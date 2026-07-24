@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -25,7 +24,7 @@ export class HellPageHeader {
     protected readonly hasToolbar: i0.Signal<boolean>;
     protected readonly layout: Readonly<Record<"body" | "titleRow", string>>;
     readonly level: i0.InputSignal<HellPageHeaderLevel>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellPageHeaderPart>;
+    protected readonly part: (part: HellPageHeaderPart) => string;
     readonly ui: i0.InputSignal<HellUiInput<HellPageHeaderPart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellPageHeader, "hell-page-header", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "level": { "alias": "level"; "required": false; "isSignal": true; }; }, {}, ["back", "leadingItems", "meta", "description", "toolbarItem"], ["hell-page-header-back, [hellPageHeaderLeading]", "[hellPageHeaderTitle]", "[hellPageHeaderMeta]", "[hellPageHeaderDescription]", "[hellPageHeaderToolbar]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPageHeader, never>;
@@ -35,7 +34,7 @@ export class HellPageHeader {
 export class HellPageHeaderBack {
     readonly ariaLabel: i0.InputSignal<string | null>;
     readonly back: i0.OutputEmitterRef<void>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected readonly resolvedLabel: i0.Signal<string>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellPageHeaderBack, "hell-page-header-back", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, { "back": "back"; }, never, never, true, never>;

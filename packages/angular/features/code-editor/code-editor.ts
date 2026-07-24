@@ -16,7 +16,8 @@ import {
 } from '@angular/core';
 import { type FormValueControl } from '@angular/forms/signals';
 import { type Extension } from '@codemirror/state';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import {
   HellCodeEditorRuntime,
   type HellCodeEditorRuntimeAccessibilityOptions,

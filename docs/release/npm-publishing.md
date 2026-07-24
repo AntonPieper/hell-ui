@@ -40,12 +40,16 @@ per tag, and both registries publish literally the same audited tarball
 instead of relying on build determinism across separate runs.
 
 - The shared release gate runs `pnpm release:dry-run` (changelog, lint,
-  dead-code, architecture, coverage, library build, package lint/audit, and
-  API-report checks — so local and tagged release gates cannot drift), checks
-  the entrypoint manifests, packs one audited tarball through the same
-  `ci:pack:lib` path CI uses, runs every consumer fixture against that exact
-  tarball, builds the docs, and uploads the tarball as the `release-package`
-  artifact.
+  dead-code, architecture, coverage, library build, package lint/audit,
+  API-report checks, and the Default Style Bundle size benchmark — so local
+  and tagged release gates cannot drift), checks the entrypoint manifests,
+  packs one audited tarball through the same `ci:pack:lib` path CI uses,
+  runs every consumer fixture against that exact tarball — re-running the
+  size benchmark against the audited artifact, since the `styles-aggregate`
+  fixture enforces the accepted budget in
+  `tools/consumer-fixtures/style-bundle-budget.json` (see
+  [`style-bundle-budget.md`](./style-bundle-budget.md)) — builds the docs,
+  and uploads the tarball as the `release-package` artifact.
 - The gate builds on the CI Node runtime: the root `.node-version` file is
   the one source of truth that both `ci.yml` and `release-gate.yml` read
   through `setup-node`'s `node-version-file`, so the published tarball is

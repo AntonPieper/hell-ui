@@ -123,7 +123,9 @@ export default tseslint.config(
   {
     // Docs demonstrate narrow import-path entry points (Light Root Entry
     // Point): the root specifier stays out of docs app code. Replaces the
-    // architecture checker's regex docs-root-import check (#270).
+    // architecture checker's regex docs-root-import check (#270). Internal
+    // Package Paths (#272) stay out of consumer documentation and examples:
+    // hell-ui/internal/* is implementation linkage with no support promise.
     files: ['apps/docs/src/**/*.ts'],
     rules: {
       'no-restricted-imports': [
@@ -134,6 +136,34 @@ export default tseslint.config(
               name: 'hell-ui',
               message:
                 'Docs must demonstrate narrow import-path entry points; import hell-ui/<entrypoint> instead of the root entry point.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['hell-ui/internal', 'hell-ui/internal/*'],
+              message:
+                'hell-ui/internal/* is an Internal Package Path with no consumer support promise; docs and examples must use supported Package Entry Points only.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Consumer-facing verification surfaces (#272): checked-in consumer
+    // fixtures and e2e specs stand in for real adopters, so they may never
+    // name an Internal Package Path — a supported contract is promoted to a
+    // named non-internal Package Entry Point instead.
+    files: ['tools/consumer-fixtures/**/*.ts', 'e2e/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['hell-ui/internal', 'hell-ui/internal/*'],
+              message:
+                'hell-ui/internal/* is an Internal Package Path with no consumer support promise; consumer fixtures and e2e specs must use supported Package Entry Points only.',
             },
           ],
         },

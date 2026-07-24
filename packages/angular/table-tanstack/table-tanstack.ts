@@ -34,7 +34,8 @@ import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
 import { HellInput, HELL_SEARCH_IMPORTS } from 'hell-ui/input';
 import { HellNativeSelect } from 'hell-ui/select';
 import { HellPaginationStrip } from 'hell-ui/pagination';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 
 /** Optional teardown returned by ɵHellTanStackBodyStrategy connect hooks. */
 export type ɵHellStrategyCleanup = VoidFunction | void;

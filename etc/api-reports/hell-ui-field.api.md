@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/form-field';
@@ -15,7 +14,7 @@ export const HELL_FIELD_IMPORTS: readonly [typeof HellField, typeof HellFieldLab
 // @public
 export class HellField {
     readonly orientation: i0.InputSignal<"vertical" | "horizontal">;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellField, "[hellField]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpFormField; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellField, never>;
@@ -24,7 +23,7 @@ export class HellField {
 // @public
 export class HellFieldDescription {
     protected readonly field: HellField | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldDescription, "[hellFieldDescription]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDescription; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldDescription, never>;
@@ -33,7 +32,7 @@ export class HellFieldDescription {
 // @public
 export class HellFieldError {
     protected readonly field: HellField | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldError, "[hellFieldError]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpError; inputs: { "id": "id"; "ngpErrorValidator": "ngpErrorValidator"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldError, never>;
@@ -41,7 +40,7 @@ export class HellFieldError {
 
 // @public
 export class HellFieldLabel {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldLabel, "label[hellFieldLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpLabel; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldLabel, never>;

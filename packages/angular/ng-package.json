@@ -51,7 +51,7 @@
       "output": "button"
     },
     {
-      "glob": "card.ts",
+      "glob": "card.recipes.ts",
       "input": "card",
       "output": "card"
     },
@@ -261,7 +261,7 @@
       "output": "save-bar"
     },
     {
-      "glob": "separator.ts",
+      "glob": "separator.recipes.ts",
       "input": "separator",
       "output": "separator"
     },

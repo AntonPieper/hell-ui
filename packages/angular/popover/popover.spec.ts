@@ -240,7 +240,7 @@ describe('HellPopoverTrigger', () => {
 
   describe('recipes', () => {
     // Part-Class Pipeline merge semantics are owned centrally by
-    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default
+    // `internal/core/part-class-pipeline.spec.ts`; the snapshot pins the default
     // surface classes without asserting individual utilities elsewhere.
     it('keeps the default surface classes stable', async () => {
       const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);

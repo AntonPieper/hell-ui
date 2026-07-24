@@ -28,8 +28,8 @@ import {
   writeRadioGroupStateValue,
   writeRovingFocusActiveItem,
 } from 'hell-ui/internal/ng-primitives';
-import { containsNode } from 'hell-ui/internal/core';
-import { hellPartStyler, HellOrientation, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import { containsNode, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
+import { HellOrientation, type HellUiInput } from 'hell-ui/core';
 
 const HELL_RADIO_GROUP_RECIPE = {
   root: 'inline-flex flex-col gap-hell-3 data-[orientation=horizontal]:flex-row',

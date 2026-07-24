@@ -1,0 +1,17 @@
+{
+  "description": "Accepted size baseline and release budget for the compiled Default Style Bundle, measured from the styles-aggregate packed-consumer fixture's production CSS output. See docs/release/style-bundle-budget.md for the review and update process.",
+  "baseline": {
+    "fixture": "styles-aggregate",
+    "packageVersion": "0.2.0",
+    "revision": "af4e27983f41d566f44251ecd8a0e9719db22dce",
+    "command": "pnpm run benchmark:style-bundle",
+    "measuredAt": "2026-07-24",
+    "rawBytes": 181296,
+    "gzipBytes": 26996
+  },
+  "budget": {
+    "maxRawBytes": 190000,
+    "maxGzipBytes": 28000,
+    "derivation": "Accepted baseline plus roughly 4-5% headroom for routine fixes, rounded to clean limits (181,296 -> 190,000 raw; 26,996 -> 28,000 gzip). Intentional growth beyond this re-measures the baseline and re-derives the budget per docs/release/style-bundle-budget.md."
+  }
+}

@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 
 // @public
@@ -17,7 +16,7 @@ export class HellMasterDetail {
     readonly compact: _angular_core.Signal<boolean>;
     readonly compactBelow: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly detailOpen: _angular_core.ModelSignal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellMasterDetail, "[hellMasterDetail]", ["hellMasterDetail"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "detailOpen": { "alias": "detailOpen"; "required": false; "isSignal": true; }; "compactBelow": { "alias": "compactBelow"; "required": false; "isSignal": true; }; }, { "detailOpen": "detailOpenChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellMasterDetail, never>;
@@ -25,7 +24,7 @@ export class HellMasterDetail {
 
 // @public
 export class HellMasterDetailBack {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellMasterDetailBack, "button[hellMasterDetailBack]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellMasterDetailBack, never>;
@@ -34,7 +33,7 @@ export class HellMasterDetailBack {
 // @public
 export class HellMasterPane {
     readonly hellMasterPane: _angular_core.InputSignal<"primary" | "detail">;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellMasterPane, "[hellMasterPane]", never, { "hellMasterPane": { "alias": "hellMasterPane"; "required": true; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellMasterPane, never>;

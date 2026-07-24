@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
 import { NgpRadioIndicator as HellRadioIndicator } from 'ng-primitives/radio';
 import { HellUiInput } from 'hell-ui/core';
@@ -16,7 +15,7 @@ import * as i1 from 'ng-primitives/radio';
 export class HellNativeRadio {
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeRadio, "input[type=\"radio\"][hellNativeRadio]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
@@ -26,7 +25,7 @@ export class HellNativeRadio {
 // @public
 export class HellNativeRadioGroup {
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeRadioGroup, "[hellNativeRadioGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeRadioGroup, never>;
@@ -38,7 +37,7 @@ export class HellRadio {
     protected readonly groupDisabled: _angular_core.Signal<boolean>;
     protected readonly isDisabled: _angular_core.Signal<boolean>;
     protected readonly itemDisabled: _angular_core.Signal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellRadio, "button[hellRadio]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpRadioItem; inputs: { "ngpRadioItemValue": "value"; "ngpRadioItemDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellRadio, never>;
@@ -50,7 +49,7 @@ export class HellRadioGroup<T = unknown> implements FormValueControl<T | null> {
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected onFocusOut(event: FocusEvent): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

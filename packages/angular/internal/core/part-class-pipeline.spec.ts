@@ -1,4 +1,5 @@
-import { hellPartStyler, type HellRecipe, type HellUiInput } from './styleable';
+import type { HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from './part-class-pipeline';
 import { hellTwMerge } from './part-style-merge';
 
 /**

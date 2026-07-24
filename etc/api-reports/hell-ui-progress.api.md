@@ -4,14 +4,13 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/progress';
 
 // @public
 export class HellProgress {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellProgress, "[hellProgress]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpProgress; inputs: { "ngpProgressValue": "value"; "ngpProgressMax": "max"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellProgress, never>;
@@ -19,7 +18,7 @@ export class HellProgress {
 
 // @public
 export class HellProgressBar {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellProgressBar, "[hellProgressBar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpProgressIndicator; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellProgressBar, never>;
