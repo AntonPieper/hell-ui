@@ -14,7 +14,8 @@ import {
 import { NgpPagination, injectPaginationState } from 'ng-primitives/pagination';
 import { ngpButton } from 'ng-primitives/button';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 
 /** Built-in accessibility labels owned by the pagination entry point. */
 export interface HellPaginationLabels {

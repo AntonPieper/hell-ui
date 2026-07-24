@@ -14,14 +14,17 @@ import {
   signal,
 } from '@angular/core';
 import {
-  hellCreateLabels, type HellLabels,
-  hellPartStyler,
+  hellCreateLabels,
+  type HellLabels,
   HellChipVariant,
   HellOrientation,
   HellSize,
-  type HellRecipe,
   type HellUiInput,
 } from 'hell-ui/core';
+import {
+  hellPartStyler,
+  type HellRecipe,
+} from 'hell-ui/internal/core';
 import {
   HellChipSetController,
   hellChipPresentationRecipe,

@@ -1,8 +1,4 @@
 {
   "category": "styled-primitive",
-  "styleBundle": "default",
-  "extraExports": [
-    "export { hellPartStyler } from 'hell-ui/core';",
-    "export type { HellPartStyler, HellPartStylerOptions, HellRecipe, HellUi, HellUiInput } from 'hell-ui/core';"
-  ]
+  "styleBundle": "default"
 }

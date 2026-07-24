@@ -27,11 +27,10 @@ import {
 import { injectInputState } from 'ng-primitives/input';
 
 import {
-  hellCreateLabels, type HellLabels,
+  hellCreateLabels,
+  type HellLabels,
   hellInvalidTypedValue,
-  hellPartStyler,
   hellTypedValue,
-  type HellRecipe,
   type HellTypedInputAdapter,
   type HellTypedValueParseResult,
   type HellUiInput,
@@ -43,6 +42,8 @@ import {
   hellSyncFormFieldLabels,
   hellUniqueIdRefs,
   type HellTypedValueCommitResult,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 
 /** Built-in accessibility labels owned by the Number Input entry point. */

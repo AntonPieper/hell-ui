@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -28,7 +27,7 @@ export interface HellToastAction {
 export class HellToaster {
     protected readonly expanded: _angular_core.WritableSignal<boolean>;
     readonly maxVisible: _angular_core.InputSignal<number>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellToasterPart>;
+    protected readonly part: (part: HellToasterPart) => string;
     readonly position: _angular_core.InputSignal<HellToastPosition>;
     protected readonly scrollable: _angular_core.WritableSignal<boolean>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellToasterPart>>;

@@ -1,6 +1,7 @@
 import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpButton, injectButtonState } from 'ng-primitives/button';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import type { HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellButtonVariant, HellSize } from 'hell-ui/core';
 
 const HELL_BUTTON_BASE_RECIPE =

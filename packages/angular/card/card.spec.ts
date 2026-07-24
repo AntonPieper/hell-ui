@@ -1,22 +1,23 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { hellTwMerge } from 'hell-ui/core';
+import { hellTwMerge } from 'hell-ui/internal/core';
 
+import { HELL_CARD_IMPORTS } from './card';
 import {
   HELL_CARD_BODY_RECIPE,
   HELL_CARD_FOOTER_RECIPE,
   HELL_CARD_HEADER_RECIPE,
-  HELL_CARD_IMPORTS,
   HELL_CARD_RECIPE,
-} from './card';
+} from './card.recipes';
 import { sortClasses } from '../spec-helpers';
 
 /**
  * Card specs assert behavior and state attributes. Part-Class Pipeline merge
- * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * semantics are owned centrally by `internal/core/part-class-pipeline.spec.ts`;
  * rendered classes are compared against the shared pipeline output for the
- * exported recipes instead of asserting individual utility classes, and the
- * recipe snapshots below pin the default classes without bootstrapping.
+ * package-internal recipe module instead of asserting individual utility
+ * classes, and the recipe snapshots below pin the default classes without
+ * bootstrapping.
  */
 const CARD_UI_SHORTHAND = 'rounded-hell-pill shadow-none p-hell-4';
 

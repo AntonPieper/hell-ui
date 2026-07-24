@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 
 // @public
@@ -18,7 +17,7 @@ export class HellControlGroup {
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected onFocusIn(): void;
     protected onFocusOut(event: FocusEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellControlGroup, "[hellControlGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -31,7 +30,7 @@ export class HellControlGroupAction {
     protected readonly group: HellControlGroup;
     protected readonly isDisabled: _angular_core.Signal<boolean>;
     protected nativeButtonType(): string;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellControlGroupAction, "button[hellControlGroupAction]", never, { "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellControlGroupAction, never>;
@@ -40,7 +39,7 @@ export class HellControlGroupAction {
 // @public
 export class HellControlGroupPrefix {
     protected readonly group: HellControlGroup;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellControlGroupPrefix, "[hellControlGroupPrefix]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellControlGroupPrefix, never>;
@@ -49,7 +48,7 @@ export class HellControlGroupPrefix {
 // @public
 export class HellControlGroupSuffix {
     protected readonly group: HellControlGroup;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellControlGroupSuffix, "[hellControlGroupSuffix]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellControlGroupSuffix, never>;

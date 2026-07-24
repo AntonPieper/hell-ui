@@ -7,7 +7,7 @@ import { expect } from 'vitest';
  * Proves consumer ui classes reach the part through the Part-Class Pipeline:
  * every ui class renders, and nothing outside the default render plus the
  * consumer's ui appears. Merge conflict semantics are owned centrally by
- * `core/part-class-pipeline.spec.ts`.
+ * `internal/core/part-class-pipeline.spec.ts`.
  */
 export function expectUiRouting(
   defaultClassName: string,

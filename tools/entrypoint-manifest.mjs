@@ -255,6 +255,8 @@ function readEntrypointMetadataFile(path) {
     );
   }
 
+  assertInternalPathAndCategoryAgree(path, relPackageDir, category, metadata);
+
   const styleBundle = readStyleBundlePolicy(path, metadata, category);
 
   return {
@@ -271,6 +273,41 @@ function readEntrypointMetadataFile(path) {
     footer: stringArray(path, metadata, 'footer'),
     extraExports: stringArray(path, metadata, 'extraExports'),
   };
+}
+
+// Internal Package Paths are unmistakably private (#272,
+// docs/adr/0002-public-package-and-stylesheet-surface.md): a shipped
+// non-consumer APF subpath lives under internal/ and declares the internal
+// Module Category, the internal/ prefix never carries a consumer category,
+// and every internal entrypoint's generated public API opens with an
+// @internal marker so the packed surface documents its own non-support.
+function assertInternalPathAndCategoryAgree(path, relPackageDir, category, metadata) {
+  const hasInternalPrefix =
+    relPackageDir === 'internal' || relPackageDir.startsWith('internal/');
+
+  if (category === entrypointCategories.INTERNAL && !hasInternalPrefix) {
+    throw new Error(
+      `${relative(root, path)} declares the internal Module Category outside the internal/ prefix; ` +
+        'non-consumer entrypoints must live under packages/angular/internal/ (Internal Package Path)',
+    );
+  }
+  if (hasInternalPrefix && category !== entrypointCategories.INTERNAL) {
+    throw new Error(
+      `${relative(root, path)} sits under the internal/ prefix but declares category "${category}"; ` +
+        'shipped internal/ subpaths must declare the internal Module Category, or move to a named ' +
+        'non-internal Package Entry Point when the contract is consumer-supported',
+    );
+  }
+
+  if (category === entrypointCategories.INTERNAL) {
+    const header = metadata.header;
+    if (!Array.isArray(header) || !header.some((line) => typeof line === 'string' && line.includes('@internal'))) {
+      throw new Error(
+        `${relative(root, path)} must declare a header containing an @internal marker; ` +
+          'internal entrypoints document their non-support in the generated public API',
+      );
+    }
+  }
 }
 
 // Every entrypoint makes an explicit Default Style Bundle decision: "default"

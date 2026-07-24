@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -20,7 +19,7 @@ export const HELL_MENU_IMPORTS: readonly [typeof HellMenuTrigger, typeof HellSub
 // @public
 export class HellMenu {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected readonly submenuTrigger: Signal<unknown>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenu, "[hellMenu]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenu; inputs: {}; outputs: {}; }]>;
@@ -31,7 +30,7 @@ export class HellMenu {
 export class HellMenuItem {
     protected nativeButtonType(): 'button' | null;
     protected nonNativeAriaDisabled(): 'true' | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected preventDisabledNonNative(event: Event): void;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItem, "button[hellMenuItem], a[hellMenuItem], div[hellMenuItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenuItem; inputs: { "ngpMenuItemDisabled": "disabled"; "ngpMenuItemCloseOnSelect": "closeOnSelect"; }; outputs: {}; }]>;
@@ -41,7 +40,7 @@ export class HellMenuItem {
 // @public
 export class HellMenuItemCheckbox {
     protected readonly menuItem: NgpMenuItemCheckbox;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemCheckbox, "button[hellMenuItemCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenuItemCheckbox; inputs: { "ngpMenuItemCheckboxChecked": "checked"; "ngpMenuItemCheckboxDisabled": "disabled"; }; outputs: { "ngpMenuItemCheckboxCheckedChange": "checkedChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemCheckbox, never>;
@@ -49,7 +48,7 @@ export class HellMenuItemCheckbox {
 
 // @public
 export class HellMenuItemIcon {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemIcon, "[hellMenuItemIcon]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemIcon, never>;
@@ -57,7 +56,7 @@ export class HellMenuItemIcon {
 
 // @public
 export class HellMenuItemIndicator {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemIndicator, "[hellMenuItemIndicator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenuItemIndicator; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemIndicator, never>;
@@ -66,7 +65,7 @@ export class HellMenuItemIndicator {
 // @public
 export class HellMenuItemRadio {
     protected readonly menuItem: NgpMenuItemRadio;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemRadio, "button[hellMenuItemRadio]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpMenuItemRadio; inputs: { "ngpMenuItemRadioValue": "value"; "ngpMenuItemRadioDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemRadio, never>;
@@ -80,7 +79,7 @@ export class HellMenuItemRadioGroup {
 
 // @public
 export class HellMenuItemTrailing {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuItemTrailing, "[hellMenuItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuItemTrailing, never>;
@@ -88,7 +87,7 @@ export class HellMenuItemTrailing {
 
 // @public
 export class HellMenuLabel {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuLabel, "[hellMenuLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuLabel, never>;
@@ -96,7 +95,7 @@ export class HellMenuLabel {
 
 // @public
 export class HellMenuSection {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuSection, "[hellMenuSection]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuSection, never>;
@@ -104,7 +103,7 @@ export class HellMenuSection {
 
 // @public
 export class HellMenuSeparator {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellMenuSeparator, "[hellMenuSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellMenuSeparator, never>;
@@ -123,7 +122,7 @@ export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
 
 // @public
 export class HellSubmenuTrigger {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSubmenuTrigger, "[hellSubmenuTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSubmenuTrigger; inputs: { "ngpSubmenuTrigger": "hellSubmenuTrigger"; "ngpSubmenuTriggerPlacement": "placement"; "ngpSubmenuTriggerOffset": "offset"; "ngpSubmenuTriggerDisabled": "disabled"; "ngpSubmenuTriggerFlip": "flip"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSubmenuTrigger, never>;

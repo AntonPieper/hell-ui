@@ -181,10 +181,14 @@ const forbiddenZonePackages = [
 ];
 
 // Named internal core modules that public APIs must never re-export even from
-// non-internal directories (mirrors the architecture checker's list).
+// non-internal directories (mirrors the architecture checker's list). The
+// Part-Class Pipeline modules keep styling plumbing (recipes, styler factory,
+// merge configuration) out of every public entry point (#271).
 const internalCoreModuleNames = new Set([
   'floating-dismissal',
   'floating-scope',
+  'part-class-pipeline',
+  'part-style-merge',
   'resize-behavior',
 ]);
 
