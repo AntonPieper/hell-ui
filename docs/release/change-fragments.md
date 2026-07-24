@@ -6,11 +6,13 @@ pull request that introduces it. The decision record is
 `docs/adr/0003-changie-release-notes.md`; the domain terms are defined in
 `CONTEXT.md`.
 
-While the changelog migration is pending, the root `CHANGELOG.md` stays the
-legacy hand-maintained Release Changelog. New Consumer Changes should be
-recorded as fragments with `pnpm change` instead of growing the legacy
-`## [Unreleased]` ledger; Release Preparation tooling assembles fragments into
-Released Version Notes in follow-up work.
+The root `CHANGELOG.md` is the generated Release Changelog: Changie assembles
+it deterministically from the Released Version Notes records under
+`.changes/`, newest first, starting at the `0.2.0` internal-beta baseline.
+Never edit the aggregate by hand — record new Consumer Changes as pending
+fragments with `pnpm change`; they stay under `.changes/unreleased/` (there is
+no unreleased changelog section) until Release Preparation tooling assembles
+them into the next version's Released Version Notes in follow-up work.
 
 ## Commands
 
@@ -105,7 +107,11 @@ fragments concise through authoring and review instead:
 `pnpm test:changelog` (also part of `pnpm release:dry-run`) enforces the
 objective fragment contract: every pending fragment in `.changes/unreleased/`
 must parse as YAML, use one of the five kinds, have a nonblank body, and — for
-`Breaking` — nonblank `custom.migration` guidance. The same run proves the
-real Changie configuration and validator against isolated repository fixtures,
-and it keeps the legacy current-version changelog check green until the
-migration completes.
+`Breaking` — nonblank `custom.migration` guidance. The same run guards the
+generated Release Changelog: the `0.2.0` baseline record and a Released
+Version Notes record for the current package version must exist under
+`.changes/`, every record must keep the release heading and kind-section
+shape, and `CHANGELOG.md` must reproduce the aggregate regenerated from those
+records byte-for-byte — hand edits to the aggregate, and record edits without
+regeneration, both fail. Isolated repository fixtures prove the real Changie
+configuration, the validator, and the byte-for-byte merge behavior.
