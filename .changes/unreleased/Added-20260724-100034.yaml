@@ -1,0 +1,6 @@
+kind: Added
+body: >-
+  New `hell-ui/control-group` entry point: wrap your own input or trigger with
+  prefix, suffix, and action-button surfaces inside one shared frame that
+  reflects focus, size, invalid, and disabled state.
+time: 2026-07-24T10:00:34.000Z

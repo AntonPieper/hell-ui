@@ -1,0 +1,10 @@
+kind: Breaking
+body: >-
+  `hell-ui/resizable` no longer exposes its internal registry, measurement,
+  and sizing methods. Resize behavior is unchanged.
+time: 2026-07-24T10:00:25.000Z
+custom:
+  migration: >-
+    Compose the public `[hellResizablePane]` and `[hellResizableHandle]`
+    directives through their documented inputs and native pointer/keyboard
+    interaction instead of calling controller methods.

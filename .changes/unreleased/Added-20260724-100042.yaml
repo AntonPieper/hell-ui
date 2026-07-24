@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/page-header` entry point: slot-based page chrome for leading
+  content, title, metadata, description, and a toolbar, filled by projecting
+  real components. An optional back affordance emits a `back` event while
+  routing stays with your app.
+time: 2026-07-24T10:00:42.000Z

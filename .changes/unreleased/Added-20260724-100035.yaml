@@ -1,0 +1,6 @@
+kind: Added
+body: >-
+  Core now exports `hellSearchResource`, a signal-based search helper for local
+  ranking and asynchronous sources. It debounces remote queries, cancels stale
+  requests, and publishes results with idle, loading, success, and error state.
+time: 2026-07-24T10:00:35.000Z

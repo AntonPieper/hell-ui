@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/confirm` entry point: `injectHellPrompt()` returns a prompt
+  service whose `confirm()` opens an accessible modal or anchored popconfirm
+  and whose `choose()` handles typed multi-option decisions. Prompts always
+  resolve, including on Escape or backdrop dismissal.
+time: 2026-07-24T10:00:37.000Z

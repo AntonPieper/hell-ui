@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  Avatar, checkbox, audio player, pagination, and the TanStack table shell
+  expose more granular styleable parts through their existing `ui` maps.
+  TanStack `data-slot` values are now camelCase, and the private
+  `.hell-tanstack-*` host classes are gone.
+time: 2026-07-24T10:00:44.000Z

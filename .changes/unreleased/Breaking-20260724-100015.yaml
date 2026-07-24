@@ -1,0 +1,15 @@
+kind: Breaking
+body: >-
+  Tooltip is redesigned around one `[hellTooltip]` trigger that accepts a
+  string or a template; `[hellTooltipSurface]` marks a custom surface.
+  Defaults change to a 500 ms show delay and a 300 ms cooldown, content is
+  always hoverable, and the `disabled` and `hoverableContent` inputs are
+  removed.
+time: 2026-07-24T10:00:15.000Z
+custom:
+  migration: >-
+    Rename `hellTooltipTrigger` bindings to `hellTooltip` and mark rendered
+    surfaces with `hellTooltipSurface`. Disable by passing `null` or an empty
+    string instead of the removed `disabled` input, set shared timing or
+    placement policy through `provideHellTooltipDefaults`, and revisit
+    interactions that relied on the previous instant show.

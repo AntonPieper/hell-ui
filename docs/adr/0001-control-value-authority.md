@@ -150,7 +150,7 @@ reference implementation.
    a field's `min()`/`max()` validator metadata can drive and clear them.
 6. **Accept the coercion break.** The model input drops transform-based
    static-attribute coercion for `value`/`checked`; document the exact typed
-   binding in the docs page and the CHANGELOG breaking entry. Configuration
+   binding in the docs page and the Breaking Change Fragment. Configuration
    inputs keep their transforms.
 7. **Verify at the seams.** Focused unit specs cover: two-way binding with no
    echo on external writes and exactly one commit per user interaction;
@@ -159,7 +159,8 @@ reference implementation.
    touched and disabled. The styled-controls consumer fixture binds the
    packed control through direct, two-way, `formField`, `formControl`, and
    `ngModel` paths at once (`tools/consumer-fixtures/styled-controls`).
-   Update the API report, docs page + example, and CHANGELOG; the permanent
+   Update the API report and docs page + example, and record the Breaking
+   Change Fragment; the permanent
    `one-forms-contract` architecture guard (`tools/check-architecture.mjs`)
    rejects any class that mixes the contract families.
 

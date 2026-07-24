@@ -1,0 +1,17 @@
+kind: Breaking
+body: >-
+  Combobox is now projection-first: the owned `<hell-combobox-basic>`
+  renderer and its options, display, and search model are removed. You
+  project your own options through the `[hellCombobox]` directive suite,
+  which keeps handling forms, keyboard navigation, dismissal, and
+  accessibility.
+time: 2026-07-24T10:00:06.000Z
+custom:
+  migration: >-
+    Replace `<hell-combobox-basic [options]="...">` with the `[hellCombobox]`
+    directive suite, drive filtering through `hellSearchResource`, and render
+    each result as a projected `hellComboboxOption`. Compose `hell-ui/chip`
+    for multiple-selection chips, and rename the value types to the Pick
+    Value family from `hell-ui/core`: `HellComboboxSingleValue` →
+    `HellPickSingleValue`, `HellComboboxMultipleValue` →
+    `HellPickMultipleValue`, `HellComboboxValue` → `HellPickValue`.

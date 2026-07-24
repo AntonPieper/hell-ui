@@ -1,0 +1,6 @@
+kind: Fixed
+body: >-
+  Multiple-select toggle-group items are now announced as toggle buttons
+  through `aria-pressed` instead of incorrectly exposing radio semantics.
+  Single-select groups keep radio items.
+time: 2026-07-24T10:00:52.000Z

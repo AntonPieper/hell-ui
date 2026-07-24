@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  Pagination is now the numbered strip plus one `hellPageLink` directive that
+  replaces the five nav-button directives. The `mode` input and the
+  status/jump parts are removed; compact and page-jump layouts become
+  documented recipes you compose yourself.
+time: 2026-07-24T10:00:21.000Z
+custom:
+  migration: >-
+    Migrate `hellPaginationFirst` → `hellPageLink="first"`,
+    `hellPaginationPrev` → `hellPageLink="previous"`, `hellPaginationNext` →
+    `hellPageLink="next"`, `hellPaginationLast` → `hellPageLink="last"`, and
+    `hellPaginationButton [page]="p"` → `[hellPageLink]="p"`, then rebuild
+    compact, status, and jump layouts from the documented recipes.

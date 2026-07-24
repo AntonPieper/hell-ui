@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/save-bar` entry point: a save/discard action bar driven by
+  `dirty`, `busy`, and `disabled` inputs, with no form coupling. It shows
+  contextually while dirty or persistently as a footer, sticks to the nearest
+  scroll container, and never steals focus.
+time: 2026-07-24T10:00:40.000Z

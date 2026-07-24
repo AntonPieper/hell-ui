@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  Styling is now one contract: `ui` Part Style Maps. The `unstyled` opt-out
+  inputs are removed everywhere, the internal class-merge plumbing and recipe
+  constants are no longer exported, and the single-part
+  `Hell<Module>Part`/`Hell<Module>Ui` aliases are gone.
+time: 2026-07-24T10:00:17.000Z
+custom:
+  migration: >-
+    Replace `unstyled` opt-outs with `ui` part refinements, and replace
+    removed recipe-constant reads with your own class strings. Configure
+    `tailwind-merge` in your app if you need class merging. Annotate
+    single-part `ui` values as `HellUi<'root'>` or drop the annotation, and
+    replace `class="hell-button"` with the `hellButton` directive.

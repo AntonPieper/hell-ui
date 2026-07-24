@@ -1,0 +1,6 @@
+kind: Changed
+body: >-
+  Field label, description, and error text now render at 13px instead of 12px,
+  and wrapped helper text keeps a steady line rhythm across skins. Weights and
+  layout are unchanged.
+time: 2026-07-24T10:00:47.000Z

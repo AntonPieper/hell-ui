@@ -1,0 +1,8 @@
+kind: Added
+body: >-
+  New optional `hell-ui/features/filter-builder` entry point:
+  `hell-filter-builder` edits typed filter expressions against fields you
+  describe, rendering each value editor from your own templates. It handles
+  keyboard interaction, focus, and announcements; your app owns the filter
+  model, rendering, and validation.
+time: 2026-07-24T10:00:32.000Z

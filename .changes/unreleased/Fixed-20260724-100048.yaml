@@ -1,0 +1,7 @@
+kind: Fixed
+body: >-
+  All documented toaster placements now position, stack, and animate correctly
+  instead of only `bottom-right`: top placements no longer drift off-screen,
+  exit animations slide toward the nearest edge, and the dismiss-all toolbar
+  renders at full size.
+time: 2026-07-24T10:00:48.000Z

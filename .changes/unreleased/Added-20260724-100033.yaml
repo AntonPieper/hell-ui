@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/chip` entry point: pill-shaped chips as spans, buttons, or
+  anchors, an optional remove button, a keyboard-navigable chip set, and a chip
+  input for building editable token lists. Removal is event-only — your app
+  owns the collection.
+time: 2026-07-24T10:00:33.000Z

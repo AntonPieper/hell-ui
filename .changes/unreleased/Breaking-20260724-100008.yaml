@@ -1,0 +1,15 @@
+kind: Breaking
+body: >-
+  Time Input is now a directive on your own native input:
+  `input[hellTimeInput]` replaces the owned `<hell-time-input>` component and
+  its embedded trigger and picker. Parsing, formatting, validation, and forms
+  behavior carry over.
+time: 2026-07-24T10:00:08.000Z
+custom:
+  migration: >-
+    Author `<input hellTimeInput>` and keep the `value`/`valueChange` pair.
+    Move `inputId`, `name`, `placeholder`, and other native attributes onto
+    the input, and compose a Control Group action, Popover, and
+    `hell-time-picker` when you need segmented selection. In tests, replace
+    `getInputValue()`/`setInputValue()` with `getValue()`/`setValue()`;
+    `openPicker()` is gone.

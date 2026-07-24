@@ -1,0 +1,5 @@
+kind: Fixed
+body: >-
+  Shipped type declarations no longer contain unbound identifiers, so
+  consumers compiling without `skipLibCheck` get clean builds.
+time: 2026-07-24T10:00:54.000Z
