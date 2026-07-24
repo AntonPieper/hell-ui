@@ -490,7 +490,7 @@ These five omnibar directives were decoration only — no content-query or
 behavior role, no stylesheet or theme-adapter coupling beyond rules that
 duplicated their own recipes — and were removed. Docs and examples now use
 plain elements with classes; the replacement class recipes are documented on
-the omnibar docs page and in the CHANGELOG breaking entry.
+the omnibar docs page and in the omnibar Breaking Change Fragment.
 
 | Directive | Selector | Role | Notes |
 | --- | --- | --- | --- |

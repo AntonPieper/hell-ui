@@ -1,0 +1,11 @@
+kind: Breaking
+body: >-
+  `size` inputs now accept exactly the sizes their styles implement:
+  `'sm' | 'md' | 'lg' | 'xl'` on `HellDialog` and `'sm' | 'md' | 'lg'` on
+  `HellSlider`. The removed values previously type-checked but rendered the
+  base `md` visuals.
+time: 2026-07-24T10:00:26.000Z
+custom:
+  migration: >-
+    Replace `size="xs"` on dialogs with `sm`, and `size="xs"`/`size="xl"` on
+    sliders with `sm`/`lg`; rendered output is unchanged.

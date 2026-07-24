@@ -1,0 +1,17 @@
+kind: Breaking
+body: >-
+  All form controls replace `ControlValueAccessor` with signal-based `value`
+  models (`checked` for checkbox and switch) that work identically with
+  direct binding, two-way binding, Signal Forms, Reactive Forms, and
+  `ngModel`. Every migrated control also gains a `(touch)` output and a
+  forms-driven `disabled` input.
+time: 2026-07-24T10:00:04.000Z
+custom:
+  migration: >-
+    Classic `formControl`/`ngModel` bindings keep working; drop any use of
+    `writeValue`, `registerOnChange`, or the
+    `NG_VALUE_ACCESSOR`/`NG_VALIDATORS` providers. Declare required and range
+    rules on the form — controls no longer contribute them. Replace static
+    value attributes with bindings, for example `[checked]="true"` and
+    `[value]="42"`. The first-beta consumer guide covers the per-control
+    mapping.

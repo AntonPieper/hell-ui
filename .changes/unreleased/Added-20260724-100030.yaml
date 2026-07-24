@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/file-picker` entry point: attach `[hellFilePicker]` to accept
+  files by drag-and-drop or a built-in browse action. It validates type, size,
+  and count, and emits one selection event carrying the accepted files and
+  structured rejections.
+time: 2026-07-24T10:00:30.000Z

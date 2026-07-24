@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  `HellTextarea` gains an `autoGrow` opt-in: the textarea grows with its
+  content through CSS `field-sizing`. Bound the growth with
+  `min-block-size`/`max-block-size` in your styles; browsers without support
+  fall back to a normal fixed-size textarea.
+time: 2026-07-24T10:00:43.000Z

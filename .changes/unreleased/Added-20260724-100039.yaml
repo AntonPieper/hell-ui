@@ -1,0 +1,8 @@
+kind: Added
+body: >-
+  New `hell-ui/number-input` entry point: `input[hellNumberInput]` binds
+  `number | null` on your own native input with spinbutton semantics, keyboard
+  and hold-to-repeat stepping, integer mode, and locale-aware parsing.
+  Stepping clamps into bounds; typed out-of-range values commit but fail
+  validation.
+time: 2026-07-24T10:00:39.000Z

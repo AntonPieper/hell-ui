@@ -1,0 +1,6 @@
+kind: Added
+body: >-
+  New `hell-ui/alert` entry point: an inline message surface with info,
+  success, warning, and danger variants, projected title, description, and
+  action content, and an optional dismiss button. Your app owns visibility.
+time: 2026-07-24T10:00:36.000Z

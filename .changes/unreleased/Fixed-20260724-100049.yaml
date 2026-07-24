@@ -1,0 +1,6 @@
+kind: Fixed
+body: >-
+  Buttons and other affected controls now actually inherit their intended
+  font family; the previous inheritance class was silently dropped when it
+  appeared next to font-weight utilities.
+time: 2026-07-24T10:00:49.000Z

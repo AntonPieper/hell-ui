@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Repository release-note contract.
+// Repository release-note contract (ADR 0003).
 //
-// Two contracts run side by side while the changelog migration is pending:
-// the legacy hand-maintained Release Changelog must keep a section for the
-// current package version, and the Change Fragment path (ADR 0003) must stay
-// healthy — the committed pending fragments must satisfy the objective
-// validator, `pnpm change` must remain the only contributor-facing Changie
-// command, and the real Changie configuration plus validator are proven in
+// The Release Changelog is generated: CHANGELOG.md must reproduce the
+// committed Released Version Notes byte-for-byte, the 0.2.0 internal-beta
+// baseline and a record for the current package version must exist, the
+// committed pending Change Fragments must satisfy the objective validator,
+// `pnpm change` must remain the only contributor-facing Changie command, and
+// the real Changie configuration, validator, and merge behavior are proven in
 // isolated repository fixtures.
 
 import { existsSync, readFileSync } from 'node:fs';
@@ -14,6 +14,14 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runChangeFragmentFixtures } from './change-fragment-fixtures.mjs';
 import { collectUnreleasedFragmentErrors, listUnreleasedFragments } from './change-fragments.mjs';
+import {
+  collectReleasedVersionNotesErrors,
+  describeFirstDifference,
+  isSemVer,
+  listReleasedVersionFiles,
+  regenerateReleaseChangelog,
+  resolveChangieBinary,
+} from './release-changelog.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const changelogPath = 'CHANGELOG.md';
@@ -30,15 +38,31 @@ if (!currentVersion) {
   errors.push(`${packageManifestPath} version must be valid SemVer; found ${currentVersion}.`);
 }
 
-const changelog = readRequiredFile(changelogPath);
-if (changelog && currentVersion) {
-  const section = extractVersionSection(changelog, currentVersion);
-  if (!section) {
+errors.push(...collectReleasedVersionNotesErrors(root, (path) => relative(root, path)));
+
+if (currentVersion && isSemVer(currentVersion)) {
+  const versionRecord = join(root, '.changes', `${currentVersion}.md`);
+  if (!existsSync(versionRecord)) {
     errors.push(
-      `${changelogPath} must include a \`## [${currentVersion}] - YYYY-MM-DD\` section for the current package version.`,
+      `Missing ${relative(root, versionRecord)}; the current package version needs a ` +
+        'Released Version Notes record (created by Release Preparation, never by hand-editing the changelog).',
     );
-  } else if (!/^[-*] /m.test(section)) {
-    errors.push(`${changelogPath} section ${currentVersion} must include at least one bullet.`);
+  }
+}
+
+const changelog = readRequiredFile(changelogPath);
+if (changelog) {
+  if (!changelog.startsWith('# Changelog\n\n## [')) {
+    errors.push(
+      `${changelogPath} must start with \`# Changelog\` and proceed directly to the newest release ` +
+        'with no introduction.',
+    );
+  }
+  if (changelog.includes('[Unreleased]')) {
+    errors.push(
+      `${changelogPath} must not carry an unreleased section; pending Consumer Changes stay in ` +
+        '.changes/unreleased/ Change Fragments until Release Preparation.',
+    );
   }
 }
 
@@ -52,6 +76,21 @@ if (!existsSync(join(root, changieConfigPath))) {
 
 errors.push(...collectCommandSurfaceErrors());
 
+const changieBinary = resolveChangieBinary(root);
+if (!existsSync(changieBinary)) {
+  errors.push(`Missing Changie binary at ${changieBinary}; run pnpm install first.`);
+} else if (changelog) {
+  const regenerated = regenerateReleaseChangelog({ root, changieBinary });
+  errors.push(...regenerated.failures);
+  if (regenerated.content !== null && regenerated.content !== changelog) {
+    errors.push(
+      `${changelogPath} does not reproduce the aggregate regenerated from the committed ` +
+        `.changes/ Released Version Notes (${describeFirstDifference(regenerated.content, changelog)}). ` +
+        'Edit the version records and regenerate; the aggregate is never edited by hand.',
+    );
+  }
+}
+
 const fixtureRun = runChangeFragmentFixtures({ root });
 errors.push(...fixtureRun.failures);
 
@@ -61,8 +100,10 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
+const releasedCount = listReleasedVersionFiles(join(root, '.changes')).length;
 console.log(
-  `Changelog ok: hell-ui ${currentVersion} has a changelog entry, ` +
+  `Changelog ok: CHANGELOG.md reproduces ${releasedCount} released version ` +
+    `record${releasedCount === 1 ? '' : 's'} byte-for-byte, ` +
     `${pendingFragmentCount} pending change fragment${pendingFragmentCount === 1 ? '' : 's'} ` +
     `passed objective validation, and ${fixtureRun.total} change-fragment fixtures passed.`,
 );
@@ -118,26 +159,4 @@ function readRequiredFile(path) {
   }
 
   return readFileSync(absolutePath, 'utf8');
-}
-
-function extractVersionSection(content, version) {
-  const lines = content.split(/\r?\n/);
-  const headingPattern = new RegExp(
-    `^## \\[${escapeRegExp(version)}\\]\\s+-\\s+\\d{4}-\\d{2}-\\d{2}\\s*$`,
-  );
-  const startIndex = lines.findIndex((line) => headingPattern.test(line));
-  if (startIndex === -1) return null;
-
-  const endIndex = lines.findIndex((line, index) => index > startIndex && /^##\s+/.test(line));
-  return lines.slice(startIndex, endIndex === -1 ? lines.length : endIndex).join('\n');
-}
-
-function isSemVer(value) {
-  return /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(
-    value,
-  );
-}
-
-function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

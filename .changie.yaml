@@ -4,6 +4,12 @@
 # Changie's batch/merge primitives stay private to Release Preparation
 # tooling; nothing here commits, tags, pushes, or publishes.
 #
+# The root CHANGELOG.md is the generated Release Changelog: Changie merge
+# assembles the header plus every Released Version Notes record under
+# `.changes/`, newest first. `pnpm test:changelog` regenerates the aggregate
+# in an isolated workspace and requires byte-for-byte equality, so the
+# aggregate is never edited by hand.
+#
 # The five-kind Consumer Change schema is deliberately closed: removals are
 # recorded as Breaking and deprecations as Changed. Concision is an authoring
 # and review responsibility, so prompts keep minLength 1 and no hard character
@@ -17,6 +23,9 @@ versionExt: md
 versionFormat: '## [{{.Version}}] - {{.Time.Format "2006-01-02"}}'
 kindFormat: '### {{.Kind}}'
 changeFormat: '- {{.Body}}'
+# One blank line between the merged changelog header and each release entry.
+newlines:
+  beforeChangelogVersion: 1
 body:
   minLength: 1
 kinds:

@@ -1,0 +1,7 @@
+kind: Changed
+body: >-
+  Transitions and entrance animations now collapse under
+  `prefers-reduced-motion: reduce`, and the spinner, skeleton, and audio
+  player disable their keyframe motion. Your own `[data-slot]` elements are
+  deliberately left untouched.
+time: 2026-07-24T10:00:46.000Z

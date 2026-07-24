@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  New `hell-ui/toolbar` entry point: `[hellToolbar]` gives your own controls
+  the standard roving-focus toolbar keyboard pattern, and `hell-overflow-toolbar`
+  additionally moves declared actions into a trailing overflow menu when the
+  container runs out of room.
+time: 2026-07-24T10:00:41.000Z

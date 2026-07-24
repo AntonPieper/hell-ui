@@ -34,20 +34,25 @@ Record a breaking change when a consumer may need to edit code, styles, package 
 
 ## Changelog contract
 
-Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
+The root `CHANGELOG.md` is the generated Release Changelog (ADR 0003): Changie
+assembles it deterministically from the immutable Released Version Notes
+records under `.changes/`, newest first, starting at the `0.2.0` internal-beta
+baseline record. Earlier history, including `0.1.0`, lives in Git history at
+the `v0.2.0` tag.
 
-- `## [Unreleased]` collects work after the current package version.
-- Each package version must have `## [x.y.z] - YYYY-MM-DD` before a release tag or publish.
-- Each version section cites the issue, pull request, or local evidence that
-  explains the change.
-- Breaking changes get a dedicated `### Breaking changes` section with affected entrypoints, migration steps, and the first version carrying the break.
-- Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy and the production-readiness checklist.
+- The aggregate starts with `# Changelog` and proceeds directly to the newest
+  release; it carries no introduction and no `Unreleased` section.
+- Each release renders as `## [x.y.z] - YYYY-MM-DD` with only its nonempty
+  kind sections, in this order: `Breaking changes`, `Added`, `Changed`,
+  `Fixed`, `Security`.
+- Breaking changes carry the migration guidance authored in their Change
+  Fragments.
+- Pending Consumer Changes are Change Fragments under `.changes/unreleased/`
+  (see [`change-fragments.md`](./change-fragments.md)); they appear in the
+  Release Changelog only when Release Preparation assembles a version.
+- Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy.
 
-New Consumer Changes are authored as Change Fragments with `pnpm change`
-instead of hand-editing the `## [Unreleased]` ledger; see
-[`change-fragments.md`](./change-fragments.md) and ADR 0003.
-
-`pnpm release:dry-run` and the release workflow run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails if the current package version lacks a matching changelog section; it also validates every pending Change Fragment and proves the fragment tooling against isolated repository fixtures.
+`pnpm release:dry-run` and the release workflow run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails when the current package version lacks a `.changes/<version>.md` Released Version Notes record or the `0.2.0` baseline record is missing; it validates every pending Change Fragment, regenerates the Release Changelog from the committed records and fails on any byte-level disagreement with `CHANGELOG.md`, and proves the fragment and merge tooling against isolated repository fixtures.
 
 ## Promotion rules
 

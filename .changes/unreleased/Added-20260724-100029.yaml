@@ -1,0 +1,7 @@
+kind: Added
+body: >-
+  One recommended stylesheet: importing `hell-ui/styles.css` brings in the
+  design tokens and every standard component style at once. The per-entry-point
+  `hell-ui/<entrypoint>/styles.css` files remain for granular imports; use one
+  approach or the other, since combining both duplicates the same CSS.
+time: 2026-07-24T10:00:29.000Z

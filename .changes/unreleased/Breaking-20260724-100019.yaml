@@ -1,0 +1,11 @@
+kind: Breaking
+body: >-
+  Avatar group folds into `hell-ui/avatar`; the `hell-ui/avatar-group` import
+  path and stylesheet are removed. Avatar initials typography also moved from
+  the `root` part to the `fallback` part.
+time: 2026-07-24T10:00:19.000Z
+custom:
+  migration: >-
+    Import the avatar-group components from `hell-ui/avatar` and their styles
+    from `hell-ui/avatar/styles.css`. Retarget initials refinements to the
+    `fallback` part, for example `[ui]="{ fallback: 'font-bold' }"`.

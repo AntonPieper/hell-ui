@@ -1,0 +1,9 @@
+kind: Breaking
+body: >-
+  `HellNativeSelect` now exports from `hell-ui/select` instead of
+  `hell-ui/input`, and the `hell-ui/search` entry point folds into
+  `hell-ui/input`. Selectors, behavior, and styling are unchanged.
+time: 2026-07-24T10:00:24.000Z
+custom:
+  migration: >-
+    Update the import paths; no template or stylesheet changes are required.

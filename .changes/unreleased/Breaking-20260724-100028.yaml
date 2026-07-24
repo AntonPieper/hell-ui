@@ -1,0 +1,9 @@
+kind: Breaking
+body: >-
+  `hell-ui/table-tanstack` no longer re-exports TanStack's FlexRender
+  helpers. The table shell's behavior is unchanged.
+time: 2026-07-24T10:00:28.000Z
+custom:
+  migration: >-
+    Import `FlexRenderDirective`, `FlexRender`, and the other FlexRender
+    helpers directly from `@tanstack/angular-table`.

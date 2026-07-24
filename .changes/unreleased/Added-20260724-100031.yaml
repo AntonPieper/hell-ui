@@ -1,0 +1,6 @@
+kind: Added
+body: >-
+  New `hell-ui/time-picker` entry point: `hell-time-picker` offers segmented,
+  keyboard-navigable time selection with optional seconds and minute presets.
+  Compose it with a time input and a popover when you want a dropdown picker.
+time: 2026-07-24T10:00:31.000Z

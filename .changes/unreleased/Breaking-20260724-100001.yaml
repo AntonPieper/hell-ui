@@ -1,0 +1,12 @@
+kind: Breaking
+body: >-
+  The published package is renamed from `@hell-ui/angular` to `hell-ui`, with
+  no alias or compatibility package. Entry-point paths under the new name are
+  unchanged, and the GitHub Packages mirror publishes as
+  `@antonpieper/hell-ui`.
+time: 2026-07-24T10:00:01.000Z
+custom:
+  migration: >-
+    Install `hell-ui` instead of `@hell-ui/angular`, then replace the
+    `@hell-ui/angular` prefix with `hell-ui` in every TypeScript and
+    stylesheet import.

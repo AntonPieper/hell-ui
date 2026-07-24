@@ -1,0 +1,16 @@
+kind: Breaking
+body: >-
+  Select is now projection-first: the owned `<hell-select-basic>` renderer
+  and its options model are removed. You project your own trigger,
+  placeholder, options, and dropdown through the `[hellSelect]` directive
+  suite, which keeps handling forms, selection, keyboard behavior, and
+  accessibility.
+time: 2026-07-24T10:00:05.000Z
+custom:
+  migration: >-
+    Replace `<hell-select-basic [options]="...">` with the directive suite
+    and one projected `[hellSelectOption]` per value. Style through each
+    directive's `ui` input, and rename the value types to the Pick Value
+    family from `hell-ui/core`: `HellSelectSingleValue` →
+    `HellPickSingleValue`, `HellSelectMultipleValue` →
+    `HellPickMultipleValue`, `HellSelectFormValue` → `HellPickValue`.

@@ -1,0 +1,6 @@
+kind: Fixed
+body: >-
+  Interactive breadcrumb ellipsis buttons are now announced to assistive
+  technology instead of being focusable yet hidden; decorative span hosts stay
+  hidden.
+time: 2026-07-24T10:00:53.000Z

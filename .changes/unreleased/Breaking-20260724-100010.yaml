@@ -1,0 +1,17 @@
+kind: Breaking
+body: >-
+  App Shell narrows to layout, responsive overlay behavior, and its toggle
+  actions. The `HellNavItem`/`HellNavSection` navigation components, the
+  toggle `appearance` inputs, and `HellAppContent.maxWidth` are removed;
+  navigation is now your own markup styled against stable shell state
+  attributes.
+time: 2026-07-24T10:00:10.000Z
+custom:
+  migration: >-
+    Build navigation as your own markup keyed off the
+    `data-sidenav-collapsed`, `data-mobile-layout`, and `data-collapsed`
+    attributes; the app-shell docs page shows the recipes. Style toggles
+    through their `ui` maps, set content width with
+    `--hell-app-content-max-width`, and bind the
+    `sidenavCollapsed`/`secondaryHidden` models to read or persist shell
+    state.

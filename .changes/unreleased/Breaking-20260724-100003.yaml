@@ -1,0 +1,10 @@
+kind: Breaking
+body: >-
+  All `HELL_*_DIRECTIVES` tuple exports are renamed to `HELL_*_IMPORTS`, with
+  no compatibility aliases. Their contents and behavior are unchanged.
+time: 2026-07-24T10:00:03.000Z
+custom:
+  migration: >-
+    Rename each import one-for-one, for example `HELL_MENU_DIRECTIVES`
+    becomes `HELL_MENU_IMPORTS`; the first-beta consumer guide lists every
+    mapping.

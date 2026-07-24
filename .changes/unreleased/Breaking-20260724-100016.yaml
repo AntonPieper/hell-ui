@@ -1,0 +1,13 @@
+kind: Breaking
+body: >-
+  The flyout entry point is retired; a popover with `[trapFocus]="false"` is
+  now the anchored, non-modal, light-dismiss surface. The popover trigger
+  gains `trapFocus`, `anchor`, `boundary`, and a reactive `open` signal.
+time: 2026-07-24T10:00:16.000Z
+custom:
+  migration: >-
+    Replace `HellFlyout`/`HellFlyoutTrigger` with the popover pair plus
+    `[trapFocus]="false"`, rename `closeOnOutsideInteraction` to
+    `closeOnOutsideClick`, widen the light-dismiss region with `boundary`
+    where nested surfaces should count as inside, and import the popover
+    stylesheet instead of the flyout one.

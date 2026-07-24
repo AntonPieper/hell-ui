@@ -1,0 +1,13 @@
+kind: Breaking
+body: >-
+  Creating a toast now returns a small immutable `HellToastRef` instead of a
+  numeric id; update and dismiss through the ref. The `id` option,
+  `dismiss(id)`, the writable `toasts` signal, and `pauseAll()`/`resumeAll()`
+  are removed; `dismissAll()` remains.
+time: 2026-07-24T10:00:14.000Z
+custom:
+  migration: >-
+    Keep the ref returned by `show()` and the message helpers, then call
+    `ref.update(patch)` or `ref.dismiss()`. Updates patch in place; only an
+    explicit `duration` patch restarts the countdown, and both actions are
+    no-ops once dismissal begins.

@@ -1,0 +1,11 @@
+kind: Breaking
+body: >-
+  Label overrides consolidate on one core provider:
+  `provideHellLabels(token, overrides)` replaces every per-module
+  `provideHell<Module>Labels` function. Label interfaces and the
+  `HELL_*_LABELS` tokens are unchanged.
+time: 2026-07-24T10:00:18.000Z
+custom:
+  migration: >-
+    Replace each `provideHell<Module>Labels({...})` call with
+    `provideHellLabels(HELL_<MODULE>_LABELS, {...})` from `hell-ui/core`.

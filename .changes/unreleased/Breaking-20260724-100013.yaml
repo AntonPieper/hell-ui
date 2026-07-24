@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  Omnibar narrows to command-palette interaction behind controlled `query`
+  and `open` models; results and their loading, error, and empty chrome are
+  now projected from your own search state. The built-in search source,
+  status templates, imperative methods, decoration directives, and
+  omnibar-specific chips are removed, and `[value]` on items is required.
+time: 2026-07-24T10:00:13.000Z
+custom:
+  migration: >-
+    Bind the controlled query and open models, drive results with
+    `hellSearchResource`, and bind `[value]` on every omnibar item. Replace
+    the removed decoration directives with plain markup, and compose
+    `hell-ui/chip` for editable scope tokens.
