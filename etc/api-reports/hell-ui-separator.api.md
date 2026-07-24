@@ -5,20 +5,15 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
-import { HellRecipe } from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i1 from 'ng-primitives/separator';
 
 // @public
-export const HELL_SEPARATOR_RECIPE: HellRecipe<'root'>;
-
-// @public
 export class HellSeparator {
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly spacing: _angular_core.InputSignal<HellSize | "none">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSeparator, "[hellSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "spacing": { "alias": "spacing"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSeparator; inputs: { "ngpSeparatorOrientation": "orientation"; }; outputs: {}; }]>;

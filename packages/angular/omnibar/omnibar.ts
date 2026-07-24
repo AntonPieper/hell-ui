@@ -30,6 +30,8 @@ import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
   type HellFloatingScope,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import { HellChipSetController } from 'hell-ui/internal/chip';
 import { HellFloatingDismissController, hellOutsideFocus } from 'hell-ui/internal/core';
@@ -47,7 +49,7 @@ import {
   type HellOmnibarActionRegistration,
   type HellOmnibarItemRegistration,
 } from './omnibar.runtime';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
 import {
   HELL_OPTION_SURFACE_METRICS,
   HELL_OPTION_SURFACE_SELECTED_STATES,

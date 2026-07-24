@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -69,7 +68,7 @@ export class HellAudioPlayer {
     protected onTime(): void;
     // (undocumented)
     protected onVolume(v: number): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellAudioPlayerPart>;
+    protected readonly part: (part: HellAudioPlayerPart) => string;
     // (undocumented)
     protected readonly playbackRate: _angular_core.WritableSignal<1 | 1.25 | 1.5 | 2 | 0.75>;
     // (undocumented)
@@ -161,64 +160,64 @@ export type HellAudioPlayerUi = HellUi<HellAudioPlayerPart>;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-audio-player.d.ts:8:5 - (ae-undocumented) Missing documentation for "play".
-// types/hell-ui-audio-player.d.ts:9:5 - (ae-undocumented) Missing documentation for "pause".
-// types/hell-ui-audio-player.d.ts:10:5 - (ae-undocumented) Missing documentation for "seek".
-// types/hell-ui-audio-player.d.ts:11:5 - (ae-undocumented) Missing documentation for "mute".
-// types/hell-ui-audio-player.d.ts:12:5 - (ae-undocumented) Missing documentation for "unmute".
-// types/hell-ui-audio-player.d.ts:13:5 - (ae-undocumented) Missing documentation for "volume".
-// types/hell-ui-audio-player.d.ts:14:5 - (ae-undocumented) Missing documentation for "showLiveCaptions".
-// types/hell-ui-audio-player.d.ts:15:5 - (ae-undocumented) Missing documentation for "hideLiveCaptions".
-// types/hell-ui-audio-player.d.ts:16:5 - (ae-undocumented) Missing documentation for "speechTranscript".
-// types/hell-ui-audio-player.d.ts:17:5 - (ae-undocumented) Missing documentation for "download".
-// types/hell-ui-audio-player.d.ts:18:5 - (ae-undocumented) Missing documentation for "playbackSpeed".
-// types/hell-ui-audio-player.d.ts:19:5 - (ae-undocumented) Missing documentation for "copyTranscript".
-// types/hell-ui-audio-player.d.ts:20:5 - (ae-undocumented) Missing documentation for "clearTranscript".
-// types/hell-ui-audio-player.d.ts:21:5 - (ae-undocumented) Missing documentation for "errorStatus".
-// types/hell-ui-audio-player.d.ts:22:5 - (ae-undocumented) Missing documentation for "liveStatus".
-// types/hell-ui-audio-player.d.ts:23:5 - (ae-undocumented) Missing documentation for "pausedStatus".
-// types/hell-ui-audio-player.d.ts:24:5 - (ae-undocumented) Missing documentation for "copied".
-// types/hell-ui-audio-player.d.ts:25:5 - (ae-undocumented) Missing documentation for "copy".
-// types/hell-ui-audio-player.d.ts:26:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-audio-player.d.ts:27:5 - (ae-undocumented) Missing documentation for "listening".
-// types/hell-ui-audio-player.d.ts:28:5 - (ae-undocumented) Missing documentation for "pressPlayForCaptions".
-// types/hell-ui-audio-player.d.ts:51:5 - (ae-undocumented) Missing documentation for "src".
-// types/hell-ui-audio-player.d.ts:58:5 - (ae-undocumented) Missing documentation for "downloadName".
-// types/hell-ui-audio-player.d.ts:59:5 - (ae-undocumented) Missing documentation for "allowDownload".
-// types/hell-ui-audio-player.d.ts:68:5 - (ae-undocumented) Missing documentation for "captions".
-// types/hell-ui-audio-player.d.ts:69:5 - (ae-undocumented) Missing documentation for "speechTranscriptEnabled".
-// types/hell-ui-audio-player.d.ts:73:5 - (ae-undocumented) Missing documentation for "playing".
-// types/hell-ui-audio-player.d.ts:74:5 - (ae-undocumented) Missing documentation for "currentTime".
-// types/hell-ui-audio-player.d.ts:75:5 - (ae-undocumented) Missing documentation for "duration".
-// types/hell-ui-audio-player.d.ts:76:5 - (ae-undocumented) Missing documentation for "volume".
-// types/hell-ui-audio-player.d.ts:77:5 - (ae-undocumented) Missing documentation for "muted".
-// types/hell-ui-audio-player.d.ts:78:5 - (ae-undocumented) Missing documentation for "playbackRate".
-// types/hell-ui-audio-player.d.ts:79:5 - (ae-undocumented) Missing documentation for "seekMax".
-// types/hell-ui-audio-player.d.ts:81:5 - (ae-undocumented) Missing documentation for "transcript".
-// types/hell-ui-audio-player.d.ts:82:5 - (ae-undocumented) Missing documentation for "interim".
-// types/hell-ui-audio-player.d.ts:83:5 - (ae-undocumented) Missing documentation for "transcribing".
-// types/hell-ui-audio-player.d.ts:84:5 - (ae-undocumented) Missing documentation for "error".
-// types/hell-ui-audio-player.d.ts:85:5 - (ae-undocumented) Missing documentation for "copied".
-// types/hell-ui-audio-player.d.ts:86:5 - (ae-undocumented) Missing documentation for "speechSupported".
-// types/hell-ui-audio-player.d.ts:87:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-audio-player.d.ts:88:5 - (ae-undocumented) Missing documentation for "speechTranscriptLabel".
-// types/hell-ui-audio-player.d.ts:90:5 - (ae-undocumented) Missing documentation for "progress".
-// types/hell-ui-audio-player.d.ts:91:5 - (ae-undocumented) Missing documentation for "volumeIcon".
-// types/hell-ui-audio-player.d.ts:92:5 - (ae-undocumented) Missing documentation for "resolvedDate".
-// types/hell-ui-audio-player.d.ts:107:5 - (ae-undocumented) Missing documentation for "toggle".
-// types/hell-ui-audio-player.d.ts:108:5 - (ae-undocumented) Missing documentation for "onPlay".
-// types/hell-ui-audio-player.d.ts:109:5 - (ae-undocumented) Missing documentation for "onPause".
-// types/hell-ui-audio-player.d.ts:110:5 - (ae-undocumented) Missing documentation for "onEnded".
-// types/hell-ui-audio-player.d.ts:111:5 - (ae-undocumented) Missing documentation for "toggleMute".
-// types/hell-ui-audio-player.d.ts:112:5 - (ae-undocumented) Missing documentation for "onVolume".
-// types/hell-ui-audio-player.d.ts:113:5 - (ae-undocumented) Missing documentation for "onTime".
-// types/hell-ui-audio-player.d.ts:114:5 - (ae-undocumented) Missing documentation for "onMeta".
-// types/hell-ui-audio-player.d.ts:115:5 - (ae-undocumented) Missing documentation for "cyclePlaybackRate".
-// types/hell-ui-audio-player.d.ts:120:5 - (ae-undocumented) Missing documentation for "onSeeking".
-// types/hell-ui-audio-player.d.ts:127:5 - (ae-undocumented) Missing documentation for "onSeekKey".
-// types/hell-ui-audio-player.d.ts:133:5 - (ae-undocumented) Missing documentation for "clearTranscript".
-// types/hell-ui-audio-player.d.ts:135:5 - (ae-undocumented) Missing documentation for "copyTranscript".
-// types/hell-ui-audio-player.d.ts:136:5 - (ae-undocumented) Missing documentation for "format".
+// types/hell-ui-audio-player.d.ts:7:5 - (ae-undocumented) Missing documentation for "play".
+// types/hell-ui-audio-player.d.ts:8:5 - (ae-undocumented) Missing documentation for "pause".
+// types/hell-ui-audio-player.d.ts:9:5 - (ae-undocumented) Missing documentation for "seek".
+// types/hell-ui-audio-player.d.ts:10:5 - (ae-undocumented) Missing documentation for "mute".
+// types/hell-ui-audio-player.d.ts:11:5 - (ae-undocumented) Missing documentation for "unmute".
+// types/hell-ui-audio-player.d.ts:12:5 - (ae-undocumented) Missing documentation for "volume".
+// types/hell-ui-audio-player.d.ts:13:5 - (ae-undocumented) Missing documentation for "showLiveCaptions".
+// types/hell-ui-audio-player.d.ts:14:5 - (ae-undocumented) Missing documentation for "hideLiveCaptions".
+// types/hell-ui-audio-player.d.ts:15:5 - (ae-undocumented) Missing documentation for "speechTranscript".
+// types/hell-ui-audio-player.d.ts:16:5 - (ae-undocumented) Missing documentation for "download".
+// types/hell-ui-audio-player.d.ts:17:5 - (ae-undocumented) Missing documentation for "playbackSpeed".
+// types/hell-ui-audio-player.d.ts:18:5 - (ae-undocumented) Missing documentation for "copyTranscript".
+// types/hell-ui-audio-player.d.ts:19:5 - (ae-undocumented) Missing documentation for "clearTranscript".
+// types/hell-ui-audio-player.d.ts:20:5 - (ae-undocumented) Missing documentation for "errorStatus".
+// types/hell-ui-audio-player.d.ts:21:5 - (ae-undocumented) Missing documentation for "liveStatus".
+// types/hell-ui-audio-player.d.ts:22:5 - (ae-undocumented) Missing documentation for "pausedStatus".
+// types/hell-ui-audio-player.d.ts:23:5 - (ae-undocumented) Missing documentation for "copied".
+// types/hell-ui-audio-player.d.ts:24:5 - (ae-undocumented) Missing documentation for "copy".
+// types/hell-ui-audio-player.d.ts:25:5 - (ae-undocumented) Missing documentation for "clear".
+// types/hell-ui-audio-player.d.ts:26:5 - (ae-undocumented) Missing documentation for "listening".
+// types/hell-ui-audio-player.d.ts:27:5 - (ae-undocumented) Missing documentation for "pressPlayForCaptions".
+// types/hell-ui-audio-player.d.ts:50:5 - (ae-undocumented) Missing documentation for "src".
+// types/hell-ui-audio-player.d.ts:57:5 - (ae-undocumented) Missing documentation for "downloadName".
+// types/hell-ui-audio-player.d.ts:58:5 - (ae-undocumented) Missing documentation for "allowDownload".
+// types/hell-ui-audio-player.d.ts:67:5 - (ae-undocumented) Missing documentation for "captions".
+// types/hell-ui-audio-player.d.ts:68:5 - (ae-undocumented) Missing documentation for "speechTranscriptEnabled".
+// types/hell-ui-audio-player.d.ts:72:5 - (ae-undocumented) Missing documentation for "playing".
+// types/hell-ui-audio-player.d.ts:73:5 - (ae-undocumented) Missing documentation for "currentTime".
+// types/hell-ui-audio-player.d.ts:74:5 - (ae-undocumented) Missing documentation for "duration".
+// types/hell-ui-audio-player.d.ts:75:5 - (ae-undocumented) Missing documentation for "volume".
+// types/hell-ui-audio-player.d.ts:76:5 - (ae-undocumented) Missing documentation for "muted".
+// types/hell-ui-audio-player.d.ts:77:5 - (ae-undocumented) Missing documentation for "playbackRate".
+// types/hell-ui-audio-player.d.ts:78:5 - (ae-undocumented) Missing documentation for "seekMax".
+// types/hell-ui-audio-player.d.ts:80:5 - (ae-undocumented) Missing documentation for "transcript".
+// types/hell-ui-audio-player.d.ts:81:5 - (ae-undocumented) Missing documentation for "interim".
+// types/hell-ui-audio-player.d.ts:82:5 - (ae-undocumented) Missing documentation for "transcribing".
+// types/hell-ui-audio-player.d.ts:83:5 - (ae-undocumented) Missing documentation for "error".
+// types/hell-ui-audio-player.d.ts:84:5 - (ae-undocumented) Missing documentation for "copied".
+// types/hell-ui-audio-player.d.ts:85:5 - (ae-undocumented) Missing documentation for "speechSupported".
+// types/hell-ui-audio-player.d.ts:86:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-audio-player.d.ts:87:5 - (ae-undocumented) Missing documentation for "speechTranscriptLabel".
+// types/hell-ui-audio-player.d.ts:89:5 - (ae-undocumented) Missing documentation for "progress".
+// types/hell-ui-audio-player.d.ts:90:5 - (ae-undocumented) Missing documentation for "volumeIcon".
+// types/hell-ui-audio-player.d.ts:91:5 - (ae-undocumented) Missing documentation for "resolvedDate".
+// types/hell-ui-audio-player.d.ts:106:5 - (ae-undocumented) Missing documentation for "toggle".
+// types/hell-ui-audio-player.d.ts:107:5 - (ae-undocumented) Missing documentation for "onPlay".
+// types/hell-ui-audio-player.d.ts:108:5 - (ae-undocumented) Missing documentation for "onPause".
+// types/hell-ui-audio-player.d.ts:109:5 - (ae-undocumented) Missing documentation for "onEnded".
+// types/hell-ui-audio-player.d.ts:110:5 - (ae-undocumented) Missing documentation for "toggleMute".
+// types/hell-ui-audio-player.d.ts:111:5 - (ae-undocumented) Missing documentation for "onVolume".
+// types/hell-ui-audio-player.d.ts:112:5 - (ae-undocumented) Missing documentation for "onTime".
+// types/hell-ui-audio-player.d.ts:113:5 - (ae-undocumented) Missing documentation for "onMeta".
+// types/hell-ui-audio-player.d.ts:114:5 - (ae-undocumented) Missing documentation for "cyclePlaybackRate".
+// types/hell-ui-audio-player.d.ts:119:5 - (ae-undocumented) Missing documentation for "onSeeking".
+// types/hell-ui-audio-player.d.ts:126:5 - (ae-undocumented) Missing documentation for "onSeekKey".
+// types/hell-ui-audio-player.d.ts:132:5 - (ae-undocumented) Missing documentation for "clearTranscript".
+// types/hell-ui-audio-player.d.ts:134:5 - (ae-undocumented) Missing documentation for "copyTranscript".
+// types/hell-ui-audio-player.d.ts:135:5 - (ae-undocumented) Missing documentation for "format".
 
 // (No @packageDocumentation comment for this package)
 

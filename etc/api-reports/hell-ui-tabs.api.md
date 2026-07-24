@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -15,7 +14,7 @@ export const HELL_TABS_IMPORTS: readonly [typeof HellTabset, typeof HellTabList,
 
 // @public
 export class HellTab {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTab, "button[hellTab]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabButton; inputs: { "ngpTabButtonValue": "value"; "ngpTabButtonDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTab, never>;
@@ -23,7 +22,7 @@ export class HellTab {
 
 // @public
 export class HellTabList {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabList, "[hellTabList]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabList; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabList, never>;
@@ -31,7 +30,7 @@ export class HellTabList {
 
 // @public
 export class HellTabPanel {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabPanel, "[hellTabPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabPanel; inputs: { "ngpTabPanelValue": "value"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabPanel, never>;
@@ -40,7 +39,7 @@ export class HellTabPanel {
 // @public
 export class HellTabset {
     readonly orientation: i0.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabset, "[hellTabset]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabset; inputs: { "ngpTabsetValue": "value"; "ngpTabsetOrientation": "orientation"; "ngpTabsetActivateOnFocus": "activateOnFocus"; }; outputs: { "ngpTabsetValueChange": "valueChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabset, never>;

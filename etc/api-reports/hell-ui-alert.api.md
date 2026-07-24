@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -23,7 +22,7 @@ export class HellAlert {
     dismiss(): void;
     readonly dismissed: OutputEmitterRef<void>;
     protected readonly hasCustomIcon: i0.Signal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellAlertPart>;
+    protected readonly part: (part: HellAlertPart) => string;
     readonly showIcon: i0.InputSignalWithTransform<boolean, unknown>;
     readonly ui: i0.InputSignal<HellUiInput<HellAlertPart>>;
     readonly variant: i0.InputSignal<HellAlertVariant>;
@@ -33,7 +32,7 @@ export class HellAlert {
 
 // @public
 export class HellAlertActions {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertActions, "[hellAlertActions]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertActions, never>;
@@ -41,7 +40,7 @@ export class HellAlertActions {
 
 // @public
 export class HellAlertDescription {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertDescription, "[hellAlertDescription]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertDescription, never>;
@@ -52,7 +51,7 @@ export class HellAlertDismiss {
     protected readonly alert: HellAlert;
     readonly ariaLabel: i0.InputSignal<string | null>;
     protected readonly labels: HellLabels<HellAlertLabels>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertDismiss, "button[hellAlertDismiss]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertDismiss, never>;
@@ -74,7 +73,7 @@ export type HellAlertPart = 'root' | 'icon' | 'content';
 
 // @public
 export class HellAlertTitle {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAlertTitle, "[hellAlertTitle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAlertTitle, never>;

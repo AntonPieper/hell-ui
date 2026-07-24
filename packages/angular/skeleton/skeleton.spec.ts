@@ -6,7 +6,7 @@ import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Skeleton specs assert behavior and state attributes. Part-Class Pipeline merge
- * semantics are owned centrally by `core/part-class-pipeline.spec.ts`;
+ * semantics are owned centrally by `internal/core/part-class-pipeline.spec.ts`;
  * ui routing asserts that consumer classes reach each part and that nothing
  * outside the default render and the consumer's ui appears, instead of
  * asserting individual recipe classes. Part Recipes stay package-private per

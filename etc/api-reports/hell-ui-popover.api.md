@@ -7,7 +7,6 @@
 import * as _angular_core from '@angular/core';
 import { ElementRef } from '@angular/core';
 import { FocusOrigin } from '@angular/cdk/a11y';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as ng_primitives_portal from 'ng-primitives/portal';
@@ -20,7 +19,7 @@ import { NgpPopoverPlacement } from 'ng-primitives/popover';
 export class HellPopover {
     constructor();
     protected readonly ariaModal: _angular_core.Signal<"false" | null>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPopover, "[hellPopover]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopover, never>;

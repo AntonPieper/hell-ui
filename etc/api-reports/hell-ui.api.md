@@ -18,7 +18,6 @@ import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import { Signal } from '@angular/core';
-import * as tailwind_merge from 'tailwind-merge';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -54,18 +53,6 @@ export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
 // @public
 export type HellOrientation = 'horizontal' | 'vertical';
 
-// @public
-export type HellPartStyler<Part extends string> = (part: Part) => string;
-
-// @public
-export function hellPartStyler<Part extends string>(ui: () => HellUiInput<Part>, options: HellPartStylerOptions<Part>): HellPartStyler<Part>;
-
-// @public
-export interface HellPartStylerOptions<Part extends string> {
-    readonly defaultPart: Part;
-    readonly recipe: () => HellRecipe<Part>;
-}
-
 export { HellPickMultipleValue }
 
 export { HellPickSingleValue }
@@ -74,9 +61,6 @@ export { HellPickValue }
 
 // @public
 export function hellRankLocalSearch<T>(items: readonly T[], request: HellSearchRankRequest<T>): readonly HellSearchResult<T>[];
-
-// @public
-export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
 // @public
 export interface HellSearchField<T> {
@@ -197,9 +181,6 @@ export interface HellTimeValue {
     readonly minute: number;
     readonly second: number;
 }
-
-// @public
-export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
 
 // @public
 export interface HellTypedInputAdapter<TValue, TContext = void> {

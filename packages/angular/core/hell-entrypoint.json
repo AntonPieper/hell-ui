@@ -4,8 +4,7 @@
   "exports": [
     "./types",
     "./pick-value",
-    "./styleable",
-    "./part-style-merge",
+    "./part-style-map",
     "./search",
     "./search-resource",
     "./labels",

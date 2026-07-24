@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -22,7 +21,7 @@ export class HellBreadcrumbEllipsis {
     readonly ariaLabel: i0.InputSignal<string | null>;
     protected readonly labels: HellLabels<HellBreadcrumbLabels>;
     protected nativeButtonType(): 'button' | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbEllipsis, "[hellBreadcrumbEllipsis]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbEllipsis; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbEllipsis, never>;
@@ -30,7 +29,7 @@ export class HellBreadcrumbEllipsis {
 
 // @public
 export class HellBreadcrumbItem {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbItem, "li[hellBreadcrumbItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbItem; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbItem, never>;
@@ -44,7 +43,7 @@ export interface HellBreadcrumbLabels {
 // @public
 export class HellBreadcrumbLink {
     protected nativeButtonType(): 'button' | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbLink, "a[hellBreadcrumbLink], button[hellBreadcrumbLink]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbLink; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbLink, never>;
@@ -52,7 +51,7 @@ export class HellBreadcrumbLink {
 
 // @public
 export class HellBreadcrumbList {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbList, "ol[hellBreadcrumbList], ul[hellBreadcrumbList]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbList; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbList, never>;
@@ -60,7 +59,7 @@ export class HellBreadcrumbList {
 
 // @public
 export class HellBreadcrumbPage {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbPage, "[hellBreadcrumbPage]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbPage; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbPage, never>;
@@ -68,7 +67,7 @@ export class HellBreadcrumbPage {
 
 // @public
 export class HellBreadcrumbs {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbs, "nav[hellBreadcrumbs]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbs; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbs, never>;
@@ -76,7 +75,7 @@ export class HellBreadcrumbs {
 
 // @public
 export class HellBreadcrumbSeparator {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbSeparator, "li[hellBreadcrumbSeparator], [hellBreadcrumbSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbSeparator; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbSeparator, never>;
