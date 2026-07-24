@@ -1,14 +1,12 @@
 kind: Breaking
 body: >-
-  The separate `@hell-ui/pdf-viewer` package is no longer published; the PDF
-  viewer ships as the optional feature entry point
-  `hell-ui/features/pdf-viewer` with `pdfjs-dist` as an optional exact-version
-  peer. Component selectors, parts, labels, worker inputs, and runtime
-  behavior are unchanged.
+  The separate `@hell-ui/pdf-viewer` package is discontinued; the PDF viewer
+  now ships inside `hell-ui` as the optional `hell-ui/features/pdf-viewer`
+  entry point. Components and behavior are unchanged.
 time: 2026-07-24T10:00:02.000Z
 custom:
   migration: >-
-    Drop the `@hell-ui/pdf-viewer` dependency, import from
-    `hell-ui/features/pdf-viewer`, replace the `@hell-ui/pdf-viewer/styles`
-    CSS import with `hell-ui/features/pdf-viewer/styles.css`, and keep the
-    exact `pdfjs-dist` peer installed.
+    Remove the `@hell-ui/pdf-viewer` dependency, import from
+    `hell-ui/features/pdf-viewer`, repoint the stylesheet import to
+    `hell-ui/features/pdf-viewer/styles.css`, and keep the exact `pdfjs-dist`
+    peer installed.

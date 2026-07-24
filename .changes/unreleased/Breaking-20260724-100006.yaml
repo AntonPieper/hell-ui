@@ -1,23 +1,17 @@
 kind: Breaking
 body: >-
-  Combobox is one projection-first interaction state machine. The owned
-  `<hell-combobox-basic>` renderer and its options/display/search/status model
-  are removed; consumers project domain objects through `[hellCombobox]`,
-  `hellComboboxInput`, `hellComboboxOption`, `hellComboboxDropdown`, and
-  `hellComboboxPortal`, compose the core Search Resource for local ranking or
-  asynchronous results, and compose Chip Set/Chip Input for editable multiple
-  values. Forms, comparison, value semantics, keyboard navigation, disabled
-  options, focus restoration, dismissal, and ARIA relationships stay delegated
-  to the directive suite.
+  Combobox is now projection-first: the owned `<hell-combobox-basic>`
+  renderer and its options, display, and search model are removed. You
+  project your own options through the `[hellCombobox]` directive suite,
+  which keeps handling forms, keyboard navigation, dismissal, and
+  accessibility.
 time: 2026-07-24T10:00:06.000Z
 custom:
   migration: >-
     Replace `<hell-combobox-basic [options]="...">` with the `[hellCombobox]`
-    directive suite, drive filtering through `hellSearchResource` (local
-    ranking or async sources with debounce, cancellation, and stale-result
-    protection), and render each result as a projected `hellComboboxOption`.
-    Compose `hell-ui/chip` primitives for multiple-selection chips, and rename
-    the per-module value types to core's Pick Value family:
-    `HellComboboxSingleValue` → `HellPickSingleValue`,
-    `HellComboboxMultipleValue` → `HellPickMultipleValue`, and
-    `HellComboboxValue` → `HellPickValue` from `hell-ui/core`.
+    directive suite, drive filtering through `hellSearchResource`, and render
+    each result as a projected `hellComboboxOption`. Compose `hell-ui/chip`
+    for multiple-selection chips, and rename the value types to the Pick
+    Value family from `hell-ui/core`: `HellComboboxSingleValue` →
+    `HellPickSingleValue`, `HellComboboxMultipleValue` →
+    `HellPickMultipleValue`, `HellComboboxValue` → `HellPickValue`.

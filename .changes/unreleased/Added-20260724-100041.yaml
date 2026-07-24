@@ -1,11 +1,7 @@
 kind: Added
 body: >-
-  The `hell-ui/toolbar` entry point separates ordinary roving-focus toolbars
-  from measured overflow: `<div hellToolbar>` plus `[hellToolbarItem]`
-  provides the APG toolbar pattern over consumer-owned controls, while
-  `<hell-overflow-toolbar>` renders declared `hellToolbarAction` templates
-  inline or in a trailing overflow menu driven by container measurement — with
-  group-aware separators, non-collapsing widgets, an `overflow` placement
-  input (`never`/`auto`/`always`), and Label Contract copy for the overflow
-  trigger.
+  New `hell-ui/toolbar` entry point: `[hellToolbar]` gives your own controls
+  the standard roving-focus toolbar keyboard pattern, and `hell-overflow-toolbar`
+  additionally moves declared actions into a trailing overflow menu when the
+  container runs out of room.
 time: 2026-07-24T10:00:41.000Z

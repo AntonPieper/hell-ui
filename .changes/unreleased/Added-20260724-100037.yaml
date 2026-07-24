@@ -1,10 +1,7 @@
 kind: Added
 body: >-
-  The `hell-ui/confirm` entry point exposes one Prompt Interface through
-  `injectHellPrompt()`: `confirm()` opens an accessible modal — or an anchored
-  popconfirm via `{ anchor, placement }` — and `choose<TValue>()` handles
-  typed N-way decisions. Prompts always resolve (Escape, backdrop, and cancel
-  resolve `false` or a dismiss-equivalent value), modal calls queue, anchored
-  prompts are singleton, destructive and countdown-gated actions start focus
-  on cancel, and default strings sit behind the Label Contract.
+  New `hell-ui/confirm` entry point: `injectHellPrompt()` returns a prompt
+  service whose `confirm()` opens an accessible modal or anchored popconfirm
+  and whose `choose()` handles typed multi-option decisions. Prompts always
+  resolve, including on Escape or backdrop dismissal.
 time: 2026-07-24T10:00:37.000Z

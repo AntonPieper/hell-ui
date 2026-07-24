@@ -1,10 +1,7 @@
 kind: Added
 body: >-
-  The `hell-ui/page-header` Composite: slot-based page chrome with `root`,
-  `leading`, `titleGroup`, `title`, `meta`, `description`, and `toolbar`
-  Public Parts, all filled by content projection of real components rather
-  than a config-array API. The marked title becomes the page's heading at a
-  configurable level, and the optional `hell-page-header-back` affordance
-  renders a ghost icon button that emits a `back` event while routing stays
-  with the app.
+  New `hell-ui/page-header` entry point: slot-based page chrome for leading
+  content, title, metadata, description, and a toolbar, filled by projecting
+  real components. An optional back affordance emits a `back` event while
+  routing stays with your app.
 time: 2026-07-24T10:00:42.000Z

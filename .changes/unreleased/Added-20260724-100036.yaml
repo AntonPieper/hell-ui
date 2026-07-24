@@ -1,10 +1,6 @@
 kind: Added
 body: >-
-  The `hell-ui/alert` Styled Primitive: a persistent inline messaging surface
-  with `info`/`success`/`warning`/`danger` variants colored through Semantic
-  Theme Tokens, a replaceable default per-variant glyph, projected title,
-  description, and actions directives, and an opt-in `hellAlertDismiss` button
-  with a built-in × glyph and Label Contract name that emits `dismissed` while
-  the consumer owns visibility. Alerts carry no live-region semantics by
-  default.
+  New `hell-ui/alert` entry point: an inline message surface with info,
+  success, warning, and danger variants, projected title, description, and
+  action content, and an optional dismiss button. Your app owns visibility.
 time: 2026-07-24T10:00:36.000Z

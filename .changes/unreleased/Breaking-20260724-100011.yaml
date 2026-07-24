@@ -1,21 +1,16 @@
 kind: Breaking
 body: >-
-  The owned `hell-ui/split-view` Composite and its stylesheet are replaced by
-  the projection-first `hell-ui/master-detail` controller: a consumer-owned
-  `[hellMasterDetail]` root, live `[hellMasterPane]` elements with `primary`
-  and `detail` values, and a projected native `button[hellMasterDetailBack]`.
-  The controlled `detailOpen`/`detailOpenChange` pair and `compactBelow`
-  breakpoint remain, and the controller adds a readonly `compact()` signal.
+  The owned `hell-ui/split-view` component is replaced by the
+  projection-first `hell-ui/master-detail` controller: you author the root,
+  panes, and back button yourself. The controlled `detailOpen` model and
+  `compactBelow` breakpoint remain, and a readonly `compact()` signal is
+  added.
 time: 2026-07-24T10:00:11.000Z
 custom:
   migration: >-
-    Replace `<hell-split-view>` plus its `hellSplitPrimary`/`hellSplitDetail`
-    templates with the `HELL_MASTER_DETAIL_IMPORTS` directives. Replace
-    `backLabel` with the Back button's authored text or accessible name, move
-    `primaryFlex`/`detailFlex`/`primaryMinSize`/`detailMinSize` to external
-    Resizable panes and handles, replace `framed`/`height` and the removed
-    owned anatomy with consumer markup and each directive's local `root` Part
-    Style Map, and replace `itemNavigation` plus `previousItem`/`nextItem`
-    with ordinary Toolbar or Pagination controls bound to application-owned
-    selection. Import `hell-ui/master-detail/styles.css` plus only the
-    stylesheets for composed primitives.
+    Replace `<hell-split-view>` and its templates with the
+    `HELL_MASTER_DETAIL_IMPORTS` directives over your own markup. Use
+    Resizable panes for sizing, ordinary Toolbar or Pagination controls for
+    item navigation, and each directive's `ui` map for styling. Import
+    `hell-ui/master-detail/styles.css` plus the stylesheets of composed
+    primitives.

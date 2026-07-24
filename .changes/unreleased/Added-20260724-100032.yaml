@@ -1,12 +1,8 @@
 kind: Added
 body: >-
-  The optional `hell-ui/features/filter-builder` Feature entry point:
-  `hell-filter-builder` accepts generic readonly `HellFilter<TField,
-  TOperator, TValue>` expressions and application-owned typed field
-  descriptors, binds each descriptor to one projected editor template with a
-  typed context, and owns one controlled interaction state machine for
-  immutable whole-array changes, identity-based create/edit/remove targeting,
-  keyboard behavior, dismissal, focus restoration, and polite announcements.
-  Applications own field/operator/value unions, drafts, rendering, validation,
-  and external Search Resources.
+  New optional `hell-ui/features/filter-builder` entry point:
+  `hell-filter-builder` edits typed filter expressions against fields you
+  describe, rendering each value editor from your own templates. It handles
+  keyboard interaction, focus, and announcements; your app owns the filter
+  model, rendering, and validation.
 time: 2026-07-24T10:00:32.000Z

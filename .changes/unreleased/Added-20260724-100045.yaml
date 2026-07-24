@@ -1,7 +1,6 @@
 kind: Added
 body: >-
-  The menu trigger conforms to the Anchored Surface Contract: it gains a
-  reactive `open` signal, an `(openChange)` boolean output, `show()`, and an
-  `exportAs` matching the directive name. Menu closing stays engine-owned
-  through item selection, outside clicks, and Escape.
+  The menu trigger now matches Hell's other anchored surfaces: it gains a
+  reactive `open` signal, an `(openChange)` output, a `show()` method, and an
+  `exportAs` matching the directive name.
 time: 2026-07-24T10:00:45.000Z

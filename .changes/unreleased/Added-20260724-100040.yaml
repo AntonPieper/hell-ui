@@ -1,11 +1,7 @@
 kind: Added
 body: >-
-  The `hell-ui/save-bar` Composite: a save/discard action bar with no form
-  coupling — state flows in through `dirty`/`busy`/`disabled` inputs and
-  actions flow out through `saved`/`discarded` outputs. The default contextual
-  mode renders only while dirty, persistent mode keeps a stable footer, and
-  the bar sticks to the bottom of its nearest scroll container, never steals
-  focus, announces its message politely at most once per dirty session,
-  projects extra actions before the built-in buttons, and takes its copy from
-  the Label Contract.
+  New `hell-ui/save-bar` entry point: a save/discard action bar driven by
+  `dirty`, `busy`, and `disabled` inputs, with no form coupling. It shows
+  contextually while dirty or persistently as a footer, sticks to the nearest
+  scroll container, and never steals focus.
 time: 2026-07-24T10:00:40.000Z

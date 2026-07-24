@@ -1,29 +1,17 @@
 kind: Breaking
 body: >-
-  Hell form controls now expose one Control Value Authority instead of
-  `ControlValueAccessor`: `value` (`checked` for checkbox and switch) is a
-  `ModelSignal` implementing the matching Signal Forms control contract on
-  slider, checkbox, switch, radio group, toggle group, date input, time input,
-  number input, select, combobox, and the code editor. Direct binding, two-way
-  binding, Signal Forms `[formField]`, Reactive Forms `formControl`, and
-  template-driven `ngModel` all read and write the same model; one user commit
-  emits exactly once, external writes never echo the change output, and every
-  migrated control gains a `(touch)` output plus a forms-driven `disabled`
-  input.
+  All form controls replace `ControlValueAccessor` with signal-based `value`
+  models (`checked` for checkbox and switch) that work identically with
+  direct binding, two-way binding, Signal Forms, Reactive Forms, and
+  `ngModel`. Every migrated control also gains a `(touch)` output and a
+  forms-driven `disabled` input.
 time: 2026-07-24T10:00:04.000Z
 custom:
   migration: >-
-    Classic `formControl`/`ngModel` bindings keep working through Angular's
-    built-in Signal Forms interoperability; remove any reliance on
-    `writeValue`, `registerOnChange`, `registerOnTouched`, `setDisabledState`,
-    or the `NG_VALUE_ACCESSOR`/`NG_VALIDATORS` providers. Declare required and
-    range policy on the form (`Validators.*` for classic controls, schema
-    rules such as `required()`, `min()`, `max()`, `minDate()`, and `maxDate()`
-    for Signal Forms) — the controls no longer write `required`, `min`, `max`,
-    or parse errors onto classic controls, while typed-input drafts report one
-    `invalid*InputDraft` parse error to bound Signal Forms fields. Model
-    inputs drop static-attribute coercion: replace a bare `checked` attribute
-    with `[checked]="true"` and `value="42"` with `[value]="42"`. Toggle-group
-    values are mode-canonical (a string or `null` in `single` mode, a readonly
-    string array in `multiple` mode). The first-beta consumer guide covers the
-    per-control mapping.
+    Classic `formControl`/`ngModel` bindings keep working; drop any use of
+    `writeValue`, `registerOnChange`, or the
+    `NG_VALUE_ACCESSOR`/`NG_VALIDATORS` providers. Declare required and range
+    rules on the form — controls no longer contribute them. Replace static
+    value attributes with bindings, for example `[checked]="true"` and
+    `[value]="42"`. The first-beta consumer guide covers the per-control
+    mapping.

@@ -1,11 +1,7 @@
 kind: Added
 body: >-
-  More granular Public Parts, all styleable through the existing `ui` maps:
-  `HellAvatar` gains `image` and `fallback`, `HellCheckbox` gains `indicator`,
-  `HellAudioPlayer` gains `captionsText`, and `HellPaginationStrip` gains
-  `control`. The TanStack table shell adopts the Part Style Map contract:
-  `HellTanStackTable` exposes `root`, `toolbar`, `footer`, and `scrollport`
-  and `HellTanStackPagination` exposes `root` and `pageSize`, with camelCase
-  `data-slot` values replacing the former kebab-case markers and the private
-  `.hell-tanstack-*` host classes removed.
+  Avatar, checkbox, audio player, pagination, and the TanStack table shell
+  expose more granular styleable parts through their existing `ui` maps.
+  TanStack `data-slot` values are now camelCase, and the private
+  `.hell-tanstack-*` host classes are gone.
 time: 2026-07-24T10:00:44.000Z

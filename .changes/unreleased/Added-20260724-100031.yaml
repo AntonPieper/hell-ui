@@ -1,9 +1,6 @@
 kind: Added
 body: >-
-  The narrow `hell-ui/time-picker` Composite: `hell-time-picker` owns
-  structured `HellTimeValue | null` selection, optional seconds, fixed clock
-  bounds, segmented keyboard navigation, minute presets, accessibility labels,
-  and an eleven-part Part Style Map, without taking on parsing, forms, field,
-  trigger, or Popover APIs. Compose it with a Time Input, Control Group
-  action, and Popover when segmented selection is useful.
+  New `hell-ui/time-picker` entry point: `hell-time-picker` offers segmented,
+  keyboard-navigable time selection with optional seconds and minute presets.
+  Compose it with a time input and a popover when you want a dropdown picker.
 time: 2026-07-24T10:00:31.000Z

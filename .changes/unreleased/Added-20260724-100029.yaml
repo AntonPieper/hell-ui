@@ -1,10 +1,7 @@
 kind: Added
 body: >-
-  The recommended `hell-ui/styles.css` Default Style Bundle: one generated
-  package-level stylesheet containing the Shared Style Substrate
-  (`hell-ui/tokens.css`) followed by every standard component stylesheet. The
-  existing `hell-ui/<entrypoint>/styles.css` exports remain available as the
-  advanced Granular Style Mode — choose one standard-style mode, since
-  combining both duplicates the same CSS — and Heavy Feature Stylesheets plus
-  Theme Adapter Stylesheets stay explicit opt-ins for either mode.
+  One recommended stylesheet: importing `hell-ui/styles.css` brings in the
+  design tokens and every standard component style at once. The per-entry-point
+  `hell-ui/<entrypoint>/styles.css` files remain for granular imports; use one
+  approach or the other, since combining both duplicates the same CSS.
 time: 2026-07-24T10:00:29.000Z

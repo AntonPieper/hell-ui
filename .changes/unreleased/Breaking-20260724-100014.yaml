@@ -1,16 +1,13 @@
 kind: Breaking
 body: >-
-  Toast creation returns a small immutable `HellToastRef` instead of a numeric
-  id. `HellToastOptions.id`, `HellToastService.dismiss(id)`, the writable
-  `toasts` signal, `pauseAll()`/`resumeAll()`, and the `HellToastTemplate`
-  marker are removed; `dismissAll()` remains the only stack-wide action, and
-  native `ng-template` bodies receive the ref as their implicit context.
+  Creating a toast now returns a small immutable `HellToastRef` instead of a
+  numeric id; update and dismiss through the ref. The `id` option,
+  `dismiss(id)`, the writable `toasts` signal, and `pauseAll()`/`resumeAll()`
+  are removed; `dismissAll()` remains.
 time: 2026-07-24T10:00:14.000Z
 custom:
   migration: >-
-    Retain the result of `show()`, `message()`, `success()`, `info()`,
-    `warning()`, or `error()` and call `ref.update(patch)` or `ref.dismiss()`
-    for that toast. Updates patch in place — omitted fields stay unchanged,
-    nullable fields clear with `null`, and only an explicit `duration` patch
-    restarts the countdown; once dismissal begins, both reference actions are
-    idempotent no-ops.
+    Keep the ref returned by `show()` and the message helpers, then call
+    `ref.update(patch)` or `ref.dismiss()`. Updates patch in place; only an
+    explicit `duration` patch restarts the countdown, and both actions are
+    no-ops once dismissal begins.

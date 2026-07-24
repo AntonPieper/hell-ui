@@ -1,16 +1,13 @@
 kind: Breaking
 body: >-
-  The `hell-ui/drop-zone` Package Entry Point and its stylesheet are removed.
-  File acquisition is the directive-first `hell-ui/file-picker` Styled
-  Primitive; upload queues, total capacity, progress, retry, removal, and
-  server work stay application-owned.
+  The `hell-ui/drop-zone` entry point and its stylesheet are removed; file
+  acquisition is now the `hell-ui/file-picker` directive. Upload queues,
+  progress, retry, and server work stay in your app.
 time: 2026-07-24T10:00:12.000Z
 custom:
   migration: >-
-    Replace `[hellDropzone]` with `[hellFilePicker]`: replace `(files)` with
-    `(selection)` and consume its accepted files plus structured `type`,
-    `size`, `count`, and `custom` rejections, use `open()` for a separate
-    browse action instead of binding a native input, replace the `data-active`
-    drag-state hook with `data-dragging`, and import
-    `hell-ui/file-picker/styles.css`. `HellDropZoneHarness` is removed;
-    `HellFilePickerHarness` covers the acquisition contract.
+    Replace `[hellDropzone]` with `[hellFilePicker]`, `(files)` with
+    `(selection)`, and the `data-active` drag hook with `data-dragging`. Use
+    `open()` instead of a bound native input for browsing, import
+    `hell-ui/file-picker/styles.css`, and switch tests to
+    `HellFilePickerHarness`.

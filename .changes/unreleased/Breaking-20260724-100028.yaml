@@ -1,7 +1,7 @@
 kind: Breaking
 body: >-
-  `hell-ui/table-tanstack` no longer re-exports TanStack's FlexRender helpers.
-  TanStack shell behavior is unchanged.
+  `hell-ui/table-tanstack` no longer re-exports TanStack's FlexRender
+  helpers. The table shell's behavior is unchanged.
 time: 2026-07-24T10:00:28.000Z
 custom:
   migration: >-

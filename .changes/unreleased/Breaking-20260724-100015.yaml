@@ -1,23 +1,15 @@
 kind: Breaking
 body: >-
-  The Tooltip is redesigned on one canonical trigger. `HellTooltipTrigger` is
-  now `HellTooltip` (`[hellTooltip]` on any host) and the consumer-authored
-  surface is `HellTooltipSurface` (`[hellTooltipSurface]`). The trigger
-  binding accepts `string | TemplateRef | null | undefined` — a string renders
-  an implicit Tooltip Surface and absent content closes and disables the
-  interaction — and it forwards the delegated behavior surface (`placement`,
-  `offset`, `flip`, `shift`, `container`, `anchor`, delays, cooldown, and
-  more) with injector-scoped `provideHellTooltipDefaults(...)`. Hell now
-  guarantees a 500 ms show delay, 0 ms hide delay, and 300 ms cooldown by
-  default, and the `disabled` and `hoverableContent` inputs are removed:
-  content is always hoverable and Escape always dismisses without moving
-  focus.
+  Tooltip is redesigned around one `[hellTooltip]` trigger that accepts a
+  string or a template; `[hellTooltipSurface]` marks a custom surface.
+  Defaults change to a 500 ms show delay and a 300 ms cooldown, content is
+  always hoverable, and the `disabled` and `hoverableContent` inputs are
+  removed.
 time: 2026-07-24T10:00:15.000Z
 custom:
   migration: >-
     Rename `hellTooltipTrigger` bindings to `hellTooltip` and mark rendered
-    surfaces with `hellTooltipSurface`; pass a plain string for the
-    convenience path. Disable by passing `null`, `undefined`, or an empty
-    string instead of the removed `disabled` input, move shared timing or
-    placement policy into `provideHellTooltipDefaults`, and revisit
-    interactions that relied on the previous 0 ms show delay.
+    surfaces with `hellTooltipSurface`. Disable by passing `null` or an empty
+    string instead of the removed `disabled` input, set shared timing or
+    placement policy through `provideHellTooltipDefaults`, and revisit
+    interactions that relied on the previous instant show.

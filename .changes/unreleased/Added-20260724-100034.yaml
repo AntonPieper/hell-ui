@@ -1,10 +1,6 @@
 kind: Added
 body: >-
-  The directive-first `hell-ui/control-group` entry point:
-  `[hellControlGroup]` composes a consumer-owned input or trigger with local
-  prefix, suffix, and native button-action surfaces while the shared frame
-  reflects focus, size, invalid, and disabled state. The grouped control stays
-  the only flexible surface — long values scroll natively inside it,
-  over-constrained affixes truncate with an ellipsis, and the action inherits
-  group disabled state without introducing a second value model.
+  New `hell-ui/control-group` entry point: wrap your own input or trigger with
+  prefix, suffix, and action-button surfaces inside one shared frame that
+  reflects focus, size, invalid, and disabled state.
 time: 2026-07-24T10:00:34.000Z

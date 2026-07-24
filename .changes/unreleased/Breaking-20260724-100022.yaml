@@ -1,15 +1,12 @@
 kind: Breaking
 body: >-
-  `HellSpinner` moved out of `hell-ui/skeleton` into its own `hell-ui/spinner`
-  entry point, and its Label Contract moved and renamed with it
-  (`HellSpinnerLabels`, `HELL_SPINNER_LABELS`). The skeleton entry point no
-  longer exports a label contract, and spinner visuals live in
-  `hell-ui/spinner/styles.css`. No selectors, data attributes, parts, or
-  runtime behavior changed.
+  `HellSpinner` moves from `hell-ui/skeleton` to its own `hell-ui/spinner`
+  entry point, together with its labels and stylesheet. Markup and behavior
+  are unchanged.
 time: 2026-07-24T10:00:22.000Z
 custom:
   migration: >-
-    Import `HellSpinner`, its part types, and `HellSpinnerVariant` from
-    `hell-ui/spinner`, rename skeleton label overrides to the spinner token,
-    and add `@import 'hell-ui/spinner/styles.css'` wherever the skeleton
-    stylesheet previously covered spinners.
+    Import the spinner component and types from `hell-ui/spinner`, rename
+    skeleton label overrides to the spinner token, and import
+    `hell-ui/spinner/styles.css` wherever the skeleton stylesheet previously
+    covered spinners.

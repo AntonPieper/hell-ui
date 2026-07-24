@@ -1,12 +1,11 @@
 kind: Breaking
 body: >-
-  Dialpad moved behind a feature entry point: `hell-ui/features/dialpad`
-  replaces `hell-ui/dialpad`, keeping the core component set domain-agnostic.
-  The component itself is unchanged, and there is no re-export from the old
-  path.
+  Dialpad moves to the optional feature entry point
+  `hell-ui/features/dialpad`; the `hell-ui/dialpad` path is removed. The
+  component itself is unchanged.
 time: 2026-07-24T10:00:23.000Z
 custom:
   migration: >-
-    Import `HellDialpad`, its Part Style Map types, and its labels from
+    Import the dialpad component, part types, and labels from
     `hell-ui/features/dialpad`, and repoint the stylesheet import to
     `hell-ui/features/dialpad/styles.css`.

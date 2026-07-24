@@ -1,11 +1,7 @@
 kind: Added
 body: >-
-  The `hell-ui/chip` Mixed Entry Point: `hellChip` renders span, button, or
-  anchor pills with `variant`/`size` state attributes and a `(remove)` output;
-  `hellChipRemove` is a real sibling remove button with a built-in × glyph and
-  an accessible name derived from the chip's text; `hellChipSet` provides one
-  roving tab stop with Arrow/Home/End focus, Delete/Backspace removal, and
-  focus continuity after removal; and `input[hellChipInput]` connects a
-  consumer-owned editable input to its enclosing set. Removal is event-only —
-  the consumer owns the collection.
+  New `hell-ui/chip` entry point: pill-shaped chips as spans, buttons, or
+  anchors, an optional remove button, a keyboard-navigable chip set, and a chip
+  input for building editable token lists. Removal is event-only — your app
+  owns the collection.
 time: 2026-07-24T10:00:33.000Z
