@@ -217,7 +217,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/avatar-group',
  detail:'components/avatar-group/examples/with-tooltip-menu.example.ts',
  terms:
-'avatar-group with-tooltip-menu composite hellTooltip string hellMenuTrigger hellMenu hellMenuItem hellMenuLabel hellAvatarGroupOverflow assignee stack overflow hover',
+'avatar-group with-tooltip-menu composite hellTooltip string hellMenuTrigger hellMenu hellMenuItemCheckbox hellMenuItemIndicator checkmark checked assigned hellMenuLabel hellAvatarGroupOverflow assignee stack overflow hover',
  },
  {
  title:'Avatar: Basic',

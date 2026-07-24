@@ -26,26 +26,39 @@ interface TeamMember {
   ],
   template: `
     <ng-template #overflowMenu>
-      <div hellMenu aria-label="Remaining assignees">
-        <div hellMenuLabel>Also assigned</div>
-        @for (person of overflowAssignees(); track person.name) {
-          <button hellMenuItem type="button" (click)="focused.set(person.name)">
-            {{ person.name }}
+      <div hellMenu aria-label="More team members">
+        <div hellMenuLabel>More people</div>
+        @for (person of overflowMembers(); track person.name) {
+          <button
+            hellMenuItemCheckbox
+            [checked]="isAssigned(person)"
+            (checkedChange)="setAssigned(person, $event)"
+            [attr.aria-label]="person.name"
+          >
+            <hell-avatar
+              size="xs"
+              [image]="person.image"
+              [fallback]="person.initials"
+              [alt]="person.name"
+            />
+            <span>{{ person.name }}</span>
+            <span hellMenuItemIndicator class="ms-auto"></span>
           </button>
         }
       </div>
     </ng-template>
 
     <hell-avatar-group>
-      @for (person of visibleAssignees(); track person.name) {
+      @for (person of visibleMembers(); track person.name) {
         <button
           hellAvatarGroupItem
           type="button"
-          [selected]="focused() === person.name"
+          [selected]="isAssigned(person)"
+          [attr.aria-pressed]="isAssigned(person)"
           [hellTooltip]="person.name"
           placement="top"
           [attr.aria-label]="person.name"
-          (click)="focused.set(person.name)"
+          (click)="toggleAssigned(person)"
         >
           <hell-avatar [image]="person.image" [fallback]="person.initials" [alt]="person.name" />
         </button>
@@ -55,9 +68,9 @@ interface TeamMember {
         type="button"
         [hellMenuTrigger]="overflowMenu"
         placement="bottom-end"
-        [attr.aria-label]="overflowAssignees().length + ' more assignees'"
+        [attr.aria-label]="overflowMembers().length + ' more team members'"
       >
-        +{{ overflowAssignees().length }}
+        +{{ overflowMembers().length }}
         <hell-icon name="faSolidChevronDown" size="10px" />
       </button>
     </hell-avatar-group>
@@ -66,7 +79,7 @@ interface TeamMember {
 export class AvatarGroupWithTooltipMenuExample {
   private readonly max = 4;
 
-  protected readonly assignees: readonly TeamMember[] = [
+  protected readonly team: readonly TeamMember[] = [
     { name: 'Hana Kim', initials: 'HK', image: 'https://i.pravatar.cc/96?img=11' },
     { name: 'Ari Patel', initials: 'AP', image: 'https://i.pravatar.cc/96?img=12' },
     { name: 'Bea Santos', initials: 'BS', image: 'https://i.pravatar.cc/96?img=13' },
@@ -75,7 +88,30 @@ export class AvatarGroupWithTooltipMenuExample {
     { name: 'Samir Khan', initials: 'SK', image: 'https://i.pravatar.cc/96?img=16' },
   ];
 
-  protected readonly visibleAssignees = computed(() => this.assignees.slice(0, this.max));
-  protected readonly overflowAssignees = computed(() => this.assignees.slice(this.max));
-  protected readonly focused = signal(this.assignees[0].name);
+  protected readonly visibleMembers = computed(() => this.team.slice(0, this.max));
+  protected readonly overflowMembers = computed(() => this.team.slice(this.max));
+
+  // One assigned set drives both surfaces: the selection ring on visible
+  // avatars and the checkmark on overflow menu rows.
+  protected readonly assigned = signal<ReadonlySet<string>>(new Set(['Hana Kim', 'Mina Ortiz']));
+
+  protected isAssigned(person: TeamMember): boolean {
+    return this.assigned().has(person.name);
+  }
+
+  protected setAssigned(person: TeamMember, assigned: boolean): void {
+    this.assigned.update((current) => {
+      const next = new Set(current);
+      if (assigned) {
+        next.add(person.name);
+      } else {
+        next.delete(person.name);
+      }
+      return next;
+    });
+  }
+
+  protected toggleAssigned(person: TeamMember): void {
+    this.setAssigned(person, !this.isAssigned(person));
+  }
 }
