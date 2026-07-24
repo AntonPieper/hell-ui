@@ -19,7 +19,7 @@ const DEFAULT_CHANNELS: readonly NotificationChannel[] = [CHANNELS[0], CHANNELS[
 const MIN_SELECTED = 1;
 
 @Component({
-  selector: 'app-multi-select-menu-button-basic-example',
+  selector: 'app-menu-multi-select-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, ...HELL_MENU_IMPORTS],
   template: `
@@ -70,7 +70,7 @@ const MIN_SELECTED = 1;
     </div>
   `,
 })
-export class MultiSelectMenuButtonBasicExample {
+export class MenuMultiSelectExample {
   protected readonly channels = CHANNELS;
   // The consumer owns the selected domain objects; Menu only emits checked state.
   protected readonly selected = signal<readonly NotificationChannel[]>([...DEFAULT_CHANNELS]);

@@ -55,7 +55,7 @@ function saveColumnVisibility(state: VisibilityState): void {
 }
 
 @Component({
-  selector: 'app-multi-select-menu-button-tanstack-example',
+  selector: 'app-menu-tanstack-columns-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HellButton,
@@ -96,7 +96,7 @@ function saveColumnVisibility(state: VisibilityState): void {
     </hell-tanstack-table>
   `,
 })
-export class MultiSelectMenuButtonTanStackExample {
+export class MenuTanStackColumnsExample {
   protected readonly rows = signal<Person[]>([...PEOPLE]);
 
   // TanStack owns the column-visibility state; the app persists it to localStorage.
