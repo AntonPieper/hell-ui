@@ -54,5 +54,5 @@ import { HellInput } from 'hell-ui/input';
 })
 export class ControlGroupStatesExample {
   protected readonly controlUi =
-    'h-auto min-h-0 min-w-0 flex-1 rounded-none border-0 bg-transparent px-hell-2 shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none disabled:bg-transparent data-disabled:bg-transparent';
+    'h-auto min-h-0 min-w-0 flex-1 rounded-none border-0 bg-transparent px-hell-3 shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none disabled:bg-transparent data-disabled:bg-transparent data-[size=sm]:px-hell-2 data-[size=lg]:px-hell-4';
 }

@@ -13,29 +13,31 @@ interface Permission {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellCheckbox, ...HELL_FIELD_IMPORTS],
   template: `
-    <div hellField orientation="horizontal">
-      <button
-        id="permissions-all"
-        hellCheckbox
-        [checked]="allGranted()"
-        [indeterminate]="someGranted()"
-        (checkedChange)="setAll($event)"
-      ></button>
-      <label hellFieldLabel for="permissions-all">All permissions</label>
-    </div>
+    <div class="grid gap-hell-4">
+      <div hellField orientation="horizontal">
+        <button
+          id="permissions-all"
+          hellCheckbox
+          [checked]="allGranted()"
+          [indeterminate]="someGranted()"
+          (checkedChange)="setAll($event)"
+        ></button>
+        <label hellFieldLabel for="permissions-all">All permissions</label>
+      </div>
 
-    <div class="ml-6 grid gap-2">
-      @for (permission of permissions(); track permission.id) {
-        <div hellField orientation="horizontal">
-          <button
-            [id]="permission.id"
-            hellCheckbox
-            [checked]="permission.granted"
-            (checkedChange)="setOne(permission.id, $event)"
-          ></button>
-          <label hellFieldLabel [for]="permission.id">{{ permission.label }}</label>
-        </div>
-      }
+      <div class="ms-hell-7 grid gap-hell-3">
+        @for (permission of permissions(); track permission.id) {
+          <div hellField orientation="horizontal">
+            <button
+              [id]="permission.id"
+              hellCheckbox
+              [checked]="permission.granted"
+              (checkedChange)="setOne(permission.id, $event)"
+            ></button>
+            <label hellFieldLabel [for]="permission.id">{{ permission.label }}</label>
+          </div>
+        }
+      </div>
     </div>
   `,
 })

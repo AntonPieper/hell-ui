@@ -32,6 +32,12 @@ import {
   peerGroupContracts,
   resolvePackedTarball,
 } from './package-pack-audit.mjs';
+import {
+  evaluateStyleBundleBudget,
+  formatBytes,
+  loadStyleBundleBudget,
+  measureCompiledCss,
+} from './style-bundle-benchmark.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
@@ -165,6 +171,7 @@ async function runFixture(fixture) {
 
     runPnpm(['run', 'build'], workspace, label);
     assertFixtureCssSentinels(fixture, workspace, label);
+    assertFixtureStyleBundleBudget(fixture, workspace, label);
     await runFixtureSmoke(fixture, workspace, label);
 
     console.log(`[${label}] ok`);
@@ -341,6 +348,66 @@ function assertFixtureCssSentinels(fixture, workspace, label) {
 
 function normalizeCssForSentinels(css) {
   return css.replace(/\s+/g, '');
+}
+
+// The style bundle size benchmark: a fixture that declares
+// `styleBundleBudget` (a budget file path resolved against the fixture
+// directory, staying inside tools/consumer-fixtures/) has every CSS byte its
+// production build emitted measured — compiled and minified through the
+// supported Tailwind/PostCSS path, never source files or an unprocessed
+// concatenation — and gated against the accepted release budget recorded in
+// that file. Nothing is filtered or excluded from the measurement; the
+// fixture's forbidden CSS sentinels are what prove heavy/optional styles
+// stay out of the bundle being measured.
+function assertFixtureStyleBundleBudget(fixture, workspace, label) {
+  const budgetFile = fixture.manifest.styleBundleBudget;
+  if (!budgetFile) return;
+
+  const budgetPath = resolve(fixture.dir, budgetFile);
+  if (!budgetPath.startsWith(`${fixturesRoot}${sep}`)) {
+    fail(`Fixture ${fixture.name} styleBundleBudget must stay inside ${fixturesRoot}`);
+  }
+  if (!existsSync(budgetPath)) {
+    fail(`Fixture ${fixture.name} styleBundleBudget file is missing: ${budgetPath}`);
+  }
+
+  let budget;
+  try {
+    budget = loadStyleBundleBudget(budgetPath);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
+  }
+
+  const distRoot = join(workspace, 'dist');
+  const cssFiles = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
+  if (!cssFiles.length) {
+    fail(`Fixture ${fixture.name} style bundle benchmark found no CSS under ${distRoot}`);
+  }
+
+  const measurement = measureCompiledCss(
+    cssFiles.map((file) => ({ name: relative(distRoot, file), bytes: readFileSync(file) })),
+  );
+  for (const file of measurement.files) {
+    console.log(
+      `[${label}] style bundle ${file.name}: ${formatBytes(file.rawBytes)} raw, ${formatBytes(file.gzipBytes)} gzip`,
+    );
+  }
+  console.log(
+    `[${label}] style bundle total: ${formatBytes(measurement.rawBytes)} raw, ${formatBytes(measurement.gzipBytes)} gzip`,
+  );
+
+  const overBudget = evaluateStyleBundleBudget({ measurement, budget: budget.budget });
+  if (overBudget.length) {
+    fail(
+      `Fixture ${fixture.name} compiled style bundle exceeds the accepted budget in ${relative(root, budgetPath)}: ` +
+        `${overBudget.join('; ')}. If this increase is intentional, follow docs/release/style-bundle-budget.md ` +
+        `to review it and update the baseline and budget together.`,
+    );
+  }
+  console.log(
+    `[${label}] ok: style bundle within budget (${formatBytes(budget.budget.maxRawBytes)} raw, ` +
+      `${formatBytes(budget.budget.maxGzipBytes)} gzip allowed)`,
+  );
 }
 
 async function runFixtureSmoke(fixture, workspace, label) {

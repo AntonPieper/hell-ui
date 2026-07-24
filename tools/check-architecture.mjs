@@ -132,6 +132,18 @@ const architectureCheckManifest = [
     owner: '@AntonPieper',
     run: checkOptionalPeerIsolationContract,
   },
+  {
+    // Internal Package Paths stay unmistakably private (#272): the manifest
+    // loader already rejects internal-category/internal-prefix mismatches for
+    // every tool that loads it, and ESLint bans the TS import edge. This
+    // check owns the durable consumer-surface concern no standard tool
+    // covers: docs content, templates, stylesheets, JSON fixtures, and e2e
+    // sources never reference an internal subpath.
+    name: 'internal-entrypoint-privacy',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkInternalEntrypointPrivacyContract,
+  },
   { name: 'style-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkStyleEntryPoints },
   {
     // Default Style Bundle contract (docs/adr/0002-public-package-and-
@@ -1200,6 +1212,45 @@ function checkOptionalPeerIsolationContract() {
     failures.push(
       'Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source',
     );
+  }
+}
+
+// Internal Package Paths are excluded from consumer documentation, examples,
+// checked-in consumer fixtures, and e2e sources (#272,
+// docs/adr/0002-public-package-and-stylesheet-surface.md). ESLint rejects the
+// TypeScript import edge; this text-level guard also covers inline templates,
+// external templates, stylesheets (`@import 'hell-ui/internal/...'`), JSON
+// fixture manifests, and docs prose, so no consumer-facing surface can
+// present an internal subpath as a supported contract.
+function checkInternalEntrypointPrivacyContract() {
+  const consumerSurfaces = [
+    { label: 'Consumer docs', dir: 'apps/docs/src' },
+    { label: 'Consumer fixture', dir: 'tools/consumer-fixtures' },
+    { label: 'E2e source', dir: 'e2e' },
+  ];
+  const internalReferencePattern = /hell-ui\/internal/;
+  const scannedExtensions = /\.(?:ts|mts|html|css|scss|json|md)$/;
+
+  for (const surface of consumerSurfaces) {
+    const surfaceRoot = join(root, surface.dir);
+    if (!existsSync(surfaceRoot)) {
+      failures.push(`Internal Package Path privacy surface is missing: ${surface.dir}`);
+      continue;
+    }
+
+    for (const file of walk(surfaceRoot)) {
+      const rel = relPath(file);
+      if (rel.includes('/node_modules/') || !scannedExtensions.test(file)) continue;
+
+      const source = readFile(file);
+      if (!internalReferencePattern.test(source)) continue;
+
+      const lineNumber =
+        source.split('\n').findIndex((line) => internalReferencePattern.test(line)) + 1;
+      failures.push(
+        `${surface.label} ${rel}:${lineNumber} references hell-ui/internal; Internal Package Paths carry no consumer support promise — use a supported Package Entry Point, or promote the contract to a named non-internal entry point first`,
+      );
+    }
   }
 }
 

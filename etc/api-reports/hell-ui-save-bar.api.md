@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
@@ -29,7 +28,7 @@ export class HellSaveBar {
     readonly mode: _angular_core.InputSignal<HellSaveBarMode>;
     protected onDiscard(): void;
     protected onSave(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellSaveBarPart>;
+    protected readonly part: (part: HellSaveBarPart) => string;
     readonly saved: OutputEmitterRef<void>;
     readonly saveType: _angular_core.InputSignal<HellSaveBarSaveType>;
     readonly size: _angular_core.InputSignal<HellSize>;

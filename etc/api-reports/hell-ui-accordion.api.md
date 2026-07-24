@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/accordion';
@@ -14,7 +13,7 @@ export const HELL_ACCORDION_IMPORTS: readonly [typeof HellAccordion, typeof Hell
 
 // @public
 export class HellAccordion {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordion, "[hellAccordion]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordion; inputs: { "ngpAccordionValue": "value"; "ngpAccordionType": "type"; "ngpAccordionCollapsible": "collapsible"; "ngpAccordionDisabled": "disabled"; "ngpAccordionOrientation": "orientation"; }; outputs: { "ngpAccordionValueChange": "valueChange"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordion, never>;
@@ -23,7 +22,7 @@ export class HellAccordion {
 // @public
 export class HellAccordionContent {
     protected readonly closed: i0.Signal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionContent, "[hellAccordionContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionContent; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionContent, never>;
@@ -31,7 +30,7 @@ export class HellAccordionContent {
 
 // @public
 export class HellAccordionItem {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionItem, "[hellAccordionItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionItem; inputs: { "ngpAccordionItemValue": "value"; "ngpAccordionItemDisabled": "disabled"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionItem, never>;
@@ -39,7 +38,7 @@ export class HellAccordionItem {
 
 // @public
 export class HellAccordionTrigger {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionTrigger, "button[hellAccordionTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionTrigger; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionTrigger, never>;

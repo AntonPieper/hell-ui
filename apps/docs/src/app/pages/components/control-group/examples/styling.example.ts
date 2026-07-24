@@ -15,7 +15,7 @@ import { HellInput } from 'hell-ui/input';
     >
       <span
         hellControlGroupPrefix
-        ui="bg-hell-primary px-hell-4 font-semibold text-hell-primary-foreground"
+        ui="inline-flex items-center self-stretch bg-hell-primary px-hell-4 font-semibold text-hell-primary-foreground"
       >
         release/
       </span>

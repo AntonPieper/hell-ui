@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellButtonVariant } from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -18,7 +17,7 @@ export class HellButton {
     protected disabledAnchorTabIndex(): -1 | null;
     readonly iconOnly: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected nativeButtonType(): string | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected preventDisabledAnchor(event: Event): void;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

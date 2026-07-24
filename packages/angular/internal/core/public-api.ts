@@ -8,6 +8,8 @@ export * from './floating-scope';
 export * from './form-field-idrefs';
 export * from './idrefs';
 export * from './native-interactive-disabled';
+export * from './part-class-pipeline';
+export * from './part-style-merge';
 export * from './pick-value';
 export * from './picker-control';
 export * from './resize-behavior';

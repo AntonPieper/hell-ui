@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellChipVariant } from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
@@ -21,7 +20,7 @@ export const HELL_CHIP_LABELS: InjectionToken<HellLabels<HellChipLabels>>;
 
 // @public
 export class HellBadge {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellBadge, "[hellBadge]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellBadge, never>;
@@ -35,7 +34,7 @@ export class HellChip {
     protected isButton(): boolean;
     readonly label: _angular_core.InputSignal<string | undefined>;
     protected onFocusin(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected readonly removable: _angular_core.Signal<boolean>;
     readonly remove: _angular_core.OutputEmitterRef<void>;
     readonly size: _angular_core.InputSignal<HellSize>;
@@ -65,7 +64,7 @@ export class HellChipRemove {
     protected readonly ariaLabel: _angular_core.Signal<string>;
     protected readonly disabled: _angular_core.Signal<boolean>;
     protected onClick(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChipRemove, "button[hellChipRemove]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChipRemove, never>;
@@ -74,9 +73,10 @@ export class HellChipRemove {
 // @public
 export class HellChipSet {
     constructor();
+    protected readonly inControlGroup: _angular_core.WritableSignal<boolean>;
     protected onKeydown(event: KeyboardEvent): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChipSet, "[hellChipSet]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellChipSet, never>;
@@ -84,7 +84,7 @@ export class HellChipSet {
 
 // @public
 export class HellKbd {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellKbd, "kbd[hellKbd], [hellKbd]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellKbd, never>;

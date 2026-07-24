@@ -452,6 +452,34 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Changed
 
+- Control Group settled its overflow behavior and affix padding rhythm. The
+  frame never grows for content: the grouped control stays the only flexible
+  surface (`flex-1 min-w-0` in its documented `ui`), so a very long unbroken
+  value scrolls natively inside the control and clips one padding step away
+  from its neighbors, while `hellControlGroupPrefix` and
+  `hellControlGroupSuffix` now truncate with an ellipsis instead of clipping
+  when the frame is over-constrained (pin a must-read affix with
+  `ui="shrink-0"`). Default affix recipes changed from stretched
+  `inline-flex flex-none items-center px-*` surfaces to self-centered blocks
+  that pad only their outer edge on one step per size (`hell-2`/`hell-3`/
+  `hell-4` for `sm`/`md`/`lg`); the grouped control supplies the inner gap
+  and scroll clip buffer through the same step, and actions keep one step on
+  both sides of their divider. Consumers who relied on the old inner affix
+  padding or full-height affix backgrounds restore them locally, e.g.
+  `ui="inline-flex items-center self-stretch px-hell-4"` for a filled
+  prefix. Closes #339. Evidence: `e2e/control-group-contracts.spec.ts`
+  overflow contracts, the recipe snapshot in
+  `packages/angular/control-group/control-group.spec.ts`, and the new
+  Overflow section at `/components/control-group`.
+
+- Field label, description, and error text now render at the design scale's
+  13px control-label size instead of 12px, so form text is comfortably
+  readable in every composition that wires a control through Field. The
+  label keeps its semibold weight above the regular control text, the muted
+  description stays below both, and the description and error pin
+  `leading-normal` so wrapped helper text keeps a steady rhythm across
+  skins. The error grows with the description because both occupy the same
+  helper-text slot under the control. Closes #338.
 - Setter-only public members are gone and the category is now release
   blocking. The table utilities' `contentWidth`, `active`, `selected`,
   `sort`, `sortable`, `columnId`, `align`, and `space` attribute inputs
@@ -774,6 +802,20 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Fixed
 
+- A Chip Set composed inside a Control Group now keeps breathing room from the
+  frame on every side, including wrapped chip rows. `[hellChipSet]` reflects
+  the composition as `data-in-control-group` and its recipe adds inner padding
+  (`px-hell-2 py-hell-1`), a tighter `gap-hell-1`, and `min-w-0 flex-1` so the
+  set fills the frame; the docs examples drop their hand-tuned spacing
+  overrides (one of which used the non-existent `py-hell-1.5` token and was
+  silently ignored). The Combobox input recipe now uses `flex-1 self-stretch`
+  instead of `flex-auto h-full`, so an inline Chip Input rides the chip flow —
+  filling the space after the final chip and wrapping at its own `min-width` —
+  and the toggle button keeps its place at the frame edge instead of being
+  pushed out and clipped; single-line comboboxes render unchanged. Evidence:
+  `packages/angular/chip/chip.spec.ts`, `packages/angular/combobox/combobox.spec.ts`,
+  and hands-on verification of the Chip Basic and Combobox Chip Input
+  composition docs examples. Closes #340.
 - Part Recipes now spell font-family inheritance as
   `font-[family-name:inherit]` instead of the ambiguous `font-[inherit]`, which
   tailwind-merge classifies into the font-weight group and silently drops next
@@ -1005,6 +1047,26 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Breaking changes
 
+- BREAKING: The public Part Style Map surface is slimmed to the consumer
+  contracts needed to author `ui` values. `hell-ui` and `hell-ui/core` no
+  longer export the Part-Class Pipeline plumbing — the `hellPartStyler`
+  styler factory, its `HellPartStyler` and `HellPartStylerOptions` types, the
+  `HellRecipe` recipe type, and the configured `hellTwMerge` Tailwind merge —
+  and `hell-ui/input` no longer re-exports any of them (including its
+  accidental `HellUi`/`HellUiInput` re-exports). `hell-ui/card` and
+  `hell-ui/separator` no longer export their `HELL_CARD_RECIPE`,
+  `HELL_CARD_HEADER_RECIPE`, `HELL_CARD_BODY_RECIPE`,
+  `HELL_CARD_FOOTER_RECIPE`, and `HELL_SEPARATOR_RECIPE` Part Recipe
+  constants; recipes, merge configuration, and styler factories are package
+  internals that now live behind the private `hell-ui/internal/core` seam.
+  Migration: keep authoring `ui` values with the public `HellUi<Part>` and
+  `HellUiInput<Part>` types from `hell-ui` or `hell-ui/core` (the `ui` input
+  name and every component part union and `Hell<Component>Ui` type are
+  unchanged); replace removed recipe-constant reads with your own class
+  strings or the rendered `data-slot` element's classes; and if you need a
+  Tailwind class merge, configure `tailwind-merge` in your app — Hell's merge
+  configuration is not a public API. Closes #271; decided by the accepted
+  public package and stylesheet surface ADR (#260, spec #310).
 - BREAKING: The published package is renamed from `@hell-ui/angular` to
   `hell-ui` as one atomic break with no compatibility package, alias package,
   dual-name export, or migration shim. Update the install dependency to
