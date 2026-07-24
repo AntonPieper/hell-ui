@@ -328,6 +328,42 @@ test.describe('component visual polish regressions', () => {
       .toBe(true);
     await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
   });
+
+  test('radio plan picker aligns control, label, chip, and description in every option', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/radio', 'Radio');
+
+    const example = page.locator('app-radio-plan-picker-example');
+    await expect(example).toBeVisible();
+    await example.scrollIntoViewIfNeeded();
+
+    const fields = example.locator('[hellField]');
+    await expect(fields).toHaveCount(3);
+
+    let chipRows = 0;
+    for (const field of await fields.all()) {
+      const { chipBox, descriptionBox, labelBox, radioBox } = await planFieldGeometry(field);
+
+      // Control and label share one row, centered on the same horizontal axis.
+      expect(Math.abs(centerY(radioBox) - centerY(labelBox))).toBeLessThanOrEqual(1);
+      // The description starts under the label, not under the radio control.
+      expect(Math.abs(descriptionBox.x - labelBox.x)).toBeLessThanOrEqual(1);
+      expect(descriptionBox.x).toBeGreaterThanOrEqual(radioBox.x + radioBox.width);
+      // And sits on its own row below the control/label row.
+      expect(descriptionBox.y).toBeGreaterThanOrEqual(
+        Math.max(labelBox.y + labelBox.height, radioBox.y + radioBox.height) - 1,
+      );
+
+      // The inline chip stays on the control row's axis without pushing the
+      // control or label off it; rows without a chip hold the same alignment.
+      if (chipBox) {
+        chipRows += 1;
+        expect(Math.abs(centerY(chipBox) - centerY(radioBox))).toBeLessThanOrEqual(1);
+      }
+    }
+    expect(chipRows).toBe(1);
+  });
 });
 
 function hasNoVisibleShadow(boxShadow: string): boolean {
@@ -338,6 +374,48 @@ function hasNoVisibleShadow(boxShadow: string): boolean {
     .replaceAll(`${transparentZeroShadow}, `, '')
     .replaceAll(transparentZeroShadow, '')
     .trim() === '';
+}
+
+type Box = { x: number; y: number; width: number; height: number };
+
+/**
+ * Measure one plan-picker field's anatomy in a single evaluate, so every box
+ * shares the same scroll position and the cross-element comparisons hold.
+ */
+async function planFieldGeometry(field: Locator): Promise<{
+  chipBox: Box | null;
+  descriptionBox: Box;
+  labelBox: Box;
+  radioBox: Box;
+}> {
+  await field.evaluate((element) => {
+    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  });
+  await field.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+
+  return field.evaluate((element) => {
+    const radio = element.querySelector('button[hellRadio]');
+    const label = element.querySelector('label[hellFieldLabel]');
+    const description = element.querySelector('[hellFieldDescription]');
+    const chip = element.querySelector('[hellChip]');
+    if (!radio || !label || !description) {
+      throw new Error('Expected plan picker field anatomy.');
+    }
+
+    const rect = (target: Element) => {
+      const box = target.getBoundingClientRect();
+      return { x: box.x, y: box.y, width: box.width, height: box.height };
+    };
+
+    return {
+      chipBox: chip ? rect(chip) : null,
+      descriptionBox: rect(description),
+      labelBox: rect(label),
+      radioBox: rect(radio),
+    };
+  });
 }
 
 async function verticalSliderGeometry(
