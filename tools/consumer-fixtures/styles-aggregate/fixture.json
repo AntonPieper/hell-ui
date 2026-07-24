@@ -21,6 +21,7 @@
     "hell-pdf-viewer",
     "[data-hell-skin=glass]hell-toaster"
   ],
+  "styleBundleBudget": "../style-bundle-budget.json",
   "smoke": {
     "stepsFile": "../style-modes-smoke.steps.json"
   }
