@@ -114,7 +114,12 @@ same release workflow (`.github/workflows/npm-publish.yml`):
 
 ## Release steps
 
-1. Update the `packages/angular/package.json` version in a release-prep change.
+1. Run `pnpm release:prepare [version]` to assemble the pending Change
+   Fragments into the version candidate — it updates the
+   `packages/angular/package.json` version, creates the Released Version
+   Notes record, and regenerates `CHANGELOG.md` (see
+   [`release-preparation.md`](./release-preparation.md)). Land the candidate
+   through a release-preparation pull request.
 2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all consumer fixtures run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.

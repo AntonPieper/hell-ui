@@ -49,7 +49,10 @@ the `v0.2.0` tag.
   Fragments.
 - Pending Consumer Changes are Change Fragments under `.changes/unreleased/`
   (see [`change-fragments.md`](./change-fragments.md)); they appear in the
-  Release Changelog only when Release Preparation assembles a version.
+  Release Changelog only when `pnpm release:prepare` assembles a version
+  (see [`release-preparation.md`](./release-preparation.md)). Automatic
+  selection follows the pre-1.0 bump policy above and never infers a stage
+  promotion; `1.0.0` and prereleases require an explicit version.
 - Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy.
 
 `pnpm release:dry-run` and the release workflow run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails when the current package version lacks a `.changes/<version>.md` Released Version Notes record or the `0.2.0` baseline record is missing; it validates every pending Change Fragment, regenerates the Release Changelog from the committed records and fails on any byte-level disagreement with `CHANGELOG.md`, and proves the fragment and merge tooling against isolated repository fixtures.
