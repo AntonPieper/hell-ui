@@ -23,6 +23,8 @@
     --hell-toaster-viewport-max-h: min(420px, calc(100vh - 104px));
     --hell-toast-dir: -1;
     --hell-toast-origin: bottom center;
+    --hell-toast-exit-x: 110%;
+    --hell-toast-exit-y: 0%;
     position: fixed;
     z-index: 9999;
     pointer-events: none;
@@ -43,10 +45,13 @@
     }
     &[data-position$='left'] {
       left: 24px;
+      --hell-toast-exit-x: -110%;
     }
     &[data-position$='center'] {
       left: 50%;
       transform: translateX(-50%);
+      --hell-toast-exit-x: 0%;
+      --hell-toast-exit-y: calc(var(--hell-toast-dir) * -120%);
     }
   }
 
@@ -309,13 +314,17 @@ hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toast'][data-st
   animation: hell-toast-in-top var(--hell-duration-slow) var(--ease-hell-out);
 }
 
-/* ── Exit: keep stack position, slide out to the right + fade ─────────── */
+/* ── Exit: keep stack position, slide out past the nearest edge + fade ── */
+/* Right placements slide out to the right, left placements to the left, and
+ * center placements slide out vertically past their anchored edge; the exit
+ * direction vars are set per data-position on the root. */
 /* High-specificity selector so it wins over the expanded-state rules
  * (which set opacity:1 and override the layout transform otherwise). */
 
 hell-toaster[data-slot='root'] [data-slot='toast'][data-state='closed'] {
   opacity: 0;
-  transform: translateY(var(--hell-toast-y, 0)) translateX(110%) scale(var(--hell-toast-scale, 1));
+  transform: translateY(var(--hell-toast-y, 0)) translateY(var(--hell-toast-exit-y, 0%))
+    translateX(var(--hell-toast-exit-x, 110%)) scale(var(--hell-toast-scale, 1));
   pointer-events: none;
 }
 

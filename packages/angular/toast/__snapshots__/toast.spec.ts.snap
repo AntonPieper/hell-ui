@@ -80,9 +80,7 @@ exports[`HellToaster > recipes > keeps the default part classes stable > toast 1
     "relative",
   ],
   "root": [
-    "[--hell-toast-dir:-1]",
     "[--hell-toast-gutter:10px]",
-    "[--hell-toast-origin:bottom_center]",
     "[--hell-toaster-gap:12px]",
     "[--hell-toaster-peek:14px]",
     "[--hell-toaster-scale-step:0.06]",

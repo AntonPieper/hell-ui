@@ -802,6 +802,20 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Fixed
 
+- Every documented `hell-toaster` placement now positions, stacks, and animates
+  correctly instead of only `bottom-right`. The toaster root recipe no longer
+  hardcodes the stack direction and transform origin as utility classes, which
+  outranked the per-`data-position` stylesheet rules and made `top-*`
+  placements peek and fan upward off-screen with a bottom-anchored scale
+  origin. Exit animations now slide toward the nearest side edge — left
+  placements exit left, right placements exit right — while center placements
+  exit past their anchored top or bottom edge instead of always sliding right.
+  The dismiss-all toolbar also drops its recipe translate/scale utilities,
+  which double-applied the hidden-state offset against the stylesheet
+  transform and kept the revealed toolbar slightly shifted and shrunken. A new
+  Toast Placement docs example exercises all six placements. Evidence:
+  `e2e/ui-behavior.spec.ts` placement contract and hands-on verification of
+  every placement in the docs example. Closes #345.
 - A Chip Set composed inside a Control Group now keeps breathing room from the
   frame on every side, including wrapped chip rows. `[hellChipSet]` reflects
   the composition as `data-in-control-group` and its recipe adds inner padding

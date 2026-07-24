@@ -9,6 +9,10 @@ import { ToastBasicExample } from './examples/basic.example';
 import toastBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { ToastPlacementExample } from './examples/placement.example';
+import toastPlacementExampleCodeRaw from './examples/placement.example.ts?raw' with {
+  loader: 'text',
+};
 import { ToastStackingExample } from './examples/stacking.example';
 import toastStackingExampleCodeRaw from './examples/stacking.example.ts?raw' with {
   loader: 'text',
@@ -40,6 +44,7 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
     ToastVariantsExample,
     ToastActionExample,
     ToastTemplateExample,
+    ToastPlacementExample,
     ToastStackingExample,
     ToastWithUploadProgressExample,
     ToastStylingExample,
@@ -118,6 +123,22 @@ import toastWithUploadProgressExampleCodeRaw from './examples/with-upload-progre
       </p>
       <hd-example-tabs [code]="toastTemplateExampleCode">
         <app-toast-template-example />
+      </hd-example-tabs>
+
+      <h2>Placement</h2>
+      <p>
+        The toaster anchors to one of six screen positions through its
+        <code>position</code> input: <code>top-left</code>, <code>top-center</code>,
+        <code>top-right</code>, <code>bottom-left</code>, <code>bottom-center</code>, and
+        <code>bottom-right</code>. Top placements peek and fan downward and slide in from
+        above; bottom placements peek and fan upward and slide in from below. Dismissed
+        toasts exit toward the nearest side edge — left placements to the left, right
+        placements to the right — while center placements exit past their anchored top or
+        bottom edge. This example mounts a scoped toaster; pick a placement, then send a
+        few more toasts to watch them anchor, stack, and dismiss there.
+      </p>
+      <hd-example-tabs [code]="toastPlacementExampleCode">
+        <app-toast-placement-example />
       </hd-example-tabs>
 
       <h2>Stacking</h2>
@@ -352,6 +373,7 @@ export class ToastPage {
   protected readonly toastVariantsExampleCode = toastVariantsExampleCodeRaw;
   protected readonly toastActionExampleCode = toastActionExampleCodeRaw;
   protected readonly toastTemplateExampleCode = toastTemplateExampleCodeRaw;
+  protected readonly toastPlacementExampleCode = toastPlacementExampleCodeRaw;
   protected readonly toastStackingExampleCode = toastStackingExampleCodeRaw;
   protected readonly toastWithUploadProgressExampleCode = toastWithUploadProgressExampleCodeRaw;
   protected readonly toastStylingExampleCode = toastStylingExampleCodeRaw;
