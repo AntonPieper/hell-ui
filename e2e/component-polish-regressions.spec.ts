@@ -253,7 +253,7 @@ test.describe('component visual polish regressions', () => {
     await ensurePageIsActive(page);
 
     const example = page.locator('app-avatar-group-with-tooltip-menu-example');
-    const trigger = example.getByRole('button', { name: '2 more assignees' });
+    const trigger = example.getByRole('button', { name: '2 more team members' });
     await expect(trigger).toBeVisible();
     await trigger.scrollIntoViewIfNeeded();
 
@@ -306,7 +306,7 @@ test.describe('component visual polish regressions', () => {
     await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
 
     await page.keyboard.press('Enter');
-    const menu = page.getByRole('menu', { name: 'Remaining assignees' });
+    const menu = page.getByRole('menu', { name: 'More team members' });
     await expect(menu).toBeVisible();
     // Settle the menu enter animation and the trigger's open-state transition
     // deterministically before reading styles and geometry.
@@ -357,6 +357,61 @@ test.describe('component visual polish regressions', () => {
       )
       .toBe(true);
     await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
+  });
+
+  test('avatar overflow menu renders checkbox rows with avatar left and checkmark right', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/avatar-group', 'Avatar group');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-avatar-group-with-tooltip-menu-example');
+    const trigger = example.getByRole('button', { name: '2 more team members' });
+    await expect(trigger).toBeVisible();
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+
+    const menu = page.getByRole('menu', { name: 'More team members' });
+    await expect(menu).toBeVisible();
+    await finishAnimations(menu);
+
+    // Rows follow the menu's checkbox-item contract: role, accessible name, and
+    // aria-checked reflecting the example's assigned set.
+    const rows = menu.getByRole('menuitemcheckbox');
+    await expect(rows).toHaveCount(2);
+    const assignedRow = menu.getByRole('menuitemcheckbox', { name: 'Mina Ortiz' });
+    const unassignedRow = menu.getByRole('menuitemcheckbox', { name: 'Samir Khan' });
+    await expect(assignedRow).toHaveAttribute('aria-checked', 'true');
+    await expect(unassignedRow).toHaveAttribute('aria-checked', 'false');
+
+    // Row anatomy: avatar leading, name after it, checkmark indicator trailing.
+    const avatarBox = await boxFor(assignedRow.locator('hell-avatar'));
+    const nameBox = await boxFor(assignedRow.getByText('Mina Ortiz', { exact: true }));
+    const indicatorBox = await boxFor(assignedRow.locator('[hellMenuItemIndicator]'));
+    expect(avatarBox.x + avatarBox.width).toBeLessThanOrEqual(nameBox.x + 1);
+    expect(indicatorBox.x).toBeGreaterThanOrEqual(nameBox.x + nameBox.width - 1);
+
+    // The checkmark mirrors checked state: painted for assigned, hidden otherwise.
+    const indicatorOpacity = (row: Locator) =>
+      row
+        .locator('[hellMenuItemIndicator]')
+        .evaluate((element) => getComputedStyle(element).opacity);
+    expect(await indicatorOpacity(assignedRow)).toBe('1');
+    expect(await indicatorOpacity(unassignedRow)).toBe('0');
+
+    // Keyboard toggle on the focused first row: state flips, menu stays open.
+    await expect(assignedRow).toBeFocused();
+    await page.keyboard.press('Space');
+    await expect(assignedRow).toHaveAttribute('aria-checked', 'false');
+    await expect(menu).toBeVisible();
+    expect(await indicatorOpacity(assignedRow)).toBe('0');
+
+    // Pointer toggle on the other row: checkmark appears, menu still open.
+    await unassignedRow.click();
+    await expect(unassignedRow).toHaveAttribute('aria-checked', 'true');
+    await expect(menu).toBeVisible();
+    expect(await indicatorOpacity(unassignedRow)).toBe('1');
   });
 
   test('radio plan picker aligns control, label, chip, and description in every option', async ({

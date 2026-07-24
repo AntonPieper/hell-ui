@@ -96,10 +96,15 @@ import avatarGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw'
 
       <h2>With tooltip &amp; menu</h2>
       <p>
-        A realistic assignee stack: each visible avatar is a <code>hellTooltip</code> that
-        names the person on hover, and the overflow badge is a <code>hellMenuTrigger</code> that
-        lists whoever didn't fit. The visual stack alone never carries the full list — the menu
-        does.
+        A realistic assignee stack: each visible avatar is a <code>hellTooltip</code> that names
+        the person on hover and toggles their assignment on click, and the overflow badge is a
+        <code>hellMenuTrigger</code> whose menu renders whoever didn't fit as
+        <code>hellMenuItemCheckbox</code> rows — avatar on the left, name, and a
+        <code>hellMenuItemIndicator</code> checkmark on the right. One assigned set drives both
+        surfaces: the ring on visible items and the checkmark on menu rows. Checkbox items keep
+        the menu open on toggle and carry the menu's
+        <code>menuitemcheckbox</code>/<code>aria-checked</code> semantics for keyboard and
+        screen-reader users. The visual stack alone never carries the full list — the menu does.
       </p>
       <hd-example-tabs [code]="avatarGroupWithTooltipMenuExampleCode">
         <app-avatar-group-with-tooltip-menu-example />
