@@ -77,9 +77,10 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
 
         <h2>Basic</h2>
         <p>
-          The smallest usage: two panes with one handle between them, inside a group with an explicit
-          height. No <code>ui</code> refinements — panes and the hairline handle render their
-          defaults.
+          The smallest usage: two panes with one handle between them. The group's root recipe is
+          <code>h-full w-full</code> — it fills its container — so a standalone demo refines the
+          group with <code>ui="h-64"</code> for an explicit height; panes and the hairline handle
+          render their defaults.
         </p>
         <hd-example-tabs [code]="resizableBasicExampleCode" flush>
           <app-resizable-basic-example />

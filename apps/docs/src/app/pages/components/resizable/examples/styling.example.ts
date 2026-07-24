@@ -13,8 +13,7 @@ import {
     <!-- single 'root'; the handle exposes 'root' and 'grip', refined via a map. -->
     <div
       hellResizable
-      class="h-64"
-      ui="rounded-hell-lg border border-hell-border bg-hell-surface-subtle p-hell-1 gap-hell-1"
+      ui="h-64 rounded-hell-lg border border-hell-border bg-hell-surface-subtle p-hell-1 gap-hell-1"
     >
       <div hellResizablePane ui="rounded-hell-md bg-hell-surface-elevated p-hell-4 text-sm">
         Left pane

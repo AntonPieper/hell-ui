@@ -6,8 +6,9 @@ import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
-    <!-- The group needs an explicit main-axis size; h-64 is the docs layout hook. -->
-    <div hellResizable class="h-64">
+    <!-- The group fills its container by default (h-full); ui="h-64" gives this -->
+    <!-- standalone demo an explicit height through the root Part Style Map. -->
+    <div hellResizable ui="h-64">
       <div hellResizablePane class="p-hell-4">
         <p class="m-0 text-sm">Drag the divider to resize.</p>
       </div>

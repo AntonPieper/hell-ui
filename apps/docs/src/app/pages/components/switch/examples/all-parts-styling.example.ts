@@ -6,19 +6,19 @@ import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from 'hell-ui/switch'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellSwitch, HellNativeSwitch],
   template: `
-    <div class="inline-flex items-center gap-2">
+    <div class="flex items-center gap-2">
       <!-- HellSwitch: root + thumb, both refined through one ui map. -->
       <button hellSwitch [checked]="true" aria-label="Custom switch" [ui]="switchUi"></button>
       <span>Styled switch (root + thumb)</span>
     </div>
-    <div class="inline-flex items-center gap-2">
+    <div class="flex items-center gap-2">
       <!-- HellNativeSwitch: single 'root' part, string shorthand refines it. -->
       <input
         type="checkbox"
         hellNativeSwitch
         checked
         aria-label="Custom native switch"
-        ui="w-[44px] rounded-hell-sm bg-hell-success data-checked:bg-hell-success"
+        ui="w-[44px] rounded-hell-sm checked:bg-hell-success"
       />
       <span>Styled native switch (root)</span>
     </div>
@@ -26,7 +26,7 @@ import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from 'hell-ui/switch'
 })
 export class SwitchAllPartsStylingExample {
   protected readonly switchUi: HellSwitchUi = {
-    root: 'w-[44px] rounded-hell-sm bg-hell-danger data-checked:bg-hell-danger',
-    thumb: 'rounded-hell-sm bg-hell-danger-soft',
+    root: 'w-[44px] rounded-hell-sm data-checked:bg-hell-success',
+    thumb: 'rounded-hell-sm',
   };
 }

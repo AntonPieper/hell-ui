@@ -76,7 +76,7 @@ import progressWithJobStatusCardExampleCodeRaw from './examples/with-job-status-
         and point <code>aria-labelledby</code> at your own label element instead of duplicating it
         in <code>aria-label</code>.
       </p>
-      <hd-example-tabs [code]="progressLabeledValueExampleCode">
+      <hd-example-tabs [code]="progressLabeledValueExampleCode" previewClass="grid gap-3">
         <app-progress-labeled-value-example />
       </hd-example-tabs>
 

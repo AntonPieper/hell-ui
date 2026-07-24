@@ -7,7 +7,8 @@ import { HELL_RESIZABLE_IMPORTS } from 'hell-ui/resizable';
   imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
     <!-- orientation="vertical" stacks panes and turns the handle into a row divider. -->
-    <div hellResizable orientation="vertical" class="h-80">
+    <!-- ui="h-80" overrides the root recipe's h-full so the stack gets real height. -->
+    <div hellResizable orientation="vertical" ui="h-80">
       <div
         hellResizablePane
         [initialFlex]="2"
