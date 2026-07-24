@@ -70,6 +70,12 @@
   --color-hell-border-strong: #c8cdd6;
   --color-hell-border-focus: var(--color-hell-primary-900);
 
+  /* Neutral text is scheme-owned (#344): the dark theme below re-tunes
+     `foreground`, `foreground-muted`, and `foreground-subtle`, and a skin may
+     remap them (high-contrast collapses muted/subtle into full foreground).
+     Palettes deliberately never touch neutral text — they retune only the
+     primary accent and focus ring — so secondary copy keeps one steady voice
+     across accent variants instead of shifting hue with the brand color. */
   --color-hell-foreground: #1c222a;
   --color-hell-foreground-muted: #5b6370;
   --color-hell-foreground-subtle: #8b94a3;
