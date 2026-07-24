@@ -21,14 +21,14 @@ import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
 import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
 import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
 import {
-  hellPartStyler,
   hellRankLocalSearch,
-  type HellRecipe,
   type HellUiInput,
 } from 'hell-ui/core';
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 

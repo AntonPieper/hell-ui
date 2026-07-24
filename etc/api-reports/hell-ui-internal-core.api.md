@@ -11,6 +11,7 @@ import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { NgpFormFieldState } from 'ng-primitives/form-field';
 import { Signal } from '@angular/core';
+import * as tailwind_merge from 'tailwind-merge';
 
 // @public (undocumented)
 export function containsNode(container: EventTarget | Node | null | undefined, target: EventTarget | Node | null | undefined): boolean;
@@ -278,6 +279,15 @@ export const hellOutsideClick: HellDismissRule;
 export const hellOutsideFocus: HellDismissRule;
 
 // @public
+export function hellPartStyler<Part extends string>(ui: () => string | Partial<Record<Part, string>> | null | undefined, options: HellPartStylerOptions<Part>): (part: Part) => string;
+
+// @public
+export interface HellPartStylerOptions<Part extends string> {
+    readonly defaultPart: Part;
+    readonly recipe: () => HellRecipe<Part>;
+}
+
+// @public
 export interface HellPickerEngineStream<TValue> {
     // (undocumented)
     subscribe(next: (value: TValue) => void): {
@@ -308,6 +318,9 @@ export type HellPickSingleValue<T = unknown> = T | null;
 
 // @public
 export type HellPickValue<T = unknown> = HellPickSingleValue<T> | HellPickMultipleValue<T>;
+
+// @public
+export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
 // @public
 export function hellRegisterFloatingElement(scope: HellFloatingScope | null | undefined, element: HTMLElement, destroyRef: DestroyRef): void;
@@ -543,6 +556,9 @@ export function hellSyncFormFieldDescriptions(formField: NgpFormFieldState, desc
 export function hellSyncFormFieldLabels(formField: NgpFormFieldState, labelledBy: Signal<string | null>): void;
 
 // @public
+export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
+
+// @public
 export function hellTypedValue<TValue>(value: TValue | null): HellTypedValueValidParse<TValue>;
 
 // @public
@@ -630,151 +646,151 @@ export function isNodeLike(target: EventTarget | Node | null | undefined): targe
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-internal-core.d.ts:11:1 - (ae-undocumented) Missing documentation for "isElementLike".
-// types/hell-ui-internal-core.d.ts:12:1 - (ae-undocumented) Missing documentation for "containsNode".
-// types/hell-ui-internal-core.d.ts:13:1 - (ae-undocumented) Missing documentation for "isDocumentPositionFollowing".
-// types/hell-ui-internal-core.d.ts:20:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
-// types/hell-ui-internal-core.d.ts:21:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
-// types/hell-ui-internal-core.d.ts:22:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
-// types/hell-ui-internal-core.d.ts:24:1 - (ae-undocumented) Missing documentation for "HellFloatingContainmentOptions".
-// types/hell-ui-internal-core.d.ts:48:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
-// types/hell-ui-internal-core.d.ts:49:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
-// types/hell-ui-internal-core.d.ts:56:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
-// types/hell-ui-internal-core.d.ts:58:1 - (ae-undocumented) Missing documentation for "hellContainsFloatingTarget".
-// types/hell-ui-internal-core.d.ts:59:1 - (ae-undocumented) Missing documentation for "hellFloatingTargetNode".
-// types/hell-ui-internal-core.d.ts:83:1 - (ae-undocumented) Missing documentation for "HellFloatingInsetVars".
-// types/hell-ui-internal-core.d.ts:84:5 - (ae-undocumented) Missing documentation for "top".
-// types/hell-ui-internal-core.d.ts:85:5 - (ae-undocumented) Missing documentation for "right".
-// types/hell-ui-internal-core.d.ts:86:5 - (ae-undocumented) Missing documentation for "bottom".
-// types/hell-ui-internal-core.d.ts:87:5 - (ae-undocumented) Missing documentation for "left".
-// types/hell-ui-internal-core.d.ts:91:5 - (ae-undocumented) Missing documentation for "document".
-// types/hell-ui-internal-core.d.ts:92:5 - (ae-undocumented) Missing documentation for "rootSelector".
-// types/hell-ui-internal-core.d.ts:93:5 - (ae-undocumented) Missing documentation for "variables".
-// types/hell-ui-internal-core.d.ts:94:5 - (ae-undocumented) Missing documentation for "styleTarget".
-// types/hell-ui-internal-core.d.ts:95:5 - (ae-undocumented) Missing documentation for "styleTargets".
-// types/hell-ui-internal-core.d.ts:108:5 - (ae-undocumented) Missing documentation for "primeFromTrigger".
-// types/hell-ui-internal-core.d.ts:109:5 - (ae-undocumented) Missing documentation for "primeRoot".
-// types/hell-ui-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "updateScope".
-// types/hell-ui-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-internal-core.d.ts:117:1 - (ae-undocumented) Missing documentation for "hellFindFloatingScopeRoot".
-// types/hell-ui-internal-core.d.ts:119:1 - (ae-undocumented) Missing documentation for "HellDismissContext".
-// types/hell-ui-internal-core.d.ts:120:5 - (ae-undocumented) Missing documentation for "event".
-// types/hell-ui-internal-core.d.ts:121:5 - (ae-undocumented) Missing documentation for "target".
-// types/hell-ui-internal-core.d.ts:122:5 - (ae-undocumented) Missing documentation for "path".
-// types/hell-ui-internal-core.d.ts:129:1 - (ae-undocumented) Missing documentation for "HellDismissDecision".
-// types/hell-ui-internal-core.d.ts:142:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissEvent".
-// types/hell-ui-internal-core.d.ts:143:5 - (ae-undocumented) Missing documentation for "decision".
-// types/hell-ui-internal-core.d.ts:157:1 - (ae-undocumented) Missing documentation for "HellFloatingFocusTargetChecker".
-// types/hell-ui-internal-core.d.ts:158:5 - (ae-undocumented) Missing documentation for "isFocusable".
-// types/hell-ui-internal-core.d.ts:160:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissOptions".
-// types/hell-ui-internal-core.d.ts:177:5 - (ae-undocumented) Missing documentation for "onDismiss".
-// types/hell-ui-internal-core.d.ts:179:1 - (ae-undocumented) Missing documentation for "HellFloatingInteractionOptions".
-// types/hell-ui-internal-core.d.ts:182:5 - (ae-undocumented) Missing documentation for "root".
-// types/hell-ui-internal-core.d.ts:183:5 - (ae-undocumented) Missing documentation for "inside".
-// types/hell-ui-internal-core.d.ts:184:5 - (ae-undocumented) Missing documentation for "scope".
-// types/hell-ui-internal-core.d.ts:185:5 - (ae-undocumented) Missing documentation for "ownerDocument".
-// types/hell-ui-internal-core.d.ts:200:5 - (ae-undocumented) Missing documentation for "connect".
-// types/hell-ui-internal-core.d.ts:201:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-internal-core.d.ts:202:5 - (ae-undocumented) Missing documentation for "markPointerDownInside".
-// types/hell-ui-internal-core.d.ts:203:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
-// types/hell-ui-internal-core.d.ts:204:5 - (ae-undocumented) Missing documentation for "isInside".
-// types/hell-ui-internal-core.d.ts:224:5 - (ae-undocumented) Missing documentation for "connect".
-// types/hell-ui-internal-core.d.ts:225:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-internal-core.d.ts:226:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
-// types/hell-ui-internal-core.d.ts:227:5 - (ae-undocumented) Missing documentation for "isInside".
-// types/hell-ui-internal-core.d.ts:239:1 - (ae-undocumented) Missing documentation for "hellIdRefs".
-// types/hell-ui-internal-core.d.ts:240:1 - (ae-undocumented) Missing documentation for "hellUniqueIdRefs".
-// types/hell-ui-internal-core.d.ts:251:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-internal-core.d.ts:252:5 - (ae-undocumented) Missing documentation for "nativeButtonDisabled".
-// types/hell-ui-internal-core.d.ts:253:5 - (ae-undocumented) Missing documentation for "anchorAriaDisabled".
-// types/hell-ui-internal-core.d.ts:260:5 - (ae-undocumented) Missing documentation for "preventDisabledAnchor".
-// types/hell-ui-internal-core.d.ts:261:5 - (ae-undocumented) Missing documentation for "preventActionAnchorNavigation".
-// types/hell-ui-internal-core.d.ts:262:5 - (ae-undocumented) Missing documentation for "isButton".
-// types/hell-ui-internal-core.d.ts:263:5 - (ae-undocumented) Missing documentation for "isAnchor".
-// types/hell-ui-internal-core.d.ts:305:5 - (ae-undocumented) Missing documentation for "subscribe".
-// types/hell-ui-internal-core.d.ts:343:15 - (ae-undocumented) Missing documentation for "HELL_RESIZE_KEY_DELTA".
-// types/hell-ui-internal-core.d.ts:344:1 - (ae-undocumented) Missing documentation for "HellResizeOrientation".
-// types/hell-ui-internal-core.d.ts:345:1 - (ae-undocumented) Missing documentation for "HellResizeDirection".
-// types/hell-ui-internal-core.d.ts:346:1 - (ae-undocumented) Missing documentation for "HellResizeKeyIntent".
-// types/hell-ui-internal-core.d.ts:349:5 - (ae-undocumented) Missing documentation for "startA".
-// types/hell-ui-internal-core.d.ts:350:5 - (ae-undocumented) Missing documentation for "startB".
-// types/hell-ui-internal-core.d.ts:351:5 - (ae-undocumented) Missing documentation for "minA".
-// types/hell-ui-internal-core.d.ts:352:5 - (ae-undocumented) Missing documentation for "minB".
-// types/hell-ui-internal-core.d.ts:353:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-internal-core.d.ts:357:5 - (ae-undocumented) Missing documentation for "a".
-// types/hell-ui-internal-core.d.ts:358:5 - (ae-undocumented) Missing documentation for "b".
-// types/hell-ui-internal-core.d.ts:359:5 - (ae-undocumented) Missing documentation for "sum".
-// types/hell-ui-internal-core.d.ts:360:5 - (ae-undocumented) Missing documentation for "ariaValueNow".
-// types/hell-ui-internal-core.d.ts:364:5 - (ae-undocumented) Missing documentation for "measure".
-// types/hell-ui-internal-core.d.ts:365:5 - (ae-undocumented) Missing documentation for "minSize".
-// types/hell-ui-internal-core.d.ts:366:5 - (ae-undocumented) Missing documentation for "setSize".
-// types/hell-ui-internal-core.d.ts:367:5 - (ae-undocumented) Missing documentation for "commitSize".
-// types/hell-ui-internal-core.d.ts:371:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-internal-core.d.ts:372:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-internal-core.d.ts:373:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-internal-core.d.ts:374:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-internal-core.d.ts:375:5 - (ae-undocumented) Missing documentation for "startCoordinate".
-// types/hell-ui-internal-core.d.ts:376:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-internal-core.d.ts:380:5 - (ae-undocumented) Missing documentation for "handle".
-// types/hell-ui-internal-core.d.ts:381:5 - (ae-undocumented) Missing documentation for "ownerWindow".
-// types/hell-ui-internal-core.d.ts:382:5 - (ae-undocumented) Missing documentation for "onActiveChange".
-// types/hell-ui-internal-core.d.ts:383:5 - (ae-undocumented) Missing documentation for "onValueChange".
-// types/hell-ui-internal-core.d.ts:384:5 - (ae-undocumented) Missing documentation for "onCommit".
-// types/hell-ui-internal-core.d.ts:388:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-internal-core.d.ts:389:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-internal-core.d.ts:393:5 - (ae-undocumented) Missing documentation for "before".
-// types/hell-ui-internal-core.d.ts:394:5 - (ae-undocumented) Missing documentation for "after".
-// types/hell-ui-internal-core.d.ts:398:5 - (ae-undocumented) Missing documentation for "measure".
-// types/hell-ui-internal-core.d.ts:399:5 - (ae-undocumented) Missing documentation for "minSize".
-// types/hell-ui-internal-core.d.ts:400:5 - (ae-undocumented) Missing documentation for "setSize".
-// types/hell-ui-internal-core.d.ts:401:5 - (ae-undocumented) Missing documentation for "commitSize".
-// types/hell-ui-internal-core.d.ts:405:5 - (ae-undocumented) Missing documentation for "pair".
-// types/hell-ui-internal-core.d.ts:406:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-internal-core.d.ts:407:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-internal-core.d.ts:408:5 - (ae-undocumented) Missing documentation for "adapters".
-// types/hell-ui-internal-core.d.ts:409:5 - (ae-undocumented) Missing documentation for "itemAdapter".
-// types/hell-ui-internal-core.d.ts:410:5 - (ae-undocumented) Missing documentation for "startCoordinate".
-// types/hell-ui-internal-core.d.ts:411:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-internal-core.d.ts:419:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-internal-core.d.ts:420:5 - (ae-undocumented) Missing documentation for "direction".
-// types/hell-ui-internal-core.d.ts:421:5 - (ae-undocumented) Missing documentation for "pair".
-// types/hell-ui-internal-core.d.ts:422:5 - (ae-undocumented) Missing documentation for "adapters".
-// types/hell-ui-internal-core.d.ts:423:5 - (ae-undocumented) Missing documentation for "itemAdapter".
-// types/hell-ui-internal-core.d.ts:424:5 - (ae-undocumented) Missing documentation for "beforeStart".
-// types/hell-ui-internal-core.d.ts:425:5 - (ae-undocumented) Missing documentation for "afterStart".
-// types/hell-ui-internal-core.d.ts:426:5 - (ae-undocumented) Missing documentation for "stopPropagation".
-// types/hell-ui-internal-core.d.ts:427:5 - (ae-undocumented) Missing documentation for "keyDelta".
-// types/hell-ui-internal-core.d.ts:447:5 - (ae-undocumented) Missing documentation for "sum".
-// types/hell-ui-internal-core.d.ts:449:5 - (ae-undocumented) Missing documentation for "byDelta".
-// types/hell-ui-internal-core.d.ts:450:5 - (ae-undocumented) Missing documentation for "byKey".
-// types/hell-ui-internal-core.d.ts:451:5 - (ae-undocumented) Missing documentation for "toResult".
-// types/hell-ui-internal-core.d.ts:460:5 - (ae-undocumented) Missing documentation for "canResize".
-// types/hell-ui-internal-core.d.ts:461:5 - (ae-undocumented) Missing documentation for "currentResult".
-// types/hell-ui-internal-core.d.ts:462:5 - (ae-undocumented) Missing documentation for "byPointer".
-// types/hell-ui-internal-core.d.ts:466:5 - (ae-undocumented) Missing documentation for "byDelta".
-// types/hell-ui-internal-core.d.ts:467:5 - (ae-undocumented) Missing documentation for "byKey".
-// types/hell-ui-internal-core.d.ts:468:5 - (ae-undocumented) Missing documentation for "commit".
-// types/hell-ui-internal-core.d.ts:471:1 - (ae-undocumented) Missing documentation for "hellCreateResizePairAdapters".
-// types/hell-ui-internal-core.d.ts:479:5 - (ae-undocumented) Missing documentation for "startPointer".
-// types/hell-ui-internal-core.d.ts:480:5 - (ae-undocumented) Missing documentation for "applyKey".
-// types/hell-ui-internal-core.d.ts:481:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-internal-core.d.ts:492:5 - (ae-undocumented) Missing documentation for "startPointer".
-// types/hell-ui-internal-core.d.ts:493:5 - (ae-undocumented) Missing documentation for "applyKey".
-// types/hell-ui-internal-core.d.ts:494:5 - (ae-undocumented) Missing documentation for "destroy".
-// types/hell-ui-internal-core.d.ts:511:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-internal-core.d.ts:512:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-internal-core.d.ts:516:5 - (ae-undocumented) Missing documentation for "valid".
-// types/hell-ui-internal-core.d.ts:525:5 - (ae-undocumented) Missing documentation for "committed".
-// types/hell-ui-internal-core.d.ts:526:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-internal-core.d.ts:527:5 - (ae-undocumented) Missing documentation for "reason".
-// types/hell-ui-internal-core.d.ts:536:5 - (ae-undocumented) Missing documentation for "external".
-// types/hell-ui-internal-core.d.ts:537:5 - (ae-undocumented) Missing documentation for "parseExternal".
-// types/hell-ui-internal-core.d.ts:538:5 - (ae-undocumented) Missing documentation for "parseText".
-// types/hell-ui-internal-core.d.ts:539:5 - (ae-undocumented) Missing documentation for "format".
-// types/hell-ui-internal-core.d.ts:540:5 - (ae-undocumented) Missing documentation for "externalChanged".
-// types/hell-ui-internal-core.d.ts:572:5 - (ae-undocumented) Missing documentation for "current".
-// types/hell-ui-internal-core.d.ts:574:5 - (ae-undocumented) Missing documentation for "invalidDraft".
-// types/hell-ui-internal-core.d.ts:575:5 - (ae-undocumented) Missing documentation for "display".
+// types/hell-ui-internal-core.d.ts:12:1 - (ae-undocumented) Missing documentation for "isElementLike".
+// types/hell-ui-internal-core.d.ts:13:1 - (ae-undocumented) Missing documentation for "containsNode".
+// types/hell-ui-internal-core.d.ts:14:1 - (ae-undocumented) Missing documentation for "isDocumentPositionFollowing".
+// types/hell-ui-internal-core.d.ts:21:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
+// types/hell-ui-internal-core.d.ts:22:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
+// types/hell-ui-internal-core.d.ts:23:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
+// types/hell-ui-internal-core.d.ts:25:1 - (ae-undocumented) Missing documentation for "HellFloatingContainmentOptions".
+// types/hell-ui-internal-core.d.ts:49:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
+// types/hell-ui-internal-core.d.ts:50:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
+// types/hell-ui-internal-core.d.ts:57:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
+// types/hell-ui-internal-core.d.ts:59:1 - (ae-undocumented) Missing documentation for "hellContainsFloatingTarget".
+// types/hell-ui-internal-core.d.ts:60:1 - (ae-undocumented) Missing documentation for "hellFloatingTargetNode".
+// types/hell-ui-internal-core.d.ts:84:1 - (ae-undocumented) Missing documentation for "HellFloatingInsetVars".
+// types/hell-ui-internal-core.d.ts:85:5 - (ae-undocumented) Missing documentation for "top".
+// types/hell-ui-internal-core.d.ts:86:5 - (ae-undocumented) Missing documentation for "right".
+// types/hell-ui-internal-core.d.ts:87:5 - (ae-undocumented) Missing documentation for "bottom".
+// types/hell-ui-internal-core.d.ts:88:5 - (ae-undocumented) Missing documentation for "left".
+// types/hell-ui-internal-core.d.ts:92:5 - (ae-undocumented) Missing documentation for "document".
+// types/hell-ui-internal-core.d.ts:93:5 - (ae-undocumented) Missing documentation for "rootSelector".
+// types/hell-ui-internal-core.d.ts:94:5 - (ae-undocumented) Missing documentation for "variables".
+// types/hell-ui-internal-core.d.ts:95:5 - (ae-undocumented) Missing documentation for "styleTarget".
+// types/hell-ui-internal-core.d.ts:96:5 - (ae-undocumented) Missing documentation for "styleTargets".
+// types/hell-ui-internal-core.d.ts:109:5 - (ae-undocumented) Missing documentation for "primeFromTrigger".
+// types/hell-ui-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "primeRoot".
+// types/hell-ui-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "updateScope".
+// types/hell-ui-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "clear".
+// types/hell-ui-internal-core.d.ts:118:1 - (ae-undocumented) Missing documentation for "hellFindFloatingScopeRoot".
+// types/hell-ui-internal-core.d.ts:120:1 - (ae-undocumented) Missing documentation for "HellDismissContext".
+// types/hell-ui-internal-core.d.ts:121:5 - (ae-undocumented) Missing documentation for "event".
+// types/hell-ui-internal-core.d.ts:122:5 - (ae-undocumented) Missing documentation for "target".
+// types/hell-ui-internal-core.d.ts:123:5 - (ae-undocumented) Missing documentation for "path".
+// types/hell-ui-internal-core.d.ts:130:1 - (ae-undocumented) Missing documentation for "HellDismissDecision".
+// types/hell-ui-internal-core.d.ts:143:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissEvent".
+// types/hell-ui-internal-core.d.ts:144:5 - (ae-undocumented) Missing documentation for "decision".
+// types/hell-ui-internal-core.d.ts:158:1 - (ae-undocumented) Missing documentation for "HellFloatingFocusTargetChecker".
+// types/hell-ui-internal-core.d.ts:159:5 - (ae-undocumented) Missing documentation for "isFocusable".
+// types/hell-ui-internal-core.d.ts:161:1 - (ae-undocumented) Missing documentation for "HellFloatingDismissOptions".
+// types/hell-ui-internal-core.d.ts:178:5 - (ae-undocumented) Missing documentation for "onDismiss".
+// types/hell-ui-internal-core.d.ts:180:1 - (ae-undocumented) Missing documentation for "HellFloatingInteractionOptions".
+// types/hell-ui-internal-core.d.ts:183:5 - (ae-undocumented) Missing documentation for "root".
+// types/hell-ui-internal-core.d.ts:184:5 - (ae-undocumented) Missing documentation for "inside".
+// types/hell-ui-internal-core.d.ts:185:5 - (ae-undocumented) Missing documentation for "scope".
+// types/hell-ui-internal-core.d.ts:186:5 - (ae-undocumented) Missing documentation for "ownerDocument".
+// types/hell-ui-internal-core.d.ts:201:5 - (ae-undocumented) Missing documentation for "connect".
+// types/hell-ui-internal-core.d.ts:202:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-internal-core.d.ts:203:5 - (ae-undocumented) Missing documentation for "markPointerDownInside".
+// types/hell-ui-internal-core.d.ts:204:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
+// types/hell-ui-internal-core.d.ts:205:5 - (ae-undocumented) Missing documentation for "isInside".
+// types/hell-ui-internal-core.d.ts:225:5 - (ae-undocumented) Missing documentation for "connect".
+// types/hell-ui-internal-core.d.ts:226:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-internal-core.d.ts:227:5 - (ae-undocumented) Missing documentation for "handleFocusExit".
+// types/hell-ui-internal-core.d.ts:228:5 - (ae-undocumented) Missing documentation for "isInside".
+// types/hell-ui-internal-core.d.ts:240:1 - (ae-undocumented) Missing documentation for "hellIdRefs".
+// types/hell-ui-internal-core.d.ts:241:1 - (ae-undocumented) Missing documentation for "hellUniqueIdRefs".
+// types/hell-ui-internal-core.d.ts:252:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
+// types/hell-ui-internal-core.d.ts:253:5 - (ae-undocumented) Missing documentation for "nativeButtonDisabled".
+// types/hell-ui-internal-core.d.ts:254:5 - (ae-undocumented) Missing documentation for "anchorAriaDisabled".
+// types/hell-ui-internal-core.d.ts:261:5 - (ae-undocumented) Missing documentation for "preventDisabledAnchor".
+// types/hell-ui-internal-core.d.ts:262:5 - (ae-undocumented) Missing documentation for "preventActionAnchorNavigation".
+// types/hell-ui-internal-core.d.ts:263:5 - (ae-undocumented) Missing documentation for "isButton".
+// types/hell-ui-internal-core.d.ts:264:5 - (ae-undocumented) Missing documentation for "isAnchor".
+// types/hell-ui-internal-core.d.ts:357:5 - (ae-undocumented) Missing documentation for "subscribe".
+// types/hell-ui-internal-core.d.ts:395:15 - (ae-undocumented) Missing documentation for "HELL_RESIZE_KEY_DELTA".
+// types/hell-ui-internal-core.d.ts:396:1 - (ae-undocumented) Missing documentation for "HellResizeOrientation".
+// types/hell-ui-internal-core.d.ts:397:1 - (ae-undocumented) Missing documentation for "HellResizeDirection".
+// types/hell-ui-internal-core.d.ts:398:1 - (ae-undocumented) Missing documentation for "HellResizeKeyIntent".
+// types/hell-ui-internal-core.d.ts:401:5 - (ae-undocumented) Missing documentation for "startA".
+// types/hell-ui-internal-core.d.ts:402:5 - (ae-undocumented) Missing documentation for "startB".
+// types/hell-ui-internal-core.d.ts:403:5 - (ae-undocumented) Missing documentation for "minA".
+// types/hell-ui-internal-core.d.ts:404:5 - (ae-undocumented) Missing documentation for "minB".
+// types/hell-ui-internal-core.d.ts:405:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-internal-core.d.ts:409:5 - (ae-undocumented) Missing documentation for "a".
+// types/hell-ui-internal-core.d.ts:410:5 - (ae-undocumented) Missing documentation for "b".
+// types/hell-ui-internal-core.d.ts:411:5 - (ae-undocumented) Missing documentation for "sum".
+// types/hell-ui-internal-core.d.ts:412:5 - (ae-undocumented) Missing documentation for "ariaValueNow".
+// types/hell-ui-internal-core.d.ts:416:5 - (ae-undocumented) Missing documentation for "measure".
+// types/hell-ui-internal-core.d.ts:417:5 - (ae-undocumented) Missing documentation for "minSize".
+// types/hell-ui-internal-core.d.ts:418:5 - (ae-undocumented) Missing documentation for "setSize".
+// types/hell-ui-internal-core.d.ts:419:5 - (ae-undocumented) Missing documentation for "commitSize".
+// types/hell-ui-internal-core.d.ts:423:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-internal-core.d.ts:424:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-internal-core.d.ts:425:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-internal-core.d.ts:426:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-internal-core.d.ts:427:5 - (ae-undocumented) Missing documentation for "startCoordinate".
+// types/hell-ui-internal-core.d.ts:428:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-internal-core.d.ts:432:5 - (ae-undocumented) Missing documentation for "handle".
+// types/hell-ui-internal-core.d.ts:433:5 - (ae-undocumented) Missing documentation for "ownerWindow".
+// types/hell-ui-internal-core.d.ts:434:5 - (ae-undocumented) Missing documentation for "onActiveChange".
+// types/hell-ui-internal-core.d.ts:435:5 - (ae-undocumented) Missing documentation for "onValueChange".
+// types/hell-ui-internal-core.d.ts:436:5 - (ae-undocumented) Missing documentation for "onCommit".
+// types/hell-ui-internal-core.d.ts:440:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-internal-core.d.ts:441:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-internal-core.d.ts:445:5 - (ae-undocumented) Missing documentation for "before".
+// types/hell-ui-internal-core.d.ts:446:5 - (ae-undocumented) Missing documentation for "after".
+// types/hell-ui-internal-core.d.ts:450:5 - (ae-undocumented) Missing documentation for "measure".
+// types/hell-ui-internal-core.d.ts:451:5 - (ae-undocumented) Missing documentation for "minSize".
+// types/hell-ui-internal-core.d.ts:452:5 - (ae-undocumented) Missing documentation for "setSize".
+// types/hell-ui-internal-core.d.ts:453:5 - (ae-undocumented) Missing documentation for "commitSize".
+// types/hell-ui-internal-core.d.ts:457:5 - (ae-undocumented) Missing documentation for "pair".
+// types/hell-ui-internal-core.d.ts:458:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-internal-core.d.ts:459:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-internal-core.d.ts:460:5 - (ae-undocumented) Missing documentation for "adapters".
+// types/hell-ui-internal-core.d.ts:461:5 - (ae-undocumented) Missing documentation for "itemAdapter".
+// types/hell-ui-internal-core.d.ts:462:5 - (ae-undocumented) Missing documentation for "startCoordinate".
+// types/hell-ui-internal-core.d.ts:463:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-internal-core.d.ts:471:5 - (ae-undocumented) Missing documentation for "orientation".
+// types/hell-ui-internal-core.d.ts:472:5 - (ae-undocumented) Missing documentation for "direction".
+// types/hell-ui-internal-core.d.ts:473:5 - (ae-undocumented) Missing documentation for "pair".
+// types/hell-ui-internal-core.d.ts:474:5 - (ae-undocumented) Missing documentation for "adapters".
+// types/hell-ui-internal-core.d.ts:475:5 - (ae-undocumented) Missing documentation for "itemAdapter".
+// types/hell-ui-internal-core.d.ts:476:5 - (ae-undocumented) Missing documentation for "beforeStart".
+// types/hell-ui-internal-core.d.ts:477:5 - (ae-undocumented) Missing documentation for "afterStart".
+// types/hell-ui-internal-core.d.ts:478:5 - (ae-undocumented) Missing documentation for "stopPropagation".
+// types/hell-ui-internal-core.d.ts:479:5 - (ae-undocumented) Missing documentation for "keyDelta".
+// types/hell-ui-internal-core.d.ts:499:5 - (ae-undocumented) Missing documentation for "sum".
+// types/hell-ui-internal-core.d.ts:501:5 - (ae-undocumented) Missing documentation for "byDelta".
+// types/hell-ui-internal-core.d.ts:502:5 - (ae-undocumented) Missing documentation for "byKey".
+// types/hell-ui-internal-core.d.ts:503:5 - (ae-undocumented) Missing documentation for "toResult".
+// types/hell-ui-internal-core.d.ts:512:5 - (ae-undocumented) Missing documentation for "canResize".
+// types/hell-ui-internal-core.d.ts:513:5 - (ae-undocumented) Missing documentation for "currentResult".
+// types/hell-ui-internal-core.d.ts:514:5 - (ae-undocumented) Missing documentation for "byPointer".
+// types/hell-ui-internal-core.d.ts:518:5 - (ae-undocumented) Missing documentation for "byDelta".
+// types/hell-ui-internal-core.d.ts:519:5 - (ae-undocumented) Missing documentation for "byKey".
+// types/hell-ui-internal-core.d.ts:520:5 - (ae-undocumented) Missing documentation for "commit".
+// types/hell-ui-internal-core.d.ts:523:1 - (ae-undocumented) Missing documentation for "hellCreateResizePairAdapters".
+// types/hell-ui-internal-core.d.ts:531:5 - (ae-undocumented) Missing documentation for "startPointer".
+// types/hell-ui-internal-core.d.ts:532:5 - (ae-undocumented) Missing documentation for "applyKey".
+// types/hell-ui-internal-core.d.ts:533:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-internal-core.d.ts:544:5 - (ae-undocumented) Missing documentation for "startPointer".
+// types/hell-ui-internal-core.d.ts:545:5 - (ae-undocumented) Missing documentation for "applyKey".
+// types/hell-ui-internal-core.d.ts:546:5 - (ae-undocumented) Missing documentation for "destroy".
+// types/hell-ui-internal-core.d.ts:563:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-internal-core.d.ts:564:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-internal-core.d.ts:568:5 - (ae-undocumented) Missing documentation for "valid".
+// types/hell-ui-internal-core.d.ts:577:5 - (ae-undocumented) Missing documentation for "committed".
+// types/hell-ui-internal-core.d.ts:578:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-internal-core.d.ts:579:5 - (ae-undocumented) Missing documentation for "reason".
+// types/hell-ui-internal-core.d.ts:588:5 - (ae-undocumented) Missing documentation for "external".
+// types/hell-ui-internal-core.d.ts:589:5 - (ae-undocumented) Missing documentation for "parseExternal".
+// types/hell-ui-internal-core.d.ts:590:5 - (ae-undocumented) Missing documentation for "parseText".
+// types/hell-ui-internal-core.d.ts:591:5 - (ae-undocumented) Missing documentation for "format".
+// types/hell-ui-internal-core.d.ts:592:5 - (ae-undocumented) Missing documentation for "externalChanged".
+// types/hell-ui-internal-core.d.ts:624:5 - (ae-undocumented) Missing documentation for "current".
+// types/hell-ui-internal-core.d.ts:626:5 - (ae-undocumented) Missing documentation for "invalidDraft".
+// types/hell-ui-internal-core.d.ts:627:5 - (ae-undocumented) Missing documentation for "display".
 
 // (No @packageDocumentation comment for this package)
 

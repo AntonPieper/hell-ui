@@ -23,8 +23,8 @@ import {
   ngpSlider,
   provideSliderState,
 } from 'ng-primitives/slider';
-import { hellUniqueIdRefs } from 'hell-ui/internal/core';
-import { hellPartStyler, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from 'hell-ui/core';
+import { hellUniqueIdRefs, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
+import type { HellOrientation, HellSize, HellUi, HellUiInput } from 'hell-ui/core';
 
 let nextSliderId = 0;
 

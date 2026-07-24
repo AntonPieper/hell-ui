@@ -5,7 +5,6 @@
 ```ts
 
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellPickValue } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -18,7 +17,7 @@ export const HELL_SELECT_IMPORTS: readonly [typeof HellSelect, typeof HellSelect
 // @public
 export class HellNativeSelect {
     readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: i0.InputSignal<"sm" | "md" | "lg">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
@@ -29,7 +28,7 @@ export class HellNativeSelect {
 export class HellSelect<T = unknown> implements FormValueControl<HellPickValue<T>> {
     constructor();
     readonly disabled: i0.InputSignalWithTransform<boolean, unknown>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly touch: i0.OutputEmitterRef<void>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     readonly value: i0.ModelSignal<HellPickValue<T>>;
@@ -40,7 +39,7 @@ export class HellSelect<T = unknown> implements FormValueControl<HellPickValue<T
 // @public (undocumented)
 export class HellSelectDropdown {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectDropdown, "[hellSelectDropdown]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectDropdown; inputs: {}; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectDropdown, never>;
@@ -50,7 +49,7 @@ export class HellSelectDropdown {
 export class HellSelectOption {
     // (undocumented)
     protected readonly disabled: i0.Signal<boolean>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectOption, "[hellSelectOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSelectOption; inputs: { "ngpSelectOptionValue": "value"; "ngpSelectOptionDisabled": "disabled"; "ngpSelectOptionIndex": "index"; }; outputs: { "ngpSelectOptionActivated": "activated"; }; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectOption, never>;
@@ -58,7 +57,7 @@ export class HellSelectOption {
 
 // @public (undocumented)
 export class HellSelectPlaceholder {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectPlaceholder, "[hellSelectPlaceholder]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectPlaceholder, never>;
@@ -72,7 +71,7 @@ export class HellSelectPortal {
 
 // @public (undocumented)
 export class HellSelectValue {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSelectValue, "[hellSelectValue]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSelectValue, never>;
@@ -80,12 +79,12 @@ export class HellSelectValue {
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-select.d.ts:54:1 - (ae-undocumented) Missing documentation for "HellSelectValue".
-// types/hell-ui-select.d.ts:64:1 - (ae-undocumented) Missing documentation for "HellSelectPlaceholder".
-// types/hell-ui-select.d.ts:74:1 - (ae-undocumented) Missing documentation for "HellSelectDropdown".
-// types/hell-ui-select.d.ts:88:1 - (ae-undocumented) Missing documentation for "HellSelectPortal".
-// types/hell-ui-select.d.ts:94:1 - (ae-undocumented) Missing documentation for "HellSelectOption".
-// types/hell-ui-select.d.ts:100:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-select.d.ts:53:1 - (ae-undocumented) Missing documentation for "HellSelectValue".
+// types/hell-ui-select.d.ts:63:1 - (ae-undocumented) Missing documentation for "HellSelectPlaceholder".
+// types/hell-ui-select.d.ts:73:1 - (ae-undocumented) Missing documentation for "HellSelectDropdown".
+// types/hell-ui-select.d.ts:87:1 - (ae-undocumented) Missing documentation for "HellSelectPortal".
+// types/hell-ui-select.d.ts:93:1 - (ae-undocumented) Missing documentation for "HellSelectOption".
+// types/hell-ui-select.d.ts:99:5 - (ae-undocumented) Missing documentation for "disabled".
 
 // (No @packageDocumentation comment for this package)
 

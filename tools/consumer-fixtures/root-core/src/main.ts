@@ -1,11 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
-  hellPartStyler,
   hellSearchResource,
-  hellTwMerge,
-  type HellPartStyler,
-  type HellRecipe,
   type HellSearchResource,
   type HellSize,
   type HellUi,
@@ -21,7 +17,8 @@ import {
 } from 'hell-ui/chip';
 import {
   hellSearchResource as hellCoreSearchResource,
-  hellTwMerge as hellCoreTwMerge,
+  type HellUi as HellCoreUi,
+  type HellUiInput as HellCoreUiInput,
 } from 'hell-ui/core';
 
 interface SearchItem {
@@ -29,23 +26,18 @@ interface SearchItem {
 }
 
 // The root entry re-exports the /core contract; both specifiers must resolve
-// the same functions from the packed tarball.
+// the same declarations from the packed tarball. The Part Style Map surface
+// consumers author `ui` values with is the HellUi/HellUiInput type family;
+// recipe construction, merge configuration, and styler factories are package
+// internals and are deliberately absent here.
 const size: HellSize = 'md';
-const recipe: HellRecipe<'root'> = { root: 'block' };
 const ui: HellUi<'root'> = { root: 'rounded-md' };
 const uiInput: HellUiInput<'root'> = 'rounded-md';
-const merged = hellTwMerge('px-hell-4', 'px-hell-7');
-const coreMerged = hellCoreTwMerge('px-hell-4', 'px-hell-7');
-const styler: HellPartStyler<'root'> = hellPartStyler(() => uiInput, {
-  defaultPart: 'root',
-  recipe: () => recipe,
-});
-const styledRoot = styler('root');
+const coreUi: HellCoreUi<'root'> = ui;
+const coreUiInput: HellCoreUiInput<'root'> = uiInput;
 void size;
-void ui;
-void merged;
-void coreMerged;
-void styledRoot;
+void coreUi;
+void coreUiInput;
 
 const chipDirectives: readonly [
   typeof HellChipSet,

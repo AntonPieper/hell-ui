@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellSize } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i1 from 'ng-primitives/toggle';
@@ -14,7 +13,7 @@ import * as ng_primitives_toggle_group from 'ng-primitives/toggle-group';
 
 // @public
 export class HellToggle {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToggle, "button[hellToggle]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpToggle; inputs: { "ngpToggleSelected": "selected"; "ngpToggleDisabled": "disabled"; }; outputs: { "ngpToggleSelectedChange": "selectedChange"; }; }]>;
@@ -26,7 +25,7 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
     constructor();
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected onFocusOut(event: FocusEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected readonly state: ng_primitives_toggle_group.NgpToggleGroupState;
     readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly type: _angular_core.InputSignal<"single" | "multiple">;
@@ -39,7 +38,7 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
 // @public
 export class HellToggleGroupItem {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToggleGroupItem, "button[hellToggleGroupItem]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof ng_primitives_toggle_group.NgpToggleGroupItem; inputs: { "ngpToggleGroupItemValue": "value"; "ngpToggleGroupItemDisabled": "disabled"; }; outputs: {}; }]>;

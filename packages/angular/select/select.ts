@@ -13,7 +13,7 @@ import {
   untracked,
 } from '@angular/core';
 import { type FormValueControl } from '@angular/forms/signals';
-import { hellPartStyler, type HellPickValue, type HellRecipe, type HellSize, type HellUiInput } from 'hell-ui/core';
+import type { HellPickValue, HellSize, HellUiInput } from 'hell-ui/core';
 import { hellOptionSurfaceRecipe } from 'hell-ui/internal/option';
 import {
   HELL_FLOATING_POP_IN,
@@ -25,6 +25,8 @@ import {
   hellNormalizePickValue,
   hellSamePickValue,
   HellPickerFocusScope,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import {
   NgpSelect,

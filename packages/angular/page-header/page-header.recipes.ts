@@ -1,4 +1,4 @@
-import type { HellRecipe } from 'hell-ui/core';
+import type { HellRecipe } from 'hell-ui/internal/core';
 
 import type { HellPageHeaderPart } from './page-header';
 
