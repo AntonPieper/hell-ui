@@ -61,16 +61,18 @@ Every exported API belongs to one documented category:
 - `Beta`: public but still pre-1.0. Shape changes require release notes and migration guidance, but are not promoted as final stable contracts.
 - `Experimental`: importable app surface for heavier/browser-specific features. API comments or generated entry-point comments must include `@experimental`, docs must disclose the risk, and apps should isolate the import behind lazy/client-only boundaries when applicable.
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
-- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
+- `Internal`: implementation detail, not a consumer import path. `hell-ui/internal/*` subpaths exist only because Angular Package Format cross-entrypoint linking requires resolvable seams; they keep the `internal` prefix and internal Module Category, carry no support promise, and never appear in consumer docs, examples, fixtures, or public API stability reports. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
 The API report gate is manifest-driven: every entry point is guarded unless it
-appears in `apiReportExclusions` in `tools/check-api-reports.mjs`. Report
-coverage includes root, `/core`, `/testing`, narrow primitive, composite, and
-table entry points, plus shared internal entry points whose declarations cross
-guarded boundaries. In particular, `hell-ui/internal/core` has its own
-baseline because stable root/core exports and narrow runtime contracts reference
-its shapes. Guarding an Internal, Beta, or Experimental entry point detects
-shape drift; it does not promote that surface to Stable or make it a supported
+appears in `apiReportExclusions` in `tools/check-api-reports.mjs`. Public API
+stability reports in `etc/api-reports/` cover root, `/core`, `/testing`,
+narrow primitive, composite, and table entry points. Guarded Internal Package
+Path seams whose declarations cross guarded boundaries keep drift-guard
+baselines apart under `etc/api-reports/internal/` — they are not public
+stability reports. In particular, `hell-ui/internal/core` has such a baseline
+because stable root/core exports and narrow runtime contracts reference its
+shapes. Guarding an Internal, Beta, or Experimental entry point detects shape
+drift; it does not promote that surface to Stable or make it a supported
 consumer import path.
 
 The current exclusions are the experimental feature surfaces
