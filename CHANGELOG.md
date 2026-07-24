@@ -802,6 +802,20 @@ Every published `hell-ui` version gets a `## [x.y.z] - YYYY-MM-DD` section, and 
 
 ### Fixed
 
+- A Chip Set composed inside a Control Group now keeps breathing room from the
+  frame on every side, including wrapped chip rows. `[hellChipSet]` reflects
+  the composition as `data-in-control-group` and its recipe adds inner padding
+  (`px-hell-2 py-hell-1`), a tighter `gap-hell-1`, and `min-w-0 flex-1` so the
+  set fills the frame; the docs examples drop their hand-tuned spacing
+  overrides (one of which used the non-existent `py-hell-1.5` token and was
+  silently ignored). The Combobox input recipe now uses `flex-1 self-stretch`
+  instead of `flex-auto h-full`, so an inline Chip Input rides the chip flow —
+  filling the space after the final chip and wrapping at its own `min-width` —
+  and the toggle button keeps its place at the frame edge instead of being
+  pushed out and clipped; single-line comboboxes render unchanged. Evidence:
+  `packages/angular/chip/chip.spec.ts`, `packages/angular/combobox/combobox.spec.ts`,
+  and hands-on verification of the Chip Basic and Combobox Chip Input
+  composition docs examples. Closes #340.
 - Part Recipes now spell font-family inheritance as
   `font-[family-name:inherit]` instead of the ambiguous `font-[inherit]`, which
   tailwind-merge classifies into the font-weight group and silently drops next

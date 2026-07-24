@@ -37,13 +37,13 @@ const GROUPS: readonly Group[] = [
         <div
           hellCombobox
           multiple
-          ui="h-auto min-h-hell-control-md flex-1 flex-wrap gap-hell-1 rounded-none border-0 bg-transparent py-hell-1 ps-hell-2 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+          ui="h-auto min-h-hell-control-md flex-1 min-w-0 items-stretch rounded-none border-0 bg-transparent p-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
           [options]="groupOptions()"
           [value]="selected()"
           [compareWith]="compareGroup"
           (valueChange)="onValueChange($event)"
         >
-          <div hellChipSet ui="contents" aria-label="Assigned groups">
+          <div hellChipSet aria-label="Assigned groups">
             @for (group of selected(); track group.id) {
               <span hellChip size="sm" (remove)="remove(group)">
                 {{ group.name }}<button hellChipRemove></button>
@@ -52,20 +52,20 @@ const GROUPS: readonly Group[] = [
             <input
               hellComboboxInput
               hellChipInput
-              class="min-w-[6rem]"
+              ui="min-w-[6rem]"
               aria-label="Assign groups"
               placeholder="Add a group…"
               [value]="groupSearch.query()"
               (input)="groupSearch.query.set($any($event.target).value ?? '')"
             />
-            <button hellComboboxButton type="button" aria-label="Toggle groups"></button>
-            <div *hellComboboxPortal hellComboboxDropdown>
-              @for (group of groupOptions(); track group.id) {
-                <div hellComboboxOption [value]="group">{{ group.name }}</div>
-              } @empty {
-                <div hellComboboxEmpty>No groups match</div>
-              }
-            </div>
+          </div>
+          <button hellComboboxButton type="button" aria-label="Toggle groups"></button>
+          <div *hellComboboxPortal hellComboboxDropdown>
+            @for (group of groupOptions(); track group.id) {
+              <div hellComboboxOption [value]="group">{{ group.name }}</div>
+            } @empty {
+              <div hellComboboxEmpty>No groups match</div>
+            }
           </div>
         </div>
       </div>
