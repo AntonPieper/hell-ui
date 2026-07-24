@@ -150,6 +150,38 @@ class ChipInputHost {
 })
 class MultipleChipInputsHost {}
 
+// The wrapper carries the public [hellControlGroup] attribute only: the set
+// detects the Control Group frame through the DOM contract, not through DI, so
+// the spec asserts against the attribute a consumer actually writes.
+@Component({
+  imports: [HellChipSet, HellChipInput, HellChip, HellChipRemove],
+  template: `
+    <div hellControlGroup>
+      <div id="grouped-set" hellChipSet aria-label="Assignees">
+        @for (chip of chips(); track chip.id) {
+          <span [id]="'grouped-chip-' + chip.id" hellChip (remove)="remove(chip.id)">
+            {{ chip.label }}
+            <button hellChipRemove></button>
+          </span>
+        }
+        <input id="grouped-input" hellChipInput />
+      </div>
+    </div>
+  `,
+})
+class ControlGroupChipSetHost {
+  readonly chips = signal([
+    { id: 'a', label: 'Anna' },
+    { id: 'b', label: 'Ben' },
+  ]);
+  readonly removed: string[] = [];
+
+  remove(id: string): void {
+    this.removed.push(id);
+    this.chips.update((chips) => chips.filter((chip) => chip.id !== id));
+  }
+}
+
 @Component({
   imports: [HellChip, HellChipRemove],
   providers: [provideHellLabels(HELL_CHIP_LABELS, { remove: (label) => `Dismiss ${label}` })],
@@ -613,6 +645,47 @@ describe('HellChipInput public keyboard behavior', () => {
     expect(fixture.nativeElement.ownerDocument.activeElement).toBe(
       query(fixture, '#input-chip-fixed'),
     );
+  });
+});
+
+describe('HellChipSet Control Group composition', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ControlGroupChipSetHost, ChipSetHost],
+    }).compileComponents();
+  });
+
+  it('reflects the Control Group frame as data-in-control-group on the set root', () => {
+    const fixture = TestBed.createComponent(ControlGroupChipSetHost);
+    fixture.detectChanges();
+
+    expect(query(fixture, '#grouped-set').getAttribute('data-in-control-group')).toBe('');
+  });
+
+  it('leaves a standalone set without the Control Group state', () => {
+    const fixture = TestBed.createComponent(ChipSetHost);
+    fixture.detectChanges();
+
+    expect(query(fixture, '[hellChipSet]').hasAttribute('data-in-control-group')).toBe(false);
+  });
+
+  it('keeps the Chip Input keyboard contract inside a Control Group', async () => {
+    const fixture = TestBed.createComponent(ControlGroupChipSetHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture, '#grouped-input');
+
+    input.focus();
+    expect(press(input, 'Backspace').defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(
+      query(fixture, '#grouped-chip-b'),
+    );
+
+    press(query(fixture, '#grouped-chip-b'), 'Backspace');
+    fixture.detectChanges();
+    await flushMicrotasks();
+
+    expect(fixture.componentInstance.removed).toEqual(['b']);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(input);
   });
 });
 

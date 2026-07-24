@@ -48,8 +48,14 @@ const HELL_COMBOBOX_RECIPE = {
   root: 'inline-flex h-hell-control-md w-full cursor-text items-center gap-0 rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated ps-hell-4 pe-0 font-[family-name:inherit] text-[13px] text-hell-foreground outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-border-strong data-focus:border-hell-border-focus data-focus:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-disabled:cursor-not-allowed data-disabled:bg-hell-surface-subtle data-disabled:text-hell-foreground-muted data-invalid:border-hell-danger',
 } satisfies HellRecipe<'root'>;
 
+// `flex-1` (not `flex-auto`): a zero flex basis keeps the input aligned with a
+// wrapping chip flow — it fills whatever space follows the final chip instead
+// of claiming its intrinsic text-field width. `self-stretch` (not `h-full`)
+// fills the control height through the flex row, so inside a wrapping Chip Set
+// the input stretches to its own row instead of resolving a percentage against
+// the whole multi-row container. Single-line comboboxes render identically.
 const HELL_COMBOBOX_INPUT_RECIPE = {
-  root: 'h-full min-w-0 flex-auto border-0 bg-transparent p-0 font-[family-name:inherit] text-[inherit] text-current outline-none placeholder:text-hell-foreground-muted',
+  root: 'min-w-0 flex-1 self-stretch border-0 bg-transparent p-0 font-[family-name:inherit] text-[inherit] text-current outline-none placeholder:text-hell-foreground-muted',
 } satisfies HellRecipe<'root'>;
 
 const HELL_COMBOBOX_BUTTON_RECIPE = {
