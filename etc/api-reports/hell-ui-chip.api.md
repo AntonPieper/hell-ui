@@ -74,6 +74,7 @@ export class HellChipRemove {
 // @public
 export class HellChipSet {
     constructor();
+    protected readonly inControlGroup: _angular_core.WritableSignal<boolean>;
     protected onKeydown(event: KeyboardEvent): void;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: hell_ui_core.HellPartStyler<"root">;

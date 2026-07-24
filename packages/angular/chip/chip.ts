@@ -44,7 +44,7 @@ export const HELL_CHIP_LABELS: InjectionToken<HellLabels<HellChipLabels>> = hell
 });
 
 const HELL_CHIP_SET_RECIPE = {
-  root: 'inline-flex flex-wrap items-center gap-hell-2 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch outline-none',
+  root: 'inline-flex flex-wrap items-center gap-hell-2 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch outline-none data-[in-control-group]:min-w-0 data-[in-control-group]:flex-1 data-[in-control-group]:gap-hell-1 data-[in-control-group]:px-hell-2 data-[in-control-group]:py-hell-1',
 } satisfies HellRecipe<'root'>;
 
 const HELL_BADGE_RECIPE = {
@@ -77,6 +77,7 @@ const HELL_KBD_RECIPE = {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
+    '[attr.data-in-control-group]': 'inControlGroup() ? "" : null',
     role: 'group',
     tabindex: '-1',
     '(keydown)': 'onKeydown($event)',
@@ -95,10 +96,30 @@ export class HellChipSet {
   /** Layout axis for roving focus and the Tailwind data attribute. Defaults to `horizontal`. */
   readonly orientation = input<HellOrientation>('horizontal');
 
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly controller = inject(HellChipSetController);
+
+  /**
+   * Whether the set is composed inside a Control Group frame, reflected as
+   * `data-in-control-group`. Inside a group the recipe pads the set away from
+   * the frame border, tightens the chip gap, and lets the set fill the frame so
+   * an inline Chip Input joins the chip flow. Detection follows the DOM
+   * contract — the public `[hellControlGroup]` attribute on an ancestor — so
+   * the chip entry point stays decoupled from the control-group entry point.
+   */
+  protected readonly inControlGroup = signal(false);
 
   constructor() {
     effect(() => this.controller.orientation.set(this.orientation()));
+
+    // Detect eagerly for the common same-template composition, then re-check
+    // after the first render for hosts created detached (embedded views are
+    // instantiated before insertion; browser-only keeps SSR safe).
+    const detectControlGroup = (): void => {
+      this.inControlGroup.set(this.host.nativeElement.closest('[hellControlGroup]') !== null);
+    };
+    detectControlGroup();
+    afterNextRender(detectControlGroup);
   }
 
   /** Delegates roving navigation and keyboard removal to the set controller. */
