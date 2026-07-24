@@ -23,9 +23,17 @@ versionExt: md
 versionFormat: '## [{{.Version}}] - {{.Time.Format "2006-01-02"}}'
 kindFormat: '### {{.Kind}}'
 changeFormat: '- {{.Body}}'
-# One blank line between the merged changelog header and each release entry.
+# One blank line between the merged changelog header and each release entry
+# (beforeChangelogVersion applies at merge time), plus batch-time spacing so a
+# generated Released Version Notes record reads like the hand-authored
+# baseline: a blank line before every kind heading and change bullet, and one
+# trailing newline so merged releases stay separated by exactly one blank
+# line.
 newlines:
   beforeChangelogVersion: 1
+  beforeKind: 1
+  beforeChange: 1
+  endOfVersion: 1
 body:
   minLength: 1
 kinds:
