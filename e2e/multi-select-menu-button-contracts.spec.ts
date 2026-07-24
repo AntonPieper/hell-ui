@@ -2,10 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 
 const STORAGE_KEY = 'hell-docs.people-table.column-visibility.v1';
 
+// The multi-select menu button recipe lives on the Menu docs page (#347).
 async function gotoMultiSelect(page: Page): Promise<void> {
-  await page.goto('/components/multi-select-menu-button');
+  await page.goto('/components/menu');
   await expect(
-    page.getByRole('heading', { name: 'Multi-select menu button', level: 1 }),
+    page.getByRole('heading', { name: 'Multi-select menu button', level: 2 }),
   ).toBeVisible();
 }
 
@@ -16,7 +17,7 @@ async function gotoRecipeClean(page: Page): Promise<void> {
   await page.evaluate((key) => localStorage.removeItem(key), STORAGE_KEY);
   await page.reload();
   await expect(
-    page.getByRole('heading', { name: 'Multi-select menu button', level: 1 }),
+    page.getByRole('heading', { name: 'Multi-select menu button', level: 2 }),
   ).toBeVisible();
 }
 
@@ -26,7 +27,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
   }) => {
     await gotoMultiSelect(page);
 
-    const example = page.locator('app-multi-select-menu-button-basic-example');
+    const example = page.locator('app-menu-multi-select-example');
     const trigger = example.getByRole('button', { name: 'Channels' });
     const menu = page.getByRole('menu', { name: 'Channels' });
 
@@ -71,7 +72,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
   test('enforces the minSelected floor while still allowing additions', async ({ page }) => {
     await gotoMultiSelect(page);
 
-    const example = page.locator('app-multi-select-menu-button-basic-example');
+    const example = page.locator('app-menu-multi-select-example');
     const trigger = example.getByRole('button', { name: 'Channels' });
     const menu = page.getByRole('menu', { name: 'Channels' });
 
@@ -99,7 +100,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
   test('typeahead focuses an option, reset emits distinctly, and Escape closes', async ({ page }) => {
     await gotoMultiSelect(page);
 
-    const example = page.locator('app-multi-select-menu-button-basic-example');
+    const example = page.locator('app-menu-multi-select-example');
     const trigger = example.getByRole('button', { name: 'Channels' });
     const menu = page.getByRole('menu', { name: 'Channels' });
 
@@ -124,7 +125,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
     // Outside interaction dismisses the menu.
     await trigger.click();
     await expect(menu).toBeVisible();
-    await page.getByRole('heading', { name: 'Multi-select menu button', level: 1 }).click();
+    await page.getByRole('heading', { name: 'Multi-select menu button', level: 2 }).click();
     await expect(menu).toBeHidden();
 
     // Escape closes the menu and returns focus to the trigger.
@@ -140,7 +141,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
   }) => {
     await gotoRecipeClean(page);
 
-    const example = page.locator('app-multi-select-menu-button-tanstack-example');
+    const example = page.locator('app-menu-tanstack-columns-example');
     const trigger = example.getByRole('button', { name: 'Columns' });
     const menu = page.getByRole('menu', { name: 'Columns' });
 
@@ -189,7 +190,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
   test('recipe: persists column visibility across reloads via localStorage', async ({ page }) => {
     await gotoRecipeClean(page);
 
-    const example = page.locator('app-multi-select-menu-button-tanstack-example');
+    const example = page.locator('app-menu-tanstack-columns-example');
     const trigger = example.getByRole('button', { name: 'Columns' });
 
     await trigger.click();
@@ -200,7 +201,7 @@ test.describe('multi-select menu button recipe browser contract', () => {
     // The hidden column survives a full reload — persistence is the app's, not the control's.
     await page.reload();
     await expect(
-      page.getByRole('heading', { name: 'Multi-select menu button', level: 1 }),
+      page.getByRole('heading', { name: 'Multi-select menu button', level: 2 }),
     ).toBeVisible();
     await expect(example.getByRole('columnheader', { name: 'Email' })).toHaveCount(0);
     await expect(trigger).toHaveAttribute('data-selection-count', '3');

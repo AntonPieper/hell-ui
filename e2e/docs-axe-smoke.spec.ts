@@ -245,10 +245,6 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           await expect(page.getByRole('menu').first()).toBeVisible();
         },
       },
-    ],
-  },
-  '/components/multi-select-menu-button': {
-    extraTargets: [
       {
         name: 'Multi-select menu button channels open',
         include: ['main', '[hellMenu][data-slot="root"]'],
