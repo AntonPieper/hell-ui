@@ -73,7 +73,9 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         Pass the Omnibar's caller-owned query signal to <code>hellSearchResource</code>, then project
         <code>search.items()</code> as <code>hellOmnibarItem</code> buttons. Each item binds a
         required <code>value</code> your <code>(submit)</code> handler receives on Enter or click; the consumer
-        also decides what empty chrome to render from <code>search.status()</code>.
+        also decides what empty chrome to render from <code>search.status()</code>. Activating an
+        entry clears the input for the next search, while dismissing the panel keeps the typed
+        query.
       </p>
       <hd-example-tabs [code]="basicCode" previewClass="min-h-[220px]">
         <app-omnibar-basic-example />
@@ -251,7 +253,7 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       <ul>
         <li><code>queryChange</code>: <code>string</code> — the implicit model output for query edits/clear.</li>
         <li><code>openChange</code>: <code>boolean</code> — the implicit model output for interaction-driven open/close.</li>
-        <li><code>submit</code>: <code>HellOmnibarSubmitEvent</code> — <code>&#123; query, item, source &#125;</code>, emitted when an item is activated by mouse or keyboard.</li>
+        <li><code>submit</code>: <code>HellOmnibarSubmitEvent</code> — <code>&#123; query, item, source &#125;</code>, emitted when an item is activated by mouse or keyboard. Activation then clears the query, ready for the next search; the payload keeps the activated text.</li>
       </ul>
       <p>
         Imperative methods are intentionally narrow: <code>focus()</code> focuses the search input,
@@ -320,8 +322,8 @@ import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <li>
           Keyboard: <code>ArrowDown</code>/<code>ArrowUp</code> move the active option (ArrowDown also
           opens a closed panel), <code>Home</code>/<code>End</code> jump to the first/last option,
-          <code>Enter</code> activates the active option, and <code>Escape</code> closes the panel,
-          then clears the query, then blurs the input.
+          <code>Enter</code> activates the active option and clears the query, and
+          <code>Escape</code> closes the panel, then clears the query, then blurs the input.
         </li>
         <li>
           The clear button and actions leave the Tab order while open; <code>F6</code> moves into the

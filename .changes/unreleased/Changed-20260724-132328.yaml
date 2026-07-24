@@ -1,0 +1,5 @@
+kind: Changed
+body: Activating an omnibar entry — by pointer or keyboard — now clears the query,
+  ready for the next search. Dismissing the panel without activating keeps the typed
+  text, and the submit payload still carries the query at activation time.
+time: 2026-07-24T13:23:28.625477+02:00

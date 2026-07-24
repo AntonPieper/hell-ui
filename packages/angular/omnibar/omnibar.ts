@@ -157,6 +157,7 @@ class HellOmnibarController implements HellFloatingScope {
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
 
   query: () => string = () => '';
+  clearQuery: () => void = () => {};
   close: () => void = () => {};
   focus: () => void = () => {};
   isOpen: () => boolean = () => false;
@@ -182,6 +183,9 @@ class HellOmnibarController implements HellFloatingScope {
     if (item.disabled()) return;
 
     this.emitSubmit({ query: this.query(), item: item.selectValue(), source });
+    // Command-palette convention: activation executes the entry and leaves the
+    // input empty, ready for the next search. Dismissal keeps the query.
+    this.clearQuery();
     if (item.closeOnSelect()) this.close();
   }
 
@@ -400,7 +404,8 @@ export class HellOmnibar {
 
   /* ── Outputs ───────────────────────────────────────────────────────── */
 
-  /** Emits when an item is activated by pointer or keyboard. */
+  /** Emits when an item is activated by pointer or keyboard. Activation
+   *  clears the query afterwards; the payload keeps the activated text. */
   readonly submit = output<HellOmnibarSubmitEvent>();
 
   /* ── Internal state ────────────────────────────────────────────────── */
@@ -474,6 +479,7 @@ export class HellOmnibar {
       (event: KeyboardEvent) => this.chipSetController.onKeydown(event),
     );
     this.controller.query = this.query;
+    this.controller.clearQuery = () => this.query.set('');
     this.controller.close = () => this.requestClose();
     this.controller.focus = () => this.focus();
     this.controller.isOpen = this.isOpen;
@@ -1024,11 +1030,12 @@ export class HellOmnibarAction {
 export type HellOmnibarActivationSource = 'mouse' | 'keyboard';
 
 /**
- * Payload emitted after an item selects. `query` is the current query text,
+ * Payload emitted after an item selects. `query` is the query text at the
+ * moment of activation (the omnibar clears its input right after emitting),
  * `item` is the selected payload, and `source` identifies the activation path.
  */
 export interface HellOmnibarSubmitEvent<T = unknown> {
-  /** Current query text at the moment of activation. */
+  /** Query text at the moment of activation, before the input clears. */
   readonly query: string;
   /** Selected item payload. */
   readonly item: T;
