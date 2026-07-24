@@ -494,6 +494,109 @@ test.describe('Hell UI browser behavior', () => {
     await expect(toasts).toHaveCount(0);
   });
 
+  test('toast placements anchor, stack, and exit toward every documented position', async ({
+    page,
+  }) => {
+    await page.goto('/components/toast');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-toast-placement-example');
+    await example.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+    const toaster = example.locator('hell-toaster');
+    // Exiting toasts linger for the exit animation with frozen data-front
+    // values, so stack assertions target open toasts only.
+    const openToasts = toaster.locator('[data-slot="toast"][data-state="open"]');
+    const viewportSize = page.viewportSize();
+    if (!viewportSize) throw new Error('Expected a page viewport');
+
+    const placements = [
+      { name: 'top-left', vertical: 'top', horizontal: 'left' },
+      { name: 'top-center', vertical: 'top', horizontal: 'center' },
+      { name: 'top-right', vertical: 'top', horizontal: 'right' },
+      { name: 'bottom-left', vertical: 'bottom', horizontal: 'left' },
+      { name: 'bottom-center', vertical: 'bottom', horizontal: 'center' },
+      { name: 'bottom-right', vertical: 'bottom', horizontal: 'right' },
+    ] as const;
+
+    for (const placement of placements) {
+      await test.step(`${placement.name} placement`, async () => {
+        const trigger = example.getByRole('button', { name: placement.name, exact: true });
+        await trigger.click();
+        await trigger.click();
+        await expect(openToasts).toHaveCount(2);
+        await expect(toaster).toHaveAttribute('data-position', placement.name);
+        await finishAnimations(toaster);
+
+        const rootBox = await toaster.boundingBox();
+        if (!rootBox) throw new Error('Expected the toaster to have a box');
+        if (placement.vertical === 'top') {
+          expect(Math.abs(rootBox.y - 24)).toBeLessThanOrEqual(2);
+        } else {
+          expect(Math.abs(rootBox.y + rootBox.height - (viewportSize.height - 24))).toBeLessThanOrEqual(2);
+        }
+        if (placement.horizontal === 'left') {
+          expect(Math.abs(rootBox.x - 24)).toBeLessThanOrEqual(2);
+        } else if (placement.horizontal === 'right') {
+          expect(Math.abs(rootBox.x + rootBox.width - (viewportSize.width - 24))).toBeLessThanOrEqual(2);
+        } else {
+          expect(
+            Math.abs(rootBox.x + rootBox.width / 2 - viewportSize.width / 2),
+          ).toBeLessThanOrEqual(2);
+        }
+
+        // The collapsed stack peeks behind the front toast away from the
+        // anchored edge: downward for top placements, upward for bottom ones.
+        const front = toaster.locator('[data-slot="toast"][data-state="open"][data-front="0"]');
+        const back = toaster.locator('[data-slot="toast"][data-state="open"][data-front="1"]');
+        const frontBox = await front.boundingBox();
+        const backBox = await back.boundingBox();
+        if (!frontBox || !backBox) throw new Error('Expected stacked toast boxes');
+        if (placement.vertical === 'top') {
+          expect(backBox.y).toBeGreaterThan(frontBox.y + 4);
+        } else {
+          expect(backBox.y).toBeLessThan(frontBox.y - 4);
+        }
+
+        // Dismissal slides toward the nearest side edge; center placements
+        // exit past their anchored top or bottom edge instead.
+        const exitDelta = await front.evaluate(async (element) => {
+          const close = element.querySelector<HTMLButtonElement>('[data-slot="close"]');
+          if (!close) throw new Error('Expected a close button');
+          const start = element.getBoundingClientRect();
+          close.click();
+          const settleAt = performance.now() + 140;
+          let last = start;
+          await new Promise<void>((resolve) => {
+            const sample = () => {
+              const rect = element.getBoundingClientRect();
+              if (rect.width > 0) last = rect;
+              if (performance.now() >= settleAt || rect.width === 0) {
+                resolve();
+                return;
+              }
+              requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+          });
+          return { x: last.x - start.x, y: last.y - start.y };
+        });
+        if (placement.horizontal === 'left') {
+          expect(exitDelta.x).toBeLessThan(-8);
+        } else if (placement.horizontal === 'right') {
+          expect(exitDelta.x).toBeGreaterThan(8);
+        } else {
+          expect(Math.abs(exitDelta.x)).toBeLessThanOrEqual(8);
+          if (placement.vertical === 'top') {
+            expect(exitDelta.y).toBeLessThan(-8);
+          } else {
+            expect(exitDelta.y).toBeGreaterThan(8);
+          }
+        }
+        await expect(openToasts).toHaveCount(1);
+      });
+    }
+  });
+
   test('menu submenu opens, returns focus, and can be dismissed', async ({ page }) => {
     await page.goto('/components/menu');
 
