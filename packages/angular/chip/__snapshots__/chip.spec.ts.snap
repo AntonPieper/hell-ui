@@ -219,6 +219,11 @@ exports[`HellChip static pill, Badge, and Kbd Part Style Maps > recipes > keeps 
     ],
   },
   "chipSet": [
+    "data-[in-control-group]:flex-1",
+    "data-[in-control-group]:gap-hell-1",
+    "data-[in-control-group]:min-w-0",
+    "data-[in-control-group]:px-hell-2",
+    "data-[in-control-group]:py-hell-1",
     "data-[orientation=vertical]:flex-col",
     "data-[orientation=vertical]:items-stretch",
     "flex-wrap",

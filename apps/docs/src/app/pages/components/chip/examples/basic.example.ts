@@ -23,11 +23,7 @@ interface Assignee {
         Assigned people
       </span>
       <div hellControlGroup aria-labelledby="assigned-people-label">
-        <div
-          hellChipSet
-          aria-labelledby="assigned-people-label"
-          ui="min-w-0 flex-1 gap-hell-1 px-hell-2 py-hell-1.5"
-        >
+        <div hellChipSet aria-labelledby="assigned-people-label">
           @for (assignee of assignees(); track assignee.id) {
             <span hellChip (remove)="remove(assignee.id)">
               {{ assignee.name }}

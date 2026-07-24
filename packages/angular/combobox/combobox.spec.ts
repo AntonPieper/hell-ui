@@ -222,10 +222,10 @@ class ComboboxProjectedHost {
         [formControl]="control"
         [compareWith]="compareById"
         [options]="filtered()"
-        ui="h-auto min-h-hell-control-md flex-1 flex-wrap gap-hell-1 rounded-none border-0 bg-transparent py-hell-1 ps-hell-2 pe-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
+        ui="h-auto min-h-hell-control-md flex-1 min-w-0 items-stretch rounded-none border-0 bg-transparent p-0 shadow-none data-focus:border-transparent data-focus:shadow-none"
         (valueChange)="values.push($any($event))"
       >
-        <div hellChipSet ui="contents" aria-label="Selected teammates">
+        <div hellChipSet aria-label="Selected teammates">
           @for (person of selected(); track person.id) {
             <span
               hellChip
@@ -244,12 +244,12 @@ class ComboboxProjectedHost {
             [value]="query()"
             (input)="query.set($any($event.target).value)"
           />
-          <button hellComboboxButton type="button" aria-label="Toggle teammates"></button>
-          <div *hellComboboxPortal hellComboboxDropdown>
-            @for (person of filtered(); track person.id) {
-              <div hellComboboxOption [value]="person">{{ person.name }}</div>
-            }
-          </div>
+        </div>
+        <button hellComboboxButton type="button" aria-label="Toggle teammates"></button>
+        <div *hellComboboxPortal hellComboboxDropdown>
+          @for (person of filtered(); track person.id) {
+            <div hellComboboxOption [value]="person">{{ person.name }}</div>
+          }
         </div>
       </div>
     </div>

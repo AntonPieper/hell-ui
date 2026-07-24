@@ -158,7 +158,11 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
           <tr>
             <td><code>HellChipSet</code></td>
             <td><code>root</code></td>
-            <td>The set container — layout, gap, and wrapping of the chips.</td>
+            <td>
+              The set container — layout, gap, and wrapping of the chips. Inside a Control Group
+              the set reflects <code>data-in-control-group</code> and pads itself away from the
+              frame, tightens the gap, and grows to fill the frame.
+            </td>
           </tr>
           <tr>
             <td><code>HellChip</code></td>
@@ -211,6 +215,13 @@ import chipVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with
         <li>
           <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — refines the
           <code>root</code> part.
+        </li>
+        <li>
+          Inside a <code>[hellControlGroup]</code> ancestor the set reflects
+          <code>data-in-control-group</code>; its recipe then adds inner padding, a tighter chip
+          gap, and <code>min-w-0 flex-1</code> so chips and an inline Chip Input keep breathing
+          room from the group border on every row. Refine or override through <code>ui</code>
+          with matching <code>data-[in-control-group]:*</code> variants.
         </li>
       </ul>
       <p><code>hellChipInput</code> (selector <code>input[hellChipInput]</code>)</p>

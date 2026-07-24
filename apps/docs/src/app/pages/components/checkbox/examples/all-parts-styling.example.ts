@@ -6,21 +6,23 @@ import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi } from 'hell-ui/c
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellCheckbox, HellNativeCheckbox],
   template: `
-    <div class="inline-flex items-center gap-2">
-      <!-- HellCheckbox: root + indicator, both refined through one ui map. -->
-      <button hellCheckbox [checked]="true" aria-label="Custom checkbox" [ui]="checkboxUi"></button>
-      <span>Styled checkbox (root + indicator)</span>
-    </div>
-    <div class="inline-flex items-center gap-2">
-      <!-- HellNativeCheckbox: single 'root' part, string shorthand refines it. -->
-      <input
-        type="checkbox"
-        hellNativeCheckbox
-        checked
-        aria-label="Custom native checkbox"
-        ui="rounded-hell-pill border-hell-success bg-hell-success-soft text-hell-success"
-      />
-      <span>Styled native checkbox (root)</span>
+    <div class="flex flex-wrap items-center gap-hell-6">
+      <div class="inline-flex items-center gap-hell-3">
+        <!-- HellCheckbox: root + indicator, both refined through one ui map. -->
+        <button hellCheckbox [checked]="true" aria-label="Custom checkbox" [ui]="checkboxUi"></button>
+        <span>Styled checkbox (root + indicator)</span>
+      </div>
+      <div class="inline-flex items-center gap-hell-3">
+        <!-- HellNativeCheckbox: single 'root' part, string shorthand refines it. -->
+        <input
+          type="checkbox"
+          hellNativeCheckbox
+          checked
+          aria-label="Custom native checkbox"
+          ui="rounded-hell-pill border-hell-success bg-hell-success-soft text-hell-success"
+        />
+        <span>Styled native checkbox (root)</span>
+      </div>
     </div>
   `,
 })
