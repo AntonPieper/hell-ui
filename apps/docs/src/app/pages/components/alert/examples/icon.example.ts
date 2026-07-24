@@ -11,7 +11,7 @@ import { HellIcon } from 'hell-ui/icon';
   imports: [...HELL_ALERT_IMPORTS, HellIcon],
   template: `
     <hell-alert variant="info">
-      <hell-icon hellAlertIcon name="faSolidBullhorn" size="20px" />
+      <hell-icon hellAlertIcon name="faSolidBullhorn" size="16px" />
       <h3 hellAlertTitle>New release available</h3>
       <p hellAlertDescription>Version 4.2 adds call-recording retention policies.</p>
     </hell-alert>

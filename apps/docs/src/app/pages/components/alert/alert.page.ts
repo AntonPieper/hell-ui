@@ -83,9 +83,9 @@ import alertVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
       <h2>Variants</h2>
       <p>
         <code>variant</code> picks the severity: <code>info</code> (default), <code>success</code>,
-        <code>warning</code>, and <code>danger</code>. Each variant sets a soft background, a border,
-        and an accent color for the default glyph — never rely on color alone, so keep the title and
-        description meaningful.
+        <code>warning</code>, and <code>danger</code>. Each variant sets a soft background, a border
+        tinted from the same accent, and accent colors for the default glyph and the title — never
+        rely on color alone, so keep the title and description meaningful.
       </p>
       <hd-example-tabs [code]="alertVariantsExampleCode" previewClass="flex flex-col gap-hell-3">
         <app-alert-variants-example />
