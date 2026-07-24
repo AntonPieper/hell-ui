@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   defaultStyleBundleImportSpecifiers,
+  entrypointCategories,
   entrypointPublicApiFiles,
   entrypointStyleExports,
 } from './entrypoint-manifest.mjs';
@@ -179,6 +180,7 @@ export function auditPackedPackage({ tarball, logger = console, verbose = false 
   checkPackagePeers(packageJson, failures);
   checkPackedFileAccounting(packageJson, tarball, files, fileSet, failures);
   checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures);
+  checkInternalEntrypointPrivacy(packageJson, failures);
 
   if (failures.length) {
     throw new Error(['Package pack audit failed:', ...failures.map((failure) => `- ${failure}`)].join('\n'));
@@ -711,6 +713,54 @@ function checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures) 
     if (/^\.\/(features\/|table-tanstack|themes\/)/.test(specifier)) {
       failures.push(
         `Packed Default Style Bundle ${bundleFile} must not import heavy or Theme Adapter stylesheet ${specifier}`,
+      );
+    }
+  }
+}
+
+// Internal Package Paths stay unmistakably private in the packed artifact
+// (#272, docs/adr/0002-public-package-and-stylesheet-surface.md): every
+// internal-category entrypoint ships under the ./internal/ export prefix,
+// every ./internal/ export resolves to an internal-category entrypoint, and
+// no ./internal/ path is presented as a supported style or shorthand surface.
+function checkInternalEntrypointPrivacy(packageJson, failures) {
+  if (packageJson.name !== angularPackageName) return;
+
+  const exportsMap = packageJson.exports;
+  if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) return;
+
+  const internalExportKeys = new Set(
+    entrypointPublicApiFiles()
+      .filter((entrypoint) => entrypoint.category === entrypointCategories.INTERNAL)
+      .map((entrypoint) => `.${entrypoint.specifier.slice(angularPackageName.length)}`),
+  );
+
+  for (const key of internalExportKeys) {
+    if (!key.startsWith('./internal/')) {
+      failures.push(
+        `Internal Package Path export ${key} must stay under the ./internal/ prefix; a supported contract is promoted to a named non-internal Package Entry Point instead`,
+      );
+    }
+    if (!exportsMap[key]) continue;
+    if (isStyleExport(exportsMap[key])) {
+      failures.push(
+        `Internal Package Path export ${key} must not be a style export; internal CSS ships through relative cross-imports only`,
+      );
+    }
+  }
+
+  for (const [key, exportValue] of Object.entries(exportsMap)) {
+    if (!key.startsWith('./internal/')) continue;
+
+    if (isStyleExport(exportValue) || key.endsWith('.css')) {
+      failures.push(
+        `Packed exports present internal stylesheet ${key} as a consumer surface; internal CSS ships through relative cross-imports only`,
+      );
+      continue;
+    }
+    if (!internalExportKeys.has(key)) {
+      failures.push(
+        `Packed exports contain ./internal/ path ${key} that is not a declared internal-category entrypoint; internal subpaths exist only for APF cross-entrypoint linking`,
       );
     }
   }
