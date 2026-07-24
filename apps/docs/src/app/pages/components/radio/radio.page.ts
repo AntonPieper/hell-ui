@@ -138,7 +138,10 @@ import radioPlanPickerExampleCodeRaw from './examples/plan-picker.example.ts?raw
       <p>
         A plan chooser combines <code>hellCard</code> for the container,
         <code>hellField</code> in horizontal orientation to pair each radio with its label and
-        description, and a <code>hellChip</code> to call out the recommended tier. The
+        description, and a <code>hellChip</code> to call out the recommended tier. A
+        <code>ui</code> refinement turns each field's horizontal row into a two-column
+        control/text grid: radio, label, and chip share the first row while the description
+        starts in the text column, aligned under the label instead of the control. The
         <code>required</code> input marks the group required for assistive technology.
       </p>
       <hd-example-tabs [code]="radioPlanPickerExampleCode">
