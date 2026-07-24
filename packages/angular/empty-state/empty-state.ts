@@ -6,12 +6,14 @@ import {
   contentChild,
   input,
 } from '@angular/core';
+import type {
+  HellUi,
+  HellUiInput,
+} from 'hell-ui/core';
 import {
   hellPartStyler,
   type HellRecipe,
-  type HellUi,
-  type HellUiInput,
-} from 'hell-ui/core';
+} from 'hell-ui/internal/core';
 
 /** Built-in dependency-free glyphs the empty state can render in its `media` part. */
 export type HellEmptyStateGlyph = 'noData' | 'noResults' | 'error' | 'forbidden';

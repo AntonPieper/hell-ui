@@ -4,7 +4,6 @@
 
 ```ts
 
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i0 from '@angular/core';
@@ -24,7 +23,7 @@ export class HellEmptyState {
     protected readonly hasCustomMedia: i0.Signal<boolean>;
     protected readonly hasCustomTitle: i0.Signal<boolean>;
     readonly headingLevel: i0.InputSignal<HellEmptyStateHeadingLevel | null>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellEmptyStatePart>;
+    protected readonly part: (part: HellEmptyStatePart) => string;
     readonly title: i0.InputSignal<string | null>;
     readonly ui: i0.InputSignal<HellUiInput<HellEmptyStatePart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellEmptyState, "hell-empty-state", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "glyph": { "alias": "glyph"; "required": false; "isSignal": true; }; "title": { "alias": "title"; "required": false; "isSignal": true; }; "description": { "alias": "description"; "required": false; "isSignal": true; }; "headingLevel": { "alias": "headingLevel"; "required": false; "isSignal": true; }; }, {}, ["customMedia", "customTitle", "customDescription", "customActions"], ["[hellEmptyStateMedia]", "[hellEmptyStateTitle]", "[hellEmptyStateDescription]", "[hellEmptyStateActions]"], true, never>;

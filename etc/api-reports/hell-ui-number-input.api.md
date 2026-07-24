@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellTypedInputAdapter } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -86,7 +85,7 @@ export class HellNumberStep {
     protected nativeButtonType(): string;
     protected onClick(event: MouseEvent): void;
     protected onPointerDown(event: PointerEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected stopHold(): void;
     readonly target: _angular_core.InputSignal<HellNumberInput>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

@@ -8,12 +8,14 @@ import {
   signal,
 } from '@angular/core';
 
+import type {
+  HellSize,
+  HellUiInput,
+} from 'hell-ui/core';
 import {
   hellPartStyler,
   type HellRecipe,
-  type HellSize,
-  type HellUiInput,
-} from 'hell-ui/core';
+} from 'hell-ui/internal/core';
 
 const HELL_CONTROL_GROUP_RECIPE = {
   root: 'inline-flex min-h-hell-control-md w-full min-w-0 items-stretch overflow-hidden rounded-hell-md border border-hell-border bg-hell-surface-elevated text-[13px] text-hell-foreground shadow-hell-xs transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out data-[focus-within=true]:border-hell-border-focus data-[focus-within=true]:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[size=sm]:min-h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:min-h-hell-control-lg data-[size=lg]:text-sm data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle data-[disabled=true]:text-hell-foreground-muted',

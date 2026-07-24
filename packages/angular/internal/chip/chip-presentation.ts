@@ -1,4 +1,5 @@
-import { type HellRecipe, type HellSize } from 'hell-ui/core';
+import type { HellSize } from 'hell-ui/core';
+import type { HellRecipe } from 'hell-ui/internal/core';
 
 type HellChipPresentationPart = 'root';
 

@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellOrientation } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -25,7 +24,7 @@ export class HellSlider implements FormValueControl<number> {
     readonly max: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
     readonly min: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellSliderPart>;
+    protected readonly part: (part: HellSliderPart) => string;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     protected readonly sliderState: ng_primitives_slider.NgpSliderState;
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;

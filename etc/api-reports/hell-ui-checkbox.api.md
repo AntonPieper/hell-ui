@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { FormCheckboxControl } from '@angular/forms/signals';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as ng_primitives_checkbox from 'ng-primitives/checkbox';
@@ -18,7 +17,7 @@ export class HellCheckbox implements FormCheckboxControl {
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
     protected markControlTouched(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellCheckboxPart>;
+    protected readonly part: (part: HellCheckboxPart) => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly state: ng_primitives_checkbox.NgpCheckboxState;
     readonly touch: _angular_core.OutputEmitterRef<void>;
@@ -40,7 +39,7 @@ export class HellNativeCheckbox {
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeCheckbox, "input[type=\"checkbox\"][hellNativeCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;

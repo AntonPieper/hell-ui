@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -29,7 +28,7 @@ export class HellPageLink {
     readonly hellPageLink: _angular_core.InputSignal<HellPageLinkTarget>;
     protected nativeButtonType(): 'button' | null;
     protected onClick(event: Event): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPageLink, "button[hellPageLink], a[hellPageLink]", never, { "hellPageLink": { "alias": "hellPageLink"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPageLink, never>;
@@ -40,7 +39,7 @@ export type HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number
 
 // @public
 export class HellPagination {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPagination, "[hellPagination]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPagination, never>;
@@ -65,7 +64,7 @@ export class HellPaginationStrip {
     protected readonly labels: HellLabels<HellPaginationLabels>;
     protected pageCount(): number;
     protected readonly pages: _angular_core.Signal<number[]>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellPaginationStripPart>;
+    protected readonly part: (part: HellPaginationStripPart) => string;
     readonly siblingCount: _angular_core.InputSignal<number>;
     protected readonly trackPage: (_: number, page: number) => number;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellPaginationStripPart>>;

@@ -1,5 +1,6 @@
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import type { HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
 // eslint-disable-next-line no-restricted-imports -- Private HostBindings keep renderer coordination out of public directive declarations.
 import { HostBinding } from '@angular/core';

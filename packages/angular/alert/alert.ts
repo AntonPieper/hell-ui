@@ -10,7 +10,8 @@ import {
   output,
 } from '@angular/core';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import type { HellUi, HellUiInput } from 'hell-ui/core';
+import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import type { InjectionToken, OutputEmitterRef } from '@angular/core';
 
 /** Built-in accessibility labels owned by the alert entry point. */

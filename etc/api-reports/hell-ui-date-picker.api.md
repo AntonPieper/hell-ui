@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -20,7 +19,7 @@ export class HellDatePicker {
     protected readonly label: _angular_core.Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     readonly locale: _angular_core.InputSignal<string | null>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellDatePickerPart>;
+    protected readonly part: (part: HellDatePickerPart) => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     protected readonly weekdayLabels: _angular_core.Signal<{
         readonly abbr: string;
@@ -69,7 +68,7 @@ export class HellDateRangePicker {
     protected readonly label: _angular_core.Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     readonly locale: _angular_core.InputSignal<string | null>;
-    protected readonly part: hell_ui_core.HellPartStyler<HellDatePickerPart>;
+    protected readonly part: (part: HellDatePickerPart) => string;
     protected readonly rangeComplete: _angular_core.Signal<boolean>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     protected readonly weekdayLabels: _angular_core.Signal<{

@@ -15,12 +15,14 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
-import { hellPartStyler, hellCreateLabels, type HellLabels, type HellRecipe, type HellUi, type HellUiInput } from 'hell-ui/core';
+import { hellCreateLabels, type HellLabels, type HellUi, type HellUiInput } from 'hell-ui/core';
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
   hellResizePairAriaValue,
   type HellResizeDirection,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import { isDocumentPositionFollowing } from 'hell-ui/internal/core';
 import { HellOrientation } from 'hell-ui/core';

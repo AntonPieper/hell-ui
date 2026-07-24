@@ -6,7 +6,6 @@
 
 import * as _angular_core from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -49,7 +48,7 @@ export class HellOmnibar {
     protected readonly overlayPositions: ConnectedPosition[];
     protected readonly overlayScrollStrategy: ScrollStrategy;
     protected readonly panelId: string;
-    protected readonly part: hell_ui_core.HellPartStyler<HellOmnibarPart>;
+    protected readonly part: (part: HellOmnibarPart) => string;
     readonly placeholder: _angular_core.InputSignal<string>;
     readonly query: _angular_core.ModelSignal<string>;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
@@ -63,7 +62,7 @@ export class HellOmnibar {
 export class HellOmnibarAction {
     constructor();
     protected onKeyDown(event: KeyboardEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly pressed: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected tabIndex(): -1 | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
@@ -73,7 +72,7 @@ export class HellOmnibarAction {
 
 // @public
 export class HellOmnibarActionsStrip {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarActionsStrip, "[hellOmnibarActions]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarActionsStrip, never>;
@@ -85,7 +84,7 @@ export type HellOmnibarActivationSource = 'mouse' | 'keyboard';
 // @public
 export class HellOmnibarGroup {
     readonly label: _angular_core.InputSignal<string>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     protected readonly visibleLabel: _angular_core.Signal<HellOmnibarGroupLabel | undefined>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroup, "[hellOmnibarGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, {}, ["visibleLabel"], never, true, never>;
@@ -95,7 +94,7 @@ export class HellOmnibarGroup {
 // @public
 export class HellOmnibarGroupLabel {
     readonly id: string;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroupLabel, "[hellOmnibarGroupLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarGroupLabel, never>;
@@ -111,7 +110,7 @@ export class HellOmnibarItem<T = unknown> {
     readonly itemValue: _angular_core.InputSignal<T>;
     protected onClick(event: MouseEvent): void;
     protected onMouseMove(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly select: _angular_core.OutputEmitterRef<T>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItem<any>, "button[hellOmnibarItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "itemValue": { "alias": "value"; "required": true; "isSignal": true; }; "closeOnSelect": { "alias": "closeOnSelect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "select": "select"; }, never, never, true, never>;
