@@ -436,6 +436,28 @@ describe('HellOmnibar command interaction runtime', () => {
     ]);
     expect(host.submitEvents[0]?.item).toBe(host.beta);
     expect(host.open()).toBe(true);
+    expect(host.query()).toBe('');
+    expect(input.value).toBe('');
+  });
+
+  it('clears the query on pointer activation while the submit payload keeps it', () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    host.query.set('alp');
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.focus();
+    fixture.detectChanges();
+
+    query<HTMLButtonElement>(overlayRoot(), '[role="option"]').click();
+    fixture.detectChanges();
+
+    expect(host.submitEvents).toEqual([{ query: 'alp', item: 'alpha', source: 'mouse' }]);
+    expect(host.query()).toBe('');
+    expect(host.queryEvents).toEqual(['']);
+    expect(input.value).toBe('');
+    expect(host.open()).toBe(false);
   });
 
   it('hands focus to actions with F6 and returns it on F6 or Escape', () => {
@@ -516,6 +538,7 @@ describe('HellOmnibar command interaction runtime', () => {
   it('keeps registered nested floating focus inside before true outside focus dismisses', async () => {
     const fixture = TestBed.createComponent(OmnibarHost);
     const host = fixture.componentInstance;
+    host.query.set('be');
     fixture.detectChanges();
 
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
@@ -544,6 +567,8 @@ describe('HellOmnibar command interaction runtime', () => {
     fixture.detectChanges();
 
     expect(host.open()).toBe(false);
+    // Dismissing without activating keeps the typed query.
+    expect(host.query()).toBe('be');
   });
 
   describe('recipes', () => {
