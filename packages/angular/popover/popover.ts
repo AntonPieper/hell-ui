@@ -30,7 +30,7 @@ import {
   type NgpOverlay,
   type NgpOverlayContent,
 } from 'ng-primitives/portal';
-import { hellPartStyler, type HellRecipe, type HellUiInput } from 'hell-ui/core';
+import type { HellUiInput } from 'hell-ui/core';
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
@@ -38,6 +38,8 @@ import {
   hellResolveElementTarget,
   HellNativeInteractiveDisabledGuard,
   type HellFloatingScope,
+  hellPartStyler,
+  type HellRecipe,
 } from 'hell-ui/internal/core';
 import {
   HELL_FLOATING_POP_IN,

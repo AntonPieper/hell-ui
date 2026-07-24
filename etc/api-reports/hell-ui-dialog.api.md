@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellNativeInteractiveDisabledGuard } from 'hell-ui/internal/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i1 from 'ng-primitives/dialog';
@@ -20,7 +19,7 @@ export const HELL_DIALOG_IMPORTS: readonly [typeof HellDialogTrigger, typeof Hel
 // @public
 export class HellDialog {
     protected onTabKeydown(event: Event): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg" | "xl">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialog, "[hellDialog]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialog; inputs: {}; outputs: {}; }]>;
@@ -29,7 +28,7 @@ export class HellDialog {
 
 // @public
 export class HellDialogDescription {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialogDescription, "[hellDialogDescription]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialogDescription; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogDescription, never>;
@@ -38,7 +37,7 @@ export class HellDialogDescription {
 // @public
 export class HellDialogOverlay {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly scoped: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialogOverlay, "[hellDialogOverlay]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "scoped": { "alias": "scoped"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialogOverlay; inputs: {}; outputs: {}; }]>;
@@ -59,7 +58,7 @@ export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
 
 // @public
 export class HellDialogTitle {
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialogTitle, "[hellDialogTitle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialogTitle; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialogTitle, never>;

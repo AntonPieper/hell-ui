@@ -6,7 +6,6 @@
 
 import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
@@ -26,7 +25,7 @@ class HellTable {
     get contentWidthInput(): boolean;
     set contentWidthInput(value: boolean);
     static ngAcceptInputType_contentWidthInput: unknown;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected role(): string | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTable, "[hellTableRoot], table[hellTable]", ["hellTableRoot"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "contentWidthInput": { "alias": "contentWidth"; "required": false; }; }, {}, never, never, true, never>;
@@ -38,7 +37,7 @@ export { HellTable as HellTableRoot }
 // @public
 export class HellTableBody {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected role(): string | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableBody, "[hellTableBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -52,7 +51,7 @@ export class HellTableCell {
     get alignInput(): 'start' | 'center' | 'end';
     set alignInput(value: 'start' | 'center' | 'end');
     readonly host: any;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected role(): string | null;
     readonly space: _angular_core.WritableSignal<"normal" | "empty">;
     get spaceInput(): 'normal' | 'empty';
@@ -66,7 +65,7 @@ export class HellTableCell {
 export class HellTableContainer {
     constructor();
     readonly busy: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableContainer, "[hellTableContainer]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "busy": { "alias": "busy"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableContainer, never>;
@@ -76,7 +75,7 @@ export class HellTableContainer {
 class HellTableHead {
     constructor();
     nextSibling(cell: HellTableHeaderCell): HellTableHeaderCell | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     register(c: HellTableHeaderCell): void;
     protected role(): string | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
@@ -100,7 +99,7 @@ export class HellTableHeaderCell implements OnDestroy {
     measure(): number;
     static ngAcceptInputType_sortableInput: unknown;
     ngOnDestroy(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     resizeItem(minSize: number): HellTableResizeItem | null;
     protected role(): string | null;
     setLiveWidth(px: number): void;
@@ -171,7 +170,7 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     ngOnDestroy(): void;
     protected onKey(e: KeyboardEvent): void;
     protected onPointerDown(e: PointerEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<HellTableResizeHandlePart>;
+    protected readonly part: (part: HellTableResizeHandlePart) => string;
     readonly resizeAdapter: _angular_core.InputSignal<HellTableResizeAdapter | null>;
     readonly resizeCommit: _angular_core.OutputEmitterRef<HellTableResizeEvent>;
     protected resizeTabIndex(): -1 | 0;
@@ -211,7 +210,7 @@ export class HellTableRow {
     set activeInput(value: boolean);
     static ngAcceptInputType_activeInput: unknown;
     static ngAcceptInputType_selectedInput: unknown;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     protected role(): string | null;
     readonly selected: _angular_core.WritableSignal<boolean>;
     get selectedInput(): boolean;
@@ -225,7 +224,7 @@ export class HellTableRow {
 export class HellTableRowAction {
     constructor();
     protected nativeButtonType(): 'button' | null;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableRowAction, "button[hellTableRowAction], a[hellTableRowAction]", ["hellTableRowAction"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableRowAction, never>;
@@ -238,7 +237,7 @@ export class HellTableRowCheckbox {
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableRowCheckbox, "input[type=\"checkbox\"][hellTableRowCheckbox]", ["hellTableRowCheckbox"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
@@ -270,7 +269,7 @@ export class HellTableRowRadio {
     constructor();
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
     protected onChange(): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableRowRadio, "input[type=\"radio\"][hellTableRowRadio]", ["hellTableRowRadio"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
@@ -280,7 +279,7 @@ export class HellTableRowRadio {
 // @public
 export class HellTableSelectionCell {
     constructor();
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableSelectionCell, "[hellTableSelectionCell]", ["hellTableSelectionCell"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableSelectionCell, never>;
@@ -292,7 +291,7 @@ export class HellTableSortTrigger {
     protected disabled(): boolean;
     protected nativeButtonType(): 'button' | null;
     protected onClick(e: MouseEvent): void;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly sortToggle: _angular_core.OutputEmitterRef<MouseEvent>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableSortTrigger, "button[hellTableSortTrigger]", ["hellTableSortTrigger"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, { "sortToggle": "sortToggle"; }, never, never, true, never>;

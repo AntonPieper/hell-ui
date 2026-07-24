@@ -9,13 +9,16 @@ import {
   model,
 } from '@angular/core';
 import {
-  hellCreateLabels, type HellLabels,
-  hellPartStyler,
-  type HellRecipe,
+  hellCreateLabels,
+  type HellLabels,
   type HellTimeValue,
   type HellUi,
   type HellUiInput,
 } from 'hell-ui/core';
+import {
+  hellPartStyler,
+  type HellRecipe,
+} from 'hell-ui/internal/core';
 import {
   hellTimePickerMaxValue,
   hellTimePickerNextValue,

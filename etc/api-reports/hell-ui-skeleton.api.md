@@ -5,13 +5,12 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as hell_ui_core from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
 
 // @public
 export class HellSkeleton {
     readonly height: _angular_core.InputSignal<string>;
-    protected readonly part: hell_ui_core.HellPartStyler<"root">;
+    protected readonly part: (part: "root") => string;
     readonly shape: _angular_core.InputSignal<"text" | "circle" | "rect">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly width: _angular_core.InputSignal<string>;

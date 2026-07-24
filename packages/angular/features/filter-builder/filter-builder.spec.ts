@@ -262,7 +262,7 @@ describe('HellFilterBuilder', () => {
 
   describe('recipes', () => {
     // Part-Class Pipeline merge semantics are owned centrally by
-    // `core/part-class-pipeline.spec.ts`; the snapshot pins the default part
+    // `internal/core/part-class-pipeline.spec.ts`; the snapshot pins the default part
     // classes (empty-string ui yields the pure recipes) without asserting
     // individual utilities elsewhere.
     it('keeps the default part classes stable', async () => {
