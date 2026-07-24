@@ -77,8 +77,12 @@ export type HellToasterPart =
 /** Part Style Map accepted by the HellToaster `ui` input. */
 export type HellToasterUi = HellUi<HellToasterPart>;
 
+// Placement-dependent values (anchor offsets, --hell-toast-dir,
+// --hell-toast-origin, exit direction) live in styles.css keyed off
+// `data-position`; recipe utilities would beat those component-layer
+// rules from the utilities layer and pin every placement to bottom-right.
 const HELL_TOASTER_RECIPE = {
-  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toast-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
+  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toast-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))]',
   region: 'relative block pointer-events-auto',
   viewport:
     'relative box-border h-16 w-full pe-[var(--hell-toast-gutter)] overflow-visible transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
@@ -93,8 +97,11 @@ const HELL_TOASTER_RECIPE = {
     'appearance-none whitespace-nowrap rounded-hell-sm border border-hell-border-strong bg-hell-surface px-2.5 py-1 text-xs font-semibold text-hell-foreground transition-[background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted active:bg-hell-surface-subtle focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
   close:
     '-my-0.5 -ms-0 me-[-4px] inline-flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent text-hell-foreground-subtle transition-[color,background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1',
+  // The hidden-state offset/scale is `transform` in styles.css; translate/scale
+  // utilities would set the independent CSS properties on top of it and keep the
+  // toolbar offset and shrunken even once the expanded reveal completes.
   toolbar:
-    'absolute z-4 flex opacity-0 pointer-events-none translate-y-1 scale-[0.98] transition-[opacity,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)]',
+    'absolute z-4 flex opacity-0 pointer-events-none transition-[opacity,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)]',
   dismissAll:
     'inline-flex cursor-pointer items-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-elevated px-2.5 py-[7px] text-xs font-semibold leading-none text-hell-foreground no-underline shadow-hell-md transition-[border-color,background-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:border-hell-border-strong hover:bg-hell-surface-elevated active:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
 } satisfies HellRecipe<HellToasterPart>;
