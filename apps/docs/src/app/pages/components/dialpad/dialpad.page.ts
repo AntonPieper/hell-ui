@@ -200,6 +200,7 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
         <li>Every key, the clear/backspace controls, and the call button are native <code>&lt;button&gt;</code> elements with <code>aria-label</code>s — digit keys announce their letters (for example "Digit 2, ABC"), <code>*</code> announces "Star", <code>#</code> announces "Pound", and <code>0</code> announces the hold-for-plus affordance.</li>
         <li>Keyboard support works from the host or the number input: digits, <code>*</code>, <code>#</code>, and <code>+</code> append to the value; <code>Backspace</code> removes one character; <code>Delete</code> clears the value; <code>Enter</code> triggers <code>(call)</code> when the call button is shown and a value is present.</li>
         <li>Press-and-hold <code>0</code> with pointer or touch input enters <code>+</code> instead of <code>0</code>; there is no separate <code>+</code> key in the layout.</li>
+        <li>Keys commit when the pointer lifts on the key it pressed, so overlapping taps all register during fast two-thumb dialing, and sliding off a key before lifting abandons the tap. A key held down while another key is tapped therefore records the digits in release order.</li>
         <li><code>disabled</code> sets <code>aria-disabled="true"</code> on the host and disables every native control; <code>invalid</code> sets <code>aria-invalid="true"</code> on both the host and the number input.</li>
       </ul>
 

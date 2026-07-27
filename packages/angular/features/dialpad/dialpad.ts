@@ -44,6 +44,12 @@ interface HellDialpadKey {
   letters?: string;
 }
 
+/** One pointer's pending press-and-hold gesture on the `0` key. */
+interface HellDialpadPlusHold {
+  timer: ReturnType<typeof setTimeout> | null;
+  entered: boolean;
+}
+
 /** Public parts of the HellDialpad module, styleable through its Part Style Map. */
 export type HellDialpadPart =
   | 'root'
@@ -205,7 +211,7 @@ const HELL_DIALPAD_RECIPE = {
           [attr.data-disabled]="!canEdit() ? '' : null"
           (pointerdown)="onKeyPointerDown($event, k.digit)"
           (pointerup)="onKeyPointerUp($event, k.digit)"
-          (pointercancel)="onKeyPointerCancel($event, k.digit)"
+          (pointercancel)="onKeyPointerCancel($event)"
           (click)="onKeyClick($event, k.digit)"
         >
           <span data-slot="digit" [class]="part('digit')">{{ k.digit }}</span>
@@ -228,7 +234,7 @@ const HELL_DIALPAD_RECIPE = {
           [attr.data-disabled]="!canEdit() ? '' : null"
           (pointerdown)="onKeyPointerDown($event, k.digit)"
           (pointerup)="onKeyPointerUp($event, k.digit)"
-          (pointercancel)="onKeyPointerCancel($event, k.digit)"
+          (pointercancel)="onKeyPointerCancel($event)"
           (click)="onKeyClick($event, k.digit)"
         >
           <span data-slot="digit" [class]="part('digit')">{{ k.digit }}</span>
@@ -307,20 +313,24 @@ export class HellDialpad {
   private readonly local = signal('');
   private readonly activeControl = signal<string | null>(null);
   private activeTimer: ReturnType<typeof setTimeout> | null = null;
-  private plusHoldTimer: ReturnType<typeof setTimeout> | null = null;
-  private plusHoldTriggered = false;
   /**
    * The key each active pointer pressed down on, keyed by pointer id. Rapid
    * dialing overlaps fingers, so several keys can be held at the same time.
    */
   private readonly heldKeys = new Map<number, string>();
+  /**
+   * Pending hold-for-plus gestures, also keyed by pointer id, so a second
+   * finger on `0` cannot cancel or claim the first finger's hold.
+   */
+  private readonly plusHolds = new Map<number, HellDialpadPlusHold>();
+  private stopWatchingPointerRelease: (() => void) | null = null;
   /** Template alias for the call-button visibility signal. */
   protected readonly showCallButtonState = this.showCallButton;
 
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.clearActiveTimer();
-      this.cancelPlusHold();
+      this.releaseAllPointers();
     });
   }
 
@@ -403,16 +413,18 @@ export class HellDialpad {
     if (!this.canEdit() || this.isSecondaryMouseButton(event)) return;
 
     this.heldKeys.set(event.pointerId, digit);
+    this.watchPointerRelease(event);
     if (digit !== '0') return;
 
-    this.cancelPlusHold();
     const target = event.currentTarget as HTMLElement | null;
     if (target?.setPointerCapture) {
       target.setPointerCapture(event.pointerId);
     }
-    this.plusHoldTimer = setTimeout(() => {
-      this.plusHoldTimer = null;
-      this.plusHoldTriggered = true;
+    const hold: HellDialpadPlusHold = { timer: null, entered: false };
+    this.plusHolds.set(event.pointerId, hold);
+    hold.timer = setTimeout(() => {
+      hold.timer = null;
+      hold.entered = true;
       this.press('+');
     }, PLUS_HOLD_MS);
   }
@@ -422,25 +434,18 @@ export class HellDialpad {
     if (this.isSecondaryMouseButton(event)) return;
 
     const pressedKey = this.heldKeys.get(event.pointerId);
-    this.heldKeys.delete(event.pointerId);
+    this.releasePointerCapture(event);
+    const enteredPlus = this.forgetPointer(event.pointerId);
 
-    if (digit === '0') {
-      this.releasePointerCapture(event);
-      const enteredPlus = this.plusHoldTriggered;
-      this.cancelPlusHold();
-      if (enteredPlus) return;
-    }
-
-    if (pressedKey !== digit) return;
+    if (enteredPlus || pressedKey !== digit) return;
+    if (!this.releasedInsideKey(event)) return;
     this.press(digit);
   }
 
   /** Abandon the tap when the browser claims the pointer for a scroll or zoom. */
-  protected onKeyPointerCancel(event: PointerEvent, digit: string): void {
-    this.heldKeys.delete(event.pointerId);
-    if (digit !== '0') return;
+  protected onKeyPointerCancel(event: PointerEvent): void {
     this.releasePointerCapture(event);
-    this.cancelPlusHold();
+    this.forgetPointer(event.pointerId);
   }
 
   /**
@@ -449,7 +454,7 @@ export class HellDialpad {
    * `detail`, and that tap already committed from `pointerup`.
    */
   protected onKeyClick(event: MouseEvent, digit: string): void {
-    if (event.detail !== 0) return;
+    if (event.detail > 0) return;
     this.press(digit);
   }
 
@@ -596,16 +601,72 @@ export class HellDialpad {
     }
   }
 
-  /** Abort a pending hold-for-plus gesture. */
-  private cancelPlusHold(): void {
-    this.clearPlusHoldTimer();
-    this.plusHoldTriggered = false;
+  /**
+   * Touch and pen pointers keep implicit capture from `pointerdown`, so their
+   * `pointerup` always retargets to the pressed key however far the finger
+   * travelled. Hit-testing the release point keeps sliding off a key a way to
+   * abandon the tap, exactly as the browser's own click did.
+   */
+  private releasedInsideKey(event: PointerEvent): boolean {
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) return true;
+
+    const rect = target.getBoundingClientRect();
+    return (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    );
   }
 
-  private clearPlusHoldTimer(): void {
-    if (this.plusHoldTimer !== null) {
-      clearTimeout(this.plusHoldTimer);
-      this.plusHoldTimer = null;
+  /** Forget one pointer, reporting whether it already entered `+` by holding. */
+  private forgetPointer(pointerId: number): boolean {
+    this.heldKeys.delete(pointerId);
+
+    const hold = this.plusHolds.get(pointerId);
+    if (hold) {
+      this.plusHolds.delete(pointerId);
+      if (hold.timer !== null) clearTimeout(hold.timer);
     }
+
+    if (this.heldKeys.size === 0) {
+      this.stopWatchingPointerRelease?.();
+      this.stopWatchingPointerRelease = null;
+    }
+    return hold?.entered ?? false;
+  }
+
+  /**
+   * Mouse pointers get no implicit capture, so a press released off the keypad
+   * never reaches a key listener. Watch the owning window until every pointer
+   * is released so no key stays recorded as held and later commits a stray
+   * digit under an unrelated pointer.
+   */
+  private watchPointerRelease(event: PointerEvent): void {
+    if (this.stopWatchingPointerRelease) return;
+
+    const view = (event.currentTarget as HTMLElement | null)?.ownerDocument.defaultView;
+    if (!view) return;
+
+    const release = (released: PointerEvent): void => {
+      this.forgetPointer(released.pointerId);
+    };
+    view.addEventListener('pointerup', release);
+    view.addEventListener('pointercancel', release);
+    this.stopWatchingPointerRelease = () => {
+      view.removeEventListener('pointerup', release);
+      view.removeEventListener('pointercancel', release);
+    };
+  }
+
+  private releaseAllPointers(): void {
+    for (const hold of this.plusHolds.values()) {
+      if (hold.timer !== null) clearTimeout(hold.timer);
+    }
+    this.plusHolds.clear();
+    this.heldKeys.clear();
+    this.stopWatchingPointerRelease?.();
+    this.stopWatchingPointerRelease = null;
   }
 }

@@ -399,7 +399,7 @@ describe('HellDialpad labels', () => {
     expect(displayValue(host)).toBe('');
   });
 
-  it('ignores a pointer that lifts on a different key than it pressed', () => {
+  it('ignores a mouse pointer that lifts on a different key than it pressed', () => {
     const fixture = TestBed.createComponent(DialpadHost);
     const host = fixture.nativeElement;
     fixture.detectChanges();
@@ -409,6 +409,104 @@ describe('HellDialpad labels', () => {
 
     pointer(one, 'pointerdown', 50, { pointerType: 'mouse' });
     pointer(two, 'pointerup', 50, { pointerType: 'mouse' });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(displayValue(host)).toBe('');
+  });
+
+  // Touch and pen pointers keep implicit capture, so their release always
+  // retargets to the pressed key however far the finger travelled. Only the
+  // release coordinates can tell a tap from a slide-off.
+  it('ignores a touch that slides off the key before lifting', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const one = query<HTMLButtonElement>(host, '[data-key="1"]');
+    stubRect(one, { left: 10, top: 10, right: 90, bottom: 70 });
+
+    pointer(one, 'pointerdown', 60, { clientX: 50, clientY: 40 });
+    pointer(one, 'pointerup', 60, { clientX: 50, clientY: 260 });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(displayValue(host)).toBe('');
+
+    // The same key still commits when the finger lifts within its bounds.
+    pointer(one, 'pointerdown', 61, { clientX: 50, clientY: 40 });
+    pointer(one, 'pointerup', 61, { clientX: 88, clientY: 68 });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual(['1']);
+    expect(displayValue(host)).toBe('1');
+  });
+
+  it('keeps hold-for-plus per pointer while another finger taps zero', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const zero = query<HTMLButtonElement>(host, '[data-key="0"]');
+
+      // Finger A starts holding for `+` while finger B taps the same key.
+      pointer(zero, 'pointerdown', 70);
+      pointer(zero, 'pointerdown', 71);
+      pointer(zero, 'pointerup', 71);
+      vi.advanceTimersByTime(520);
+      fixture.detectChanges();
+      pointer(zero, 'pointerup', 70);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.digits).toEqual(['0', '+']);
+      expect(displayValue(host)).toBe('0+');
+    } finally {
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps a pending hold-for-plus alive when a foreign pointer lifts over zero', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const zero = query<HTMLButtonElement>(host, '[data-key="0"]');
+      const five = query<HTMLButtonElement>(host, '[data-key="5"]');
+
+      pointer(zero, 'pointerdown', 72);
+      // A mouse press that started on `5` drags across and lifts over `0`.
+      pointer(five, 'pointerdown', 73, { pointerType: 'mouse' });
+      pointer(zero, 'pointerup', 73, { pointerType: 'mouse' });
+      vi.advanceTimersByTime(520);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.digits).toEqual(['+']);
+      expect(displayValue(host)).toBe('+');
+    } finally {
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it('forgets a mouse press released away from the keypad', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const five = query<HTMLButtonElement>(host, '[data-key="5"]');
+
+    // Mouse pointers get no implicit capture, so a release off the keypad
+    // never reaches a key listener and the press must not stay recorded.
+    pointer(five, 'pointerdown', 80, { pointerType: 'mouse' });
+    window.dispatchEvent(
+      new PointerEvent('pointerup', { bubbles: true, pointerType: 'mouse', pointerId: 80 }),
+    );
+    pointer(five, 'pointerup', 80, { pointerType: 'mouse' });
     fixture.detectChanges();
 
     expect(fixture.componentInstance.digits).toEqual([]);
@@ -578,6 +676,22 @@ function pointer(
       ...init,
     }),
   );
+}
+
+/** jsdom reports a zero-sized rect, so release hit-testing needs real bounds. */
+function stubRect(
+  element: HTMLElement,
+  bounds: { left: number; top: number; right: number; bottom: number },
+): void {
+  const rect: DOMRect = {
+    ...bounds,
+    x: bounds.left,
+    y: bounds.top,
+    width: bounds.right - bounds.left,
+    height: bounds.bottom - bounds.top,
+    toJSON: () => bounds,
+  };
+  element.getBoundingClientRect = () => rect;
 }
 
 /** The click a browser synthesizes after a completed pointer tap. */

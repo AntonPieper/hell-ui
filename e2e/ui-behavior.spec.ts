@@ -331,7 +331,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
   });
 
-  test('dialpad keeps every tap of an overlapping multi-touch sequence', async ({
+  test('dialpad keeps overlapping taps and still cancels a slide-off', async ({
     page,
     browserName,
   }) => {
@@ -377,6 +377,36 @@ test.describe('Hell UI browser behavior', () => {
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 
     await expect(display).toHaveValue('12');
+
+    await display.focus();
+    await page.keyboard.press('Delete');
+    await expect(display).toHaveValue('');
+
+    // A non-scrollable dialer never gets the scroll-driven `pointercancel`
+    // that hides a missing release check: implicit pointer capture retargets
+    // the release to the pressed key however far the finger travelled.
+    await dialpad.evaluate((node: HTMLElement) => {
+      node.style.touchAction = 'none';
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 53, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ id: 53, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('');
+
+    // The same layout still commits a clean tap, so the slide-off above was
+    // cancelled rather than the whole sequence being dropped.
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 54, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('2');
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
