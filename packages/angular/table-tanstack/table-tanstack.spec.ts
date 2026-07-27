@@ -359,6 +359,20 @@ describe('Hell TanStack table shell', () => {
     ).toBe('');
   });
 
+  it('publishes the TanStack column size and matching grow factor on body cells', () => {
+    const fixture = TestBed.createComponent(VirtualRowsHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const cell = query(root, 'td[data-column-id="name"]');
+    const size = fixture.componentInstance.table.getColumn('name')?.getSize();
+
+    // The header keeps the native table grid, which stretches columns
+    // proportionally when the shell table is wider than the TanStack total
+    // size. The grow factor lets the flex body row reproduce that same grid.
+    expect(cell.style.getPropertyValue('--hell-table-column-size')).toBe(`${size}px`);
+    expect(cell.style.getPropertyValue('--hell-table-column-grow')).toBe(`${size}`);
+  });
+
   it('exposes the shell chrome parts through public data-slot markers', () => {
     const fixture = TestBed.createComponent(StyledShellHost);
     fixture.detectChanges();
