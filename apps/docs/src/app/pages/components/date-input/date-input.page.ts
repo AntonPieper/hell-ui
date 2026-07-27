@@ -11,6 +11,10 @@ import { DateInputBoundsAndValidationExample } from './examples/bounds-and-valid
 import dateInputBoundsAndValidationExampleCodeRaw from './examples/bounds-and-validation.example.ts?raw' with {
   loader: 'text',
 };
+import { DateInputFormatExample } from './examples/format.example';
+import dateInputFormatExampleCodeRaw from './examples/format.example.ts?raw' with {
+  loader: 'text',
+};
 import { DateInputFormsExample } from './examples/forms.example';
 import dateInputFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
   loader: 'text',
@@ -44,6 +48,7 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
     RouterLink,
     DateInputBasicExample,
     DateInputBoundsAndValidationExample,
+    DateInputFormatExample,
     DateInputFormsExample,
     DateInputReactiveFormsExample,
     DateInputSizesExample,
@@ -83,12 +88,33 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
 
       <h2>Controlled value</h2>
       <p>
-        The default adapter accepts only <code>YYYY-MM-DD</code>. A valid blur or Enter commits a
+        The default adapter accepts only the configured format, ISO <code>YYYY-MM-DD</code> until a
+        provider or a local <code>format</code> changes it. A valid blur or Enter commits a
         local-calendar date; empty text commits <code>null</code>. Partial or malformed text remains
         visible as an invalid draft without emitting a replacement value.
       </p>
       <hd-example-tabs [code]="dateInputBasicExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-basic-example />
+      </hd-example-tabs>
+
+      <h2>Date format</h2>
+      <p>
+        A format is one pattern written with the <code>YYYY</code>, <code>MM</code>, and
+        <code>DD</code> tokens plus literal separators.
+        <code>provideHellDateInputFormat</code> sets it for an injector scope — the application, a
+        lazy route, or a single component — and a local <code>format</code> input overrides that
+        scope for one input. Parsing, display, the native <code>min</code>/<code>max</code>
+        attributes, and the placeholder hint all follow the effective format, while the committed
+        value stays a plain <code>Date | null</code>: changing the format never changes what a form
+        receives.
+      </p>
+      <p>
+        Date Input fills the native <code>placeholder</code> with the effective pattern unless the
+        consumer authors one. Anything a pattern cannot express — month names, locale-aware output,
+        or several accepted input shapes — belongs in a custom adapter instead.
+      </p>
+      <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
+        <app-date-input-format-example />
       </hd-example-tabs>
 
       <h2>Calendar composition recipe</h2>
@@ -187,7 +213,9 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         Override parsing and display policy per injector with
         <code>provideHellDateInputAdapter</code>. A <code>HellDateInputAdapter</code> supplies
         <code>parseText</code>, <code>format</code>, and optional <code>normalize</code>,
-        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks. Return
+        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks; every hook receives the
+        effective <code>{{ '{ format }' }}</code> context, so a custom adapter can still honor the
+        configured pattern. Return
         <code>hellTypedValue(value)</code> for a commit, <code>hellTypedValue(null)</code> for a
         clear, or <code>hellInvalidTypedValue()</code> to retain an invalid draft.
       </p>
@@ -233,6 +261,14 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
             <td>
               Inclusive typed bounds in stable adapter format; also driven by a bound field's
               <code>minDate()</code>/<code>maxDate()</code> metadata.
+            </td>
+          </tr>
+          <tr>
+            <td><code>format</code></td>
+            <td><code>HellDateInputFormat | undefined</code></td>
+            <td>
+              Per-instance format pattern; unset uses the nearest
+              <code>provideHellDateInputFormat</code> scope, then ISO <code>YYYY-MM-DD</code>.
             </td>
           </tr>
           <tr>
@@ -332,6 +368,7 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <ul class="hd-do">
         <li>Use a visible Field label or a native <code>aria-label</code> on standalone inputs.</li>
         <li>Use the strict default ISO format for stable business dates, or replace the adapter coherently.</li>
+        <li>Set one format per app or feature scope; keep the per-input <code>format</code> for genuinely local formats.</li>
         <li>Add a picker only when calendar navigation materially helps the workflow.</li>
       </ul>
 
@@ -348,6 +385,7 @@ export class DateInputPage {
   protected readonly dateInputBasicExampleCode = dateInputBasicExampleCodeRaw;
   protected readonly dateInputBoundsAndValidationExampleCode =
     dateInputBoundsAndValidationExampleCodeRaw;
+  protected readonly dateInputFormatExampleCode = dateInputFormatExampleCodeRaw;
   protected readonly dateInputFormsExampleCode = dateInputFormsExampleCodeRaw;
   protected readonly dateInputReactiveFormsExampleCode = dateInputReactiveFormsExampleCodeRaw;
   protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;

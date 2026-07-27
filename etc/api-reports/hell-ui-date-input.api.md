@@ -16,7 +16,13 @@ import { Signal } from '@angular/core';
 export const HELL_DATE_INPUT_ADAPTER: InjectionToken<HellDateInputAdapter>;
 
 // @public
+export const HELL_DATE_INPUT_FORMAT: InjectionToken<string>;
+
+// @public
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter;
+
+// @public
+export const HELL_DEFAULT_DATE_INPUT_FORMAT: HellDateInputFormat;
 
 // @public
 export class HellDateInput implements FormValueControl<Date | null> {
@@ -28,6 +34,7 @@ export class HellDateInput implements FormValueControl<Date | null> {
     protected readonly display: _angular_core.Signal<string>;
     protected readonly fieldAriaDescribedby: Signal<string | null>;
     protected readonly fieldAriaLabelledby: Signal<string | null>;
+    readonly format: _angular_core.InputSignalWithTransform<string | undefined, string | null | undefined>;
     readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
@@ -44,15 +51,26 @@ export class HellDateInput implements FormValueControl<Date | null> {
     protected readonly requiredMissing: Signal<boolean>;
     readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly value: _angular_core.ModelSignal<Date | null>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDateInput, "input[hellDateInput]", ["hellDateInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDateInput, "input[hellDateInput]", ["hellDateInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "format": { "alias": "format"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateInput, never>;
 }
 
 // @public
-export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
+export type HellDateInputAdapter = HellTypedInputAdapter<Date, HellDateInputAdapterContext>;
+
+// @public
+export interface HellDateInputAdapterContext {
+    readonly format: HellDateInputFormat;
+}
+
+// @public
+export type HellDateInputFormat = string;
 
 // @public
 export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Provider;
+
+// @public
+export function provideHellDateInputFormat(format: HellDateInputFormat): Provider;
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,0 +1,13 @@
+kind: Breaking
+body: >-
+  `HellDateInputAdapter` hooks now receive a `HellDateInputAdapterContext`
+  (`{ format }`) as their trailing argument, the same shape Time Input's adapter
+  context already uses. Custom adapters that ignore the argument keep compiling;
+  direct calls into `HELL_DEFAULT_DATE_INPUT_ADAPTER` must pass a context.
+time: 2026-07-27T11:19:34.000000+02:00
+custom:
+  migration: >-
+    Add the effective format context to direct calls into
+    `HELL_DEFAULT_DATE_INPUT_ADAPTER`: its hooks now take a trailing
+    `{ format: HELL_DEFAULT_DATE_INPUT_FORMAT }` argument. Adapters supplied
+    through `provideHellDateInputAdapter` need no change.

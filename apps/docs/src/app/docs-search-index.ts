@@ -661,6 +661,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'date-input input hellDateInput required min max invalid disabled native attributes bounds invalid draft',
  },
  {
+ title:'Date Input: Format',
+ path:'/components/date-input',
+ detail:'components/date-input/examples/format.example.ts',
+ terms:
+'date-input format provideHellDateInputFormat HELL_DATE_INPUT_FORMAT HellDateInputFormat pattern YYYY MM DD DD.MM.YYYY MM/DD/YYYY locale order separator placeholder hint per-instance override provider scope parsing display',
+ },
+ {
  title:'Date Input: Forms',
  path:'/components/date-input',
  detail:'components/date-input/examples/forms.example.ts',
