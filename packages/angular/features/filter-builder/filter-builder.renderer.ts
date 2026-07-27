@@ -776,11 +776,17 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     // after the exit animation. Skipping `show()` there would let the pending
     // dispose tear down the panel the new session just claimed, leaving a
     // create session with no editor at all. `show()` is what cancels that
-    // pending close.
+    // pending close, and on an open trigger it returns before it would create
+    // an overlay, so there is nothing to double-open.
     //
-    // Its promise, however, only settles when it actually mounts a panel: an
-    // already-open trigger returns early and never resolves, so the focus step
-    // has to be scheduled outside the promise for that case.
+    // Its promise is the unreliable part. On the plain already-open path —
+    // `openTimeout || isOpen()` with no destruction pending — it returns
+    // without resolving, so a focus step riding on `then()` would never run;
+    // hence the second, unconditional call below. Mid-exit-animation the
+    // promise does settle, because that path calls `cancelDestruction()` and
+    // resolves while `open()` is still true, so both branches fire. That is
+    // harmless: `scheduleFocus` clears the pending timer first and both
+    // branches schedule the same callback, so the panel is still focused once.
     const wasOpen = trigger.open();
     void trigger.show().then(() => {
       if (this.isLatestSession(session)) this.scheduleEditorFocus('create');

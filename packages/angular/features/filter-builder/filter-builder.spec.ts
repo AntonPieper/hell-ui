@@ -778,6 +778,52 @@ describe('HellFilterBuilder', () => {
     );
   });
 
+  it('mounts the next create editor when it opens inside the previous teardown', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+
+    // The field option has to be mounted up front: opening the picker
+    // dropdown costs a task, and the dispose this test needs to still be
+    // pending is itself queued on a task.
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+    inputValue(picker, 'Status');
+    const option = await waitFor<HTMLElement>(fixture, document.body, '[data-slot="fieldOption"]');
+
+    // Cancelling only queues the popover's dispose; the trigger keeps
+    // reporting itself open until the portal has detached. Activating the next
+    // field in the same task lands inside that window, so `beginCreate` sees
+    // an open trigger that is on its way out. Only calling `show()` cancels
+    // the pending close — skipping it lets the dispose tear down the panel the
+    // new session just claimed and leaves a create session with no editor.
+    query<HTMLButtonElement>(editor, '[data-test-name-cancel]').click();
+    option.click();
+
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    const editors = queryAll<HTMLElement>(document.body, '[data-slot="editor"]');
+    expect(editors).toHaveLength(1);
+    expect(editors[0]!.dataset['mode']).toBe('create');
+    expect(editors[0]!.dataset['field']).toBe('status');
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="root"]').dataset['editing'])
+      .toBe('create');
+    // The focus step cannot ride on `show()`'s promise here: an already-open
+    // trigger returns without resolving it.
+    expect(editors[0]!.contains(document.activeElement)).toBe(true);
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
+
   it('returns focus to the inline picker when Tab wraps it onto a page control', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.value.set([]);

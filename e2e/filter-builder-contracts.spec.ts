@@ -718,10 +718,25 @@ test.describe('Filter Builder browser contract', () => {
     // no displayParts.
     const presentation = await value.evaluate((element) => {
       const style = getComputedStyle(element);
-      const root = getComputedStyle(element.ownerDocument.documentElement);
+      const root = element.ownerDocument.documentElement;
+      const rootFontSize = Number.parseFloat(getComputedStyle(root).fontSize);
+      const maxWidth = Number.parseFloat(getComputedStyle(element).maxWidth);
+
+      // Doubling the root font size must double the max width. A single
+      // reading cannot tell `16rem` from a pixel literal that happens to match
+      // at this root size, and the root here is 14px — set by the library's
+      // own token sheet, not by the docs shell — so the width is 224px rather
+      // than the 256px a 16px root would give.
+      const previousRootFontSize = root.style.fontSize;
+      root.style.fontSize = `${rootFontSize * 2}px`;
+      const doubledMaxWidth = Number.parseFloat(getComputedStyle(element).maxWidth);
+      root.style.fontSize = previousRootFontSize;
+
       return {
-        maxWidth: Number.parseFloat(style.maxWidth),
-        rootFontSize: Number.parseFloat(root.fontSize),
+        maxWidth,
+        doubledMaxWidth,
+        rootFontSize,
+        restoredMaxWidth: Number.parseFloat(getComputedStyle(element).maxWidth),
         textOverflow: style.textOverflow,
         whiteSpace: style.whiteSpace,
         fontWeight: style.fontWeight,
@@ -729,9 +744,11 @@ test.describe('Filter Builder browser contract', () => {
     });
     expect(presentation.textOverflow).toBe('ellipsis');
     expect(presentation.whiteSpace).toBe('nowrap');
-    // The migration table promises `16rem`, so assert the rem contract rather
-    // than a pixel width that would move with the host page's root font size.
+    // The migration table promises `16rem`; assert that contract, not a pixel
+    // width that would move with the page's root font size.
     expect(presentation.maxWidth).toBe(16 * presentation.rootFontSize);
+    expect(presentation.doubledMaxWidth).toBe(2 * presentation.maxWidth);
+    expect(presentation.restoredMaxWidth).toBe(presentation.maxWidth);
     expect(Number(presentation.fontWeight)).toBeGreaterThan(400);
   });
 
