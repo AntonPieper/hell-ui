@@ -363,6 +363,39 @@ describe('HellDatePicker', () => {
     },
   );
 
+  it('resolves every locale its coverage table claims', () => {
+    // The per-locale cases skip when an ICU build lacks the data, so without
+    // this the whole table could pass vacuously on a small-icu runtime.
+    const claimed = [...GLUED_LOCALES, ...SEPARATED_LOCALES].map(([locale]) => locale);
+    const missing = claimed.filter(
+      (locale) => !Intl.DateTimeFormat.supportedLocalesOf([locale]).length,
+    );
+
+    expect(claimed).toHaveLength(31);
+    expect(missing, `ICU build is missing ${missing.join(', ')}`).toEqual([]);
+  });
+
+  // A calendar override is outside the documented `locale` contract, but it
+  // must still never drop another unit's text into a trigger. `uz-u-ca-*`
+  // formats as `2569 (BE), aprel`: the era sits behind a separator, so it
+  // prefixes nothing.
+  const CALENDAR_OVERRIDES: readonly (readonly [string, string, string])[] = [
+    ['uz-u-ca-buddhist', 'aprel', '2569'],
+    ['uz-u-ca-japanese', 'aprel', '8'],
+    ['uz-u-ca-roc', 'aprel', '115'],
+    ['cv-u-ca-japanese', 'ака', '8'],
+    // A leading era with nothing before it still prefixes its year.
+    ['lrc', 'Ordibehesht', 'AP ۱۴۰۵'],
+    ['mzn', 'Ordibehesht', 'AP ۱۴۰۵'],
+  ];
+
+  it.each([...CALENDAR_OVERRIDES])(
+    'keeps a separated era out of the triggers for %s',
+    (locale, month, year) => {
+      expectLocaleTriggers(locale, month, year);
+    },
+  );
+
   it('never loses or reorders a formatted part, whatever the locale', () => {
     vi.setSystemTime(new Date(2026, 3, 22));
     const fixture = TestBed.createComponent(DatePickerHost);
@@ -373,14 +406,18 @@ describe('HellDatePicker', () => {
     const locales = [
       ...GLUED_LOCALES.map(([locale]) => locale),
       ...SEPARATED_LOCALES.map(([locale]) => locale),
-      'lrc',
+      ...CALENDAR_OVERRIDES.map(([locale]) => locale),
       'ps',
       'ckb',
       'ar-EG',
       'fa-IR',
       'th-TH',
+      'uz-u-ca-persian',
+      'uz-u-ca-hebrew',
+      'uz-u-ca-islamic',
     ];
 
+    let ran = 0;
     for (const locale of locales) {
       if (!Intl.DateTimeFormat.supportedLocalesOf([locale]).length) continue;
       fixture.componentInstance.locale.set(locale);
@@ -391,7 +428,11 @@ describe('HellDatePicker', () => {
         .map((part) => part.value)
         .join('');
       expect(labelElement(fixture.nativeElement).textContent, locale).toBe(parts);
+      ran += 1;
     }
+
+    // Unsupported locales are skipped, so the loop has to prove it ran.
+    expect(ran).toBeGreaterThanOrEqual(locales.length);
   });
 
   it('does not paint an out-of-range month in view as the selected one', () => {

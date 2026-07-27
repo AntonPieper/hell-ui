@@ -545,11 +545,19 @@ function formatLabelSegments(
   // whitespace stay outside, so the buttons hold their unit and nothing else.
   const segments: { type: 'month' | 'year' | 'literal'; value: string }[] = [];
   let pendingPrefix = '';
+  // Whether the last thing emitted was a literal this gate refused to fold.
+  // A refusal is a boundary: a marker on the far side of one is not glued to
+  // the unit beyond it, so it must not start a prefix either. Without this,
+  // `uz-u-ca-buddhist` (`2569 (BE), aprel`) leaves `(` outside while pushing
+  // `BE), ` into the month button — the shape the leading gap already rules
+  // out for backward folds.
+  let boundary = false;
 
   for (const part of parts) {
     if (part.type !== 'literal') {
       segments.push({ type: part.type, value: pendingPrefix + part.value });
       pendingPrefix = '';
+      boundary = false;
       continue;
     }
 
@@ -563,13 +571,20 @@ function formatLabelSegments(
       HELL_DATE_PICKER_LABEL_DIGIT.test(core) ||
       !HELL_DATE_PICKER_LABEL_GLUE.test(lead)
     ) {
-      // A buffered leading era still belongs in front of the unit it prefixes,
-      // so anything arriving before that unit keeps queueing behind it.
       if (pendingPrefix) {
-        pendingPrefix += part.value;
-        continue;
+        // A buffered leading era stays attached to the unit it prefixes across
+        // whitespace (`lrc` wants `AP <year>` in one trigger), but punctuation
+        // is a boundary: `cv-u-ca-japanese` would otherwise carry a stray
+        // comma into the year button. Flush the era out as plain text.
+        if (part.value.trim() === '') {
+          pendingPrefix += part.value;
+          continue;
+        }
+        segments.push({ type: 'literal', value: pendingPrefix });
+        pendingPrefix = '';
       }
       segments.push({ type: 'literal', value: part.value });
+      boundary = true;
       continue;
     }
 
@@ -577,6 +592,12 @@ function formatLabelSegments(
     if (previous && previous.type !== 'literal') {
       previous.value += lead + core;
       if (trail) segments.push({ type: 'literal', value: trail });
+      boundary = false;
+      continue;
+    }
+
+    if (boundary) {
+      segments.push({ type: 'literal', value: part.value });
       continue;
     }
 
