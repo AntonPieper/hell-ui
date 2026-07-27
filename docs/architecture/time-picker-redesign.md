@@ -101,12 +101,12 @@ root
             └── option     one selectable unit value, data-slot="option"
 ```
 
-Removed anatomy: `unit`, `unitControl`, `unitValue`, `unitStep`,
-`minutePresets`, `minutePreset`. The `−`/`+` steppers disappear (columns make
-the value range directly visible and tappable) and the fixed minute-preset
-grid disappears (it bundled one team's presets; granularity is now the
-`minuteStep` input, and bespoke preset rows are consumer markup beside the
-picker).
+Removed anatomy: the whole unit/preset structure — the authoritative removed
+Public Part list lives under "Public API for #361" below. The `−`/`+`
+steppers disappear (columns make the value range directly visible and
+tappable) and the fixed minute-preset grid disappears (it bundled one team's
+presets; granularity is now the `minuteStep` input, and bespoke preset rows
+are consumer markup beside the picker).
 
 The seconds column renders only when `seconds` is set, exactly as today.
 
@@ -117,9 +117,17 @@ The seconds column renders only when `seconds` is set, exactly as today.
 - **Null renders as no selection.** The readout shows a placeholder
   (`--:--` / `--:--:--`) instead of today's silent midnight, and no option is
   selected. The first activation in any column commits a complete
-  `HellTimeValue` in one write, defaulting the untouched units to `0` —
-  preserving today's "first user step commits a structured value" contract
-  without ever displaying a fake 00:00.
+  `HellTimeValue` in one write — preserving today's "first user step commits
+  a structured value" contract without ever displaying a fake 00:00.
+  **First-commit rule:** the committed value is the *earliest in-range* time
+  whose activated unit equals the chosen option (untouched units take the
+  smallest values that keep the whole value within `min`/`max`; with no
+  bounds this reduces to defaulting untouched units to `0`). This is
+  definitionally consistent with option disabling below: an option is enabled
+  exactly when at least one in-range value contains it, so the earliest such
+  value always exists — e.g. with `min` 09:00 and a null value, activating
+  minute `30` commits `{hour: 9, minute: 30, second: 0}`, never an
+  out-of-range `{hour: 0, minute: 30}`.
 - Every activation commits immediately through the model (one `valueChange`
   per user action). No internal draft, no confirm state.
 - New `min` / `max` inputs (`HellTimeValue`, unset by default) mirror
@@ -128,11 +136,14 @@ The seconds column renders only when `seconds` is set, exactly as today.
   skipped by keyboard traversal, and inert to pointer activation. No
   midnight-wrapping ranges (the native input's periodic domain is explicitly
   not adopted; Time Input has no wrap either).
-- New `minuteStep` / `secondStep` inputs (default `1`; must divide 60)
-  control column granularity. When the committed value does not sit on the
-  step grid (external write, typed value from the composed input), the column
-  renders that value as one extra in-place option so the selection is always
-  visible — adopted from Material's typed-value behavior.
+- New `minuteStep` / `secondStep` inputs (default `1`; must be a positive
+  integer that divides 60) control column granularity. An invalid step value
+  throws in dev mode (`ngDevMode`) and falls back to `1` in production
+  builds. When the committed value does not sit on the step grid (external
+  write, typed value from the composed input), the column renders that value
+  as one extra in-place option so the selection is always visible — adopted
+  from Material's typed-value behavior. Picker-internal interaction never
+  creates off-step options; only external/committed values do.
 - Hour cycle stays 24-hour (`00`–`23`). See Deferred for `h12`.
 
 ### Desktop keyboard flow
@@ -152,11 +163,19 @@ One Interaction State Machine per column; no second model behind it.
   decrement/increment role — Up/Down own value movement.
 - **Home / End** jump to the first / last enabled option. **PageUp /
   PageDown** move by five options, preserving today's large-step contract.
-- **Typed digits** edit the focused column React Aria-style: digits
-  accumulate into the unit value (`3`, then `7` → `37`), select the matching
-  enabled option, and auto-advance focus to the next column when another
-  digit could no longer fit (`7` → advance; `2` → wait for a second digit).
-  The accumulator resets on column change or after a short timeout.
+- **Typed digits** edit the focused column React Aria-style through a
+  two-digit accumulator defined against the unit's numeric domain (0–23 or
+  0–59), not against the rendered option set. Digits accumulate into a unit
+  value (`3`, then `7` → `37`); the buffer **completes** when a second digit
+  arrives or when appending any further digit would exceed the unit maximum
+  (hours: `7` completes immediately because `70` > 23; `2` waits for a
+  second digit). On completion the buffered value **snaps to the nearest
+  enabled option** — ties resolve to the earlier value, disabled options
+  never match — the snapped option is selected and committed, and focus
+  auto-advances to the next column. With `minuteStep` 15, typing `3`, `7`
+  therefore selects `30` (nearest of `30`/`45`); typing never creates an
+  off-step option (see Value semantics). The accumulator resets on column
+  change or after a short timeout.
 - Enter/Space perform no picker-level action (selection already followed
   focus); inside the Popover recipe, Escape closes and restores the trigger
   via the delegated dismissal engine, untouched by this spec.
@@ -190,13 +209,17 @@ pointer, not to replace typed entry.
   accessible name is its padded text (`"05"`); the labelled listbox provides
   the unit context.
 - Selection follows focus, so assistive tech announces "05, selected,
-  Minutes" naturally on arrow movement — no live region. The `readout` is
-  presentational text labelled by the existing `selectedTime` label; it is
-  not focusable and gains no live region (a live region would double-announce
-  every arrow step).
-- The root keeps `data-slot="root"`, `role="group"`, an accessible name from
-  `selectedTime`/`noTimeSelected`, and today's `data-disabled`/`aria-disabled`
-  reflection; `disabled` removes all options from the tab order.
+  Minutes" naturally on arrow movement — no live region (a live region would
+  double-announce every arrow step).
+- The root **gains** `role="group"` and an accessible name from
+  `selectedTime`/`noTimeSelected` — today's host has neither a role nor a
+  name (the `selectedTime` label currently sits on the readout span as
+  `aria-label`). That name lives on the root **only**: the `readout` becomes
+  presentational (`aria-hidden="true"`, not focusable) so the current value
+  is exposed exactly once and cannot double-announce against the group name.
+- The root keeps `data-slot="root"` and today's
+  `data-disabled`/`aria-disabled` reflection; `disabled` removes all options
+  from the tab order.
 - Disabled-option traversal matches the repo keyboard matrix
   (`docs/architecture/keyboard-navigation-matrix.md`): disabled options are
   skipped by arrows and typeahead and cannot be selected.
@@ -254,16 +277,25 @@ export interface HellTimePickerLabels {
   minutes: string;
   seconds: string;
   selectedTime: (time: string) => string;   // unchanged
-  noTimeSelected: string;                   // new — null readout/group name
+  noTimeSelected: string;                   // new — root group name when null
 }
 ```
 
-Removed from the public surface: the `unitLabel`/`unitControl`/`unitValue`/
-`unitStep`/`minutePresets`/`minutePreset` parts and the `decreaseUnit`/
-`increaseUnit`/`minutePresets`/`minutePreset` label fields. `HellTimeValue`
-re-export, entry point path, selector, `hell-entrypoint.json` category
-(`composite`), and the recipe-module/stylesheet wiring rules
-(`docs/adr/part-style-map.md`) are unchanged.
+Removed from the public surface (authoritative list against the current
+`HellTimePickerPart` union in `packages/angular/time-picker/time-picker.ts`):
+
+- **Parts (8 removed, 5 added):** `units`, `unit`, `unitLabel`,
+  `unitControl`, `unitValue`, `unitStep`, `minutePresets`, and
+  `minutePreset` are removed; `columns`, `column`, `columnLabel`, `options`,
+  and `option` are added; `root`, `header`, and `readout` carry over.
+- **Label fields (4 removed, 1 added):** `decreaseUnit`, `increaseUnit`,
+  `minutePresets`, and `minutePreset` are removed; `noTimeSelected` is
+  added; `hours`, `minutes`, `seconds`, and `selectedTime` carry over.
+
+`HellTimeValue` re-export, entry point path, selector,
+`hell-entrypoint.json` category (`composite`), and the
+recipe-module/stylesheet wiring rules (`docs/adr/part-style-map.md`) are
+unchanged.
 
 ## Breaking changes and release notes (#361)
 
@@ -279,11 +311,13 @@ Consumer Change.
 
 ## Validation plan (#361)
 
-- Unit specs: column rendering per `seconds`/steps, selection-follows-focus,
-  no-wrap arrows, Home/End/PageUp/PageDown, digit entry with auto-advance,
-  disabled-option skipping, bounds disabling, null placeholder + first-commit
-  semantics, off-step value rendering, one `valueChange` per activation, `ui`
-  part merging, label overrides.
+- Unit specs: column rendering per `seconds`/steps (including the dev-mode
+  invalid-step throw), selection-follows-focus, no-wrap arrows,
+  Home/End/PageUp/PageDown, digit entry with buffer completion,
+  snap-to-nearest-enabled-option, and auto-advance, disabled-option skipping,
+  bounds disabling, the bounds-aware null first-commit rule, off-step value
+  rendering from external writes only, one `valueChange` per activation,
+  `ui` part merging, label overrides.
 - Browser coverage: a time-picker keyboard/pointer contract spec in `e2e/`
   against the docs examples (tab-stop-per-column, arrow selection, typed
   digits, tap selection, scroll-then-tap, popover recipe focus policy), plus
