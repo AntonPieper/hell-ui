@@ -26,12 +26,15 @@ const FITS_INSIDE_FRAME = { paneEscapesFrame: false, documentScrollsSideways: fa
  */
 async function escapesFrame(
   example: Locator,
-): Promise<{ paneEscapesFrame: boolean; documentScrollsSideways: boolean }> {
+): Promise<{ paneEscapesFrame: boolean; documentScrollsSideways: boolean } | string> {
   return example.evaluate((element) => {
     const frame = element as HTMLElement;
     const panes = [...frame.querySelectorAll('[hellMasterPane]')] as HTMLElement[];
     const visible = panes.filter((pane) => pane.getClientRects().length > 0);
-    if (!visible.length) throw new Error('Expected at least one visible pane.');
+    // Returned rather than thrown: `expect.poll` retries a mismatch but not an
+    // exception, so throwing mid-reflow would fail on the first attempt instead
+    // of waiting for the panes to settle.
+    if (!visible.length) return 'no visible pane';
     const widest = Math.max(...visible.map((pane) => pane.getBoundingClientRect().width));
     return {
       // Sub-pixel layout rounds either way, so only a whole pixel past the
