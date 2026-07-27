@@ -141,6 +141,15 @@ const HD_APP_SHELL_PAGE_ICONS = {
           the collapsed aside as one large click target and hides while the panel is open.
         </li>
       </ul>
+      <p>
+        The shell reserves the secondary column only when the aside is actually projected, so a
+        shell without one hands the whole trailing width to content instead of leaving a dead
+        column. Where the reserved space exists it is never shared: on desktop the rail is its own
+        grid column, and on mobile — where the aside pins itself to the inline end of the content
+        area — the content box reserves the collapsed rail's width, so main content is never laid
+        out or clicked underneath it. Only the expanded mobile panel deliberately overlays content,
+        as a dismissable drawer with a backdrop.
+      </p>
       <p class="hd-note">
         Click the <em>Activity</em> header row to hide the panel, then click the collapsed rail to
         bring it back.

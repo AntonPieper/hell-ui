@@ -1,6 +1,13 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { SETTLE_TIMEOUT, ensurePageIsActive, finishAnimations } from './utils';
 
+interface Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 interface AppShellParts {
   readonly topbar: Locator;
   readonly sidenavToggle: Locator;
@@ -42,6 +49,29 @@ async function expectFocused(locator: Locator, label: string): Promise<void> {
       timeout: SETTLE_TIMEOUT,
     })
     .toBe(true);
+}
+
+async function boundingBoxOf(locator: Locator, label: string): Promise<Rect> {
+  const box = await locator.boundingBox();
+  expect(box, `${label} needs a rendered box`).not.toBeNull();
+  return box!;
+}
+
+/**
+ * The shell must reserve the secondary rail's width instead of letting main
+ * content run underneath it, so the content box always ends at or before the
+ * rail's leading edge.
+ */
+async function expectContentClearOfRailEdge(
+  parts: AppShellParts,
+  railLeadingEdge: number,
+  label: string,
+): Promise<void> {
+  const content = await boundingBoxOf(parts.content, `${label} content`);
+  expect(
+    Math.round(content.x + content.width),
+    `${label}: main content must stay clear of the secondary rail`,
+  ).toBeLessThanOrEqual(Math.round(railLeadingEdge) + 1);
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
@@ -130,6 +160,68 @@ test.describe('App Shell responsive contracts', () => {
     await expect(parts.secondaryBody).not.toHaveAttribute('inert', '');
     await expect(parts.headerToggle).toBeVisible();
     await expect(parts.headerToggle).toHaveAttribute('aria-expanded', 'true');
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test('the shell reserves the secondary rail so main content is never overlapped', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const shell = page
+      .locator('app-app-shell-secondary-panel-example')
+      .locator('> [hellAppShell][data-slot="root"]');
+    const parts = appShellParts(shell);
+
+    await expect(shell).toBeVisible();
+    await finishAnimations(shell);
+    await expectContentClearOfRailEdge(
+      parts,
+      (await boundingBoxOf(parts.secondary, 'desktop open secondary')).x,
+      'desktop, secondary open',
+    );
+
+    await parts.headerToggle.click();
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await finishAnimations(shell);
+    await expectContentClearOfRailEdge(
+      parts,
+      (await boundingBoxOf(parts.secondary, 'desktop collapsed rail')).x,
+      'desktop, secondary collapsed',
+    );
+
+    // A shell without a secondary panel must not reserve a dead rail column.
+    const bareShell = page
+      .locator('app-app-shell-basic-example')
+      .locator('> [hellAppShell][data-slot="root"]');
+    const bareParts = appShellParts(bareShell);
+    await expect(bareParts.secondary).toHaveCount(0);
+    await finishAnimations(bareShell);
+    const [bareShellBox, bareContentBox] = await Promise.all([
+      boundingBoxOf(bareShell, 'bare shell'),
+      boundingBoxOf(bareParts.content, 'bare shell content'),
+    ]);
+    expect(
+      Math.round(bareShellBox.x + bareShellBox.width - (bareContentBox.x + bareContentBox.width)),
+      'a shell with no secondary panel must give the trailing width to content',
+      // The docs example draws a 1px border around the shell.
+    ).toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(shell).toHaveAttribute('data-mobile-layout', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await finishAnimations(shell);
+    const mobileRail = await boundingBoxOf(parts.railToggle, 'mobile collapsed rail');
+    expect(mobileRail.width, 'the mobile rail stays an operable click target').toBeGreaterThan(0);
+    await expectContentClearOfRailEdge(parts, mobileRail.x, 'mobile, secondary collapsed');
+
+    // The expanded mobile panel is a deliberate drawer overlay, but the rail
+    // strip it collapses back into must stay reserved underneath it.
+    await parts.railToggle.click();
+    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
+    await finishAnimations(shell);
+    await expectContentClearOfRailEdge(parts, mobileRail.x, 'mobile, secondary open');
     await expectNoHorizontalOverflow(page);
   });
 

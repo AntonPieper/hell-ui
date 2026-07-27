@@ -18,32 +18,38 @@
    */
 
   [hellAppShell][data-slot='root'] {
+    /*
+     * Width reserved for the secondary column. Presence is structural, so it
+     * is read from the projected aside rather than a state attribute: a shell
+     * without a secondary panel gives the whole remaining width to content
+     * instead of leaving a dead column, and a shell with one always reserves
+     * either the open panel or the collapsed rail.
+     */
+    --_hell-app-secondary-track: 0px;
+
     position: relative;
     display: grid;
     height: 100vh;
     width: 100%;
-    grid-template-columns: var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width);
+    grid-template-columns: var(--hell-app-sidenav-width) 1fr var(--_hell-app-secondary-track);
     grid-template-rows: var(--hell-app-topbar-height) 1fr;
     overflow: hidden;
     background-color: var(--color-hell-surface);
     color: var(--color-hell-foreground);
     grid-template-areas: 'topbar topbar topbar' 'sidenav content secondary';
     transition: grid-template-columns var(--hell-duration-base) var(--ease-hell-out);
+
+    &:has(> [hellAppSecondary][data-slot='root']) {
+      --_hell-app-secondary-track: var(--hell-app-secondary-width);
+    }
+
     @media (min-width: 768px) {
+      &[data-secondary-hidden='true']:has(> [hellAppSecondary][data-slot='root']) {
+        --_hell-app-secondary-track: var(--hell-app-secondary-collapsed-width);
+      }
       &[data-sidenav-collapsed='true'] {
-        grid-template-columns: var(--hell-app-sidenav-collapsed-width) 1fr var(
-            --hell-app-secondary-width
-          );
-      }
-      &[data-secondary-hidden='true'] {
-        grid-template-columns: var(--hell-app-sidenav-width) 1fr var(
-            --hell-app-secondary-collapsed-width
-          );
-      }
-      &[data-sidenav-collapsed='true'][data-secondary-hidden='true'] {
-        grid-template-columns: var(--hell-app-sidenav-collapsed-width) 1fr var(
-            --hell-app-secondary-collapsed-width
-          );
+        grid-template-columns: var(--hell-app-sidenav-collapsed-width) 1fr
+          var(--_hell-app-secondary-track);
       }
     }
   }
@@ -393,6 +399,19 @@
     [hellAppContent][data-slot='root'] {
       padding: var(--spacing-hell-4);
       grid-area: content;
+    }
+
+    /*
+     * The mobile grid has no secondary column: the aside shares the content
+     * area and pins itself to the inline end. Reserve the collapsed rail's
+     * width on the content box so main content is never laid out — or made
+     * unclickable — underneath the rail. Margin rather than padding keeps the
+     * reservation intact when a consumer refines the content padding through
+     * its Part Style Map.
+     */
+    [hellAppShell][data-slot='root']:has(> [hellAppSecondary][data-slot='root'])
+      > [hellAppContent][data-slot='root'] {
+      margin-inline-end: var(--hell-app-secondary-collapsed-width);
     }
 
     [hellAppSecondary][data-slot='root'] {

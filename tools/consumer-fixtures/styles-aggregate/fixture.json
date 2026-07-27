@@ -14,7 +14,7 @@
     "@keyframes hell-pop-in",
     "animation:hell-shimmer 1.6s linear infinite",
     "table-layout:fixed",
-    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)"
+    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--_hell-app-secondary-track)"
   ],
   "forbiddenCssSentinels": [
     "hell-code-editor",
