@@ -175,13 +175,19 @@
   }
 
   /*
-   * Header cells keep the `position` their recipe gives them: the recipe is a
+   * This declaration does not currently land. The header cell recipe is a
    * Tailwind utility, and `@layer utilities` outranks this layer whatever the
-   * selectors say, so this declaration only lands where the recipe does not.
-   * That also means resize separators — absolutely positioned against their
-   * header cell — always have a positioned containing block, and this file must
-   * not add one: `position: relative` here would turn a pinned header cell's
-   * `--hell-table-pinned-start`/`-after` into a displacement off its column.
+   * selectors say, so shell header cells stay `position: sticky` even here —
+   * which is also the only reason resize separators, absolutely positioned
+   * against their header cell, have a containing block at all.
+   *
+   * So whoever makes this rule win — by raising it into `@layer utilities`, or
+   * by dropping `sticky` from the recipe — turns every non-sticky shell header
+   * cell static and sends every separator to the initial containing block. The
+   * fix then is a containing-block rule scoped to `:not([data-pinned])`: a
+   * pinned header cell must not become `position: relative`, because that turns
+   * its `--hell-table-pinned-start`/`-after` into a displacement off the column
+   * it heads. Give pinned cells `position: sticky` back instead.
    */
   hell-tanstack-table:not([data-sticky-header='true'])
     .hell-table-shell-table
