@@ -306,11 +306,12 @@ describe('HellDialpad labels', () => {
 
       const zero = query<HTMLButtonElement>(host, '[data-key="0"]');
 
-      zero.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+      pointer(zero, 'pointerdown', 1);
       vi.advanceTimersByTime(520);
       fixture.detectChanges();
-      zero.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
-      zero.click();
+      pointer(zero, 'pointerup', 1);
+      // The browser still delivers the compatibility click after the hold.
+      compatibilityClick(zero, 1);
       fixture.detectChanges();
 
       expect(fixture.componentInstance.digits).toEqual(['+']);
@@ -321,6 +322,97 @@ describe('HellDialpad labels', () => {
       vi.runOnlyPendingTimers();
       vi.useRealTimers();
     }
+  });
+
+  // Browsers suppress the compatibility click for every pointer in an
+  // overlapping touch sequence, so a click-only keypad silently dropped both
+  // taps whenever a second finger landed before the first one lifted.
+  it('registers overlapping taps that never produce a compatibility click', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const one = query<HTMLButtonElement>(host, '[data-key="1"]');
+    const two = query<HTMLButtonElement>(host, '[data-key="2"]');
+
+    pointer(one, 'pointerdown', 10);
+    pointer(two, 'pointerdown', 11);
+    pointer(one, 'pointerup', 10);
+    pointer(two, 'pointerup', 11);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual(['1', '2']);
+    expect(fixture.componentInstance.values).toEqual(['1', '12']);
+    expect(displayValue(host)).toBe('12');
+  });
+
+  it('registers a three-finger rolling sequence across keys', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const seven = query<HTMLButtonElement>(host, '[data-key="7"]');
+    const eight = query<HTMLButtonElement>(host, '[data-key="8"]');
+    const nine = query<HTMLButtonElement>(host, '[data-key="9"]');
+
+    pointer(seven, 'pointerdown', 20);
+    pointer(eight, 'pointerdown', 21);
+    pointer(seven, 'pointerup', 20);
+    pointer(nine, 'pointerdown', 22);
+    pointer(eight, 'pointerup', 21);
+    pointer(nine, 'pointerup', 22);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual(['7', '8', '9']);
+    expect(displayValue(host)).toBe('789');
+  });
+
+  it('registers each rapid tap once when the compatibility click does arrive', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const five = query<HTMLButtonElement>(host, '[data-key="5"]');
+
+    // A fast double-tap reports a rising click `detail` on the same key.
+    tap(five, 30, 1);
+    tap(five, 31, 2);
+    tap(five, 32, 3);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual(['5', '5', '5']);
+    expect(displayValue(host)).toBe('555');
+  });
+
+  it('abandons a tap the browser cancels for a scroll gesture', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const four = query<HTMLButtonElement>(host, '[data-key="4"]');
+
+    pointer(four, 'pointerdown', 40);
+    pointer(four, 'pointercancel', 40);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(displayValue(host)).toBe('');
+  });
+
+  it('ignores a pointer that lifts on a different key than it pressed', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const one = query<HTMLButtonElement>(host, '[data-key="1"]');
+    const two = query<HTMLButtonElement>(host, '[data-key="2"]');
+
+    pointer(one, 'pointerdown', 50, { pointerType: 'mouse' });
+    pointer(two, 'pointerup', 50, { pointerType: 'mouse' });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(displayValue(host)).toBe('');
   });
 
   it('clears with Delete and submits with Enter from host focus', () => {
@@ -469,6 +561,43 @@ function numberInput(root: HTMLElement): HTMLInputElement {
 
 function displayValue(root: HTMLElement): string {
   return numberInput(root).value;
+}
+
+function pointer(
+  target: HTMLElement,
+  type: 'pointerdown' | 'pointerup' | 'pointercancel',
+  pointerId: number,
+  init: PointerEventInit = {},
+): void {
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      pointerType: 'touch',
+      pointerId,
+      ...init,
+    }),
+  );
+}
+
+/** The click a browser synthesizes after a completed pointer tap. */
+function compatibilityClick(target: HTMLElement, pointerId: number, detail = 1): void {
+  target.dispatchEvent(
+    new PointerEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      pointerType: 'touch',
+      pointerId,
+      detail,
+    }),
+  );
+}
+
+/** A complete browser tap: the pointer pair plus its compatibility click. */
+function tap(target: HTMLElement, pointerId: number, detail = 1): void {
+  pointer(target, 'pointerdown', pointerId);
+  pointer(target, 'pointerup', pointerId);
+  compatibilityClick(target, pointerId, detail);
 }
 
 function dispatchKey(target: HTMLElement, key: string): KeyboardEvent {
