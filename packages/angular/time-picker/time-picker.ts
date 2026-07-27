@@ -202,6 +202,8 @@ export class HellTimePicker {
   private readonly pendingFocus = signal<PendingFocus | null>(null);
   /** Pending scroll centering for every column. */
   private readonly pendingCenter = signal(0);
+  /** Last centering generation actually applied to the DOM. */
+  private appliedCenter = 0;
   /** Open typed-digit accumulator for one column. */
   private digitBuffer: DigitBuffer | null = null;
   private digitTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -286,6 +288,8 @@ export class HellTimePicker {
 
     effect(() => {
       this.value();
+      // A precision change adds or removes a column that needs centering too.
+      this.seconds();
       if (this.internalCommit) {
         this.internalCommit = false;
         return;
@@ -294,22 +298,42 @@ export class HellTimePicker {
       this.pendingCenter.update((generation) => generation + 1);
     });
 
+    // Two separate render effects on purpose. Bulk centering must react only
+    // to the centering generation: sharing an effect with the focus request
+    // would re-center every column on each arrow or tap and throw away a
+    // browse-scroll the user left in the other columns.
     afterRenderEffect(() => {
-      // Only the centering generation may retrigger this pass; reading the
-      // columns tracked would re-center on every ordinary commit and fight a
-      // user's own scrolling.
-      if (this.pendingCenter() > 0) {
-        for (const unit of untracked(() => this.visibleUnits())) this.centerColumn(unit);
-      }
+      const generation = this.pendingCenter();
+      if (generation === this.appliedCenter) return;
+      this.appliedCenter = generation;
+      for (const unit of untracked(() => this.visibleUnits())) this.centerColumn(unit);
+    });
 
+    afterRenderEffect(() => {
       const pending = this.pendingFocus();
       if (!pending) return;
       this.pendingFocus.set(null);
       const option = this.resolveOptionElement(pending);
       if (!option) return;
       option.focus({ preventScroll: true });
+      // Only the column the user is actually in follows its selection.
       this.centerColumn(pending.unit);
     });
+
+    if (isDevMode()) {
+      effect(() => {
+        const columns = this.columns();
+        if (!columns.length) return;
+        if (columns.some((column) => column.options.some((option) => !option.disabled))) return;
+        // A warning rather than the throw `validateStep` uses: this depends on
+        // bound values, so a momentarily incompatible min/max during data
+        // loading must not take the app down.
+        console.warn(
+          'hell-time-picker: no selectable time exists for the current min/max and step inputs, ' +
+            'so every option is disabled. Widen the bounds or lower minuteStep/secondStep.',
+        );
+      });
+    }
   }
 
   /** Units shown by the picker. */

@@ -120,6 +120,63 @@ test.describe('time picker anatomy and accessibility', () => {
 });
 
 test.describe('time picker interaction contract', () => {
+  test('auto-centers the selected option in every column on open', async ({ page }) => {
+    const { picker } = await gotoBasicPicker(page);
+
+    for (const unit of ['hour', 'minute']) {
+      const offset = await column(picker, unit).evaluate((element) => {
+        const list = element.querySelector('[data-slot="options"]');
+        const selected = list?.querySelector('[data-slot="option"][data-selected="true"]');
+        if (!list || !selected) return null;
+        const listRect = list.getBoundingClientRect();
+        const selectedRect = selected.getBoundingClientRect();
+        return {
+          scrollTop: list.scrollTop,
+          // Distance from a perfectly centered selection.
+          centerDelta: Math.abs(
+            selectedRect.top - listRect.top - (listRect.height - selectedRect.height) / 2,
+          ),
+        };
+      });
+
+      // 14:30 sits well down both columns, so centering must have scrolled.
+      expect(offset?.scrollTop ?? 0, unit).toBeGreaterThan(0);
+      expect(offset?.centerDelta ?? Number.POSITIVE_INFINITY, unit).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('re-centers the column the user is driving', async ({ page }) => {
+    const { picker } = await gotoBasicPicker(page);
+    const hours = column(picker, 'hour').locator('[data-slot="options"]');
+    const before = await hours.evaluate((element) => element.scrollTop);
+
+    // Home walks the selection to hour 00, which must scroll back to the top.
+    // This is the focus-centering path: the acting column follows its own
+    // selection. Bulk centering is covered by the open case above.
+    await option(picker, 'hour', '14').focus();
+    await page.keyboard.press('Home');
+    await expect.poll(() => hours.evaluate((element) => element.scrollTop)).toBeLessThan(before);
+  });
+
+  test('keeps a browse-scroll in other columns while arrowing', async ({ page }) => {
+    const { example, picker } = await gotoBasicPicker(page);
+    const minutes = column(picker, 'minute').locator('[data-slot="options"]');
+
+    // Park the minute column away from its selection, as a user browsing it
+    // would, then drive the hour column.
+    await minutes.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    const parked = await minutes.evaluate((element) => element.scrollTop);
+
+    await option(picker, 'hour', '14').focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(example.getByText('Selected: 15:30')).toBeVisible();
+
+    // Committing in the hour column must not re-center the minute column.
+    expect(await minutes.evaluate((element) => element.scrollTop)).toBe(parked);
+  });
+
   test('commits on tap and never on scroll', async ({ page }) => {
     const { example, picker } = await gotoBasicPicker(page);
     const minutes = column(picker, 'minute').locator('[data-slot="options"]');
@@ -286,13 +343,21 @@ test.describe('time picker touch contract', () => {
     const { example, picker } = await gotoBasicPicker(page);
     const hours = column(picker, 'hour').locator('[data-slot="options"]');
 
-    const before = await hours.evaluate((element) => element.scrollTop);
-    await hours.evaluate((element) => {
-      element.scrollTop += 200;
-    });
+    const { before, optionHeight } = await hours.evaluate((element) => ({
+      before: element.scrollTop,
+      optionHeight:
+        element.querySelector('[data-slot="option"]')?.getBoundingClientRect().height ?? 0,
+    }));
+    // Scroll several options at once: `scroll-snap-type: y proximity` may
+    // adjust the resting offset, so assert a coarse move rather than an exact
+    // delta.
+    await hours.evaluate((element, step) => {
+      element.scrollTop += step * 5;
+    }, optionHeight);
+
     await expect
       .poll(() => hours.evaluate((element) => element.scrollTop))
-      .toBeGreaterThan(before);
+      .toBeGreaterThan(before + optionHeight * 2);
     await expect(example.getByText('Selected: 14:30')).toBeVisible();
   });
 });

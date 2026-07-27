@@ -136,6 +136,17 @@ describe('time picker column engine', () => {
       expect(hellTimePickerNextOptionIndex('PageUp', 2, enabled)).toBe(0);
     });
 
+    it('pages exactly five enabled options from a disabled starting option', () => {
+      // 0-2 disabled: from the disabled option 1 the enabled run is
+      // 3,4,5,6,7,... so five steps forward must land on 7, not 8.
+      const leadingGap = [true, true, true, false, false, false, false, false, false, false];
+      expect(hellTimePickerNextOptionIndex('PageDown', 1, leadingGap)).toBe(7);
+
+      // 7-9 disabled: from the disabled option 8 five steps back is 2.
+      const trailingGap = [false, false, false, false, false, false, false, true, true, true];
+      expect(hellTimePickerNextOptionIndex('PageUp', 8, trailingGap)).toBe(2);
+    });
+
     it('skips disabled options in every direction', () => {
       const gap = [false, true, true, false, false];
       expect(hellTimePickerNextOptionIndex('ArrowDown', 0, gap)).toBe(3);

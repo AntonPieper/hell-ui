@@ -1,6 +1,6 @@
 # Time Picker redesign: interaction spec
 
-- Status: Proposed — awaiting maintainer approval (#360); implementation is #361
+- Status: Accepted (#360) and implemented (#361)
 - Date: 2026-07-27
 - Scope: the `hell-ui/time-picker` Composite panel and its documented
   composition with `hell-ui/time-input`, Field, Control Group, and Popover.

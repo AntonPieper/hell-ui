@@ -146,6 +146,31 @@ describe('HellTimePicker', () => {
       fixture.componentInstance.minuteStep.set(7);
       expect(() => fixture.detectChanges()).toThrowError(/minuteStep/);
     });
+
+    it('warns in dev mode when the bounds and step leave nothing selectable', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        // A 30-minute grid cannot land inside 09:45..09:50.
+        render({
+          minuteStep: 30,
+          min: { hour: 9, minute: 45, second: 0 },
+          max: { hour: 9, minute: 50, second: 0 },
+        });
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('no selectable time exists'));
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('stays quiet when some option is selectable', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        render({ minuteStep: 30, min: { hour: 9, minute: 0, second: 0 } });
+        expect(warn).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+      }
+    });
   });
 
   describe('activation and commits', () => {

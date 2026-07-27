@@ -196,18 +196,20 @@ function stepThroughEnabled(
   delta: number,
 ): number {
   const position = enabled.indexOf(current);
-  const from =
-    position === -1
-      ? // A disabled current option (an out-of-bounds external value) still
-        // anchors paging: start from the nearest enabled option in the
-        // travel direction.
-        delta > 0
-        ? enabled.findIndex((index) => index > current)
-        : lastIndexWhere(enabled, (index) => index < current)
-      : position;
-  if (from === -1) return delta > 0 ? enabled[enabled.length - 1] : enabled[0];
+  if (position !== -1) return enabled[clamp(position + delta, 0, enabled.length - 1)];
 
-  return enabled[clamp(from + delta, 0, enabled.length - 1)];
+  // A disabled current option (an out-of-bounds external value) still anchors
+  // paging. The nearest enabled option in the travel direction is step one, so
+  // anchor just short of it — anchoring *on* it would travel delta + 1.
+  if (delta > 0) {
+    const next = enabled.findIndex((index) => index > current);
+    if (next === -1) return enabled[enabled.length - 1];
+    return enabled[clamp(next - 1 + delta, 0, enabled.length - 1)];
+  }
+
+  const previous = lastIndexWhere(enabled, (index) => index < current);
+  if (previous === -1) return enabled[0];
+  return enabled[clamp(previous + 1 + delta, 0, enabled.length - 1)];
 }
 
 function assembleTime(
