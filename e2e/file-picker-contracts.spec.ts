@@ -19,8 +19,7 @@ async function gotoFilePicker(page: Page): Promise<void> {
  * The drop-zone surface plus its built-in `::before` glyph. Border *style* is
  * part of the contract, not just border color: drag-over turns the resting
  * dashed outline solid so the armed state survives a monochrome rendering.
- */
-/**
+ *
  * Every comparison in this file is measured against a value this returns, so it
  * has to be a settled one. Read mid-transition, the resting background came
  * back as `rgba(247, 248, 250, 0.494)` — a frame, not a resting state — and the
