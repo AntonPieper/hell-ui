@@ -25,7 +25,7 @@ export const PDF_ZOOM_OPTIONS = [
   { value: '3', label: '300%' },
 ] as const;
 
-function isPdfZoomPreset(value: string): value is PdfZoomPreset {
+export function isPdfZoomPreset(value: string): value is PdfZoomPreset {
   return PDF_ZOOM_VALUES.includes(value as PdfZoomPreset);
 }
 

@@ -33,6 +33,9 @@
     background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
     flex-wrap: wrap;
+    /* Controls answer the first tap: no browser double-tap zoom and no tap
+       delay waiting to find out whether one is coming. */
+    touch-action: manipulation;
   }
 
   /* Controls wrap as whole clusters instead of orphaning single buttons. */
@@ -98,6 +101,8 @@
     border-bottom: 1px solid var(--color-hell-border);
     background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
+    flex-wrap: wrap;
+    touch-action: manipulation;
   }
 
   hell-pdf-viewer [data-slot='findInput'] {
@@ -200,6 +205,73 @@
         0 1px 2px rgb(0 0 0 / 0.06),
         0 8px 24px -12px rgb(0 0 0 / 0.18);
       background-color: white;
+    }
+  }
+
+  /* A finger needs a bigger target than a cursor does. Height comes from
+     `min-height`, which no control recipe sets, and width from a fixed
+     flex-basis: the pagination recipe's `min-width` sits in the utilities
+     layer and would outrank a `min-width` here, but a definite basis on a
+     non-flexing item settles the used width above it either way. */
+  @media (pointer: coarse) {
+    hell-pdf-viewer :is([data-slot='toolbar'], [data-slot='findBar']) button {
+      min-height: var(--spacing-hell-control-lg);
+      flex: 0 0 var(--spacing-hell-control-lg);
+    }
+
+    hell-pdf-viewer [data-slot='pageInput'],
+    hell-pdf-viewer [data-slot='zoomSelect'],
+    hell-pdf-viewer [data-slot='findInput'] {
+      min-height: var(--spacing-hell-control-lg);
+    }
+
+    hell-pdf-viewer [data-slot='thumb'] {
+      padding-block: calc(var(--spacing) * 2);
+    }
+  }
+
+  /* On a phone the rail's fixed width leaves the document too narrow to read,
+     so it floats over the page area instead of dividing it. The toolbar toggle
+     stays in view, so dismissing it is still one tap. */
+  @media (width <= 640px) {
+    hell-pdf-viewer [data-slot='sidebar'] {
+      position: absolute;
+      inset-block: calc(var(--spacing) * 0);
+      inset-inline-start: calc(var(--spacing) * 0);
+      z-index: 1;
+      /* Floating over the document, the rail has to read as a layer above it
+         rather than as another region of the same surface. */
+      background-color: var(--color-hell-surface-elevated);
+      box-shadow: var(--shadow-hell-lg);
+    }
+
+    hell-pdf-viewer [data-slot='sidebar'] + [data-slot='pageArea'] {
+      position: absolute;
+      inset: calc(var(--spacing) * 0);
+    }
+
+    /* Spend the width on targets rather than on chrome: the rules between
+       groups are decoration the wrap already supplies, the bar tightens, and
+       the zoom field gives up its fixed width so the action group can share a
+       row with it instead of claiming a third one. */
+    hell-pdf-viewer :is([data-slot='toolbar'], [data-slot='findBar']) {
+      gap: calc(var(--spacing) * 1);
+      padding-inline: calc(var(--spacing) * 2);
+    }
+
+    hell-pdf-viewer [data-slot='divider'] {
+      display: none;
+    }
+
+    hell-pdf-viewer [data-slot='zoomSelect'] {
+      flex: 0 1 5.5rem;
+    }
+
+    /* The find field owns its row so the match count and its buttons stay on
+       one line. */
+    hell-pdf-viewer [data-slot='findInput'] {
+      flex-basis: 100%;
+      max-width: none;
     }
   }
 }
