@@ -1,12 +1,12 @@
 # The single release workflow for every registry and Release Projection. A
-# tag push runs the publish-last graph: release gate → GitHub Packages →
-# every other configured Required Registry (npmjs when enabled) → draft and
-# verify the GitHub prerelease → publish the GitHub prerelease. Both registry
-# publish jobs download the same gate run's audited `release-package`
-# artifact, so cross-registry byte-identity comes from literally sharing one
-# tarball rather than from build determinism across separate gate runs. The
-# GitHub Release body is an exact byte projection of the tagged Released
-# Version Notes, decided by the fixture-tested policy in
+# tag push runs the publish-last graph: release gate and the immutable-release
+# policy gate → GitHub Packages → every other configured Required Registry
+# (npmjs when enabled) → draft and verify the GitHub prerelease → publish the
+# GitHub prerelease. Both registry publish jobs download the same gate run's
+# audited `release-package` artifact, so cross-registry byte-identity comes
+# from literally sharing one tarball rather than from build determinism across
+# separate gate runs. The GitHub Release body is an exact byte projection of
+# the tagged Released Version Notes, decided by the fixture-tested policy in
 # tools/release-projection.mjs; manual dispatch stays evidence-only.
 #
 # This file must keep the npm-publish.yml name: the npm trusted-publisher
@@ -39,13 +39,54 @@ jobs:
     name: Release gate
     uses: ./.github/workflows/release-gate.yml
 
+  # Publication trust gate (ADR 0003): nothing publishes while GitHub's
+  # native immutable-release policy is unproven. The policy locks published
+  # release tags and assets and attests them; it does not lock note text, so
+  # the tagged Released Version Notes stay authoritative and
+  # release-drift.yml watches the published projection against them.
+  #
+  # The gate runs before both registry publish jobs so a disabled policy costs
+  # nothing but a blocked run, and it decides through the same fixture-tested
+  # seam draft verification uses rather than a second shell implementation.
+  # Evidence-only workflow_dispatch runs skip it along with the publish jobs;
+  # see docs/release/release-immutability.md for remediation.
+  release-immutability:
+    name: Release immutability policy
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      # An unreadable policy leaves no evidence file, which the seam treats
+      # exactly like missing evidence: the gate fails closed.
+      - name: Capture the immutable-releases policy
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
+            rm -f "$RUNNER_TEMP/immutable-releases.json"
+
+      - name: Require the enabled immutable-release policy
+        run: node tools/release-projection.mjs policy "$RUNNER_TEMP/immutable-releases.json"
+
   publish-npm:
     name: Publish to npm
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.HELL_ENABLE_NPMJS_PUBLISH == 'true'
     # GitHub Packages publishes first; enabling the npmjs switch makes npmjs
-    # a Required Registry that runs after it (ADR 0003).
+    # a Required Registry that runs after it (ADR 0003). Nothing publishes
+    # before the immutable-release policy is proven enabled.
     needs:
       - release-gate
+      - release-immutability
       - publish-github-packages
     runs-on: ubuntu-latest
     environment: npm-publish
@@ -103,7 +144,10 @@ jobs:
   publish-github-packages:
     name: Publish to GitHub Packages
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: release-gate
+    # Nothing publishes before the immutable-release policy is proven enabled.
+    needs:
+      - release-gate
+      - release-immutability
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

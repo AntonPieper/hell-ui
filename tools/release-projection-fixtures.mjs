@@ -5,19 +5,32 @@
 // tools/release-projection.mjs and asserts the explicit pass/fail decision.
 // Nothing here talks to GitHub or publishes anything; the release workflow's
 // thin jobs consume exactly these functions at publish time.
+//
+// The post-publication half is proven the same way: drift fixtures feed
+// captured live releases back through the same projection the draft is built
+// from, so exact releases stay clean while body drift, metadata drift,
+// unexpected assets, missing tagged notes, and repair-shaped options fail
+// with visible evidence — and the immutability policy gate refuses anything
+// but affirmative evidence.
 
 import {
   chooseProjectionAction,
   classifyPrereleaseVersion,
+  evaluateImmutabilityPolicy,
   evaluateRegistryBarrier,
   normalizeGithubRelease,
   planReleaseProjection,
+  releaseTagVersion,
+  verifyReleaseDrift,
   verifyReleaseProjection,
 } from './release-projection.mjs';
 
 const commit = 'a'.repeat(40);
 const otherCommit = 'b'.repeat(40);
-const notes = '## [0.3.0] - 2026-07-27\n\n### Fixed\n\n- Fixed toast exit ordering.\n';
+// One Released Version Notes record shape for every fixture, so the drafting
+// and drift halves are proven against the same bytes.
+const record = (version) => `## [${version}] - 2026-07-27\n\n### Fixed\n\n- Fixed toast exit ordering.\n`;
+const notes = record('0.3.0');
 
 const fixtures = [
   { name: 'prerelease classification follows the release-stage policy', run: fixturePrereleaseClassification },
@@ -36,6 +49,16 @@ const fixtures = [
   { name: 'a rerun accepts only an exact existing release', run: fixtureRerunRequiresExactRelease },
   { name: 'published verification requires a published immutable release', run: fixtureVerifiesPublishedState },
   { name: 'github api releases normalize into policy metadata', run: fixtureNormalizesGithubReleases },
+  { name: 'an exact published release reports no projection drift', run: fixtureExactReleaseHasNoDrift },
+  { name: 'drift detection reuses the drafted projection byte-for-byte', run: fixtureDriftSharesTheProjection },
+  { name: 'body drift fails with first-difference evidence', run: fixtureBodyDrift },
+  { name: 'release metadata drift fails visibly', run: fixtureMetadataDrift },
+  { name: 'a release retargeted at another commit drifts', run: fixtureTargetDrift },
+  { name: 'unexpected custom assets fail the drift check', run: fixtureUnexpectedAssets },
+  { name: 'a missing or unprojectable tagged record fails the drift check', run: fixtureMissingTaggedRecord },
+  { name: 'automatic repair requests are rejected', run: fixtureRepairRequestsRejected },
+  { name: 'a published release outside the immutable policy drifts', run: fixtureDriftRequiresImmutability },
+  { name: 'the publication gate refuses anything but an enabled policy', run: fixtureImmutabilityPolicyGate },
 ];
 
 export function runReleaseProjectionFixtures() {
@@ -411,4 +434,240 @@ function fixtureNormalizesGithubReleases(context) {
   if (bare.draft !== false || bare.prerelease !== false || bare.immutable !== false || bare.assetNames.length !== 0) {
     context.fail('normalization must default missing flags to false and assets to none.');
   }
+}
+
+// ---------------------------------------------------------------------------
+// Post-publication drift. The release objects below are captured GitHub REST
+// payloads, as the API returns them for a release the publication path
+// created; the tagged record is the exact `.changes/<version>.md` bytes at
+// the release tag.
+// ---------------------------------------------------------------------------
+
+function publishedRelease(version, overrides = {}) {
+  return {
+    id: 200,
+    tag_name: `v${version}`,
+    name: `v${version}`,
+    // The draft job posts the tagged commit SHA and GitHub returns what it
+    // was sent, so a projection this repository created names that commit.
+    target_commitish: commit,
+    body: record(version),
+    draft: false,
+    prerelease: classifyPrereleaseVersion(version),
+    immutable: true,
+    assets: [],
+    ...overrides,
+  };
+}
+
+function drift(release, options = {}) {
+  const version = releaseTagVersion(release.tag_name);
+  return verifyReleaseDrift({
+    release,
+    taggedRecord: version === null ? null : record(version),
+    recordCommit: commit,
+    tagCommit: commit,
+    ...options,
+  });
+}
+
+function fixtureExactReleaseHasNoDrift(context) {
+  expectPass(context, drift(publishedRelease('0.3.0')), 'an exact 0.3.0 release');
+  expectPass(context, drift(publishedRelease('0.3.0-beta.1')), 'an exact 0.3.0-beta.1 release');
+  expectPass(context, drift(publishedRelease('1.2.0')), 'an exact stable 1.2.0 release');
+}
+
+// Draft creation and drift detection must never be two implementations that
+// happen to agree: the drift check verifies against the very projection the
+// draft job plans from the same tagged bytes.
+function fixtureDriftSharesTheProjection(context) {
+  const { expected } = planReleaseProjection({
+    tagName: 'v0.3.0',
+    commit,
+    manifestVersion: '0.3.0',
+    notesBody: record('0.3.0'),
+  });
+  if (expected === null) {
+    context.fail('the drafted projection must plan from the tagged record.');
+    return;
+  }
+  if (expected.body !== record('0.3.0')) {
+    context.fail('the projection body must be the tagged record bytes exactly.');
+  }
+  expectPass(
+    context,
+    drift(publishedRelease('0.3.0', { body: expected.body, name: expected.title })),
+    'a release carrying exactly the drafted projection',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { body: expected.body.replace(/\n$/, '') })),
+    'byte-for-byte',
+    'a release whose body lost the tagged trailing newline',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0'), { tagCommit: otherCommit }),
+    'not the audited release commit',
+    'a tag that no longer resolves to the commit the record was read from',
+  );
+}
+
+function fixtureBodyDrift(context) {
+  const edited = drift(
+    publishedRelease('0.3.0', {
+      body: '## [0.3.0] - 2026-07-27\n\n### Fixed\n\n- Fixed toast exit ordering, honest!\n',
+    }),
+  );
+  expectFailure(context, edited, 'byte-for-byte', 'an edited body');
+  expectFailure(context, edited, 'first difference at line 5', 'an edited body');
+
+  // A web-UI edit that "restores" the text with CRLF line endings is still
+  // drift; exact restoration means exact tagged bytes.
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { body: record('0.3.0').replaceAll('\n', '\r\n') })),
+    'byte-for-byte',
+    'a CRLF-normalized body',
+  );
+  expectFailure(context, drift(publishedRelease('0.3.0', { body: null })), 'byte-for-byte', 'an emptied body');
+}
+
+function fixtureMetadataDrift(context) {
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { name: 'Hell UI 0.3.0 (big one)' })),
+    'The release title is',
+    'a retitled release',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { draft: true })),
+    'still a draft',
+    'a release turned back into a draft',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { prerelease: false })),
+    'GitHub prerelease until an explicit stable Release Stage Promotion',
+    'a 0.x release reclassified as stable',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('1.2.0', { prerelease: true })),
+    'must be a stable release',
+    'a stable release reclassified as a prerelease',
+  );
+}
+
+// The release's stored target is the one field that exists only on a live
+// release, so it is the one comparison drift adds on top of the published
+// verification. A concrete commit that disagrees with the tagged record's
+// commit is drift; a branch-name target — what releases created outside this
+// path carry — is tolerated so they do not report drift forever.
+function fixtureTargetDrift(context) {
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { target_commitish: otherCommit })),
+    'Release target drifted',
+    'a release retargeted at another commit',
+  );
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { target_commitish: otherCommit.toUpperCase() })),
+    'Release target drifted',
+    'a release retargeted at another commit in upper case',
+  );
+  for (const tolerated of ['main', 'attacker-branch', undefined, null, 12345]) {
+    expectPass(
+      context,
+      drift(publishedRelease('0.3.0', { target_commitish: tolerated })),
+      `a release targeting ${JSON.stringify(tolerated ?? null)}`,
+    );
+  }
+  expectPass(
+    context,
+    drift(publishedRelease('0.3.0', { target_commitish: commit.toUpperCase() })),
+    'a release targeting the tagged commit in upper case',
+  );
+}
+
+function fixtureUnexpectedAssets(context) {
+  const errors = drift(
+    publishedRelease('0.3.0', { assets: [{ name: 'hell-ui-0.3.0.tgz' }, { name: 'checksums.txt' }] }),
+  );
+  expectFailure(context, errors, 'no custom assets', 'a release with custom assets');
+  expectFailure(context, errors, 'hell-ui-0.3.0.tgz', 'a release with custom assets');
+}
+
+function fixtureMissingTaggedRecord(context) {
+  const missing = verifyReleaseDrift({
+    release: publishedRelease('0.3.0'),
+    taggedRecord: null,
+    recordCommit: commit,
+    tagCommit: commit,
+  });
+  expectFailure(context, missing, 'carries no Released Version Notes record', 'a tag without a record');
+  expectFailure(context, missing, '.changes/0.3.0.md', 'a tag without a record');
+
+  // The tag is validated before it can name a record path, so a tag outside
+  // the v<SemVer> shape never reaches the filesystem.
+  for (const tagName of ['release-0.3.0', 'v0.3', 'v../../etc/passwd', null]) {
+    expectFailure(
+      context,
+      drift(publishedRelease('0.3.0', { tag_name: tagName })),
+      'not a v-prefixed SemVer release tag',
+      `a ${JSON.stringify(tagName)} release tag`,
+    );
+    if (releaseTagVersion(tagName) !== null) {
+      context.fail(`${JSON.stringify(tagName)} must not resolve to a Released Version Notes path.`);
+    }
+  }
+  if (releaseTagVersion('v0.3.0') !== '0.3.0') {
+    context.fail('a v-prefixed SemVer tag must resolve to its version.');
+  }
+}
+
+function fixtureRepairRequestsRejected(context) {
+  const repair = drift(publishedRelease('0.3.0'), { repair: true });
+  expectFailure(context, repair, 'Unsupported release drift option', 'a repair request');
+  expectFailure(context, repair, 'never repairs, edits, or republishes', 'a repair request');
+
+  const autoFix = drift(publishedRelease('0.3.0', { body: 'drifted' }), { autoRepair: 'restore-from-tag' });
+  expectFailure(context, autoFix, 'Unsupported release drift option', 'an auto-repair request');
+}
+
+function fixtureDriftRequiresImmutability(context) {
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0', { immutable: false })),
+    'not immutable',
+    'a mutable published release',
+  );
+
+  const unreported = publishedRelease('0.3.0');
+  delete unreported.immutable;
+  expectFailure(context, drift(unreported), 'not immutable', 'a release without immutability evidence');
+}
+
+// The gate that runs before any registry publishes reads the same decision
+// draft verification does, so publication and verification cannot disagree
+// about what an enabled policy looks like.
+function fixtureImmutabilityPolicyGate(context) {
+  expectPass(context, evaluateImmutabilityPolicy({ enabled: true, enforced_by_owner: false }), 'an enabled policy');
+  expectFailure(context, evaluateImmutabilityPolicy({ enabled: false }), 'is disabled', 'a disabled policy');
+  expectFailure(context, evaluateImmutabilityPolicy({}), 'Could not read', 'a policy without evidence');
+  expectFailure(context, evaluateImmutabilityPolicy(null), 'Could not read', 'an unreadable policy');
+  expectFailure(
+    context,
+    evaluateImmutabilityPolicy({ enabled: 'true' }),
+    'Could not read',
+    'a non-boolean policy value',
+  );
+  expectFailure(
+    context,
+    verify({ immutableReleasesPolicy: { enabled: 'true' } }),
+    'Could not read',
+    'draft verification over a non-boolean policy value',
+  );
 }
