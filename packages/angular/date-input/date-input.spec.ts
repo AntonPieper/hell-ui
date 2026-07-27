@@ -360,6 +360,37 @@ class SilentAdapterFormatHost {}
 })
 class HintingAdapterFormatHost {}
 
+/**
+ * A configured format whose inputs carry no `aria-label`: the Field supplies
+ * `aria-labelledby`, and the plain `<label for>` supplies `host.labels`. Both
+ * author an explicit `id`, because a Field-composed Date Input without one
+ * currently ends up with NgpInput's generated id on the element while the label
+ * targets the id `setFormControl` registered, leaving `for` dangling.
+ */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput, ...HELL_FIELD_IMPORTS],
+  providers: [provideHellDateInputFormat('DD.MM.YYYY')],
+  template: `
+    <div hellField>
+      <label hellFieldLabel for="field-labelled-date">Field labelled date</label>
+      <input id="field-labelled-date" hellDateInput [value]="value()" />
+    </div>
+    <label for="native-labelled-date">Native labelled date</label>
+    <input id="native-labelled-date" hellDateInput [value]="value()" />
+    <span id="referenced-date-label">Referenced date</span>
+    <input
+      id="referenced-labelled-date"
+      hellDateInput
+      aria-labelledby="referenced-date-label"
+      [value]="value()"
+    />
+  `,
+})
+class LabelledFormatHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -378,6 +409,7 @@ describe('HellDateInput', () => {
         LocalFormatOnlyHost,
         SilentAdapterFormatHost,
         HintingAdapterFormatHost,
+        LabelledFormatHost,
       ],
     }).compileComponents();
   });
@@ -1010,6 +1042,52 @@ describe('HellDateInput', () => {
     expect(input.value).toBe('22.04.2026');
   });
 
+  it('writes the hint for a Field-labelled input that has no aria-label', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The Field's label ids reach the input through `aria-labelledby`, which is
+    // the naming markup the gate must accept — this is the documented Field
+    // composition, so withholding the hint here would be the real regression.
+    const input = dateInputById(fixture.nativeElement, 'field-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes the hint for an input named by a plain associated label', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // No `aria-label` and no Field: only the associated `<label for>` can
+    // satisfy the gate here.
+    const input = dateInputById(fixture.nativeElement, 'native-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.getAttribute('aria-labelledby')).toBeNull();
+    expect(input.labels?.length).toBe(1);
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes the hint for an input named only by aria-labelledby', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // No `aria-label` and no `<label>` element at all, so the merged
+    // `aria-labelledby` — the same channel an enclosing Field writes through —
+    // is the only clause that can satisfy the gate.
+    const input = dateInputById(fixture.nativeElement, 'referenced-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.labels?.length ?? 0).toBe(0);
+    expect(input.getAttribute('aria-labelledby')).toBe('referenced-date-label');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
   it('writes no placeholder onto an input that has no accessible name', async () => {
     const fixture = TestBed.createComponent(ScopedFormatHost);
     fixture.detectChanges();
@@ -1148,6 +1226,12 @@ describe('HellDateInput', () => {
 function dateInput(root: HTMLElement): HTMLInputElement {
   const input = root.querySelector('input[hellDateInput]');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected input[hellDateInput].');
+  return input;
+}
+
+function dateInputById(root: HTMLElement, id: string): HTMLInputElement {
+  const input = root.querySelector(`input[hellDateInput]#${id}`);
+  if (!(input instanceof HTMLInputElement)) throw new Error(`Expected date input #${id}.`);
   return input;
 }
 
