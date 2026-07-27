@@ -89,10 +89,12 @@ export interface HellDateInputAdapter
   extends HellTypedInputAdapter<Date, HellDateInputAdapterContext> {
   /**
    * Text hint for the accepted input shape. Date Input writes it to an
-   * unauthored native `placeholder` only when a format is configured; return
-   * `null` (or omit the hook) to write no placeholder at all. An adapter that
-   * accepts text its context format cannot describe should omit it rather than
-   * let the field advertise a shape it will reject.
+   * unauthored native `placeholder` only when a format is configured and the
+   * host already authors naming markup (an `aria-label`, an `aria-labelledby`,
+   * or an associated `<label>`); return `null` (or omit the hook) to write no
+   * placeholder at all. An adapter that accepts text its context format cannot
+   * describe should omit it rather than let the field advertise a shape it will
+   * reject.
    */
   readonly placeholderHint?: (context: HellDateInputAdapterContext) => string | null;
 }
@@ -326,9 +328,12 @@ let nextDateInputId = 0;
  * Typed text, display, and native bound attributes follow the effective date
  * format: the local `format` input when set, otherwise the nearest
  * `provideHellDateInputFormat` scope, otherwise ISO `YYYY-MM-DD`. The committed
- * `Date | null` contract is unaffected by the format. When — and only when — a
- * format is configured, an unauthored native `placeholder` receives the
- * adapter's `placeholderHint`; author `placeholder=""` to keep it empty.
+ * `Date | null` contract is unaffected by the format. An unauthored native
+ * `placeholder` receives the adapter's `placeholderHint` only when a format is
+ * configured *and* the host authors naming markup of its own — an `aria-label`,
+ * an `aria-labelledby`, or an associated `<label>` — so a hint does not become
+ * the accessible name of an input that names itself nowhere. Author
+ * `placeholder=""` to keep it empty.
  */
 @Directive({
   selector: 'input[hellDateInput]',
@@ -533,13 +538,13 @@ export class HellDateInput implements FormValueControl<Date | null> {
     afterRenderEffect(() => {
       // Four gates before the directive touches a consumer's markup: a format
       // must be configured (so unconfigured apps keep their empty field), the
-      // host must already have a real accessible name (see `hasAccessibleName`),
-      // the adapter must supply the hint (so the field never advertises a shape
-      // it rejects), and the attribute must be absent or previously ours (so an
+      // host must author naming markup (see `authorsNamingMarkup`), the adapter
+      // must supply the hint (so the field never advertises a shape it
+      // rejects), and the attribute must be absent or previously ours (so an
       // authored `placeholder`, including `placeholder=""`, always wins).
       // Reading after render sees static attributes and bindings alike.
       const hint =
-        this.configuredFormat() === null || !this.hasAccessibleName()
+        this.configuredFormat() === null || !this.authorsNamingMarkup()
           ? null
           : this.adapter.placeholderHint?.(this.context()) || null;
       const current = this.host.getAttribute('placeholder');
@@ -599,17 +604,29 @@ export class HellDateInput implements FormValueControl<Date | null> {
   }
 
   /**
-   * Whether something other than a placeholder can name the host: a native
-   * `aria-label`, merged `aria-labelledby` ids (including an enclosing Field's),
-   * or an associated `<label>`.
+   * Whether the host authors naming markup that outranks a placeholder: a
+   * native `aria-label`, merged `aria-labelledby` ids (including an enclosing
+   * Field's), or an associated `<label>`.
    *
    * A placeholder is the last fallback in the accessible name computation, and
-   * axe's `label` rule accepts a non-empty one. Writing a hint onto an
-   * otherwise unnamed input would therefore give it a name and silence the
-   * violation that names the real defect, so an unnamed input gets no hint —
-   * the missing label stays as visible to tooling as it was before.
+   * axe's `label` rule accepts a non-empty one, so writing a hint onto an input
+   * that names itself nowhere would hand it a name and silence the violation
+   * that reports the real defect.
+   *
+   * This is deliberately a structural check and not a name computation, so it
+   * has two known boundaries. Empty or dangling naming markup — `<label
+   * for="x"></label>`, a text-less wrapping label, an `aria-labelledby` whose
+   * target never renders — counts as authored, and the hint is written. And
+   * only `fieldAriaLabelledby()` is reactive: `aria-label` and `labels` are
+   * sampled per run, so markup removed after a hint was written does not take
+   * the hint with it. Resolving label text instead of structure, or observing
+   * mutations, would each trade these for worse failure modes (a label whose
+   * text arrives asynchronously would lose its hint), so the boundary is
+   * documented rather than papered over. What this gate does guarantee is the
+   * common case: an input that authors no naming markup at all is never handed
+   * an accessible name it did not have.
    */
-  private hasAccessibleName(): boolean {
+  private authorsNamingMarkup(): boolean {
     return (
       (this.host.getAttribute('aria-label') ?? '').trim() !== '' ||
       this.fieldAriaLabelledby() !== null ||
