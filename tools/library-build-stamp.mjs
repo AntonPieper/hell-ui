@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+
+import { collectSourceFiles, digestSourceFiles } from './source-digest.mjs';
 
 /**
  * Build provenance for the published library.
@@ -39,40 +40,24 @@ export const LIBRARY_BUILD_CONFIGURATIONS = ['production', 'development'];
  * (`*.spec.ts`, stylesheets, assets, installed packages).
  */
 function declarationInputPaths(root) {
-  const paths = [
+  return [
     join(root, 'pnpm-lock.yaml'),
     join(root, 'tsconfig.base.json'),
     join(root, 'packages/angular/tsconfig.lib.json'),
     join(root, 'packages/angular/tsconfig.lib.prod.json'),
     join(root, 'packages/angular/angular.json'),
     join(root, 'packages/angular/package.json'),
-  ].filter((path) => existsSync(path));
-
-  collectDeclarationSources(join(root, 'packages/angular'), paths);
-  return paths.sort();
-}
-
-function collectDeclarationSources(folder, collected) {
-  for (const entry of readdirSync(folder, { withFileTypes: true })) {
-    if (entry.name === 'node_modules') continue;
-    const path = join(folder, entry.name);
-    if (entry.isDirectory()) {
-      collectDeclarationSources(path, collected);
-      continue;
-    }
-    if (entry.name === 'ng-package.json') collected.push(path);
-    else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.spec.ts')) collected.push(path);
-  }
+    ...collectSourceFiles(
+      join(root, 'packages/angular'),
+      (name) =>
+        name === 'ng-package.json' || (name.endsWith('.ts') && !name.endsWith('.spec.ts')),
+    ),
+  ];
 }
 
 /** Content digest of every declaration input, independent of build order or timestamps. */
 function computeDeclarationInputsDigest(root) {
-  const digest = createHash('sha256');
-  for (const path of declarationInputPaths(root)) {
-    const fileDigest = createHash('sha256').update(readFileSync(path)).digest('hex');
-    digest.update(`${toPosixPath(relative(root, path))}\0${fileDigest}\n`);
-  }
-  return digest.digest('hex');
+  return digestSourceFiles(root, declarationInputPaths(root));
 }
 
 export function writeLibraryBuildStamp({ root, configuration }) {
@@ -186,8 +171,4 @@ export function checkLibraryBuildStampFixture() {
     [],
     'the build timestamp must not affect staleness',
   );
-}
-
-function toPosixPath(path) {
-  return path.split(sep).join('/');
 }
