@@ -171,6 +171,39 @@ describe('HellTimePicker', () => {
         warn.mockRestore();
       }
     });
+
+    it('warns once per degenerate episode, not once per recompute', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        // A 30-minute grid offers 09:00 and 09:30, so a 09:45 floor excludes
+        // everything no matter where the ceiling sits.
+        const fixture = render({
+          minuteStep: 30,
+          min: { hour: 9, minute: 45, second: 0 },
+          max: { hour: 9, minute: 50, second: 0 },
+        });
+        expect(warn).toHaveBeenCalledTimes(1);
+
+        // Further writes that leave the picker degenerate must stay silent.
+        fixture.componentInstance.max.set({ hour: 9, minute: 55, second: 0 });
+        fixture.detectChanges();
+        fixture.componentInstance.max.set({ hour: 9, minute: 59, second: 0 });
+        fixture.detectChanges();
+        expect(warn).toHaveBeenCalledTimes(1);
+
+        // Recovering releases the latch without announcing anything.
+        fixture.componentInstance.min.set({ hour: 9, minute: 0, second: 0 });
+        fixture.detectChanges();
+        expect(warn).toHaveBeenCalledTimes(1);
+
+        // A genuine relapse is a new episode and warns again.
+        fixture.componentInstance.min.set({ hour: 9, minute: 45, second: 0 });
+        fixture.detectChanges();
+        expect(warn).toHaveBeenCalledTimes(2);
+      } finally {
+        warn.mockRestore();
+      }
+    });
   });
 
   describe('activation and commits', () => {

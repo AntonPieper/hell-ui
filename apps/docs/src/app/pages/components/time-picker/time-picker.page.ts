@@ -61,6 +61,12 @@ import timePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         immediately — there is no draft and no confirm step. Scrolling a column only reveals
         options; it never commits.
       </p>
+      <p>
+        Writing the value from outside the picker scrolls every column back to the new selection,
+        so a programmatic change is never left off-screen. Arrowing or tapping inside one column
+        deliberately leaves the other columns where they are, so a scroll position you are still
+        browsing survives.
+      </p>
       <hd-example-tabs [code]="basicExampleCode">
         <app-time-picker-basic-example />
       </hd-example-tabs>

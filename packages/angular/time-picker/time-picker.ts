@@ -287,9 +287,17 @@ export class HellTimePicker {
     destroyRef.onDestroy(() => this.clearDigitTimeout());
 
     effect(() => {
+      // Everything that moves the selected option within its column. A new
+      // value moves it directly; `seconds` adds or removes a whole column; the
+      // effective steps rewrite a column's option count, so the selection lands
+      // somewhere new even when the value itself never changed.
+      //
+      // `min`/`max` are deliberately absent. Bounds only toggle `disabled` on
+      // options that keep their positions and their count, so nothing moves.
       this.value();
-      // A precision change adds or removes a column that needs centering too.
       this.seconds();
+      this.effectiveMinuteStep();
+      this.effectiveSecondStep();
       if (this.internalCommit) {
         this.internalCommit = false;
         return;
@@ -305,8 +313,17 @@ export class HellTimePicker {
     afterRenderEffect(() => {
       const generation = this.pendingCenter();
       if (generation === this.appliedCenter) return;
-      this.appliedCenter = generation;
-      for (const unit of untracked(() => this.visibleUnits())) this.centerColumn(unit);
+
+      let centered = true;
+      // Every column, then the bookkeeping: `centerColumn` must run for all of
+      // them regardless of which ones missed.
+      for (const unit of untracked(() => this.visibleUnits())) {
+        if (!this.centerColumn(unit)) centered = false;
+      }
+      // Bank the generation only once every column measured. A picker first
+      // rendered inside a hidden ancestor centers nothing, and must stay owed
+      // this generation so the next render pass after it is revealed retries.
+      if (centered) this.appliedCenter = generation;
     });
 
     afterRenderEffect(() => {
@@ -321,10 +338,20 @@ export class HellTimePicker {
     });
 
     if (isDevMode()) {
+      // `columns` recomputes on every value, bounds, step and precision write,
+      // so warning unconditionally would emit one identical line per write per
+      // picker. Latch instead, and release the latch on recovery so a genuine
+      // relapse is still reported once.
+      let warnedNoSelectableTime = false;
       effect(() => {
         const columns = this.columns();
         if (!columns.length) return;
-        if (columns.some((column) => column.options.some((option) => !option.disabled))) return;
+        if (columns.some((column) => column.options.some((option) => !option.disabled))) {
+          warnedNoSelectableTime = false;
+          return;
+        }
+        if (warnedNoSelectableTime) return;
+        warnedNoSelectableTime = true;
         // A warning rather than the throw `validateStep` uses: this depends on
         // bound values, so a momentarily incompatible min/max during data
         // loading must not take the app down.
@@ -530,20 +557,29 @@ export class HellTimePicker {
    * Scrolls one column so its selected option sits in the middle. Rect math
    * keeps this correct regardless of which ancestor is the offset parent, and
    * only ever writes the column's own `scrollTop`.
+   *
+   * @returns whether the column could actually be measured and centered.
    */
-  private centerColumn(unit: HellTimePickerUnit): void {
+  private centerColumn(unit: HellTimePickerUnit): boolean {
     const root = this.host.nativeElement;
     const list = root.querySelector<HTMLElement>(`[data-unit="${unit}"] [data-slot="options"]`);
     // A disabled picker has no tab stop, so the selected option leads.
     const active =
       list?.querySelector<HTMLElement>('[data-slot="option"][data-selected="true"]') ??
       list?.querySelector<HTMLElement>('[data-slot="option"][tabindex="0"]');
-    if (!list || !active) return;
+    if (!list || !active) return false;
 
     const listRect = list.getBoundingClientRect();
+    // A hidden ancestor — an inactive tab panel, a collapsed section, a
+    // consumer's own `display: none` wrapper — measures as a zero rect, which
+    // would make the scroll write a silent no-op. Report the miss so the
+    // caller can retry once the picker is actually laid out.
+    if (listRect.height === 0) return false;
+
     const activeRect = active.getBoundingClientRect();
     list.scrollTop +=
       activeRect.top - listRect.top - (listRect.height - activeRect.height) / 2;
+    return true;
   }
 }
 

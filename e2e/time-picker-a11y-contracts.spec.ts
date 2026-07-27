@@ -24,6 +24,25 @@ function tabStop(picker: Locator, unit: string): Locator {
   return column(picker, unit).locator('[data-slot="option"][tabindex="0"]');
 }
 
+function optionList(picker: Locator, unit: string): Locator {
+  return column(picker, unit).locator('[data-slot="options"]');
+}
+
+/**
+ * How far a column's selected option sits from the middle of its own scroll
+ * viewport, in pixels. Zero is perfectly centered; infinity means there is no
+ * selection to center on.
+ */
+function selectionCenterDelta(list: Locator): Promise<number> {
+  return list.evaluate((element) => {
+    const selected = element.querySelector('[data-slot="option"][data-selected="true"]');
+    if (!selected) return Number.POSITIVE_INFINITY;
+    const listRect = element.getBoundingClientRect();
+    const selectedRect = selected.getBoundingClientRect();
+    return Math.abs(selectedRect.top - listRect.top - (listRect.height - selectedRect.height) / 2);
+  });
+}
+
 async function gotoBasicPicker(page: Page) {
   await page.goto('/components/time-picker');
   await expect(page.getByRole('heading', { name: 'Time picker', level: 1 })).toBeVisible();
@@ -124,30 +143,41 @@ test.describe('time picker interaction contract', () => {
     const { picker } = await gotoBasicPicker(page);
 
     for (const unit of ['hour', 'minute']) {
-      const offset = await column(picker, unit).evaluate((element) => {
-        const list = element.querySelector('[data-slot="options"]');
-        const selected = list?.querySelector('[data-slot="option"][data-selected="true"]');
-        if (!list || !selected) return null;
-        const listRect = list.getBoundingClientRect();
-        const selectedRect = selected.getBoundingClientRect();
-        return {
-          scrollTop: list.scrollTop,
-          // Distance from a perfectly centered selection.
-          centerDelta: Math.abs(
-            selectedRect.top - listRect.top - (listRect.height - selectedRect.height) / 2,
-          ),
-        };
-      });
-
+      const list = optionList(picker, unit);
       // 14:30 sits well down both columns, so centering must have scrolled.
-      expect(offset?.scrollTop ?? 0, unit).toBeGreaterThan(0);
-      expect(offset?.centerDelta ?? Number.POSITIVE_INFINITY, unit).toBeLessThanOrEqual(1);
+      expect(await list.evaluate((element) => element.scrollTop), unit).toBeGreaterThan(0);
+      expect(await selectionCenterDelta(list), unit).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('re-centers every column after an external value change', async ({ page }) => {
+    const { example, picker } = await gotoBasicPicker(page);
+    const units = ['hour', 'minute'];
+
+    // Park both columns at the top, away from the 14:30 selection, so a write
+    // that does not re-center cannot pass by accident.
+    for (const unit of units) {
+      await optionList(picker, unit).evaluate((element) => {
+        element.scrollTop = 0;
+      });
+    }
+
+    // The button writes `value` from outside the picker. Unlike an arrow or a
+    // tap, that must pull *every* column back onto the new selection.
+    await example.getByRole('button', { name: 'Set to 08:15' }).click();
+    await expect(example.getByText('Selected: 08:15')).toBeVisible();
+
+    for (const unit of units) {
+      const list = optionList(picker, unit);
+      await expect
+        .poll(() => selectionCenterDelta(list), { message: unit })
+        .toBeLessThanOrEqual(1);
     }
   });
 
   test('re-centers the column the user is driving', async ({ page }) => {
     const { picker } = await gotoBasicPicker(page);
-    const hours = column(picker, 'hour').locator('[data-slot="options"]');
+    const hours = optionList(picker, 'hour');
     const before = await hours.evaluate((element) => element.scrollTop);
 
     // Home walks the selection to hour 00, which must scroll back to the top.
@@ -160,7 +190,7 @@ test.describe('time picker interaction contract', () => {
 
   test('keeps a browse-scroll in other columns while arrowing', async ({ page }) => {
     const { example, picker } = await gotoBasicPicker(page);
-    const minutes = column(picker, 'minute').locator('[data-slot="options"]');
+    const minutes = optionList(picker, 'minute');
 
     // Park the minute column away from its selection, as a user browsing it
     // would, then drive the hour column.
