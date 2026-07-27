@@ -13,6 +13,26 @@ async function widthOf(locator: Locator): Promise<number> {
   return locator.evaluate((element) => element.getBoundingClientRect().width);
 }
 
+/**
+ * How far the visible panes stick out of the Master Detail frame, and how far
+ * the document scrolls sideways, read together so the two cannot be measured
+ * at different reflow states. The frame clips its overflow, so a pane pinned
+ * wider than its container is invisible to a document-level check alone.
+ */
+async function overflowOf(example: Locator): Promise<{ pane: number; document: number }> {
+  return example.evaluate((element) => {
+    const frame = element as HTMLElement;
+    const panes = [...frame.querySelectorAll('[hellMasterPane]')] as HTMLElement[];
+    const visible = panes.filter((pane) => pane.getClientRects().length > 0);
+    if (!visible.length) throw new Error('Expected at least one visible pane.');
+    const widest = Math.max(...visible.map((pane) => pane.getBoundingClientRect().width));
+    return {
+      pane: Math.round(widest - frame.clientWidth),
+      document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+}
+
 test.describe('Master Detail responsive, focus, keyboard, and axe contracts', () => {
   test('wide mode keeps both consumer panes available and external Resizable owns keyboard sizing', async ({
     page,
@@ -50,6 +70,64 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
         .analyze()
     ).violations;
     expect(violations).toEqual([]);
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('a pane pinned by keyboard resize refits when the viewport crosses the breakpoint', async ({
+    page,
+  }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') consoleErrors.push(message.text());
+    });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await gotoMasterDetail(page);
+
+    const example = page.getByTestId('master-detail-resizable');
+    const primary = example.locator('[hellMasterPane="primary"]');
+    const detail = example.locator('[hellMasterPane="detail"]');
+    const handle = example.getByTestId('master-detail-resizable-handle');
+
+    await expect(example).not.toHaveAttribute('data-compact', 'true');
+
+    // A resized pane stops flexing: `resizable.ts` swaps `<initialFlex> 1 0`
+    // for a rigid `0 0 <px>px` on first commit. Everything below asks what
+    // happens to that pinned pixel width when the frame later becomes far
+    // narrower than it — the case a viewport set before navigation never
+    // reaches, because the pane is still flexible at first paint.
+    const relaxed = await widthOf(primary);
+    await handle.focus();
+    for (let step = 0; step < 12; step += 1) await page.keyboard.press('ArrowRight');
+    await expect.poll(() => widthOf(primary)).toBeGreaterThan(relaxed);
+    const pinned = await widthOf(primary);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await expect(example).toHaveAttribute('data-compact', 'true');
+    await expect(handle).toBeHidden();
+    await expect(detail).toBeHidden();
+    await expect(detail).toHaveAttribute('aria-hidden', 'true');
+    // The pinned width is wider than the compact frame, so the pane must be
+    // refitted rather than clipped by the frame's own `overflow-hidden`.
+    expect(pinned).toBeGreaterThan(390);
+    await expect.poll(() => overflowOf(example)).toEqual({ pane: 0, document: 0 });
+
+    await page.setViewportSize({ width: 1440, height: 1000 });
+
+    await expect(example).not.toHaveAttribute('data-compact', 'true');
+    await expect(primary).toBeVisible();
+    await expect(detail).toBeVisible();
+    await expect(handle).toBeVisible();
+    await expect(handle).toHaveAttribute('role', 'separator');
+    await expect.poll(() => overflowOf(example)).toEqual({ pane: 0, document: 0 });
+
+    // The resize transaction has to survive both reflows, not just look right.
+    const restored = await widthOf(primary);
+    await handle.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect.poll(() => widthOf(primary)).toBeLessThan(restored);
+    await expect(handle).toBeFocused();
+
     expect(consoleErrors).toEqual([]);
   });
 
