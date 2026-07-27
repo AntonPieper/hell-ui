@@ -95,6 +95,113 @@ test.describe('date picker browser accessibility contract', () => {
     await expect(example).toContainText('Selected: Thu Apr 30 2026');
   });
 
+  test('header month and year triggers drill into keyboard-operable option grids', async ({
+    page,
+  }) => {
+    await gotoDatePicker(page);
+
+    const example = page.locator('app-date-picker-basic-example');
+    const picker = example.locator('hell-date-picker');
+    await expect(picker).toHaveAttribute('data-view', 'day');
+
+    const monthTrigger = picker.locator('[data-slot="monthTrigger"]');
+    const yearTrigger = picker.locator('[data-slot="yearTrigger"]');
+    await expect(monthTrigger).toHaveText('April');
+    await expect(monthTrigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(yearTrigger).toHaveText('2026');
+    // Trigger names come from content, so the heading still names the day grid.
+    await expect(monthLabel(picker, 'April 2026')).toBeVisible();
+
+    // Plain enabled buttons with no tabindex override: both triggers sit in the
+    // natural tab order. (Tab traversal itself is engine policy — WebKit skips
+    // buttons by default — so the contract is asserted structurally.)
+    for (const control of [monthTrigger, yearTrigger]) {
+      await expect(control).toHaveJSProperty('tagName', 'BUTTON');
+      await expect(control).toBeEnabled();
+      expect(await control.getAttribute('tabindex')).toBeNull();
+    }
+
+    await monthTrigger.focus();
+    await expect(monthTrigger).toBeFocused();
+    await page.keyboard.press('Enter');
+    const monthPanel = picker.getByRole('grid', { name: 'Choose a month' });
+    await expect(monthPanel).toBeVisible();
+    await expect(picker).toHaveAttribute('data-view', 'month');
+    await expect(monthTrigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(monthTrigger).toHaveAttribute(
+      'aria-controls',
+      (await monthPanel.getAttribute('id')) ?? '',
+    );
+    // The month step buttons collapse away; the year step keeps paging.
+    await expect(picker.getByRole('button', { name: 'Previous month' })).toHaveCount(0);
+    await expect(picker.getByRole('button', { name: 'Next year' })).toBeVisible();
+
+    await expect(panelOption(picker, 'Apr')).toBeFocused();
+    await expect(panelOption(picker, 'Apr')).toHaveAttribute('data-selected', '');
+    await expect(panelCell(picker, 'Apr')).toHaveAttribute('aria-selected', 'true');
+    await expect(panelOption(picker, 'Apr')).toHaveAttribute('aria-label', 'April 2026');
+
+    await page.keyboard.press('ArrowRight');
+    await expect(panelOption(picker, 'May')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(panelOption(picker, 'Aug')).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(panelOption(picker, 'Jan')).toBeFocused();
+    await page.keyboard.press('End');
+    await expect(panelOption(picker, 'Dec')).toBeFocused();
+    // Rolling off the last month steps the grid onto the next year.
+    await page.keyboard.press('ArrowRight');
+    await expect(monthLabel(picker, 'April 2027')).toBeVisible();
+    await expect(panelOption(picker, 'Jan')).toBeFocused();
+    await page.keyboard.press('PageUp');
+    await expect(monthLabel(picker, 'April 2026')).toBeVisible();
+
+    // Escape leaves the drill-down and restores the trigger, keeping the day grid.
+    await page.keyboard.press('Escape');
+    await expect(picker).toHaveAttribute('data-view', 'day');
+    await expect(monthTrigger).toBeFocused();
+    await expect(monthTrigger).toHaveAttribute('aria-expanded', 'false');
+
+    await yearTrigger.click();
+    const yearPanel = picker.getByRole('grid', { name: 'Choose a year' });
+    await expect(yearPanel).toBeVisible();
+    await expect(picker).toHaveAttribute('data-view', 'year');
+    // The page is centred on the year in view, so nearby years are one click away.
+    await expect(panelOptions(picker).first()).toHaveText('2015');
+    await expect(panelOptions(picker).last()).toHaveText('2038');
+    await expect(panelOptions(picker)).toHaveCount(24);
+    await expect(panelOption(picker, '2026')).toBeFocused();
+
+    await picker.getByRole('button', { name: 'Next years' }).click();
+    await expect(panelOptions(picker).first()).toHaveText('2039');
+    await picker.getByRole('button', { name: 'Previous years' }).click();
+    await expect(panelOptions(picker).first()).toHaveText('2015');
+  });
+
+  test('reaches a date five years away in five interactions and restores grid focus', async ({
+    page,
+  }) => {
+    await gotoDatePicker(page);
+
+    const example = page.locator('app-date-picker-basic-example');
+    const picker = example.locator('hell-date-picker');
+    await expect(monthLabel(picker, 'April 2026')).toBeVisible();
+
+    await picker.locator('[data-slot="yearTrigger"]').click(); // 1
+    await panelOption(picker, '2031').click(); // 2
+    await expect(monthLabel(picker, 'April 2031')).toBeVisible();
+    await expect(picker).toHaveAttribute('data-view', 'day');
+    // Focus lands back on the day grid's roving tab stop, ready for arrow keys.
+    await expect(dayButton(picker, 22)).toBeFocused();
+
+    await picker.locator('[data-slot="monthTrigger"]').click(); // 3
+    await panelOption(picker, 'Sep').click(); // 4
+    await expect(monthLabel(picker, 'September 2031')).toBeVisible();
+
+    await dayButton(picker, 15).click(); // 5
+    await expect(example).toContainText('Selected: Mon Sep 15 2031');
+  });
+
   test('bounded and disabled pickers expose disabled navigation and date states', async ({
     page,
   }) => {
@@ -129,6 +236,20 @@ test.describe('date picker browser accessibility contract', () => {
     }
     await expect(dayButton(disabledPicker, 22)).toBeDisabled();
     await expect(cellForDay(disabledPicker, 22)).toHaveAttribute('aria-disabled', 'true');
+    await expect(disabledPicker.locator('[data-slot="monthTrigger"]')).toBeDisabled();
+    await expect(disabledPicker.locator('[data-slot="yearTrigger"]')).toBeDisabled();
+
+    // Bounds reach the drill-down grids as well as the day grid.
+    await boundedPicker.locator('[data-slot="monthTrigger"]').click();
+    await expect(panelOption(boundedPicker, 'Mar')).toBeDisabled();
+    await expect(panelCell(boundedPicker, 'Mar')).toHaveAttribute('aria-disabled', 'true');
+    await expect(panelOption(boundedPicker, 'Apr')).toBeEnabled();
+
+    await boundedPicker.locator('[data-slot="yearTrigger"]').click();
+    await expect(panelOption(boundedPicker, '2026')).toBeEnabled();
+    await expect(panelOption(boundedPicker, '2027')).toBeDisabled();
+    await expect(boundedPicker.getByRole('button', { name: 'Previous years' })).toBeDisabled();
+    await expect(boundedPicker.getByRole('button', { name: 'Next years' })).toBeDisabled();
 
     const disabledRangePicker = page
       .locator('app-date-picker-disabled-example')
@@ -187,6 +308,40 @@ test.describe('date picker browser accessibility contract', () => {
     await expect(example).toContainText(/Wed Apr 22 2026\s+to\s+Wed Apr 22 2026/);
   });
 
+  test('drill-down works inside a popover and leaves the popover Escape contract intact', async ({
+    page,
+  }) => {
+    await gotoDatePicker(page);
+
+    const example = page.locator('app-date-picker-with-popover-example');
+    await example.scrollIntoViewIfNeeded();
+    const trigger = example.getByRole('button', { name: /Apr 6/ });
+    await trigger.click();
+
+    const surface = page.getByRole('dialog', { name: 'Choose trip dates' });
+    const picker = surface.locator('hell-date-range-picker');
+    await expect(picker).toBeVisible();
+
+    await picker.locator('[data-slot="yearTrigger"]').click();
+    await expect(picker.getByRole('grid', { name: 'Choose a year' })).toBeVisible();
+    await expect(panelOption(picker, '2026')).toBeFocused();
+    // The popover's own min keeps past years out of the drill-down.
+    await expect(panelOption(picker, '2025')).toBeDisabled();
+
+    await panelOption(picker, '2029').click();
+    await expect(picker.getByRole('heading', { level: 2, name: 'April 2029' })).toBeVisible();
+    await expect(picker).toBeVisible();
+
+    // Escape keeps closing the popover itself: dismissal stays engine-owned.
+    await page.keyboard.press('Escape');
+    await expect(surface).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+
+    // Reopening starts on the day grid again.
+    await trigger.click();
+    await expect(picker).toHaveAttribute('data-view', 'day');
+  });
+
   test('range picker keeps completed ranges visible across month and year views', async ({
     page,
   }) => {
@@ -240,6 +395,18 @@ function dayButton(picker: Locator, day: number): Locator {
 
 function cellForDay(picker: Locator, day: number): Locator {
   return dayButton(picker, day).locator('xpath=ancestor::td[1]');
+}
+
+function panelOptions(picker: Locator): Locator {
+  return picker.locator('[data-slot="panelOption"]');
+}
+
+function panelOption(picker: Locator, label: string): Locator {
+  return panelOptions(picker).filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) }).first();
+}
+
+function panelCell(picker: Locator, label: string): Locator {
+  return panelOption(picker, label).locator('xpath=ancestor::td[1]');
 }
 
 async function expectPickerLayoutAligned(picker: Locator): Promise<void> {

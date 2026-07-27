@@ -62,9 +62,10 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <code>hell-date-range-picker</code> for a start/end range. Both are Composites built on
         <code>ng-primitives/date-picker</code>, which owns the ARIA date grid, roving focus,
         keyboard navigation, and month paging. The Hell wrapper adds the header chrome — a
-        localized month/year label plus single-chevron month and double-chevron year navigation —
-        and the default styling, while forwarding <code>min</code>, <code>max</code>,
-        <code>disabled</code>, and <code>firstDayOfWeek</code> straight through to the primitive.
+        localized month/year label whose two halves are buttons that drill down to month and year
+        grids, plus single-chevron month and double-chevron year navigation — and the default
+        styling, while forwarding <code>min</code>, <code>max</code>, <code>disabled</code>, and
+        <code>firstDayOfWeek</code> straight through to the primitive.
       </p>
       <p>
         Reach for it when a date is best chosen by looking at a calendar: bounded booking windows,
@@ -88,6 +89,19 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
       >
         <app-date-picker-basic-example />
       </hd-example-tabs>
+
+      <h2 id="quick-navigation">Quick navigation</h2>
+      <p>
+        The month and the year in the heading are separate buttons. Activating one replaces the day
+        grid with a drill-down grid — twelve months for the year in view, or twenty-four years
+        centred on it — so a date years away is a handful of interactions away instead of a run of
+        month paging. Picking an option returns to the day grid on that month or year and puts
+        focus back on the grid's roving tab stop; activating the same trigger again, or pressing
+        <code>Escape</code>, returns without changing anything. While a drill-down is open the
+        single-chevron month buttons step aside and the double chevrons page the grid: by one year
+        in the month grid, by one screen of years in the year grid. Try it on the basic picker
+        above — year, <em>2031</em>, month, <em>Sep</em>, then the day.
+      </p>
 
       <h2>Bounded</h2>
       <p>
@@ -193,12 +207,26 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
             <td><code>navButton</code></td>
             <td>
               The month/year chevron buttons (each carries <code>data-direction</code> and
-              <code>data-step="month|year"</code>).
+              <code>data-step="month|year|yearPage"</code>).
             </td>
           </tr>
           <tr>
             <td><code>label</code></td>
             <td>The month-and-year heading (<code>&lt;h2&gt;</code>).</td>
+          </tr>
+          <tr>
+            <td><code>monthTrigger</code></td>
+            <td>
+              The month half of the heading — a button that opens the month grid, carrying
+              <code>aria-expanded</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>yearTrigger</code></td>
+            <td>
+              The year half of the heading — a button that opens the year grid, carrying
+              <code>aria-expanded</code>.
+            </td>
           </tr>
           <tr>
             <td><code>grid</code></td>
@@ -221,6 +249,25 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
               <code>data-range-between</code> state attributes.
             </td>
           </tr>
+          <tr>
+            <td><code>panel</code></td>
+            <td>
+              The open drill-down grid (<code>role="grid"</code>, carrying
+              <code>data-view="month|year"</code>). It replaces <code>grid</code> while open.
+            </td>
+          </tr>
+          <tr>
+            <td><code>panelCell</code></td>
+            <td>Each drill-down grid cell (<code>&lt;td role="gridcell"&gt;</code>).</td>
+          </tr>
+          <tr>
+            <td><code>panelOption</code></td>
+            <td>
+              The repeated month or year button, carrying <code>data-selected</code> for the value
+              in view, <code>data-today</code> for the current month or year, and
+              <code>data-disabled</code> outside <code>min</code>/<code>max</code>.
+            </td>
+          </tr>
         </tbody>
       </table>
       <p>
@@ -238,7 +285,8 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li><code>(dateChange)</code>: emits <code>Date | undefined</code> on selection.</li>
         <li><code>min</code> / <code>max</code>: <code>Date | undefined</code> — selectable bounds.</li>
         <li>
-          <code>disabled</code>: <code>boolean</code>. Disables day selection and all navigation.
+          <code>disabled</code>: <code>boolean</code>. Disables day selection, all navigation, and
+          the month/year drill-down triggers.
         </li>
         <li>
           <code>firstDayOfWeek</code>: <code>1 | 2 | 3 | 4 | 5 | 6 | 7</code> (Monday…Sunday).
@@ -250,7 +298,8 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         </li>
         <li>
           <code>focusedDate</code> / <code>(focusedDateChange)</code>: the month the grid shows,
-          independent of the selected date.
+          independent of the selected date. The month and year drill-downs move it, so a jump is
+          observable without a selection.
         </li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;HellDatePickerPart&gt;</code> — a shorthand class
@@ -285,7 +334,9 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>
           <code>provideHellLabels(HELL_DATE_PICKER_LABELS, overrides)</code> overrides the navigation button
           labels (<code>previousYear</code>, <code>nextYear</code>, <code>previousMonth</code>,
-          <code>nextMonth</code>) for an injector scope. English defaults ship built in.
+          <code>nextMonth</code>), the year-grid paging labels (<code>previousYears</code>,
+          <code>nextYears</code>), and the drill-down grid names (<code>chooseMonth</code>,
+          <code>chooseYear</code>) for an injector scope. English defaults ship built in.
         </li>
       </ul>
 
@@ -306,8 +357,27 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>
           The month and year navigation buttons carry Label Contract accessible names
           (<code>Previous month</code>, <code>Next month</code>, <code>Previous year</code>,
-          <code>Next year</code> by default), overridable via
-          <code>HELL_DATE_PICKER_LABELS</code>.
+          <code>Next year</code>, and <code>Previous years</code> / <code>Next years</code> while
+          the year grid is open), overridable via <code>HELL_DATE_PICKER_LABELS</code>.
+        </li>
+        <li>
+          The heading's month and year triggers are plain buttons named by their visible text, so
+          the heading still reads <em>April 2026</em> and keeps naming the day grid. Each carries
+          <code>aria-expanded</code>, plus <code>aria-controls</code> while its grid is open.
+        </li>
+        <li>
+          Each drill-down is a <code>role="grid"</code> named <em>Choose a month</em> /
+          <em>Choose a year</em>, with <code>role="gridcell"</code> cells exposing
+          <code>aria-selected</code> and <code>aria-disabled</code>. Opening one moves focus to the
+          option in view. Arrow keys move by column and row and roll onto the neighbouring page at
+          the edges; <code>Home</code> / <code>End</code> jump within the page;
+          <code>PageUp</code> / <code>PageDown</code> page it; <code>Enter</code> and
+          <code>Space</code> commit; <code>Escape</code> returns to the day grid and restores the
+          trigger. Options outside <code>min</code>/<code>max</code> are disabled and skipped.
+        </li>
+        <li>
+          Inside a <code>hell-popover</code>, <code>Escape</code> keeps closing the popover — light
+          dismissal stays engine-owned — and the picker reopens on the day grid.
         </li>
         <li>
           Disabled days (out of <code>min</code>/<code>max</code>, or when the whole picker is
@@ -320,12 +390,13 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>Use it for bounded calendar selection where seeing the month matters.</li>
         <li>Reach for the range picker when start and end are part of one decision.</li>
         <li>Set <code>min</code>/<code>max</code> up front so invalid dates are never selectable.</li>
+        <li>Point users at the heading's month and year buttons when a target date is years away.</li>
         <li>Drop the picker into a <code>hell-popover</code> to build a compact date field in dense forms.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't use it for free-form or far-away dates where typing wins — use <code>date-input</code>.</li>
+        <li>Don't use it for free-form dates where typing wins — use <code>date-input</code>.</li>
         <li>Don't hide <code>min</code>/<code>max</code> rules until submit; constrain the grid instead.</li>
         <li>Don't restyle day states with template <code>class</code>; refine the <code>dateButton</code> <code>data-*</code> states through <code>ui</code>.</li>
       </ul>

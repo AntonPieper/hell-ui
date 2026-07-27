@@ -134,9 +134,197 @@ describe('HellDatePicker', () => {
         root: sortClasses(datePicker(fixture.nativeElement).className),
         navButton: sortClasses(button(fixture.nativeElement, 'Previous year').className),
         label: sortClasses(labelElement(fixture.nativeElement).className),
+        monthTrigger: sortClasses(trigger(fixture.nativeElement, 'month').className),
+        yearTrigger: sortClasses(trigger(fixture.nativeElement, 'year').className),
         dateButton: sortClasses(dateButtons(fixture.nativeElement)[0].className),
       }).toMatchSnapshot('datePicker');
     });
+
+    it('keeps the default drill-down part classes stable', () => {
+      vi.setSystemTime(new Date(2026, 3, 30));
+      const fixture = TestBed.createComponent(DatePickerHost);
+      fixture.detectChanges();
+      trigger(fixture.nativeElement, 'month').click();
+      fixture.detectChanges();
+
+      expect({
+        panel: sortClasses(panel(fixture.nativeElement).className),
+        panelCell: sortClasses(panelCells(fixture.nativeElement)[0].className),
+        panelOption: sortClasses(panelOptions(fixture.nativeElement)[0].className),
+      }).toMatchSnapshot('datePickerPanel');
+    });
+  });
+
+  it('drills from the month trigger into a month grid and back to the chosen month', () => {
+    vi.setSystemTime(new Date(2026, 3, 30));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+
+    const monthTrigger = trigger(fixture.nativeElement, 'month');
+    expect(monthTrigger.textContent?.trim()).toBe('April');
+    expect(monthTrigger.getAttribute('aria-expanded')).toBe('false');
+    expect(label(fixture.nativeElement)).toBe('April 2026');
+
+    monthTrigger.click();
+    fixture.detectChanges();
+
+    const grid = panel(fixture.nativeElement);
+    expect(grid.getAttribute('role')).toBe('grid');
+    expect(grid.getAttribute('data-view')).toBe('month');
+    expect(grid.getAttribute('aria-label')).toBe('Choose a month');
+    expect(trigger(fixture.nativeElement, 'month').getAttribute('aria-expanded')).toBe('true');
+    expect(trigger(fixture.nativeElement, 'month').getAttribute('aria-controls')).toBe(grid.id);
+    expect(panelOptions(fixture.nativeElement).map((option) => option.textContent?.trim())).toEqual(
+      ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    );
+    expect(panelOptions(fixture.nativeElement)[3].getAttribute('aria-label')).toBe('April 2026');
+    expect(panelOptions(fixture.nativeElement)[3].hasAttribute('data-selected')).toBe(true);
+    expect(panelOptions(fixture.nativeElement)[3].getAttribute('tabindex')).toBe('0');
+    // The whole month nav collapses to the year step while a panel is open.
+    expect(fixture.nativeElement.querySelector('button[aria-label="Previous month"]')).toBeNull();
+
+    panelOptions(fixture.nativeElement)[8].click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="panel"]')).toBeNull();
+    expect(label(fixture.nativeElement)).toBe('September 2026');
+    expect(dateButtons(fixture.nativeElement).length).toBeGreaterThan(0);
+  });
+
+  it('drills from the year trigger into a paged year grid centred on the focused year', () => {
+    vi.setSystemTime(new Date(2026, 3, 30));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'year').click();
+    fixture.detectChanges();
+
+    expect(panel(fixture.nativeElement).getAttribute('data-view')).toBe('year');
+    expect(panel(fixture.nativeElement).getAttribute('aria-label')).toBe('Choose a year');
+    const firstPage = panelOptions(fixture.nativeElement).map((option) =>
+      option.textContent?.trim(),
+    );
+    expect(firstPage).toHaveLength(24);
+    expect(firstPage[0]).toBe('2015');
+    expect(firstPage.at(-1)).toBe('2038');
+    expect(panelOptions(fixture.nativeElement)[11].hasAttribute('data-selected')).toBe(true);
+
+    button(fixture.nativeElement, 'Next years').click();
+    fixture.detectChanges();
+
+    expect(panelOptions(fixture.nativeElement)[0].textContent?.trim()).toBe('2039');
+
+    button(fixture.nativeElement, 'Previous years').click();
+    fixture.detectChanges();
+
+    // 2031 is on the page the panel opened with, so a distant year is one click away.
+    const option2031 = panelOptions(fixture.nativeElement).find(
+      (candidate) => candidate.textContent?.trim() === '2031',
+    );
+    option2031?.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="panel"]')).toBeNull();
+    expect(label(fixture.nativeElement)).toBe('April 2031');
+  });
+
+  it('moves the roving tab stop with grid keys and leaves the panel on Escape', () => {
+    vi.setSystemTime(new Date(2026, 3, 30));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    expect(activeIndex(fixture.nativeElement)).toBe(3);
+
+    pressPanelKey(fixture.nativeElement, 'ArrowRight');
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(4);
+
+    pressPanelKey(fixture.nativeElement, 'ArrowDown');
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(7);
+
+    pressPanelKey(fixture.nativeElement, 'Home');
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(0);
+
+    pressPanelKey(fixture.nativeElement, 'End');
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(11);
+
+    // Rolling off the last month steps the panel onto the next year.
+    pressPanelKey(fixture.nativeElement, 'ArrowRight');
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(0);
+    expect(label(fixture.nativeElement)).toBe('April 2027');
+
+    pressPanelKey(fixture.nativeElement, 'PageUp');
+    fixture.detectChanges();
+    expect(label(fixture.nativeElement)).toBe('April 2026');
+
+    pressPanelKey(fixture.nativeElement, 'Escape');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="panel"]')).toBeNull();
+    expect(trigger(fixture.nativeElement, 'month').getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('disables out-of-range drill-down options and locks the triggers when disabled', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.min.set(new Date(2026, 3, 1));
+    fixture.componentInstance.max.set(new Date(2026, 11, 31));
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    const disabledMonths = panelOptions(fixture.nativeElement)
+      .filter((option) => option.disabled)
+      .map((option) => option.textContent?.trim());
+    expect(disabledMonths).toEqual(['Jan', 'Feb', 'Mar']);
+
+    trigger(fixture.nativeElement, 'year').click();
+    fixture.detectChanges();
+
+    const enabledYears = panelOptions(fixture.nativeElement)
+      .filter((option) => !option.disabled)
+      .map((option) => option.textContent?.trim());
+    expect(enabledYears).toEqual(['2026']);
+    expect(button(fixture.nativeElement, 'Previous years').disabled).toBe(true);
+    expect(button(fixture.nativeElement, 'Next years').disabled).toBe(true);
+
+    fixture.componentInstance.min.set(undefined);
+    fixture.componentInstance.max.set(undefined);
+    fixture.componentInstance.disabled.set(true);
+    fixture.detectChanges();
+
+    expect(trigger(fixture.nativeElement, 'month').disabled).toBe(true);
+    expect(trigger(fixture.nativeElement, 'month').getAttribute('data-disabled')).toBe('');
+    expect(trigger(fixture.nativeElement, 'year').disabled).toBe(true);
+  });
+
+  it('renders locale-ordered heading triggers on the range picker too', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerHost);
+    fixture.detectChanges();
+
+    expect(trigger(fixture.nativeElement, 'month').textContent?.trim()).toBe('April');
+    expect(trigger(fixture.nativeElement, 'year').textContent?.trim()).toBe('2026');
+
+    trigger(fixture.nativeElement, 'year').click();
+    fixture.detectChanges();
+
+    const option2029 = panelOptions(fixture.nativeElement).find(
+      (candidate) => candidate.textContent?.trim() === '2029',
+    );
+    option2029?.click();
+    fixture.detectChanges();
+
+    expect(label(fixture.nativeElement)).toBe('April 2029');
+    expect(rangePicker(fixture.nativeElement).getAttribute('data-view')).toBe('day');
   });
 
   it('moves the focused month by one year with previous and next year buttons', () => {
@@ -227,6 +415,36 @@ function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
   const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
   return element;
+}
+
+function trigger(root: HTMLElement, kind: 'month' | 'year'): HTMLButtonElement {
+  const element = root.querySelector(`button[data-slot="${kind}Trigger"]`);
+  if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${kind} trigger.`);
+  return element;
+}
+
+function panel(root: HTMLElement): HTMLTableElement {
+  const element = root.querySelector('[data-slot="panel"]');
+  if (!(element instanceof HTMLTableElement)) throw new Error('Expected drill-down panel.');
+  return element;
+}
+
+function panelCells(root: HTMLElement): HTMLTableCellElement[] {
+  return [...root.querySelectorAll<HTMLTableCellElement>('[data-slot="panelCell"]')];
+}
+
+function panelOptions(root: HTMLElement): HTMLButtonElement[] {
+  return [...root.querySelectorAll<HTMLButtonElement>('button[data-slot="panelOption"]')];
+}
+
+function activeIndex(root: HTMLElement): number {
+  const active = panelOptions(root).find((option) => option.getAttribute('tabindex') === '0');
+  if (!active) throw new Error('Expected one roving tab stop in the drill-down panel.');
+  return Number(active.getAttribute('data-index'));
+}
+
+function pressPanelKey(root: HTMLElement, key: string): void {
+  panel(root).dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 }
 
 function dateButtons(root: HTMLElement): HTMLButtonElement[] {
