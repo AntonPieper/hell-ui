@@ -121,6 +121,11 @@ test.describe('date picker browser accessibility contract', () => {
       expect(await control.getAttribute('tabindex')).toBeNull();
     }
 
+    const outerChevron = await requiredBox(
+      picker.getByRole('button', { name: 'Next year' }),
+      'day-view next-year chevron',
+    );
+
     await monthTrigger.focus();
     await expect(monthTrigger).toBeFocused();
     await page.keyboard.press('Enter');
@@ -177,6 +182,16 @@ test.describe('date picker browser accessibility contract', () => {
     await expect(panelOptions(picker).first()).toHaveText('2039');
     await picker.getByRole('button', { name: 'Previous years' }).click();
     await expect(panelOptions(picker).first()).toHaveText('2015');
+
+    // The lone pager keeps the outer chevron's position rather than sliding
+    // inward — the `nav` part's own defaults are untouched, so this rides on a
+    // layout hook and is worth proving rather than asserting.
+    const pagerBox = await requiredBox(
+      picker.getByRole('button', { name: 'Next years' }),
+      'year pager',
+    );
+    expect(Math.abs(pagerBox.x + pagerBox.width - (outerChevron.x + outerChevron.width))).
+      toBeLessThanOrEqual(1);
   });
 
   test('reaches a date five years away in five interactions and restores grid focus', async ({

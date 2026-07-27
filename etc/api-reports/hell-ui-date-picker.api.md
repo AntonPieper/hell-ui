@@ -26,9 +26,11 @@ export class HellDatePicker {
     }[]>;
     readonly locale: i0.InputSignal<string | null>;
     protected readonly nextPageDisabled: Signal<boolean>;
+    protected readonly nextPageLabel: Signal<string>;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
     protected readonly onTriggerKeydown: (event: KeyboardEvent) => void;
     protected readonly pagePanel: (delta: number) => void;
+    protected readonly pageStep: Signal<"year" | "yearPage">;
     protected readonly panelId: string;
     protected readonly panelLabel: Signal<string>;
     protected readonly panelRows: Signal<{
@@ -43,6 +45,7 @@ export class HellDatePicker {
     protected readonly part: (part: HellDatePickerPart) => string;
     protected readonly pickerDisabled: Signal<boolean>;
     protected readonly previousPageDisabled: Signal<boolean>;
+    protected readonly previousPageLabel: Signal<string>;
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;
     readonly ui: i0.InputSignal<HellUiInput<HellDatePickerPart>>;
@@ -104,9 +107,11 @@ export class HellDateRangePicker {
     }[]>;
     readonly locale: i0.InputSignal<string | null>;
     protected readonly nextPageDisabled: Signal<boolean>;
+    protected readonly nextPageLabel: Signal<string>;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
     protected readonly onTriggerKeydown: (event: KeyboardEvent) => void;
     protected readonly pagePanel: (delta: number) => void;
+    protected readonly pageStep: Signal<"year" | "yearPage">;
     protected readonly panelId: string;
     protected readonly panelLabel: Signal<string>;
     protected readonly panelRows: Signal<{
@@ -121,6 +126,7 @@ export class HellDateRangePicker {
     protected readonly part: (part: HellDatePickerPart) => string;
     protected readonly pickerDisabled: Signal<boolean>;
     protected readonly previousPageDisabled: Signal<boolean>;
+    protected readonly previousPageLabel: Signal<string>;
     protected readonly rangeComplete: Signal<boolean>;
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;

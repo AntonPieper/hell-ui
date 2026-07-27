@@ -145,11 +145,13 @@ const HELL_DATE_PICKER_RECIPE = {
   // Tailwind's variant sort, not source order, decides which `data-*` variant
   // wins at equal specificity, and `data-[today]` beats every filled state. A
   // selected day is very often also today, which painted its number in its own
-  // background colour, so the today text colour is scoped out of the filled
-  // states instead of relying on order. Selection deliberately still shows
-  // through `data-[disabled]`: a disabled picker keeps its selection visible.
+  // background colour and drew the today ring inside the fill — a
+  // `data-[selected]:shadow-none` after it is simply dead. Both halves of the
+  // today treatment are scoped out of the filled states instead of relying on
+  // order. Selection deliberately still shows through `data-[disabled]`: a
+  // disabled picker keeps its selection visible.
   dateButton:
-    'grid aspect-square h-auto w-full cursor-pointer appearance-none place-items-center rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-xs text-hell-foreground transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out data-[today]:font-semibold not-data-[selected]:not-data-[range-start]:not-data-[range-end]:not-data-[range-between]:data-[today]:text-hell-primary data-[today]:shadow-[inset_0_0_0_1px_var(--color-hell-primary-soft)] data-[hover]:bg-hell-surface-subtle data-[press]:bg-hell-surface-muted data-[outside-month]:text-hell-foreground-muted data-[selected]:bg-hell-primary data-[selected]:text-hell-primary-foreground data-[selected]:shadow-none data-[disabled]:cursor-not-allowed data-[disabled]:text-hell-foreground-subtle data-[disabled]:opacity-40 data-[range-start]:bg-hell-primary data-[range-start]:text-hell-primary-foreground data-[range-start]:shadow-none data-[range-end]:bg-hell-primary data-[range-end]:text-hell-primary-foreground data-[range-end]:shadow-none data-[range-between]:bg-hell-primary-soft data-[range-between]:text-hell-primary-soft-foreground data-[focus-visible]:outline-2 data-[focus-visible]:outline-hell-focus-ring data-[focus-visible]:outline-offset-1',
+    'grid aspect-square h-auto w-full cursor-pointer appearance-none place-items-center rounded-hell-sm border-0 bg-transparent p-0 font-[family-name:inherit] text-xs text-hell-foreground transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out data-[today]:font-semibold not-data-[selected]:not-data-[range-start]:not-data-[range-end]:not-data-[range-between]:data-[today]:text-hell-primary not-data-[selected]:not-data-[range-start]:not-data-[range-end]:not-data-[range-between]:data-[today]:shadow-[inset_0_0_0_1px_var(--color-hell-primary-soft)] data-[hover]:bg-hell-surface-subtle data-[press]:bg-hell-surface-muted data-[outside-month]:text-hell-foreground-muted data-[selected]:bg-hell-primary data-[selected]:text-hell-primary-foreground data-[disabled]:cursor-not-allowed data-[disabled]:text-hell-foreground-subtle data-[disabled]:opacity-40 data-[range-start]:bg-hell-primary data-[range-start]:text-hell-primary-foreground data-[range-end]:bg-hell-primary data-[range-end]:text-hell-primary-foreground data-[range-between]:bg-hell-primary-soft data-[range-between]:text-hell-primary-soft-foreground data-[focus-visible]:outline-2 data-[focus-visible]:outline-hell-focus-ring data-[focus-visible]:outline-offset-1',
   panel: 'w-full table-fixed border-separate border-spacing-hell-1',
   panelCell: 'p-0 text-center',
   // Unlike a day, an out-of-bounds month or year is never a selection the user
@@ -301,21 +303,7 @@ export class HellDatePickerNextYear {
 const PICKER_TEMPLATE = `
   <div data-slot="header" [class]="part('header')">
     <div data-slot="nav" [class]="part('nav')" data-direction="previous">
-      @if (view() === 'year') {
-        <button
-          data-slot="navButton"
-          data-direction="previous"
-          data-step="yearPage"
-          [class]="part('navButton')"
-          type="button"
-          [disabled]="previousPageDisabled()"
-          [attr.data-disabled]="previousPageDisabled() ? '' : null"
-          [attr.aria-label]="labels.previousYears"
-          (click)="pagePanel(-1)"
-        >
-          <hell-icon name="faSolidAnglesLeft" />
-        </button>
-      } @else {
+      @if (view() === 'day') {
         <button
           data-slot="navButton"
           data-direction="previous"
@@ -326,19 +314,31 @@ const PICKER_TEMPLATE = `
         >
           <hell-icon name="faSolidAnglesLeft" />
         </button>
-        @if (view() === 'day') {
-          <button
-            data-slot="navButton"
-            data-direction="previous"
-            data-step="month"
-            [class]="part('navButton')"
-            type="button"
-            ngpDatePickerPreviousMonth
-            [attr.aria-label]="labels.previousMonth"
-          >
-            <hell-icon name="faSolidChevronLeft" />
-          </button>
-        }
+        <button
+          data-slot="navButton"
+          data-direction="previous"
+          data-step="month"
+          [class]="part('navButton')"
+          type="button"
+          ngpDatePickerPreviousMonth
+          [attr.aria-label]="labels.previousMonth"
+        >
+          <hell-icon name="faSolidChevronLeft" />
+        </button>
+      } @else {
+        <button
+          data-slot="navButton"
+          data-direction="previous"
+          [attr.data-step]="pageStep()"
+          [class]="part('navButton')"
+          type="button"
+          [disabled]="previousPageDisabled()"
+          [attr.data-disabled]="previousPageDisabled() ? '' : null"
+          [attr.aria-label]="previousPageLabel()"
+          (click)="pagePanel(-1)"
+        >
+          <hell-icon name="faSolidAnglesLeft" />
+        </button>
       }
     </div>
     <h2 ngpDatePickerLabel data-slot="label" [class]="part('label')">
@@ -377,35 +377,18 @@ const PICKER_TEMPLATE = `
       }
     </h2>
     <div data-slot="nav" [class]="part('nav')" data-direction="next">
-      @if (view() === 'year') {
+      @if (view() === 'day') {
         <button
           data-slot="navButton"
           data-direction="next"
-          data-step="yearPage"
-          class="ms-auto"
+          data-step="month"
           [class]="part('navButton')"
           type="button"
-          [disabled]="nextPageDisabled()"
-          [attr.data-disabled]="nextPageDisabled() ? '' : null"
-          [attr.aria-label]="labels.nextYears"
-          (click)="pagePanel(1)"
+          ngpDatePickerNextMonth
+          [attr.aria-label]="labels.nextMonth"
         >
-          <hell-icon name="faSolidAnglesRight" />
+          <hell-icon name="faSolidChevronRight" />
         </button>
-      } @else {
-        @if (view() === 'day') {
-          <button
-            data-slot="navButton"
-            data-direction="next"
-            data-step="month"
-            [class]="part('navButton')"
-            type="button"
-            ngpDatePickerNextMonth
-            [attr.aria-label]="labels.nextMonth"
-          >
-            <hell-icon name="faSolidChevronRight" />
-          </button>
-        }
         <button
           data-slot="navButton"
           data-direction="next"
@@ -414,6 +397,21 @@ const PICKER_TEMPLATE = `
           [class]="part('navButton')"
           type="button"
           hellDatePickerNextYear
+        >
+          <hell-icon name="faSolidAnglesRight" />
+        </button>
+      } @else {
+        <button
+          data-slot="navButton"
+          data-direction="next"
+          [attr.data-step]="pageStep()"
+          class="ms-auto"
+          [class]="part('navButton')"
+          type="button"
+          [disabled]="nextPageDisabled()"
+          [attr.data-disabled]="nextPageDisabled() ? '' : null"
+          [attr.aria-label]="nextPageLabel()"
+          (click)="pagePanel(1)"
         >
           <hell-icon name="faSolidAnglesRight" />
         </button>
@@ -512,12 +510,16 @@ function formatMonthLabel(date: Date, locale: string | null): string {
   }).format(date);
 }
 
-// Literal parts that carry no unit meaning of their own: spaces and the
-// punctuation locales use between a month and a year. Anything else — CJK unit
-// markers (`年`, `月`, `년`), era words (`民國`), the Russian year suffix
-// (`г.`) — is part of the unit beside it, not a separator.
+// Punctuation locales put between a month and a year, carrying no unit meaning.
 const HELL_DATE_PICKER_LABEL_SEPARATOR = /^[,./،‐-―·]*$/u;
 const HELL_DATE_PICKER_LABEL_DIGIT = /\p{Nd}/u;
+// A unit marker is *glued* to its unit: either directly adjacent or joined by a
+// no-break space. That gap is what separates a marker from an ordinary
+// connective — `ja` writes `2026<year-marker>` and `ru` puts a narrow no-break
+// space before its `г.` suffix, while `es` writes `abril de 2026` and `vi`
+// writes `tháng 4 năm 2026` with plain spaces. Without this gate `de`,
+// `del`, and `năm` — Vietnamese for *year* — land in the month button.
+const HELL_DATE_PICKER_LABEL_GLUE = /^[\u00a0\u202f\ufeff]*$/u;
 
 // Structural return type: a named module-local interface here would leak
 // through the pickers' protected template members as an ae-forgotten-export.
@@ -537,9 +539,10 @@ function formatLabelSegments(
 
   // `ja-JP` formats as `year "2026" | literal "年" | month "4" | literal "月"`,
   // so emitting parts verbatim would label the month trigger `4` and strand
-  // `月` outside the control. Each unit marker is folded into the unit it
-  // belongs to — the one before it, or the one after it for leading eras —
-  // while surrounding whitespace stays outside so the buttons stay tight.
+  // `月` outside the control. A literal glued to its unit is folded into it —
+  // the unit before it, or the one after it for leading eras — while ordinary
+  // connectives (`abril de 2026`, `tháng 4 năm 2026`) and surrounding
+  // whitespace stay outside, so the buttons hold their unit and nothing else.
   const segments: { type: 'month' | 'year' | 'literal'; value: string }[] = [];
   let pendingPrefix = '';
 
@@ -557,8 +560,15 @@ function formatLabelSegments(
     if (
       core === '' ||
       HELL_DATE_PICKER_LABEL_SEPARATOR.test(core) ||
-      HELL_DATE_PICKER_LABEL_DIGIT.test(core)
+      HELL_DATE_PICKER_LABEL_DIGIT.test(core) ||
+      !HELL_DATE_PICKER_LABEL_GLUE.test(lead)
     ) {
+      // A buffered leading era still belongs in front of the unit it prefixes,
+      // so anything arriving before that unit keeps queueing behind it.
+      if (pendingPrefix) {
+        pendingPrefix += part.value;
+        continue;
+      }
       segments.push({ type: 'literal', value: part.value });
       continue;
     }
@@ -722,20 +732,37 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
     view() === 'year' ? labels.chooseYear : labels.chooseMonth,
   );
 
-  const yearPageShiftDisabled = (delta: number): boolean => {
+  // One predicate for both halves of paging: the chevrons and PageUp/PageDown
+  // do the same job, so they must agree on what is reachable. The month grid
+  // pages by one year and the year grid by one screen of years; both are gated
+  // on whether that whole target span falls outside `min`/`max`.
+  const pageShiftDisabled = (delta: number): boolean => {
     const current = state();
     if (current.disabled()) return true;
-    const start = yearPageStart() + delta * HELL_DATE_PICKER_YEAR_COUNT;
+
+    const [first, last] =
+      view() === 'year'
+        ? [
+            yearPageStart() + delta * HELL_DATE_PICKER_YEAR_COUNT,
+            yearPageStart() + delta * HELL_DATE_PICKER_YEAR_COUNT + HELL_DATE_PICKER_YEAR_COUNT - 1,
+          ]
+        : [current.focusedDate().getFullYear() + delta, current.focusedDate().getFullYear() + delta];
+
     return hellDatePickerSpanOutsideBounds(
-      hellDatePickerYearSpan(start).start,
-      hellDatePickerYearSpan(start + HELL_DATE_PICKER_YEAR_COUNT - 1).end,
+      hellDatePickerYearSpan(first).start,
+      hellDatePickerYearSpan(last).end,
       current.min(),
       current.max(),
     );
   };
 
-  const previousPageDisabled = computed(() => yearPageShiftDisabled(-1));
-  const nextPageDisabled = computed(() => yearPageShiftDisabled(1));
+  const previousPageDisabled = computed(() => pageShiftDisabled(-1));
+  const nextPageDisabled = computed(() => pageShiftDisabled(1));
+  const pageStep = computed(() => (view() === 'year' ? 'yearPage' : 'year'));
+  const previousPageLabel = computed(() =>
+    view() === 'year' ? labels.previousYears : labels.previousYear,
+  );
+  const nextPageLabel = computed(() => (view() === 'year' ? labels.nextYears : labels.nextYear));
 
   const focusAfterRender = (select: () => HTMLElement | null): void => {
     afterNextRender({ write: () => select()?.focus({ preventScroll: true }) }, { injector });
@@ -814,29 +841,16 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
   };
 
   const pageBy = (delta: number): boolean => {
-    const current = state();
+    // Same gate the chevrons render from, so the keyboard can never reach a
+    // page the pointer cannot.
+    if (pageShiftDisabled(delta)) return false;
+
     if (view() === 'year') {
-      if (yearPageShiftDisabled(delta)) return false;
       yearPageStart.update((start) => start + delta * HELL_DATE_PICKER_YEAR_COUNT);
       return true;
     }
 
-    // The month grid pages by a whole year, so it is gated on the target
-    // year's span, not on the same month next year: with `max` in February
-    // 2027, April 2027 is unreachable but January 2027 is not.
-    const targetYear = current.focusedDate().getFullYear() + delta;
-    const targetSpan = hellDatePickerYearSpan(targetYear);
-    if (
-      hellDatePickerSpanOutsideBounds(
-        targetSpan.start,
-        targetSpan.end,
-        current.min(),
-        current.max(),
-      )
-    ) {
-      return false;
-    }
-
+    const current = state();
     current.setFocusedDate(
       hellShiftDateByMonths(current.focusedDate(), delta * HELL_DATE_PICKER_MONTH_COUNT),
       undefined,
@@ -914,6 +928,9 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
     panelLabel,
     previousPageDisabled,
     nextPageDisabled,
+    pageStep,
+    previousPageLabel,
+    nextPageLabel,
     toggleView,
     pagePanel,
     selectOption,
@@ -1019,6 +1036,12 @@ export class HellDatePicker {
   protected readonly previousPageDisabled = this.views.previousPageDisabled;
   /** Whether paging the year grid forwards leaves the `min`/`max` range. */
   protected readonly nextPageDisabled = this.views.nextPageDisabled;
+  /** `data-step` the open drill-down's pager reports. */
+  protected readonly pageStep = this.views.pageStep;
+  /** Accessible name of the pager that steps the open drill-down backwards. */
+  protected readonly previousPageLabel = this.views.previousPageLabel;
+  /** Accessible name of the pager that steps the open drill-down forwards. */
+  protected readonly nextPageLabel = this.views.nextPageLabel;
   /** Opens or closes one drill-down grid from its header trigger. */
   protected readonly toggleView = this.views.toggleView;
   /** Pages the open drill-down grid by one screen. */
@@ -1120,6 +1143,12 @@ export class HellDateRangePicker {
   protected readonly previousPageDisabled = this.views.previousPageDisabled;
   /** Whether paging the year grid forwards leaves the `min`/`max` range. */
   protected readonly nextPageDisabled = this.views.nextPageDisabled;
+  /** `data-step` the open drill-down's pager reports. */
+  protected readonly pageStep = this.views.pageStep;
+  /** Accessible name of the pager that steps the open drill-down backwards. */
+  protected readonly previousPageLabel = this.views.previousPageLabel;
+  /** Accessible name of the pager that steps the open drill-down forwards. */
+  protected readonly nextPageLabel = this.views.nextPageLabel;
   /** Opens or closes one drill-down grid from its header trigger. */
   protected readonly toggleView = this.views.toggleView;
   /** Pages the open drill-down grid by one screen. */

@@ -132,6 +132,7 @@ describe('HellDatePicker', () => {
 
       expect({
         root: sortClasses(datePicker(fixture.nativeElement).className),
+        nav: sortClasses(navCluster(fixture.nativeElement, 'next').className),
         navButton: sortClasses(button(fixture.nativeElement, 'Previous year').className),
         label: sortClasses(labelElement(fixture.nativeElement).className),
         monthTrigger: sortClasses(trigger(fixture.nativeElement, 'month').className),
@@ -307,41 +308,90 @@ describe('HellDatePicker', () => {
     expect(trigger(fixture.nativeElement, 'year').disabled).toBe(true);
   });
 
-  it('keeps locale unit markers inside the trigger they belong to', () => {
+  // A unit marker is glued to its unit (`2026年`, `2026<NNBSP>г.`); an ordinary
+  // connective is separated by a plain space (`abril de 2026`, `tháng 4 năm
+  // 2026`). Both families are pinned: folding the second would put a dangling
+  // preposition — or another unit's word — inside the month button.
+  const GLUED_LOCALES: readonly (readonly [string, string, string])[] = [
+    ['ja-JP', '4月', '2026年'],
+    ['zh-CN', '4月', '2026年'],
+    ['zh-HK', '4月', '2026年'],
+    ['yue', '4月', '2026年'],
+    ['ko-KR', '4월', '2026년'],
+    ['zh-TW-u-ca-roc', '4月', '民國115年'],
+    ['ja-JP-u-ca-japanese', '4月', '令和8年'],
+    ['ru-RU', 'апрель', '2026\u202fг.'],
+    ['uk-UA', 'квітень', '2026\u202fр.'],
+    ['bg-BG', 'април', '2026\u202fг.'],
+    ['mk-MK', 'април', '2026\u202fг.'],
+    ['eu-ES', 'apirila', '2026(e)ko'],
+    ['ku', 'nîsana', '2026an'],
+  ];
+
+  const SEPARATED_LOCALES: readonly (readonly [string, string, string])[] = [
+    ['en-US', 'April', '2026'],
+    ['de-DE', 'April', '2026'],
+    ['fr-FR', 'avril', '2026'],
+    ['hu-HU', 'április', '2026'],
+    ['es-ES', 'abril', '2026'],
+    ['es-MX', 'abril', '2026'],
+    ['pt-BR', 'abril', '2026'],
+    ['ca', 'abril', '2026'],
+    ['gl', 'abril', '2026'],
+    ['ast', 'abril', '2026'],
+    ['fur', 'Avrîl', '2026'],
+    ['kea', 'Abril', '2026'],
+    ['sc', 'abrile', '2026'],
+    ['seh', 'Abril', '2026'],
+    ['vi', 'tháng 4', '2026'],
+    ['hy', 'ապրիլ', '2026'],
+    ['lt', 'balandis', '2026'],
+    ['he-IL', 'אפריל', '2026'],
+  ];
+
+  it.each([...GLUED_LOCALES])(
+    'folds the glued unit marker into its own trigger for %s',
+    (locale, month, year) => {
+      expectLocaleTriggers(locale, month, year);
+    },
+  );
+
+  it.each([...SEPARATED_LOCALES])(
+    'leaves the ordinary connective outside the triggers for %s',
+    (locale, month, year) => {
+      expectLocaleTriggers(locale, month, year);
+    },
+  );
+
+  it('never loses or reorders a formatted part, whatever the locale', () => {
     vi.setSystemTime(new Date(2026, 3, 22));
     const fixture = TestBed.createComponent(DatePickerHost);
     fixture.detectChanges();
 
-    // ja-JP formats as "2026年4月": the unit markers are separate literal parts,
-    // so a verbatim render would name the month trigger "4".
-    fixture.componentInstance.locale.set('ja-JP');
-    fixture.detectChanges();
-    expect(label(fixture.nativeElement)).toBe('2026年4月');
-    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026年');
-    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('4月');
+    // `lrc`/`ps` lead with an era, which buffers ahead of the year: anything
+    // arriving before that year has to queue behind the era, not jump it.
+    const locales = [
+      ...GLUED_LOCALES.map(([locale]) => locale),
+      ...SEPARATED_LOCALES.map(([locale]) => locale),
+      'lrc',
+      'ps',
+      'ckb',
+      'ar-EG',
+      'fa-IR',
+      'th-TH',
+    ];
 
-    fixture.componentInstance.locale.set('ko-KR');
-    fixture.detectChanges();
-    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026년');
-    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('4월');
+    for (const locale of locales) {
+      if (!Intl.DateTimeFormat.supportedLocalesOf([locale]).length) continue;
+      fixture.componentInstance.locale.set(locale);
+      fixture.detectChanges();
 
-    // Trailing unit words fold backwards too, keeping the narrow no-break
-    // space ru-RU puts before the year suffix inside the trigger.
-    fixture.componentInstance.locale.set('ru-RU');
-    fixture.detectChanges();
-    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026 г.');
-    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('апрель');
-
-    fixture.componentInstance.locale.set('hu-HU');
-    fixture.detectChanges();
-    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026');
-    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('április');
-
-    fixture.componentInstance.locale.set('en-US');
-    fixture.detectChanges();
-    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026');
-    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('April');
-    expect(label(fixture.nativeElement)).toBe('April 2026');
+      const parts = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
+        .formatToParts(new Date(2026, 3, 22))
+        .map((part) => part.value)
+        .join('');
+      expect(labelElement(fixture.nativeElement).textContent, locale).toBe(parts);
+    }
   });
 
   it('does not paint an out-of-range month in view as the selected one', () => {
@@ -420,7 +470,10 @@ describe('HellDatePicker', () => {
     trigger(fixture.nativeElement, 'month').click();
     fixture.detectChanges();
 
-    // April 2027 is out of range but January and February 2027 are not.
+    // April 2027 is out of range but January and February 2027 are not, so the
+    // chevron must offer the page the keyboard can reach — one gate, not two.
+    expect(button(fixture.nativeElement, 'Next year').disabled).toBe(false);
+
     pressPanelKey(fixture.nativeElement, 'PageDown');
     fixture.detectChanges();
 
@@ -429,6 +482,42 @@ describe('HellDatePicker', () => {
       .filter((option) => !option.disabled)
       .map((option) => option.textContent?.trim());
     expect(reachable).toEqual(['Jan', 'Feb']);
+
+    // And the chevron closes the same door the keyboard finds closed.
+    expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
+    pressPanelKey(fixture.nativeElement, 'PageDown');
+    fixture.detectChanges();
+    expect(label(fixture.nativeElement)).toBe('February 2027');
+  });
+
+  it('keeps the nav cluster defaults and aligns the drill-down pager outward', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+
+    // The shipped `nav` part is untouched: the alignment rides on the button
+    // as an additive layout hook, so no consumer's Part Style Map shifts.
+    const cluster = navCluster(fixture.nativeElement, 'next');
+    expect(cluster.className).not.toContain('justify-end');
+    expect(button(fixture.nativeElement, 'Next year').className).toContain('ms-auto');
+    // Two buttons fill the day-view cluster, so the hook is inert there.
+    expect(cluster.querySelectorAll('button')).toHaveLength(2);
+
+    trigger(fixture.nativeElement, 'year').click();
+    fixture.detectChanges();
+
+    const pager = button(fixture.nativeElement, 'Next years');
+    expect(navCluster(fixture.nativeElement, 'next').querySelectorAll('button')).toHaveLength(1);
+    expect(pager.className).toContain('ms-auto');
+    expect(pager.getAttribute('data-step')).toBe('yearPage');
+
+    trigger(fixture.nativeElement, 'year').click();
+    fixture.detectChanges();
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    // The month grid pages by a year, so its pager keeps the year vocabulary.
+    expect(button(fixture.nativeElement, 'Next year').getAttribute('data-step')).toBe('year');
   });
 
   it('renders locale-ordered heading triggers on the range picker too', () => {
@@ -542,9 +631,28 @@ function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
   return element;
 }
 
+function expectLocaleTriggers(locale: string, month: string, year: string): void {
+  // A different ICU build is a reason to skip, never to fail on stale CLDR data.
+  if (!Intl.DateTimeFormat.supportedLocalesOf([locale]).length) return;
+
+  vi.setSystemTime(new Date(2026, 3, 22));
+  const fixture = TestBed.createComponent(DatePickerHost);
+  fixture.componentInstance.locale.set(locale);
+  fixture.detectChanges();
+
+  expect(trigger(fixture.nativeElement, 'month').textContent, `${locale} month`).toBe(month);
+  expect(trigger(fixture.nativeElement, 'year').textContent, `${locale} year`).toBe(year);
+}
+
 function trigger(root: HTMLElement, kind: 'month' | 'year'): HTMLButtonElement {
   const element = root.querySelector(`button[data-slot="${kind}Trigger"]`);
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${kind} trigger.`);
+  return element;
+}
+
+function navCluster(root: HTMLElement, direction: 'previous' | 'next'): HTMLElement {
+  const element = root.querySelector(`[data-slot="nav"][data-direction="${direction}"]`);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${direction} nav cluster.`);
   return element;
 }
 

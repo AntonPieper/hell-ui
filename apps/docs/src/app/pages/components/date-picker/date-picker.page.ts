@@ -386,10 +386,13 @@ import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <li>
           The heading's month and year triggers are plain buttons named by their visible text —
           never <code>aria-label</code>. The heading is an <code>aria-live="polite"</code> region,
-          so trigger labels would be folded into every month-change announcement. Locale unit
-          markers stay inside the trigger they belong to, so <code>ja-JP</code> gives
-          <em>2026年</em> and <em>4月</em> rather than a bare <em>4</em>. Each trigger carries
-          <code>aria-expanded</code>, plus <code>aria-controls</code> while its grid is open.
+          so trigger labels would be folded into every month-change announcement. A unit marker
+          <em>glued</em> to its unit stays inside that trigger — <code>ja-JP</code> gives
+          <em>2026年</em> and <em>4月</em> rather than a bare <em>4</em>, and <code>ru-RU</code>
+          keeps its <em>г.</em> on the year — while an ordinary connective separated by a plain
+          space stays outside, so <code>es-ES</code> reads <em>abril</em> <em>de</em> <em>2026</em>
+          with only the month in the button. Each trigger carries <code>aria-expanded</code>, plus
+          <code>aria-controls</code> while its grid is open.
         </li>
         <li>
           Each drill-down is a <code>role="grid"</code> named <em>Choose a month</em> /
