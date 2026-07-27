@@ -41,7 +41,7 @@ catalog:
   "ng-packagr": "^22.0.1"
   "ng-primitives": "0.123.0"
   "pdfjs-dist": "5.6.205"
-  "postcss": "^8.5.12"
+  "postcss": "^8.5.18"
   "rxjs": "~7.8.2"
   "tailwind-merge": "^3.5.0"
   "tailwindcss": "^4.2.4"
