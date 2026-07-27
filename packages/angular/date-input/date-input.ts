@@ -613,18 +613,24 @@ export class HellDateInput implements FormValueControl<Date | null> {
    * that names itself nowhere would hand it a name and silence the violation
    * that reports the real defect.
    *
-   * This is deliberately a structural check and not a name computation, so it
-   * has two known boundaries. Empty or dangling naming markup — `<label
-   * for="x"></label>`, a text-less wrapping label, an `aria-labelledby` whose
-   * target never renders — counts as authored, and the hint is written. And
-   * only `fieldAriaLabelledby()` is reactive: `aria-label` and `labels` are
-   * sampled per run, so markup removed after a hint was written does not take
-   * the hint with it. Resolving label text instead of structure, or observing
-   * mutations, would each trade these for worse failure modes (a label whose
-   * text arrives asynchronously would lose its hint), so the boundary is
-   * documented rather than papered over. What this gate does guarantee is the
-   * common case: an input that authors no naming markup at all is never handed
-   * an accessible name it did not have.
+   * This is deliberately a structural check and not a name computation, and it
+   * runs against whatever has rendered, so it has three known boundaries.
+   * Empty or dangling naming markup — `<label for="x"></label>`, a text-less
+   * wrapping label, an `aria-labelledby` whose target never renders — counts as
+   * authored, and the hint is written. Markup removed after a hint was written
+   * does not take the hint with it. And markup that arrives after the first
+   * pass through any channel but `fieldAriaLabelledby()` — the only reactive
+   * one — never re-triggers the check, so an `[attr.aria-label]` resolved from
+   * a late i18n bundle or a `@if`-guarded `<label for>` leaves a correctly
+   * named input permanently hintless.
+   *
+   * The last case loses a formatting affordance, not accessibility. Neither
+   * alternative is better: resolving label text moves the same first-render
+   * problem from markup arrival to text arrival, and a `MutationObserver` would
+   * watch every date input's subtree for the life of the page. So the boundary
+   * is documented rather than papered over. What this gate does guarantee is
+   * the case that matters: an input that authors no naming markup at all is
+   * never handed an accessible name it did not have.
    */
   private authorsNamingMarkup(): boolean {
     return (

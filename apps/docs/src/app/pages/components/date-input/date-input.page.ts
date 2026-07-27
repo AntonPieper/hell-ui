@@ -138,16 +138,27 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         <code>&lt;label&gt;</code>.
       </p>
       <p>
-        That is a check on markup, not a name computation, and it has two boundaries worth knowing.
-        Naming markup that is present but empty or dangling — <code>&lt;label
-        for="x"&gt;&lt;/label&gt;</code>, a text-less wrapping label, an <code>aria-labelledby</code>
-        whose target never renders — counts as authored, and the hint is written. And a label
-        removed after the hint was written does not take the hint with it, because only the
-        Field-supplied <code>aria-labelledby</code> is tracked reactively. Resolving label text, or
-        watching the DOM for mutations, would each trade these cases for worse ones — a label whose
-        text arrives asynchronously would lose its hint — so the rule stays deliberately simple and
-        its edges documented. It removes the common failure, not every one: keep a Field label or an
-        <code>aria-label</code> on every Date Input, and the hint follows.
+        That is a check on markup, not a name computation, and it is checked when the input first
+        renders. Three boundaries follow. Naming markup that is present but empty or dangling —
+        <code>&lt;label for="x"&gt;&lt;/label&gt;</code>, a text-less wrapping label, an
+        <code>aria-labelledby</code> whose target never renders — counts as authored, and the hint
+        is written. Markup removed after the hint was written does not take the hint with it. And
+        markup that arrives <em>after</em> that first render, through any channel except an
+        enclosing <a routerLink="/components/field">Field</a>, never re-triggers the check, so the
+        hint is never written: an <code>[attr.aria-label]</code> bound to a translation that
+        resolves after first paint, or a <code>&lt;label for&gt;</code> inside
+        <code>&#64;if (data())</code>, leaves a correctly named input permanently without its hint.
+        Only the Field's <code>aria-labelledby</code> is tracked reactively.
+      </p>
+      <p>
+        The last case costs a formatting affordance, not accessibility — the input is properly
+        named either way. Both alternatives are worse: resolving label text moves the same
+        first-render problem from markup to text, so a label whose words arrive asynchronously
+        would lose its hint instead, and watching the DOM for mutations would mean observing every
+        date input's subtree for the life of the page. So the rule stays deliberately simple and
+        its edges documented. Two shapes are reliable: a Field wrapper, or an
+        <code>aria-label</code> authored statically in the template. Use either and the hint
+        follows.
       </p>
       <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-format-example />
