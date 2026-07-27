@@ -114,6 +114,12 @@ test.describe('component visual polish regressions', () => {
   test('toggle group selected state stays visually distinct in dark mode', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await gotoDocsPage(page, '/components/toggle', 'Toggle');
+    // Every snapshot below reads a computed colour, and the toggle recipes
+    // transition `background-color`. Without activation and settled timelines
+    // these compare mid-transition frames: a loaded run reads the hover colour
+    // before it has diverged from the idle one, while an isolated run reads it
+    // after. Same hazard the disabled-toggle test below already guards.
+    await ensurePageIsActive(page);
 
     const example = page.locator('app-toggle-group-single-example');
     await expect(example).toBeVisible();
@@ -126,6 +132,7 @@ test.describe('component visual polish regressions', () => {
       .first();
     await expect(selected).toHaveAttribute('aria-label', 'Align left');
 
+    await finishAnimations(group);
     const colors = await group.evaluate((element) => {
       const groupElement = element as HTMLElement;
       const selectedElement = groupElement.querySelector(
@@ -161,6 +168,10 @@ test.describe('component visual polish regressions', () => {
     );
     await unselected.hover();
     await expect(unselected).not.toHaveAttribute('data-selected');
+    // Finishing the transition also strengthens the check: a hover state that
+    // wrongly starts a transition is jumped to its end value and caught, rather
+    // than read near the idle value and passing by accident.
+    await finishAnimations(unselected);
     const hoverBackground = await unselected.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
@@ -169,6 +180,7 @@ test.describe('component visual polish regressions', () => {
     }
 
     await selected.hover();
+    await finishAnimations(selected);
     const selectedHoverBackground = await selected.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
