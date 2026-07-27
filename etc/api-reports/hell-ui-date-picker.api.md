@@ -17,7 +17,7 @@ export const HELL_DATE_PICKER_LABELS: InjectionToken<HellLabels<HellDatePickerLa
 
 // @public
 export class HellDatePicker {
-    protected readonly activeOptionIndex: Signal<number>;
+    protected readonly activeOptionIndex: Signal<number | null>;
     protected readonly label: Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected readonly labelSegments: Signal<{
@@ -95,7 +95,7 @@ export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
 // @public
 export class HellDateRangePicker {
-    protected readonly activeOptionIndex: Signal<number>;
+    protected readonly activeOptionIndex: Signal<number | null>;
     protected readonly label: Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected readonly labelSegments: Signal<{

@@ -177,7 +177,8 @@ describe('HellDatePicker', () => {
     expect(panelOptions(fixture.nativeElement).map((option) => option.textContent?.trim())).toEqual(
       ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     );
-    expect(panelOptions(fixture.nativeElement)[3].getAttribute('aria-label')).toBe('April 2026');
+    // WCAG 2.5.3: the accessible name extends the visible text, never replaces it.
+    expect(panelOptions(fixture.nativeElement)[3].getAttribute('aria-label')).toBe('Apr 2026');
     expect(panelOptions(fixture.nativeElement)[3].hasAttribute('data-selected')).toBe(true);
     expect(panelOptions(fixture.nativeElement)[3].getAttribute('tabindex')).toBe('0');
     // The whole month nav collapses to the year step while a panel is open.
@@ -304,6 +305,130 @@ describe('HellDatePicker', () => {
     expect(trigger(fixture.nativeElement, 'month').disabled).toBe(true);
     expect(trigger(fixture.nativeElement, 'month').getAttribute('data-disabled')).toBe('');
     expect(trigger(fixture.nativeElement, 'year').disabled).toBe(true);
+  });
+
+  it('keeps locale unit markers inside the trigger they belong to', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.detectChanges();
+
+    // ja-JP formats as "2026年4月": the unit markers are separate literal parts,
+    // so a verbatim render would name the month trigger "4".
+    fixture.componentInstance.locale.set('ja-JP');
+    fixture.detectChanges();
+    expect(label(fixture.nativeElement)).toBe('2026年4月');
+    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026年');
+    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('4月');
+
+    fixture.componentInstance.locale.set('ko-KR');
+    fixture.detectChanges();
+    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026년');
+    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('4월');
+
+    // Trailing unit words fold backwards too, keeping the narrow no-break
+    // space ru-RU puts before the year suffix inside the trigger.
+    fixture.componentInstance.locale.set('ru-RU');
+    fixture.detectChanges();
+    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026 г.');
+    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('апрель');
+
+    fixture.componentInstance.locale.set('hu-HU');
+    fixture.detectChanges();
+    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026');
+    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('április');
+
+    fixture.componentInstance.locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture.nativeElement, 'year').textContent).toBe('2026');
+    expect(trigger(fixture.nativeElement, 'month').textContent).toBe('April');
+    expect(label(fixture.nativeElement)).toBe('April 2026');
+  });
+
+  it('does not paint an out-of-range month in view as the selected one', () => {
+    // Bounds that exclude today: ng-primitives leaves focusedDate on today, so
+    // the month in view is both "selected" and unavailable.
+    vi.setSystemTime(new Date(2026, 6, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.min.set(new Date(2026, 3, 6));
+    fixture.componentInstance.max.set(new Date(2026, 4, 15));
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    const july = panelOptions(fixture.nativeElement)[6];
+    expect(july.textContent?.trim()).toBe('Jul');
+    expect(july.hasAttribute('data-selected')).toBe(true);
+    expect(july.hasAttribute('data-disabled')).toBe(true);
+    expect(july.disabled).toBe(true);
+    // The filled treatment is scoped out of the disabled state, so the
+    // unavailable month cannot out-rank the two selectable ones.
+    expect(july.className).toContain('not-data-[disabled]:data-[selected]:bg-hell-primary');
+    expect(july.className).not.toContain(' data-[selected]:bg-hell-primary');
+    // The roving tab stop moves to the nearest month the user can choose.
+    expect(activeIndex(fixture.nativeElement)).toBe(4);
+  });
+
+  it('opens the drill-down on a page with something selectable when bounds exclude today', () => {
+    // ng-primitives leaves focusedDate on today, which is years before `min`:
+    // opening on 2026 would show twelve disabled months and no tab stop.
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.min.set(new Date(2028, 0, 1));
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    expect(label(fixture.nativeElement)).toBe('January 2028');
+    expect(panelOptions(fixture.nativeElement).every((option) => option.disabled)).toBe(false);
+    expect(activeIndex(fixture.nativeElement)).toBe(0);
+    expect(panel(fixture.nativeElement).hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('gives the grid the tab stop when bounds move every option out of range', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.min.set(new Date(2026, 0, 1));
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+    expect(activeIndex(fixture.nativeElement)).toBe(3);
+
+    // Bounds tightened while the drill-down is open: no button can hold an
+    // inert tab stop, so the grid takes it and stays dismissable.
+    fixture.componentInstance.min.set(new Date(2030, 0, 1));
+    fixture.detectChanges();
+
+    const options = panelOptions(fixture.nativeElement);
+    expect(options.every((option) => option.disabled)).toBe(true);
+    expect(options.some((option) => option.getAttribute('tabindex') === '0')).toBe(false);
+    expect(panel(fixture.nativeElement).getAttribute('tabindex')).toBe('0');
+
+    pressPanelKey(fixture.nativeElement, 'Escape');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-slot="panel"]')).toBeNull();
+  });
+
+  it('pages the month grid by the target year, not by the same month next year', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.max.set(new Date(2027, 1, 15));
+    fixture.detectChanges();
+
+    trigger(fixture.nativeElement, 'month').click();
+    fixture.detectChanges();
+
+    // April 2027 is out of range but January and February 2027 are not.
+    pressPanelKey(fixture.nativeElement, 'PageDown');
+    fixture.detectChanges();
+
+    expect(label(fixture.nativeElement)).toBe('February 2027');
+    const reachable = panelOptions(fixture.nativeElement)
+      .filter((option) => !option.disabled)
+      .map((option) => option.textContent?.trim());
+    expect(reachable).toEqual(['Jan', 'Feb']);
   });
 
   it('renders locale-ordered heading triggers on the range picker too', () => {

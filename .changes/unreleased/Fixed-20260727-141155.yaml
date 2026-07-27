@@ -1,0 +1,5 @@
+kind: Fixed
+body: 'Date picker: a day that is both today and the selected date is readable again.
+  Tailwind''s variant sort let the `today` text colour win over the selected one,
+  so the day number was painted in its own background colour and disappeared.'
+time: 2026-07-27T14:11:55.413062+02:00

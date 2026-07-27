@@ -67,6 +67,21 @@ describe('hellDatePickerPanelMove', () => {
     expect(move('a', 3)).toBeNull();
     expect(move('Escape', 3)).toBeNull();
   });
+
+  it('mirrors left and right under rtl, matching the day grid beside it', () => {
+    expect(hellDatePickerPanelMove('ArrowRight', 3, months, monthColumns, 'rtl')).toEqual(
+      move('ArrowLeft', 3),
+    );
+    expect(hellDatePickerPanelMove('ArrowLeft', 3, months, monthColumns, 'rtl')).toEqual(
+      move('ArrowRight', 3),
+    );
+  });
+
+  it('leaves block-direction and paging keys alone under rtl', () => {
+    for (const key of ['ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown']) {
+      expect(hellDatePickerPanelMove(key, 4, months, monthColumns, 'rtl')).toEqual(move(key, 4));
+    }
+  });
 });
 
 describe('panel option scanning', () => {

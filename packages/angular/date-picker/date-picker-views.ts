@@ -30,6 +30,8 @@ export function hellDatePickerYearPageStart(year: number): number {
  * the direction to keep searching in when the target option is unavailable.
  * Arrow keys move within the visual grid and roll onto the neighbouring page
  * at the edges; Home/End jump within the page; PageUp/PageDown page directly.
+ * Left and right are mirrored under `direction: 'rtl'` so the panel answers
+ * them the same visual way the day grid beside it does.
  * Returns `null` for keys the panel does not own.
  */
 export function hellDatePickerPanelMove(
@@ -37,8 +39,9 @@ export function hellDatePickerPanelMove(
   index: number,
   count: number,
   columns: number,
+  direction: 'ltr' | 'rtl' = 'ltr',
 ): { readonly index: number; readonly pageDelta: number; readonly step: 1 | -1 } | null {
-  const move = panelTarget(key, index, count, columns);
+  const move = panelTarget(hellDatePickerPanelKey(key, direction), index, count, columns);
   if (!move) return null;
 
   let target = move.index;
@@ -54,6 +57,13 @@ export function hellDatePickerPanelMove(
   }
 
   return { index: target, pageDelta, step: move.step };
+}
+
+function hellDatePickerPanelKey(key: string, direction: 'ltr' | 'rtl'): string {
+  if (direction !== 'rtl') return key;
+  if (key === 'ArrowLeft') return 'ArrowRight';
+  if (key === 'ArrowRight') return 'ArrowLeft';
+  return key;
 }
 
 function panelTarget(
