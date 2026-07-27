@@ -263,38 +263,63 @@ test.describe('File Picker browser contract', () => {
     expect(optedOutGlyph.display).toBe('none');
   });
 
-  test('keeps the glyph dimmed when a disabled picker takes focus', async ({ page }) => {
-    await gotoFilePicker(page);
+  // The glyph color is a *stable* property of a focused disabled host, not an
+  // eventual one, so it must not be asserted with a polling primitive that a
+  // running transition can satisfy before the transition has done anything.
+  // Reduced motion collapses `--hell-duration-fast` through the shared
+  // substrate override, and both reads settle a frame first.
+  test.describe('disabled focus guard', () => {
+    test.use({ reducedMotion: 'reduce' });
 
-    // The upload recipe restores focus to the picker host after a removal, so a
-    // disabled host really does receive focus in practice. It must keep the
-    // resting glyph instead of lighting up as if it were operable.
-    const enabled = page
-      .locator('app-file-picker-basic-example')
-      .getByRole('button', { name: 'Add attachments' });
-    const disabled = page
-      .locator('app-file-picker-disabled-example')
-      .getByRole('button', { name: 'Add files' });
-    await expect(disabled).toHaveAttribute('data-disabled', 'true');
+    test('keeps the glyph dimmed when a disabled picker takes focus', async ({ page }) => {
+      await gotoFilePicker(page);
 
-    const glyphColor = (picker: Locator) =>
-      picker.evaluate(
-        (element) =>
-          element.ownerDocument.defaultView?.getComputedStyle(element, '::before').backgroundColor,
-      );
+      // The upload recipe restores focus to the picker host after a removal, so
+      // a disabled host really does receive focus in practice. It must keep the
+      // resting glyph instead of lighting up as if it were operable.
+      const enabled = page
+        .locator('app-file-picker-basic-example')
+        .getByRole('button', { name: 'Add attachments' });
+      const disabled = page
+        .locator('app-file-picker-disabled-example')
+        .getByRole('button', { name: 'Add files' });
+      await expect(disabled).toHaveAttribute('data-disabled', 'true');
 
-    const restingColor = await glyphColor(enabled);
-    await disabled.evaluate((element) => (element as HTMLElement).focus());
-    await expect.poll(() => glyphColor(disabled)).toBe(restingColor);
+      const glyphColor = (picker: Locator) =>
+        picker.evaluate(
+          (element) =>
+            element.ownerDocument.defaultView?.getComputedStyle(element, '::before').backgroundColor,
+        );
+      const settle = () =>
+        page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+            }),
+        );
 
-    // Sanity-check the other half of the guard: keyboard focus on an enabled
-    // host does move the glyph to the accent color, so the `:not()` above is
-    // narrowing a live rule rather than disabling it outright.
-    await enabled.evaluate((element) => (element as HTMLElement).focus());
-    await page.keyboard.press('Shift+Tab');
-    await page.keyboard.press('Tab');
-    await expect(enabled).toBeFocused();
-    await expect.poll(() => glyphColor(enabled)).not.toBe(restingColor);
+      // The reference value carries the same hazard as the assertion: sampling
+      // it while anything is still transitioning pins a frame the glyph never
+      // returns to, so settle before reading it too.
+      await settle();
+      const restingColor = await glyphColor(enabled);
+
+      // Establish that the accent rule is live before pinning the guard, so a
+      // rule that never fires cannot pass the guard assertion by accident.
+      await enabled.evaluate((element) => (element as HTMLElement).focus());
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(enabled).toBeFocused();
+      await settle();
+      expect(await glyphColor(enabled)).not.toBe(restingColor);
+
+      // The guard itself: a disabled host that takes focus keeps the resting
+      // glyph, read once the accent transition would long since have run.
+      await disabled.evaluate((element) => (element as HTMLElement).focus());
+      await expect(disabled).toBeFocused();
+      await settle();
+      expect(await glyphColor(disabled)).toBe(restingColor);
+    });
   });
 
   test('opts projected text entry out of the select-none root without freeing labels', async ({
