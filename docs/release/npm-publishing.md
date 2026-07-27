@@ -32,14 +32,19 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 
 The single release workflow lives at `.github/workflows/npm-publish.yml` in
 this repository; the filename is pinned by the npm trusted-publisher record
-above. A tag push runs the publish-last graph once: release gate → GitHub
-Packages → every other configured Required Registry → draft and verify the
-GitHub prerelease → publish the GitHub prerelease. The `release-gate` job
-calls the reusable (`workflow_call`) `.github/workflows/release-gate.yml`
-workflow, and the two registry publish jobs — `publish-github-packages` and
-`publish-npm` — both download that same run's `release-package` artifact.
-Exactly one gate runs per tag, and both registries publish literally the same
-audited tarball instead of relying on build determinism across separate runs.
+above. A tag push runs the publish-last graph once: release gate and the
+immutable-release policy gate → GitHub Packages → every other configured
+Required Registry → draft and verify the GitHub prerelease → publish the
+GitHub prerelease. The `release-gate` job calls the reusable
+(`workflow_call`) `.github/workflows/release-gate.yml` workflow, and the two
+registry publish jobs — `publish-github-packages` and `publish-npm` — both
+download that same run's `release-package` artifact. Exactly one gate runs
+per tag, and both registries publish literally the same audited tarball
+instead of relying on build determinism across separate runs. The
+`release-immutability` gate blocks both publish jobs unless GitHub's native
+immutable-release policy reports `enabled: true` — see
+[`release-immutability.md`](./release-immutability.md), which also covers the
+read-only drift check that watches a published projection afterwards.
 
 - The shared release gate runs `pnpm release:dry-run` (changelog, lint,
   dead-code, architecture, coverage, library build, package lint/audit,
@@ -59,10 +64,12 @@ audited tarball instead of relying on build determinism across separate runs.
   through an edit to either workflow alone. The publish-only jobs run Node 24
   for the publish command itself; they never build or run package scripts.
 - The release publishes `hell-ui`; the tag must match the package version.
-- `publish-github-packages` has `needs: release-gate`, and `publish-npm` has
-  `needs: [release-gate, publish-github-packages]`: only a fully gated
-  tarball publishes, and GitHub Packages publishes before every other
-  configured Required Registry.
+- `publish-github-packages` has `needs: [release-gate, release-immutability]`,
+  and `publish-npm` has
+  `needs: [release-gate, release-immutability, publish-github-packages]`: only
+  a fully gated tarball publishes, nothing publishes while the repository's
+  immutable-release policy is unproven, and GitHub Packages publishes before
+  every other configured Required Registry.
 - The npm publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
 - The publish jobs run on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
@@ -155,9 +162,14 @@ workflow contract — no test publishes anything.
   wrong, publish a corrective patch release instead of editing the GitHub
   Release.
 
-The repository's native immutable-releases setting must be enabled (draft
-verification requires proof via `GET /repos/{owner}/{repo}/immutable-releases`)
-so published release tags and assets are locked and attested.
+The repository's native immutable-releases setting must be enabled so
+published release tags and assets are locked and attested. The
+`release-immutability` job proves it via
+`GET /repos/{owner}/{repo}/immutable-releases` before any registry publishes,
+and draft verification proves it again. The policy never locks note text, so
+the tagged Released Version Notes stay authoritative and a read-only drift
+check watches the published projection against them — see
+[`release-immutability.md`](./release-immutability.md).
 
 ## Release steps
 

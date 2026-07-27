@@ -10,6 +10,17 @@
 // without live publication, and the release workflow's thin jobs consume the
 // same policy through the CLI at the bottom of this file.
 //
+// The same projection is also the yardstick after publication. GitHub's
+// native immutable-release policy locks a release's tag and assets and
+// attests them, but it never locks the title or note text, so a published
+// projection stays editable forever. `verifyReleaseDrift` re-runs the
+// published-phase verification against a live release and its tagged notes,
+// which means drift detection and draft creation agree byte-for-byte by
+// construction rather than by two implementations happening to match. The
+// seam holds no edit, repair, or republish capability, and rejects any
+// repair-shaped option explicitly: a drifted projection is evidence for a
+// maintainer (docs/release/release-immutability.md).
+//
 // Deliberately dependency-free: the release workflow's projection jobs run
 // `node tools/release-projection.mjs` on a bare checkout without installing
 // node_modules, so this module must not import tools that pull in the yaml
@@ -220,18 +231,141 @@ export function verifyReleaseProjection({ expected, release, tagCommit, phase, i
           'immutable-releases policy for Release Projections.',
       );
     }
-  } else if (immutableReleasesPolicy?.enabled !== true) {
-    failures.push(
-      immutableReleasesPolicy?.enabled === false
-        ? "The repository's native immutable-releases policy is disabled; enable it in the " +
-            'repository settings before publishing Release Projections.'
-        : "Could not read the repository's native immutable-releases policy; draft verification " +
-            'requires proof that the policy is enabled.',
-    );
+  } else {
+    failures.push(...evaluateImmutabilityPolicy(immutableReleasesPolicy).failures);
   }
 
   return { failures };
 }
+
+// The repository's native immutable-releases policy gate, over the captured
+// `GET /repos/{owner}/{repo}/immutable-releases` payload. Only affirmative
+// evidence (`{ "enabled": true }`) opens the gate; disabled, missing,
+// unreadable, and non-boolean evidence all refuse, so the release workflow
+// fails closed. Draft verification consumes this through
+// `verifyReleaseProjection`, and the publication gate that runs before any
+// registry publish consumes it through the `policy` subcommand — one
+// fixture-tested decision behind both.
+export function evaluateImmutabilityPolicy(policy) {
+  if (policy?.enabled === true) return { failures: [] };
+  return {
+    failures: [
+      policy?.enabled === false
+        ? "The repository's native immutable-releases policy is disabled; enable it in the " +
+          'repository settings before publishing Release Projections.'
+        : "Could not read the repository's native immutable-releases policy; release publication " +
+          'requires proof that the policy is enabled.',
+    ],
+  };
+}
+
+// Read-only drift comparison between one published GitHub release and the
+// Released Version Notes locked at its tag.
+//
+// `release` is the GitHub REST release object re-read from the API,
+// `taggedRecord` is the exact content of `.changes/<version>.md` at the
+// release tag (or null when the tag carries no record), `recordCommit` is the
+// commit that record was read from, and `tagCommit` is the commit the release
+// tag resolves to now. The comparison is the published-phase verification of
+// the projection this repository would draft today, so an exact release and a
+// freshly drafted one are the same bytes by construction, plus the one field
+// only a live release carries: its stored target.
+//
+// Any extra option — including a repair request — is rejected: this seam
+// holds no repair capability.
+export function verifyReleaseDrift({ release, taggedRecord, recordCommit, tagCommit, ...unsupported }) {
+  const unsupportedKeys = Object.keys(unsupported);
+  if (unsupportedKeys.length > 0) {
+    return {
+      failures: [
+        `Unsupported release drift option${unsupportedKeys.length === 1 ? '' : 's'} ` +
+          `${unsupportedKeys.map((key) => JSON.stringify(key)).join(', ')}; ${readOnlyGuidance}.`,
+      ],
+    };
+  }
+
+  // Validate the tag before it is used to name a Released Version Notes
+  // record: only a v-prefixed SemVer tag names a `.changes/<version>.md`.
+  const version = releaseTagVersion(release?.tag_name);
+  if (version === null) {
+    return {
+      failures: [
+        `Release tag ${JSON.stringify(release?.tag_name ?? null)} is not a v-prefixed SemVer ` +
+          'release tag; only v<version> tags project tagged Released Version Notes.',
+      ],
+    };
+  }
+
+  if (taggedRecord === null || taggedRecord === undefined) {
+    return {
+      failures: [
+        `Tag v${version} carries no Released Version Notes record .changes/${version}.md; the ` +
+          'release cannot be verified against a tagged authoritative source. A GitHub release must ' +
+          'project a tagged record created by Release Preparation.',
+      ],
+    };
+  }
+
+  const plan = planReleaseProjection({
+    tagName: `v${version}`,
+    commit: recordCommit,
+    manifestVersion: version,
+    notesBody: taggedRecord,
+  });
+  if (plan.failures.length > 0) return { failures: plan.failures };
+
+  const { failures } = verifyReleaseProjection({
+    expected: plan.expected,
+    release: normalizeGithubRelease(release),
+    tagCommit,
+    phase: 'published',
+  });
+  failures.push(...collectTargetDriftFailures(release?.target_commitish, recordCommit, version));
+  return { failures };
+}
+
+// The release's stored target, which only a live release carries — the draft
+// job posts `target_commitish` as the tagged commit SHA and GitHub returns
+// what it was sent, so a projection this repository created names that exact
+// commit. A target naming a *different* commit is drift: it repoints the
+// release at history the tagged notes never described.
+//
+// A non-SHA target (a branch name such as `main`) is tolerated rather than
+// failed. Releases created outside this path — by hand, or before this
+// tooling existed — carry one, and failing them would report drift for every
+// such release without the tagged bytes having moved. The authoritative
+// checks above still hold those releases to the tagged record byte-for-byte.
+//
+// The tolerance is bypassable by design: anyone who can PATCH a release can
+// write a branch name instead of a SHA and land in the tolerated case. That
+// is accepted because the tag is immutable, `tarball_url`/`zipball_url` are
+// derived from it, and no documented consumption path reads
+// `target_commitish` — so the field cannot redirect a consumer. Do not read
+// a passing target check as proof the target was never touched.
+function collectTargetDriftFailures(target, recordCommit, version) {
+  const commitPattern = /^[0-9a-f]{40}$/;
+  if (typeof target !== 'string' || !commitPattern.test(target.toLowerCase())) return [];
+  if (target.toLowerCase() === String(recordCommit).toLowerCase()) return [];
+  return [
+    `Release target drifted: v${version} names commit ${target}, not the commit ` +
+      `${recordCommit} its tagged .changes/${version}.md was read from; a release must target ` +
+      'the commit its Released Version Notes were tagged at.',
+  ];
+}
+
+// The version a release tag projects, or null when the tag is not a
+// v-prefixed SemVer release tag.
+export function releaseTagVersion(tagName) {
+  if (typeof tagName !== 'string' || !tagName.startsWith('v')) return null;
+  const version = tagName.slice(1);
+  return semVerPattern.test(version) ? version : null;
+}
+
+const readOnlyGuidance =
+  'drift detection is read-only and automation never repairs, edits, or republishes a release; ' +
+  'restore an accidentally drifted projection to the exact tagged bytes by hand, or publish a ' +
+  'corrective patch release when the tagged Released Version Notes themselves are wrong ' +
+  '(docs/release/release-immutability.md)';
 
 // Mirrors describeFirstDifference in tools/release-changelog.mjs (not
 // imported; see the dependency-free note above).
@@ -271,8 +405,10 @@ function main(argv) {
       return runDecide(rest);
     case 'verify':
       return runVerify(rest);
+    case 'policy':
+      return runPolicy(rest);
     default:
-      console.error('Usage: node tools/release-projection.mjs <barrier|plan|decide|verify> ...');
+      console.error('Usage: node tools/release-projection.mjs <barrier|plan|decide|verify|policy> ...');
       return 2;
   }
 }
@@ -388,6 +524,26 @@ function runVerify(args) {
   });
   if (report(`Release projection verification (${phase})`, failures)) return 1;
   console.log(`Release projection verification (${phase}) ok: the release matches the tagged notes exactly.`);
+  return 0;
+}
+
+// The publication gate that runs before any registry publish: the captured
+// immutable-releases policy must report `enabled: true`. Missing evidence is
+// a missing file, so an unreadable API response fails here too.
+function runPolicy(args) {
+  const [policyPath] = args;
+  if (!policyPath) {
+    console.error('Usage: node tools/release-projection.mjs policy <immutable-releases.json>');
+    return 2;
+  }
+  const policy = existsSync(policyPath) ? readJson(policyPath) : null;
+  const { failures } = evaluateImmutabilityPolicy(policy);
+  if (report('Immutable-releases policy gate', failures)) return 1;
+  console.log(
+    'Immutable-releases policy gate ok: the repository locks and attests published release ' +
+      'tags and assets. Note text stays mutable — the tagged Released Version Notes remain ' +
+      'authoritative and release-drift.yml watches the published projection against them.',
+  );
   return 0;
 }
 
