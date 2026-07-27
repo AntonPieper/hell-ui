@@ -290,6 +290,7 @@ class CustomAdapterHost {
       [value]="value()"
     />
     <input hellDateInput data-unlabelled [value]="value()" />
+    <input hellDateInput data-blank-label aria-label="   " [value]="value()" />
   `,
 })
 class ScopedFormatHost {
@@ -1088,7 +1089,7 @@ describe('HellDateInput', () => {
     expect(input.placeholder).toBe('DD.MM.YYYY');
   });
 
-  it('writes no placeholder onto an input that has no accessible name', async () => {
+  it('writes no placeholder onto an input that authors no naming markup', async () => {
     const fixture = TestBed.createComponent(ScopedFormatHost);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -1100,6 +1101,12 @@ describe('HellDateInput', () => {
     if (!(input instanceof HTMLInputElement)) throw new Error('Expected unlabelled date input.');
     expect(input.value).toBe('22.04.2026');
     expect(input.hasAttribute('placeholder')).toBe(false);
+
+    // A whitespace-only `aria-label` names nothing, so it is not naming markup.
+    const blank = fixture.nativeElement.querySelector('input[data-blank-label]');
+    if (!(blank instanceof HTMLInputElement)) throw new Error('Expected blank-label date input.');
+    expect(blank.getAttribute('aria-label')).toBe('   ');
+    expect(blank.hasAttribute('placeholder')).toBe(false);
   });
 
   it('rejects a provided format that is not built from YYYY, MM, and DD', () => {
