@@ -72,8 +72,10 @@ command automates none of them.
    consumer outcomes, newest release first in `CHANGELOG.md`.
 2. Run `pnpm release:dry-run` for release evidence. It validates the prepared
    candidate — including the changelog contract — without publishing.
-3. Commit the candidate on a `release-preparation` pull request that contains
-   only the allowed artifact set above.
+3. Commit the candidate on a pull request carrying the `release-preparation`
+   label and containing only the allowed artifact set above — see
+   [`pull-request-states.md`](./pull-request-states.md) for how CI enforces
+   that state.
 4. After merge, tag the release commit (`git tag v<version>`, then
    `git push origin v<version>`) to trigger the gated publication workflow —
    see [`npm-publishing.md`](./npm-publishing.md).

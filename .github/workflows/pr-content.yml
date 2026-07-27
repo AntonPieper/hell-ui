@@ -1,0 +1,55 @@
+# Read-only pull-request content check (ADR 0003).
+#
+# The unprivileged half of the pull-request state contract: it checks out the
+# proposed content with read-only permissions and validates the objective
+# release-note surface — Change Fragment schema, Released Version Notes shape,
+# package-version agreement, and deterministic byte-for-byte Release Changelog
+# generation — through `pnpm run test:changelog`. Fragment validity is thereby
+# reported separately from PR-state validity (pr-state.yml), so a present but
+# malformed fragment can never satisfy the Consumer Change state.
+#
+# The push trigger keeps the same contract observable on main after merges.
+name: PR content
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-content-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  release-notes:
+    name: Release notes (content)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm run ci:install
+
+      - name: Release-note contract
+        run: pnpm run test:changelog
