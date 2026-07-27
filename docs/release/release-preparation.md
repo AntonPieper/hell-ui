@@ -75,7 +75,8 @@ command automates none of them.
 3. Commit the candidate on a pull request carrying the `release-preparation`
    label and containing only the allowed artifact set above — see
    [`pull-request-states.md`](./pull-request-states.md) for how CI enforces
-   that state.
+   that state and [`pull-request-contract.md`](./pull-request-contract.md)
+   for the required checks that block the merge on protected `main`.
 4. After merge, tag the release commit (`git tag v<version>`, then
    `git push origin v<version>`) to trigger the gated publication workflow —
    see [`npm-publishing.md`](./npm-publishing.md).
