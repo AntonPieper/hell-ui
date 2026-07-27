@@ -685,6 +685,40 @@ describe('HellCombobox', () => {
     expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
   });
 
+  it('keeps the active option through pointer boundary events the pointer did not cause', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    // A panel placed asynchronously can move after it is painted, sliding an
+    // option out from under a pointer nobody touched. The keyboard's active
+    // option has to survive that, and no phantom hover may be painted.
+    first.dispatchEvent(new PointerEvent('pointerenter'));
+    second.dispatchEvent(new PointerEvent('pointerenter'));
+    first.dispatchEvent(new PointerEvent('pointerleave'));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+    expect(first.hasAttribute('data-hover')).toBe(false);
+    expect(second.hasAttribute('data-hover')).toBe(false);
+
+    // A pointer that is actually being used owns the active option again, and
+    // the move replays the entry the option under it never received.
+    second.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.hasAttribute('data-hover')).toBe(true);
+
+    second.dispatchEvent(new PointerEvent('pointerleave'));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
+  });
+
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
     const fixture = TestBed.createComponent(ComboboxProjectedHost);
     fixture.detectChanges();
