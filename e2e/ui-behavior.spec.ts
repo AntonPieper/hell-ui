@@ -980,6 +980,12 @@ test.describe('Hell UI browser behavior', () => {
     });
 
     test('the phone layout reports no axe WCAG smoke violations', async ({ page }) => {
+      // Two axe passes over a live pdf.js document is the slowest test in this
+      // file: ~10s alone, ~24s on firefox under parallel load. That is inside
+      // the 30s default, but with no headroom worth relying on, so it gets its
+      // own budget rather than leaning on a CI retry to absorb the variance.
+      test.setTimeout(90_000);
+
       // The docs axe smoke only ever sees this viewer at desktop width, so the
       // coarse-pointer sizing and the floating overview would otherwise ship
       // with no accessibility scan at all.

@@ -183,11 +183,12 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         </li>
         <li>
           Taking the two-finger gesture from the browser needs a blocking <code>touchstart</code>
-          listener, which means the browser must reach the main thread and back before it may start
-          any scroll — including a one-finger pan the viewer does not handle. That handshake is
-          cheap only while the main thread is free, and rendering a page is exactly when it is not,
-          so scrolling can feel slower to start on a busy document. There is no cheaper way to
-          suppress a two-finger pan; <code>touch-action</code> cannot express it.
+          listener, which adds a main-thread round trip at touch-down — earlier than the one
+          <code>touchmove</code> already required — before the browser may start any scroll,
+          including a one-finger pan the viewer does not handle. That handshake is cheap only while
+          the main thread is free, and rendering a page is exactly when it is not, so scrolling can
+          feel slower to start on a busy document. There is no cheaper way to suppress a two-finger
+          pan; <code>touch-action</code> cannot express it.
         </li>
         <li>
           A double tap that lands on a link annotation both follows the link and zooms, because each
@@ -271,7 +272,7 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <li>With <code>globalShortcuts</code>, the command shortcuts (Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0) also fire from document level while pointer or focus activity is scoped to the viewer, and never override keydowns your app already prevented.</li>
         <li>The rendered page layer is pdf.js output; provide a document title and surrounding context in your own page so screen-reader users know what they are viewing.</li>
         <li>Every touch gesture has a control equivalent: the zoom stepper and preset select cover pinch and double tap, so zooming never requires a multi-finger gesture. On coarse pointers the toolbar and find-bar controls grow to a finger-sized target.</li>
-        <li>Where the page overview floats over the document, it is a panel rather than a dialog: it takes no focus trap, and Tab continues from the rail into the page behind it. Link annotations under the rail therefore stay focusable while visually covered — close the overview before working through the document by keyboard.</li>
+        <li>Where the page overview floats over the document, it is a panel rather than a dialog: it takes no focus trap, and Tab continues from the rail into the page behind it. A link annotation under the rail therefore stays focusable while it may be <em>entirely</em> obscured, which is what WCAG 2.2 SC 2.4.11 (Focus Not Obscured) is about. Close the overview before working through the document by keyboard.</li>
       </ul>
 
       <h2>Do</h2>

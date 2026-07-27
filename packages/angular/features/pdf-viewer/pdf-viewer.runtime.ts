@@ -576,12 +576,13 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     // second finger has to be able to take the gesture off the browser's own
     // two-finger pan before it starts.
     //
-    // This is a cost the viewer accepts, not one it dodges. A blocking
-    // touchstart makes the browser hand every touch start to the main thread
-    // and wait for the acknowledgement before the compositor may scroll. The
-    // early return for a single touch keeps that acknowledgement cheap only
-    // while the main thread is free — and here it is often busy rasterizing
-    // pages, which is exactly when the added scroll-start latency shows.
+    // This is a cost the viewer accepts, not one it dodges. `touchmove` was
+    // already blocking, so scrolling here already waited on the main thread;
+    // what this adds is a second, earlier round trip, at touch-down rather than
+    // at first movement. The early return for a single touch keeps that
+    // acknowledgement cheap only while the main thread is free — and here it is
+    // often busy rasterizing pages, which is exactly when the extra latency
+    // before a scroll starts is felt.
     container.addEventListener('touchstart', onTouchStart, { passive: false });
     container.addEventListener('touchmove', onTouchMove, { passive: false });
     container.addEventListener('touchend', onTouchEnd);
