@@ -369,6 +369,89 @@ test.describe('table docs regressions', () => {
       .toBeLessThanOrEqual(1);
   });
 
+  test('TanStack Virtual body columns follow the header grid when the shell table stretches', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoTableDocs(page);
+
+    const virtual = page.locator('app-table-tanstack-virtual-example hell-tanstack-table');
+    await expect(virtual).toHaveAttribute('data-hell-tanstack-virtual-rows', 'true');
+    await virtual.scrollIntoViewIfNeeded();
+
+    // The regression only appears when the shell table is wider than the
+    // TanStack total column size, because the native header grid then stretches
+    // its columns while the virtual body row keeps flex item widths.
+    await expect
+      .poll(() =>
+        virtual.evaluate((shell) => {
+          const table = shell.querySelector('[data-hell-table-shell-table]') as HTMLElement;
+          const totalSize = Number.parseFloat(
+            getComputedStyle(table).getPropertyValue('--hell-table-total-size'),
+          );
+          return table.getBoundingClientRect().width - totalSize;
+        }),
+      )
+      .toBeGreaterThan(8);
+
+    const columnDrift = async (): Promise<number> =>
+      virtual.evaluate((shell) => {
+        const headers = [...shell.querySelectorAll('thead th')];
+        const row = shell.querySelector('[data-hell-table-virtual-row-kind="row"]');
+        const cells = row ? [...row.querySelectorAll('td')] : [];
+        if (!cells.length || cells.length !== headers.length) return Number.POSITIVE_INFINITY;
+        return Math.max(
+          ...headers.map((header, index) => {
+            const headerBox = header.getBoundingClientRect();
+            const cellBox = cells[index].getBoundingClientRect();
+            return Math.max(
+              Math.abs(cellBox.x - headerBox.x),
+              Math.abs(cellBox.width - headerBox.width),
+            );
+          }),
+        );
+      });
+
+    await expect.poll(columnDrift).toBeLessThanOrEqual(1);
+
+    const scrollport = virtual.locator('[data-hell-table-virtual-scrollport="true"]');
+    await scrollport.evaluate((element) => {
+      element.scrollTop = 620;
+      element.dispatchEvent(new Event('scroll'));
+    });
+    await expect
+      .poll(async () => await scrollport.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+
+    await expect.poll(columnDrift).toBeLessThanOrEqual(1);
+
+    // Rendered rows keep the virtual row size, so scrolling leaves no seam or overlap.
+    await expect
+      .poll(() =>
+        virtual.evaluate((shell) => {
+          const rows = [...shell.querySelectorAll('[data-hell-table-virtual-row="true"]')]
+            .map((row) => {
+              const box = row.getBoundingClientRect();
+              return {
+                index: Number(row.getAttribute('data-hell-table-virtual-row-index')),
+                top: box.top,
+                bottom: box.bottom,
+              };
+            })
+            .sort((left, right) => left.index - right.index);
+          let worstSeam = 0;
+          for (let index = 1; index < rows.length; index++) {
+            const previous = rows[index - 1];
+            const current = rows[index];
+            if (current.index !== previous.index + 1) continue;
+            worstSeam = Math.max(worstSeam, Math.abs(current.top - previous.bottom));
+          }
+          return worstSeam;
+        }),
+      )
+      .toBeLessThanOrEqual(1);
+  });
+
   test('TanStack shell preserves pagination controls after compact Master Detail back', async ({
     page,
   }) => {
