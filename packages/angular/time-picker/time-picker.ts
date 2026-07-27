@@ -287,17 +287,23 @@ export class HellTimePicker {
     destroyRef.onDestroy(() => this.clearDigitTimeout());
 
     effect(() => {
-      // Everything that moves the selected option within its column. A new
-      // value moves it directly; `seconds` adds or removes a whole column; the
-      // effective steps rewrite a column's option count, so the selection lands
-      // somewhere new even when the value itself never changed.
+      // Everything that moves a column's centering anchor. A new value moves
+      // it directly; `seconds` adds or removes a whole column; the effective
+      // steps rewrite a column's option count, so the anchor lands somewhere
+      // new even when the value itself never changed.
       //
-      // `min`/`max` are deliberately absent. Bounds only toggle `disabled` on
-      // options that keep their positions and their count, so nothing moves.
+      // The bounds count too, though less obviously. They leave every option
+      // in place and only toggle `disabled` — but with no value the anchor is
+      // the roving tab stop rather than a selection, and that tab stop is the
+      // first *enabled* option. So bounds arriving asynchronously over a null
+      // value move the anchor. Bounds changes are rare, so paying an extra
+      // generation for them is cheaper than reasoning about when they matter.
       this.value();
       this.seconds();
       this.effectiveMinuteStep();
       this.effectiveSecondStep();
+      this.min();
+      this.max();
       if (this.internalCommit) {
         this.internalCommit = false;
         return;
@@ -313,17 +319,17 @@ export class HellTimePicker {
     afterRenderEffect(() => {
       const generation = this.pendingCenter();
       if (generation === this.appliedCenter) return;
-
-      let centered = true;
-      // Every column, then the bookkeeping: `centerColumn` must run for all of
-      // them regardless of which ones missed.
-      for (const unit of untracked(() => this.visibleUnits())) {
-        if (!this.centerColumn(unit)) centered = false;
-      }
-      // Bank the generation only once every column measured. A picker first
-      // rendered inside a hidden ancestor centers nothing, and must stay owed
-      // this generation so the next render pass after it is revealed retries.
-      if (centered) this.appliedCenter = generation;
+      this.appliedCenter = generation;
+      for (const unit of untracked(() => this.visibleUnits())) this.centerColumn(unit);
+      // Known gap: a picker first laid out inside a `display: none` ancestor
+      // measures a zero rect, so this pass centers nothing and the generation
+      // is spent anyway — it will not re-center when the ancestor is revealed.
+      // Retrying would need a ResizeObserver feeding a signal this effect also
+      // reads, because `afterRenderEffect` re-runs only when a tracked signal
+      // changes, never merely because another render happened. The spec asks
+      // for centering on open and on external value changes only, and the
+      // popover recipe builds the picker from an `ng-template`, so it is
+      // constructed fresh per open and never reaches this path.
     });
 
     afterRenderEffect(() => {
@@ -557,29 +563,22 @@ export class HellTimePicker {
    * Scrolls one column so its selected option sits in the middle. Rect math
    * keeps this correct regardless of which ancestor is the offset parent, and
    * only ever writes the column's own `scrollTop`.
-   *
-   * @returns whether the column could actually be measured and centered.
    */
-  private centerColumn(unit: HellTimePickerUnit): boolean {
+  private centerColumn(unit: HellTimePickerUnit): void {
     const root = this.host.nativeElement;
     const list = root.querySelector<HTMLElement>(`[data-unit="${unit}"] [data-slot="options"]`);
-    // A disabled picker has no tab stop, so the selected option leads.
+    // A disabled picker has no tab stop, so the selected option leads. With no
+    // value at all the tab stop is the first *enabled* option, which is why the
+    // centering generation has to track the bounds as well as the value.
     const active =
       list?.querySelector<HTMLElement>('[data-slot="option"][data-selected="true"]') ??
       list?.querySelector<HTMLElement>('[data-slot="option"][tabindex="0"]');
-    if (!list || !active) return false;
+    if (!list || !active) return;
 
     const listRect = list.getBoundingClientRect();
-    // A hidden ancestor — an inactive tab panel, a collapsed section, a
-    // consumer's own `display: none` wrapper — measures as a zero rect, which
-    // would make the scroll write a silent no-op. Report the miss so the
-    // caller can retry once the picker is actually laid out.
-    if (listRect.height === 0) return false;
-
     const activeRect = active.getBoundingClientRect();
     list.scrollTop +=
       activeRect.top - listRect.top - (listRect.height - activeRect.height) / 2;
-    return true;
   }
 }
 

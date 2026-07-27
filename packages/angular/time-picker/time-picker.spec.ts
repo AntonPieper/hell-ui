@@ -303,6 +303,59 @@ describe('HellTimePicker', () => {
     });
   });
 
+  describe('scroll centering', () => {
+    let restoreLayout: (() => void) | null = null;
+
+    beforeEach(() => {
+      restoreLayout = installStubLayout();
+    });
+
+    afterEach(() => {
+      restoreLayout?.();
+      restoreLayout = null;
+    });
+
+    it('centers the selected option in every column', () => {
+      const fixture = render({ value: { hour: 14, minute: 30, second: 0 } });
+
+      expect(listbox(fixture, 'hour').scrollTop).toBe(centeredScrollTop(14));
+      expect(listbox(fixture, 'minute').scrollTop).toBe(centeredScrollTop(30));
+    });
+
+    it('re-centers a null-valued column when the bounds arrive late', () => {
+      const fixture = render();
+      const hours = listbox(fixture, 'hour');
+
+      // With no value and no bounds the anchor is the roving tab stop, parked
+      // on hour 00 at the very top.
+      expect(tabStop(fixture, 'hour')).toBe('00');
+      expect(hours.scrollTop).toBe(centeredScrollTop(0));
+
+      // Bounds arriving asynchronously move the tab stop to the first enabled
+      // option. The value never changes, so only tracking the bounds keeps the
+      // anchor on screen.
+      fixture.componentInstance.min.set({ hour: 9, minute: 0, second: 0 });
+      fixture.detectChanges();
+
+      expect(tabStop(fixture, 'hour')).toBe('09');
+      expect(hours.scrollTop).toBe(centeredScrollTop(9));
+    });
+
+    it('re-centers when a step change renumbers a column', () => {
+      const fixture = render({ value: { hour: 14, minute: 30, second: 0 } });
+      const minutes = listbox(fixture, 'minute');
+
+      expect(minutes.scrollTop).toBe(centeredScrollTop(30));
+
+      // A 15-minute grid turns 60 options into 4, so minute 30 becomes index 2.
+      fixture.componentInstance.minuteStep.set(15);
+      fixture.detectChanges();
+
+      expect(optionValues(fixture, 'minute')).toEqual(['00', '15', '30', '45']);
+      expect(minutes.scrollTop).toBe(centeredScrollTop(2));
+    });
+  });
+
   describe('keyboard', () => {
     it('keeps exactly one tab stop per column', () => {
       const fixture = render({ value: { hour: 8, minute: 30, second: 0 } });
@@ -701,6 +754,90 @@ function isOptionDisabled(fixture: Fixture, unit: string, text: string): boolean
 function selected(fixture: Fixture, unit: string): string | null {
   const element = column(fixture, unit).querySelector<HTMLElement>('[data-selected="true"]');
   return element?.textContent?.trim() ?? null;
+}
+
+function tabStop(fixture: Fixture, unit: string): string | null {
+  const element = column(fixture, unit).querySelector<HTMLElement>('[tabindex="0"]');
+  return element?.textContent?.trim() ?? null;
+}
+
+/** Stubbed option height and column viewport height, in px. */
+const STUB_OPTION_SIZE = 40;
+const STUB_LIST_SIZE = 280;
+
+/**
+ * Where centering must leave a column whose anchor is option `index`, under
+ * {@link installStubLayout}: the anchor's midpoint meets the viewport's, and
+ * browsers clamp the negative offset the first few options would ask for.
+ */
+function centeredScrollTop(index: number): number {
+  return Math.max(0, index * STUB_OPTION_SIZE - (STUB_LIST_SIZE - STUB_OPTION_SIZE) / 2);
+}
+
+/**
+ * jsdom neither lays elements out nor implements `scrollTop`, so centering is
+ * invisible to it. This installs just enough of both: every option is
+ * {@link STUB_OPTION_SIZE} tall and stacked in order inside a
+ * {@link STUB_LIST_SIZE} viewport that scrolls, which is all the rect math
+ * reads. Follows the same prototype-patching approach as `toolbar.spec.ts` and
+ * the `scrollTop` accessor in `toast.spec.ts`.
+ *
+ * @returns a function restoring the real implementations.
+ */
+function installStubLayout(): () => void {
+  const scrollTops = new WeakMap<HTMLElement, number>();
+  const originalRect = HTMLElement.prototype.getBoundingClientRect;
+  const originalScrollTop = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'scrollTop',
+  );
+
+  Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return scrollTops.get(this) ?? 0;
+    },
+    set(this: HTMLElement, value: number) {
+      scrollTops.set(this, Math.max(0, value));
+    },
+  });
+
+  HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement): DOMRect {
+    if (this.matches('[data-slot="options"]')) return stubRect(0, STUB_LIST_SIZE);
+
+    if (this.matches('[data-slot="option"]')) {
+      const list = this.closest<HTMLElement>('[data-slot="options"]');
+      if (list) {
+        const siblings = Array.from(list.querySelectorAll<HTMLElement>('[data-slot="option"]'));
+        return stubRect(siblings.indexOf(this) * STUB_OPTION_SIZE - list.scrollTop, STUB_OPTION_SIZE);
+      }
+    }
+
+    return originalRect.call(this);
+  };
+
+  return () => {
+    HTMLElement.prototype.getBoundingClientRect = originalRect;
+    if (originalScrollTop) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollTop', originalScrollTop);
+    } else {
+      delete (HTMLElement.prototype as unknown as { scrollTop?: unknown }).scrollTop;
+    }
+  };
+}
+
+function stubRect(top: number, height: number): DOMRect {
+  return {
+    x: 0,
+    y: top,
+    top,
+    bottom: top + height,
+    left: 0,
+    right: 0,
+    width: 0,
+    height,
+    toJSON: () => ({}),
+  } as DOMRect;
 }
 
 function columnLabels(host: HTMLElement): string[] {
