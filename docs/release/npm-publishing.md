@@ -32,12 +32,14 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 
 The single release workflow lives at `.github/workflows/npm-publish.yml` in
 this repository; the filename is pinned by the npm trusted-publisher record
-above. A tag push runs it once: its `release-gate` job calls the reusable
-(`workflow_call`) `.github/workflows/release-gate.yml` workflow, and the two
-registry publish jobs — `publish-npm` and `publish-github-packages` — both
-download that same run's `release-package` artifact. Exactly one gate runs
-per tag, and both registries publish literally the same audited tarball
-instead of relying on build determinism across separate runs.
+above. A tag push runs the publish-last graph once: release gate → GitHub
+Packages → every other configured Required Registry → draft and verify the
+GitHub prerelease → publish the GitHub prerelease. The `release-gate` job
+calls the reusable (`workflow_call`) `.github/workflows/release-gate.yml`
+workflow, and the two registry publish jobs — `publish-github-packages` and
+`publish-npm` — both download that same run's `release-package` artifact.
+Exactly one gate runs per tag, and both registries publish literally the same
+audited tarball instead of relying on build determinism across separate runs.
 
 - The shared release gate runs `pnpm release:dry-run` (changelog, lint,
   dead-code, architecture, coverage, library build, package lint/audit,
@@ -57,17 +59,21 @@ instead of relying on build determinism across separate runs.
   through an edit to either workflow alone. The publish-only jobs run Node 24
   for the publish command itself; they never build or run package scripts.
 - The release publishes `hell-ui`; the tag must match the package version.
-- Both publish jobs have `needs: release-gate`, so they only run when the whole gate passed.
+- `publish-github-packages` has `needs: release-gate`, and `publish-npm` has
+  `needs: [release-gate, publish-github-packages]`: only a fully gated
+  tarball publishes, and GitHub Packages publishes before every other
+  configured Required Registry.
 - The npm publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
 - The publish jobs run on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
 - The OIDC-enabled npm publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `pnpm publish "$tarball" --access public --provenance --no-git-checks` for the audited package tarball.
 
 `workflow_dispatch` is evidence-only, on the release workflow and on
-`release-gate.yml` itself: a dispatched run exercises the full gate and
-produces the audited `release-package` artifact without publishing. To
-publish, create a protected tag whose name matches the package version, for
-example `v0.2.0`.
+`release-gate.yml` itself: a dispatched run exercises the full gate, produces
+the audited `release-package` artifact, and runs the release-projection plan
+against the current commit — it cannot publish a registry package, create a
+draft, or publish a GitHub Release. To publish, create a protected tag whose
+name matches the package version, for example `v0.2.0`.
 
 The npmjs publish job only runs when the repository variable
 `HELL_ENABLE_NPMJS_PUBLISH` is set to `true`. Until the npm trusted-publisher
@@ -112,6 +118,47 @@ same release workflow (`.github/workflows/npm-publish.yml`):
   plus an `.npmrc` entry `@antonpieper:registry=https://npm.pkg.github.com`
   and an authenticated `//npm.pkg.github.com/:_authToken`.
 
+## GitHub Release projection (publish-last)
+
+The GitHub Release for a tag is a Release Projection of the tagged Released
+Version Notes (`.changes/<version>.md`), never a separately authored copy.
+The `draft-github-release` and `publish-github-release` jobs of the release
+workflow drive it through the fixture-tested policy in
+[`tools/release-projection.mjs`](../../tools/release-projection.mjs), which
+`pnpm test:changelog` proves from captured-metadata fixtures plus a static
+workflow contract — no test publishes anything.
+
+- **Required Registry barrier.** The draft job runs after every registry job
+  (`!cancelled()`) and first evaluates the actual job results: a skipped,
+  cancelled, or failed Required Registry fails the barrier before any GitHub
+  release is touched. GitHub Packages is always required; npmjs joins the
+  barrier exactly when `HELL_ENABLE_NPMJS_PUBLISH` is `true`, and a disabled
+  optional registry never blocks. Future private registries join the same
+  barrier by being listed as required entries in the draft job.
+- **Exact projection.** The draft is created with the tag name as its title
+  and the exact tagged `.changes/<version>.md` bytes as its body. Draft
+  verification then checks the tag, title, tagged commit, byte-for-byte body,
+  prerelease classification, absence of custom assets, and that the
+  repository's native immutable-releases policy is enabled. Every `0.x.y`
+  version and every SemVer prerelease suffix is classified as a GitHub
+  prerelease until an explicit stable Release Stage Promotion.
+- **Publish last.** `publish-github-release` runs only after the draft job —
+  and therefore the barrier and every draft verification — succeeded. It
+  re-verifies the draft, publishes it, and verifies the published release is
+  exact and immutable. No package tarball, checksum, or other custom asset is
+  ever attached; registries remain the package-distribution surface, and no
+  changelog copy is added to npm packages or the docs site.
+- **Idempotent reruns.** A rerun adopts an existing draft or published
+  release only when it matches the expected projection exactly; any mismatch
+  fails visibly, and automation never edits a release to make verification
+  pass. The tagged Released Version Notes stay authoritative — if they are
+  wrong, publish a corrective patch release instead of editing the GitHub
+  Release.
+
+The repository's native immutable-releases setting must be enabled (draft
+verification requires proof via `GET /repos/{owner}/{repo}/immutable-releases`)
+so published release tags and assets are locked and attested.
+
 ## Release steps
 
 1. Run `pnpm release:prepare [version]` to assemble the pending Change
@@ -122,7 +169,14 @@ same release workflow (`.github/workflows/npm-publish.yml`):
    through a release-preparation pull request.
 2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all consumer fixtures run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
+   Use a lightweight tag exactly as written (no `-a`/`-s`): an annotated
+   tag's own SHA differs from the commit it dereferences to, so projection
+   verification would fail closed on the target-commit check.
 4. Approve the `npm-publish` GitHub environment deployment.
 5. After publish, verify the npm package page shows provenance and that the single release run contains both the `release-package` artifact and the `release-package-github-mirror` artifact.
+6. Verify the run ended with the published GitHub prerelease whose body is
+   the exact tagged `.changes/<version>.md` — the workflow drafts, verifies,
+   and publishes it last, after every Required Registry succeeded (see the
+   projection section above).
 
 If future private install dependencies are introduced, use a read-only install token only for the install step. Do not use a publish token for the normal release path.
