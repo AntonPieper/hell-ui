@@ -85,6 +85,14 @@ import controlGroupStylingExampleCodeRaw from './examples/styling.example.ts?raw
       <hd-example-tabs [code]="overflowExampleCode" previewClass="grid max-w-xl gap-2">
         <app-control-group-overflow-example />
       </hd-example-tabs>
+      <p>
+        <strong>Chips are the documented exception.</strong> A <code>hellChipSet</code> composed
+        inside the frame reflects <code>data-in-control-group</code>, wraps its chips across rows,
+        and lets the frame grow vertically instead of holding one line. The chip flow — not the
+        frame — owns that spacing, so it never touches the border. The Chip, Combobox, and Filter
+        Builder pages all build on that one composition; nothing else in a Control Group grows or
+        wraps.
+      </p>
 
       <h2>Sizes and states</h2>
       <p>

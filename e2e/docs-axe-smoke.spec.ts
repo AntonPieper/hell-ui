@@ -331,7 +331,8 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           const picker = example.getByRole('combobox', { name: 'People filter builder' });
           await picker.fill('Status');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-mode="create"]');
+          // The create editor is portalled into an anchored popover.
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-mode="create"]');
           await editor.getByRole('combobox', { name: 'Status option' }).fill('pau');
           await editor.getByRole('combobox', { name: 'Status option' }).press('ArrowDown');
           await expect(page.getByRole('option', { name: 'Paused' })).toBeVisible();
@@ -347,7 +348,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           });
           await picker.fill('Owner');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-field="owner"]');
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-field="owner"]');
           await editor
             .getByRole('combobox', { name: 'Owner directory' })
             .fill('not in the directory');
@@ -365,7 +366,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           });
           await picker.fill('Created date');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-field="created"]');
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-field="created"]');
           const input = editor.getByRole('textbox', { name: 'Created from' });
           await input.fill('2026-05-01');
           await input.press('Enter');

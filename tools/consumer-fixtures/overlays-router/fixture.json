@@ -28,7 +28,8 @@
     "--hell-toast-offset",
     "hell-overflow-toolbar[data-slot=root]",
     "z-index:var(--hell-z-popover,60)",
-    "min-width:180px"
+    "min-width:8rem",
+    "max-width:16rem"
   ],
   "smoke": {
     "steps": [
