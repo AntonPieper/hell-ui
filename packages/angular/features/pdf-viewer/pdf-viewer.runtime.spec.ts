@@ -463,6 +463,30 @@ describe('PDF Runtime', () => {
     expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
   });
 
+  it('disarms a waiting tap when the touch after it turns out not to be one', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+    adapter.session.handlers?.onZoomChange('auto', 'auto');
+
+    // A pan between two taps: without disarming, the tap after it pairs with
+    // the tap before it and zooms, seconds of scrolling apart.
+    tap(container, 1, 150, 200);
+    container.dispatchEvent(touchPointer('pointerdown', 2, 150, 200));
+    container.dispatchEvent(touchPointer('pointerup', 2, 150, 270));
+    tap(container, 3, 150, 200);
+
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+
+    // Same for the browser taking the gesture: a cancelled pointer is not a tap.
+    container.dispatchEvent(touchPointer('pointerdown', 4, 150, 200));
+    container.dispatchEvent(touchPointer('pointercancel', 4, 150, 200));
+    tap(container, 5, 150, 200);
+
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+  });
+
   it('does not read the two lifts that end a pinch as a double tap', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);

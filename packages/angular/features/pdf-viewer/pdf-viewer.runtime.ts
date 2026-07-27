@@ -572,10 +572,16 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     container.addEventListener('pointermove', onPointerMove, { passive: false });
     container.addEventListener('pointerup', onPointerEnd);
     container.addEventListener('pointercancel', onPointerEnd);
-    // Non-passive: a second finger has to be able to take the gesture away from
-    // the browser's own two-finger pan before it starts. The handler returns
-    // immediately for a single touch, so one-finger scrolling keeps its
-    // compositor path apart from that one check.
+    // Non-passive, because a passive listener cannot preventDefault and a
+    // second finger has to be able to take the gesture off the browser's own
+    // two-finger pan before it starts.
+    //
+    // This is a cost the viewer accepts, not one it dodges. A blocking
+    // touchstart makes the browser hand every touch start to the main thread
+    // and wait for the acknowledgement before the compositor may scroll. The
+    // early return for a single touch keeps that acknowledgement cheap only
+    // while the main thread is free — and here it is often busy rasterizing
+    // pages, which is exactly when the added scroll-start latency shows.
     container.addEventListener('touchstart', onTouchStart, { passive: false });
     container.addEventListener('touchmove', onTouchMove, { passive: false });
     container.addEventListener('touchend', onTouchEnd);
@@ -739,7 +745,11 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.gestureScale = null;
 
+    // A lift that is not a tap ends the pair as surely as a second finger does.
+    // Leaving `lastTap` armed through a pan or a cancelled pointer would let
+    // the next tap pair with a tap two touches ago and zoom unbidden.
     if (tapped) this.registerTap(event);
+    else this.lastTap = null;
   }
 
   private onTouchStart(event: TouchEvent): void {

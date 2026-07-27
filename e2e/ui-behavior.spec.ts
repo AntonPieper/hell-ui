@@ -962,6 +962,10 @@ test.describe('Hell UI browser behavior', () => {
       const controlCount = await controls.count();
       expect(controlCount).toBeGreaterThan(0);
 
+      // 40px is `--spacing-hell-control-lg` in the default skin the docs use.
+      // The stylesheet asks for the token, not for a number, so a denser skin
+      // (`compact` resolves it to 32px) legitimately lands lower — read this as
+      // "the coarse-pointer sizing applies", not as a floor Hell guarantees.
       for (let index = 0; index < controlCount; index++) {
         const control = controls.nth(index);
         const box = await control.boundingBox();
@@ -973,6 +977,18 @@ test.describe('Hell UI browser behavior', () => {
           expect(Math.round(box.width), `width of ${label ?? index}`).toBeGreaterThanOrEqual(40);
         }
       }
+    });
+
+    test('the phone layout reports no axe WCAG smoke violations', async ({ page }) => {
+      // The docs axe smoke only ever sees this viewer at desktop width, so the
+      // coarse-pointer sizing and the floating overview would otherwise ship
+      // with no accessibility scan at all.
+      const viewer = await openBasicPdfViewer(page);
+      await expectNoSeriousA11yIssues(page, 'app-pdf-viewer-basic-example hell-pdf-viewer');
+
+      await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+      await expect(viewer.locator('aside[data-slot="sidebar"]')).toBeVisible();
+      await expectNoSeriousA11yIssues(page, 'app-pdf-viewer-basic-example hell-pdf-viewer');
     });
 
     test('the page overview floats over the document instead of squeezing it', async ({ page }) => {

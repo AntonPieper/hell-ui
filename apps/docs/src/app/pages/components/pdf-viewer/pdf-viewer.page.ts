@@ -144,11 +144,20 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         The viewer arbitrates the four gestures that compete inside a document surface. One finger
         pans, and the browser keeps that gesture so the pan holds its native momentum and rubber
         banding. A second finger is a pinch: the viewer takes the gesture over and zooms around the
-        point between the fingers. A double tap toggles between the fitted zoom preset and a
-        magnified view anchored on the tap — tapping twice while zoomed restores the preset itself,
-        so <code>auto</code>, <code>page-fit</code>, and <code>page-width</code> keep re-fitting
-        after a rotation instead of freezing at the scale they last produced. A long press still
-        selects text in the pdf.js text layer, and a single tap still activates links.
+        point between the fingers. A double tap magnifies to twice the fitted scale, anchored on the
+        tap, and a double tap while zoomed in restores the fitted zoom <em>preset</em> itself — so
+        <code>auto</code>, <code>page-fit</code>, and <code>page-width</code> keep re-fitting after a
+        rotation instead of freezing at the scale they last produced. A long press still selects
+        text in the pdf.js text layer.
+      </p>
+      <p>
+        Double tap is a zoom-to-fit gesture, not a symmetric undo, and it is worth being precise
+        about what that means. It measures against the last <em>preset</em> the viewer settled on,
+        so it always returns to that fit rather than to whatever zoom you last chose: pick 300% from
+        the zoom select and one double tap takes you back to the fit, not to 300%. A document zoomed
+        <em>below</em> its fit magnifies to twice the fit rather than returning to it. This matches
+        what phone document and photo viewers do; reach for the zoom stepper or the preset select
+        when you want an exact level back.
       </p>
       <p>
         The page area declares <code>touch-action: pan-x pan-y</code>, so the browser never
@@ -160,13 +169,32 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         overview floats over the document rather than dividing an already narrow viewport — the
         toolbar toggle stays in view, so dismissing it is one tap.
       </p>
-      <p>
-        Two caveats worth knowing. A pinch that starts <em>during</em> an in-flight one-finger pan
-        arrives after the browser already owns the gesture, so the zoom applies while the pan is
-        still settling; lift and pinch for a clean zoom. And because gesture zoom coalesces through
-        <code>requestAnimationFrame</code>, a pinch does not apply while the document is
-        backgrounded or otherwise has rAF throttled.
-      </p>
+      <p>Four caveats worth knowing.</p>
+      <ul>
+        <li>
+          A pinch that starts <em>during</em> an in-flight one-finger pan arrives after the browser
+          already owns the gesture, so the zoom applies while the pan is still settling; lift and
+          pinch for a clean zoom.
+        </li>
+        <li>
+          Because gesture zoom coalesces through <code>requestAnimationFrame</code>, a pinch does
+          not apply while the document is backgrounded or otherwise has rAF throttled. Double tap,
+          the toolbar, and the keyboard apply immediately and are unaffected.
+        </li>
+        <li>
+          Taking the two-finger gesture from the browser needs a blocking <code>touchstart</code>
+          listener, which means the browser must reach the main thread and back before it may start
+          any scroll — including a one-finger pan the viewer does not handle. That handshake is
+          cheap only while the main thread is free, and rendering a page is exactly when it is not,
+          so scrolling can feel slower to start on a busy document. There is no cheaper way to
+          suppress a two-finger pan; <code>touch-action</code> cannot express it.
+        </li>
+        <li>
+          A double tap that lands on a link annotation both follows the link and zooms, because each
+          tap is a real click on the pdf.js annotation layer. The pdf.js reference viewer behaves
+          the same way. Double-tap on empty page area to zoom without following anything.
+        </li>
+      </ul>
 
       <h2>Styling</h2>
       <p>
@@ -243,6 +271,7 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <li>With <code>globalShortcuts</code>, the command shortcuts (Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0) also fire from document level while pointer or focus activity is scoped to the viewer, and never override keydowns your app already prevented.</li>
         <li>The rendered page layer is pdf.js output; provide a document title and surrounding context in your own page so screen-reader users know what they are viewing.</li>
         <li>Every touch gesture has a control equivalent: the zoom stepper and preset select cover pinch and double tap, so zooming never requires a multi-finger gesture. On coarse pointers the toolbar and find-bar controls grow to a finger-sized target.</li>
+        <li>Where the page overview floats over the document, it is a panel rather than a dialog: it takes no focus trap, and Tab continues from the rail into the page behind it. Link annotations under the rail therefore stay focusable while visually covered — close the overview before working through the document by keyboard.</li>
       </ul>
 
       <h2>Do</h2>
