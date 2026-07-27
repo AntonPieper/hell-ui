@@ -485,6 +485,71 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
   });
 
+  it('frees the shell from assistive technology when a page-modal dialog closes under a scoped one', async () => {
+    const fixture = TestBed.createComponent(ModalityDialogHost);
+    await settle(fixture);
+    const appRoot = attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    const scope = query(fixture.nativeElement, '#modality-scope');
+
+    // Reverse of the usual order: the page-modal dialog opens first, so it is
+    // the one whose open ran the manager's page-wide assistive-technology pass.
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-page-modal').click();
+    await settle(fixture);
+    await microtask();
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-scoped').click();
+    await settle(fixture);
+    await microtask();
+    // While the page-modal dialog is open it still blocks everything.
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+    expect(scope.hasAttribute('inert')).toBe(true);
+
+    query<HTMLButtonElement>(document.body, '#close-page-modal').click();
+    await settleClose(fixture);
+    await microtask();
+
+    // Only the scoped dialog is left. The manager restores its own map only
+    // when its last dialog closes, and that has not happened, so nothing but
+    // this replay can free the shell.
+    expect(document.body.querySelector('#modality-overlay')).toBeTruthy();
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+    expect(scope.hasAttribute('inert')).toBe(true);
+
+    query<HTMLButtonElement>(document.body, '#close-scoped').click();
+    await settleClose(fixture);
+
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+  });
+
+  it('leaves a consumer-owned aria-hidden on the page untouched across scoped modality', async () => {
+    const fixture = TestBed.createComponent(ModalityDialogHost);
+    await settle(fixture);
+    const appRoot = attachToBody(fixture.nativeElement);
+    appRoot.setAttribute('aria-hidden', 'true');
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-scoped').click();
+    await settle(fixture);
+    await microtask();
+
+    // The replay only undoes what the machinery added; a value the page owned
+    // before any dialog opened is not the modality runtime's to clear.
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+
+    query<HTMLButtonElement>(document.body, '#close-scoped').click();
+    await settleClose(fixture);
+
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+    appRoot.removeAttribute('aria-hidden');
+  });
+
   it('names the ng-primitives release its focus-trap escape marker is written against', () => {
     // The marker is a version-bound DOM seam. This records the pairing the
     // tests above exercise; `tools/check-architecture.mjs` owns the exact match

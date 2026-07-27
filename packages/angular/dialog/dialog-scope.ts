@@ -19,16 +19,6 @@ export const HELL_DIALOG_SCOPE_ROOT = new InjectionToken<HTMLElement | null>(
 );
 
 /**
- * `aria-hidden` values of the owner document's body children captured by the
- * trigger immediately before the dialog manager opened the dialog. A scoped
- * dialog replays it so the manager's page-wide assistive-technology pass does
- * not hide the shell that scoped modality deliberately keeps interactive.
- */
-export const HELL_DIALOG_ARIA_HIDDEN_BASELINE = new InjectionToken<
-  ReadonlyMap<Element, string | null>
->('HELL_DIALOG_ARIA_HIDDEN_BASELINE');
-
-/**
  * ng-primitives' focus trap treats any target inside `[data-focus-trap]` as a
  * region that owns its own focus and stops pulling focus back into the trapped
  * panel. Scoped modality marks the owner document body with it so shell chrome
@@ -82,10 +72,19 @@ interface HellDialogScopeModalityState {
 }
 
 interface HellDialogDocumentModalityState {
+  /** Dialog overlays currently rendered in this document, scoped or not. */
+  overlays: number;
   /** Scoped dialogs currently blocking a region in this document. */
   scoped: number;
   /** Open dialogs in this document that block the whole page instead. */
   pageModal: number;
+  /**
+   * `aria-hidden` on the body children as it was before any dialog in this
+   * document touched it. Captured once, by the first overlay, and dropped when
+   * the last one goes — so it always answers "what did the machinery change?"
+   * rather than "what did this particular open change?".
+   */
+  ariaHiddenBaseline: ReadonlyMap<Element, string | null> | null;
   marked: boolean;
   focusTrapEscape: string | null;
 }
@@ -103,13 +102,17 @@ const documentModalityStates = new WeakMap<Document, HellDialogDocumentModalityS
  * - the scope root stops scrolling, because the pinned overlay tracks its box
  *   and the shell keeps its own scroll containers;
  * - the dialog manager's page-wide `aria-hidden` pass is replayed back to the
- *   values captured before the dialog opened, so the surrounding shell is not
- *   an `aria-hidden` ancestor of the controls it still hands focus to;
+ *   document's pre-dialog values, so the surrounding shell is not an
+ *   `aria-hidden` ancestor of the controls it still hands focus to;
  * - the owner document is marked so the delegated focus trap stops pulling
- *   focus out of that shell — but only while every open dialog is scoped, see
- *   `hellRetainDialogPageModality`.
+ *   focus out of that shell.
  *
- * All four are reference counted per scope root and per document, so
+ * The last two are document-wide decisions, so they hold only while every open
+ * dialog is scoped — see `hellRetainDialogPageModality` — and they are
+ * re-evaluated on every transition, in either direction, so the order dialogs
+ * happen to open and close in cannot leave them stale.
+ *
+ * All of it is reference counted per scope root and per document, so
  * simultaneous scoped dialogs engage once and the last release restores the
  * exact values that were there before.
  */
@@ -119,54 +122,36 @@ export class HellDialogScopedModality {
   constructor(
     private readonly root: HTMLElement,
     private readonly doc: Document,
-    private readonly ariaHiddenBaseline: ReadonlyMap<Element, string | null>,
   ) {}
 
   engage(): void {
     if (this.engaged) return;
     this.engaged = true;
-    // The manager attaches the portal — which renders this overlay and can flush
-    // its effects — before running the page-wide assistive-technology pass, and
-    // the whole open is one synchronous task. Replaying once now and once at the
-    // end of that task covers both orders; the replay only touches values the
-    // pass added, so running it twice changes nothing.
-    hellRestoreDialogAriaHidden(this.ariaHiddenBaseline);
-    queueMicrotask(() => {
-      if (this.engaged) hellRestoreDialogAriaHidden(this.ariaHiddenBaseline);
-    });
     engageScopeModality(this.root);
-    engageDocumentModality(this.doc);
+    const state = documentModalityState(this.doc);
+    state.scoped += 1;
+    syncDocumentModality(this.doc, state);
   }
 
   release(): void {
     if (!this.engaged) return;
     this.engaged = false;
     releaseScopeModality(this.root);
-    releaseDocumentModality(this.doc);
+    const state = documentModalityStates.get(this.doc);
+    if (!state || state.scoped === 0) return;
+    state.scoped -= 1;
+    syncDocumentModality(this.doc, state);
   }
 }
 
 /**
- * Snapshot the `aria-hidden` values a dialog open is about to overwrite. The
- * trigger takes it before handing the template to the dialog manager, because
- * afterwards the manager's own previous-value map is the only other record and
- * it is private.
+ * Undo only the `aria-hidden="true"` the dialog machinery added. Values a
+ * consumer owned before any dialog opened keep theirs, and the dialog manager's
+ * own previous-value map is left untouched, so its restore on the last close
+ * still lands on the original value.
  */
-export function hellCaptureDialogAriaHidden(doc: Document): ReadonlyMap<Element, string | null> {
-  const baseline = new Map<Element, string | null>();
-  for (const child of Array.from(doc.body.children)) {
-    baseline.set(child, child.getAttribute('aria-hidden'));
-  }
-  return baseline;
-}
-
-/**
- * Undo only the `aria-hidden="true"` values the modality pass added. Anything a
- * consumer or an already-open page-modal dialog hid before the snapshot keeps
- * its value.
- */
-function hellRestoreDialogAriaHidden(baseline: ReadonlyMap<Element, string | null>): void {
-  for (const [element, previous] of baseline) {
+function replayDialogAriaHidden(state: HellDialogDocumentModalityState): void {
+  for (const [element, previous] of state.ariaHiddenBaseline ?? []) {
     if (!element.isConnected || previous === 'true') continue;
     if (element.getAttribute('aria-hidden') !== 'true') continue;
     if (previous === null) element.removeAttribute('aria-hidden');
@@ -222,41 +207,65 @@ function lockScopeScroll(root: HTMLElement): void {
 function documentModalityState(doc: Document): HellDialogDocumentModalityState {
   let state = documentModalityStates.get(doc);
   if (!state) {
-    state = { scoped: 0, pageModal: 0, marked: false, focusTrapEscape: null };
+    state = {
+      overlays: 0,
+      scoped: 0,
+      pageModal: 0,
+      ariaHiddenBaseline: null,
+      marked: false,
+      focusTrapEscape: null,
+    };
     documentModalityStates.set(doc, state);
   }
   return state;
 }
 
-function engageDocumentModality(doc: Document): void {
+/**
+ * Count one rendered dialog overlay, and — for the first one in the document —
+ * record what `aria-hidden` looked like before any dialog touched it.
+ *
+ * Overlay construction is the only hook that is reliably earlier than the
+ * manager's assistive-technology pass: the manager attaches the portal, which
+ * creates this directive, and only then hides the body children. Capturing per
+ * open instead would record whatever an already-open page-modal dialog had
+ * already hidden, and a scoped dialog left behind when that one closes would
+ * then have nothing to put back.
+ */
+export function hellRetainDialogOverlay(doc: Document): void {
   const state = documentModalityState(doc);
-  state.scoped += 1;
-  syncDocumentFocusTrapEscape(doc, state);
+  if (state.overlays === 0) {
+    const baseline = new Map<Element, string | null>();
+    for (const child of Array.from(doc.body.children)) {
+      baseline.set(child, child.getAttribute('aria-hidden'));
+    }
+    state.ariaHiddenBaseline = baseline;
+  }
+  state.overlays += 1;
 }
 
-function releaseDocumentModality(doc: Document): void {
+/** Release one overlay counted by `hellRetainDialogOverlay`. */
+export function hellReleaseDialogOverlay(doc: Document): void {
   const state = documentModalityStates.get(doc);
-  if (!state || state.scoped === 0) return;
+  if (!state || state.overlays === 0) return;
 
-  state.scoped -= 1;
-  syncDocumentFocusTrapEscape(doc, state);
+  state.overlays -= 1;
+  if (state.overlays === 0) state.ariaHiddenBaseline = null;
 }
 
 /**
  * Count an open dialog that blocks the whole page — one without `scoped`, or a
  * `scoped` one that found no scope root.
  *
- * The focus-trap escape marker is document-wide, so it releases every trap in
- * the document, not only the scoped dialog's. That is the right trade only
- * while every open dialog is scoped: a page-modal dialog does mean to block
- * the surrounding shell, so while one is open the marker comes off and the
- * delegated trap does its job again. Reference counted, so a page-modal dialog
- * opened from inside a scoped one restores the marker when it closes.
+ * Both the focus-trap escape marker and the `aria-hidden` replay are
+ * document-wide, so they are only right while every open dialog is scoped. A
+ * page-blocking dialog means to block the surrounding shell, so while one is
+ * open the marker comes off, the delegated trap does its job again, and the
+ * shell stays hidden from assistive technology.
  */
 export function hellRetainDialogPageModality(doc: Document): void {
   const state = documentModalityState(doc);
   state.pageModal += 1;
-  syncDocumentFocusTrapEscape(doc, state);
+  syncDocumentModality(doc, state);
 }
 
 /** Release one page-blocking dialog counted by `hellRetainDialogPageModality`. */
@@ -265,25 +274,41 @@ export function hellReleaseDialogPageModality(doc: Document): void {
   if (!state || state.pageModal === 0) return;
 
   state.pageModal -= 1;
-  syncDocumentFocusTrapEscape(doc, state);
+  syncDocumentModality(doc, state);
 }
 
-function syncDocumentFocusTrapEscape(
-  doc: Document,
-  state: HellDialogDocumentModalityState,
-): void {
-  const wanted = state.scoped > 0 && state.pageModal === 0;
-  if (wanted === state.marked) return;
+/**
+ * Re-derive both document-wide decisions from the current counts. Every
+ * transition runs this, in either direction, so no open/close order can leave
+ * the shell blocked from assistive technology while only scoped dialogs remain
+ * — the manager restores its own map only when its last dialog closes, and a
+ * scoped dialog outliving a page-blocking one is exactly that case.
+ */
+function syncDocumentModality(doc: Document, state: HellDialogDocumentModalityState): void {
+  const scopedOnly = state.scoped > 0 && state.pageModal === 0;
 
-  if (wanted) {
-    state.focusTrapEscape = doc.body.getAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
-    doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, '');
-  } else if (state.focusTrapEscape === null) {
-    doc.body.removeAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
-  } else {
-    doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, state.focusTrapEscape);
+  if (scopedOnly !== state.marked) {
+    if (scopedOnly) {
+      state.focusTrapEscape = doc.body.getAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
+      doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, '');
+    } else if (state.focusTrapEscape === null) {
+      doc.body.removeAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
+    } else {
+      doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, state.focusTrapEscape);
+    }
+    state.marked = scopedOnly;
   }
-  state.marked = wanted;
+
+  if (!scopedOnly) return;
+
+  // Opening runs this from the portal attach, which is still before the
+  // manager's pass; closing runs it after. Replaying now and again at the end
+  // of the current task covers both, and the replay only touches values the
+  // machinery added, so the second pass is a no-op when the first sufficed.
+  replayDialogAriaHidden(state);
+  queueMicrotask(() => {
+    if (state.scoped > 0 && state.pageModal === 0) replayDialogAriaHidden(state);
+  });
 }
 
 export function hellFindDialogScopeRoot(trigger: HTMLElement): HTMLElement | null {

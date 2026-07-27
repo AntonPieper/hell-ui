@@ -178,24 +178,36 @@ in `packages/angular/dialog/dialog-scope.ts`:
 - the scope root's own scroll is locked, with the scrollbar width paid back as
   trailing padding so the blocked content does not reflow;
 - the manager's page-wide `aria-hidden` pass is replayed from a baseline the
-  trigger captures immediately before `open()`, so only values that pass added
-  are undone;
+  first overlay in the document captures before that pass runs, so only values
+  the machinery added are undone and a value the page owned beforehand is left
+  alone;
 - the owner document body is marked with ng-primitives' own `[data-focus-trap]`
   escape hatch, which `NgpFocusTrap.isAllowedExternalTarget` documents as
   "belongs to another focus trap … an intentional escape hatch", so the shell
   can really hold focus. The dialog panel's Tab cycle is unchanged, so keyboard
   focus still never walks into the blocked region.
 
-That marker is document-wide: `isAllowedExternalTarget` is
-`target.closest('[data-focus-trap]')`, so a marker on `body` makes the
-predicate universally true and releases **every** trap in the document, not
-just the scoped dialog's. That is only the right trade while every open dialog
-is scoped. A dialog that blocks the whole page — one without `scoped`, a
-`scoped` one that found no scope root, or `hell-ui/confirm` stacked on top of a
-scoped dialog — means to block the shell, so `HellDialogOverlay` reference
-counts those separately and the marker comes off for as long as one is open.
-Marking a narrower subtree does not solve this: the shell sits inside whatever
-ancestor could be marked.
+Both the marker and the replay are document-wide, not dialog-scoped.
+`isAllowedExternalTarget` is `target.closest('[data-focus-trap]')`, so a marker
+on `body` makes the predicate universally true and releases **every**
+`ngpFocusTrap` in the document — not just the scoped dialog's, and not just
+dialogs: a `HellPopover` with the default `trapFocus` true loses its
+pull-back too (see Constraints). The replay is equally global: it edits
+`aria-hidden` on body children the whole page shares.
+
+Both are therefore gated on the same condition — every open dialog is scoped —
+and both are re-derived on every transition of the counts, in either direction.
+A dialog that blocks the whole page (one without `scoped`, a `scoped` one that
+found no scope root, or `hell-ui/confirm` opened over a scoped dialog) means to
+block the shell, so `HellDialogOverlay` reference counts those separately; the
+marker comes off and the shell stays hidden for as long as one is open, and
+both come back the moment the last one closes. Re-deriving on close is not
+optional bookkeeping: the manager restores its own `aria-hidden` map only when
+its **last** dialog closes, so a page-blocking dialog closing under a surviving
+scoped dialog restores nothing, and only this replay frees the shell.
+
+Marking a narrower subtree than `body` does not avoid the breadth: the shell
+sits inside whatever ancestor could be marked.
 
 All of it is reference counted, so simultaneous scoped dialogs engage once and
 the last release restores the exact prior values. A dialog without `scoped`, or
@@ -228,6 +240,26 @@ Constraints:
   refocused. It must never extend to a dialog that does block the page — that
   is what the page-modal reference count is for, and
   `e2e/ui-behavior.spec.ts` pins it by measuring where focus actually lands.
+- The weakening is not dialog-only, and naming it that way would understate it.
+  `isAllowedExternalTarget` matches `closest('[data-focus-trap]')`, so while
+  the marker is on the body **every** `ngpFocusTrap` in the document stops
+  pulling focus back — including a `HellPopover` opened with the default
+  `trapFocus` true, whose panel would otherwise reclaim focus that moved out of
+  it. Such a popover keeps its Tab wrap (that is an element-level `keydown`
+  handler, not the document listeners) and its own dismissal, so it stays
+  usable; what it loses is the safety net that re-focuses the panel when focus
+  lands outside. That is consistent with scoped modality's premise — the
+  surrounding shell is deliberately live — but it is a real reduction for a
+  modal popover, and it is the strongest reason to keep the marker's window as
+  narrow as it is.
+- The `aria-hidden` replay is document-wide for the same reason and gets the
+  same treatment: it is re-derived on every transition of the counts, in either
+  direction, so no open/close order can leave the shell hidden from assistive
+  technology while only scoped dialogs remain. The baseline it replays is
+  captured once per document by the first overlay, before the manager's pass,
+  so it always answers "what did the machinery change?" rather than "what did
+  this open change?" — the per-open form silently skipped a value an
+  already-open page-blocking dialog had set.
 
 ## Consequences
 

@@ -383,6 +383,60 @@ test.describe('Hell UI browser behavior', () => {
     await expectFocused(page, trigger, 'scoped dialog trigger restore inside the released scope');
   });
 
+  test('a scoped dialog left open by a closing page-modal one frees the shell', async ({ page }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+    const anyPageHidden = () =>
+      page.evaluate(() =>
+        [...document.body.children].some((child) => child.getAttribute('aria-hidden') === 'true'),
+      );
+
+    // The reverse of the stacked case: the page-modal dialog opens first, so it
+    // is the one whose open ran the manager's page-wide assistive-technology
+    // pass, and the manager restores that pass only when its last dialog goes.
+    await page.locator('app-dialog-basic-example').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'Publish article' }).click();
+    const pageModal = page.getByRole('dialog', { name: 'Publish this article?' });
+    await expect(pageModal).toBeVisible();
+    expect(await anyPageHidden()).toBe(true);
+
+    // Opening the scoped dialog underneath is a programmatic activation: the
+    // page-modal dialog is blocking the page, which is the point.
+    await example.evaluate((host) => {
+      const trigger = [...host.querySelectorAll<HTMLElement>('button')].find(
+        (button) => button.textContent?.trim() === 'Approve invoice',
+      );
+      trigger?.click();
+    });
+    const scoped = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+    await expect(scoped).toBeVisible();
+    await expect(content).toHaveAttribute('inert', '');
+    // While the page-modal dialog is open it still blocks everything.
+    expect(await anyPageHidden()).toBe(true);
+    await expectShellFocusIsContained(page, true, 'page-modal dialog open over a scoped one');
+
+    await pageModal.getByRole('button', { name: 'Cancel' }).click();
+    await expect(pageModal).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(scoped).toBeVisible();
+
+    // Only the scoped dialog is left, so the shell has to be reachable again —
+    // by assistive technology as well as by focus.
+    await expect.poll(anyPageHidden, {
+      message: 'a remaining scoped dialog must not leave the page aria-hidden',
+      timeout: SETTLE_TIMEOUT,
+    }).toBe(false);
+    await expect(content).toHaveAttribute('inert', '');
+    await expectShellFocusIsContained(page, false, 'scoped dialog left alone by the page-modal one');
+
+    await page.keyboard.press('Escape');
+    await expect(scoped).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(content).not.toHaveAttribute('inert', '');
+    expect(await anyPageHidden()).toBe(false);
+  });
+
   test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
     await page.goto('/components/dialpad');
 
