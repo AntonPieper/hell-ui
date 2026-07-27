@@ -206,6 +206,17 @@ const architectureCheckManifest = [
     run: checkNgpStateWriterContract,
   },
   {
+    // Scoped dialog modality (docs/adr/floating-dismissal.md, #359) reaches for
+    // one ng-primitives DOM marker because the dialog primitive exposes no
+    // focus-trap or aria-hidden configuration. Like the state-writer seam, the
+    // reliance is version-bound, so it stays in one file and the recorded
+    // version must match the installed package.
+    name: 'dialog-scoped-modality-seam',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkDialogScopedModalitySeam,
+  },
+  {
     // One Control Value Authority (docs/adr/0001-control-value-authority.md,
     // #277): a control class implements exactly one Angular forms contract
     // family. Angular's migration guidance forbids implementing both a
@@ -1898,6 +1909,41 @@ function checkNgpStateWriterContract() {
     if (usesStateWriter) {
       failures.push(`ng-primitives state writer usage is not approved in ${rel}`);
     }
+  }
+}
+
+// Scoped dialog modality seam (docs/adr/floating-dismissal.md, #359).
+// `NgpDialog` applies its focus trap as a host directive with no exposed input
+// and hides page content from assistive technology unconditionally, so the
+// scoped dialog owns those two decisions by writing ng-primitives' own
+// focus-trap escape marker. That reliance is version-bound: keep it in one
+// file, and keep the recorded version matching the installed package.
+function checkDialogScopedModalitySeam() {
+  const seamRelPath = 'packages/angular/dialog/dialog-scope.ts';
+  const seamSource = readFile(join(root, seamRelPath));
+  const ngpPackage = parseJsonWithComments(
+    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
+  );
+  const expectedVersion = `ng-primitives@${ngpPackage.version}`;
+
+  if (!seamSource.includes(`HELL_DIALOG_SCOPED_MODALITY_VERSION = '${expectedVersion}'`)) {
+    failures.push(
+      `scoped dialog modality seam version must match installed ${expectedVersion}; recheck the ng-primitives focus-trap escape marker before moving the pin`,
+    );
+  }
+
+  // Specs read the marker to assert the rendered contract; production sources
+  // must not, so only one module can ever write it.
+  const marker = "'data-focus-trap'";
+  const productionSources = walk(join(root, libraryRoot)).filter(
+    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'),
+  );
+  for (const path of productionSources) {
+    const rel = relative(root, path);
+    if (rel === seamRelPath || !readFile(path).includes(marker)) continue;
+    failures.push(
+      `ng-primitives focus-trap escape marker is only owned by ${seamRelPath}; found in ${rel}`,
+    );
   }
 }
 

@@ -53,7 +53,7 @@ import { PageHeader } from '../../../shared/page-header';
             <td><a routerLink="/components/dialog">Dialog</a></td>
             <td>Click / imperative</td>
             <td>Yes</td>
-            <td>Modal (page-blocking)</td>
+            <td>Modal (page-blocking) / one region with <code>scoped</code></td>
             <td>Escape, backdrop, explicit close</td>
           </tr>
           <tr>
@@ -104,8 +104,15 @@ import { PageHeader } from '../../../shared/page-header';
         until the user resolves it. Use it for deliberate decisions and self-contained tasks —
         delete a record, edit a row, resolve a conflict. For the common yes/no confirmation, prefer
         the <a routerLink="/components/confirm">confirm service</a> rather than hand-building a
-        dialog each time; an optional scoped mode blocks one content region while the app shell
-        stays live.
+        dialog each time.
+      </p>
+      <p>
+        An optional <code>scoped</code> mode narrows that modality to one content region: the
+        region becomes <code>inert</code> and stops scrolling, while the app shell around it keeps
+        focus, pointer input, and its place in the accessibility tree, and shell popovers layer
+        over the dialog. Reach for it when a task blocks one workspace but must not block global
+        navigation — and not when the surrounding chrome could undo the decision the dialog asks
+        for.
       </p>
 
       <h2>Menu, select, and combobox dropdowns</h2>

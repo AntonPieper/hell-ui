@@ -231,6 +231,115 @@ test.describe('Hell UI browser behavior', () => {
     });
   });
 
+  test('scoped dialog modality blocks the content region and spares the app shell', async ({
+    page,
+  }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+    const trigger = example.getByRole('button', { name: 'Approve invoice' });
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+
+    const dialog = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+    await expect(dialog).toBeVisible();
+    await finishAnimations(dialog);
+
+    // Only the Dialog Scope root is blocked, and nothing outside it is hidden
+    // from assistive technology while it still holds focusable controls.
+    await expect(content).toHaveAttribute('inert', '');
+    expect(
+      await page.evaluate(() =>
+        [...document.body.children].some((child) => child.getAttribute('aria-hidden') === 'true'),
+      ),
+    ).toBe(false);
+    expect(
+      await content.evaluate((element) => {
+        const button = element.querySelector('button');
+        button?.focus();
+        return document.activeElement === button;
+      }),
+    ).toBe(false);
+
+    // The shell keeps working: a sidenav press activates and keeps focus
+    // outside the dialog rather than being pulled back into it.
+    const projects = example.locator('[hellAppSidenav] button', { hasText: 'Projects' });
+    await projects.click();
+    await expect(content.locator('strong')).toHaveText('Projects');
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null),
+        { message: 'shell activation must not pull focus back into the scoped dialog' },
+      )
+      .toBe(false);
+    await expect(dialog).toBeVisible();
+
+    // A shell overlay opens over the dialog region and dismisses on its own,
+    // one layer at a time.
+    const account = example.getByRole('button', { name: 'Account' });
+    await account.scrollIntoViewIfNeeded();
+    await account.click();
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    expect(
+      await page.evaluate(() => {
+        const overlay = document.querySelector('[hellDialogOverlay][data-scoped="true"]');
+        const panel = document.querySelector('[hellMenu][data-slot="root"]');
+        if (!overlay || !panel) return null;
+        const overlayRect = overlay.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        const overlaps =
+          panelRect.left < overlayRect.right &&
+          panelRect.right > overlayRect.left &&
+          panelRect.top < overlayRect.bottom &&
+          panelRect.bottom > overlayRect.top;
+        if (!overlaps) return 'no-overlap';
+        const shared = document.elementFromPoint(
+          panelRect.left + 8,
+          Math.min(panelRect.bottom, overlayRect.bottom) - 8,
+        );
+        return shared?.closest('[hellMenu]') ? 'menu-on-top' : 'overlay-on-top';
+      }),
+    ).toBe('menu-on-top');
+
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+
+    // A surface opened from inside the dialog nests the other way: it layers
+    // above the panel and Escape closes it before the dialog.
+    await dialog.getByRole('combobox', { name: 'Cost centre' }).click();
+    const listbox = page.getByRole('listbox');
+    await expect(listbox).toBeVisible();
+    expect(
+      await page.evaluate(() => {
+        const panel = document.querySelector('[hellDialog][data-slot="root"]');
+        const dropdown = document.querySelector('[hellSelectDropdown][data-slot="root"]');
+        if (!panel || !dropdown) return null;
+        const dropdownRect = dropdown.getBoundingClientRect();
+        const shared = document.elementFromPoint(
+          dropdownRect.left + 8,
+          dropdownRect.top + 8,
+        );
+        return shared?.closest('[hellSelectDropdown]') ? 'dropdown-on-top' : 'panel-on-top';
+      }),
+    ).toBe('dropdown-on-top');
+    await page.keyboard.press('Escape');
+    await expect(listbox).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+    await expect(content).toHaveAttribute('inert', '');
+
+    // Closing releases the blocked region before focus returns to a trigger
+    // that lived inside it.
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(content).not.toHaveAttribute('inert', '');
+    await expectFocused(page, trigger, 'scoped dialog trigger restore inside the released scope');
+  });
+
   test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
     await page.goto('/components/dialpad');
 

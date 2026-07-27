@@ -5,7 +5,11 @@ import { NgpDialogManager } from 'ng-primitives/dialog';
 
 import { type HellSize } from 'hell-ui/core';
 import { HELL_DIALOG_IMPORTS } from './dialog';
-import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
+import {
+  HELL_DIALOG_SCOPED_MODALITY_VERSION,
+  HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE,
+  HellDialogScopedOverlayAdapter,
+} from './dialog-scope';
 import { sortClasses } from '../spec-helpers';
 
 @Component({
@@ -36,6 +40,85 @@ import { sortClasses } from '../spec-helpers';
   `,
 })
 class ScopedDialogHost {}
+
+@Component({
+  imports: [...HELL_DIALOG_IMPORTS],
+  template: `
+    <section id="shared-scope" hellDialogScope>
+      <button id="open-first" type="button" [hellDialogTrigger]="first">Open first</button>
+      <button id="open-second" type="button" [hellDialogTrigger]="second">Open second</button>
+    </section>
+
+    <ng-template #first let-close="close">
+      <div id="first-overlay" hellDialogOverlay scoped>
+        <div hellDialog><button id="close-first" type="button" (click)="close()">Close</button></div>
+      </div>
+    </ng-template>
+
+    <ng-template #second let-close="close">
+      <div id="second-overlay" hellDialogOverlay scoped>
+        <div hellDialog>
+          <button id="close-second" type="button" (click)="close()">Close</button>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class SharedScopeDialogHost {}
+
+@Component({
+  imports: [...HELL_DIALOG_IMPORTS],
+  template: `
+    <section id="nesting-scope" hellDialogScope>
+      <button id="open-outer" type="button" [hellDialogTrigger]="outer">Open outer</button>
+    </section>
+
+    <ng-template #outer let-close="close">
+      <div id="outer-overlay" hellDialogOverlay scoped>
+        <div hellDialog>
+          <button id="open-inner" type="button" [hellDialogTrigger]="inner">Open inner</button>
+          <button id="close-outer" type="button" (click)="close()">Close outer</button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #inner let-close="close">
+      <div id="inner-overlay" hellDialogOverlay>
+        <div hellDialog>
+          <button id="close-inner" type="button" (click)="close()">Close inner</button>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class NestedDialogHost {}
+
+@Component({
+  imports: [...HELL_DIALOG_IMPORTS],
+  template: `
+    <section id="modality-scope" hellDialogScope>
+      <button id="open-scoped" type="button" [hellDialogTrigger]="scoped">Open scoped</button>
+    </section>
+    <button id="open-page-modal" type="button" [hellDialogTrigger]="pageModal">Open page modal</button>
+
+    <ng-template #scoped let-close="close">
+      <div id="modality-overlay" hellDialogOverlay scoped>
+        <div hellDialog>
+          <button id="close-scoped" type="button" (click)="close()">Close</button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #pageModal let-close="close">
+      <div id="page-modal-overlay" hellDialogOverlay>
+        <div hellDialog>
+          <button id="close-page-modal" type="button" (click)="close()">Close</button>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class ModalityDialogHost {}
 
 @Component({
   imports: [...HELL_DIALOG_IMPORTS],
@@ -219,6 +302,9 @@ describe('HellDialogTrigger scoped overlays', () => {
     await TestBed.configureTestingModule({
       imports: [
         ScopedDialogHost,
+        SharedScopeDialogHost,
+        NestedDialogHost,
+        ModalityDialogHost,
         DisabledDialogTriggerHost,
         EnabledDialogTriggerHost,
         ClosePolicyDialogHost,
@@ -320,6 +406,139 @@ describe('HellDialogTrigger scoped overlays', () => {
     expectVar(overlayA, '--hell-dialog-scope-left', '10px');
     expectVar(rootB, '--hell-dialog-scope-left', '40px');
     expectVar(overlayB, '--hell-dialog-scope-left', '40px');
+  });
+
+  it('blocks only the Dialog Scope root and leaves the rest of the page perceivable', async () => {
+    const fixture = TestBed.createComponent(ModalityDialogHost);
+    await settle(fixture);
+
+    const scope = query(fixture.nativeElement, '#modality-scope');
+    const appRoot = attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-scoped').click();
+    await settle(fixture);
+    await microtask();
+
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(scope.style.overflow).toBe('hidden');
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+    // The dialog manager hides every body child from assistive technology; a
+    // scoped dialog puts that back so the surrounding chrome it still hands
+    // focus to is not sitting behind an aria-hidden ancestor.
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+
+    query<HTMLButtonElement>(document.body, '#close-scoped').click();
+    await settleClose(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(scope.style.overflow).toBe('');
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+  });
+
+  it('keeps a scoped dialog blocked while a dialog opened from inside it comes and goes', async () => {
+    const fixture = TestBed.createComponent(NestedDialogHost);
+    await settle(fixture);
+    const appRoot = attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    const scope = query(fixture.nativeElement, '#nesting-scope');
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-outer').click();
+    await settle(fixture);
+    await microtask();
+
+    query<HTMLButtonElement>(document.body, '#open-inner').click();
+    await settle(fixture);
+    await microtask();
+
+    // The inner dialog's trigger is portaled outside the scope, so it opens a
+    // page-modal dialog; the outer scope stays blocked and the shell around it
+    // stays perceivable for as long as the scoped dialog is open.
+    expect(document.body.querySelector('#inner-overlay')).toBeTruthy();
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+
+    query<HTMLButtonElement>(document.body, '#close-inner').click();
+    await settleClose(fixture);
+
+    expect(document.body.querySelector('#inner-overlay')).toBeNull();
+    expect(document.body.querySelector('#outer-overlay')).toBeTruthy();
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+
+    query<HTMLButtonElement>(document.body, '#close-outer').click();
+    await settleClose(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+  });
+
+  it('names the ng-primitives release its focus-trap escape marker is written against', () => {
+    // The marker is a version-bound DOM seam. This records the pairing the
+    // tests above exercise; `tools/check-architecture.mjs` owns the exact match
+    // against the installed package.
+    expect(HELL_DIALOG_SCOPED_MODALITY_VERSION).toMatch(/^ng-primitives@\d+\.\d+\.\d+$/);
+  });
+
+  it('keeps page-wide modality for dialogs that are not scoped', async () => {
+    const fixture = TestBed.createComponent(ModalityDialogHost);
+    await settle(fixture);
+
+    const appRoot = attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-page-modal').click();
+    await settle(fixture);
+    await microtask();
+
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+    expect(query(fixture.nativeElement, '#modality-scope').hasAttribute('inert')).toBe(false);
+  });
+
+  it('reference counts scoped modality so one close does not unblock a shared scope', async () => {
+    const fixture = TestBed.createComponent(SharedScopeDialogHost);
+    await settle(fixture);
+
+    const scope = query(fixture.nativeElement, '#shared-scope');
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-first').click();
+    await settle(fixture);
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-second').click();
+    await settle(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(true);
+
+    query<HTMLButtonElement>(document.body, '#close-second').click();
+    await settleClose(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+
+    query<HTMLButtonElement>(document.body, '#close-first').click();
+    await settleClose(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+  });
+
+  it('restores focus to a scoped trigger that was inside the blocked region', async () => {
+    const fixture = TestBed.createComponent(ModalityDialogHost);
+    await settle(fixture);
+    attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#open-scoped');
+    trigger.focus();
+    trigger.click();
+    await settle(fixture);
+
+    query<HTMLButtonElement>(document.body, '#close-scoped').click();
+    await settle(fixture);
+    await animationFrame();
+    await settle(fixture);
+
+    expect(query(fixture.nativeElement, '#modality-scope').hasAttribute('inert')).toBe(false);
+    expect(document.activeElement).toBe(trigger);
   });
 
   it('emits dialog close result values that are independent from template data', async () => {
@@ -552,6 +771,39 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
 
 function animationFrame(): Promise<void> {
   return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+function microtask(): Promise<void> {
+  return new Promise((resolve) => queueMicrotask(() => resolve()));
+}
+
+/** Closing awaits the exit animation and the portal detach before teardown runs. */
+async function settleClose(fixture: {
+  detectChanges(): void;
+  whenStable(): Promise<unknown>;
+}): Promise<void> {
+  await settle(fixture);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await settle(fixture);
+}
+
+/**
+ * The body child the dialog manager's assistive-technology pass will hide —
+ * the stand-in for an application root around the fixture.
+ */
+function attachToBody(element: HTMLElement): HTMLElement {
+  if (!element.isConnected) {
+    const host = document.createElement('div');
+    host.append(element);
+    document.body.append(host);
+    return host;
+  }
+
+  let current = element;
+  while (current.parentElement && current.parentElement !== document.body) {
+    current = current.parentElement;
+  }
+  return current;
 }
 
 function query<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: string): T {

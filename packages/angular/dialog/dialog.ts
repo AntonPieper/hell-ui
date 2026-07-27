@@ -35,8 +35,11 @@ import {
   type HellRecipe,
 } from 'hell-ui/internal/core';
 import {
+  HELL_DIALOG_ARIA_HIDDEN_BASELINE,
   HELL_DIALOG_SCOPE_ROOT,
+  HellDialogScopedModality,
   HellDialogScopedOverlayAdapter,
+  hellCaptureDialogAriaHidden,
   hellFindDialogScopeRoot,
 } from './dialog-scope';
 
@@ -127,9 +130,17 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     if (this.disabled()) return;
 
     const root = hellFindDialogScopeRoot(this.element.nativeElement);
+    // Captured before the manager runs its page-wide assistive-technology pass,
+    // so a scoped overlay can put back exactly what that pass overwrote.
+    const ariaHiddenBaseline = hellCaptureDialogAriaHidden(
+      this.element.nativeElement.ownerDocument,
+    );
     const injector = Injector.create({
       parent: this.injector,
-      providers: [{ provide: HELL_DIALOG_SCOPE_ROOT, useValue: root }],
+      providers: [
+        { provide: HELL_DIALOG_SCOPE_ROOT, useValue: root },
+        { provide: HELL_DIALOG_ARIA_HIDDEN_BASELINE, useValue: ariaHiddenBaseline },
+      ],
     });
     const config = {
       injector,
@@ -187,14 +198,23 @@ export class HellDialogOverlay {
     recipe: () => HELL_DIALOG_OVERLAY_RECIPE,
   });
 
-  /** When true, overlay reads bounds from nearest dialog root captured by
-   *  opening trigger. If none exists, it falls back to viewport. */
+  /**
+   * When true, the overlay reads its bounds from the nearest Dialog Scope root
+   * captured by the opening trigger and blocks only that region: the scope is
+   * made inert and stops scrolling while the surrounding shell keeps focus,
+   * pointer input, and its place in the accessibility tree. If no scope root
+   * exists it falls back to the viewport and to page-wide modality.
+   */
   readonly scoped = input(false, { transform: booleanAttribute });
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly scopeRoot = inject(HELL_DIALOG_SCOPE_ROOT, { optional: true });
+  private readonly ariaHiddenBaseline = inject(HELL_DIALOG_ARIA_HIDDEN_BASELINE, {
+    optional: true,
+  });
   private readonly doc = inject(DOCUMENT);
   private adapter: HellDialogScopedOverlayAdapter | null = null;
+  private modality: HellDialogScopedModality | null = null;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -211,11 +231,21 @@ export class HellDialogOverlay {
     if (!root) return;
     this.adapter = new HellDialogScopedOverlayAdapter(root, this.element.nativeElement, this.doc);
     this.adapter.connect();
+    this.modality = new HellDialogScopedModality(
+      root,
+      this.doc,
+      this.ariaHiddenBaseline ?? new Map<Element, string | null>(),
+    );
+    this.modality.engage();
   }
 
   private disconnectScope(): void {
     this.adapter?.destroy();
     this.adapter = null;
+    // Released before the manager restores focus to the opener, which lives
+    // inside the scope and must be focusable again by then.
+    this.modality?.release();
+    this.modality = null;
   }
 }
 

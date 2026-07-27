@@ -108,6 +108,10 @@ The set of DOM targets that count as "inside" one floating interaction, even whe
 **Dialog Scope**
 The content region that a scoped dialog should cover while leaving surrounding app shell chrome interactive. Each Dialog Scope root owns independent scoped inset state; scoped dialog overlays receive copied vars from their owning root through an overlay Adapter so simultaneous scoped dialogs do not override each other.
 
+**Scoped Modality**
+The blocking contract of a scoped dialog: the Dialog Scope root is the whole blocked region — inert and scroll-locked — while everything outside it keeps focus, pointer input, and its place in the accessibility tree, and every surface the surrounding shell can open layers above the dialog. It is reference counted per scope root, so simultaneous scoped dialogs block once and the last close restores the exact prior state.
+_Avoid_: Page-wide `aria-hidden` for a scoped dialog, focus guard instead of `inert`, non-modal dialog.
+
 **Resize Behavior**
 The pointer, keyboard, sizing, and minimum-size rules shared by resizable panes and table column resizing, independent of the layout adapter that renders it.
 
