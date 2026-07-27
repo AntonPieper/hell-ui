@@ -460,6 +460,69 @@ describe('HellDialpad labels', () => {
       expect(fixture.componentInstance.values).toEqual(['132', '913']);
     });
 
+    it('appends after the host replaces the number under a placed caret', () => {
+      const fixture = TestBed.createComponent(ControlledDialpadHost);
+      fixture.componentInstance.value.set('5550137');
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement;
+      const input = numberInput(host);
+      placeCaret(input, 1);
+
+      // Replaying a number from a call log writes straight past the caret,
+      // and assigning the field a new string leaves the native caret at the
+      // end of it.
+      fixture.componentInstance.value.set('0800123456');
+      fixture.detectChanges();
+      expect(input.value).toBe('0800123456');
+      expect(caretOf(input)).toEqual([10, 10]);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 98);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.values).toEqual(['08001234562']);
+    });
+
+    it('keeps tabbing into the display from selecting the whole number', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      // Keyboard focus selects the field's contents and announces it through
+      // the same events a deliberate selection uses.
+      input.dispatchEvent(new Event('focus'));
+      input.setSelectionRange(0, 3);
+      input.dispatchEvent(new Event('select'));
+      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Tab' }));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 99);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1232');
+    });
+
+    it('replaces the range when the user selects it after tabbing in', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      input.dispatchEvent(new Event('focus'));
+      input.setSelectionRange(0, 3);
+      input.dispatchEvent(new Event('select'));
+
+      // Select-all in the already-focused field is a deliberate selection,
+      // and the key that starts it says so.
+      input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'a', ctrlKey: true }));
+      input.dispatchEvent(new Event('select'));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 101);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('9');
+    });
+
     it('appends when the display has never been given a caret', () => {
       const fixture = TestBed.createComponent(DialpadHost);
       const host = fixture.nativeElement;

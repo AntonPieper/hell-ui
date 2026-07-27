@@ -378,6 +378,20 @@ test.describe('Hell UI browser behavior', () => {
     await page.keyboard.press('5');
     await expect(display).toHaveValue('459');
     expect(await caret()).toEqual([2, 2]);
+
+    // Tabbing in selects the whole number the way any text field does, but a
+    // keypad key adds a digit rather than replacing all of it. The number
+    // input is the tab stop before the clear control.
+    await dialpad.getByRole('button', { name: 'Clear' }).focus();
+    await page.keyboard.press('Shift+Tab');
+    await expect(display).toBeFocused();
+    expect(await caret()).toEqual([0, 3]);
+
+    // The tabbed-in range is ignored, so the key lands on the caret the
+    // display already had rather than replacing all of "459".
+    await dialpad.getByRole('button', { name: 'Digit 8, TUV' }).click();
+    await expect(display).toHaveValue('4589');
+    expect(await caret()).toEqual([3, 3]);
   });
 
   test('dialpad keeps overlapping taps and still cancels a slide-off', async ({
