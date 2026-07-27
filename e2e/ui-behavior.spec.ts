@@ -275,6 +275,18 @@ test.describe('Hell UI browser behavior', () => {
     await page.mouse.up();
     await expect(display).toHaveValue('+');
 
+    // A single mouse press-and-release on a key enters exactly one digit, and
+    // native keyboard activation of a focused key still goes through click.
+    await display.focus();
+    await page.keyboard.press('Delete');
+    await five.click();
+    await expect(display).toHaveValue('5');
+    await five.focus();
+    await page.keyboard.press('Space');
+    await expect(display).toHaveValue('55');
+    await page.keyboard.press('Enter');
+    await expect(display).toHaveValue('555');
+
     await display.focus();
     await page.keyboard.press('Delete');
     await page.keyboard.press('3');
@@ -317,6 +329,84 @@ test.describe('Hell UI browser behavior', () => {
     await expect(statesDialpad).toHaveAttribute('aria-disabled', 'true');
     await expect(statesDisplay).toBeDisabled();
     await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
+  });
+
+  test('dialpad keeps overlapping taps and still cancels a slide-off', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Overlapping multi-touch dialing uses Chromium DevTools Protocol touch input.',
+    );
+
+    await page.goto('/components/dialpad');
+
+    const example = page.locator('app-dialpad-basic-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    const display = dialpad.getByRole('textbox', { name: 'Number' });
+    await dialpad.scrollIntoViewIfNeeded();
+
+    const keyCenter = async (name: string) => {
+      const box = await dialpad.getByRole('button', { name }).boundingBox();
+      if (!box) throw new Error(`Expected a bounding box for the "${name}" key.`);
+      return { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+    };
+    const one = await keyCenter('Digit 1');
+    const two = await keyCenter('Digit 2, ABC');
+
+    // A second finger landing before the first lifts makes the browser suppress
+    // the compatibility click for both pointers, so a click-only keypad loses
+    // the whole sequence.
+    const client = await page.context().newCDPSession(page);
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 51, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [
+        { id: 51, ...one },
+        { id: 52, ...two },
+      ],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchEnd',
+      touchPoints: [{ id: 51, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+    await expect(display).toHaveValue('12');
+
+    await display.focus();
+    await page.keyboard.press('Delete');
+    await expect(display).toHaveValue('');
+
+    // A non-scrollable dialer never gets the scroll-driven `pointercancel`
+    // that hides a missing release check: implicit pointer capture retargets
+    // the release to the pressed key however far the finger travelled.
+    await dialpad.evaluate((node: HTMLElement) => {
+      node.style.touchAction = 'none';
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 53, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ id: 53, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('');
+
+    // The same layout still commits a clean tap, so the slide-off above was
+    // cancelled rather than the whole sequence being dropped.
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 54, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('2');
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {

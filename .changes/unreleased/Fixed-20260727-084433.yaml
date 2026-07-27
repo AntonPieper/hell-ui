@@ -1,0 +1,6 @@
+kind: Fixed
+body: >-
+  Dialpad keys now register every tap during fast dialing, including
+  overlapping touches where a second finger lands before the first one lifts.
+  Those sequences previously entered no digits at all.
+time: 2026-07-27T08:44:33.575326+02:00
