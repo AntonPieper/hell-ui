@@ -1,0 +1,7 @@
+kind: Changed
+body: 'Dialpad keys, typing, and backspace now act on the caret in the number display:
+  place the caret inside the number and the next key press inserts there, backspace
+  deletes there, and a selected range is replaced. A display nobody has moved the
+  caret in keeps appending, so ordinary dialing is unchanged, as does one whose
+  `[value]` was just written from outside.'
+time: 2026-07-27T10:43:43.461085+02:00

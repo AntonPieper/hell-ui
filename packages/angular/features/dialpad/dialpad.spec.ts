@@ -1,6 +1,6 @@
 import { provideHellLabels } from 'hell-ui/core';
 import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import { HellDialpad, HELL_DIALPAD_LABELS, type HellDialpadUi } from './dialpad';
 import { expectUiRouting, sortClasses } from '../../spec-helpers';
@@ -65,6 +65,31 @@ class ControlledDialpadHost {
 }
 
 @Component({
+  selector: 'app-echoed-dialpad-host',
+  imports: [HellDialpad],
+  template: `<hell-dialpad [value]="value()" (valueChange)="value.set($event)" />`,
+})
+class EchoedDialpadHost {
+  readonly value = signal('13');
+}
+
+/** A controlled host that echoes every value it is given, a render late. */
+@Component({
+  selector: 'app-deferred-dialpad-host',
+  imports: [HellDialpad],
+  template: `<hell-dialpad [value]="value()" (valueChange)="queue.push($event)" />`,
+})
+class DeferredDialpadHost {
+  readonly value = signal('1234');
+  queue: string[] = [];
+
+  flushOne(): void {
+    const next = this.queue.shift();
+    if (next !== undefined) this.value.set(next);
+  }
+}
+
+@Component({
   selector: 'app-ui-dialpad-host',
   imports: [HellDialpad],
   template: `<hell-dialpad [ui]="ui" />`,
@@ -87,6 +112,8 @@ describe('HellDialpad labels', () => {
         StatedDialpadHost,
         LocalizedDialpadHost,
         ControlledDialpadHost,
+        EchoedDialpadHost,
+        DeferredDialpadHost,
         UiDialpadHost,
       ],
     }).compileComponents();
@@ -295,6 +322,447 @@ describe('HellDialpad labels', () => {
 
     expect(displayValue(host)).toBe('2+#');
     expect(fixture.componentInstance.values).toEqual(['2', '2+', '2+#']);
+  });
+
+  // The caret in the number input decides where an edit lands, so key taps,
+  // typing, and backspace all act relative to it instead of the end.
+  describe('caret-relative input', () => {
+    it('inserts a tapped key at the caret and advances the caret past it', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '13');
+      placeCaret(input, 1);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 90);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('123');
+      expect(caretOf(input)).toEqual([2, 2]);
+      expect(fixture.componentInstance.values).toEqual(['1', '13', '123']);
+    });
+
+    it('inserts a typed character at the caret in the number input', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '5551');
+      input.focus();
+      placeCaret(input, 3, 3, 'keyup');
+
+      dispatchKey(input, '0');
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('55501');
+      expect(caretOf(input)).toEqual([4, 4]);
+      expect(fixture.componentInstance.digits).toEqual(['5', '5', '5', '1', '0']);
+    });
+
+    it('backspaces the character before the caret rather than the last one', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      placeCaret(input, 2);
+
+      query<HTMLButtonElement>(host, '[data-slot="backspaceButton"]').click();
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('13');
+      expect(caretOf(input)).toEqual([1, 1]);
+    });
+
+    it('ignores backspace with the caret before the first character', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      placeCaret(input, 0, 0, 'keyup');
+
+      const backspace = dispatchKey(input, 'Backspace');
+      fixture.detectChanges();
+
+      expect(backspace.defaultPrevented).toBe(true);
+      expect(displayValue(host)).toBe('123');
+      expect(fixture.componentInstance.values).toEqual(['1', '12', '123']);
+    });
+
+    it('replaces a selected range with the pressed key', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '555');
+      placeCaret(input, 0, 2, 'select');
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 91);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('95');
+      expect(caretOf(input)).toEqual([1, 1]);
+      expect(fixture.componentInstance.digits).toEqual(['5', '5', '5', '9']);
+    });
+
+    it('deletes a selected range on backspace', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '1234');
+      placeCaret(input, 1, 3, 'select');
+
+      dispatchKey(input, 'Backspace');
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('14');
+      expect(caretOf(input)).toEqual([1, 1]);
+    });
+
+    it('keeps the caret in place while the sanitizing round trip rewrites the field', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '2#');
+      placeCaret(input, 1);
+      // Pasting "abc9" between "2" and "#" leaves only "9" behind.
+      input.value = '2abc9#';
+      input.setSelectionRange(5, 5);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('29#');
+      expect(caretOf(input)).toEqual([2, 2]);
+    });
+
+    it('restores the caret after a controlled value echoes an edit back', () => {
+      const fixture = TestBed.createComponent(EchoedDialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = numberInput(host);
+      expect(input.value).toBe('13');
+      placeCaret(input, 1);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 92);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.value()).toBe('123');
+      expect(input.value).toBe('123');
+      expect(caretOf(input)).toEqual([2, 2]);
+    });
+
+    it('adopts a caret placed in a number a controlled host held back', () => {
+      const fixture = TestBed.createComponent(ControlledDialpadHost);
+      fixture.componentInstance.value.set('13');
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement;
+      const input = numberInput(host);
+
+      // The host keeps its own number, so the display never shows the edit.
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 96);
+      fixture.detectChanges();
+      expect(input.value).toBe('13');
+
+      // The caret the user then places belongs to the number on display.
+      placeCaret(input, 0);
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 97);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.values).toEqual(['132', '913']);
+    });
+
+    it('appends after the host replaces the number under a placed caret', () => {
+      const fixture = TestBed.createComponent(ControlledDialpadHost);
+      fixture.componentInstance.value.set('5550137');
+      fixture.detectChanges();
+
+      const host = fixture.nativeElement;
+      const input = numberInput(host);
+      placeCaret(input, 1);
+
+      // Replaying a number from a call log writes straight past the caret,
+      // and assigning the field a new string leaves the native caret at the
+      // end of it.
+      fixture.componentInstance.value.set('0800123456');
+      fixture.detectChanges();
+      expect(input.value).toBe('0800123456');
+      expect(caretOf(input)).toEqual([10, 10]);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 98);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.values).toEqual(['08001234562']);
+    });
+
+    it('keeps tabbing into the display from selecting the whole number', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 99);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1232');
+    });
+
+    it('replaces the range when the user selects it after tabbing in', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // Select-all in the already-focused field is a deliberate selection,
+      // and the key that starts it says so.
+      input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'a', ctrlKey: true }));
+      input.dispatchEvent(new Event('select'));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 101);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('9');
+    });
+
+    it('still refuses a tabbed-in selection after a pointer was released out of reach', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      // A press in the display released where the field never sees it:
+      // dragged onto the keypad or the page, or taken for a scroll.
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      window.dispatchEvent(new Event('pointerup'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 102);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a rejected character is typed', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // A letter never reaches the field, so the selection outlives it just
+      // as it outlives a modifier.
+      dispatchKey(input, 'x');
+      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'x' }));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 111);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a bare modifier is pressed', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // A modifier on its own changes no selection, so the keyup that
+      // follows still reports the range the focus left behind.
+      input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Shift' }));
+      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Shift' }));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 103);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after AltGr and A', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // AltGr reports as `Ctrl`+`Alt` and its `key` falls back to `a`, but
+      // it selects nothing, so the focus range is still all that is there.
+      const altGrA = { bubbles: true, key: 'a', ctrlKey: true, altKey: true };
+      input.dispatchEvent(new KeyboardEvent('keydown', altGrA));
+      input.dispatchEvent(new KeyboardEvent('keyup', altGrA));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 112);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a touch became a scroll', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // A touch the browser takes for a scroll is never released; only a
+      // cancel reaches the page, and it does so through the window.
+      pointer(input, 'pointerdown', 113);
+      window.dispatchEvent(new Event('pointercancel'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 114);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('forgets a press in the display that no release ever reported', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // A release over a cross-origin frame reaches neither the display nor
+      // the window, so losing focus is the last chance to retire the press.
+      pointer(input, 'pointerdown', 119, { pointerType: 'mouse', button: 0 });
+      input.dispatchEvent(new Event('focus'));
+      input.dispatchEvent(new Event('blur'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 120);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('ignores a right-click in the display that never reports a release', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // The context menu can swallow the release, so a right-click must not
+      // leave the display looking pressed.
+      pointer(input, 'pointerdown', 117, { pointerType: 'mouse', button: 2 });
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 118);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('ignores a key slide-off that is released over the display', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // Press a key, slide onto the unfocused display, and release there.
+      pointer(query<HTMLButtonElement>(host, '[data-key="5"]'), 'pointerdown', 104);
+      input.setSelectionRange(0, 0);
+      pointer(input, 'pointerup', 104);
+      fixture.detectChanges();
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 105);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('keeps the caret while a controlled host echoes each value a render late', () => {
+      const fixture = TestBed.createComponent(DeferredDialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = numberInput(host);
+      placeCaret(input, 2);
+
+      // Two taps land before the host has echoed either of them, so the
+      // second is built from the number still on display.
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 106);
+      fixture.detectChanges();
+      tap(query<HTMLButtonElement>(host, '[data-key="8"]'), 107);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.queue).toEqual(['12734', '12384']);
+
+      // The host now renders the first while the second is still in flight.
+      // That number came from the dialpad, so the caret is not discarded as
+      // an outside write; it follows the edit the display is actually
+      // showing, which puts it after the `7`.
+      fixture.componentInstance.flushOne();
+      fixture.detectChanges();
+      expect(input.value).toBe('12734');
+      expect(caretOf(input)).toEqual([3, 3]);
+
+      // Restoring that caret makes the field fire `select` a task later in
+      // every engine. Delivering it must change nothing.
+      input.dispatchEvent(new Event('select'));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 108);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.queue).toEqual(['12384', '127934']);
+    });
+
+    it('tracks the caret of an edit that lands after a range was selected', () => {
+      const fixture = TestBed.createComponent(DeferredDialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = numberInput(host);
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 109);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.queue).toEqual(['12347']);
+
+      // A range is selected while that edit is still held back.
+      placeCaret(input, 0, 2, 'select');
+
+      // The edit then lands, which puts the caret at its own position. The
+      // tracked caret has to follow, or the next tap replaces a range that
+      // belongs to a number the display no longer shows.
+      fixture.componentInstance.flushOne();
+      fixture.detectChanges();
+      expect(input.value).toBe('12347');
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 110);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.queue).toEqual(['123479']);
+    });
+
+    it('appends when the display has never been given a caret', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 93);
+      tap(query<HTMLButtonElement>(host, '[data-key="8"]'), 94);
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 95);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('789');
+      expect(caretOf(numberInput(host))).toEqual([3, 3]);
+    });
   });
 
   it('enters plus from a pointer hold on zero without a separate plus key', () => {
@@ -659,6 +1127,58 @@ function numberInput(root: HTMLElement): HTMLInputElement {
 
 function displayValue(root: HTMLElement): string {
   return numberInput(root).value;
+}
+
+function caretOf(input: HTMLInputElement): [number | null, number | null] {
+  return [input.selectionStart, input.selectionEnd];
+}
+
+/**
+ * Places the caret the way a user would. jsdom moves no caret of its own, so
+ * the range is set directly and paired with the event a browser fires for
+ * that gesture: `pointerup` for a click, `keyup` for arrow keys, and `select`
+ * for a drag or select-all.
+ */
+function placeCaret(
+  input: HTMLInputElement,
+  start: number,
+  end: number = start,
+  via: 'pointerup' | 'keyup' | 'select' = 'pointerup',
+): void {
+  // A pointer gesture starts in the field it ends in; the dialpad ignores a
+  // release from a pointer that went down somewhere else.
+  if (via === 'pointerup') input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+  input.setSelectionRange(start, end);
+  input.dispatchEvent(new Event(via, { bubbles: via !== 'select' }));
+}
+
+/**
+ * Focuses the display the way the keyboard does. The browser selects the
+ * whole field, and engines disagree over whether that has happened by the
+ * time `focus` runs, so the range is announced after it.
+ */
+function tabInto(input: HTMLInputElement, length: number): void {
+  input.dispatchEvent(new Event('focus'));
+  input.setSelectionRange(0, length);
+  input.dispatchEvent(new Event('select'));
+  input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Tab' }));
+}
+
+/** Types a starting number through the host keyboard path. */
+function seedNumber(
+  fixture: ComponentFixture<{ readonly values: string[] }>,
+  number: string,
+): HTMLInputElement {
+  const host = fixture.nativeElement as HTMLElement;
+  const dialpad = query(host, 'hell-dialpad');
+  for (const character of number) dispatchKey(dialpad, character);
+  fixture.detectChanges();
+
+  const input = numberInput(host);
+  if (input.value !== number) {
+    throw new Error(`Expected the display to read ${number}, got ${input.value}.`);
+  }
+  return input;
 }
 
 function pointer(
