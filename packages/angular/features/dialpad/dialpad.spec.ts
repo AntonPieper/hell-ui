@@ -73,6 +73,22 @@ class EchoedDialpadHost {
   readonly value = signal('13');
 }
 
+/** A controlled host that echoes every value it is given, a render late. */
+@Component({
+  selector: 'app-deferred-dialpad-host',
+  imports: [HellDialpad],
+  template: `<hell-dialpad [value]="value()" (valueChange)="queue.push($event)" />`,
+})
+class DeferredDialpadHost {
+  readonly value = signal('1234');
+  queue: string[] = [];
+
+  flushOne(): void {
+    const next = this.queue.shift();
+    if (next !== undefined) this.value.set(next);
+  }
+}
+
 @Component({
   selector: 'app-ui-dialpad-host',
   imports: [HellDialpad],
@@ -97,6 +113,7 @@ describe('HellDialpad labels', () => {
         LocalizedDialpadHost,
         ControlledDialpadHost,
         EchoedDialpadHost,
+        DeferredDialpadHost,
         UiDialpadHost,
       ],
     }).compileComponents();
@@ -489,12 +506,7 @@ describe('HellDialpad labels', () => {
       fixture.detectChanges();
 
       const input = seedNumber(fixture, '123');
-      // Keyboard focus selects the field's contents and announces it through
-      // the same events a deliberate selection uses.
-      input.dispatchEvent(new Event('focus'));
-      input.setSelectionRange(0, 3);
-      input.dispatchEvent(new Event('select'));
-      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Tab' }));
+      tabInto(input, 3);
 
       tap(query<HTMLButtonElement>(host, '[data-key="2"]'), 99);
       fixture.detectChanges();
@@ -508,9 +520,7 @@ describe('HellDialpad labels', () => {
       fixture.detectChanges();
 
       const input = seedNumber(fixture, '123');
-      input.dispatchEvent(new Event('focus'));
-      input.setSelectionRange(0, 3);
-      input.dispatchEvent(new Event('select'));
+      tabInto(input, 3);
 
       // Select-all in the already-focused field is a deliberate selection,
       // and the key that starts it says so.
@@ -521,6 +531,136 @@ describe('HellDialpad labels', () => {
       fixture.detectChanges();
 
       expect(displayValue(host)).toBe('9');
+    });
+
+    it('still refuses a tabbed-in selection after a pointer was released out of reach', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      // A press in the display released where the field never sees it:
+      // dragged onto the keypad or the page, or taken for a scroll.
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      window.dispatchEvent(new Event('pointerup'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 102);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a rejected character is typed', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // A letter never reaches the field, so the selection outlives it just
+      // as it outlives a modifier.
+      dispatchKey(input, 'x');
+      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'x' }));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 111);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a bare modifier is pressed', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // A modifier on its own changes no selection, so the keyup that
+      // follows still reports the range the focus left behind.
+      input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Shift' }));
+      input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Shift' }));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 103);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('ignores a key slide-off that is released over the display', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // Press a key, slide onto the unfocused display, and release there.
+      pointer(query<HTMLButtonElement>(host, '[data-key="5"]'), 'pointerdown', 104);
+      input.setSelectionRange(0, 0);
+      pointer(input, 'pointerup', 104);
+      fixture.detectChanges();
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 105);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('keeps the caret while a controlled host echoes each value a render late', () => {
+      const fixture = TestBed.createComponent(DeferredDialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = numberInput(host);
+      placeCaret(input, 2);
+
+      // Two taps land before the host has echoed either of them, so the
+      // second is built from the number still on display.
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 106);
+      fixture.detectChanges();
+      tap(query<HTMLButtonElement>(host, '[data-key="8"]'), 107);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.queue).toEqual(['12734', '12384']);
+
+      // The host now renders the first while the second is still in flight.
+      // That number came from the dialpad, so the caret survives it.
+      fixture.componentInstance.flushOne();
+      fixture.detectChanges();
+      expect(input.value).toBe('12734');
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 108);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.queue).toEqual(['12384', '127394']);
+    });
+
+    it('tracks the caret of an edit that lands after a range was selected', () => {
+      const fixture = TestBed.createComponent(DeferredDialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = numberInput(host);
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 109);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.queue).toEqual(['12347']);
+
+      // A range is selected while that edit is still held back.
+      placeCaret(input, 0, 2, 'select');
+
+      // The edit then lands, which puts the caret at its own position. The
+      // tracked caret has to follow, or the next tap replaces a range that
+      // belongs to a number the display no longer shows.
+      fixture.componentInstance.flushOne();
+      fixture.detectChanges();
+      expect(input.value).toBe('12347');
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 110);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.queue).toEqual(['123479']);
     });
 
     it('appends when the display has never been given a caret', () => {
@@ -918,8 +1058,23 @@ function placeCaret(
   end: number = start,
   via: 'pointerup' | 'keyup' | 'select' = 'pointerup',
 ): void {
+  // A pointer gesture starts in the field it ends in; the dialpad ignores a
+  // release from a pointer that went down somewhere else.
+  if (via === 'pointerup') input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
   input.setSelectionRange(start, end);
   input.dispatchEvent(new Event(via, { bubbles: via !== 'select' }));
+}
+
+/**
+ * Focuses the display the way the keyboard does. The browser selects the
+ * whole field, and engines disagree over whether that has happened by the
+ * time `focus` runs, so the range is announced after it.
+ */
+function tabInto(input: HTMLInputElement, length: number): void {
+  input.dispatchEvent(new Event('focus'));
+  input.setSelectionRange(0, length);
+  input.dispatchEvent(new Event('select'));
+  input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Tab' }));
 }
 
 /** Types a starting number through the host keyboard path. */

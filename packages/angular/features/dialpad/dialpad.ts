@@ -59,6 +59,12 @@ interface HellDialpadEdit {
   readonly caret: number;
 }
 
+/**
+ * How many published-but-unrendered edits are remembered before the oldest is
+ * dropped. A host that has rendered none of this many is not echoing at all.
+ */
+const HELL_DIALPAD_PENDING_EDIT_LIMIT = 32;
+
 /** A caret position or selected range inside the number input. */
 interface HellDialpadSelection {
   readonly start: number;
@@ -179,9 +185,10 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-invalid]="invalid() ? '' : null"
         (beforeinput)="onBeforeInput($event)"
         (input)="onNumberInput($event)"
-        (pointerdown)="onNumberPointerDown()"
+        (pointerdown)="onNumberPointerDown($event)"
+        (pointercancel)="onNumberPointerCancel()"
         (focus)="onNumberFocus()"
-        (keydown)="onNumberKeyDown()"
+        (keydown)="onNumberKeyDown($event)"
         (pointerup)="onNumberSelect($event)"
         (keyup)="onNumberSelect($event)"
         (select)="onNumberSelect($event)"
@@ -349,11 +356,12 @@ export class HellDialpad {
   private stopWatchingPointerRelease: (() => void) | null = null;
   private readonly numberInputRef = viewChild<ElementRef<HTMLInputElement>>('numberInput');
   /**
-   * The most recent dialpad-owned edit, kept until the number it produced has
-   * rendered so the caret can be put back where the edit left it, and dropped
-   * as soon as it lands or a write from outside supersedes it.
+   * Every edit published since the display last rendered, oldest first. A
+   * controlled host that echoes asynchronously can render an earlier one of
+   * them while a later one is still in flight, so recognising a rendered
+   * number takes the whole set rather than only the newest edit.
    */
-  private pendingEdit: HellDialpadEdit | null = null;
+  private readonly pendingEdits: HellDialpadEdit[] = [];
   /**
    * The number the display last rendered. A displayed number that changed
    * into something no pending edit asked for came from outside the dialpad.
@@ -368,15 +376,19 @@ export class HellDialpad {
    */
   private caret: HellDialpadSelection | null = null;
   /**
-   * Whether the range now in the field was put there by focusing it rather
-   * than by the user selecting anything. Browsers select a text field's whole
-   * contents when focus arrives from the keyboard, and Chromium and Firefox
-   * announce that through the same `select` event a deliberate select-all
-   * uses, so the two are told apart by what led to the focus.
+   * The whole-field range a keyboard focus put in the display, once the field
+   * has reported it. Browsers select a text field's contents when focus
+   * arrives from the keyboard, and engines disagree about both when that
+   * happens and which event announces it, so the range itself is remembered
+   * and refused for as long as the field keeps reporting exactly it.
    */
-  private focusSelection = false;
+  private focusRange: HellDialpadSelection | null = null;
+  /** Whether a keyboard focus is still waiting for its range to be reported. */
+  private awaitingFocusRange = false;
   /** Whether a pointer went down inside the number input and is still down. */
   private pointerInInput = false;
+  /** Stops the window-level watch for a release the number input cannot see. */
+  private stopWatchingInputPointer: (() => void) | null = null;
   /** Template alias for the call-button visibility signal. */
   protected readonly showCallButtonState = this.showCallButton;
 
@@ -393,16 +405,23 @@ export class HellDialpad {
       const input = this.numberInputRef()?.nativeElement;
       if (!input || input.value !== value) return;
 
-      const edit = this.pendingEdit;
-      if (edit && edit.value === value) {
+      const index = this.pendingEdits.findIndex((pending) => pending.value === value);
+      if (index !== -1) {
+        const edit = this.pendingEdits[index];
         input.setSelectionRange(edit.caret, edit.caret);
-        this.pendingEdit = null;
+        // This edit and everything older than it have now been seen.
+        this.pendingEdits.splice(0, index + 1);
+        // With nothing newer still in flight this edit is the current state,
+        // so the tracked caret is brought back in line with the field rather
+        // than left to the `select` event `setSelectionRange` happens to
+        // fire. A newer edit already owns the tracked caret, so leave it.
+        if (this.pendingEdits.length === 0) this.caret = { start: edit.caret, end: edit.caret };
       } else if (value !== this.lastRendered) {
         // Nobody asked for this number, so it came from outside the dialpad.
         // Whatever caret was being tracked points into a number that is gone
         // while the native caret sits at the end, so the next edit appends.
         this.caret = null;
-        this.pendingEdit = null;
+        this.pendingEdits.length = 0;
       }
 
       this.lastRendered = value;
@@ -411,6 +430,7 @@ export class HellDialpad {
     this.destroyRef.onDestroy(() => {
       this.clearActiveTimer();
       this.releaseAllPointers();
+      this.releaseInputPointer();
     });
   }
 
@@ -600,30 +620,63 @@ export class HellDialpad {
    * dragging, or arrow-keying, so the next key press, typed character, or
    * backspace acts there.
    */
-  protected onNumberPointerDown(): void {
+  protected onNumberPointerDown(event: PointerEvent): void {
     this.pointerInInput = true;
-    // Whatever the field had selected, the user is now placing a new caret.
-    this.focusSelection = false;
+    // The release can land anywhere — on a key, on the page, or nowhere at
+    // all when a touch turns into a scroll — and a pointer left recorded as
+    // down would make the next keyboard focus look pointer-led.
+    this.watchInputPointerRelease(event);
+    // A pointer gesture is the user placing a caret or selecting a range, so
+    // nothing an earlier focus left behind is worth guarding any more.
+    this.disarmFocusRange();
+  }
+
+  /** The browser took the pointer for a scroll or zoom; it is not down here. */
+  protected onNumberPointerCancel(): void {
+    this.releaseInputPointer();
   }
 
   /**
-   * Remember whether this focus selected the number by itself. Keyboard focus
-   * does; pressing a pointer into the field does not.
+   * Arm the focus-range guard when focus did not arrive with a pointer.
+   * Engines disagree over whether the selection is already in place by the
+   * time this runs, so the range is captured from the first one the field
+   * reports rather than read here.
    */
   protected onNumberFocus(): void {
-    this.focusSelection = !this.pointerInInput;
-    this.pointerInInput = false;
+    this.awaitingFocusRange = !this.pointerInInput;
+    this.focusRange = null;
   }
 
-  /** A key pressed in an already-focused field ends the focus selection. */
-  protected onNumberKeyDown(): void {
-    this.focusSelection = false;
+  /**
+   * Retire the guard for a deliberate select-all, which is the one selection
+   * the user can make that reproduces the focus range exactly and so cannot
+   * be recognised from the range alone. Every other keyboard selection —
+   * `Shift` with an arrow, `Home`, or `End` — produces a different range and
+   * is adopted on its own merits.
+   *
+   * Nothing else retires it. A bare modifier or `Escape` changes no
+   * selection, and neither does a character the dialpad rejects, so the
+   * keyup that follows any of them would otherwise adopt the focus range. A
+   * character the dialpad accepts is handled on this same keydown and leaves
+   * a collapsed caret behind, which needs no exemption.
+   */
+  protected onNumberKeyDown(event: KeyboardEvent): void {
+    if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'a') return;
+    this.disarmFocusRange();
   }
 
   protected onNumberSelect(event: Event): void {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
-    if (event.type === 'pointerup') this.pointerInInput = false;
+
+    if (event.type === 'pointerup') {
+      // A pointer that went down on a key and slid onto the display is
+      // finishing that gesture rather than placing a caret. The display is
+      // not even focused, so what it reports is not the user's intent.
+      const startedInInput = this.pointerInInput;
+      this.releaseInputPointer();
+      if (!startedInInput) return;
+    }
 
     // An edit still on its way to the field would report the caret it had
     // before that edit, so only a field already showing the current number
@@ -635,14 +688,21 @@ export class HellDialpad {
     if (selectionStart === null || selectionEnd === null) return;
 
     // Tabbing into a text field selects its whole contents. Adopting that
-    // range would turn the next key press into a replacement of the whole
-    // number, but tapping a keypad key means "add a digit", so a display that
-    // was merely tabbed into keeps the caret the dialpad already had. The
-    // caret itself still moves, so arrow-keying from a tabbed-in field works.
-    // Typing replaces the focus selection either way, because the field does
-    // that on its own.
-    if (this.focusSelection && selectionStart !== selectionEnd) return;
+    // range would turn the next edit into a replacement of the whole number,
+    // but reaching the display with the keyboard is not asking for that, so
+    // the range a focus produced is refused for as long as the field keeps
+    // reporting exactly it. A range the user selected, and any caret at all,
+    // still count.
+    if (selectionStart !== selectionEnd) {
+      if (this.awaitingFocusRange) {
+        this.awaitingFocusRange = false;
+        this.focusRange = { start: selectionStart, end: selectionEnd };
+        return;
+      }
+      if (this.focusRange?.start === selectionStart && this.focusRange.end === selectionEnd) return;
+    }
 
+    this.disarmFocusRange();
     this.caret = { start: selectionStart, end: selectionEnd };
   }
 
@@ -723,8 +783,44 @@ export class HellDialpad {
   /** Record an edit's caret and publish the number it produced. */
   private commit(value: string, caret: number): void {
     this.caret = { start: caret, end: caret };
-    this.pendingEdit = { value, caret };
+    this.pendingEdits.push({ value, caret });
+    // A host that never renders anything it is given would otherwise grow
+    // this without bound; one that has ignored this many edits is not
+    // echoing at all.
+    if (this.pendingEdits.length > HELL_DIALPAD_PENDING_EDIT_LIMIT) this.pendingEdits.shift();
     this.setNumber(value);
+  }
+
+  /** Stop refusing the range a keyboard focus left in the display. */
+  private disarmFocusRange(): void {
+    this.awaitingFocusRange = false;
+    this.focusRange = null;
+  }
+
+  /**
+   * Watch the owning window so a pointer that went down in the number input
+   * is forgotten wherever it is released — over a key, over the page, or not
+   * at all when a touch becomes a scroll and only `pointercancel` arrives.
+   */
+  private watchInputPointerRelease(event: PointerEvent): void {
+    if (this.stopWatchingInputPointer) return;
+
+    const view = (event.target as HTMLElement | null)?.ownerDocument.defaultView;
+    if (!view) return;
+
+    const release = (): void => this.releaseInputPointer();
+    view.addEventListener('pointerup', release);
+    view.addEventListener('pointercancel', release);
+    this.stopWatchingInputPointer = () => {
+      view.removeEventListener('pointerup', release);
+      view.removeEventListener('pointercancel', release);
+    };
+  }
+
+  private releaseInputPointer(): void {
+    this.pointerInInput = false;
+    this.stopWatchingInputPointer?.();
+    this.stopWatchingInputPointer = null;
   }
 
   /**
