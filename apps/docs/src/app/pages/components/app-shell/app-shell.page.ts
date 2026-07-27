@@ -114,13 +114,16 @@ const HD_APP_SHELL_PAGE_ICONS = {
         layout for the whole transition and the narrowing rail simply crops it — which leaves
         rail mode free to animate only continuous properties. Labels and trailing content fade
         through <code>opacity</code> plus <code>visibility</code>, so they leave the accessibility
-        tree and tab order when the fade ends rather than lingering at zero opacity. The icon
-        covers the remaining distance to the rail's center with <code>translate</code>, which
-        costs no layout; its offset is half of
-        <code>--hell-app-sidenav-collapsed-content-width</code>, less half the glyph, less the
-        row's leading padding. Drive every duration from
-        <code>--hell-duration-*</code> so the reduced-motion preference collapses the whole recipe
-        along with the shell.
+        tree and tab order when the fade ends rather than lingering at zero opacity —
+        which is exactly why every rail entry needs its own <code>aria-label</code>: once the
+        label is hidden the link has no other name source. The icon covers the remaining distance
+        to the rail's center with <code>translate</code>, which costs no layout; its offset is half
+        of <code>--hell-app-sidenav-collapsed-content-width</code>, less half the glyph, less the
+        row's leading padding. Square the row's <code>border-radius</code> off over the same
+        duration: the rail crops the row, so a rounded highlight would otherwise reach the rail
+        edge as a pill cut off mid-curve, and a full-bleed band reads as deliberate. Drive every
+        duration from <code>--hell-duration-*</code> so the reduced-motion preference collapses the
+        whole recipe along with the shell.
       </p>
       <p>
         A collapsible group is a small disclosure recipe: the app owns the expanded state, binds
@@ -237,11 +240,16 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>
           <code>hellAppSidenav</code> — sidenav slot. Input: <code>[ui]</code>. Its collapsed and
           mobile visibility state always follows the enclosing shell. It publishes the rail's
-          resting geometry as <code>--hell-app-sidenav-content-width</code> and
-          <code>--hell-app-sidenav-collapsed-content-width</code> — the sidenav's own inline
-          padding is already subtracted, which a nav recipe cannot do for itself. Size rail rows
-          and center rail glyphs against these rather than against the box the shell is
-          interpolating; override them alongside any refinement of the sidenav's padding.
+          resting geometry, which a nav recipe cannot derive for itself:
+          <code>--hell-app-sidenav-content-width</code> is a real content box — expanded width
+          less both paddings and the trailing border — so a row sized by it fills the rail and
+          leaves matching gutters, and it is <code>100%</code> on the mobile drawer, which slides
+          at a fixed width rather than interpolating one.
+          <code>--hell-app-sidenav-collapsed-content-width</code> is the width a rail glyph
+          centers against, deliberately the collapsed <em>border</em> box, so a centered glyph
+          looks centered in the strip the rail reads as. Size rail rows and center rail glyphs
+          against these rather than against the box the shell is interpolating; override them
+          alongside any refinement of the sidenav's padding or border.
         </li>
         <li>
           <code>hellAppContent</code> — content slot. Input: <code>[ui]</code>. Its public

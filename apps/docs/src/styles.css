@@ -605,6 +605,13 @@
     font-weight: var(--font-weight-medium);
     color: var(--color-hell-foreground-muted);
     text-decoration-line: none;
+    /* The rail crops the row, so a rounded highlight would arrive at the rail
+       edge as a half-pill cut off mid-curve. Squaring the corners over the same
+       duration turns it into a deliberate full-bleed rail band. `border-radius`
+       is continuous and costs no layout, so it joins the motion without
+       reintroducing the per-frame relayout that sizing the row from the
+       animating box caused. */
+    transition: border-radius var(--hell-duration-base) var(--ease-hell-out);
   }
 
   .hd-nav-item:hover {
@@ -769,8 +776,9 @@
    * Rail mode. Every rule here is a transition of a continuous property, so
    * collapsing and expanding read as one motion rather than a layout swap:
    * labels and headings fade out, the icon translates into the rail's center,
-   * and the heading trades its height for the divider's. Collapsed sections
-   * auto-expand so every item stays reachable while the rail is icon-only.
+   * the row's highlight squares off into a full-bleed band, and the heading
+   * trades its height for the divider's. Collapsed sections auto-expand so
+   * every item stays reachable while the rail is icon-only.
    *
    * Nothing here re-centers a row, because a row's box is interpolating while
    * the rail collapses — centering against it is what made the icons jump.
@@ -778,6 +786,10 @@
    * remaining distance on its own: half the collapsed rail's content width,
    * less half its own width, less the row's leading padding.
    */
+
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-item {
+    border-radius: 0;
+  }
 
   [hellAppSidenav][data-collapsed='true'] .hd-nav-item-icon {
     translate: calc(

@@ -462,6 +462,56 @@ test.describe('App Shell responsive contracts', () => {
       Math.abs(iconBox.x + iconBox.width / 2 - (railBox.x + railBox.width / 2)),
       'a collapsed rail icon ends up centered in the rail',
     ).toBeLessThanOrEqual(1);
+
+    // The rail crops the row, so a row that kept its radius would present a
+    // pill cut off mid-curve at the rail edge instead of a full-bleed band.
+    await expect(page.locator('hd-root [hellAppSidenav] .hd-nav-item').first()).toHaveCSS(
+      'border-radius',
+      '0px',
+    );
+
+    // Rows overflow the collapsed rail on purpose, which leaves it inline
+    // scroll range the user can neither see nor reach. "Scroll the active nav
+    // item into view" is the realistic caller, and without matching
+    // scroll-padding it comes to rest one inline padding off, shunting every
+    // glyph sideways for the rest of the session.
+    const restingScrollLeft = await parts.sidenav.evaluate((rail) => {
+      rail.scrollLeft = 0;
+      rail.querySelectorAll('.hd-nav-item')[3]?.scrollIntoView();
+      return rail.scrollLeft;
+    });
+    expect(
+      restingScrollLeft,
+      'scrolling a rail row into view must leave the rail at its resting inline position',
+    ).toBe(0);
+  });
+
+  test('rail rows fill the sidenav without overflowing its scrollport', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    await expect(appShellParts(shell).sidenav).toBeVisible();
+    await finishAnimations(shell);
+
+    // The published content width must be a real content box: the sidenav's
+    // padding *and* its trailing border subtracted. A row one pixel too wide
+    // leaves mismatched gutters and eats into the trailing padding that absorbs
+    // a platform scrollbar.
+    const geometry = await appShellParts(shell).sidenav.evaluate((rail) => {
+      const row = rail.querySelector<HTMLElement>('.hd-nav-item')!;
+      const railBox = rail.getBoundingClientRect();
+      const rowBox = row.getBoundingClientRect();
+      return {
+        leadingGutter: Math.round(rowBox.x - railBox.x),
+        trailingGutter: Math.round(railBox.x + rail.clientWidth - (rowBox.x + rowBox.width)),
+        inlineOverflow: rail.scrollWidth - rail.clientWidth,
+      };
+    });
+    expect(geometry.inlineOverflow, 'an expanded row must fit the sidenav scrollport').toBe(0);
+    expect(geometry.trailingGutter, 'row gutters must match on both sides').toBe(
+      geometry.leadingGutter,
+    );
   });
 
   test('the rail recipe takes its motion from the shell duration tokens', async ({ page }) => {
