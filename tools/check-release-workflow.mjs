@@ -148,6 +148,33 @@ function checkProjectionBarrier(workflow, errors) {
     errors.push('draft-github-release must evaluate `release-projection.mjs barrier` over the registry results.');
   } else if (createIndex !== -1 && barrierIndex > createIndex) {
     errors.push('draft-github-release must evaluate the Required Registry barrier before touching GitHub releases.');
+  } else {
+    // The barrier must read the actual registry job results, never hardcoded
+    // outcomes, and every registry it evaluates must also gate this job's
+    // `needs` — a future registry added to one side but not the other fails
+    // here instead of silently weakening the barrier.
+    const barrierStep = draft.steps?.[barrierIndex] ?? null;
+    const registriesEnv =
+      typeof barrierStep?.env?.HELL_REQUIRED_REGISTRIES === 'string'
+        ? barrierStep.env.HELL_REQUIRED_REGISTRIES
+        : '';
+    for (const registryJob of ['publish-github-packages', 'publish-npm']) {
+      if (!registriesEnv.includes(`needs.${registryJob}.result`)) {
+        errors.push(
+          `The Required Registry barrier must evaluate the actual \`needs.${registryJob}.result\`; ` +
+            'hardcoded registry outcomes cannot pass.',
+        );
+      }
+    }
+    for (const [, registryJob] of registriesEnv.matchAll(/needs\.([A-Za-z0-9_-]+)\.result/g)) {
+      if (!needs.includes(registryJob)) {
+        errors.push(
+          `The Required Registry barrier reads \`needs.${registryJob}.result\`, but ` +
+            `draft-github-release does not list \`${registryJob}\` in its needs; every barrier ` +
+            'registry must also gate the draft job.',
+        );
+      }
+    }
   }
   if (!runs.some((run) => run.includes('release-projection.mjs plan'))) {
     errors.push('draft-github-release must plan the projection from the tagged artifacts.');

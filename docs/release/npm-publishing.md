@@ -169,6 +169,9 @@ so published release tags and assets are locked and attested.
    through a release-preparation pull request.
 2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all consumer fixtures run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
+   Use a lightweight tag exactly as written (no `-a`/`-s`): an annotated
+   tag's own SHA differs from the commit it dereferences to, so projection
+   verification would fail closed on the target-commit check.
 4. Approve the `npm-publish` GitHub environment deployment.
 5. After publish, verify the npm package page shows provenance and that the single release run contains both the `release-package` artifact and the `release-package-github-mirror` artifact.
 6. Verify the run ended with the published GitHub prerelease whose body is
