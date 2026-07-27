@@ -1,0 +1,6 @@
+kind: Fixed
+body: The app shell keeps main content clear of the secondary sidebar rail. Below
+  the 768px breakpoint the content region now reserves the collapsed rail's width
+  instead of rendering and taking clicks underneath it, and a shell with no projected
+  `hellAppSecondary` no longer reserves a dead secondary column.
+time: 2026-07-27T09:52:41.905656+02:00
