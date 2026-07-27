@@ -140,13 +140,15 @@
      * the narrowing rail crop them. Override it alongside any refinement of the
      * sidenav's padding or border.
      *
-     * Note the two are not the same kind of measurement. The content width is
-     * a real content box — expanded width less both paddings and the trailing
-     * border — so a row sized by it fills the rail exactly and leaves matching
-     * gutters. The collapsed value is the width a rail glyph centers against,
-     * and that is deliberately the border box: the rail reads as a 56px strip,
-     * so a glyph centered on 56 looks centered even though the border makes the
-     * content box narrower.
+     * The two subtract deliberately different things; the asymmetry is load
+     * bearing, not an oversight to tidy up. The content width is a real content
+     * box — expanded width less both paddings and the trailing border — so a
+     * row sized by it fills the rail exactly and leaves matching gutters. The
+     * collapsed value subtracts both paddings but deliberately not the trailing
+     * border, so a glyph centered on it lands on the center of the whole strip
+     * the rail reads as, rather than half a pixel off it toward the leading
+     * edge. Subtracting the border there would be arithmetically tidier and
+     * visually wrong.
      */
     --hell-app-sidenav-content-width: calc(
       var(--hell-app-sidenav-width) - 2 * var(--spacing-hell-3) - 1px
@@ -168,15 +170,24 @@
      * which all three engines do — so the declaration below is what we get
      * either way.
      *
-     * What that leaves reachable is programmatic scrolling, and the realistic
-     * caller is "scroll the active nav item into view". `scroll-padding` is the
-     * property that decides where such a scroll comes to rest: matching it to
-     * the rail's own inline padding makes the aligned position the resting one,
-     * so the icons stay centered instead of being shunted permanently sideways.
+     * What that leaves reachable is programmatic scrolling. `scroll-padding`
+     * decides where such a scroll comes to rest, so matching it to the rail's
+     * own padding lands start-aligned scrolls on the resting position on both
+     * axes: a bare `scrollIntoView()`, `{ inline: 'start' }`, `{ inline:
+     * 'nearest' }`, `scrollIntoViewIfNeeded()`, `focus()`, Tab traversal and
+     * fragment navigation all leave the rail where it was. It does not, and
+     * cannot, cover an explicitly centered or end-aligned scroll, nor a scroll
+     * targeting a descendant of a row rather than the row.
+     *
+     * None of that is permanent — expanding the rail resets the offset — but
+     * while it lasts the collapsed rail can be scrolled fully blank. Note for
+     * whoever writes the next collapsed-rail test: a point-rect scroll, which
+     * is what a test driver's hover and click actionability performs, is one of
+     * the uncovered alignments.
      */
     overflow-x: hidden;
     overflow-y: auto;
-    scroll-padding-inline: var(--spacing-hell-3);
+    scroll-padding: var(--spacing-hell-3);
     background-color: var(--color-hell-surface-elevated);
     padding: var(--spacing-hell-3);
     border-right: 1px solid var(--color-hell-border);

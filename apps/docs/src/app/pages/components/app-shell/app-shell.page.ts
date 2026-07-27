@@ -246,10 +246,11 @@ const HD_APP_SHELL_PAGE_ICONS = {
           leaves matching gutters, and it is <code>100%</code> on the mobile drawer, which slides
           at a fixed width rather than interpolating one.
           <code>--hell-app-sidenav-collapsed-content-width</code> is the width a rail glyph
-          centers against, deliberately the collapsed <em>border</em> box, so a centered glyph
-          looks centered in the strip the rail reads as. Size rail rows and center rail glyphs
-          against these rather than against the box the shell is interpolating; override them
-          alongside any refinement of the sidenav's padding or border.
+          centers against: it subtracts both paddings but deliberately <em>not</em> the trailing
+          border, so a glyph centered on it lands on the center of the whole strip the rail reads
+          as. The asymmetry between the two is load bearing, not an oversight. Size rail rows and
+          center rail glyphs against these rather than against the box the shell is interpolating;
+          override them alongside any refinement of the sidenav's padding or border.
         </li>
         <li>
           <code>hellAppContent</code> — content slot. Input: <code>[ui]</code>. Its public

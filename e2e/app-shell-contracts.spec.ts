@@ -518,21 +518,26 @@ test.describe('App Shell responsive contracts', () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/components/app-shell');
 
+    const row = page.locator('hd-root [hellAppSidenav] .hd-nav-item').first();
     const label = page.locator('hd-root [hellAppSidenav] .hd-nav-item-label').first();
     const icon = page.locator('hd-root [hellAppSidenav] .hd-nav-item-icon').first();
     await expect(label).toBeVisible();
 
+    // Every property the rail recipe animates belongs here. A transition added
+    // to the recipe but left out of this list is exactly the gap the list is
+    // meant to close.
     const durations = () =>
-      Promise.all([
-        label.evaluate((element) => getComputedStyle(element).transitionDuration),
-        icon.evaluate((element) => getComputedStyle(element).transitionDuration),
-      ]);
+      Promise.all(
+        [row, label, icon].map((part) =>
+          part.evaluate((element) => getComputedStyle(element).transitionDuration),
+        ),
+      );
 
     // `--hell-duration-base` is 180ms by default and 1ms under reduced motion;
     // hardcoded recipe durations would survive the preference unchanged.
-    expect(await durations()).toEqual(['0.18s, 0.18s', '0.18s']);
+    expect(await durations()).toEqual(['0.18s', '0.18s, 0.18s', '0.18s']);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    expect(await durations()).toEqual(['0.001s, 0.001s', '0.001s']);
+    expect(await durations()).toEqual(['0.001s', '0.001s, 0.001s', '0.001s']);
 
     const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
     await appShellParts(shell).sidenavToggle.click();
