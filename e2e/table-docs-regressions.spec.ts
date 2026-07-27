@@ -394,12 +394,26 @@ test.describe('table docs regressions', () => {
       )
       .toBeGreaterThan(8);
 
+    // Compared cell-by-cell, so a header/cell count mismatch has to fail loudly
+    // instead of decaying into an unexplained drift-poll timeout.
+    const headerCells = virtual.locator('thead th');
+    const bodyCells = virtual
+      .locator('[data-hell-table-virtual-row-kind="row"]')
+      .first()
+      .locator('td');
+    await expect(headerCells).not.toHaveCount(0);
+    await expect(bodyCells).toHaveCount(await headerCells.count());
+
     const columnDrift = async (): Promise<number> =>
       virtual.evaluate((shell) => {
         const headers = [...shell.querySelectorAll('thead th')];
         const row = shell.querySelector('[data-hell-table-virtual-row-kind="row"]');
         const cells = row ? [...row.querySelectorAll('td')] : [];
-        if (!cells.length || cells.length !== headers.length) return Number.POSITIVE_INFINITY;
+        if (cells.length !== headers.length) {
+          throw new Error(
+            `Expected one virtual body cell per header, got ${cells.length} cells for ${headers.length} headers.`,
+          );
+        }
         return Math.max(
           ...headers.map((header, index) => {
             const headerBox = header.getBoundingClientRect();
@@ -419,9 +433,13 @@ test.describe('table docs regressions', () => {
       element.scrollTop = 620;
       element.dispatchEvent(new Event('scroll'));
     });
+    // Near the requested offset, not merely nonzero, so a clamped or reset
+    // scrollport cannot pass this test on an unscrolled body.
     await expect
-      .poll(async () => await scrollport.evaluate((element) => element.scrollTop))
-      .toBeGreaterThan(0);
+      .poll(async () =>
+        Math.abs((await scrollport.evaluate((element) => element.scrollTop)) - 620),
+      )
+      .toBeLessThanOrEqual(1);
 
     await expect.poll(columnDrift).toBeLessThanOrEqual(1);
 

@@ -263,6 +263,12 @@
    * Virtual body cells reproduce that same grid by growing in proportion to the
    * TanStack column size instead of pinning to the raw size, so both sides
    * resolve to identical column geometry at any scrollport width.
+   *
+   * The equivalence relies on how user agents distribute excess width under
+   * `table-layout: fixed`: Blink, Gecko, and WebKit all share it out in
+   * proportion to the specified column widths, which is a convention rather
+   * than something CSS guarantees. The three-engine table e2e run is what
+   * protects that assumption.
    */
   hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
