@@ -1,7 +1,7 @@
 # Manual runtime ownership matrix
 
 - Date: 2026-05-29
-- Updated: 2026-07-11
+- Updated: 2026-07-27
 - Scope: custom Hell browser/runtime behavior that should be kept, deleted from
   core, or delegated before a production-ready claim.
 
@@ -28,7 +28,35 @@ Allowed direct browser-global seams follow
 | code editor | `packages/angular/features/code-editor/**`; `docs/adr/hell-heavy-features.md` | **Keep as optional entrypoint.** Keep the CodeMirror wrapper only behind `hell-ui/features/code-editor`; do not export it from root/composites or eager docs paths. | Direct CodeMirror in consuming app; Monaco/editor packages for full IDE needs; a split package only if peer/runtime cost stops being narrow. | CodeMirror peers leak into root installs, DOM-only runtime hurts SSR, and editor API becomes falsely stable before API policy promotes it. | Architecture/package-consumer guard for no CodeMirror peers in root/button/table/PDF paths, runtime setup tests, docs lazy/client-only guidance, and experimental/beta API status. |
 | audio transcript | `packages/angular/audio-player/**`; `packages/angular/features/audio-transcript/**`; `docs/adr/hell-heavy-features.md` | **Keep as opt-in feature.** Base audio playback stays in package; Web Speech/`captureStream()` transcript runtime lives behind `hell-ui/features/audio-transcript` and `provideHellAudioTranscript()`. | Native Web Speech only through opt-in adapter; WebVTT/timed text or media text tracks for captions; external transcription/caption products for production transcript needs. | Browser support/privacy is uneven, `captureStream()` is browser-only, and best-effort speech transcript can be mistaken for accessibility captions. | Base audio-player scenario without speech runtime, transcript opt-in scenario, static guard for Web Speech/`captureStream()` outside seam, and docs warning that transcript is not production captions. |
 | table shell | `packages/angular/table/**`; `packages/angular/table-tanstack/**`; removed `data-table`, `table-virtual`, and `table-cdk` paths; `docs/adr/tanstack-table-shell.md` | **Keep primitives; delegate the engine to TanStack.** Hell owns native-table primitives and a reusable TanStack table shell. Hell does not own a first-party data-table renderer, normalized table model, table state channels, grid mode, row draft controller, column visibility table UI, CDK table skin, or separate virtual table entrypoint. | Native HTML tables for primitive use; TanStack Table for row/column/sorting/filtering/pagination/selection/pinning/sizing/expansion/state; TanStack Virtual only inside the optional `/table-tanstack` virtual body strategy. | Hell can still accidentally rebuild a worse table engine, leak TanStack/Virtual peers into `/table`, or hide custom behavior behind shell shorthand props. | Primitive isolation, shell contract tests, controls/status views, virtual strategy tests, docs/package/API/browser gates, and package-consumer checks before production-ready claims. |
+| time picker columns | `packages/angular/time-picker/time-picker-navigation.ts`; `packages/angular/time-picker/time-picker-navigation.spec.ts`; `packages/angular/time-picker/time-picker.spec.ts`; `e2e/time-picker-a11y-contracts.spec.ts`; `docs/architecture/time-picker-redesign.md` | **Keep Hell-owned, small and pure.** The delegate-first check for #361 rejected `NgpListbox@0.123.0` as the column engine on four contract mismatches (evidence below), so the column keyboard model is a pure, unit-tested module: option grids, bounds-driven option disabling, the earliest-in-range commit rule, index navigation, the two-digit accumulator, and snap-to-nearest. The component adds only rendering, focus moves, and scroll centering. | Recheck `NgpListbox` on every ng-primitives upgrade; adopt it once it offers a roving-focus mode, selection-follows-focus, disable-able typeahead, and public (non-`@internal`) selection. Angular Aria listbox is not a dependency today and adding one is its own decision. Do not layer a second key manager over a delegated one. | A local key handler can wrap at column bounds, select disabled options, fight the roving tab stop, or let typed digits create off-step values. | Unit coverage for option grids, step validation, bounds disabling, earliest-in-range commits, no-wrap arrows, Home/End/paging, disabled skipping, digit buffering, and tie-resolving snaps; browser coverage for one tab stop per column, selection-follows-focus, cross-column arrows, typed digits, tap selection, scroll-then-tap, and popover focus policy. |
 | omnibar | `packages/angular/omnibar/omnibar.ts`; `packages/angular/omnibar/omnibar.spec.ts`; `packages/angular/omnibar/omnibar.runtime.spec.ts` | **Keep as composite; extract runtime seams.** Do not delete user-facing omnibar. Search, active-item, and keyboard behavior have a tested controller. Outside-focus dismissal stays as a focus-only composite rule for the input, CDK panel, and nested registered floating surfaces. Delegate listbox/combobox/menu semantics if omnibar becomes a reusable primitive. | Angular Aria combobox/listbox/menu/grid patterns; CDK A11y key managers and CDK connected-overlay outside-click ownership; ng-primitives combobox/menu primitives; app-owned command-palette libraries for product-specific workflows. | Large mixed component couples search, overlay, item registry, keyboard movement, templates, rendering, and focus dismissal; behavior becomes unreviewable and hard to test. | Public behavior tests for active item/search/keyboard movement, one pure/controller contract, focus leaving input/panel while nested registered floating surfaces remain inside, explicit browser role/name/state assertions, and no behavior change during extraction. |
+
+## Delegate-first check: time picker columns vs `NgpListbox` (2026-07-27)
+
+Required by `docs/architecture/time-picker-redesign.md` before writing any
+Hell-owned roving-focus code for #361. Evidence is the installed
+`ng-primitives@0.123.0` package: `types/ng-primitives-listbox.d.ts` and
+`fesm2022/ng-primitives-listbox.mjs`.
+
+| Contract the spec requires | `NgpListbox@0.123.0` | Verdict |
+| --- | --- | --- |
+| Roving `tabindex`; one focusable option per column | `ActiveDescendantKeyManager` (`.mjs` line 281). DOM focus stays on the listbox host and `aria-activedescendant` names the active option. | **Mismatch** — a different focus model, not a configurable option. |
+| Selection follows focus | `onKeydown` moves the active item only; selection happens on `Enter`/`Space`. | **Mismatch** |
+| Typed digits drive a two-digit numeric accumulator with snap-to-nearest and auto-advance | `ngAfterContentInit` hard-wires `.withTypeAhead()` (`.mjs` line 298), a string-prefix label matcher that swallows printable keys. There is no input to disable it. | **Conflict** — it would consume the digits before Hell sees them. |
+| Commit through the picker's own `value` model | `value` is `InputSignal<T[]>`; `selectOption`, `activateOption`, and `isSelected` are all marked `@internal`. | **Mismatch** — no public single-value selection API. |
+| No wrap at column bounds | No `.withWrap()`; the CDK default does not wrap. | Match |
+| Disabled options skipped | CDK `ListKeyManager` skips disabled items. | Match |
+| Home/End | `.withHomeAndEnd()` | Match |
+| PageUp/PageDown by five options | `withPageUpDown()` is not enabled. | Missing |
+| ArrowLeft/Right move between columns | `.withVerticalOrientation()` only; horizontal keys are unhandled. | Neutral — layerable |
+
+Three of the four mismatches are structural rather than missing options, and
+the typeahead conflict cannot be switched off through the public API, so
+delegation would mean fighting the primitive on its own keydown path. Angular
+Aria is not an installed dependency, and taking on a new public peer for one
+column engine is a larger decision than this ticket. The decision is therefore
+Hell-owned, following the menu-typeahead precedent: the logic is pure, lives in
+one module, and is covered by unit and browser tests.
 
 ## Review Usage
 

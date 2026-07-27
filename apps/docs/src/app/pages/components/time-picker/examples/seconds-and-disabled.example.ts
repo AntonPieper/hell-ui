@@ -8,7 +8,7 @@ import { HellTimePicker, type HellTimeValue } from 'hell-ui/time-picker';
   template: `
     <div class="grid gap-2">
       <span class="text-sm font-medium text-hell-foreground">Second precision</span>
-      <hell-time-picker seconds [(value)]="precise" />
+      <hell-time-picker seconds [secondStep]="15" [(value)]="precise" />
     </div>
 
     <div class="grid gap-2">
@@ -21,7 +21,7 @@ export class TimePickerSecondsAndDisabledExample {
   protected readonly precise = signal<HellTimeValue | null>({
     hour: 12,
     minute: 34,
-    second: 56,
+    second: 45,
   });
   protected readonly locked = signal<HellTimeValue | null>({
     hour: 9,
