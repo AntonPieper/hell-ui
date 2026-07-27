@@ -469,6 +469,10 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     const drawingDelay = options.drawingDelay;
     const currentScale = viewer.currentScale;
 
+    // A fixed scale supersedes any preset still waiting for a container box,
+    // otherwise the next resize would throw the user's zoom away.
+    this.pendingPresetZoom = null;
+
     // Gesture-driven writes go through `updateScale`, the only pdf.js entry
     // point that accepts `drawingDelay`. With a delay set, pdf.js re-scales the
     // already-rendered page canvases with a CSS transform and re-rasterizes

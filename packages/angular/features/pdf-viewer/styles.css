@@ -161,14 +161,10 @@
     border-color: var(--color-hell-border);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
     line-height: 1;
-    /* Placeholder box for the unpainted 0x0 canvas. `renderThumbnail` writes
-       inline width/height once a page is rasterized, and those win over these
-       defaults. */
     & > canvas {
       display: block;
       max-width: 100%;
-      width: 120px;
-      height: 160px;
+      height: auto;
     }
   }
 

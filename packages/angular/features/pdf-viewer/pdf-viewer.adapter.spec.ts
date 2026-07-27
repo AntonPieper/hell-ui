@@ -89,10 +89,22 @@ vi.mock('pdfjs-dist/web/pdf_viewer.mjs', () => {
   }
 
   class PDFViewer {
-    currentScale = 1;
     currentPageNumber = 1;
+    /** Writes the adapter made through the `currentScaleValue` setter. */
     readonly scaleValueWrites: string[] = [];
+    #currentScale = 1;
     #currentScaleValue = 'auto';
+
+    get currentScale(): number {
+      return this.#currentScale;
+    }
+
+    // Mirrors pdf.js: every applied scale is recorded as the current scale
+    // value, so a numeric zoom replaces whatever preset was active.
+    set currentScale(value: number) {
+      this.#currentScale = value;
+      this.#currentScaleValue = String(value);
+    }
 
     get currentScaleValue(): string {
       return this.#currentScaleValue;
@@ -101,6 +113,10 @@ vi.mock('pdfjs-dist/web/pdf_viewer.mjs', () => {
     set currentScaleValue(value: string) {
       this.#currentScaleValue = value;
       this.scaleValueWrites.push(value);
+      // Mirrors pdf.js: a numeric value applies directly, a preset is resolved
+      // from the container box (which this mock does not model).
+      const numeric = Number.parseFloat(value);
+      if (numeric > 0) this.#currentScale = numeric;
     }
 
     readonly setDocument = vi.fn();
@@ -109,7 +125,7 @@ vi.mock('pdfjs-dist/web/pdf_viewer.mjs', () => {
     // Mirrors pdf.js: `updateScale` takes a ratio and quantizes to two decimals.
     readonly updateScale = vi.fn(
       ({ scaleFactor = 1 }: { readonly scaleFactor?: number; readonly drawingDelay?: number }) => {
-        this.currentScale = Math.round(this.currentScale * scaleFactor * 100) / 100;
+        this.currentScale = Math.round(this.#currentScale * scaleFactor * 100) / 100;
       },
     );
 
@@ -289,6 +305,28 @@ describe('PDF Adapter browser seam', () => {
     expect(viewer.scaleValueWrites).toEqual(['1.5']);
   });
 
+  it('lets a gesture zoom supersede a preset held back by a collapsed container', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+    const container = document.createElement('div') as HTMLDivElement;
+    const session = await adapter.createViewer(container, handlers, {
+      worker: '/assets/pdf.worker.mjs',
+    });
+    const eventBus = required(pdfViewerMock.eventBuses[0]);
+    const viewer = required(pdfViewerMock.viewers[0]);
+
+    // `pagesinit` defers `page-width`; the user then zooms with a gesture, which
+    // reaches pdf.js through `setNumericZoom` rather than `setZoomValue`. Laying
+    // the container out must not resurrect the preset and throw that zoom away.
+    eventBus.emit('pagesinit');
+    session.setNumericZoom(2, { drawingDelay: 400 });
+    sizeContainer(container);
+    session.refreshPresetZoom?.();
+
+    expect(viewer.scaleValueWrites).toEqual([]);
+    expect(viewer.currentScale).toBe(2);
+  });
+
   it('adapts pdf.js viewer events and commands behind a stable session port', async () => {
     const adapter = new HellPdfJsRuntimeAdapter();
     const handlers = createSessionHandlers();
@@ -350,9 +388,13 @@ describe('PDF Adapter browser seam', () => {
     expect(viewer.currentPageNumber).toBe(1);
 
     session.setZoomValue('auto');
-    session.setNumericZoom(2);
     expect(viewer.currentScaleValue).toBe('auto');
+
+    // A plain numeric zoom writes the scale directly; pdf.js then reports that
+    // scale as the current scale value, replacing the preset.
+    session.setNumericZoom(2);
     expect(viewer.currentScale).toBe(2);
+    expect(viewer.currentScaleValue).toBe('2');
     expect(session.currentScale).toBe(2);
     expect(viewer.updateScale).not.toHaveBeenCalled();
 

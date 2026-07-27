@@ -215,10 +215,18 @@ describe('HellPdfViewer', () => {
     await commit('0');
     expect(pageInput.value).toBe('1');
 
-    await commit('not a page');
-    expect(pageInput.value).toBe('1');
-
     await commit('2');
+    expect(pageInput.value).toBe('2');
+
+    // A cleared field means "no page number", not page zero: it restores the
+    // page the viewer is on rather than navigating to the first one. Asserted
+    // from page 2 so navigating to page 1 would be visible.
+    await commit('');
+    expect(pageInput.value).toBe('2');
+
+    // `type="number"` sanitizes unparseable text to an empty string, so this
+    // takes the same path.
+    await commit('not a page');
     expect(pageInput.value).toBe('2');
   });
 

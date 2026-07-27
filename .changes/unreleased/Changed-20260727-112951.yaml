@@ -1,7 +1,0 @@
-kind: Changed
-body: Pinch and Ctrl+wheel zoom in the PDF viewer now coalesce to one scale update
-  per frame and let pdf.js defer re-rasterizing pages until the gesture settles, and
-  the page overview only allocates a thumbnail canvas once that thumbnail is rendered.
-  Zooming a 400-page document drops from 53 full page rasters to 3, and opening the
-  overview allocates 1.4 MB of canvas instead of 29 MB.
-time: 2026-07-27T11:29:51.077491+02:00

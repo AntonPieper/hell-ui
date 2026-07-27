@@ -374,11 +374,18 @@ export class HellPdfViewer {
    * back explicitly instead.
    */
   protected commitPageInput(input: HTMLInputElement) {
+    // `type="number"` sanitizes anything unparseable to an empty string, so a
+    // blank field is how "not a page number" arrives here. Restore the current
+    // page rather than reading `Number('')` as page 0 and navigating away.
+    const raw = input.value.trim();
+    const parsed = raw === '' ? Number.NaN : Number(raw);
+    if (!Number.isFinite(parsed)) {
+      input.value = String(this.page());
+      return;
+    }
+
     const total = this.totalPages() || 1;
-    const parsed = Number(input.value);
-    const target = Number.isFinite(parsed)
-      ? Math.min(Math.max(Math.trunc(parsed), 1), total)
-      : this.page();
+    const target = Math.min(Math.max(Math.trunc(parsed), 1), total);
 
     this.goTo(target);
     input.value = String(this.page());

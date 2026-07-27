@@ -25,6 +25,19 @@ import type { HellPdfPrintOptions } from './pdf-viewer.print';
  */
 const HELL_PDF_GESTURE_DRAWING_DELAY_MS = 400;
 
+/**
+ * How far the wheel accumulator may sit from the scale pdf.js actually holds
+ * before it counts as stale: half a two-decimal quantization step, plus float
+ * slack. Anything wider means something other than this gesture moved the
+ * scale.
+ */
+const HELL_PDF_GESTURE_SCALE_DRIFT = 0.006;
+
+/** pdf.js quantizes gesture-driven scales to two decimals; match it exactly. */
+function quantizeGestureScale(scale: number): number {
+  return Math.round(scale * 100) / 100;
+}
+
 /** Source types accepted by the PDF runtime and adapter. */
 export type HellPdfSource = string | URL | ArrayBuffer;
 /** pdf.js preset names plus numeric scale values accepted at load time. */
@@ -572,10 +585,35 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     if (!Number.isFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor === 1) return;
 
     event.preventDefault();
-    this.queueGestureZoom(
-      (this.gestureScale ?? this.currentScale) * scaleFactor,
-      getZoomOrigin(this.container, event),
-    );
+    this.queueGestureZoom(this.wheelBaseScale * scaleFactor, getZoomOrigin(this.container, event));
+  }
+
+  /**
+   * Scale a new gesture step builds on. A queued flush has not reached pdf.js
+   * yet, so its target — not `currentScale` — is the live value.
+   */
+  private get gestureBaseScale(): number {
+    return this.pendingZoom?.scale ?? this.currentScale;
+  }
+
+  /**
+   * Wheel has no gesture-end event, so unlike pinch the accumulator cannot
+   * reset itself when the gesture stops. It has to notice on its own when
+   * something else moved the scale: clicking an internal link or outline entry
+   * whose destination carries a zoom makes pdf.js write `currentScaleValue`
+   * directly. A settled accumulator sits within half a quantization step of the
+   * scale it applied, so anything wider is an external change and
+   * `currentScale` wins.
+   */
+  private get wheelBaseScale(): number {
+    if (this.pendingZoom) return this.pendingZoom.scale;
+
+    const gestureScale = this.gestureScale;
+    const currentScale = this.currentScale;
+    return gestureScale !== null &&
+      Math.abs(gestureScale - currentScale) <= HELL_PDF_GESTURE_SCALE_DRIFT
+      ? gestureScale
+      : currentScale;
   }
 
   private onPointerDown(event: PointerEvent): void {
@@ -690,7 +728,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.pinchGesture = {
       startDistance: getPointerDistance(points[0], points[1]),
-      startScale: this.currentScale,
+      startScale: this.gestureBaseScale,
     };
   }
 
@@ -700,7 +738,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.touchPinchGesture = {
       startDistance: getPointerDistance(points[0], points[1]),
-      startScale: this.currentScale,
+      startScale: this.gestureBaseScale,
     };
   }
 
@@ -753,11 +791,11 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.pendingZoom = null;
     if (!pending) return;
 
-    // pdf.js quantizes gesture scales to two decimals, so quantize here too:
-    // the skip check and the scroll anchoring then work off the scale pdf.js
-    // will actually apply. `gestureScale` still holds the unrounded target so a
-    // slow gesture keeps accumulating instead of stalling below the step.
-    this.setNumericZoom(Math.round(pending.scale * 100) / 100, pending.origin, {
+    // Quantize to match pdf.js: the skip check and the scroll anchoring then
+    // work off the scale pdf.js will actually apply. `gestureScale` still holds
+    // the unrounded target so a slow gesture keeps accumulating instead of
+    // stalling below the step.
+    this.setNumericZoom(quantizeGestureScale(pending.scale), pending.origin, {
       drawingDelay: HELL_PDF_GESTURE_DRAWING_DELAY_MS,
     });
   }

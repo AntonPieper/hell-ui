@@ -174,6 +174,107 @@ describe('PDF Runtime', () => {
     );
   });
 
+  it('rebases wheel zoom on the scale pdf.js holds after it changes the scale itself', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    const wheel = () => {
+      container.dispatchEvent(
+        new WheelEvent('wheel', {
+          ctrlKey: true,
+          deltaY: -60,
+          clientX: 4,
+          clientY: 4,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      return nextFrame();
+    };
+
+    await wheel();
+    const zoomedIn = adapter.session.currentScale;
+    expect(zoomedIn).toBeCloseTo(1.52, 2);
+
+    // Wheel has no gesture-end event, so nothing tells the accumulator that
+    // pdf.js jumped the scale on its own — an internal link or outline entry
+    // whose destination carries a zoom writes `currentScaleValue` directly.
+    adapter.session.currentScale = 0.9;
+    await wheel();
+
+    expect(adapter.session.currentScale).toBeCloseTo(0.9 * Math.exp(60 * 0.007), 1);
+    expect(adapter.session.currentScale).toBeLessThan(zoomedIn);
+  });
+
+  it('keeps accumulating within a frame instead of rebasing mid-burst', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // Three events inside one frame must compound; `currentScale` is still the
+    // pre-gesture value until the flush lands, so it is not a valid base.
+    for (let i = 0; i < 3; i++) {
+      container.dispatchEvent(
+        new WheelEvent('wheel', {
+          ctrlKey: true,
+          deltaY: -30,
+          clientX: 4,
+          clientY: 4,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    }
+    await nextFrame();
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+    expect(adapter.session.currentScale).toBeCloseTo(
+      Math.round(Math.exp(30 * 0.007 * 3) * 100) / 100,
+      2,
+    );
+  });
+
+  it('starts a pinch from the scale a queued gesture flush will apply', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 300,
+      height: 400,
+      top: 0,
+      right: 300,
+      bottom: 400,
+      left: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // Queue a zoom, then start a pinch before the frame flushes. Reading
+    // `currentScale` here would restart the pinch from a superseded scale.
+    container.dispatchEvent(
+      new WheelEvent('wheel', {
+        ctrlKey: true,
+        deltaY: -60,
+        clientX: 150,
+        clientY: 200,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    container.dispatchEvent(touchPointer('pointerdown', 1, 100, 200));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 200, 200));
+    container.dispatchEvent(touchPointer('pointermove', 2, 300, 200));
+    await nextFrame();
+
+    // Pinch doubled the distance, so it doubles the queued 1.52, not 1.0.
+    expect(adapter.session.currentScale).toBeCloseTo(3.04, 1);
+  });
+
   it('applies keyboard and toolbar zoom immediately instead of deferring drawing', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
