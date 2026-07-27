@@ -103,6 +103,21 @@ export type HellTanStackRowClass<TData extends RowData = RowData> = {
   bivarianceHack(row: Row<TData>): HellClassValue;
 }['bivarianceHack'];
 
+/**
+ * Everything the `rowClass` input accepts: a class value, or a function
+ * returning one per row.
+ *
+ * Named rather than written inline at the input. Declaration emit prints an
+ * inferred union in the compiler's own normalised order, which follows the
+ * order types happened to be created across the whole program — so an unrelated
+ * source change elsewhere in the library reorders this member in the emitted
+ * `.d.ts`, and the API report shows drift on a public surface nobody touched.
+ * A named alias is printed by name, so the report text follows the source.
+ */
+export type HellTanStackRowClassInput<TData extends RowData = RowData> =
+  | HellTanStackRowClass<TData>
+  | HellClassValue;
+
 export type HellTableStatusValue =
   | { readonly kind: 'ready' }
   | { readonly kind: 'loading' }
@@ -709,7 +724,7 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   readonly table = input.required<Table<TData>>();
   readonly status = input<HellTableStatusValue>(HellTableStatus.READY);
   readonly stickyHeader = input(false, { transform: booleanAttribute });
-  readonly rowClass = input<HellTanStackRowClass<TData> | HellClassValue>(null);
+  readonly rowClass = input<HellTanStackRowClassInput<TData>>(null);
 
   protected readonly providerViews = inject(HELL_TABLE_STATUS_VIEWS);
   private readonly tableLabels: HellTableUtilitiesLabels = inject(HELL_TABLE_UTILITIES_LABELS);
