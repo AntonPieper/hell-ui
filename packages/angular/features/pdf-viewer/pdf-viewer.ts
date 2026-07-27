@@ -149,7 +149,9 @@ const HELL_PDF_VIEWER_ICONS = {
  * page, zoom, loaded, and error events. Pass an app-owned pdf.js `worker`
  * source; Hell does not bundle one in the package tarball. Host keyboard
  * shortcuts support Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End.
- * Document-level shortcuts are opt-in via `globalShortcuts`.
+ * Document-level shortcuts are opt-in via `globalShortcuts`. On touch, one
+ * finger pans, two fingers pinch-zoom, and a double tap toggles between the
+ * fitted zoom preset and a magnified view anchored on the tap.
  *
  * @experimental This feature wraps pdf.js viewer internals and may change as
  * the PDF Runtime seam is hardened.
