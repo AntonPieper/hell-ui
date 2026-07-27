@@ -54,7 +54,12 @@ Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
 
 `pnpm run test:api-report` reads the built library, so it needs a current
 `pnpm run build:lib`. It refuses any `dist/hell` that was not produced by a
-completed production build of the working tree, and refuses one that changed
-afterwards — a `pnpm run watch` session, an interrupted build, or two builds
-sharing the directory. It names which case it found, because an API report from
-the wrong build names changes nobody made.
+completed production build of the working tree, and refuses one whose emitted
+declarations or package manifest changed afterwards — a `pnpm run watch`
+session, an interrupted build, or two builds sharing the directory. It names
+which case it found, because an API report from the wrong build names changes
+nobody made.
+
+It guards what it reads, not all of `dist/hell`: an edit to a `fesm2022` bundle
+passes, because the report is derived from `types/*.d.ts` and `package.json`
+alone. Concurrent builds are narrowed by this, not excluded.

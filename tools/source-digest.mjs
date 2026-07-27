@@ -12,7 +12,13 @@ import { join, relative, sep } from 'node:path';
  * wrong answer into a clear error.
  */
 
-/** Every file under `folder` that `matches`, skipping installed packages. */
+/**
+ * Every file under `folder` that `matches`, skipping installed packages.
+ *
+ * Used for build outputs as well as sources — the library stamp enumerates
+ * `dist/hell/types` through this — so the filter is the caller's whole
+ * contract; nothing here assumes the tree is source.
+ */
 export function collectSourceFiles(folder, matches, collected = []) {
   if (!existsSync(folder)) return collected;
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
