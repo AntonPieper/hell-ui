@@ -1,0 +1,69 @@
+# Trusted three-state pull-request check (ADR 0003).
+#
+# The privileged half of the pull-request state contract: it decides whether a
+# pull request is exactly one of Consumer Change (added Change Fragments),
+# No Consumer Change (`no-consumer-change`), or Release Preparation
+# (`release-preparation`). It is trusted because pull_request_target runs the
+# base branch's workflow definition and policy code — so it reads GitHub label
+# and changed-file metadata only and never checks out, imports, evaluates, or
+# executes pull-request content. The labeled/unlabeled triggers re-evaluate
+# the state whenever the labels change.
+#
+# The read-only content half (fragment schema, Released Version Notes,
+# package-version agreement, deterministic Release Changelog generation) lives
+# in pr-content.yml. `pnpm run test:pr-states` statically proves this trust
+# contract: metadata only, no `${{ }}` in run blocks, no head checkout, and no
+# dependency installation.
+name: PR state
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-state-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  metadata:
+    name: PR state (metadata)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # On pull_request_target the default checkout ref is the trusted base
+      # branch; the policy code below is always base code, never the proposal.
+      - name: Checkout trusted base
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      # Pagination: per_page plus --paginate concatenates every page, so a
+      # fragment or violation beyond the first 100 entries is still seen.
+      # Label names and file paths are attacker-influenced data; they are
+      # written to JSON files and compared by the policy, never interpolated
+      # into a command or workflow expression.
+      - name: Read pull-request metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/labels?per_page=100" \
+            --paginate --jq '.[] | {name: .name}' |
+            jq --slurp '.' > "${RUNNER_TEMP}/labels.json"
+          gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100" \
+            --paginate --jq '.[] | {filename: .filename, status: .status, previous_filename: .previous_filename}' |
+            jq --slurp '.' > "${RUNNER_TEMP}/files.json"
+
+      - name: Decide the pull-request state
+        run: node tools/decide-pr-state.mjs --labels "${RUNNER_TEMP}/labels.json" --files "${RUNNER_TEMP}/files.json"
