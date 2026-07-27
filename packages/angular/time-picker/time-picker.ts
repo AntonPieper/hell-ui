@@ -292,18 +292,23 @@ export class HellTimePicker {
       // steps rewrite a column's option count, so the anchor lands somewhere
       // new even when the value itself never changed.
       //
-      // The bounds count too, though less obviously. They leave every option
-      // in place and only toggle `disabled` — but with no value the anchor is
-      // the roving tab stop rather than a selection, and that tab stop is the
-      // first *enabled* option. So bounds arriving asynchronously over a null
-      // value move the anchor. Bounds changes are rare, so paying an extra
-      // generation for them is cheaper than reasoning about when they matter.
+      // The bounds count too, but only while nothing is selected. They leave
+      // every option in place and only toggle `disabled`, so a selected anchor
+      // never moves when they change. With no value the anchor is the roving
+      // tab stop instead, and that is the first *enabled* option — so bounds
+      // arriving asynchronously over a null value do move it. Reading them
+      // unconditionally would re-center on every bounds change and throw away
+      // a browse-scroll the user left in the other columns, which is exactly
+      // what splitting this effect from the focus pass set out to protect.
+      // Effects re-track per run, so the conditional read is sound.
       this.value();
       this.seconds();
       this.effectiveMinuteStep();
       this.effectiveSecondStep();
-      this.min();
-      this.max();
+      if (!this.current()) {
+        this.min();
+        this.max();
+      }
       if (this.internalCommit) {
         this.internalCommit = false;
         return;
@@ -560,9 +565,10 @@ export class HellTimePicker {
   }
 
   /**
-   * Scrolls one column so its selected option sits in the middle. Rect math
-   * keeps this correct regardless of which ancestor is the offset parent, and
-   * only ever writes the column's own `scrollTop`.
+   * Scrolls one column so its anchor sits in the middle — the selected option,
+   * or the roving tab stop when nothing is selected. Rect math keeps this
+   * correct regardless of which ancestor is the offset parent, and only ever
+   * writes the column's own `scrollTop`.
    */
   private centerColumn(unit: HellTimePickerUnit): void {
     const root = this.host.nativeElement;

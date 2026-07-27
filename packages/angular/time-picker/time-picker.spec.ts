@@ -318,18 +318,20 @@ describe('HellTimePicker', () => {
     it('centers the selected option in every column', () => {
       const fixture = render({ value: { hour: 14, minute: 30, second: 0 } });
 
-      expect(listbox(fixture, 'hour').scrollTop).toBe(centeredScrollTop(14));
-      expect(listbox(fixture, 'minute').scrollTop).toBe(centeredScrollTop(30));
+      expect(listbox(fixture, 'hour').scrollTop).toBe(centeredScrollTop(14, 24));
+      expect(listbox(fixture, 'minute').scrollTop).toBe(centeredScrollTop(30, 60));
     });
 
     it('re-centers a null-valued column when the bounds arrive late', () => {
       const fixture = render();
       const hours = listbox(fixture, 'hour');
 
-      // With no value and no bounds the anchor is the roving tab stop, parked
-      // on hour 00 at the very top.
+      // A statement of the starting position, not coverage: centering on hour
+      // 00 asks for a negative offset, so this clamps to the same 0 an
+      // un-centered column would report. The assertion below is the one with
+      // teeth.
       expect(tabStop(fixture, 'hour')).toBe('00');
-      expect(hours.scrollTop).toBe(centeredScrollTop(0));
+      expect(hours.scrollTop).toBe(centeredScrollTop(0, 24));
 
       // Bounds arriving asynchronously move the tab stop to the first enabled
       // option. The value never changes, so only tracking the bounds keeps the
@@ -338,21 +340,38 @@ describe('HellTimePicker', () => {
       fixture.detectChanges();
 
       expect(tabStop(fixture, 'hour')).toBe('09');
-      expect(hours.scrollTop).toBe(centeredScrollTop(9));
+      expect(hours.scrollTop).toBe(centeredScrollTop(9, 24));
+    });
+
+    it('leaves a browsed column alone when the bounds change under a selection', () => {
+      const fixture = render({ value: { hour: 14, minute: 30, second: 0 } });
+      const minutes = listbox(fixture, 'minute');
+
+      // Park the minute column away from its selection, as a browsing user
+      // would.
+      minutes.scrollTop = 0;
+
+      // A selected anchor cannot move when the bounds change — they only
+      // toggle `disabled`, never option order — so re-centering here would
+      // destroy the browse-scroll for nothing.
+      fixture.componentInstance.min.set({ hour: 9, minute: 0, second: 0 });
+      fixture.detectChanges();
+
+      expect(minutes.scrollTop).toBe(0);
     });
 
     it('re-centers when a step change renumbers a column', () => {
       const fixture = render({ value: { hour: 14, minute: 30, second: 0 } });
       const minutes = listbox(fixture, 'minute');
 
-      expect(minutes.scrollTop).toBe(centeredScrollTop(30));
+      expect(minutes.scrollTop).toBe(centeredScrollTop(30, 60));
 
       // A 15-minute grid turns 60 options into 4, so minute 30 becomes index 2.
       fixture.componentInstance.minuteStep.set(15);
       fixture.detectChanges();
 
       expect(optionValues(fixture, 'minute')).toEqual(['00', '15', '30', '45']);
-      expect(minutes.scrollTop).toBe(centeredScrollTop(2));
+      expect(minutes.scrollTop).toBe(centeredScrollTop(2, 4));
     });
   });
 
@@ -766,12 +785,21 @@ const STUB_OPTION_SIZE = 40;
 const STUB_LIST_SIZE = 280;
 
 /**
- * Where centering must leave a column whose anchor is option `index`, under
- * {@link installStubLayout}: the anchor's midpoint meets the viewport's, and
- * browsers clamp the negative offset the first few options would ask for.
+ * Where centering must leave a column of `optionCount` options whose anchor is
+ * option `index`, under {@link installStubLayout}: the anchor's midpoint meets
+ * the viewport's, clamped into the scrollable range the way a browser clamps
+ * it. Both ends matter — options near the start ask for a negative offset, and
+ * options near the end ask for more than the column can actually scroll.
  */
-function centeredScrollTop(index: number): number {
-  return Math.max(0, index * STUB_OPTION_SIZE - (STUB_LIST_SIZE - STUB_OPTION_SIZE) / 2);
+function centeredScrollTop(index: number, optionCount: number): number {
+  const ideal = index * STUB_OPTION_SIZE - (STUB_LIST_SIZE - STUB_OPTION_SIZE) / 2;
+  return clampScrollTop(ideal, optionCount);
+}
+
+/** The browser's `[0, scrollHeight - clientHeight]` clamp. */
+function clampScrollTop(value: number, optionCount: number): number {
+  const max = Math.max(0, optionCount * STUB_OPTION_SIZE - STUB_LIST_SIZE);
+  return Math.min(Math.max(0, value), max);
 }
 
 /**
@@ -779,8 +807,11 @@ function centeredScrollTop(index: number): number {
  * invisible to it. This installs just enough of both: every option is
  * {@link STUB_OPTION_SIZE} tall and stacked in order inside a
  * {@link STUB_LIST_SIZE} viewport that scrolls, which is all the rect math
- * reads. Follows the same prototype-patching approach as `toolbar.spec.ts` and
- * the `scrollTop` accessor in `toast.spec.ts`.
+ * reads. Follows the same prototype-patching approach as `toolbar.spec.ts`, and
+ * the same accessor shape as the `scrollTop` stub in `toast.spec.ts` — though
+ * Toast installs its accessor on one element instance, while centering has to
+ * work on whichever list the component happens to query, so this one goes on
+ * `HTMLElement.prototype` and is restored in full below.
  *
  * @returns a function restoring the real implementations.
  */
@@ -792,13 +823,19 @@ function installStubLayout(): () => void {
     'scrollTop',
   );
 
+  const optionCountOf = (element: HTMLElement): number =>
+    element.querySelectorAll('[data-slot="option"]').length;
+
   Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
     configurable: true,
     get(this: HTMLElement) {
-      return scrollTops.get(this) ?? 0;
+      const stored = scrollTops.get(this) ?? 0;
+      // Browsers re-clamp when the content shrinks under a scrolled viewport,
+      // which is exactly what a step change does to a column.
+      return clampScrollTop(stored, optionCountOf(this));
     },
     set(this: HTMLElement, value: number) {
-      scrollTops.set(this, Math.max(0, value));
+      scrollTops.set(this, clampScrollTop(value, optionCountOf(this)));
     },
   });
 
