@@ -1925,21 +1925,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/time-picker',
  detail:'components/time-picker/examples/basic.example.ts',
  terms:
-'time-picker hell-time-picker HellTimePicker HellTimeValue structured time valueChange midnight spinbutton minute presets smallest usage',
+'time-picker hell-time-picker HellTimePicker HellTimeValue structured time valueChange column listbox option scroll select smallest usage',
+ },
+ {
+ title:'Time Picker: Steps And Bounds',
+ path:'/components/time-picker',
+ detail:'components/time-picker/examples/steps-and-bounds.example.ts',
+ terms:
+'time-picker hell-time-picker minuteStep secondStep min max inclusive bounds disabled options granularity quarter hour booking slots null placeholder first commit earliest in range',
  },
  {
  title:'Time Picker: Seconds And Disabled',
  path:'/components/time-picker',
  detail:'components/time-picker/examples/seconds-and-disabled.example.ts',
  terms:
-'time-picker hell-time-picker HellTimePicker HellTimeValue seconds disabled fixed bounds precision locked schedule',
+'time-picker hell-time-picker HellTimePicker HellTimeValue seconds disabled precision locked schedule off-step option',
  },
  {
  title:'Time Picker: Styling',
  path:'/components/time-picker',
  detail:'components/time-picker/examples/styling.example.ts',
  terms:
-'time-picker hell-time-picker ui HellTimePickerUi part style map root header readout units unit unitLabel unitControl unitValue unitStep minutePresets minutePreset tailwind tokens',
+'time-picker hell-time-picker ui HellTimePickerUi part style map root header readout columns column columnLabel options option tailwind tokens',
  },
  {
  title:'Number Input: Basic',

@@ -201,7 +201,8 @@ test.describe('time input native behavior and composition contracts', () => {
     const group = example.locator('[hellControlGroup]');
     const panel = page.locator('[data-testid="time-picker-panel"]');
     const picker = panel.locator('hell-time-picker');
-    const hours = picker.getByRole('spinbutton', { name: 'Hours' });
+    const hourColumn = picker.locator('[data-unit="hour"]');
+    const hourTabStop = hourColumn.locator('[data-slot="option"][tabindex="0"]');
 
     await input.focus();
     await expect(input).toBeFocused();
@@ -211,8 +212,8 @@ test.describe('time input native behavior and composition contracts', () => {
 
     await trigger.click();
     await expect(panel).toBeVisible();
-    await expect(hours).toBeVisible();
-    await expect(hours).toBeFocused();
+    await expect(picker.getByRole('listbox', { name: 'Hours' })).toBeVisible();
+    await expect(hourTabStop).toBeFocused();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
     const renderedSlots = await picker.evaluate((element) => [
@@ -227,14 +228,11 @@ test.describe('time input native behavior and composition contracts', () => {
         'root',
         'header',
         'readout',
-        'units',
-        'unit',
-        'unitLabel',
-        'unitControl',
-        'unitValue',
-        'unitStep',
-        'minutePresets',
-        'minutePreset',
+        'columns',
+        'column',
+        'columnLabel',
+        'options',
+        'option',
       ]),
     );
     expect(renderedSlots.some((slot) => slot?.startsWith('picker'))).toBe(false);
@@ -246,14 +244,15 @@ test.describe('time input native behavior and composition contracts', () => {
 
     await trigger.click();
     await expect(panel).toBeVisible();
-    await hours.focus();
     const initialValue = await input.inputValue();
-    const initialHour = Number(await hours.getAttribute('aria-valuenow'));
-    const key = initialHour === 23 ? 'ArrowDown' : 'ArrowUp';
-    const expectedHour = initialHour === 23 ? 22 : initialHour + 1;
+    const initialHour = Number(initialValue.slice(0, 2));
+    // The recipe bounds the picker at 08:00-18:00, so step away from the edge.
+    const key = initialHour >= 18 ? 'ArrowUp' : 'ArrowDown';
+    const expectedHour = initialHour >= 18 ? initialHour - 1 : initialHour + 1;
     const expectedValue = `${expectedHour.toString().padStart(2, '0')}:${initialValue.slice(3, 5)}`;
-    await hours.press(key);
-    await expect(hours).toHaveAttribute('aria-valuenow', String(expectedHour));
+    await hourTabStop.focus();
+    await page.keyboard.press(key);
+    await expect(hourTabStop).toHaveText(expectedHour.toString().padStart(2, '0'));
     await expect(input).toHaveValue(expectedValue);
 
     await panel.getByRole('button', { name: 'Done' }).click();

@@ -411,7 +411,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           await expect(example.locator('#picker-time')).toBeVisible();
           await example.getByRole('button', { name: 'Choose time' }).click();
           await expect(
-            page.locator('[data-testid="time-picker-panel"]').getByRole('spinbutton', {
+            page.locator('[data-testid="time-picker-panel"]').getByRole('listbox', {
               name: 'Hours',
             }),
           ).toBeVisible();

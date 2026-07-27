@@ -31,7 +31,7 @@ const confirmLabels = {
 
 const timePickerLabels = {
   selectedTime: (time: string) => 'Consumer fixture selected ' + time,
-  minutePresets: 'Consumer fixture minute presets',
+  noTimeSelected: 'Consumer fixture no time selected',
 } satisfies Partial<HellTimePickerLabels>;
 
 // Unified modal and anchored HellPrompt flows plus the standalone Time Picker
@@ -58,7 +58,7 @@ export class OverlayPrompts {
   protected readonly timePickerUi = {
     root: 'border-hell-primary',
     readout: 'text-hell-primary',
-    minutePreset: 'rounded-hell-md',
+    option: 'rounded-hell-md',
   } satisfies HellTimePickerUi;
 
   protected async openModal(): Promise<void> {
