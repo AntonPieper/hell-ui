@@ -9,7 +9,7 @@ import {
   faSolidFileLines,
   faSolidFilePdf,
   faSolidFolderOpen,
-  faSolidTrashCan,
+  faSolidTrash,
   faSolidTriangleExclamation,
 } from '@ng-icons/font-awesome/solid';
 
@@ -55,7 +55,7 @@ const FILE_PICKER_UPLOAD_ICONS = {
   faSolidFileLines,
   faSolidFilePdf,
   faSolidFolderOpen,
-  faSolidTrashCan,
+  faSolidTrash,
   faSolidTriangleExclamation,
 };
 
@@ -199,7 +199,7 @@ const FILE_PICKER_UPLOAD_ICONS = {
                       [attr.aria-label]="'Remove ' + item.file.name"
                       (click)="remove(item.id, pickerHost)"
                     >
-                      <hell-icon name="faSolidTrashCan" />
+                      <hell-icon name="faSolidTrash" />
                     </button>
                   </div>
                 </div>
