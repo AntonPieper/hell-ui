@@ -366,6 +366,31 @@ export class HellPdfViewer {
     this.runtime.goTo(n);
   }
 
+  /**
+   * Commit a typed page number. The input is bound to `page()`, so an
+   * out-of-range entry that clamps to the page the viewer is already on would
+   * otherwise leave the typed text sitting in the box: the binding value never
+   * changes, so Angular never rewrites the DOM value. Write the resolved page
+   * back explicitly instead.
+   */
+  protected commitPageInput(input: HTMLInputElement) {
+    // `type="number"` sanitizes anything unparseable to an empty string, so a
+    // blank field is how "not a page number" arrives here. Restore the current
+    // page rather than reading `Number('')` as page 0 and navigating away.
+    const raw = input.value.trim();
+    const parsed = raw === '' ? Number.NaN : Number(raw);
+    if (!Number.isFinite(parsed)) {
+      input.value = String(this.page());
+      return;
+    }
+
+    const total = this.totalPages() || 1;
+    const target = Math.min(Math.max(Math.trunc(parsed), 1), total);
+
+    this.goTo(target);
+    input.value = String(this.page());
+  }
+
   protected zoomIn() {
     this.runtime.zoomIn();
   }

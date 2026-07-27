@@ -113,6 +113,7 @@ describe('PDF Runtime', () => {
 
     const plainWheel = new WheelEvent('wheel', { deltaY: -10, bubbles: true, cancelable: true });
     container.dispatchEvent(plainWheel);
+    await nextFrame();
 
     expect(plainWheel.defaultPrevented).toBe(false);
     expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
@@ -126,6 +127,7 @@ describe('PDF Runtime', () => {
       cancelable: true,
     });
     container.dispatchEvent(zoomWheel);
+    await nextFrame();
 
     expect(zoomWheel.defaultPrevented).toBe(true);
     expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
@@ -135,8 +137,209 @@ describe('PDF Runtime', () => {
     container.dispatchEvent(
       new WheelEvent('wheel', { ctrlKey: true, deltaY: -10, bubbles: true, cancelable: true }),
     );
+    await nextFrame();
 
     expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+  });
+
+  it('coalesces a gesture zoom burst into one scale write per frame', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    for (let i = 0; i < 12; i++) {
+      container.dispatchEvent(
+        new WheelEvent('wheel', {
+          ctrlKey: true,
+          deltaY: -6,
+          clientX: 4,
+          clientY: 4,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    }
+    await nextFrame();
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+    // The burst still lands on the scale the last event asked for.
+    expect(adapter.session.setNumericZoom.mock.calls[0]?.[0]).toBeCloseTo(
+      Math.round(Math.exp(6 * 0.007 * 12) * 100) / 100,
+      2,
+    );
+    // Gesture writes ask pdf.js to postpone re-rasterizing until the gesture settles.
+    expect(adapter.session.setNumericZoom.mock.calls[0]?.[1]?.drawingDelay).toBeGreaterThanOrEqual(
+      0,
+    );
+  });
+
+  it('rebases wheel zoom on the scale pdf.js holds after it changes the scale itself', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    const wheel = () => {
+      container.dispatchEvent(
+        new WheelEvent('wheel', {
+          ctrlKey: true,
+          deltaY: -60,
+          clientX: 4,
+          clientY: 4,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      return nextFrame();
+    };
+
+    await wheel();
+    const zoomedIn = adapter.session.currentScale;
+    expect(zoomedIn).toBeCloseTo(1.52, 2);
+
+    // Wheel has no gesture-end event, so nothing tells the accumulator that
+    // pdf.js jumped the scale on its own — an internal link or outline entry
+    // whose destination carries a zoom writes `currentScaleValue` directly.
+    adapter.session.currentScale = 0.9;
+    await wheel();
+
+    expect(adapter.session.currentScale).toBeCloseTo(0.9 * Math.exp(60 * 0.007), 1);
+    expect(adapter.session.currentScale).toBeLessThan(zoomedIn);
+  });
+
+  it('keeps accumulating within a frame instead of rebasing mid-burst', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // Three events inside one frame must compound; `currentScale` is still the
+    // pre-gesture value until the flush lands, so it is not a valid base.
+    for (let i = 0; i < 3; i++) {
+      container.dispatchEvent(
+        new WheelEvent('wheel', {
+          ctrlKey: true,
+          deltaY: -30,
+          clientX: 4,
+          clientY: 4,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    }
+    await nextFrame();
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+    expect(adapter.session.currentScale).toBeCloseTo(
+      Math.round(Math.exp(30 * 0.007 * 3) * 100) / 100,
+      2,
+    );
+  });
+
+  it('starts a pinch from the scale a queued gesture flush will apply', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 300,
+      height: 400,
+      top: 0,
+      right: 300,
+      bottom: 400,
+      left: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // Queue a zoom, then start a pinch before the frame flushes. Reading
+    // `currentScale` here would restart the pinch from a superseded scale.
+    container.dispatchEvent(
+      new WheelEvent('wheel', {
+        ctrlKey: true,
+        deltaY: -60,
+        clientX: 150,
+        clientY: 200,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    container.dispatchEvent(touchPointer('pointerdown', 1, 100, 200));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 200, 200));
+    container.dispatchEvent(touchPointer('pointermove', 2, 300, 200));
+    await nextFrame();
+
+    // Pinch doubled the distance, so it doubles the queued 1.52, not 1.0.
+    expect(adapter.session.currentScale).toBeCloseTo(3.04, 1);
+  });
+
+  it('applies keyboard and toolbar zoom immediately instead of deferring drawing', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    runtime.zoomIn();
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+    expect(adapter.session.setNumericZoom.mock.calls[0]?.[1]).toBeUndefined();
+  });
+
+  it('drops a pending gesture zoom when a preset zoom is selected', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    container.dispatchEvent(
+      new WheelEvent('wheel', {
+        ctrlKey: true,
+        deltaY: -6,
+        clientX: 4,
+        clientY: 4,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    runtime.setZoomValue('page-width');
+    await nextFrame();
+
+    expect(adapter.session.setZoomValue).toHaveBeenCalledWith('page-width');
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+  });
+
+  it('re-applies a container-fitted preset zoom when the container is resized', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    const observers = stubResizeObserver();
+
+    try {
+      await runtime.bootstrap(container, createRuntimeHandlers());
+      adapter.loadQueue.push({ promise: Promise.resolve(fakeDocument(2)), destroy: vi.fn() });
+      await runtime.loadDocument('resize.pdf', {
+        initialPage: 1,
+        initialZoom: 'auto',
+        onLoaded: vi.fn(),
+      });
+
+      expect(observers.observed()).toContain(container);
+
+      observers.trigger();
+      await nextFrame();
+
+      expect(adapter.session.refreshPresetZoom).toHaveBeenCalled();
+
+      runtime.cleanup();
+      observers.trigger();
+      await nextFrame();
+
+      expect(adapter.session.refreshPresetZoom).toHaveBeenCalledOnce();
+    } finally {
+      observers.restore();
+    }
   });
 
   it('zooms around the gesture center on two-touch pinch', async () => {
@@ -165,14 +368,16 @@ describe('PDF Runtime', () => {
 
     const pinchMove = touchPointer('pointermove', 2, 280, 260);
     container.dispatchEvent(pinchMove);
+    await nextFrame();
 
     expect(pinchMove.defaultPrevented).toBe(true);
-    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(1.5);
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(1.5, expect.anything());
     expect(container.scrollLeft).toBeCloseTo(52.5);
     expect(container.scrollTop).toBeCloseTo(30);
 
     runtime.cleanup();
     container.dispatchEvent(touchPointer('pointermove', 2, 340, 260));
+    await nextFrame();
 
     expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
   });
@@ -221,6 +426,38 @@ describe('PDF Runtime', () => {
     await runtime.renderThumbs([canvas], () => true);
 
     expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
+  });
+
+  it('repaints thumbnails onto the fresh canvases a reopened overview creates', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
+    const doc = fakeDocument(3);
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    const opened = document.createElement('canvas');
+    opened.dataset['page'] = '2';
+    await runtime.renderThumbs([opened], () => true);
+    await runtime.renderThumbs([opened], () => true);
+
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledOnce();
+
+    // Closing the overview discards the canvases; reopening builds new blank
+    // ones for the same page numbers, and those have to be painted again.
+    const reopened = document.createElement('canvas');
+    reopened.dataset['page'] = '2';
+    await runtime.renderThumbs([reopened], () => true);
+
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
+    expect(adapter.session.renderThumbnail).toHaveBeenLastCalledWith(doc, 2, reopened);
   });
 
   it('destroys the active document during cleanup', async () => {
@@ -530,10 +767,57 @@ class FakePdfSession implements HellPdfViewerSession {
   }
 
   setPage = vi.fn();
+  refreshPresetZoom = vi.fn();
 
-  setNumericZoom = vi.fn((scale: number): void => {
+  setNumericZoom = vi.fn((scale: number, _options?: { readonly drawingDelay?: number }): void => {
     this.currentScale = scale;
   });
+}
+
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+/** jsdom ships no ResizeObserver; install a controllable one for the test. */
+function stubResizeObserver() {
+  const view = window as unknown as { ResizeObserver?: typeof ResizeObserver };
+  const previous = Object.getOwnPropertyDescriptor(view, 'ResizeObserver');
+  const instances: { targets: Set<Element>; notify: () => void }[] = [];
+
+  class TestResizeObserver {
+    private readonly targets = new Set<Element>();
+
+    constructor(notify: () => void) {
+      instances.push({ targets: this.targets, notify });
+    }
+
+    observe(target: Element): void {
+      this.targets.add(target);
+    }
+
+    unobserve(target: Element): void {
+      this.targets.delete(target);
+    }
+
+    disconnect(): void {
+      this.targets.clear();
+    }
+  }
+
+  view.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+
+  return {
+    observed: () => instances.flatMap((entry) => [...entry.targets]),
+    trigger: () => {
+      for (const entry of instances) {
+        if (entry.targets.size > 0) entry.notify();
+      }
+    },
+    restore: () => {
+      if (previous) Object.defineProperty(view, 'ResizeObserver', previous);
+      else delete view.ResizeObserver;
+    },
+  };
 }
 
 function ctrlKey(key: string): KeyboardEvent {

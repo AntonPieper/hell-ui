@@ -193,6 +193,43 @@ describe('HellPdfViewer', () => {
     expect(prev.disabled).toBe(false);
   });
 
+  it('snaps a typed page number back to the page the viewer navigated to', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const root = fixture.nativeElement as HTMLElement;
+    const pageInput = root.querySelector<HTMLInputElement>('[data-slot="pageInput"]');
+    if (!pageInput) throw new Error('Expected the toolbar page input.');
+
+    const commit = async (value: string) => {
+      pageInput.value = value;
+      pageInput.dispatchEvent(new Event('change', { bubbles: true }));
+      await settle(fixture);
+    };
+
+    // The fake document has 3 pages; out-of-range entries clamp, and the input
+    // must not keep showing a page the viewer never navigated to.
+    await commit('9999');
+    expect(pageInput.value).toBe('3');
+
+    await commit('0');
+    expect(pageInput.value).toBe('1');
+
+    await commit('2');
+    expect(pageInput.value).toBe('2');
+
+    // A cleared field means "no page number", not page zero: it restores the
+    // page the viewer is on rather than navigating to the first one. Asserted
+    // from page 2 so navigating to page 1 would be visible.
+    await commit('');
+    expect(pageInput.value).toBe('2');
+
+    // `type="number"` sanitizes unparseable text to an empty string, so this
+    // takes the same path.
+    await commit('not a page');
+    expect(pageInput.value).toBe('2');
+  });
+
   it('composes page overview thumbnails with the Hell button primitive', async () => {
     const fixture = TestBed.createComponent(PdfViewerHost);
     await settle(fixture);

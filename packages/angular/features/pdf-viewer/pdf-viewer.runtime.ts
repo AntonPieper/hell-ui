@@ -11,12 +11,32 @@ import {
   HellPdfJsRuntimeAdapter,
   type HellPdfDocumentHandle,
   type HellPdfDocumentLoadTask,
+  type HellPdfNumericZoomOptions,
   type HellPdfRuntimeAdapter,
   type HellPdfWorkerSource,
   type HellPdfPrintSession,
   type HellPdfViewerSession,
 } from './pdf-viewer.adapter';
 import type { HellPdfPrintOptions } from './pdf-viewer.print';
+
+/**
+ * Milliseconds pdf.js waits after the last gesture-driven scale write before it
+ * re-rasterizes pages. Matches the pdf.js reference viewer's zoom delay.
+ */
+const HELL_PDF_GESTURE_DRAWING_DELAY_MS = 400;
+
+/**
+ * How far the wheel accumulator may sit from the scale pdf.js actually holds
+ * before it counts as stale: half a two-decimal quantization step, plus float
+ * slack. Anything wider means something other than this gesture moved the
+ * scale.
+ */
+const HELL_PDF_GESTURE_SCALE_DRIFT = 0.006;
+
+/** pdf.js quantizes gesture-driven scales to two decimals; match it exactly. */
+function quantizeGestureScale(scale: number): number {
+  return Math.round(scale * 100) / 100;
+}
 
 /** Source types accepted by the PDF runtime and adapter. */
 export type HellPdfSource = string | URL | ArrayBuffer;
@@ -250,13 +270,24 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     readonly startDistance: number;
     readonly startScale: number;
   } | null = null;
-  private readonly renderedThumbs = new Set<number>();
+  /**
+   * Which load a thumbnail canvas was painted for. Keyed by element so canvases
+   * discarded when the overview closes are never mistaken for painted ones, and
+   * weak so detached canvases stay collectable.
+   */
+  private readonly renderedThumbs = new WeakMap<HTMLCanvasElement, number>();
   private handlers: HellPdfRuntimeHandlers | null = null;
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
   private loadToken = 0;
   private loadTask: HellPdfDocumentLoadTask | null = null;
   private printCleanup: (() => void) | null = null;
+  private containerResizeObserver: ResizeObserver | null = null;
+  private resizeFrame: number | null = null;
+  private zoomFrame: number | null = null;
+  private pendingZoom: { readonly scale: number; readonly origin?: [number, number] } | null = null;
+  /** Last gesture-requested scale, kept unrounded so slow gestures still accumulate. */
+  private gestureScale: number | null = null;
 
   constructor(private readonly adapter: HellPdfRuntimeAdapter = new HellPdfJsRuntimeAdapter()) {}
 
@@ -302,7 +333,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     const token = ++this.loadToken;
     this.initialPage = options.initialPage;
     this.initialZoom = options.initialZoom;
-    this.renderedThumbs.clear();
+    this.cancelPendingZoom();
 
     await this.cancelActiveLoadTask();
     this.clearActiveDocument();
@@ -336,6 +367,8 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.loadToken++;
     this.containerEventCleanup?.();
     this.containerEventCleanup = null;
+    this.cancelPendingZoom();
+    this.cancelPendingResize();
     this.resetPinchGesture();
     this.clearPrintSession();
     void this.cancelActiveLoadTask();
@@ -355,15 +388,18 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
   zoomIn(): void {
     if (!this.session) return;
+    this.cancelPendingZoom();
     this.setNumericZoom(getNextZoomStep(this.currentScale));
   }
 
   zoomOut(): void {
     if (!this.session) return;
+    this.cancelPendingZoom();
     this.setNumericZoom(getPreviousZoomStep(this.currentScale));
   }
 
   setZoomValue(value: string): void {
+    this.cancelPendingZoom();
     this.session?.setZoomValue(value);
   }
 
@@ -421,16 +457,18 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   ): Promise<void> {
     if (!this.doc || !this.session || !shouldContinue()) return;
 
+    const token = this.loadToken;
+
     for (const canvas of canvases) {
       if (!shouldContinue()) return;
       const n = Number(canvas.dataset['page']);
-      if (!Number.isFinite(n) || this.renderedThumbs.has(n)) continue;
-      this.renderedThumbs.add(n);
+      if (!Number.isFinite(n) || this.renderedThumbs.get(canvas) === token) continue;
+      this.renderedThumbs.set(canvas, token);
 
       try {
         await this.session.renderThumbnail(this.doc, n, canvas);
       } catch {
-        this.renderedThumbs.delete(n);
+        this.renderedThumbs.delete(canvas);
       }
     }
   }
@@ -486,8 +524,12 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     container.addEventListener('touchmove', onTouchMove, { passive: false });
     container.addEventListener('touchend', onTouchEnd);
     container.addEventListener('touchcancel', onTouchEnd);
+    this.observeContainerResize(container);
 
     this.containerEventCleanup = () => {
+      this.containerResizeObserver?.disconnect();
+      this.containerResizeObserver = null;
+      this.cancelPendingResize();
       container.removeEventListener('wheel', onWheel);
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
@@ -501,6 +543,40 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     };
   }
 
+  /**
+   * pdf.js derives `auto`, `page-fit`, and `page-width` from the container box
+   * once and never revisits them. Without this observer a viewer that mounts at
+   * zero width (hidden tab, collapsed pane, detail pane opened later) keeps the
+   * bogus scale that box produced, and a viewer that is merely resized keeps a
+   * preset that no longer fits.
+   */
+  private observeContainerResize(container: HTMLDivElement): void {
+    const view = container.ownerDocument.defaultView;
+    if (!view?.ResizeObserver) return;
+
+    this.containerResizeObserver = new view.ResizeObserver(() => this.queuePresetZoomRefresh());
+    this.containerResizeObserver.observe(container);
+  }
+
+  private queuePresetZoomRefresh(): void {
+    if (this.resizeFrame !== null) return;
+
+    const view = this.container?.ownerDocument.defaultView;
+    if (!view) return;
+
+    this.resizeFrame = view.requestAnimationFrame(() => {
+      this.resizeFrame = null;
+      if (!this.doc) return;
+      this.session?.refreshPresetZoom?.();
+    });
+  }
+
+  private cancelPendingResize(): void {
+    if (this.resizeFrame === null) return;
+    this.container?.ownerDocument.defaultView?.cancelAnimationFrame(this.resizeFrame);
+    this.resizeFrame = null;
+  }
+
   private onWheelZoom(event: WheelEvent): void {
     if (!this.session || !this.container || !event.ctrlKey) return;
 
@@ -509,7 +585,35 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     if (!Number.isFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor === 1) return;
 
     event.preventDefault();
-    this.setNumericZoom(this.currentScale * scaleFactor, getZoomOrigin(this.container, event));
+    this.queueGestureZoom(this.wheelBaseScale * scaleFactor, getZoomOrigin(this.container, event));
+  }
+
+  /**
+   * Scale a new gesture step builds on. A queued flush has not reached pdf.js
+   * yet, so its target — not `currentScale` — is the live value.
+   */
+  private get gestureBaseScale(): number {
+    return this.pendingZoom?.scale ?? this.currentScale;
+  }
+
+  /**
+   * Wheel has no gesture-end event, so unlike pinch the accumulator cannot
+   * reset itself when the gesture stops. It has to notice on its own when
+   * something else moved the scale: clicking an internal link or outline entry
+   * whose destination carries a zoom makes pdf.js write `currentScaleValue`
+   * directly. A settled accumulator sits within half a quantization step of the
+   * scale it applied, so anything wider is an external change and
+   * `currentScale` wins.
+   */
+  private get wheelBaseScale(): number {
+    if (this.pendingZoom) return this.pendingZoom.scale;
+
+    const gestureScale = this.gestureScale;
+    const currentScale = this.currentScale;
+    return gestureScale !== null &&
+      Math.abs(gestureScale - currentScale) <= HELL_PDF_GESTURE_SCALE_DRIFT
+      ? gestureScale
+      : currentScale;
   }
 
   private onPointerDown(event: PointerEvent): void {
@@ -553,7 +657,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     if (event.cancelable) event.preventDefault();
 
     const center = getPointerCenter(points[0], points[1]);
-    this.setNumericZoom(
+    this.queueGestureZoom(
       this.pinchGesture.startScale * (distance / this.pinchGesture.startDistance),
       getZoomOrigin(this.container, center),
     );
@@ -567,7 +671,10 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     if (this.activeTouchPointers.size >= 2) {
       this.startPinchGesture();
+      return;
     }
+
+    this.gestureScale = null;
   }
 
   private onTouchStart(event: TouchEvent): void {
@@ -597,7 +704,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     if (event.cancelable) event.preventDefault();
 
     const center = getPointerCenter(points[0], points[1]);
-    this.setNumericZoom(
+    this.queueGestureZoom(
       this.touchPinchGesture.startScale * (distance / this.touchPinchGesture.startDistance),
       getZoomOrigin(this.container, center),
     );
@@ -609,7 +716,10 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.touchPinchGesture = null;
     if (event.touches.length >= 2) {
       this.startTouchPinchGesture(event);
+      return;
     }
+
+    this.gestureScale = null;
   }
 
   private startPinchGesture(): void {
@@ -618,7 +728,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.pinchGesture = {
       startDistance: getPointerDistance(points[0], points[1]),
-      startScale: this.currentScale,
+      startScale: this.gestureBaseScale,
     };
   }
 
@@ -628,7 +738,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.touchPinchGesture = {
       startDistance: getPointerDistance(points[0], points[1]),
-      startScale: this.currentScale,
+      startScale: this.gestureBaseScale,
     };
   }
 
@@ -636,6 +746,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.activeTouchPointers.clear();
     this.pinchGesture = null;
     this.touchPinchGesture = null;
+    this.gestureScale = null;
   }
 
   private getPinchPoints():
@@ -649,7 +760,59 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     return [points[0], points[1]];
   }
 
-  private setNumericZoom(scale: number, origin?: [number, number]): void {
+  /**
+   * Collapse a burst of wheel/pinch events into one scale write per frame.
+   * A trackpad emits 60-120 zoom events per second and each raw write made
+   * pdf.js re-layout and re-rasterize every visible page.
+   */
+  private queueGestureZoom(scale: number, origin?: [number, number]): void {
+    if (!this.session || !this.container) return;
+
+    const targetScale = clampZoomScale(scale);
+    this.gestureScale = targetScale;
+    this.pendingZoom = { scale: targetScale, origin };
+
+    if (this.zoomFrame !== null) return;
+
+    const view = this.container.ownerDocument.defaultView;
+    if (!view) {
+      this.flushGestureZoom();
+      return;
+    }
+
+    this.zoomFrame = view.requestAnimationFrame(() => {
+      this.zoomFrame = null;
+      this.flushGestureZoom();
+    });
+  }
+
+  private flushGestureZoom(): void {
+    const pending = this.pendingZoom;
+    this.pendingZoom = null;
+    if (!pending) return;
+
+    // Quantize to match pdf.js: the skip check and the scroll anchoring then
+    // work off the scale pdf.js will actually apply. `gestureScale` still holds
+    // the unrounded target so a slow gesture keeps accumulating instead of
+    // stalling below the step.
+    this.setNumericZoom(quantizeGestureScale(pending.scale), pending.origin, {
+      drawingDelay: HELL_PDF_GESTURE_DRAWING_DELAY_MS,
+    });
+  }
+
+  private cancelPendingZoom(): void {
+    this.pendingZoom = null;
+    this.gestureScale = null;
+    if (this.zoomFrame === null) return;
+    this.container?.ownerDocument.defaultView?.cancelAnimationFrame(this.zoomFrame);
+    this.zoomFrame = null;
+  }
+
+  private setNumericZoom(
+    scale: number,
+    origin?: [number, number],
+    options?: HellPdfNumericZoomOptions,
+  ): void {
     if (!this.session || !this.container) return;
 
     const currentScale = this.currentScale;
@@ -662,7 +825,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     const previousScrollTop = this.container.scrollTop;
     const zoomRatio = targetScale / currentScale;
 
-    this.session.setNumericZoom(targetScale);
+    this.session.setNumericZoom(targetScale, options);
     this.container.scrollLeft = (previousScrollLeft + localX) * zoomRatio - localX;
     this.container.scrollTop = (previousScrollTop + localY) * zoomRatio - localY;
   }
