@@ -1,0 +1,9 @@
+kind: Changed
+body: 'Date Input now fills the native `placeholder` of inputs that do not author
+  one, but only where a format is configured through `provideHellDateInputFormat`
+  or the `format` input, and only with the text the active adapter returns from its
+  new optional `placeholderHint` hook. Inputs without a configured format keep an
+  empty placeholder exactly as before, an adapter that omits the hook suppresses the
+  write, and authoring `placeholder=""` opts out. A placeholder is not a label: keep
+  a Field label or `aria-label` on every Date Input.'
+time: 2026-07-27T12:37:05.767453+02:00

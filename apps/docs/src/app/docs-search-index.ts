@@ -2309,7 +2309,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/date-input',
  detail:'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
  terms:
-'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal strict ISO YYYY-MM-DD',
+'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal placeholderHint HellDateInputAdapterContext configured format ISO YYYY-MM-DD default',
  },
  {
  title:'Date input forms value',

@@ -109,9 +109,29 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         receives.
       </p>
       <p>
-        Date Input fills the native <code>placeholder</code> with the effective pattern unless the
-        consumer authors one. Anything a pattern cannot express — month names, locale-aware output,
-        or several accepted input shapes — belongs in a custom adapter instead.
+        A pattern is validated where it is written: both
+        <code>provideHellDateInputFormat</code> and the <code>format</code> input throw on an
+        unsupported pattern instead of failing later during rendering.
+        <code>HellDateInputFormat</code> is a plain <code>string</code>, so that check is
+        deliberately a runtime one. Anything a pattern cannot express — month names, locale-aware
+        output, or several accepted input shapes — belongs in a custom adapter instead.
+      </p>
+
+      <h3>Placeholder hint</h3>
+      <p>
+        Once a format is configured, Date Input writes the adapter's
+        <code>placeholderHint</code> into the native <code>placeholder</code>. Three rules keep that
+        write out of your way: an input with no configured format is never touched, an adapter that
+        omits <code>placeholderHint</code> (or returns <code>null</code>) suppresses it entirely, and
+        any authored <code>placeholder</code> wins — including <code>placeholder=""</code>, which is
+        the explicit opt-out. The hint is applied after render, so server-rendered markup receives it
+        on hydration.
+      </p>
+      <p>
+        A hint is a formatting affordance, never a label: <code>placeholder</code> is the last
+        fallback in the accessible name computation, so an input that relies on it has no real label.
+        Keep a <a routerLink="/components/field">Field</a> label or an <code>aria-label</code> on
+        every Date Input.
       </p>
       <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-format-example />
@@ -213,9 +233,12 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         Override parsing and display policy per injector with
         <code>provideHellDateInputAdapter</code>. A <code>HellDateInputAdapter</code> supplies
         <code>parseText</code>, <code>format</code>, and optional <code>normalize</code>,
-        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks; every hook receives the
-        effective <code>{{ '{ format }' }}</code> context, so a custom adapter can still honor the
-        configured pattern. Return
+        <code>isSameValue</code>, <code>isWithinBounds</code>, and
+        <code>placeholderHint</code> hooks. <code>parseText</code>, <code>format</code>,
+        <code>normalize</code>, <code>isWithinBounds</code>, and <code>placeholderHint</code>
+        receive the effective <code>{{ '{ format }' }}</code> context so a custom adapter can honor
+        the configured pattern; <code>isSameValue</code> compares two values and receives no
+        context. Return
         <code>hellTypedValue(value)</code> for a commit, <code>hellTypedValue(null)</code> for a
         clear, or <code>hellInvalidTypedValue()</code> to retain an invalid draft.
       </p>

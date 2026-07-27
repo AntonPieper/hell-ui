@@ -49,13 +49,17 @@ import {
  */
 export type HellDateInputFormat = string;
 
-/** Business-default ISO date format. */
+/** Business-default ISO date format, used when nothing configures one. */
 export const HELL_DEFAULT_DATE_INPUT_FORMAT: HellDateInputFormat = 'YYYY-MM-DD';
 
-/** Injection token resolving to the effective scoped date input format. */
+/**
+ * Injection token resolving to the configured date input format for a scope.
+ * It has no factory: absence means "nothing configured a format", which is what
+ * keeps Date Input's unconfigured behavior (including its silent placeholder)
+ * identical to before formats existed. Inject it with `{ optional: true }`.
+ */
 export const HELL_DATE_INPUT_FORMAT = new InjectionToken<HellDateInputFormat>(
   'HELL_DATE_INPUT_FORMAT',
-  { factory: () => HELL_DEFAULT_DATE_INPUT_FORMAT },
 );
 
 /**
@@ -76,8 +80,22 @@ export interface HellDateInputAdapterContext {
 
 /**
  * Strategy for parsing, formatting, normalizing, and bounds-checking dates.
+ *
+ * `parseText`, `format`, `normalize`, and `isWithinBounds` receive the
+ * `HellDateInputAdapterContext`; `isSameValue` compares two values and receives
+ * no context.
  */
-export type HellDateInputAdapter = HellTypedInputAdapter<Date, HellDateInputAdapterContext>;
+export interface HellDateInputAdapter
+  extends HellTypedInputAdapter<Date, HellDateInputAdapterContext> {
+  /**
+   * Text hint for the accepted input shape. Date Input writes it to an
+   * unauthored native `placeholder` only when a format is configured; return
+   * `null` (or omit the hook) to write no placeholder at all. An adapter that
+   * accepts text its context format cannot describe should omit it rather than
+   * let the field advertise a shape it will reject.
+   */
+  readonly placeholderHint?: (context: HellDateInputAdapterContext) => string | null;
+}
 
 /** Default adapter for the configured `YYYY`/`MM`/`DD` format. */
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
@@ -86,6 +104,7 @@ export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
   normalize: hellCoerceDateInputValue,
   isSameValue: hellSameDateInputValue,
   isWithinBounds: hellIsDateInputValueWithinBounds,
+  placeholderHint: (context) => context.format,
 };
 
 /** Injection token resolving to the effective date input adapter. */
@@ -155,9 +174,20 @@ function hellCompileDateInputFormat(format: HellDateInputFormat): HellCompiledDa
     source += escapeDateInputFormatLiteral(tail);
   }
 
-  if (order.length !== 3 || new Set(order).size !== 3) {
+  // Leftover `Y`/`M`/`D` means a mistyped token (`YYYYY`, `DDD`) that would
+  // format and be typed literally, and edge whitespace makes the pattern
+  // unable to parse its own output, because parsing trims first.
+  const literalToken = segments.some(
+    (segment) => 'literal' in segment && /[YMD]/.test(segment.literal),
+  );
+  if (
+    order.length !== 3 ||
+    new Set(order).size !== 3 ||
+    literalToken ||
+    format !== format.trim()
+  ) {
     throw new Error(
-      `Unsupported hell date input format "${format}": use YYYY, MM, and DD exactly once each, plus literal separators.`,
+      `Unsupported hell date input format "${format}": use YYYY, MM, and DD exactly once each, plus literal separators that contain no Y, M, D, or leading/trailing whitespace.`,
     );
   }
 
@@ -263,11 +293,18 @@ function hellDateInputBoundAttribute(value: unknown): Date | undefined {
   return value instanceof Date ? value : undefined;
 }
 
-/** Coerces an optional format pattern; `''`, `null`, and `undefined` stay unset. */
+/**
+ * Coerces an optional format pattern; `''`, `null`, and `undefined` stay unset
+ * and fall through to the scoped format. Compiling here makes an unsupported
+ * local pattern throw at the binding, exactly like `provideHellDateInputFormat`
+ * throws at the provider, instead of surfacing later from a render computation.
+ */
 function hellOptionalDateInputFormat(
   value: string | null | undefined,
 ): HellDateInputFormat | undefined {
-  return value ? value : undefined;
+  if (!value) return undefined;
+  hellCompileDateInputFormat(value);
+  return value;
 }
 
 let nextDateInputId = 0;
@@ -286,10 +323,12 @@ let nextDateInputId = 0;
  * failures through `transformedValue` as `invalidDateInputDraft` errors on the
  * nearest Signal Forms field.
  *
- * Typed text, display, native bound attributes, and the placeholder hint follow
- * the effective date format: the local `format` input when set, otherwise the
- * nearest `provideHellDateInputFormat` scope, otherwise ISO `YYYY-MM-DD`. The
- * committed `Date | null` contract is unaffected by the format.
+ * Typed text, display, and native bound attributes follow the effective date
+ * format: the local `format` input when set, otherwise the nearest
+ * `provideHellDateInputFormat` scope, otherwise ISO `YYYY-MM-DD`. The committed
+ * `Date | null` contract is unaffected by the format. When — and only when — a
+ * format is configured, an unauthored native `placeholder` receives the
+ * adapter's `placeholderHint`; author `placeholder=""` to keep it empty.
  */
 @Directive({
   selector: 'input[hellDateInput]',
@@ -365,7 +404,7 @@ export class HellDateInput implements FormValueControl<Date | null> {
   private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
   private readonly renderer = inject(Renderer2);
   private readonly adapter = inject(HELL_DATE_INPUT_ADAPTER);
-  private readonly scopedFormat = inject(HELL_DATE_INPUT_FORMAT);
+  private readonly scopedFormat = inject(HELL_DATE_INPUT_FORMAT, { optional: true });
   /**
    * The Signal Forms `FormField` directive bound to this host, when present.
    * Parse failures are reported only into its field: classic
@@ -388,8 +427,15 @@ export class HellDateInput implements FormValueControl<Date | null> {
   /** Last placeholder hint this directive wrote, so consumer text is never replaced. */
   private appliedPlaceholder: string | null = null;
 
-  /** Effective format: the local input, then the scoped provider, then ISO. */
-  private readonly dateFormat = computed(() => this.format() ?? this.scopedFormat);
+  /**
+   * Explicitly configured format — the local input, then the scoped provider.
+   * `null` means nothing configured one, which keeps the placeholder unwritten.
+   */
+  private readonly configuredFormat = computed(() => this.format() ?? this.scopedFormat);
+  /** Effective format: the configured one, otherwise the ISO default. */
+  private readonly dateFormat = computed(
+    () => this.configuredFormat() ?? HELL_DEFAULT_DATE_INPUT_FORMAT,
+  );
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.value(),
@@ -485,12 +531,26 @@ export class HellDateInput implements FormValueControl<Date | null> {
     });
 
     afterRenderEffect(() => {
-      // The effective format doubles as the placeholder hint. A placeholder the
-      // directive did not write is consumer-owned text and is left untouched;
-      // reading after render sees static attributes and template bindings alike.
-      const hint = this.dateFormat();
+      // Three gates before the directive touches a consumer's markup: a format
+      // must be configured (so unconfigured apps keep their empty field), the
+      // adapter must supply the hint (so the field never advertises a shape it
+      // rejects), and the attribute must be absent or previously ours (so an
+      // authored `placeholder`, including `placeholder=""`, always wins).
+      // Reading after render sees static attributes and bindings alike.
+      const hint =
+        this.configuredFormat() === null
+          ? null
+          : this.adapter.placeholderHint?.(this.context()) || null;
       const current = this.host.getAttribute('placeholder');
       if (current !== null && current !== this.appliedPlaceholder) return;
+      if (hint === null) {
+        // A hint the directive owns is removed again once it would stop being
+        // true, rather than left behind advertising a format no longer in use.
+        if (this.appliedPlaceholder === null) return;
+        this.renderer.removeAttribute(this.host, 'placeholder');
+        this.appliedPlaceholder = null;
+        return;
+      }
       if (current === hint) return;
       this.renderer.setAttribute(this.host, 'placeholder', hint);
       this.appliedPlaceholder = hint;

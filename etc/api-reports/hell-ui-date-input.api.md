@@ -56,7 +56,9 @@ export class HellDateInput implements FormValueControl<Date | null> {
 }
 
 // @public
-export type HellDateInputAdapter = HellTypedInputAdapter<Date, HellDateInputAdapterContext>;
+export interface HellDateInputAdapter extends HellTypedInputAdapter<Date, HellDateInputAdapterContext> {
+    readonly placeholderHint?: (context: HellDateInputAdapterContext) => string | null;
+}
 
 // @public
 export interface HellDateInputAdapterContext {

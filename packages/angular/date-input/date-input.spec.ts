@@ -294,6 +294,65 @@ class ScopedFormatHost {
   readonly overriddenValues: Array<Date | null> = [];
 }
 
+/** No format provider: only the local input can configure one. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  template: `
+    <input
+      hellDateInput
+      aria-label="Local format date"
+      [value]="value()"
+      [format]="format()"
+    />
+  `,
+})
+class LocalFormatOnlyHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  readonly format = signal<string | undefined>(undefined);
+}
+
+/** A configured format plus an adapter that accepts text the format cannot describe. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  providers: [
+    provideHellDateInputFormat('DD.MM.YYYY'),
+    provideHellDateInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'today'
+          ? { valid: true, value: new Date(2026, 0, 2) }
+          : text.trim()
+            ? { valid: false }
+            : { valid: true, value: null },
+      format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
+    }),
+  ],
+  template: `<input hellDateInput aria-label="Silent adapter date" />`,
+})
+class SilentAdapterFormatHost {}
+
+/** A configured format plus an adapter that supplies its own hint. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  providers: [
+    provideHellDateInputFormat('DD.MM.YYYY'),
+    provideHellDateInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'today'
+          ? { valid: true, value: new Date(2026, 0, 2) }
+          : text.trim()
+            ? { valid: false }
+            : { valid: true, value: null },
+      format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
+      placeholderHint: () => 'today',
+    }),
+  ],
+  template: `<input hellDateInput aria-label="Hinting adapter date" />`,
+})
+class HintingAdapterFormatHost {}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -309,6 +368,9 @@ describe('HellDateInput', () => {
         InvalidFieldHost,
         CustomAdapterHost,
         ScopedFormatHost,
+        LocalFormatOnlyHost,
+        SilentAdapterFormatHost,
+        HintingAdapterFormatHost,
       ],
     }).compileComponents();
   });
@@ -933,6 +995,113 @@ describe('HellDateInput', () => {
     expect(() => provideHellDateInputFormat('DD.MM.YY')).toThrow(
       /Unsupported hell date input format/,
     );
+    // Leftover token letters would be formatted and typed literally.
+    expect(() => provideHellDateInputFormat('YYYYY-MM-DD')).toThrow(
+      /Unsupported hell date input format/,
+    );
+    expect(() => provideHellDateInputFormat('YYYY-MM-DDD')).toThrow(
+      /Unsupported hell date input format/,
+    );
+    // Edge whitespace cannot round-trip, because parsing trims first.
+    expect(() => provideHellDateInputFormat(' YYYY-MM-DD ')).toThrow(
+      /Unsupported hell date input format/,
+    );
+  });
+
+  it('rejects an unsupported local format at the binding, not during rendering', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    fixture.componentInstance.format.set('DD.MM');
+    expect(() => fixture.detectChanges()).toThrow(/Unsupported hell date input format/);
+  });
+
+  it('treats an empty local format as unset and falls through to the provider', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInputLabelled(fixture.nativeElement, 'Scoped format date');
+
+    host.format.set('YYYY/MM/DD');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026/04/22');
+
+    host.format.set('');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('22.04.2026');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes no placeholder until a format is configured', async () => {
+    const fixture = TestBed.createComponent(TwoWayHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = dateInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('adds and removes its own placeholder as a local format comes and goes', async () => {
+    const fixture = TestBed.createComponent(LocalFormatOnlyHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInputLabelled(fixture.nativeElement, 'Local format date');
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+
+    host.format.set('DD.MM.YYYY');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('22.04.2026');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+
+    // Back to the unconfigured default: the hint would no longer be true.
+    host.format.set(undefined);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('writes no placeholder when the adapter supplies no hint', async () => {
+    const fixture = TestBed.createComponent(SilentAdapterFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The adapter accepts only `today`, so the field must not advertise a
+    // format pattern it would reject.
+    const input = dateInputLabelled(fixture.nativeElement, 'Silent adapter date');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('writes the adapter placeholder hint instead of the raw format', async () => {
+    const fixture = TestBed.createComponent(HintingAdapterFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = dateInputLabelled(fixture.nativeElement, 'Hinting adapter date');
+    expect(input.placeholder).toBe('today');
+  });
+
+  it('hints the default adapter with the context format', () => {
+    expect(HELL_DEFAULT_DATE_INPUT_ADAPTER.placeholderHint!({ format: 'DD.MM.YYYY' })).toBe(
+      'DD.MM.YYYY',
+    );
+    expect(HELL_DEFAULT_DATE_INPUT_ADAPTER.placeholderHint!(ISO_CONTEXT)).toBe('YYYY-MM-DD');
   });
 });
 

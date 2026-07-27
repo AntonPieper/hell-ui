@@ -1,13 +1,17 @@
 kind: Breaking
 body: >-
-  `HellDateInputAdapter` hooks now receive a `HellDateInputAdapterContext`
+  `HellDateInputAdapter`'s `parseText`, `format`, `normalize`, and
+  `isWithinBounds` hooks now receive a `HellDateInputAdapterContext`
   (`{ format }`) as their trailing argument, the same shape Time Input's adapter
-  context already uses. Custom adapters that ignore the argument keep compiling;
-  direct calls into `HELL_DEFAULT_DATE_INPUT_ADAPTER` must pass a context.
+  context already uses; `isSameValue` compares two values and receives no
+  context. Custom adapters that ignore the argument keep compiling; direct calls
+  into `HELL_DEFAULT_DATE_INPUT_ADAPTER` must pass a context.
 time: 2026-07-27T11:19:34.000000+02:00
 custom:
   migration: >-
-    Add the effective format context to direct calls into
-    `HELL_DEFAULT_DATE_INPUT_ADAPTER`: its hooks now take a trailing
-    `{ format: HELL_DEFAULT_DATE_INPUT_FORMAT }` argument. Adapters supplied
-    through `provideHellDateInputAdapter` need no change.
+    Inside an adapter hook that delegates to `HELL_DEFAULT_DATE_INPUT_ADAPTER`
+    forward the `context` argument your hook received. Passing a fixed
+    `{ format: HELL_DEFAULT_DATE_INPUT_FORMAT }` there also compiles but pins
+    that adapter to ISO forever and makes `provideHellDateInputFormat` do
+    nothing for your app; use the fixed context only for calls made outside an
+    adapter hook.
