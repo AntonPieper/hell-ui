@@ -590,6 +590,11 @@
 
   .hd-nav-item {
     display: flex;
+    /* One stable layout for the whole collapse: rows are sized by the rail's
+       resting content width, not by the box the shell is interpolating, so
+       nothing inside them re-wraps or re-ellipsises frame by frame. The rail
+       crops the row as it narrows. */
+    width: var(--hell-app-sidenav-content-width);
     cursor: pointer;
     align-items: center;
     gap: var(--spacing-hell-3);
@@ -620,6 +625,9 @@
     align-items: center;
     justify-content: center;
     color: var(--color-hell-foreground-subtle);
+    /* `translate` moves the glyph without touching layout, so the icon glides
+       into the rail's center while the row it sits in stays put. */
+    transition: translate var(--hell-duration-base) var(--ease-hell-out);
   }
 
   .hd-nav-item-label {
@@ -627,6 +635,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    /* `visibility` keeps the fade honest: the label leaves the accessibility
+       tree at the end of the transition rather than lingering at opacity 0. */
+    transition:
+      opacity var(--hell-duration-base) var(--ease-hell-out),
+      visibility var(--hell-duration-base) var(--ease-hell-out);
   }
 
   /*
@@ -643,17 +656,37 @@
 
   .hd-nav-section {
     display: flex;
+    width: var(--hell-app-sidenav-content-width);
     flex-direction: column;
   }
 
+  /*
+   * The divider that stands in for the heading in rail mode. It is always in
+   * flow so the swap animates: heading height and divider height trade places
+   * over one duration instead of the items below jumping in a single frame.
+   */
   .hd-nav-section::before {
     content: '';
-    display: none;
+    display: block;
+    flex: none;
+    height: 0;
+    margin-block: 0;
+    margin-inline: calc(var(--spacing) * 2);
+    opacity: 0;
+    background-color: var(--color-hell-border);
+    transition:
+      height var(--hell-duration-base) var(--ease-hell-out),
+      margin-block var(--hell-duration-base) var(--ease-hell-out),
+      opacity var(--hell-duration-base) var(--ease-hell-out);
   }
 
   .hd-nav-section-toggle {
     display: flex;
     width: 100%;
+    /* An explicit line box makes the heading exactly one line tall, so the row
+       has a real height to animate to zero and can never re-wrap while the
+       rail is narrow. */
+    height: calc(14px + 2 * calc(var(--spacing) * 1.5));
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-hell-2);
@@ -667,12 +700,20 @@
     font: inherit;
     font-size: 10px;
     font-weight: var(--font-weight-bold);
+    line-height: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
     color: var(--color-hell-foreground-subtle);
     border-radius: var(--radius-hell-sm);
     transition:
+      height var(--hell-duration-base) var(--ease-hell-out),
+      margin-top var(--hell-duration-base) var(--ease-hell-out),
+      padding-block var(--hell-duration-base) var(--ease-hell-out),
+      opacity var(--hell-duration-base) var(--ease-hell-out),
+      visibility var(--hell-duration-base) var(--ease-hell-out),
       background var(--hell-duration-fast) var(--ease-hell-out),
       color var(--hell-duration-fast) var(--ease-hell-out);
   }
@@ -725,30 +766,43 @@
   }
 
   /*
-   * Rail mode. Labels and section toggles hide, items center as icons, and
-   * a divider replaces each section heading. Collapsed sections auto-expand
-   * so every item stays reachable while the rail is icon-only.
+   * Rail mode. Every rule here is a transition of a continuous property, so
+   * collapsing and expanding read as one motion rather than a layout swap:
+   * labels and headings fade out, the icon translates into the rail's center,
+   * and the heading trades its height for the divider's. Collapsed sections
+   * auto-expand so every item stays reachable while the rail is icon-only.
+   *
+   * Nothing here re-centers a row, because a row's box is interpolating while
+   * the rail collapses — centering against it is what made the icons jump.
+   * The row stays anchored to the rail's leading edge and the icon covers the
+   * remaining distance on its own: half the collapsed rail's content width,
+   * less half its own width, less the row's leading padding.
    */
 
-  [hellAppSidenav][data-collapsed='true'] .hd-nav-item {
-    justify-content: center;
-    padding-inline: calc(var(--spacing) * 0);
+  [hellAppSidenav][data-collapsed='true'] .hd-nav-item-icon {
+    translate: calc(
+        (var(--hell-app-sidenav-collapsed-content-width) - 100%) / 2 - calc(var(--spacing) * 3)
+      )
+      0;
   }
 
   [hellAppSidenav][data-collapsed='true'] .hd-nav-item-label {
-    display: none;
+    visibility: hidden;
+    opacity: 0;
   }
 
   [hellAppSidenav][data-collapsed='true'] .hd-nav-section-toggle {
-    display: none;
+    height: 0;
+    margin-top: 0;
+    padding-block: 0;
+    visibility: hidden;
+    opacity: 0;
   }
 
   [hellAppSidenav][data-collapsed='true'] .hd-nav-section::before {
-    display: block;
     height: 1px;
     margin-block: calc(var(--spacing) * 2);
-    margin-inline: calc(var(--spacing) * 2);
-    background-color: var(--color-hell-border);
+    opacity: 1;
   }
 
   [hellAppSidenav][data-collapsed='true'] .hd-nav-section-items {

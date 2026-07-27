@@ -19,13 +19,18 @@ const HD_APP_SHELL_SIDENAV_ICONS = {
   faSolidUsers,
 };
 
-/** Nav item recipe over the sidenav's `data-collapsed` shell state attribute. */
+/**
+ * Nav item recipe over the sidenav's `data-collapsed` shell state attribute.
+ * Rows take the sidenav's resting content width rather than the box the shell
+ * is interpolating, so rail mode is pure motion: labels fade and icons slide to
+ * the rail's center instead of the row re-laying-out on every frame.
+ */
 const NAV_ITEM =
-  'flex cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
+  'flex w-[var(--hell-app-sidenav-content-width)] cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary';
 const NAV_ICON =
-  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle';
-const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
-const NAV_TRAILING = 'in-data-[collapsed=true]:hidden';
+  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle transition-[translate] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:translate-x-[calc((var(--hell-app-sidenav-collapsed-content-width)_-_100%)/2_-_calc(var(--spacing)_*_3))]';
+const NAV_LABEL = 'flex-1 truncate transition-[opacity,visibility] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:invisible in-data-[collapsed=true]:opacity-0';
+const NAV_TRAILING = 'transition-[opacity,visibility] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:invisible in-data-[collapsed=true]:opacity-0';
 
 @Component({
   selector: 'app-app-shell-sidenav-example',
@@ -35,23 +40,38 @@ const NAV_TRAILING = 'in-data-[collapsed=true]:hidden';
   // Collapsible group recipe: the app owns the expanded state and
   // `aria-expanded`, collapsed items leave the accessibility tree and tab
   // order through `visibility: hidden`, and the shell's stable
-  // `[hellAppSidenav][data-collapsed='true']` attribute hides the heading,
-  // draws a divider, and force-expands the group so every item stays
-  // reachable while the rail is icon-only.
+  // `[hellAppSidenav][data-collapsed='true']` attribute fades the heading out
+  // behind a divider and force-expands the group so every item stays reachable
+  // while the rail is icon-only. Rail mode animates the heading's height into
+  // the divider's, so the items below glide instead of jumping a row.
   styles: `
     .nav-section {
       display: flex;
+      width: var(--hell-app-sidenav-content-width);
       flex-direction: column;
     }
 
     .nav-section::before {
       content: '';
-      display: none;
+      display: block;
+      flex: none;
+      height: 0;
+      margin-block: 0;
+      margin-inline: calc(var(--spacing) * 2);
+      opacity: 0;
+      background-color: var(--color-hell-border);
+      transition:
+        height var(--hell-duration-base) var(--ease-hell-out),
+        margin-block var(--hell-duration-base) var(--ease-hell-out),
+        opacity var(--hell-duration-base) var(--ease-hell-out);
     }
 
     .nav-section-toggle {
       display: flex;
       width: 100%;
+      /* An explicit line box gives the heading a real height to animate to
+         zero, and stops it re-wrapping while the rail is narrow. */
+      height: calc(14px + 2 * calc(var(--spacing) * 1.5));
       align-items: center;
       justify-content: space-between;
       gap: var(--spacing-hell-2);
@@ -63,11 +83,20 @@ const NAV_TRAILING = 'in-data-[collapsed=true]:hidden';
       font: inherit;
       font-size: 10px;
       font-weight: var(--font-weight-bold);
+      line-height: 14px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
       color: var(--color-hell-foreground-subtle);
       border-radius: var(--radius-hell-sm);
+      transition:
+        height var(--hell-duration-base) var(--ease-hell-out),
+        margin-top var(--hell-duration-base) var(--ease-hell-out),
+        padding-block var(--hell-duration-base) var(--ease-hell-out),
+        opacity var(--hell-duration-base) var(--ease-hell-out),
+        visibility var(--hell-duration-base) var(--ease-hell-out);
     }
 
     .nav-section-toggle::after {
@@ -114,14 +143,17 @@ const NAV_TRAILING = 'in-data-[collapsed=true]:hidden';
     }
 
     [hellAppSidenav][data-collapsed='true'] .nav-section-toggle {
-      display: none;
+      height: 0;
+      margin-top: 0;
+      padding-block: 0;
+      visibility: hidden;
+      opacity: 0;
     }
 
     [hellAppSidenav][data-collapsed='true'] .nav-section::before {
-      display: block;
       height: 1px;
-      margin: calc(var(--spacing) * 2);
-      background-color: var(--color-hell-border);
+      margin-block: calc(var(--spacing) * 2);
+      opacity: 1;
     }
 
     [hellAppSidenav][data-collapsed='true'] .nav-section-items {
