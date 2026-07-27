@@ -127,9 +127,17 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <code>scoped</code> also narrows the dialog's <em>modality</em> to that region. Only the
         scope root becomes <code>inert</code> — removed from the tab order, from pointer input, and
         from the accessibility tree in one step — and stops scrolling. Everything outside it keeps
-        real focus and stays in the accessibility tree, which is why a scoped dialog must not be
-        used to block a decision the surrounding chrome could still undo. Without a scope root,
-        <code>scoped</code> falls back to the viewport and to page-wide modality.
+        real focus and stays in the accessibility tree, and the panel reports
+        <code>aria-modal="false"</code> so assistive technology is not told to ignore it. That is
+        why a scoped dialog must not be used to block a decision the surrounding chrome could still
+        undo. Without a scope root, <code>scoped</code> falls back to the viewport and to page-wide
+        modality.
+      </p>
+      <p>
+        Stacking still works the way you would expect: a page-blocking dialog opened from inside a
+        scoped one — including <a routerLink="/components/confirm">confirm</a> — goes back to
+        blocking everything, shell included, for as long as it is open, and the scoped dialog
+        resumes when it closes.
       </p>
       <hd-example-tabs [code]="dialogScopedExampleCode">
         <app-dialog-scoped-example />
@@ -143,8 +151,8 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         panel they open stay fully usable, and shell overlays layer over the dialog region because
         <code>--hell-z-dialog-scoped</code> sits below <code>--hell-z-popover</code> and
         <code>--hell-z-menu</code>. Keyboard focus still cycles inside the dialog panel, so Tab
-        never walks into the blocked region; the shell is reached by pointer or by its own global
-        hotkeys, and Escape closes the dialog.
+        never walks into the blocked region; the shell is reached by pointer, by a screen reader's
+        own navigation, or by the shell's global hotkeys, and Escape closes the dialog.
       </p>
       <hd-example-tabs [code]="dialogAppShellScopedExampleCode">
         <app-dialog-app-shell-scoped-example />
@@ -242,8 +250,9 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li>
           <code>scoped</code>: <code>boolean</code>. Default <code>false</code>. Reads bounds from
           the nearest scope root instead of the viewport, and narrows modality to that root: the
-          root becomes <code>inert</code> and stops scrolling while everything outside it keeps
-          focus, pointer input, and its place in the accessibility tree.
+          root becomes <code>inert</code> and stops scrolling, the panel reports
+          <code>aria-modal="false"</code>, and everything outside the root keeps focus, pointer
+          input, and its place in the accessibility tree.
         </li>
         <li><code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or <code>&#123; root?: string &#125;</code> map refining <code>root</code>.</li>
       </ul>
@@ -264,7 +273,7 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Accessibility</h2>
       <ul>
-        <li>The panel is a modal dialog (<code>role="dialog"</code>, <code>aria-modal</code>) from the underlying primitive. A page-modal dialog hides the rest of the page from assistive technology; a <code>scoped</code> one instead makes only its scope root <code>inert</code> and leaves the surrounding shell in the accessibility tree, so no still-focusable region is left behind an <code>aria-hidden</code> ancestor.</li>
+        <li>The panel is a dialog (<code>role="dialog"</code>) from the underlying primitive. A page-modal dialog reports <code>aria-modal="true"</code> and hides the rest of the page from assistive technology; a <code>scoped</code> one makes only its scope root <code>inert</code>, leaves the surrounding shell in the accessibility tree, and reports <code>aria-modal="false"</code> — so nothing tells assistive technology to ignore a region that is still available, and no still-focusable region sits behind an <code>aria-hidden</code> ancestor.</li>
         <li>
           Focus is trapped inside the panel: Tab and Shift+Tab cycle through the dialog's own
           focusable elements, and if none exist focus falls back to the panel itself. Focus is
@@ -275,6 +284,8 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           A dialog opened from inside another dialog, and a popover, menu, or select opened from
           inside a dialog, keep their own dismissal order: Escape closes the innermost surface
           first, and interacting with a shell popover never dismisses the scoped dialog underneath.
+          A page-blocking dialog stacked on a scoped one restores full-page focus containment while
+          it is open.
         </li>
         <li>
           Name every dialog with <code>hellDialogTitle</code> (or an <code>aria-label</code>) and,

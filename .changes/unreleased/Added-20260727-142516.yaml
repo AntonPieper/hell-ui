@@ -1,9 +1,0 @@
-kind: Added
-body: 'A dialog overlay marked `scoped` now blocks only its Dialog Scope root instead
-  of the whole page: the scope root becomes `inert` and stops scrolling, while everything
-  outside it — an app shell''s topbar, sidenav, secondary panel, and any popover,
-  menu, or omnibar panel they open — keeps focus, pointer input, and its place in
-  the accessibility tree. Focus still cycles inside the dialog panel, so it never
-  reaches the blocked region, and closing releases the region before focus returns
-  to the trigger.'
-time: 2026-07-27T14:25:16.987797+02:00

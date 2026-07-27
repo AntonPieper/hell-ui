@@ -158,9 +158,14 @@ reachable.
 | --- | --- |
 | Portal lifecycle, dismiss guards, Escape routing through `NgpOverlayRegistry`, exit animations, focus restore to the opener, `closeOnNavigation` | Yes. `NgpDialogManager` / `NgpDialogRef` keep owning all of it; scoped modality changes none of it. |
 | Backdrop geometry | Yes — Hell-owned already, through the shared `HellFloatingScopedInsetsRuntime`. |
+| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` writes the attribute through its own host binding (declared after the `NgpDialog` host directive, so it is the one that lands) rather than binding the exposed input. |
 | Focus trap scope | **No.** `NgpDialog` applies `NgpFocusTrap` as a host directive and exposes none of its inputs, and `ng-primitives/dialog` exports no `ngpDialog` primitive function — only `provideDialogState` / `injectDialogState`. The popover path (`ngpPopover({}) + ngpFocusTrap({ disabled })`, which is how `trapFocus` works) has no dialog equivalent. Angular's host-directive input exposure is template-bound, so the library cannot drive it either. |
 | Page-wide `aria-hidden` | **No.** `NgpDialogManager.hideNonDialogContentFromAssistiveTechnology` runs unconditionally for the first open, its previous-value map is private, and `NgpDialogConfig` has no switch. Left alone it makes the still-focusable shell a descendant of `aria-hidden="true"`, which is the violation scoped modality exists to avoid. |
 | Background scroll | Partly. `NgpDialogConfig.scrollStrategy` is public, but `BlockScrollStrategy` targets the document, and inside an app shell the document does not scroll — the Dialog Scope root is the real scroll container. |
+
+Dialog modality is therefore only partly un-delegable: `aria-modal` is a public
+input Hell drives, and only the focus trap and the assistive-technology pass
+are closed.
 
 Decision: keep every delegated concern delegated, and let `HellDialogOverlay`
 own exactly the four decisions above that `scoped` changes. The runtime lives
@@ -181,10 +186,31 @@ in `packages/angular/dialog/dialog-scope.ts`:
   can really hold focus. The dialog panel's Tab cycle is unchanged, so keyboard
   focus still never walks into the blocked region.
 
-All four are reference counted, so simultaneous scoped dialogs engage once and
+That marker is document-wide: `isAllowedExternalTarget` is
+`target.closest('[data-focus-trap]')`, so a marker on `body` makes the
+predicate universally true and releases **every** trap in the document, not
+just the scoped dialog's. That is only the right trade while every open dialog
+is scoped. A dialog that blocks the whole page — one without `scoped`, a
+`scoped` one that found no scope root, or `hell-ui/confirm` stacked on top of a
+scoped dialog — means to block the shell, so `HellDialogOverlay` reference
+counts those separately and the marker comes off for as long as one is open.
+Marking a narrower subtree does not solve this: the shell sits inside whatever
+ancestor could be marked.
+
+All of it is reference counted, so simultaneous scoped dialogs engage once and
 the last release restores the exact prior values. A dialog without `scoped`, or
 `scoped` without a scope root, keeps ng-primitives' page-wide modality
 untouched.
+
+Known consequence: a page-blocking dialog stacked on a scoped one does not
+re-hide the page from assistive technology, because
+`hideNonDialogContentFromAssistiveTechnology` only runs for the first open in a
+stack. That is upstream behavior — page-modal-on-page-modal has the same gap
+without any Hell change — and the stacked panel still carries
+`aria-modal="true"`, which is the mechanism assistive technology actually
+honors for "everything outside this dialog is unavailable". Closing the scoped
+dialog while that stacked page-modal is still open therefore leaves it with a
+fully live, non-AT-hidden page for the rest of its lifetime.
 
 Constraints:
 
@@ -196,9 +222,12 @@ Constraints:
   a focus-trap disable and an assistive-technology-hiding opt-out on
   `NgpDialogConfig`, delete the marker and the replay and drive those inputs
   instead — the same way select left the state adapter.
-- Scoped modality deliberately weakens document-wide focus containment while it
-  is engaged. That is the contract, not a leak: nothing outside the scope root
-  is blocked, so nothing outside it should be forcibly refocused.
+- Scoped modality deliberately weakens document-wide focus containment while
+  every open dialog is scoped. That is the contract, not a leak: nothing
+  outside the scope root is blocked, so nothing outside it should be forcibly
+  refocused. It must never extend to a dialog that does block the page — that
+  is what the page-modal reference count is for, and
+  `e2e/ui-behavior.spec.ts` pins it by measuring where focus actually lands.
 
 ## Consequences
 

@@ -423,6 +423,10 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(scope.hasAttribute('inert')).toBe(true);
     expect(scope.style.overflow).toBe('hidden');
     expect(document.body.getAttribute('data-focus-trap')).toBe('');
+    // The blocked region is inert and therefore already absent from the
+    // accessibility tree; claiming page-wide modality would tell assistive
+    // technology to ignore the shell this mode keeps available.
+    expect(query(document.body, '[role="dialog"]').getAttribute('aria-modal')).toBe('false');
     // The dialog manager hides every body child from assistive technology; a
     // scoped dialog puts that back so the surrounding chrome it still hands
     // focus to is not sitting behind an aria-hidden ancestor.
@@ -457,6 +461,14 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(document.body.querySelector('#inner-overlay')).toBeTruthy();
     expect(scope.hasAttribute('inert')).toBe(true);
     expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    // The stacked dialog does mean to block the shell, so the focus-trap
+    // release comes off while it is open and its own trap works again. Without
+    // this, the scoped marker would disable focus containment for every trap
+    // in the document.
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+    const overlays = document.body.querySelectorAll('[role="dialog"]');
+    expect(overlays[0].getAttribute('aria-modal')).toBe('false');
+    expect(overlays[1].getAttribute('aria-modal')).toBe('true');
 
     query<HTMLButtonElement>(document.body, '#close-inner').click();
     await settleClose(fixture);
@@ -494,6 +506,7 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(appRoot.getAttribute('aria-hidden')).toBe('true');
     expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
     expect(query(fixture.nativeElement, '#modality-scope').hasAttribute('inert')).toBe(false);
+    expect(query(document.body, '[role="dialog"]').getAttribute('aria-modal')).toBe('true');
   });
 
   it('reference counts scoped modality so one close does not unblock a shared scope', async () => {

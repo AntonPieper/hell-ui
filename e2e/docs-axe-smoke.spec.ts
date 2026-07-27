@@ -143,10 +143,15 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
   '/components/dialog': {
     extraTargets: [
       {
-        // Scoped modality's whole claim is that the shell stays usable while
-        // the dialog is open, so the shell subtree is scanned together with
-        // the open dialog — `aria-hidden-focus` fires here if the page-wide
-        // modality pass ever hides still-focusable shell chrome again.
+        // The shell subtree is scanned together with the open dialog, so
+        // `aria-hidden-focus` can fire if the page-wide modality pass ever
+        // hides still-focusable shell chrome again.
+        //
+        // That only works because a scoped panel renders `aria-modal="false"`:
+        // axe's `focusable-modal-open` exemption suppresses `aria-hidden-focus`
+        // for the whole page while any `aria-modal="true"` dialog is open, so
+        // this scan would be vacuous against a page-modal panel. The
+        // assertions below are the direct guard and do not depend on that.
         name: 'Dialog scoped inside the app shell open',
         include: [
           'app-dialog-app-shell-scoped-example > [hellAppShell][data-slot="root"]',
@@ -163,6 +168,14 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           await expect(
             example.locator('[hellAppContent][data-slot="root"]'),
           ).toHaveAttribute('inert', '');
+          await expect(dialog).toHaveAttribute('aria-modal', 'false');
+          expect(
+            await page.evaluate(() =>
+              [...document.body.children].some(
+                (child) => child.getAttribute('aria-hidden') === 'true',
+              ),
+            ),
+          ).toBe(false);
         },
       },
       {

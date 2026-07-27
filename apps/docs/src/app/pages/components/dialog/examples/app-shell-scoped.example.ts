@@ -10,6 +10,7 @@ import {
 import { HELL_APP_SHELL_IMPORTS } from 'hell-ui/app-shell';
 import { HellButton } from 'hell-ui/button';
 import { HELL_CARD_IMPORTS } from 'hell-ui/card';
+import { injectHellPrompt } from 'hell-ui/confirm';
 import { HELL_DIALOG_IMPORTS } from 'hell-ui/dialog';
 import { HellIcon } from 'hell-ui/icon';
 import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
@@ -143,7 +144,12 @@ const COST_CENTRES = ['Operations', 'Marketing', 'Research'];
           </div>
           <div hellCardFooter>
             <button hellButton (click)="close()">Cancel</button>
-            <button hellButton variant="primary" (click)="close()">Approve</button>
+            <!-- A page-blocking confirm stacked on a scoped dialog goes back to
+                 blocking the whole page, shell included, for as long as it is
+                 open. -->
+            <button hellButton variant="primary" (click)="approveInvoice(close)">
+              Approve
+            </button>
           </div>
         </div>
       </div>
@@ -157,4 +163,17 @@ export class DialogAppShellScopedExample {
   protected readonly visited = signal('Dashboard');
   protected readonly costCentres = COST_CENTRES;
   protected readonly costCentre = signal(COST_CENTRES[0]);
+  private readonly prompt = injectHellPrompt();
+
+  /** Confirms the release, then closes the scoped dialog with the decision. */
+  protected async approveInvoice(close: (result?: boolean) => void): Promise<void> {
+    const confirmed = await this.prompt.confirm(
+      {
+        title: 'Release this payment?',
+        description: 'The shell is blocked again while this confirmation is open.',
+      },
+      { action: { label: 'Release', variant: 'primary' } },
+    );
+    if (confirmed) close(true);
+  }
 }

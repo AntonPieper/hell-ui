@@ -82,7 +82,11 @@ interface HellDialogScopeModalityState {
 }
 
 interface HellDialogDocumentModalityState {
-  engaged: number;
+  /** Scoped dialogs currently blocking a region in this document. */
+  scoped: number;
+  /** Open dialogs in this document that block the whole page instead. */
+  pageModal: number;
+  marked: boolean;
   focusTrapEscape: string | null;
 }
 
@@ -102,7 +106,8 @@ const documentModalityStates = new WeakMap<Document, HellDialogDocumentModalityS
  *   values captured before the dialog opened, so the surrounding shell is not
  *   an `aria-hidden` ancestor of the controls it still hands focus to;
  * - the owner document is marked so the delegated focus trap stops pulling
- *   focus out of that shell.
+ *   focus out of that shell — but only while every open dialog is scoped, see
+ *   `hellRetainDialogPageModality`.
  *
  * All four are reference counted per scope root and per document, so
  * simultaneous scoped dialogs engage once and the last release restores the
@@ -214,32 +219,71 @@ function lockScopeScroll(root: HTMLElement): void {
   root.style.paddingInlineEnd = `${padding + gutter}px`;
 }
 
-function engageDocumentModality(doc: Document): void {
+function documentModalityState(doc: Document): HellDialogDocumentModalityState {
   let state = documentModalityStates.get(doc);
   if (!state) {
-    state = { engaged: 0, focusTrapEscape: null };
+    state = { scoped: 0, pageModal: 0, marked: false, focusTrapEscape: null };
     documentModalityStates.set(doc, state);
   }
+  return state;
+}
 
-  if (state.engaged === 0) {
-    state.focusTrapEscape = doc.body.getAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
-    doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, '');
-  }
-  state.engaged += 1;
+function engageDocumentModality(doc: Document): void {
+  const state = documentModalityState(doc);
+  state.scoped += 1;
+  syncDocumentFocusTrapEscape(doc, state);
 }
 
 function releaseDocumentModality(doc: Document): void {
   const state = documentModalityStates.get(doc);
-  if (!state || state.engaged === 0) return;
+  if (!state || state.scoped === 0) return;
 
-  state.engaged -= 1;
-  if (state.engaged > 0) return;
+  state.scoped -= 1;
+  syncDocumentFocusTrapEscape(doc, state);
+}
 
-  if (state.focusTrapEscape === null) {
+/**
+ * Count an open dialog that blocks the whole page — one without `scoped`, or a
+ * `scoped` one that found no scope root.
+ *
+ * The focus-trap escape marker is document-wide, so it releases every trap in
+ * the document, not only the scoped dialog's. That is the right trade only
+ * while every open dialog is scoped: a page-modal dialog does mean to block
+ * the surrounding shell, so while one is open the marker comes off and the
+ * delegated trap does its job again. Reference counted, so a page-modal dialog
+ * opened from inside a scoped one restores the marker when it closes.
+ */
+export function hellRetainDialogPageModality(doc: Document): void {
+  const state = documentModalityState(doc);
+  state.pageModal += 1;
+  syncDocumentFocusTrapEscape(doc, state);
+}
+
+/** Release one page-blocking dialog counted by `hellRetainDialogPageModality`. */
+export function hellReleaseDialogPageModality(doc: Document): void {
+  const state = documentModalityStates.get(doc);
+  if (!state || state.pageModal === 0) return;
+
+  state.pageModal -= 1;
+  syncDocumentFocusTrapEscape(doc, state);
+}
+
+function syncDocumentFocusTrapEscape(
+  doc: Document,
+  state: HellDialogDocumentModalityState,
+): void {
+  const wanted = state.scoped > 0 && state.pageModal === 0;
+  if (wanted === state.marked) return;
+
+  if (wanted) {
+    state.focusTrapEscape = doc.body.getAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
+    doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, '');
+  } else if (state.focusTrapEscape === null) {
     doc.body.removeAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE);
   } else {
     doc.body.setAttribute(HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE, state.focusTrapEscape);
   }
+  state.marked = wanted;
 }
 
 export function hellFindDialogScopeRoot(trigger: HTMLElement): HTMLElement | null {

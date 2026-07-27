@@ -85,6 +85,32 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
   }
 }
 
+/**
+ * Focus a shell control and report where focus settles. `contained` asserts the
+ * delegated focus trap pulled it back into a dialog, which is what a
+ * page-blocking dialog must still do even when a scoped one is open underneath.
+ */
+async function expectShellFocusIsContained(
+  page: Page,
+  contained: boolean,
+  label: string,
+): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const shellControl = document.querySelector<HTMLElement>(
+            'app-dialog-app-shell-scoped-example [hellAppSidenav] button',
+          );
+          shellControl?.focus();
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          return document.activeElement?.closest('[role="dialog"]') !== null;
+        }),
+      { message: `${label}: shell focus containment`, timeout: SETTLE_TIMEOUT },
+    )
+    .toBe(contained);
+}
+
 async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
   try {
     await expect(locator, label).toBeFocused({ timeout: SETTLE_TIMEOUT });
@@ -250,6 +276,9 @@ test.describe('Hell UI browser behavior', () => {
     // Only the Dialog Scope root is blocked, and nothing outside it is hidden
     // from assistive technology while it still holds focusable controls.
     await expect(content).toHaveAttribute('inert', '');
+    // `aria-modal="true"` would tell assistive technology the shell is
+    // unavailable, which is exactly the claim scoped modality retracts.
+    await expect(dialog).toHaveAttribute('aria-modal', 'false');
     expect(
       await page.evaluate(() =>
         [...document.body.children].some((child) => child.getAttribute('aria-hidden') === 'true'),
@@ -331,6 +360,20 @@ test.describe('Hell UI browser behavior', () => {
     await expect(listbox).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(dialog).toBeVisible();
     await expect(content).toHaveAttribute('inert', '');
+
+    // A page-blocking dialog stacked on the scoped one does mean to block the
+    // shell, so the document-wide focus-trap release comes off and the
+    // delegated trap contains focus again for as long as it is open.
+    await dialog.getByRole('button', { name: 'Approve' }).click();
+    const confirm = page.getByRole('dialog', { name: 'Release this payment?' });
+    await expect(confirm).toBeVisible();
+    await expect(confirm).toHaveAttribute('aria-modal', 'true');
+    await expectShellFocusIsContained(page, true, 'stacked page-modal dialog');
+
+    await page.keyboard.press('Escape');
+    await expect(confirm).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+    await expectShellFocusIsContained(page, false, 'scoped dialog after the stacked one closed');
 
     // Closing releases the blocked region before focus returns to a trigger
     // that lived inside it.

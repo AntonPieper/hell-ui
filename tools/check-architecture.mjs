@@ -1932,9 +1932,21 @@ function checkDialogScopedModalitySeam() {
     );
   }
 
-  // Specs read the marker to assert the rendered contract; production sources
-  // must not, so only one module can ever write it.
-  const marker = "'data-focus-trap'";
+  // Bare substring, not a quoted literal: a double-quoted or templated copy is
+  // the same coupling. Specs read the marker to assert the rendered contract;
+  // production sources must not, so only one module can ever write it.
+  const marker = 'data-focus-trap';
+  // Ownership means the constant still carries the marker — a comment that
+  // merely mentions it is not the seam.
+  const seamDeclaration = new RegExp(
+    `HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE\\s*=\\s*['"\`]${escapeRegExp(marker)}['"\`]`,
+  );
+  if (!seamDeclaration.test(seamSource)) {
+    failures.push(
+      `${seamRelPath} must own the ng-primitives focus-trap escape marker "${marker}" through HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE; the seam moved or was deleted without retiring this check`,
+    );
+  }
+
   const productionSources = walk(join(root, libraryRoot)).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'),
   );
