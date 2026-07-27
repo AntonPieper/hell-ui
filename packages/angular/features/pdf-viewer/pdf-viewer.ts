@@ -366,6 +366,24 @@ export class HellPdfViewer {
     this.runtime.goTo(n);
   }
 
+  /**
+   * Commit a typed page number. The input is bound to `page()`, so an
+   * out-of-range entry that clamps to the page the viewer is already on would
+   * otherwise leave the typed text sitting in the box: the binding value never
+   * changes, so Angular never rewrites the DOM value. Write the resolved page
+   * back explicitly instead.
+   */
+  protected commitPageInput(input: HTMLInputElement) {
+    const total = this.totalPages() || 1;
+    const parsed = Number(input.value);
+    const target = Number.isFinite(parsed)
+      ? Math.min(Math.max(Math.trunc(parsed), 1), total)
+      : this.page();
+
+    this.goTo(target);
+    input.value = String(this.page());
+  }
+
   protected zoomIn() {
     this.runtime.zoomIn();
   }

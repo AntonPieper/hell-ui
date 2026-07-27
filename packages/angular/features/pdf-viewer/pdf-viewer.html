@@ -40,7 +40,7 @@
       min="1"
       [max]="totalPages() || 1"
       [value]="page()"
-      (change)="goTo(+pageInput.value)"
+      (change)="commitPageInput(pageInput)"
       [attr.aria-label]="labels.page"
     />
     <span data-slot="toolbarText" [class]="part('toolbarText')">/ {{ totalPages() || '…' }}</span>
@@ -250,8 +250,14 @@
           [attr.aria-label]="labels.goToPage(n)"
           [attr.aria-current]="page() === n ? 'page' : null"
         >
+          <!--
+            The canvas stays 0x0 until the thumbnail is actually painted so a
+            long document does not allocate one backing store per page up front;
+            the placeholder box comes from CSS until `renderThumbnail` writes
+            real inline dimensions.
+          -->
           <span class="hell-pdf-thumb-canvas-wrap">
-            <canvas #thumbCanvas [attr.data-page]="n" width="120" height="160"></canvas>
+            <canvas #thumbCanvas [attr.data-page]="n" width="0" height="0"></canvas>
           </span>
           <span data-slot="thumbLabel" [class]="part('thumbLabel')">{{ n }}</span>
         </button>

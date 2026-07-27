@@ -1,0 +1,6 @@
+kind: Fixed
+body: The PDF viewer no longer keeps a broken zoom when it bootstraps inside a collapsed
+  box. The `auto`, `page-fit`, and `page-width` presets now wait for a real container
+  and re-fit whenever it resizes, instead of locking in a negative scale that rendered
+  every page invisible.
+time: 2026-07-27T11:29:42.885946+02:00

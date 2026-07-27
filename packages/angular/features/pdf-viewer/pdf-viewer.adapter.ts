@@ -57,13 +57,29 @@ export interface HellPdfAdapterBootstrapOptions {
   readonly worker?: HellPdfWorkerSource;
 }
 
+/**
+ * Options for one numeric zoom write.
+ *
+ * `drawingDelay` marks the write as gesture-driven: the adapter may apply the
+ * new scale as a cheap transform and postpone the expensive page re-render
+ * until the gesture has been idle for that many milliseconds.
+ */
+export interface HellPdfNumericZoomOptions {
+  readonly drawingDelay?: number;
+}
+
 /** Adapter-owned viewer session. Runtime commands stay pdf.js-agnostic. */
 export interface HellPdfViewerSession {
   readonly currentScale: number;
   setDocument(doc: HellPdfDocumentHandle | null): void;
   setPage(page: number, totalPages: number): void;
   setZoomValue(value: string): void;
-  setNumericZoom(scale: number): void;
+  setNumericZoom(scale: number, options?: HellPdfNumericZoomOptions): void;
+  /**
+   * Re-apply the active preset zoom (`auto`, `page-fit`, `page-width`) so it
+   * re-fits the current container box. Optional so older adapters keep working.
+   */
+  refreshPresetZoom?(): void;
   dispatchFind(request: HellPdfFindRequest): void;
   closeFind(source: unknown): void;
   renderThumbnail(
@@ -157,8 +173,17 @@ interface HellPdfJsViewer {
   currentScaleValue: string;
   currentPageNumber: number;
   setDocument(doc: HellPdfDocumentHandle | null): void;
+  update?(): void;
+  updateScale?(options: {
+    readonly scaleFactor?: number;
+    readonly steps?: number;
+    readonly drawingDelay?: number;
+  }): void;
   cleanup?(): void;
 }
+
+/** pdf.js preset zoom values whose scale is derived from the container box. */
+const HELL_PDF_CONTAINER_FITTED_ZOOM = new Set(['auto', 'page-fit', 'page-width']);
 
 interface HellPdfJsViewerModule {
   readonly EventBus: new () => HellPdfJsEventBus;
@@ -259,6 +284,7 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
     return new HellPdfJsViewerSession({
       pdfjs,
       viewer,
+      container,
       linkService,
       findController,
       eventBus,
@@ -391,6 +417,7 @@ export function hellWithPdfJsGlobal<T>(
 interface HellPdfJsViewerSessionOptions {
   readonly pdfjs: HellPdfJsModule;
   readonly viewer: HellPdfJsViewer;
+  readonly container: HTMLDivElement;
   readonly linkService: HellPdfJsLinkService;
   readonly findController: HellPdfJsFindController;
   readonly eventBus: HellPdfJsEventBus;
@@ -400,6 +427,9 @@ interface HellPdfJsViewerSessionOptions {
 }
 
 class HellPdfJsViewerSession implements HellPdfViewerSession {
+  /** Container-fitted preset that could not be applied yet because the container had no box. */
+  private pendingPresetZoom: string | null = null;
+
   constructor(private readonly options: HellPdfJsViewerSessionOptions) {
     this.installEventHandlers();
   }
@@ -431,11 +461,70 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
   }
 
   setZoomValue(value: string): void {
-    this.options.viewer.currentScaleValue = value;
+    this.applyZoomValue(value);
   }
 
-  setNumericZoom(scale: number): void {
-    this.options.viewer.currentScale = scale;
+  setNumericZoom(scale: number, options: HellPdfNumericZoomOptions = {}): void {
+    const { viewer } = this.options;
+    const drawingDelay = options.drawingDelay;
+    const currentScale = viewer.currentScale;
+
+    // Gesture-driven writes go through `updateScale`, the only pdf.js entry
+    // point that accepts `drawingDelay`. With a delay set, pdf.js re-scales the
+    // already-rendered page canvases with a CSS transform and re-rasterizes
+    // once the gesture settles, instead of resetting every visible page on
+    // every wheel/pinch event.
+    if (
+      typeof drawingDelay === 'number' &&
+      drawingDelay >= 0 &&
+      typeof viewer.updateScale === 'function' &&
+      currentScale > 0
+    ) {
+      viewer.updateScale({ scaleFactor: scale / currentScale, drawingDelay });
+      return;
+    }
+
+    viewer.currentScale = scale;
+  }
+
+  refreshPresetZoom(): void {
+    const { viewer } = this.options;
+    if (!this.hasContainerBox) return;
+
+    const preset = this.pendingPresetZoom ?? viewer.currentScaleValue;
+    this.pendingPresetZoom = null;
+    // Mirrors the pdf.js reference viewer's resize handling: container-fitted
+    // presets have to be re-applied whenever the container box changes, and
+    // pdf.js itself never does that for an embedded PDFViewer.
+    if (HELL_PDF_CONTAINER_FITTED_ZOOM.has(preset)) {
+      viewer.currentScaleValue = preset;
+    }
+    viewer.update?.();
+  }
+
+  /**
+   * pdf.js derives container-fitted presets from `container.clientWidth`, which
+   * yields a negative scale when the container has no box yet. A viewer that
+   * bootstraps hidden or collapsed would keep that scale forever, so hold the
+   * preset back until there is something to fit against.
+   */
+  private get hasContainerBox(): boolean {
+    const { container } = this.options;
+    return container.clientWidth > 0 && container.clientHeight > 0;
+  }
+
+  /**
+   * Write a zoom value, deferring container-fitted presets while the container
+   * has no box so pdf.js never derives — and then keeps — a negative scale.
+   */
+  private applyZoomValue(value: string): void {
+    if (HELL_PDF_CONTAINER_FITTED_ZOOM.has(value) && !this.hasContainerBox) {
+      this.pendingPresetZoom = value;
+      return;
+    }
+
+    this.pendingPresetZoom = null;
+    this.options.viewer.currentScaleValue = value;
   }
 
   dispatchFind(request: HellPdfFindRequest): void {
@@ -494,7 +583,7 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
       handlers.onZoomChange(normalizeZoomEventValue(presetValue, scale), presetValue ?? scale);
     });
     eventBus.on('pagesinit', () => {
-      viewer.currentScaleValue = String(handlers.initialZoom());
+      this.applyZoomValue(String(handlers.initialZoom()));
       const initialPage = handlers.initialPage();
       if (initialPage > 1) viewer.currentPageNumber = initialPage;
       handlers.onPagesReady();
