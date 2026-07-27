@@ -18,9 +18,13 @@ import {
 import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 import {
   HELL_DEFAULT_DATE_INPUT_ADAPTER,
+  HELL_DEFAULT_DATE_INPUT_FORMAT,
   HellDateInput,
   provideHellDateInputAdapter,
+  provideHellDateInputFormat,
 } from './date-input';
+
+const ISO_CONTEXT = { format: HELL_DEFAULT_DATE_INPUT_FORMAT };
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -252,6 +256,142 @@ class CustomAdapterHost {
   readonly values: Array<Date | null> = [];
 }
 
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  providers: [provideHellDateInputFormat('DD.MM.YYYY')],
+  template: `
+    <input
+      hellDateInput
+      aria-label="Scoped format date"
+      [value]="value()"
+      [min]="min"
+      [max]="max"
+      [format]="format()"
+      (valueChange)="values.push($event)"
+    />
+    <input
+      hellDateInput
+      aria-label="Overridden format date"
+      format="MM/DD/YYYY"
+      [value]="value()"
+      (valueChange)="overriddenValues.push($event)"
+    />
+    <input
+      hellDateInput
+      aria-label="Authored placeholder date"
+      placeholder="Invoice date"
+      [value]="value()"
+    />
+    <input
+      hellDateInput
+      aria-label="Opted out date"
+      placeholder=""
+      [value]="value()"
+    />
+    <input hellDateInput data-unlabelled [value]="value()" />
+    <input hellDateInput data-blank-label aria-label="   " [value]="value()" />
+  `,
+})
+class ScopedFormatHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  readonly format = signal<string | undefined>(undefined);
+  readonly min = new Date(2026, 3, 1);
+  readonly max = new Date(2026, 3, 30);
+  readonly values: Array<Date | null> = [];
+  readonly overriddenValues: Array<Date | null> = [];
+}
+
+/** No format provider: only the local input can configure one. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  template: `
+    <input
+      hellDateInput
+      aria-label="Local format date"
+      [value]="value()"
+      [format]="format()"
+    />
+  `,
+})
+class LocalFormatOnlyHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+  readonly format = signal<string | undefined>(undefined);
+}
+
+/** A configured format plus an adapter that accepts text the format cannot describe. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  providers: [
+    provideHellDateInputFormat('DD.MM.YYYY'),
+    provideHellDateInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'today'
+          ? { valid: true, value: new Date(2026, 0, 2) }
+          : text.trim()
+            ? { valid: false }
+            : { valid: true, value: null },
+      format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
+    }),
+  ],
+  template: `<input hellDateInput aria-label="Silent adapter date" />`,
+})
+class SilentAdapterFormatHost {}
+
+/** A configured format plus an adapter that supplies its own hint. */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput],
+  providers: [
+    provideHellDateInputFormat('DD.MM.YYYY'),
+    provideHellDateInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'today'
+          ? { valid: true, value: new Date(2026, 0, 2) }
+          : text.trim()
+            ? { valid: false }
+            : { valid: true, value: null },
+      format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
+      placeholderHint: () => 'today',
+    }),
+  ],
+  template: `<input hellDateInput aria-label="Hinting adapter date" />`,
+})
+class HintingAdapterFormatHost {}
+
+/**
+ * A configured format whose inputs carry no `aria-label`: the Field supplies
+ * `aria-labelledby`, and the plain `<label for>` supplies `host.labels`. Both
+ * author an explicit `id`, because a Field-composed Date Input without one
+ * currently ends up with NgpInput's generated id on the element while the label
+ * targets the id `setFormControl` registered, leaving `for` dangling.
+ */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellDateInput, ...HELL_FIELD_IMPORTS],
+  providers: [provideHellDateInputFormat('DD.MM.YYYY')],
+  template: `
+    <div hellField>
+      <label hellFieldLabel for="field-labelled-date">Field labelled date</label>
+      <input id="field-labelled-date" hellDateInput [value]="value()" />
+    </div>
+    <label for="native-labelled-date">Native labelled date</label>
+    <input id="native-labelled-date" hellDateInput [value]="value()" />
+    <span id="referenced-date-label">Referenced date</span>
+    <input
+      id="referenced-labelled-date"
+      hellDateInput
+      aria-labelledby="referenced-date-label"
+      [value]="value()"
+    />
+  `,
+})
+class LabelledFormatHost {
+  readonly value = signal<Date | null>(new Date(2026, 3, 22));
+}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -266,6 +406,11 @@ describe('HellDateInput', () => {
         FieldHost,
         InvalidFieldHost,
         CustomAdapterHost,
+        ScopedFormatHost,
+        LocalFormatOnlyHost,
+        SilentAdapterFormatHost,
+        HintingAdapterFormatHost,
+        LabelledFormatHost,
       ],
     }).compileComponents();
   });
@@ -801,6 +946,7 @@ describe('HellDateInput', () => {
 
     const normalized = HELL_DEFAULT_DATE_INPUT_ADAPTER.normalize!(
       new Date(2026, 3, 22, 16, 45, 30, 12),
+      ISO_CONTEXT,
     );
     expect(formatDate(normalized)).toBe('2026-04-22');
     expect(normalized?.getHours()).toBe(0);
@@ -808,11 +954,297 @@ describe('HellDateInput', () => {
     expect(normalized?.getSeconds()).toBe(0);
     expect(normalized?.getMilliseconds()).toBe(0);
   });
+
+  it('parses, displays, bounds, and hints the placeholder in the provided format', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInputLabelled(fixture.nativeElement, 'Scoped format date');
+
+    expect(input.value).toBe('22.04.2026');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+    expect(input.getAttribute('min')).toBe('01.04.2026');
+    expect(input.getAttribute('max')).toBe('30.04.2026');
+
+    // Text in the configured format commits the same `Date | null` contract.
+    typeText(input, '06.04.2026');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(formatDate(host.values[0])).toBe('2026-04-06');
+    expect(input.value).toBe('06.04.2026');
+
+    // The configured bounds still reject an out-of-range day.
+    typeText(input, '06.05.2026');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.values.length).toBe(1);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // Text in the default ISO format no longer parses under this format.
+    typeText(input, '2026-04-07');
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.values.length).toBe(1);
+    expect(input.value).toBe('2026-04-07');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('lets a local format input win over the provider and follow later changes', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const scoped = dateInputLabelled(fixture.nativeElement, 'Scoped format date');
+    const overridden = dateInputLabelled(fixture.nativeElement, 'Overridden format date');
+
+    expect(overridden.value).toBe('04/22/2026');
+    expect(overridden.placeholder).toBe('MM/DD/YYYY');
+
+    typeText(overridden, '05/06/2026');
+    overridden.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(formatDate(host.overriddenValues[0])).toBe('2026-05-06');
+
+    // A format change re-renders the committed value and the hint.
+    host.format.set('YYYY/MM/DD');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(scoped.value).toBe('2026/04/22');
+    expect(scoped.placeholder).toBe('YYYY/MM/DD');
+    expect(scoped.getAttribute('min')).toBe('2026/04/01');
+  });
+
+  it('never replaces a consumer-authored placeholder', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = dateInputLabelled(fixture.nativeElement, 'Authored placeholder date');
+    expect(input.placeholder).toBe('Invoice date');
+    expect(input.value).toBe('22.04.2026');
+  });
+
+  it('treats an authored empty placeholder as the documented opt-out', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The attribute is present but empty: emptiness, not absence, is what the
+    // opt-out rests on, so the hint must not fill it in.
+    const input = dateInputLabelled(fixture.nativeElement, 'Opted out date');
+    expect(input.getAttribute('placeholder')).toBe('');
+    expect(input.value).toBe('22.04.2026');
+  });
+
+  it('writes the hint for a Field-labelled input that has no aria-label', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The Field's label ids reach the input through `aria-labelledby`, which is
+    // the naming markup the gate must accept — this is the documented Field
+    // composition, so withholding the hint here would be the real regression.
+    const input = dateInputById(fixture.nativeElement, 'field-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes the hint for an input named by a plain associated label', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // No `aria-label` and no Field: only the associated `<label for>` can
+    // satisfy the gate here.
+    const input = dateInputById(fixture.nativeElement, 'native-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.getAttribute('aria-labelledby')).toBeNull();
+    expect(input.labels?.length).toBe(1);
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes the hint for an input named only by aria-labelledby', async () => {
+    const fixture = TestBed.createComponent(LabelledFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // No `aria-label` and no `<label>` element at all, so the merged
+    // `aria-labelledby` — the same channel an enclosing Field writes through —
+    // is the only clause that can satisfy the gate.
+    const input = dateInputById(fixture.nativeElement, 'referenced-labelled-date');
+    expect(input.getAttribute('aria-label')).toBeNull();
+    expect(input.labels?.length ?? 0).toBe(0);
+    expect(input.getAttribute('aria-labelledby')).toBe('referenced-date-label');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes no placeholder onto an input that authors no naming markup', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // A hint would become this input's accessible name and hide the missing
+    // label from tooling, so a configured format is not enough to write one.
+    const input = fixture.nativeElement.querySelector('input[data-unlabelled]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected unlabelled date input.');
+    expect(input.value).toBe('22.04.2026');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+
+    // A whitespace-only `aria-label` names nothing, so it is not naming markup.
+    const blank = fixture.nativeElement.querySelector('input[data-blank-label]');
+    if (!(blank instanceof HTMLInputElement)) throw new Error('Expected blank-label date input.');
+    expect(blank.getAttribute('aria-label')).toBe('   ');
+    expect(blank.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('rejects a provided format that is not built from YYYY, MM, and DD', () => {
+    expect(() => provideHellDateInputFormat('DD.MM')).toThrow(/Unsupported hell date input format/);
+    expect(() => provideHellDateInputFormat('DD.MM.YY')).toThrow(
+      /Unsupported hell date input format/,
+    );
+    // Leftover token letters would be formatted and typed literally.
+    expect(() => provideHellDateInputFormat('YYYYY-MM-DD')).toThrow(
+      /Unsupported hell date input format/,
+    );
+    expect(() => provideHellDateInputFormat('YYYY-MM-DDD')).toThrow(
+      /Unsupported hell date input format/,
+    );
+    // Edge whitespace cannot round-trip, because parsing trims first.
+    expect(() => provideHellDateInputFormat(' YYYY-MM-DD ')).toThrow(
+      /Unsupported hell date input format/,
+    );
+  });
+
+  it('rejects an unsupported local format at the binding, not during rendering', async () => {
+    const fixture = TestBed.createComponent(LocalFormatOnlyHost);
+    const host = fixture.componentInstance;
+    // An empty value with no bounds is the case where nothing renders through
+    // the format: display, min, and max all short-circuit before compiling, so
+    // only validating the binding itself can reject the pattern at all.
+    host.value.set(null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(dateInputLabelled(fixture.nativeElement, 'Local format date').value).toBe('');
+
+    host.format.set('DD.MM');
+    expect(() => fixture.detectChanges()).toThrow(/Unsupported hell date input format/);
+  });
+
+  it('treats an empty local format as unset and falls through to the provider', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInputLabelled(fixture.nativeElement, 'Scoped format date');
+
+    host.format.set('YYYY/MM/DD');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026/04/22');
+
+    host.format.set('');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('22.04.2026');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+  });
+
+  it('writes no placeholder until a format is configured', async () => {
+    const fixture = TestBed.createComponent(TwoWayHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = dateInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('adds and removes its own placeholder as a local format comes and goes', async () => {
+    const fixture = TestBed.createComponent(LocalFormatOnlyHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = dateInputLabelled(fixture.nativeElement, 'Local format date');
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+
+    host.format.set('DD.MM.YYYY');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('22.04.2026');
+    expect(input.placeholder).toBe('DD.MM.YYYY');
+
+    // Back to the unconfigured default: the hint would no longer be true.
+    host.format.set(undefined);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-04-22');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('writes no placeholder when the adapter supplies no hint', async () => {
+    const fixture = TestBed.createComponent(SilentAdapterFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The adapter accepts only `today`, so the field must not advertise a
+    // format pattern it would reject.
+    const input = dateInputLabelled(fixture.nativeElement, 'Silent adapter date');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
+  it('writes the adapter placeholder hint instead of the raw format', async () => {
+    const fixture = TestBed.createComponent(HintingAdapterFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = dateInputLabelled(fixture.nativeElement, 'Hinting adapter date');
+    expect(input.placeholder).toBe('today');
+  });
+
+  it('hints the default adapter with the context format', () => {
+    expect(HELL_DEFAULT_DATE_INPUT_ADAPTER.placeholderHint!({ format: 'DD.MM.YYYY' })).toBe(
+      'DD.MM.YYYY',
+    );
+    expect(HELL_DEFAULT_DATE_INPUT_ADAPTER.placeholderHint!(ISO_CONTEXT)).toBe('YYYY-MM-DD');
+  });
 });
 
 function dateInput(root: HTMLElement): HTMLInputElement {
   const input = root.querySelector('input[hellDateInput]');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected input[hellDateInput].');
+  return input;
+}
+
+function dateInputById(root: HTMLElement, id: string): HTMLInputElement {
+  const input = root.querySelector(`input[hellDateInput]#${id}`);
+  if (!(input instanceof HTMLInputElement)) throw new Error(`Expected date input #${id}.`);
+  return input;
+}
+
+function dateInputLabelled(root: HTMLElement, label: string): HTMLInputElement {
+  const input = root.querySelector(`input[hellDateInput][aria-label="${label}"]`);
+  if (!(input instanceof HTMLInputElement)) throw new Error(`Expected date input "${label}".`);
   return input;
 }
 

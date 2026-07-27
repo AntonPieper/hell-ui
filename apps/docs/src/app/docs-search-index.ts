@@ -661,6 +661,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'date-input input hellDateInput required min max invalid disabled native attributes bounds invalid draft',
  },
  {
+ title:'Date Input: Format',
+ path:'/components/date-input',
+ detail:'components/date-input/examples/format.example.ts',
+ terms:
+'date-input format provideHellDateInputFormat HELL_DATE_INPUT_FORMAT HellDateInputFormat pattern YYYY MM DD DD.MM.YYYY MM/DD/YYYY locale order separator placeholder hint per-instance override provider scope parsing display',
+ },
+ {
  title:'Date Input: Forms',
  path:'/components/date-input',
  detail:'components/date-input/examples/forms.example.ts',
@@ -2302,7 +2309,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/date-input',
  detail:'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
  terms:
-'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal strict ISO YYYY-MM-DD',
+'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal placeholderHint HellDateInputAdapterContext configured format ISO YYYY-MM-DD default',
  },
  {
  title:'Date input forms value',
