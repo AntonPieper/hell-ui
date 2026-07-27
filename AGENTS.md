@@ -51,3 +51,8 @@ pnpm run build:lib
 Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
 `pnpm run test:consumer-fixtures`, `pnpm run test:api-report`, or
 `pnpm run release:dry-run` when the touched surface warrants it.
+
+`pnpm run test:api-report` reads the built library, so it needs a current
+`pnpm run build:lib`. It refuses to run against a `dist/hell` left by
+`pnpm run watch`, by an interrupted build, or by other sources, and says which
+one it found — an API report from the wrong build names changes nobody made.

@@ -1,11 +1,18 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { LIBRARY_BUILD_CONFIGURATIONS, writeLibraryBuildStamp } from './library-build-stamp.mjs';
 
 const sourcePackageCondition = '@heinrich/source';
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const distRootArg = process.argv[2];
-if (!distRootArg) {
-  console.error('Usage: node tools/finalize-dist-package.mjs <dist-package-root>');
+const configuration = parseConfiguration(process.argv.slice(3));
+if (!distRootArg || !configuration) {
+  console.error(
+    `Usage: node tools/finalize-dist-package.mjs <dist-package-root> --configuration <${LIBRARY_BUILD_CONFIGURATIONS.join('|')}>`,
+  );
   process.exit(1);
 }
 
@@ -23,6 +30,20 @@ if (remainingSourcePaths.length > 0) {
 }
 
 writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+// Last step of the build, so the stamp exists only for a build that ran to
+// completion. Gates that consume the prepared `dist` verify it before reading
+// a single declaration.
+writeLibraryBuildStamp({ root, configuration });
+
+function parseConfiguration(args) {
+  for (let index = 0; index < args.length; index += 1) {
+    if (args[index] !== '--configuration') continue;
+    const value = args[index + 1];
+    return LIBRARY_BUILD_CONFIGURATIONS.includes(value) ? value : null;
+  }
+  return null;
+}
 
 function finalizeExports(exportsMap) {
   if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) {

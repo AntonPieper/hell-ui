@@ -1,10 +1,12 @@
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   apiReportSiblingPaths,
+  checkApiReportInputPackageFixture,
   createApiReportDeclarationMirror,
+  createApiReportInputPackage,
 } from './api-report-model.mjs';
 import { checkApiReportCrossEntrypoint } from './check-api-report-cross-entrypoint.mjs';
 import {
@@ -18,6 +20,10 @@ import {
   entrypointPublicApiFiles,
   packageName,
 } from './entrypoint-manifest.mjs';
+import {
+  checkLibraryBuildStampFixture,
+  describeStaleLibraryBuild,
+} from './library-build-stamp.mjs';
 
 const require = createRequire(import.meta.url);
 const { ConsoleMessageId, Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
@@ -73,8 +79,12 @@ const reportFolder = join(root, 'etc/api-reports');
 const internalReportFolder = join(reportFolder, 'internal');
 const reportTempFolder = join(root, 'tmp/api-reports');
 const declarationMirrorFolder = join(root, 'tmp/api-report-declaration-mirror');
-const packageJsonFullPath = join(root, 'dist/hell/package.json');
+const inputPackageFolder = join(root, 'tmp/api-report-input-package');
+const distPackageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
+
+checkLibraryBuildStampFixture();
+checkApiReportInputPackageFixture();
 
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {
@@ -83,11 +93,26 @@ if (missingInputs.length) {
   process.exit(1);
 }
 
+// A report generated from a `dist` that does not match the working tree is not
+// a weaker signal, it is a wrong one: it names API changes nobody made. Refuse
+// the run instead of describing the wrong artifact.
+const staleBuildReasons = describeStaleLibraryBuild({ root, expectedConfiguration: 'production' });
+if (staleBuildReasons.length) {
+  console.error('API report check requires the current production build of the library.');
+  for (const reason of staleBuildReasons) console.error(`- ${reason}`);
+  process.exit(1);
+}
+
 mkdirSync(reportFolder, { recursive: true });
 mkdirSync(internalReportFolder, { recursive: true });
 mkdirSync(reportTempFolder, { recursive: true });
 
-annotateCompilerGeneratedStatics();
+const inputPackage = createApiReportInputPackage({
+  stageFolder: inputPackageFolder,
+  packageJsonFullPath: distPackageJsonFullPath,
+  declarationFilePaths: declarationEntrypoints.map((entrypoint) => distDeclarationPath(entrypoint)),
+});
+const packageJsonFullPath = inputPackage.packageJsonFullPath;
 const mirroredDeclarations = createApiReportDeclarationMirror({
   mirrorFolder: declarationMirrorFolder,
   packageName,
@@ -164,37 +189,10 @@ console.log(
   `[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`,
 );
 
-// The Angular compiler emits ɵfac/ɵdir/ɵcmp/... and ngAcceptInputType_...
-// static declarations into the built d.ts with no way to attach TSDoc in
-// source, so API Extractor flags every one as ae-undocumented. Annotate them
-// in the built types (idempotent) before extraction so reports only flag
-// documentation gaps authors can fix.
-function annotateCompilerGeneratedStatics() {
-  const typesFolder = join(root, 'dist/hell/types');
-  const staticPattern = /^([ \t]*)(static (?:ɵ(?:fac|dir|cmp|prov|mod|inj|pipe)|ngAcceptInputType_\w+):)/;
-  for (const name of readdirSync(typesFolder)) {
-    if (!name.endsWith('.d.ts')) continue;
-    const filePath = join(typesFolder, name);
-    const lines = readFileSync(filePath, 'utf8').split('\n');
-    const annotated = [];
-    let changed = false;
-    for (const line of lines) {
-      const match = staticPattern.exec(line);
-      const previous = annotated[annotated.length - 1];
-      if (match && !previous?.trimEnd().endsWith('*/')) {
-        annotated.push(`${match[1]}/** Angular compiler-generated declaration. */`);
-        changed = true;
-      }
-      annotated.push(line);
-    }
-    if (changed) writeFileSync(filePath, annotated.join('\n'));
-  }
-}
-
 function requiredBuildInputs() {
   return [
-    packageJsonFullPath,
-    ...declarationEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint)),
+    distPackageJsonFullPath,
+    ...declarationEntrypoints.map((entrypoint) => distDeclarationPath(entrypoint)),
   ];
 }
 
@@ -282,8 +280,13 @@ function apiExtractorTsconfig(entrypoint) {
   };
 }
 
-function mainEntryPointPath(entrypoint) {
+function distDeclarationPath(entrypoint) {
   return join(root, entrypoint.mainEntryPointFilePath);
+}
+
+/** Extraction reads the staged package, never `dist` itself. */
+function mainEntryPointPath(entrypoint) {
+  return inputPackage.stagedDeclarations.get(distDeclarationPath(entrypoint));
 }
 
 function isInternalEntrypoint(entrypoint) {
