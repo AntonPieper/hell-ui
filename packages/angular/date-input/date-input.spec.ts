@@ -283,6 +283,13 @@ class CustomAdapterHost {
       placeholder="Invoice date"
       [value]="value()"
     />
+    <input
+      hellDateInput
+      aria-label="Opted out date"
+      placeholder=""
+      [value]="value()"
+    />
+    <input hellDateInput data-unlabelled [value]="value()" />
   `,
 })
 class ScopedFormatHost {
@@ -990,6 +997,33 @@ describe('HellDateInput', () => {
     expect(input.value).toBe('22.04.2026');
   });
 
+  it('treats an authored empty placeholder as the documented opt-out', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The attribute is present but empty: emptiness, not absence, is what the
+    // opt-out rests on, so the hint must not fill it in.
+    const input = dateInputLabelled(fixture.nativeElement, 'Opted out date');
+    expect(input.getAttribute('placeholder')).toBe('');
+    expect(input.value).toBe('22.04.2026');
+  });
+
+  it('writes no placeholder onto an input that has no accessible name', async () => {
+    const fixture = TestBed.createComponent(ScopedFormatHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // A hint would become this input's accessible name and hide the missing
+    // label from tooling, so a configured format is not enough to write one.
+    const input = fixture.nativeElement.querySelector('input[data-unlabelled]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected unlabelled date input.');
+    expect(input.value).toBe('22.04.2026');
+    expect(input.hasAttribute('placeholder')).toBe(false);
+  });
+
   it('rejects a provided format that is not built from YYYY, MM, and DD', () => {
     expect(() => provideHellDateInputFormat('DD.MM')).toThrow(/Unsupported hell date input format/);
     expect(() => provideHellDateInputFormat('DD.MM.YY')).toThrow(
@@ -1009,12 +1043,18 @@ describe('HellDateInput', () => {
   });
 
   it('rejects an unsupported local format at the binding, not during rendering', async () => {
-    const fixture = TestBed.createComponent(ScopedFormatHost);
+    const fixture = TestBed.createComponent(LocalFormatOnlyHost);
+    const host = fixture.componentInstance;
+    // An empty value with no bounds is the case where nothing renders through
+    // the format: display, min, and max all short-circuit before compiling, so
+    // only validating the binding itself can reject the pattern at all.
+    host.value.set(null);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+    expect(dateInputLabelled(fixture.nativeElement, 'Local format date').value).toBe('');
 
-    fixture.componentInstance.format.set('DD.MM');
+    host.format.set('DD.MM');
     expect(() => fixture.detectChanges()).toThrow(/Unsupported hell date input format/);
   });
 

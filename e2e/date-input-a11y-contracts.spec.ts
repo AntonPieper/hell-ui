@@ -172,6 +172,13 @@ test.describe('date input native behavior and composition contracts', () => {
     await expect(scoped).toHaveValue('2026-05-07');
     await expect(scoped).toHaveAttribute('aria-invalid', 'true');
     await expect(state).toContainText('May 06 2026');
+
+    // Inputs outside a configured format keep the empty placeholder they had
+    // before formats existed; the hint never leaks across the page.
+    const sizes = page.locator('app-date-input-sizes-example');
+    for (const name of ['Small date input', 'Medium date input', 'Large date input']) {
+      await expect(sizes.getByRole('textbox', { name })).not.toHaveAttribute('placeholder');
+    }
   });
 
   test('serializes canonical committed text for click and Enter native form submissions', async ({

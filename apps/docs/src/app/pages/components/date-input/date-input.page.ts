@@ -120,18 +120,22 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <h3>Placeholder hint</h3>
       <p>
         Once a format is configured, Date Input writes the adapter's
-        <code>placeholderHint</code> into the native <code>placeholder</code>. Three rules keep that
-        write out of your way: an input with no configured format is never touched, an adapter that
-        omits <code>placeholderHint</code> (or returns <code>null</code>) suppresses it entirely, and
-        any authored <code>placeholder</code> wins — including <code>placeholder=""</code>, which is
-        the explicit opt-out. The hint is applied after render, so server-rendered markup receives it
-        on hydration.
+        <code>placeholderHint</code> into the native <code>placeholder</code>. Four rules keep that
+        write out of your way: an input with no configured format is never touched, an input with no
+        accessible name is never touched, an adapter that omits <code>placeholderHint</code> (or
+        returns <code>null</code>) suppresses it entirely, and any authored
+        <code>placeholder</code> wins — including <code>placeholder=""</code>, which is the explicit
+        opt-out. The hint is applied after render, so server-rendered markup receives it on
+        hydration.
       </p>
       <p>
         A hint is a formatting affordance, never a label: <code>placeholder</code> is the last
-        fallback in the accessible name computation, so an input that relies on it has no real label.
-        Keep a <a routerLink="/components/field">Field</a> label or an <code>aria-label</code> on
-        every Date Input.
+        fallback in the accessible name computation, and automated checks such as axe's
+        <code>label</code> rule accept a non-empty one. Date Input therefore refuses to write a hint
+        onto an input with no <code>aria-label</code>, no <code>aria-labelledby</code> (including an
+        enclosing <a routerLink="/components/field">Field</a>'s), and no associated
+        <code>&lt;label&gt;</code> — a missing label stays exactly as visible to your tooling as it
+        was before. Name every Date Input, and the hint follows.
       </p>
       <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-format-example />

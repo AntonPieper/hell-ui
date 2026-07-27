@@ -187,7 +187,7 @@ function hellCompileDateInputFormat(format: HellDateInputFormat): HellCompiledDa
     format !== format.trim()
   ) {
     throw new Error(
-      `Unsupported hell date input format "${format}": use YYYY, MM, and DD exactly once each, plus literal separators that contain no Y, M, D, or leading/trailing whitespace.`,
+      `Unsupported hell date input format "${format}": use YYYY, MM, and DD exactly once each, keep Y, M, and D out of the literal separators, and leave no leading or trailing whitespace on the pattern.`,
     );
   }
 
@@ -531,14 +531,15 @@ export class HellDateInput implements FormValueControl<Date | null> {
     });
 
     afterRenderEffect(() => {
-      // Three gates before the directive touches a consumer's markup: a format
+      // Four gates before the directive touches a consumer's markup: a format
       // must be configured (so unconfigured apps keep their empty field), the
-      // adapter must supply the hint (so the field never advertises a shape it
-      // rejects), and the attribute must be absent or previously ours (so an
+      // host must already have a real accessible name (see `hasAccessibleName`),
+      // the adapter must supply the hint (so the field never advertises a shape
+      // it rejects), and the attribute must be absent or previously ours (so an
       // authored `placeholder`, including `placeholder=""`, always wins).
       // Reading after render sees static attributes and bindings alike.
       const hint =
-        this.configuredFormat() === null
+        this.configuredFormat() === null || !this.hasAccessibleName()
           ? null
           : this.adapter.placeholderHint?.(this.context()) || null;
       const current = this.host.getAttribute('placeholder');
@@ -595,6 +596,25 @@ export class HellDateInput implements FormValueControl<Date | null> {
 
   private context(): HellDateInputAdapterContext {
     return { format: this.dateFormat() };
+  }
+
+  /**
+   * Whether something other than a placeholder can name the host: a native
+   * `aria-label`, merged `aria-labelledby` ids (including an enclosing Field's),
+   * or an associated `<label>`.
+   *
+   * A placeholder is the last fallback in the accessible name computation, and
+   * axe's `label` rule accepts a non-empty one. Writing a hint onto an
+   * otherwise unnamed input would therefore give it a name and silence the
+   * violation that names the real defect, so an unnamed input gets no hint —
+   * the missing label stays as visible to tooling as it was before.
+   */
+  private hasAccessibleName(): boolean {
+    return (
+      (this.host.getAttribute('aria-label') ?? '').trim() !== '' ||
+      this.fieldAriaLabelledby() !== null ||
+      (this.host.labels?.length ?? 0) > 0
+    );
   }
 
   private parseText(text: string): HellTypedValueParseResult<Date> {
