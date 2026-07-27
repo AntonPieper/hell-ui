@@ -1,35 +1,26 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
-  faSolidBan,
   faSolidCircleCheck,
-  faSolidCircleExclamation,
   faSolidFileImage,
   faSolidFileLines,
   faSolidFilePdf,
-  faSolidLayerGroup,
   faSolidTriangleExclamation,
-  faSolidWeightHanging,
 } from '@ng-icons/font-awesome/solid';
 
 import {
   HellFilePicker,
-  type HellFileRejectionReason,
   type HellFileSelection,
   type HellFileValidator,
 } from 'hell-ui/file-picker';
 import { HellIcon } from 'hell-ui/icon';
 
 const FILE_PICKER_VALIDATION_ICONS = {
-  faSolidBan,
   faSolidCircleCheck,
-  faSolidCircleExclamation,
   faSolidFileImage,
   faSolidFileLines,
   faSolidFilePdf,
-  faSolidLayerGroup,
   faSolidTriangleExclamation,
-  faSolidWeightHanging,
 };
 
 @Component({
@@ -94,7 +85,7 @@ const FILE_PICKER_VALIDATION_ICONS = {
                   [attr.data-reason]="rejection.reason"
                 >
                   <hell-icon
-                    [name]="reasonIcon(rejection.reason)"
+                    [name]="fileIcon(rejection.file)"
                     size="16px"
                     class="mt-hell-1 shrink-0 text-hell-danger"
                   />
@@ -126,19 +117,5 @@ export class FilePickerValidationExample {
       return 'faSolidFilePdf';
     }
     return 'faSolidFileLines';
-  }
-
-  /** Maps the structured rejection reason onto a decorative glyph. */
-  protected reasonIcon(reason: HellFileRejectionReason): string {
-    switch (reason) {
-      case 'type':
-        return 'faSolidBan';
-      case 'size':
-        return 'faSolidWeightHanging';
-      case 'count':
-        return 'faSolidLayerGroup';
-      case 'custom':
-        return 'faSolidCircleExclamation';
-    }
   }
 }

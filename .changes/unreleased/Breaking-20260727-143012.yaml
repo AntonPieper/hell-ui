@@ -1,0 +1,14 @@
+kind: Breaking
+body: >-
+  The File Picker drop zone now renders a decorative upload glyph on its root
+  and a clearly separate drag-over treatment: the dashed border turns solid,
+  the glyph lifts and takes the primary color, and hover sharpens the projected
+  copy. The glyph is a `::before` mask that never joins the accessible name,
+  but it does make every drop zone roughly 30px taller, and a host that already
+  projects its own drop icon now renders two glyphs.
+time: 2026-07-27T14:30:12.000000+02:00
+custom:
+  migration: >-
+    Add `before:hidden` to the picker's `ui` refinement when your host already
+    projects its own drop icon. Re-check fixed-height drop zones too — the
+    built-in glyph adds roughly 30px to the root's intrinsic height.

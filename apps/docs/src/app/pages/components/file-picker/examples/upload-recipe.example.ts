@@ -3,7 +3,6 @@ import { provideIcons } from '@ng-icons/core';
 import {
   faSolidArrowRotateRight,
   faSolidCircleCheck,
-  faSolidCircleExclamation,
   faSolidClock,
   faSolidCloudArrowUp,
   faSolidFileImage,
@@ -50,7 +49,6 @@ const UPLOAD_TICK_MS = 260;
 const FILE_PICKER_UPLOAD_ICONS = {
   faSolidArrowRotateRight,
   faSolidCircleCheck,
-  faSolidCircleExclamation,
   faSolidClock,
   faSolidCloudArrowUp,
   faSolidFileImage,
@@ -217,13 +215,9 @@ const FILE_PICKER_UPLOAD_ICONS = {
                 }
 
                 @if (item.status === 'error') {
-                  <p
-                    class="m-0 flex items-start gap-hell-2 text-sm text-hell-danger"
-                    data-upload-error
-                  >
-                    <hell-icon name="faSolidTriangleExclamation" size="14px" class="mt-hell-1" />
-                    {{ item.error }}
-                  </p>
+                  <!-- The status line above already carries the error glyph; this
+                       detail row only has to carry the server's message. -->
+                  <p class="m-0 text-sm text-hell-danger" data-upload-error>{{ item.error }}</p>
                 }
               </li>
             }
@@ -362,7 +356,7 @@ export class FilePickerUploadRecipeExample {
       case 'done':
         return 'faSolidCircleCheck';
       case 'error':
-        return 'faSolidCircleExclamation';
+        return 'faSolidTriangleExclamation';
     }
   }
 

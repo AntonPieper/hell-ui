@@ -1,16 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import { faSolidBan, faSolidCloudArrowUp } from '@ng-icons/font-awesome/solid';
 
 import { HellButton } from 'hell-ui/button';
 import { HellFilePicker } from 'hell-ui/file-picker';
-import { HellIcon } from 'hell-ui/icon';
 
 @Component({
   selector: 'app-file-picker-disabled-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellFilePicker, HellIcon],
-  providers: [provideIcons({ faSolidBan, faSolidCloudArrowUp })],
+  imports: [HellButton, HellFilePicker],
   template: `
     <button
       hellButton
@@ -19,10 +15,11 @@ import { HellIcon } from 'hell-ui/icon';
       class="justify-self-start"
       (click)="disabled.set(!disabled())"
     >
-      <hell-icon [name]="disabled() ? 'faSolidCloudArrowUp' : 'faSolidBan'" />
       {{ disabled() ? 'Enable' : 'Disable' }} picker
     </button>
 
+    <!-- The built-in drop glyph dims with the rest of the root under
+         data-disabled, so the disabled state needs no extra iconography. -->
     <div
       hellFilePicker
       [disabled]="disabled()"

@@ -160,7 +160,12 @@ interface HellFileRejection &#123;
       <p>
         The built-in drop glyph is a <code>::before</code> mask on the same root, so a
         <code>before:hidden</code> refinement removes it when the host projects its own icon, and
-        <code>before:*</code> utilities resize or recolor it otherwise.
+        <code>before:size-*</code> resizes it. Recoloring is different: Tailwind's utilities layer
+        outranks the components layer the glyph rules live in, so a <code>before:text-*</code>
+        refinement wins in <em>every</em> state and flattens the built-in hover, focus, and
+        drag-over feedback. Pair it with matching
+        <code>hover:before:text-*</code>, <code>focus-visible:before:text-*</code>, and
+        <code>data-[dragging=true]:before:text-*</code> refinements, or leave the color alone.
       </p>
       <hd-example-tabs [code]="stylingExampleCode" previewClass="grid max-w-xl gap-hell-3">
         <app-file-picker-styling-example />

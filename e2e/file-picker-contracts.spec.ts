@@ -14,6 +14,26 @@ async function gotoFilePicker(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'File Picker', level: 1 })).toBeVisible();
 }
 
+/**
+ * The drop-zone surface plus its built-in `::before` glyph. Border *style* is
+ * part of the contract, not just border color: drag-over turns the resting
+ * dashed outline solid so the armed state survives a monochrome rendering.
+ */
+async function zoneStyle(picker: Locator): Promise<Record<string, string | undefined>> {
+  return picker.evaluate((element) => {
+    const view = element.ownerDocument.defaultView;
+    const style = view?.getComputedStyle(element);
+    const glyph = view?.getComputedStyle(element, '::before');
+    return {
+      backgroundColor: style?.backgroundColor,
+      borderColor: style?.borderColor,
+      borderTopStyle: style?.borderTopStyle,
+      glyphColor: glyph?.backgroundColor,
+      glyphTransform: glyph?.transform,
+    };
+  });
+}
+
 async function dropFiles(picker: Locator, files: readonly BrowserFile[]): Promise<void> {
   await picker.evaluate((element, definitions) => {
     const transfer = new DataTransfer();
@@ -77,13 +97,8 @@ test.describe('File Picker browser contract', () => {
     const picker = page
       .locator('app-file-picker-basic-example')
       .getByRole('button', { name: 'Add attachments' });
-    const restingStyle = await picker.evaluate((element) => {
-      const style = element.ownerDocument.defaultView?.getComputedStyle(element);
-      return {
-        backgroundColor: style?.backgroundColor,
-        borderColor: style?.borderColor,
-      };
-    });
+    const restingStyle = await zoneStyle(picker);
+    expect(restingStyle.borderTopStyle).toBe('dashed');
     await picker.evaluate((element) => {
       element.dispatchEvent(
         new DragEvent('dragenter', {
@@ -94,15 +109,14 @@ test.describe('File Picker browser contract', () => {
       );
     });
     await expect(picker).toHaveAttribute('data-dragging', 'true');
-    const draggingStyle = await picker.evaluate((element) => {
-      const style = element.ownerDocument.defaultView?.getComputedStyle(element);
-      return {
-        backgroundColor: style?.backgroundColor,
-        borderColor: style?.borderColor,
-      };
-    });
+    await expect.poll(() => zoneStyle(picker).then((style) => style.glyphTransform)).not.toBe(
+      restingStyle.glyphTransform,
+    );
+    const draggingStyle = await zoneStyle(picker);
     expect(draggingStyle.backgroundColor).not.toBe(restingStyle.backgroundColor);
     expect(draggingStyle.borderColor).not.toBe(restingStyle.borderColor);
+    expect(draggingStyle.borderTopStyle).toBe('solid');
+    expect(draggingStyle.glyphColor).not.toBe(restingStyle.glyphColor);
 
     await picker.locator('strong').evaluate((child) => {
       child.dispatchEvent(
@@ -118,17 +132,7 @@ test.describe('File Picker browser contract', () => {
 
     await dropFiles(picker, []);
     await expect(picker).not.toHaveAttribute('data-dragging');
-    await expect
-      .poll(() =>
-        picker.evaluate((element) => {
-          const style = element.ownerDocument.defaultView?.getComputedStyle(element);
-          return {
-            backgroundColor: style?.backgroundColor,
-            borderColor: style?.borderColor,
-          };
-        }),
-      )
-      .toEqual(restingStyle);
+    await expect.poll(() => zoneStyle(picker)).toEqual(restingStyle);
     await expect(page.locator('app-file-picker-basic-example [data-file-picker-result]')).toContainText(
       '0 accepted',
     );
@@ -221,6 +225,99 @@ test.describe('File Picker browser contract', () => {
     await dropFiles(picker, [{ name: 'ignored.pdf', type: 'application/pdf' }]);
     await expect(example.getByText('Selection events: 0')).toBeVisible();
     await expect(picker).not.toHaveAttribute('data-dragging');
+  });
+
+  test('renders the built-in drop glyph and honors the before:hidden opt-out', async ({ page }) => {
+    await gotoFilePicker(page);
+
+    const glyph = (picker: Locator) =>
+      picker.evaluate((element) => {
+        const style = element.ownerDocument.defaultView?.getComputedStyle(element, '::before');
+        return {
+          content: style?.content,
+          display: style?.display,
+          width: style?.width,
+          height: style?.height,
+          maskImage: style?.maskImage ?? style?.webkitMaskImage,
+        };
+      });
+
+    // The default host ships the glyph with zero consumer markup, and its mask
+    // resolves from --hell-icon-upload rather than falling back to `none`.
+    const defaultGlyph = await glyph(
+      page.locator('app-file-picker-basic-example').getByRole('button', { name: 'Add attachments' }),
+    );
+    expect(defaultGlyph.display).toBe('block');
+    expect(defaultGlyph.content).not.toBe('none');
+    expect(defaultGlyph.width).not.toBe('0px');
+    expect(defaultGlyph.height).not.toBe('0px');
+    expect(defaultGlyph.maskImage).toContain('data:image/svg+xml');
+
+    // The documented `before:hidden` escape hatch depends on Tailwind's
+    // utilities layer outranking the components layer that owns the glyph.
+    const optedOutGlyph = await glyph(
+      page
+        .locator('app-file-picker-styling-example')
+        .getByRole('button', { name: 'Add compact attachments' }),
+    );
+    expect(optedOutGlyph.display).toBe('none');
+  });
+
+  test('keeps the glyph dimmed when a disabled picker takes focus', async ({ page }) => {
+    await gotoFilePicker(page);
+
+    // The upload recipe restores focus to the picker host after a removal, so a
+    // disabled host really does receive focus in practice. It must keep the
+    // resting glyph instead of lighting up as if it were operable.
+    const enabled = page
+      .locator('app-file-picker-basic-example')
+      .getByRole('button', { name: 'Add attachments' });
+    const disabled = page
+      .locator('app-file-picker-disabled-example')
+      .getByRole('button', { name: 'Add files' });
+    await expect(disabled).toHaveAttribute('data-disabled', 'true');
+
+    const glyphColor = (picker: Locator) =>
+      picker.evaluate(
+        (element) =>
+          element.ownerDocument.defaultView?.getComputedStyle(element, '::before').backgroundColor,
+      );
+
+    const restingColor = await glyphColor(enabled);
+    await disabled.evaluate((element) => (element as HTMLElement).focus());
+    await expect.poll(() => glyphColor(disabled)).toBe(restingColor);
+
+    // Sanity-check the other half of the guard: keyboard focus on an enabled
+    // host does move the glyph to the accent color, so the `:not()` above is
+    // narrowing a live rule rather than disabling it outright.
+    await enabled.evaluate((element) => (element as HTMLElement).focus());
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(enabled).toBeFocused();
+    await expect.poll(() => glyphColor(enabled)).not.toBe(restingColor);
+  });
+
+  test('keeps projected interactive descendants selectable inside the select-none root', async ({
+    page,
+  }) => {
+    await gotoFilePicker(page);
+
+    const picker = page
+      .locator('app-file-picker-basic-example')
+      .getByRole('button', { name: 'Add attachments' });
+    await expect(picker).toHaveCSS('user-select', 'none');
+
+    const projectedInputUserSelect = await picker.evaluate((element) => {
+      const input = element.ownerDocument.createElement('input');
+      input.type = 'text';
+      input.setAttribute('data-file-picker-projected-input', '');
+      element.append(input);
+      const value =
+        element.ownerDocument.defaultView?.getComputedStyle(input).userSelect ?? 'unknown';
+      input.remove();
+      return value;
+    });
+    expect(projectedInputUserSelect).toBe('text');
   });
 
   test('keeps the documented File Picker examples axe-clean', async ({ page }) => {

@@ -22,8 +22,11 @@
       transform var(--hell-duration-base) var(--ease-hell-out);
   }
 
+  /* Both accent states stay behind the same disabled guard: a disabled host can
+     still receive programmatic focus, and it must keep the dimmed resting
+     glyph rather than lighting up as if it were operable. */
   [hellFilePicker][data-slot='root']:hover:not([data-disabled='true'])::before,
-  [hellFilePicker][data-slot='root']:focus-visible::before {
+  [hellFilePicker][data-slot='root']:focus-visible:not([data-disabled='true'])::before {
     color: var(--color-hell-primary);
   }
 
@@ -32,5 +35,16 @@
   [hellFilePicker][data-slot='root'][data-dragging='true']::before {
     color: var(--color-hell-primary);
     transform: translateY(calc(var(--spacing) * -1)) scale(1.1);
+  }
+
+  /* The root is `select-none` so dragging a file across the zone does not smear
+     a text selection over its copy. Projected interactive descendants are an
+     explicitly supported shape (see HELL_FILE_PICKER_INTERACTIVE_SELECTOR), so
+     they opt back in — `user-select: auto` would inherit `none` here, hence
+     `text`. */
+  [hellFilePicker][data-slot='root']
+    :is(a[href], button, input, select, summary, textarea, [tabindex], [contenteditable]:not([contenteditable='false'])) {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }
