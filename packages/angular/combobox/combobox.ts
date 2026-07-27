@@ -183,7 +183,15 @@ class HellComboboxController {
       if (!option) return;
       const PointerEventCtor = dropdown.ownerDocument.defaultView?.PointerEvent;
       if (!PointerEventCtor) return;
-      option.dispatchEvent(new PointerEventCtor('pointerenter', { bubbles: false }));
+      // The replay carries the real pointer's type: hover is a mouse-only
+      // affordance, and a touch entry that claimed to be a mouse would raise a
+      // hover state that the matching touch leave then refuses to clear.
+      option.dispatchEvent(
+        new PointerEventCtor('pointerenter', {
+          bubbles: false,
+          pointerType: event instanceof PointerEventCtor ? event.pointerType : 'mouse',
+        }),
+      );
     };
     for (const type of HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS) {
       dropdown.addEventListener(type, swallowWhileAtRest, { capture: true });

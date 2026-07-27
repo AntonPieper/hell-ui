@@ -699,9 +699,9 @@ describe('HellCombobox', () => {
     // A panel placed asynchronously can move after it is painted, sliding an
     // option out from under a pointer nobody touched. The keyboard's active
     // option has to survive that, and no phantom hover may be painted.
-    first.dispatchEvent(new PointerEvent('pointerenter'));
-    second.dispatchEvent(new PointerEvent('pointerenter'));
-    first.dispatchEvent(new PointerEvent('pointerleave'));
+    first.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    second.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    first.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
     expect(first.hasAttribute('data-hover')).toBe(false);
@@ -709,14 +709,33 @@ describe('HellCombobox', () => {
 
     // A pointer that is actually being used owns the active option again, and
     // the move replays the entry the option under it never received.
-    second.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }));
+    second.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse' }),
+    );
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
     expect(second.hasAttribute('data-hover')).toBe(true);
 
-    second.dispatchEvent(new PointerEvent('pointerleave'));
+    second.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
     fixture.detectChanges();
     expect(input.getAttribute('aria-activedescendant')).toBeNull();
+  });
+
+  it('does not raise a mouse hover from a touch that opens the dropdown', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const first = query<HTMLElement>(dropdown, '[role="option"]');
+
+    // Hover is a mouse affordance. The replayed entry has to carry the real
+    // pointer type, or a touch leave — which deliberately clears nothing —
+    // would strand the option looking hovered.
+    first.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+    fixture.detectChanges();
+    expect(first.hasAttribute('data-hover')).toBe(false);
   });
 
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
