@@ -1,6 +1,6 @@
 import { Directive, ElementRef, Injector, inject } from '@angular/core';
 
-import { HELL_FLOATING_SCOPE, type HellFloatingScope } from 'hell-ui/internal/core';
+import { HELL_FLOATING_SCOPE, containsNode, type HellFloatingScope } from 'hell-ui/internal/core';
 
 /**
  * The floating surface that hosts one projected editor: its injector, its
@@ -45,7 +45,7 @@ export class HellFilterBuilderEditorSurface {
    * floating surface opened from within it.
    */
   containsTarget(target: EventTarget | Node | null): boolean {
-    if (target instanceof Node && this.panel.contains(target)) return true;
+    if (containsNode(this.panel, target)) return true;
     return this.scope?.containsFloatingTarget(target) ?? false;
   }
 }

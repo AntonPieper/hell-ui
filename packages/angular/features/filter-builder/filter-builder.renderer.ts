@@ -26,6 +26,7 @@ import {
 import {
   HELL_FLOATING_SCOPE,
   HellFloatingScopeRegistry,
+  containsNode,
   hellPartStyler,
   type HellRecipe,
 } from 'hell-ui/internal/core';
@@ -724,7 +725,7 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
       if (this.editor()?.session !== state.session) return;
       const active = this.host.ownerDocument.activeElement;
       if (surface.containsTarget(active)) return;
-      const insideBuilder = active instanceof Node && this.host.contains(active);
+      const insideBuilder = containsNode(this.host, active);
       if (byTab && !insideBuilder) this.focusPickerInput();
       this.cancelEditor(state.session, false);
     }, 0);
@@ -769,16 +770,22 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
       trigger,
       session,
     });
-    // An already-open trigger must not be shown again: `show()` resolves
-    // against the surface that is already mounted, so the focus step would
-    // run before the swapped-in editor content renders and land on `<body>`.
-    if (trigger.open()) {
-      this.scheduleEditorFocus('create');
-      return;
-    }
+    // `show()` is always called, including on a trigger that already reports
+    // itself open: that flag stays true for the whole teardown window, because
+    // `hide()` only queues the dispose and the panel's `isOpen` is cleared
+    // after the exit animation. Skipping `show()` there would let the pending
+    // dispose tear down the panel the new session just claimed, leaving a
+    // create session with no editor at all. `show()` is what cancels that
+    // pending close.
+    //
+    // Its promise, however, only settles when it actually mounts a panel: an
+    // already-open trigger returns early and never resolves, so the focus step
+    // has to be scheduled outside the promise for that case.
+    const wasOpen = trigger.open();
     void trigger.show().then(() => {
       if (this.isLatestSession(session)) this.scheduleEditorFocus('create');
     });
+    if (wasOpen) this.scheduleEditorFocus('create');
   }
 
   private createEditorContext(): HellFilterBuilderEditorContext<TFilter> | null {

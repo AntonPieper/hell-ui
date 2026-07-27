@@ -718,8 +718,10 @@ test.describe('Filter Builder browser contract', () => {
     // no displayParts.
     const presentation = await value.evaluate((element) => {
       const style = getComputedStyle(element);
+      const root = getComputedStyle(element.ownerDocument.documentElement);
       return {
         maxWidth: Number.parseFloat(style.maxWidth),
+        rootFontSize: Number.parseFloat(root.fontSize),
         textOverflow: style.textOverflow,
         whiteSpace: style.whiteSpace,
         fontWeight: style.fontWeight,
@@ -727,7 +729,9 @@ test.describe('Filter Builder browser contract', () => {
     });
     expect(presentation.textOverflow).toBe('ellipsis');
     expect(presentation.whiteSpace).toBe('nowrap');
-    expect(presentation.maxWidth).toBeGreaterThan(0);
+    // The migration table promises `16rem`, so assert the rem contract rather
+    // than a pixel width that would move with the host page's root font size.
+    expect(presentation.maxWidth).toBe(16 * presentation.rootFontSize);
     expect(Number(presentation.fontWeight)).toBeGreaterThan(400);
   });
 
@@ -745,4 +749,3 @@ test.describe('Filter Builder browser contract', () => {
     expect(results.violations).toEqual([]);
   });
 });
-

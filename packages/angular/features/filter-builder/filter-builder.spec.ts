@@ -778,6 +778,37 @@ describe('HellFilterBuilder', () => {
     );
   });
 
+  it('returns focus to the inline picker when Tab wraps it onto a page control', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const focused = document.activeElement as HTMLElement;
+    expect(editor.contains(focused)).toBe(true);
+
+    // The other exit the portal allows: instead of stranding focus, Tab wraps
+    // past the end of the document onto a real focusable elsewhere on the
+    // page. The user is just as ejected from the component, so the picker must
+    // still take focus back.
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '[data-test-outside]');
+    key(focused, 'Tab');
+    outside.focus();
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
+
   it('cancels the editor on Escape from a composed field whose own layer is closed', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.value.set([]);
