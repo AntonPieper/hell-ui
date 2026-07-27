@@ -8,18 +8,22 @@
 // `pnpm change` and `pnpm release:prepare` must remain the only public
 // Changie-backed commands, and the real Changie configuration, validator,
 // merge behavior, and Release Preparation transaction are proven in isolated
-// repository fixtures.
+// repository fixtures. Release Projection publication is proven the same
+// way: fixture-driven policy decisions plus a static release-workflow
+// contract, with no live publication.
 
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runChangeFragmentFixtures } from './change-fragment-fixtures.mjs';
+import { collectReleaseWorkflowErrors } from './check-release-workflow.mjs';
 import {
   collectChangelogContractErrors,
   listReleasedVersionFiles,
   resolveChangieBinary,
 } from './release-changelog.mjs';
 import { runReleasePreparationFixtures } from './release-preparation-fixtures.mjs';
+import { runReleaseProjectionFixtures } from './release-projection-fixtures.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -36,6 +40,9 @@ const fragmentFixtures = runChangeFragmentFixtures({ root });
 errors.push(...fragmentFixtures.failures);
 const preparationFixtures = runReleasePreparationFixtures({ root });
 errors.push(...preparationFixtures.failures);
+const projectionFixtures = runReleaseProjectionFixtures();
+errors.push(...projectionFixtures.failures);
+errors.push(...collectReleaseWorkflowErrors({ root }));
 
 if (errors.length > 0) {
   console.error('Changelog check failed:');
@@ -49,8 +56,10 @@ console.log(
   `Changelog ok: CHANGELOG.md reproduces ${releasedCount} released version ` +
     `record${releasedCount === 1 ? '' : 's'} byte-for-byte, ` +
     `${pendingFragmentCount} pending change fragment${pendingFragmentCount === 1 ? '' : 's'} ` +
-    `passed objective validation, and ${fragmentFixtures.total} change-fragment plus ` +
-    `${preparationFixtures.total} release-preparation fixtures passed.`,
+    `passed objective validation, ${fragmentFixtures.total} change-fragment plus ` +
+    `${preparationFixtures.total} release-preparation plus ` +
+    `${projectionFixtures.total} release-projection fixtures passed, and the release ` +
+    'workflow satisfies the publish-last contract.',
 );
 
 function collectCommandSurfaceErrors() {

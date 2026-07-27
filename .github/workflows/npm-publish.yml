@@ -1,8 +1,13 @@
-# The single release workflow for every registry. A tag push runs the shared
-# release gate (release-gate.yml) exactly once, and both registry publish
-# jobs download that same run's audited `release-package` artifact, so
-# cross-registry byte-identity comes from literally sharing one tarball
-# rather than from build determinism across separate gate runs.
+# The single release workflow for every registry and Release Projection. A
+# tag push runs the publish-last graph: release gate → GitHub Packages →
+# every other configured Required Registry (npmjs when enabled) → draft and
+# verify the GitHub prerelease → publish the GitHub prerelease. Both registry
+# publish jobs download the same gate run's audited `release-package`
+# artifact, so cross-registry byte-identity comes from literally sharing one
+# tarball rather than from build determinism across separate gate runs. The
+# GitHub Release body is an exact byte projection of the tagged Released
+# Version Notes, decided by the fixture-tested policy in
+# tools/release-projection.mjs; manual dispatch stays evidence-only.
 #
 # This file must keep the npm-publish.yml name: the npm trusted-publisher
 # record pins the workflow filename (docs/release/npm-publishing.md).
@@ -37,7 +42,11 @@ jobs:
   publish-npm:
     name: Publish to npm
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.HELL_ENABLE_NPMJS_PUBLISH == 'true'
-    needs: release-gate
+    # GitHub Packages publishes first; enabling the npmjs switch makes npmjs
+    # a Required Registry that runs after it (ADR 0003).
+    needs:
+      - release-gate
+      - publish-github-packages
     runs-on: ubuntu-latest
     environment: npm-publish
     timeout-minutes: 10
@@ -191,3 +200,182 @@ jobs:
           set -euo pipefail
           echo "Publishing ${HELL_MIRROR_TARBALL}"
           pnpm publish "$HELL_MIRROR_TARBALL" --no-git-checks
+
+  # Evidence-only manual runs: a dispatch exercises the full release gate and
+  # the projection-verification plan against the current commit without
+  # publishing a registry package, creating a draft, or touching GitHub
+  # Releases.
+  release-projection-plan:
+    name: Release projection plan (evidence)
+    if: github.event_name == 'workflow_dispatch'
+    needs: release-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      - name: Plan the release projection from the current commit
+        env:
+          HELL_RELEASE_COMMIT: ${{ github.sha }}
+        run: node tools/release-projection.mjs plan --evidence
+
+  # The Required Registry barrier and the Release Projection draft. This job
+  # runs even when a registry job failed or was skipped (`!cancelled()`) so
+  # the fixture-tested policy in tools/release-projection.mjs blocks loudly:
+  # a skipped, cancelled, or failed Required Registry fails the barrier step
+  # before any GitHub release is touched. The draft body is the exact tagged
+  # .changes/<version>.md bytes; a rerun adopts an existing release only when
+  # it verifies exactly and never edits it.
+  draft-github-release:
+    name: Draft GitHub release
+    if: ${{ !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    needs:
+      - publish-github-packages
+      - publish-npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      release-id: ${{ steps.create.outputs.release-id || steps.decide.outputs.release-id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      # Every configured Required Registry must have succeeded; a disabled
+      # optional registry (npmjs while its publication switch is off) never
+      # blocks. Future private registries join this list as required entries.
+      - name: Require every Required Registry
+        env:
+          HELL_REQUIRED_REGISTRIES: >-
+            [{"name": "GitHub Packages", "required": true,
+              "result": "${{ needs.publish-github-packages.result }}"},
+             {"name": "npmjs",
+              "required": ${{ vars.HELL_ENABLE_NPMJS_PUBLISH == 'true' }},
+              "result": "${{ needs.publish-npm.result }}"}]
+        run: node tools/release-projection.mjs barrier
+
+      - name: Plan the release projection
+        env:
+          HELL_RELEASE_TAG: ${{ github.ref_name }}
+          HELL_RELEASE_COMMIT: ${{ github.sha }}
+        run: node tools/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
+
+      - name: Capture existing releases for the tag
+        run: |
+          set -euo pipefail
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/releases" |
+            jq --arg tag "$GITHUB_REF_NAME" '[.[][] | select(.tag_name == $tag)]' \
+              > "$RUNNER_TEMP/existing.json"
+
+      - name: Decide the projection action
+        id: decide
+        run: |
+          set -euo pipefail
+          decision="$(node tools/release-projection.mjs decide "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/existing.json")"
+          echo "action=$(jq -r '.action' <<<"$decision")" >> "$GITHUB_OUTPUT"
+          echo "release-id=$(jq -r '.releaseId // empty' <<<"$decision")" >> "$GITHUB_OUTPUT"
+
+      - name: Create the draft prerelease
+        id: create
+        if: steps.decide.outputs.action == 'create'
+        run: |
+          set -euo pipefail
+          release_id="$(
+            jq '{tag_name: .tagName, name: .title, body: .body,
+                 target_commitish: .commit, draft: true, prerelease: .prerelease}' \
+              "$RUNNER_TEMP/expected.json" |
+              gh api "repos/${GITHUB_REPOSITORY}/releases" --input - --jq '.id'
+          )"
+          echo "release-id=$release_id" >> "$GITHUB_OUTPUT"
+
+      - name: Capture the release and repository policy
+        env:
+          HELL_RELEASE_ID: ${{ steps.create.outputs.release-id || steps.decide.outputs.release-id }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/release.json"
+          gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
+            echo 'null' > "$RUNNER_TEMP/immutable-releases.json"
+          echo "HELL_TAG_COMMIT=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_REF_NAME}" --jq '.sha')" >> "$GITHUB_ENV"
+
+      - name: Verify the draft projection
+        run: |
+          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
+            --phase projection --policy "$RUNNER_TEMP/immutable-releases.json"
+
+  # Publishing the GitHub prerelease is the last release action. No
+  # `always()`/`!cancelled()` here: this job runs only after the draft job —
+  # and therefore the Required Registry barrier and every draft verification
+  # — succeeded. A rerun over an already-published exact release verifies it
+  # without editing.
+  publish-github-release:
+    name: Publish GitHub release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: draft-github-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HELL_RELEASE_ID: ${{ needs.draft-github-release.outputs.release-id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      - name: Plan the release projection
+        env:
+          HELL_RELEASE_TAG: ${{ github.ref_name }}
+          HELL_RELEASE_COMMIT: ${{ github.sha }}
+        run: node tools/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
+
+      - name: Capture the verified draft
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/release.json"
+          gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
+            echo 'null' > "$RUNNER_TEMP/immutable-releases.json"
+          echo "HELL_TAG_COMMIT=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_REF_NAME}" --jq '.sha')" >> "$GITHUB_ENV"
+
+      - name: Verify the draft projection before publication
+        run: |
+          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
+            --phase projection --policy "$RUNNER_TEMP/immutable-releases.json"
+
+      - name: Publish the GitHub prerelease
+        run: |
+          set -euo pipefail
+          if [ "$(jq -r '.draft' "$RUNNER_TEMP/release.json")" = "true" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" \
+              -F draft=false --jq '.id' > /dev/null
+          else
+            echo "The release is already published; this rerun verifies it without editing."
+          fi
+
+      - name: Verify the published projection
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/published.json"
+          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/published.json" \
+            --phase published
