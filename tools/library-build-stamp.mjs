@@ -29,15 +29,20 @@ import { collectSourceFiles, digestSourceFiles } from './source-digest.mjs';
 const LIBRARY_BUILD_STAMP_PATH = 'dist/hell.build.json';
 
 /** Bump when the digest inputs change so old stamps are rejected, not trusted. */
-const STAMP_VERSION = 1;
+const STAMP_VERSION = 2;
+
+const LIBRARY_DIST_ROOT = 'dist/hell';
 
 export const LIBRARY_BUILD_CONFIGURATIONS = ['production', 'development'];
 
 /**
  * Sources that decide the emitted `.d.ts` files. Over-inclusion only costs a
- * rebuild; under-inclusion would let a stale `dist` pass as current, so files
- * are excluded only when they cannot reach declaration emit at all
- * (`*.spec.ts`, stylesheets, assets, installed packages).
+ * rebuild; under-inclusion would let a stale `dist` pass as current.
+ *
+ * `.html` templates reach declaration emit through `NgContentSelectors`, and
+ * `hell-entrypoint.json` decides which entrypoints exist at all, so both count
+ * even though neither is TypeScript. Spec files, stylesheets, assets and
+ * installed packages cannot reach it.
  */
 function declarationInputPaths(root) {
   return [
@@ -50,14 +55,36 @@ function declarationInputPaths(root) {
     ...collectSourceFiles(
       join(root, 'packages/angular'),
       (name) =>
-        name === 'ng-package.json' || (name.endsWith('.ts') && !name.endsWith('.spec.ts')),
+        name === 'ng-package.json' ||
+        name === 'hell-entrypoint.json' ||
+        name.endsWith('.html') ||
+        (name.endsWith('.ts') && !name.endsWith('.spec.ts')),
     ),
+  ];
+}
+
+/**
+ * The built artifact itself. Matching sources prove the build was *started*
+ * from this tree; they say nothing about what happened to `dist/hell`
+ * afterwards. A `pnpm run watch` session overwriting it, a hand-edited
+ * declaration, a build killed halfway, or two builds interleaving into one
+ * directory all leave the source digest intact and the output different.
+ */
+function outputPaths(root) {
+  const dist = join(root, LIBRARY_DIST_ROOT);
+  return [
+    join(dist, 'package.json'),
+    ...collectSourceFiles(join(dist, 'types'), (name) => name.endsWith('.d.ts')),
   ];
 }
 
 /** Content digest of every declaration input, independent of build order or timestamps. */
 function computeDeclarationInputsDigest(root) {
   return digestSourceFiles(root, declarationInputPaths(root));
+}
+
+function computeOutputDigest(root) {
+  return digestSourceFiles(root, outputPaths(root));
 }
 
 export function writeLibraryBuildStamp({ root, configuration }) {
@@ -76,6 +103,7 @@ export function writeLibraryBuildStamp({ root, configuration }) {
     // sources stay comparable.
     builtAt: new Date().toISOString(),
     declarationInputsDigest: computeDeclarationInputsDigest(root),
+    outputDigest: computeOutputDigest(root),
   };
   writeFileSync(stampPath, `${JSON.stringify(stamp, null, 2)}\n`);
   return stampPath;
@@ -102,10 +130,16 @@ export function describeStaleLibraryBuild({ root, expectedConfiguration = 'produ
     stamp: readLibraryBuildStamp(root),
     expectedConfiguration,
     currentDigest: computeDeclarationInputsDigest(root),
+    currentOutputDigest: computeOutputDigest(root),
   });
 }
 
-function classifyLibraryBuildStamp({ stamp, expectedConfiguration, currentDigest }) {
+function classifyLibraryBuildStamp({
+  stamp,
+  expectedConfiguration,
+  currentDigest,
+  currentOutputDigest,
+}) {
   const rebuild =
     expectedConfiguration === 'production'
       ? 'Run `pnpm run build:lib`.'
@@ -129,16 +163,26 @@ function classifyLibraryBuildStamp({ stamp, expectedConfiguration, currentDigest
       `dist/hell was built from different library sources than the working tree, so its declarations describe other code. ${rebuild}`,
     ];
   }
+  if (stamp.outputDigest !== currentOutputDigest) {
+    return [
+      `dist/hell has changed since the build that stamped it — a \`pnpm run watch\` session, an interrupted build, a hand edit, or two builds writing the same directory all do this. Its sources match, but its declarations are no longer the ones that were stamped. ${rebuild}`,
+    ];
+  }
   return [];
 }
 
 /** Self-check with synthetic stamps; runs before the real gate. */
 export function checkLibraryBuildStampFixture() {
-  const current = { expectedConfiguration: 'production', currentDigest: 'digest-a' };
+  const current = {
+    expectedConfiguration: 'production',
+    currentDigest: 'digest-a',
+    currentOutputDigest: 'output-a',
+  };
   const fresh = {
     version: STAMP_VERSION,
     configuration: 'production',
     declarationInputsDigest: 'digest-a',
+    outputDigest: 'output-a',
   };
 
   assert.deepEqual(
@@ -155,6 +199,13 @@ export function checkLibraryBuildStampFixture() {
       { ...fresh, declarationInputsDigest: 'digest-b' },
       /different library sources/,
       'other sources must fail',
+    ],
+    // Matching sources with different output is the watch-overwrite case: the
+    // build started from this tree, then something else rewrote dist.
+    [
+      { ...fresh, outputDigest: 'output-b' },
+      /has changed since the build that stamped it/,
+      'a rewritten dist must fail even when its sources match',
     ],
   ];
   for (const [stamp, expected, message] of cases) {
