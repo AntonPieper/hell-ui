@@ -12,13 +12,15 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runPrStatePolicyFixtures } from './pr-state-policy-fixtures.mjs';
+import { runWorkflowTrustContractFixtures } from './workflow-trust-contract-fixtures.mjs';
 import { collectWorkflowTrustContractErrors } from './workflow-trust-contracts.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const fixtures = runPrStatePolicyFixtures();
 const trustErrors = collectWorkflowTrustContractErrors({ root });
-const failures = [...fixtures.failures, ...trustErrors];
+const trustFixtures = runWorkflowTrustContractFixtures({ root });
+const failures = [...fixtures.failures, ...trustErrors, ...trustFixtures.failures];
 
 if (failures.length > 0) {
   console.error('PR-state contract check failed:');
@@ -27,5 +29,6 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `PR states ok: ${fixtures.total} policy fixtures passed and the workflow trust contracts hold.`,
+  `PR states ok: ${fixtures.total} policy fixtures passed, the workflow trust contracts hold, ` +
+    `and ${trustFixtures.total} adversarial workflow fixtures were rejected.`,
 );

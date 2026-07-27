@@ -10,6 +10,7 @@
 // Nothing here talks to GitHub.
 
 import {
+  changedFilesApiCap,
   evaluatePullRequestState,
   noConsumerChangeLabel,
   packageManifestPath,
@@ -211,6 +212,36 @@ const fixtures = [
     expect: { state: 'no-consumer-change', errors: ['generated Release Changelog'] },
   },
   {
+    name: 'a matching reported changed-file count passes',
+    labels: [],
+    files: [fragmentAddition(), file('packages/angular/button/button.ts', 'modified')],
+    expectedFileCount: 2,
+    expect: { state: 'consumer-change' },
+  },
+  {
+    name: 'a changed-file list at the API cap fails closed',
+    labels: [noConsumerChangeLabel],
+    files: Array.from({ length: changedFilesApiCap }, (_, index) =>
+      file(`docs/examples/example-${index}.ts`, 'modified'),
+    ),
+    expectedFileCount: changedFilesApiCap,
+    expect: { state: null, errors: ['GitHub API cap'] },
+  },
+  {
+    name: 'a diverging reported changed-file count fails closed',
+    labels: [noConsumerChangeLabel],
+    files: [file('docs/notes.md', 'modified')],
+    expectedFileCount: 2,
+    expect: { state: null, errors: ['refusing to decide from incomplete metadata'] },
+  },
+  {
+    name: 'a malformed reported changed-file count fails closed',
+    labels: [noConsumerChangeLabel],
+    files: [file('docs/notes.md', 'modified')],
+    expectedFileCount: '1',
+    expect: { state: null, errors: ['must be a non-negative integer'] },
+  },
+  {
     name: 'an unknown changed-file status fails closed',
     labels: [noConsumerChangeLabel],
     files: [file('docs/notes.md', 'mystery-status')],
@@ -249,7 +280,11 @@ export function runPrStatePolicyFixtures() {
 function runFixture(fixture) {
   const failures = [];
   const files = fixture.pages ? fixture.pages.flat() : fixture.files;
-  const { state, errors } = evaluatePullRequestState({ labels: fixture.labels, files });
+  const { state, errors } = evaluatePullRequestState({
+    labels: fixture.labels,
+    files,
+    expectedFileCount: fixture.expectedFileCount ?? null,
+  });
 
   if (state !== fixture.expect.state) {
     failures.push(`expected state ${JSON.stringify(fixture.expect.state)}, got ${JSON.stringify(state)}.`);

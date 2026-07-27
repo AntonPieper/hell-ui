@@ -142,7 +142,8 @@ function collectTrustedWorkflowErrors(workflow) {
     }
   }
 
-  for (const expression of collectExpressions(workflow)) {
+  const { expressions, opaque } = collectExpressions(workflow);
+  for (const expression of expressions) {
     if (!trustedExpressionAllowlist.includes(expression)) {
       errors.push(
         `${label} evaluates the expression "\${{ ${expression} }}" outside the trusted allowlist ` +
@@ -150,6 +151,13 @@ function collectTrustedWorkflowErrors(workflow) {
           'privileged expression.',
       );
     }
+  }
+  for (const value of opaque) {
+    errors.push(
+      `${label} contains a workflow expression the audit cannot fully extract ` +
+        `(${JSON.stringify(value)}); the privileged workflow may only evaluate simple allowlisted ` +
+        'expressions with no literal braces.',
+    );
   }
 
   const rawText = JSON.stringify(workflow);
@@ -202,11 +210,18 @@ function collectReadOnlyPermissionErrors(workflow, label) {
 // Collects `${{ ... }}` expressions from every string value in the parsed
 // workflow. Parsing first keeps YAML comments out of the audit while every
 // evaluated expression stays in.
-function collectExpressions(node, found = []) {
+//
+// The brace-free extraction pattern cannot represent an expression containing
+// a literal `}` — for example `${{ format('{0}', github.event.number) }}` —
+// but GitHub would still evaluate it. Any string whose `${{` openers outnumber
+// the fully extracted expressions is therefore reported as opaque, so an
+// unauditable expression fails the contract instead of evading the allowlist.
+function collectExpressions(node, found = { expressions: [], opaque: [] }) {
   if (typeof node === 'string') {
-    for (const match of node.matchAll(/\$\{\{([^}]*)\}\}/g)) {
-      found.push(match[1].trim());
-    }
+    const openers = node.split('${{').length - 1;
+    const matches = [...node.matchAll(/\$\{\{([^}]*)\}\}/g)];
+    for (const match of matches) found.expressions.push(match[1].trim());
+    if (matches.length !== openers) found.opaque.push(node);
   } else if (Array.isArray(node)) {
     for (const item of node) collectExpressions(item, found);
   } else if (typeof node === 'object' && node !== null) {

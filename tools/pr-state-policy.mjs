@@ -28,6 +28,10 @@ const semVerPattern =
 // new API status can never silently widen the policy.
 const knownFileStatuses = ['added', 'removed', 'modified', 'changed', 'renamed', 'copied', 'unchanged'];
 
+// GitHub's list-PR-files endpoint returns at most 3000 entries, so a decision
+// at or beyond the cap could be missing files entirely.
+export const changedFilesApiCap = 3000;
+
 const exactlyOneStateGuidance =
   'a pull request has exactly one state: it adds Change Fragments (Consumer Change), carries ' +
   `"${noConsumerChangeLabel}", or carries "${releasePreparationLabel}"`;
@@ -46,13 +50,42 @@ function isReleasedRecordPath(path) {
 //
 // `labels` is an array of label names; `files` is the GitHub REST
 // changed-file metadata (`filename`, `status`, optional `previous_filename`),
-// already concatenated across pagination pages. Returns
-// `{ state, errors }`; the decision passes only when `errors` is empty.
-// `state` names the claimed state (or null when no state can be claimed) so
-// callers can report what was evaluated even on failure.
-export function evaluatePullRequestState({ labels, files }) {
+// already concatenated across pagination pages; `expectedFileCount` is the
+// pull-request object's `changed_files` count and, when provided, must agree
+// with the received entries. Returns `{ state, errors }`; the decision passes
+// only when `errors` is empty. `state` names the claimed state (or null when
+// no state can be claimed) so callers can report what was evaluated even on
+// failure.
+export function evaluatePullRequestState({ labels, files, expectedFileCount = null }) {
   const errors = collectMetadataShapeErrors(labels, files);
   if (errors.length > 0) return { state: null, errors };
+
+  // Truncated metadata could hide a violating file, so an entry list at the
+  // API cap or disagreeing with the pull request's own count fails closed.
+  if (expectedFileCount !== null) {
+    if (!Number.isInteger(expectedFileCount) || expectedFileCount < 0) {
+      errors.push(
+        `The pull request's changed-file count must be a non-negative integer; got ` +
+          `${JSON.stringify(expectedFileCount)}. Refusing to decide from unrecognized metadata.`,
+      );
+      return { state: null, errors };
+    }
+    if (expectedFileCount !== files.length) {
+      errors.push(
+        `Received ${files.length} changed-file entries but the pull request reports ` +
+          `${expectedFileCount} changed files; refusing to decide from incomplete metadata.`,
+      );
+      return { state: null, errors };
+    }
+  }
+  if (files.length >= changedFilesApiCap) {
+    errors.push(
+      `Received ${files.length} changed-file entries, at or beyond the GitHub API cap of ` +
+        `${changedFilesApiCap}; the list may be truncated — refusing to decide from incomplete ` +
+        'metadata. Split the pull request into reviewable pieces.',
+    );
+    return { state: null, errors };
+  }
 
   const touches = files.flatMap((file) => normalizeFileTouches(file, errors));
   if (errors.length > 0) return { state: null, errors };

@@ -47,7 +47,9 @@ jobs:
           node-version-file: .node-version
 
       # Pagination: per_page plus --paginate concatenates every page, so a
-      # fragment or violation beyond the first 100 entries is still seen.
+      # fragment or violation beyond the first 100 entries is still seen. The
+      # pull-request object's changed_files count lets the policy fail closed
+      # if the files endpoint truncates the list at its 3000-entry cap.
       # Label names and file paths are attacker-influenced data; they are
       # written to JSON files and compared by the policy, never interpolated
       # into a command or workflow expression.
@@ -58,6 +60,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+          gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}" \
+            --jq '{changed_files: .changed_files}' > "${RUNNER_TEMP}/pull.json"
           gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/labels?per_page=100" \
             --paginate --jq '.[] | {name: .name}' |
             jq --slurp '.' > "${RUNNER_TEMP}/labels.json"
@@ -66,4 +70,8 @@ jobs:
             jq --slurp '.' > "${RUNNER_TEMP}/files.json"
 
       - name: Decide the pull-request state
-        run: node tools/decide-pr-state.mjs --labels "${RUNNER_TEMP}/labels.json" --files "${RUNNER_TEMP}/files.json"
+        run: >-
+          node tools/decide-pr-state.mjs
+          --labels "${RUNNER_TEMP}/labels.json"
+          --files "${RUNNER_TEMP}/files.json"
+          --pull "${RUNNER_TEMP}/pull.json"

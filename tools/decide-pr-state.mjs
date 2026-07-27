@@ -11,16 +11,18 @@
 import { readFileSync } from 'node:fs';
 import { evaluatePullRequestState } from './pr-state-policy.mjs';
 
-const usage = 'Usage: node tools/decide-pr-state.mjs --labels <labels.json> --files <files.json>';
+const usage =
+  'Usage: node tools/decide-pr-state.mjs --labels <labels.json> --files <files.json> --pull <pull.json>';
 
 const options = parseArguments(process.argv.slice(2));
 const labels = readLabelNames(options.labels);
 const files = readJson(options.files, 'changed-file metadata');
+const expectedFileCount = readChangedFileCount(options.pull);
 
-const { state, errors } = evaluatePullRequestState({ labels, files });
+const { state, errors } = evaluatePullRequestState({ labels, files, expectedFileCount });
 
 console.log(`Labels: ${labels.join(', ') || '(none)'}`);
-console.log(`Changed files: ${files.length}`);
+console.log(`Changed files: ${files.length} received, ${expectedFileCount} reported`);
 console.log(`Claimed state: ${state ?? '(none)'}`);
 
 if (errors.length > 0) {
@@ -36,17 +38,29 @@ function parseArguments(argv) {
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index];
     const value = argv[index + 1];
-    if ((flag !== '--labels' && flag !== '--files') || value === undefined) {
+    if ((flag !== '--labels' && flag !== '--files' && flag !== '--pull') || value === undefined) {
       console.error(usage);
       process.exit(2);
     }
     parsed[flag.slice(2)] = value;
   }
-  if (!parsed.labels || !parsed.files) {
+  if (!parsed.labels || !parsed.files || !parsed.pull) {
     console.error(usage);
     process.exit(2);
   }
   return parsed;
+}
+
+// The pull-request object's changed_files count guards the changed-file list
+// against silent truncation at the API's 3000-entry cap; the policy fails
+// closed when it diverges from the received entries.
+function readChangedFileCount(path) {
+  const pull = readJson(path, 'pull-request metadata');
+  if (typeof pull !== 'object' || pull === null || !('changed_files' in pull)) {
+    console.error(`Pull-request metadata at ${path} must carry a changed_files count.`);
+    process.exit(2);
+  }
+  return pull.changed_files;
 }
 
 function readJson(path, description) {
