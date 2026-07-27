@@ -22,6 +22,7 @@ import {
 } from '@angular/core';
 import {
   FlexRenderDirective,
+  defaultColumnSizing,
   type Cell,
   type Column,
   type Header,
@@ -384,9 +385,12 @@ export interface HellTableShellExpandedRowContext<TData extends RowData = RowDat
   readonly table: Table<TData>;
 }
 
-/** Rendered-pixels-per-TanStack-unit, latched for the life of one resize transaction. */
-interface HellColumnRenderScale {
-  value: number;
+/** Mutable state both sides of one resize transaction share while it runs. */
+interface HellColumnResizeTransaction {
+  /** Rendered pixels per TanStack unit, latched for the life of the transaction. */
+  scale: number;
+  /** Sizes this transaction has written so far, keyed by column id. */
+  writes: Readonly<Record<string, number>>;
 }
 
 interface HellColumnMeta {
@@ -494,16 +498,22 @@ interface HellColumnMeta {
                         </ng-container>
                       }
                     }
-                  }
 
-                  @if (resizeAdapterFor(header); as resizeAdapter) {
-                    <button
-                      hellTableResizeHandle
-                      type="button"
-                      data-hell-table-shell-resize-handle
-                      [resizeAdapter]="resizeAdapter"
-                      [aria-label]="resizeHandleLabel(header)"
-                    ></button>
+                    <!--
+                      Inside the placeholder guard: a placeholder header still
+                      carries the leaf column, so a separator outside it would
+                      render a second handle for the same pair in whichever
+                      grouped header row padded that column out.
+                    -->
+                    @if (resizeAdapterFor(header); as resizeAdapter) {
+                      <button
+                        hellTableResizeHandle
+                        type="button"
+                        data-hell-table-shell-resize-handle
+                        [resizeAdapter]="resizeAdapter"
+                        [aria-label]="resizeHandleLabel(header)"
+                      ></button>
+                    }
                   }
                 </th>
               }
@@ -814,11 +824,12 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     const cached = this.resizePairs.get(before.id);
     if (cached?.afterId === after.id) return cached.adapter;
 
-    // Both sides share one latched scale so a transaction cannot half-convert.
-    const scale: HellColumnRenderScale = { value: 1 };
+    // Both sides share one transaction so neither can half-convert its delta
+    // nor overwrite the other's write.
+    const transaction: HellColumnResizeTransaction = { scale: 1, writes: {} };
     const adapter: HellTableResizeAdapter = {
-      before: this.resizeItemFor(before.id, after.id, scale),
-      after: this.resizeItemFor(after.id, before.id, scale),
+      before: this.resizeItemFor(before.id, after.id, transaction),
+      after: this.resizeItemFor(after.id, before.id, transaction),
     };
     this.resizePairs.set(before.id, { afterId: after.id, adapter });
     return adapter;
@@ -844,20 +855,23 @@ export class HellTanStackTable<TData extends RowData = RowData> {
    * transaction. Recomputing it per call would read a `getTotalSize()` that
    * already contains this transaction's first write, so the two sides would
    * convert at different rates and the pair total would creep on every move.
+   * `measure()` also opens a fresh write set, so a new drag starts from
+   * TanStack's own state rather than from what the last one left behind.
    */
   private resizeItemFor(
     columnId: string,
     otherColumnId: string,
-    scale: HellColumnRenderScale,
+    transaction: HellColumnResizeTransaction,
   ): HellTableResizeItem {
     return {
       columnId,
       measure: () => {
-        scale.value = this.columnRenderScale();
-        return this.columnUnits(columnId) * scale.value;
+        transaction.scale = this.columnRenderScale();
+        transaction.writes = {};
+        return this.columnUnits(columnId) * transaction.scale;
       },
-      minSize: () => this.resizeMinUnits(columnId, otherColumnId) * scale.value,
-      setSize: (px) => this.writeColumnSize(columnId, px / scale.value),
+      minSize: () => this.resizeMinUnits(columnId, otherColumnId) * transaction.scale,
+      setSize: (px) => this.writeColumnSize(transaction, columnId, px / transaction.scale),
     };
   }
 
@@ -879,11 +893,17 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     return Number.isFinite(size) && size > 0 ? size : 0;
   }
 
+  /**
+   * TanStack merges `defaultColumnSizing` into every `columnDef`, so a column
+   * that still exists always answers with concrete bounds. The fallbacks only
+   * cover a column disappearing between two reads, and deliberately reuse
+   * TanStack's own defaults so the shell never invents a bound of its own.
+   */
   private columnBounds(columnId: string): { readonly min: number; readonly max: number } {
     const columnDef = this.table().getColumn(columnId)?.columnDef;
     return {
-      min: columnDef?.minSize ?? 0,
-      max: columnDef?.maxSize ?? Number.MAX_SAFE_INTEGER,
+      min: columnDef?.minSize ?? defaultColumnSizing.minSize,
+      max: columnDef?.maxSize ?? defaultColumnSizing.maxSize,
     };
   }
 
@@ -901,8 +921,29 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     return rendered > 0 ? rendered / total : 1;
   }
 
-  private writeColumnSize(columnId: string, size: number): void {
-    this.table().setColumnSizing((current) => ({ ...current, [columnId]: size }));
+  /**
+   * Records one side's size and republishes the whole transaction in a single
+   * `columnSizing` updater.
+   *
+   * The resize runtime writes both sides back to back with no render in
+   * between, and TanStack's own `columnSizing` state does not refresh between
+   * two synchronous updaters: the Angular adapter's `onStateChange` closes over
+   * the state captured when its options last recomputed, and the table proxy
+   * caches `setColumnSizing` after the first access. A per-side updater would
+   * therefore compute the second write from the same state as the first and
+   * drop the leading column's size, leaving the pair total — and with it
+   * `getTotalSize()` — drifting by the whole delta on every move. Carrying the
+   * accumulated writes makes each call land both sides at once, which is also
+   * correct when the caller controls `columnSizing` through a signal.
+   */
+  private writeColumnSize(
+    transaction: HellColumnResizeTransaction,
+    columnId: string,
+    size: number,
+  ): void {
+    transaction.writes = { ...transaction.writes, [columnId]: size };
+    const { writes } = transaction;
+    this.table().setColumnSizing((current) => ({ ...current, ...writes }));
   }
 
   private allBodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {

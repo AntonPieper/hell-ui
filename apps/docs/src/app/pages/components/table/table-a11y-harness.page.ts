@@ -194,6 +194,21 @@ const people: readonly Person[] = [
         </table>
       </section>
 
+      <!--
+        Pinned columns, resizable separators, and no sticky header row: the one
+        combination where the header cell's positioning has to serve the pinned
+        offsets and the separator's containing block at the same time. The frame
+        is narrow enough that the scrollport actually scrolls sideways.
+      -->
+      <section aria-labelledby="pinned-resize-heading" data-testid="pinned-resize-section">
+        <h2 id="pinned-resize-heading">Pinned columns with resizing</h2>
+        <div style="max-width: 420px">
+          <hell-tanstack-table [table]="pinnedTable">
+            <ng-template hellTableShellEmpty>No people found.</ng-template>
+          </hell-tanstack-table>
+        </div>
+      </section>
+
       <section aria-labelledby="shell-heading" data-testid="tanstack-shell-section">
         <h2 id="shell-heading">TanStack shell</h2>
         <hell-tanstack-table [table]="table">
@@ -252,6 +267,23 @@ export class TableA11yHarnessPage {
     getRowId: (row) => row.id,
     state: { expanded: this.expanded() },
     onExpandedChange: (updater) => applyUpdater(this.expanded, updater),
+  }));
+
+  protected readonly pinnedColumns: ColumnDef<Person>[] = [
+    { accessorKey: 'name', header: 'Name', size: 160 },
+    { accessorKey: 'role', header: 'Role', size: 160 },
+    { id: 'team', header: 'Team', accessorFn: (row) => row.id, size: 160 },
+    { id: 'region', header: 'Region', accessorFn: () => 'eu-central-1', size: 160 },
+    { id: 'status', header: 'Status', accessorFn: () => 'Active', size: 160 },
+    { id: 'updated', header: 'Updated', accessorFn: () => '2 days ago', size: 160 },
+  ];
+  protected readonly pinnedTable = createAngularTable<Person>(() => ({
+    data: this.rows(),
+    columns: this.pinnedColumns,
+    enableColumnResizing: true,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+    initialState: { columnPinning: { left: ['name', 'role'] } },
   }));
 
   protected sortedPeople(): readonly Person[] {

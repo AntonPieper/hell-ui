@@ -476,11 +476,13 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             <li>
               <code>hellTableResizeHandle</code> is a keyboard-operable
               <code>role="separator"</code> with <code>aria-orientation="vertical"</code>,
-              <code>aria-valuemin</code>/<code>max</code>/<code>now</code>, and an
-              <code>aria-controls</code> pointing at the two affected columns; its accessible name
-              comes from the injectable <code>resizeColumn</code> label. When it has no resolvable
-              resize pair it becomes inert (<code>tabindex="-1"</code>, no separator role). Shell
+              <code>aria-valuemin</code>/<code>max</code>/<code>now</code>; its accessible name comes
+              from the injectable <code>resizeColumn</code> label. When it has no resolvable resize
+              pair it becomes inert (<code>tabindex="-1"</code>, no separator role). Shell
               separators append their column id to that label so each one is distinguishable.
+              <code>aria-controls</code> is opt-in: set it on the handle, or give the adapter's two
+              items an <code>ariaControls</code> id each, whenever the affected cells have ids to
+              point at. Shell separators carry none, because shell header cells have no ids.
             </li>
             <li>
               Row checkbox/radio controls are native inputs, so they receive native focus, keyboard,

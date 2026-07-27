@@ -1802,18 +1802,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'shell composite components/table/examples/tanstack-shell.example components/table hell-tanstack-table HellTanStackTable HellTableStatus hellTableShellCell hellTableShellToolbar hellTableShellFooter hellTableShellLoading hellTableShellEmpty hellTableShellError hell-tanstack-pagination HellTanStackPagination hellTableRowRadio hell-omnibar hellMenu hellMasterDetail hellMasterPane hellMasterDetailBack hellToolbar omnibar menu master detail sorting server-side manual flexRender columnDef meta hell',
  },
  {
- title:'Table: Resizable columns',
- path:'/components/table',
- detail:'components/table/examples/tanstack-resizable.example.ts',
- terms:
-'resize resizable columns components/table/examples/tanstack-resizable.example components/table hell-tanstack-table hellTableResizeHandle enableColumnResizing enableResizing columnSizing setColumnSizing resetColumnSizing minSize maxSize colgroup separator drag keyboard ArrowLeft ArrowRight Home End hellTanStackVirtualRows column width',
- },
- {
  title:'Table: Virtual rows and expansion',
  path:'/components/table',
  detail:'components/table/examples/tanstack-virtual.example.ts',
  terms:
 'tanstack components/table/examples/tanstack-virtual.example components/table hell-ui/table-tanstack/virtual hellTanStackVirtualRows virtualEstimateRowSize virtualOverscan hellTableShellExpandedRow hellTableShellCell hellTableShellToolbar hell-tanstack-table hell-omnibar hellMenu expanded',
+ },
+ {
+ title:'Table: Resizable columns',
+ path:'/components/table',
+ detail:'components/table/examples/tanstack-resizable.example.ts',
+ terms:
+'resize resizable columns components/table/examples/tanstack-resizable.example components/table hell-tanstack-table hellTableResizeHandle enableColumnResizing enableResizing columnSizing setColumnSizing resetColumnSizing minSize maxSize colgroup separator drag keyboard ArrowLeft ArrowRight Home End hellTanStackVirtualRows column width',
  },
  {
  title:'Tabs: Basic',

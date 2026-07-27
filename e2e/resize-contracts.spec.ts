@@ -308,7 +308,89 @@ test.describe('modern resize handle browser contracts', () => {
       .toBe('200px');
     await expect.poll(() => columnGridDrift(shell)).toBeLessThanOrEqual(1);
   });
+
+  test('pinned shell header cells stay on their body cells when the shell is resizable', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoTableHarness(page);
+
+    const shell = page.getByTestId('pinned-resize-section').locator('hell-tanstack-table');
+    await shell.scrollIntoViewIfNeeded();
+    // The regime the positioning rules have to survive together: separators on,
+    // columns pinned, and no sticky header row to position the cells already.
+    await expect(shell).toHaveAttribute('data-hell-tanstack-resizable-columns', 'true');
+    await expect(shell).not.toHaveAttribute('data-sticky-header', 'true');
+    await expect(shell.locator('thead th[data-pinned="left"]')).toHaveCount(2);
+
+    // `position: relative` here would turn `--hell-table-pinned-start` into a
+    // plain displacement, sliding the header off the column it heads.
+    for (const columnId of ['name', 'role']) {
+      expect(await headerPosition(shell, columnId)).toBe('sticky');
+    }
+
+    // The separator is absolutely positioned, so it only lands on the column
+    // edge while its own header cell is the containing block.
+    await expect(shell.locator('th[data-column-id="name"] [hellTableResizeHandle]')).toHaveCount(1);
+    expect(await handleOverhang(shell, 'name')).toBeLessThanOrEqual(1);
+
+    expect(await pinnedGridDrift(shell)).toBeLessThanOrEqual(1);
+
+    const scrollport = shell.locator('[data-hell-table-shell-scrollport]');
+    await scrollport.evaluate((element) => {
+      element.scrollLeft = 260;
+    });
+    await expect.poll(() => scrollport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(
+      100,
+    );
+    // Pinned header and body cells travel together, so they still share a column.
+    await expect.poll(() => pinnedGridDrift(shell)).toBeLessThanOrEqual(1);
+
+    await dragResizeHandle(page, shell, 'name', 40);
+    await expect.poll(() => pinnedGridDrift(shell)).toBeLessThanOrEqual(1);
+    expect(await handleOverhang(shell, 'name')).toBeLessThanOrEqual(1);
+  });
 });
+
+async function headerPosition(shell: Locator, columnId: string): Promise<string> {
+  return shell
+    .locator(`th[data-column-id="${columnId}"]`)
+    .evaluate((element) => getComputedStyle(element).position);
+}
+
+/** Worst header-to-body-cell offset or width difference across the pinned columns. */
+async function pinnedGridDrift(shell: Locator): Promise<number> {
+  return shell.evaluate((element) => {
+    const headers = [...element.querySelectorAll('thead th[data-pinned]')];
+    const row = element.querySelector('tbody tr');
+    if (!headers.length || !row) throw new Error('Expected pinned headers and a body row.');
+    return Math.max(
+      ...headers.map((header) => {
+        const columnId = header.getAttribute('data-column-id');
+        const cell = row.querySelector(`td[data-column-id="${columnId}"]`);
+        if (!cell) throw new Error(`Expected a body cell for column ${columnId}.`);
+        const headerBox = header.getBoundingClientRect();
+        const cellBox = cell.getBoundingClientRect();
+        return Math.max(
+          Math.abs(cellBox.x - headerBox.x),
+          Math.abs(cellBox.width - headerBox.width),
+        );
+      }),
+    );
+  });
+}
+
+/** How far a separator escapes its header cell, which is zero while that cell positions it. */
+async function handleOverhang(shell: Locator, columnId: string): Promise<number> {
+  return shell.evaluate((element, id) => {
+    const header = element.querySelector(`th[data-column-id="${id}"]`);
+    const handle = header?.querySelector('[hellTableResizeHandle]');
+    if (!header || !handle) throw new Error(`Expected a separator on column ${id}.`);
+    const headerBox = header.getBoundingClientRect();
+    const handleBox = handle.getBoundingClientRect();
+    return Math.max(headerBox.left - handleBox.left, handleBox.right - headerBox.right, 0);
+  }, columnId);
+}
 
 async function gotoResizableTableExample(page: Page): Promise<Locator> {
   await page.goto('/components/table');

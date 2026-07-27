@@ -259,6 +259,36 @@ class ResizableShellHost {
   }));
 }
 
+/**
+ * The same table with column sizing left to TanStack: no `state.columnSizing`,
+ * no `onColumnSizingChange`. Sizing then lives in the adapter's own state, which
+ * does not refresh between two synchronous writes.
+ */
+@Component({
+  selector: 'hell-test-uncontrolled-resizable-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class UncontrolledResizableShellHost {
+  readonly columns: ColumnDef<Person>[] = [
+    { id: 'a', header: 'A', size: 200, minSize: 120 },
+    { id: 'b', header: 'B', size: 160 },
+  ];
+
+  readonly table = createAngularTable<Person>(() => ({
+    data: people,
+    columns: this.columns,
+    enableColumnResizing: true,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+  }));
+}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -271,6 +301,7 @@ describe('Hell TanStack table shell', () => {
         ColumnFilterHost,
         StyledShellHost,
         ResizableShellHost,
+        UncontrolledResizableShellHost,
       ],
     }).compileComponents();
   });
@@ -482,6 +513,28 @@ describe('Hell TanStack table shell', () => {
     // gives up exactly that much, so the table's total size is untouched.
     expect(fixture.componentInstance.columnSizing()).toEqual({ a: 216, b: 144 });
     expect(fixture.componentInstance.table.getTotalSize()).toBe(totalBefore);
+  });
+
+  it('commits both sides of a resize when TanStack owns the column sizing state', () => {
+    const fixture = TestBed.createComponent(UncontrolledResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const { table } = fixture.componentInstance;
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+    const totalBefore = table.getTotalSize();
+
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    // Both sides are written back to back with no render in between, and
+    // uncontrolled sizing state does not refresh across them. Writing one
+    // column per updater would compute the second from the same state as the
+    // first, dropping "a" and growing the table by the whole key step.
+    expect(table.getState().columnSizing).toEqual({ a: 216, b: 144 });
+    expect(table.getTotalSize()).toBe(totalBefore);
+
+    const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;
+    expect(col.style.width).toBe('216px');
   });
 
   it('flows a committed width into the colgroup and both body cell size variables', () => {

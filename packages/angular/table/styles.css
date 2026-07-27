@@ -174,24 +174,19 @@
     min-width: var(--hell-table-total-size, 100%);
   }
 
+  /*
+   * Header cells keep the `position` their recipe gives them: the recipe is a
+   * Tailwind utility, and `@layer utilities` outranks this layer whatever the
+   * selectors say, so this declaration only lands where the recipe does not.
+   * That also means resize separators — absolutely positioned against their
+   * header cell — always have a positioned containing block, and this file must
+   * not add one: `position: relative` here would turn a pinned header cell's
+   * `--hell-table-pinned-start`/`-after` into a displacement off its column.
+   */
   hell-tanstack-table:not([data-sticky-header='true'])
     .hell-table-shell-table
     [data-hell-table-header-cell][data-slot='root'] {
     position: static;
-  }
-
-  /*
-   * Resize separators are absolutely positioned against their header cell. A
-   * sticky header cell already establishes that containing block; a non-sticky
-   * shell header cell is static, so give it one back when the shell renders
-   * resize handles.
-   */
-  hell-tanstack-table[data-hell-tanstack-resizable-columns='true']:not(
-      [data-sticky-header='true']
-    )
-    .hell-table-shell-table
-    [data-hell-table-header-cell][data-slot='root'] {
-    position: relative;
   }
 
   hell-tanstack-table [data-pinned='left'],
