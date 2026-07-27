@@ -13,13 +13,20 @@ async function widthOf(locator: Locator): Promise<number> {
   return locator.evaluate((element) => element.getBoundingClientRect().width);
 }
 
+const FITS_INSIDE_FRAME = { paneEscapesFrame: false, documentScrollsSideways: false };
+
 /**
- * How far the visible panes stick out of the Master Detail frame, and how far
- * the document scrolls sideways, read together so the two cannot be measured
- * at different reflow states. The frame clips its overflow, so a pane pinned
- * wider than its container is invisible to a document-level check alone.
+ * Whether any visible pane is sized wider than the frame that holds it, and
+ * whether the document scrolls sideways — read in one evaluate so the two
+ * cannot come from different reflow states.
+ *
+ * Both are needed. The frame clips its own overflow, so a pane sized past it
+ * hides its own content while the document stays exactly as wide as before;
+ * a document-level scroll check alone reports that as healthy.
  */
-async function overflowOf(example: Locator): Promise<{ pane: number; document: number }> {
+async function escapesFrame(
+  example: Locator,
+): Promise<{ paneEscapesFrame: boolean; documentScrollsSideways: boolean }> {
   return example.evaluate((element) => {
     const frame = element as HTMLElement;
     const panes = [...frame.querySelectorAll('[hellMasterPane]')] as HTMLElement[];
@@ -27,8 +34,11 @@ async function overflowOf(example: Locator): Promise<{ pane: number; document: n
     if (!visible.length) throw new Error('Expected at least one visible pane.');
     const widest = Math.max(...visible.map((pane) => pane.getBoundingClientRect().width));
     return {
-      pane: Math.round(widest - frame.clientWidth),
-      document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      // Sub-pixel layout rounds either way, so only a whole pixel past the
+      // frame counts as escaping it.
+      paneEscapesFrame: Math.round(widest - frame.clientWidth) > 0,
+      documentScrollsSideways:
+        document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
   });
 }
@@ -107,10 +117,15 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
     await expect(handle).toBeHidden();
     await expect(detail).toBeHidden();
     await expect(detail).toHaveAttribute('aria-hidden', 'true');
-    // The pinned width is wider than the compact frame, so the pane must be
-    // refitted rather than clipped by the frame's own `overflow-hidden`.
+
+    // The pinned width is far wider than the compact frame, so it has to be
+    // refitted rather than left to be clipped by the frame's `overflow-hidden`.
+    // Overflow is the hazard: a clipped pane hides its own content and the
+    // frame swallows the evidence, which is why this is measured against the
+    // frame rather than against document scroll.
     expect(pinned).toBeGreaterThan(390);
-    await expect.poll(() => overflowOf(example)).toEqual({ pane: 0, document: 0 });
+    await expect.poll(() => escapesFrame(example)).toEqual(FITS_INSIDE_FRAME);
+    await expect.poll(() => widthOf(primary)).toBeLessThan(pinned);
 
     await page.setViewportSize({ width: 1440, height: 1000 });
 
@@ -119,7 +134,7 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
     await expect(detail).toBeVisible();
     await expect(handle).toBeVisible();
     await expect(handle).toHaveAttribute('role', 'separator');
-    await expect.poll(() => overflowOf(example)).toEqual({ pane: 0, document: 0 });
+    await expect.poll(() => escapesFrame(example)).toEqual(FITS_INSIDE_FRAME);
 
     // The resize transaction has to survive both reflows, not just look right.
     const restored = await widthOf(primary);
