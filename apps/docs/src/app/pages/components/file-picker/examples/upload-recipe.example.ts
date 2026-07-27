@@ -1,4 +1,17 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidArrowRotateRight,
+  faSolidCircleCheck,
+  faSolidClock,
+  faSolidCloudArrowUp,
+  faSolidFileImage,
+  faSolidFileLines,
+  faSolidFilePdf,
+  faSolidFolderOpen,
+  faSolidTrash,
+  faSolidTriangleExclamation,
+} from '@ng-icons/font-awesome/solid';
 
 import { HELL_ALERT_IMPORTS } from 'hell-ui/alert';
 import { HellButton } from 'hell-ui/button';
@@ -8,6 +21,7 @@ import {
   type HellFileSelection,
   type HellFileValidator,
 } from 'hell-ui/file-picker';
+import { HellIcon } from 'hell-ui/icon';
 import { HellProgress, HellProgressBar } from 'hell-ui/progress';
 
 type UploadStatus = 'pending' | 'uploading' | 'done' | 'error';
@@ -28,7 +42,22 @@ interface UploadCapacityIssue {
 }
 
 const MAX_QUEUE_ITEMS = 4;
-const UPLOAD_TICK_MS = 180;
+// Slow enough that the uploading glyph and progress bar are actually readable
+// before the mock transport completes.
+const UPLOAD_TICK_MS = 260;
+
+const FILE_PICKER_UPLOAD_ICONS = {
+  faSolidArrowRotateRight,
+  faSolidCircleCheck,
+  faSolidClock,
+  faSolidCloudArrowUp,
+  faSolidFileImage,
+  faSolidFileLines,
+  faSolidFilePdf,
+  faSolidFolderOpen,
+  faSolidTrash,
+  faSolidTriangleExclamation,
+};
 
 @Component({
   selector: 'app-file-picker-upload-recipe-example',
@@ -37,9 +66,11 @@ const UPLOAD_TICK_MS = 180;
     ...HELL_ALERT_IMPORTS,
     HellButton,
     HellFilePicker,
+    HellIcon,
     HellProgress,
     HellProgressBar,
   ],
+  providers: [provideIcons(FILE_PICKER_UPLOAD_ICONS)],
   template: `
     <section class="grid gap-hell-4" data-upload-recipe>
       <div
@@ -54,13 +85,14 @@ const UPLOAD_TICK_MS = 180;
         aria-describedby="file-picker-upload-hint"
         (selection)="enqueue($event)"
       >
-        <strong>Drop files into the application queue</strong>
+        <strong class="text-hell-foreground">Drop files into the application queue</strong>
         <span id="file-picker-upload-hint" class="hd-muted">
           Images or PDF, at most 5 MB each. The application keeps four queue slots.
         </span>
       </div>
 
       <button hellButton type="button" size="sm" class="justify-self-start" (click)="picker.open()">
+        <hell-icon name="faSolidFolderOpen" />
         Browse files
       </button>
 
@@ -116,22 +148,36 @@ const UPLOAD_TICK_MS = 180;
           >
             @for (item of items(); track item.id) {
               <li
-                class="grid min-w-0 gap-hell-2 rounded-hell-lg border border-solid border-hell-border bg-hell-surface-subtle p-hell-3"
+                class="grid min-w-0 gap-hell-2 rounded-hell-lg border border-solid border-hell-border bg-hell-surface-subtle p-hell-3 data-[upload-status=done]:border-hell-success/40 data-[upload-status=error]:border-hell-danger/40"
                 [attr.data-upload-item]="item.file.name"
                 [attr.data-upload-status]="item.status"
               >
-                <div class="grid min-w-0 gap-hell-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-                  <div class="grid min-w-0 gap-hell-1">
+                <div class="flex min-w-0 flex-wrap items-start gap-hell-3">
+                  <!-- File-type glyph, tinted by the application-owned status. -->
+                  <hell-icon
+                    [name]="fileIcon(item.file)"
+                    size="20px"
+                    class="mt-hell-1 shrink-0"
+                    [ui]="statusColor(item.status)"
+                  />
+
+                  <div class="grid min-w-0 flex-1 gap-hell-1">
                     <strong class="break-all text-sm">{{ item.file.name }}</strong>
-                    <span class="text-xs text-hell-foreground-muted">
+                    <span
+                      [class]="
+                        'flex items-center gap-hell-1 text-xs ' + statusColor(item.status)
+                      "
+                    >
+                      <hell-icon [name]="statusIcon(item.status)" size="12px" />
                       {{ formatBytes(item.file.size) }} &middot; {{ statusLabel(item.status) }}
                     </span>
                   </div>
 
-                  <div class="flex flex-wrap items-center gap-hell-2">
+                  <div class="flex shrink-0 flex-wrap items-center gap-hell-1">
                     @if (item.status === 'error') {
                       <button
                         hellButton
+                        iconOnly
                         type="button"
                         size="xs"
                         variant="soft"
@@ -139,12 +185,13 @@ const UPLOAD_TICK_MS = 180;
                         [attr.aria-label]="'Retry ' + item.file.name"
                         (click)="retry(item.id, removeButton)"
                       >
-                        Retry
+                        <hell-icon name="faSolidArrowRotateRight" />
                       </button>
                     }
                     <button
                       #removeButton
                       hellButton
+                      iconOnly
                       type="button"
                       size="xs"
                       variant="ghost"
@@ -152,7 +199,7 @@ const UPLOAD_TICK_MS = 180;
                       [attr.aria-label]="'Remove ' + item.file.name"
                       (click)="remove(item.id, pickerHost)"
                     >
-                      Remove
+                      <hell-icon name="faSolidTrash" />
                     </button>
                   </div>
                 </div>
@@ -168,9 +215,9 @@ const UPLOAD_TICK_MS = 180;
                 }
 
                 @if (item.status === 'error') {
-                  <p class="m-0 text-sm text-hell-danger" data-upload-error>
-                    {{ item.error }}
-                  </p>
+                  <!-- The status line above already carries the error glyph; this
+                       detail row only has to carry the server's message. -->
+                  <p class="m-0 text-sm text-hell-danger" data-upload-error>{{ item.error }}</p>
                 }
               </li>
             }
@@ -287,6 +334,41 @@ export class FilePickerUploadRecipeExample {
         return 'Complete';
       case 'error':
         return 'Server error';
+    }
+  }
+
+  /** Picks a decorative glyph from the browser-reported type and the name. */
+  protected fileIcon(file: File): string {
+    if (file.type.startsWith('image/')) return 'faSolidFileImage';
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      return 'faSolidFilePdf';
+    }
+    return 'faSolidFileLines';
+  }
+
+  /** Decorative glyph for one application-owned upload status. */
+  protected statusIcon(status: UploadStatus): string {
+    switch (status) {
+      case 'pending':
+        return 'faSolidClock';
+      case 'uploading':
+        return 'faSolidCloudArrowUp';
+      case 'done':
+        return 'faSolidCircleCheck';
+      case 'error':
+        return 'faSolidTriangleExclamation';
+    }
+  }
+
+  /** Shared text colour for the status glyph, file glyph, and status line. */
+  protected statusColor(status: UploadStatus): string {
+    switch (status) {
+      case 'done':
+        return 'text-hell-success-strong';
+      case 'error':
+        return 'text-hell-danger';
+      default:
+        return 'text-hell-foreground-muted';
     }
   }
 
