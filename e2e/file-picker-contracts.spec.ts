@@ -297,27 +297,64 @@ test.describe('File Picker browser contract', () => {
     await expect.poll(() => glyphColor(enabled)).not.toBe(restingColor);
   });
 
-  test('keeps projected interactive descendants selectable inside the select-none root', async ({
+  test('opts projected text entry out of the select-none root without freeing labels', async ({
     page,
   }) => {
     await gotoFilePicker(page);
 
+    // WebKit exposes only the prefixed longhand on `getComputedStyle`, so an
+    // unprefixed read returns `""` there even though the shipped CSS applies.
+    // Same fallback the mask assertion above uses.
+    const userSelect = (element: Element): string => {
+      const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+      return (
+        style?.getPropertyValue('user-select') ||
+        style?.getPropertyValue('-webkit-user-select') ||
+        'unknown'
+      );
+    };
+
     const picker = page
       .locator('app-file-picker-basic-example')
       .getByRole('button', { name: 'Add attachments' });
-    await expect(picker).toHaveCSS('user-select', 'none');
+    await expect.poll(() => picker.evaluate(userSelect)).toBe('none');
 
-    const projectedInputUserSelect = await picker.evaluate((element) => {
-      const input = element.ownerDocument.createElement('input');
-      input.type = 'text';
-      input.setAttribute('data-file-picker-projected-input', '');
-      element.append(input);
-      const value =
-        element.ownerDocument.defaultView?.getComputedStyle(input).userSelect ?? 'unknown';
-      input.remove();
-      return value;
+    // Projected text entry normalizes to `text` on every engine; label shapes
+    // stay out of the opt-out, because giving them `user-select: text` makes
+    // their labels drag-selectable — the smear `select-none` exists to prevent.
+    const projected = await picker.evaluate((element) => {
+      const read = (target: Element): string => {
+        const style = target.ownerDocument.defaultView?.getComputedStyle(target);
+        return (
+          style?.getPropertyValue('user-select') ||
+          style?.getPropertyValue('-webkit-user-select') ||
+          'unknown'
+        );
+      };
+      const measure = (tag: string, mutate?: (node: HTMLElement) => void): string => {
+        const node = element.ownerDocument.createElement(tag);
+        node.setAttribute('data-file-picker-projected-probe', '');
+        mutate?.(node);
+        element.append(node);
+        const value = read(node);
+        node.remove();
+        return value;
+      };
+      return {
+        input: measure('input', (node) => ((node as HTMLInputElement).type = 'text')),
+        textarea: measure('textarea'),
+        button: measure('button', (node) => (node.textContent = 'Label')),
+        tabbable: measure('div', (node) => {
+          node.tabIndex = 0;
+          node.textContent = 'Label';
+        }),
+      };
     });
-    expect(projectedInputUserSelect).toBe('text');
+
+    expect(projected.input).toBe('text');
+    expect(projected.textarea).toBe('text');
+    expect(projected.button).not.toBe('text');
+    expect(projected.tabbable).not.toBe('text');
   });
 
   test('keeps the documented File Picker examples axe-clean', async ({ page }) => {

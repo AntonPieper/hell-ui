@@ -167,6 +167,13 @@ interface HellFileRejection &#123;
         <code>hover:before:text-*</code>, <code>focus-visible:before:text-*</code>, and
         <code>data-[dragging=true]:before:text-*</code> refinements, or leave the color alone.
       </p>
+      <p>
+        The root is <code>select-none</code> so dragging a file across the zone does not smear a
+        text selection over its copy, which also makes projected copy unselectable. Projected
+        <code>input</code>, <code>textarea</code>, and <code>[contenteditable]</code> keep their
+        caret selection; refine the root with <code>select-auto</code> when the projected copy
+        itself is meant to be selectable.
+      </p>
       <hd-example-tabs [code]="stylingExampleCode" previewClass="grid max-w-xl gap-hell-3">
         <app-file-picker-styling-example />
       </hd-example-tabs>

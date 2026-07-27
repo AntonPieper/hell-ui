@@ -38,12 +38,20 @@
   }
 
   /* The root is `select-none` so dragging a file across the zone does not smear
-     a text selection over its copy. Projected interactive descendants are an
-     explicitly supported shape (see HELL_FILE_PICKER_INTERACTIVE_SELECTOR), so
-     they opt back in — `user-select: auto` would inherit `none` here, hence
-     `text`. */
+     a text selection over its copy. Every engine already special-cases editing
+     hosts, so projected text entry stays caret-selectable either way, but the
+     value they report for it under an inherited `none` diverges — Chromium
+     `none`, Firefox `auto`, WebKit `text` — which leaks into consumer CSS and
+     into anything reading the computed style. Declaring `text` normalizes that
+     and keeps the guarantee explicit if an engine ever stops special-casing.
+     `auto` cannot do the job: it re-inherits `none`.
+
+     Deliberately text entry only. Widening this to the label shapes in
+     HELL_FILE_PICKER_INTERACTIVE_SELECTOR (`button`, `a[href]`, `summary`,
+     `[tabindex]`) does change behavior: it makes their labels drag-selectable
+     inside the zone, re-enabling the exact smear `select-none` prevents. */
   [hellFilePicker][data-slot='root']
-    :is(a[href], button, input, select, summary, textarea, [tabindex], [contenteditable]:not([contenteditable='false'])) {
+    :is(input, textarea, [contenteditable]:not([contenteditable='false'])) {
     -webkit-user-select: text;
     user-select: text;
   }
