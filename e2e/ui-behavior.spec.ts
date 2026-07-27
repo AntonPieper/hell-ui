@@ -967,9 +967,10 @@ test.describe('Hell UI browser behavior', () => {
         const box = await control.boundingBox();
         const label = await control.getAttribute('aria-label');
         if (!box) throw new Error(`Expected a box for toolbar control ${label ?? index}.`);
-        expect(box.height, `height of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+        // Rounded: engines disagree on the last subpixel of a token-sized box.
+        expect(Math.round(box.height), `height of ${label ?? index}`).toBeGreaterThanOrEqual(40);
         if ((await control.evaluate((el) => el.tagName)) === 'BUTTON') {
-          expect(box.width, `width of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+          expect(Math.round(box.width), `width of ${label ?? index}`).toBeGreaterThanOrEqual(40);
         }
       }
     });
