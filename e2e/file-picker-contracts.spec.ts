@@ -238,7 +238,11 @@ test.describe('File Picker browser contract', () => {
           display: style?.display,
           width: style?.width,
           height: style?.height,
-          maskImage: style?.maskImage ?? style?.webkitMaskImage,
+          // `||`, not `??`: an engine that exposes only the prefixed property
+          // returns `""` for the unprefixed one rather than `undefined`, and
+          // `??` would keep the empty string. That is exactly how the
+          // `user-select` read below used to fail on WebKit.
+          maskImage: style?.maskImage || style?.webkitMaskImage,
         };
       });
 
@@ -329,7 +333,8 @@ test.describe('File Picker browser contract', () => {
 
     // WebKit exposes only the prefixed longhand on `getComputedStyle`, so an
     // unprefixed read returns `""` there even though the shipped CSS applies.
-    // Same fallback the mask assertion above uses.
+    // `||` rather than `??` for that reason: the miss is an empty string, not
+    // `undefined`.
     const userSelect = (element: Element): string => {
       const style = element.ownerDocument.defaultView?.getComputedStyle(element);
       return (
@@ -368,6 +373,16 @@ test.describe('File Picker browser contract', () => {
       return {
         input: measure('input', (node) => ((node as HTMLInputElement).type = 'text')),
         textarea: measure('textarea'),
+        editable: measure('div', (node) => {
+          node.setAttribute('contenteditable', '');
+          node.textContent = 'Label';
+        }),
+        // A non-editable host, spelled the way the attribute's ASCII
+        // case-insensitivity allows. It must not take the opt-out.
+        notEditable: measure('div', (node) => {
+          node.setAttribute('contenteditable', 'FALSE');
+          node.textContent = 'Label';
+        }),
         button: measure('button', (node) => (node.textContent = 'Label')),
         tabbable: measure('div', (node) => {
           node.tabIndex = 0;
@@ -378,6 +393,8 @@ test.describe('File Picker browser contract', () => {
 
     expect(projected.input).toBe('text');
     expect(projected.textarea).toBe('text');
+    expect(projected.editable).toBe('text');
+    expect(projected.notEditable).not.toBe('text');
     expect(projected.button).not.toBe('text');
     expect(projected.tabbable).not.toBe('text');
   });

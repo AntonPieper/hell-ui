@@ -46,12 +46,19 @@
      and keeps the guarantee explicit if an engine ever stops special-casing.
      `auto` cannot do the job: it re-inherits `none`.
 
-     Deliberately text entry only. Widening this to the label shapes in
+     Scoped to text entry. Widening it to the label shapes in
      HELL_FILE_PICKER_INTERACTIVE_SELECTOR (`button`, `a[href]`, `summary`,
-     `[tabindex]`) does change behavior: it makes their labels drag-selectable
-     inside the zone, re-enabling the exact smear `select-none` prevents. */
+     `select`, `[tabindex]`) does change behavior: it makes their labels
+     drag-selectable inside the zone, re-enabling the smear `select-none`
+     prevents. Bare `input` is deliberate rather than exact — it also admits
+     `submit`, `button`, `reset`, and the checkbox-like types, which carry no
+     selectable text and measured inert either way, so enumerating the text
+     entry types would buy nothing but a list to keep current. The `i` flag
+     matters: `contenteditable` is ASCII case-insensitive, so an unflagged
+     `'false'` would let `contenteditable="FALSE"` — a non-editable host —
+     take the opt-out. */
   [hellFilePicker][data-slot='root']
-    :is(input, textarea, [contenteditable]:not([contenteditable='false'])) {
+    :is(input, textarea, [contenteditable]:not([contenteditable='false' i])) {
     -webkit-user-select: text;
     user-select: text;
   }
