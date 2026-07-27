@@ -63,7 +63,9 @@ Examples:
 Per ADR 0003, such pull requests declare the explicit No Consumer Change state
 (the `no-consumer-change` label) instead of adding fragments; CI enforces the
 three mutually exclusive pull-request states — see
-[`pull-request-states.md`](./pull-request-states.md).
+[`pull-request-states.md`](./pull-request-states.md) for the checks and
+[`pull-request-contract.md`](./pull-request-contract.md) for how protected
+`main` requires them and how to remediate a blocked pull request.
 
 ## Choosing a kind
 
