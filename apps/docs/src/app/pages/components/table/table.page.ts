@@ -18,6 +18,10 @@ import { TableTanStackShellExample } from './examples/tanstack-shell.example';
 import tableTanStackShellExampleCodeRaw from './examples/tanstack-shell.example.ts?raw' with {
   loader: 'text',
 };
+import { TableTanStackResizableExample } from './examples/tanstack-resizable.example';
+import tableTanStackResizableExampleCodeRaw from './examples/tanstack-resizable.example.ts?raw' with {
+  loader: 'text',
+};
 import { TableTanStackVirtualExample } from './examples/tanstack-virtual.example';
 import tableTanStackVirtualExampleCodeRaw from './examples/tanstack-virtual.example.ts?raw' with {
   loader: 'text',
@@ -33,6 +37,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
     TablePrimitiveExample,
     TableStylingExample,
     TableTanStackShellExample,
+    TableTanStackResizableExample,
     TableTanStackVirtualExample,
     TableA11yHarnessPage,
     PageHeader,
@@ -148,6 +153,32 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
 
         <hd-example-tabs class="hd-doc-wide" [code]="tableTanStackVirtualExampleCode">
           <app-table-tanstack-virtual-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>Resizable columns</h2>
+          <p>
+            Set TanStack's own <code>enableColumnResizing: true</code> and the shell renders a
+            <code>hellTableResizeHandle</code> separator on every header cell that has a resizable
+            neighbour to its trailing side. There is no Hell resize prop: opt a single column out
+            with <code>columnDef.enableResizing: false</code>, and bound it with
+            <code>minSize</code>/<code>maxSize</code>.
+          </p>
+          <p>
+            The separator writes into TanStack's <code>columnSizing</code> state, which is the one
+            channel the <code>&lt;colgroup&gt;</code>, the header grid, and the body cells all read
+            — so header and body stay on a single column grid, virtualized or not. Widths are
+            transacted between the two adjacent columns and preserve their combined width, so the
+            table's total size never drifts while you drag. Point at a divider and drag it, or
+            focus it and use Arrow keys (Home and End jump to the pair's minimum and maximum).
+            Because sizing lives in TanStack state, persisting or resetting widths is ordinary
+            state work — this example keeps <code>columnSizing</code> in a signal and resets it
+            with <code>table.resetColumnSizing(true)</code>.
+          </p>
+        </div>
+
+        <hd-example-tabs class="hd-doc-wide" [code]="tableTanStackResizableExampleCode">
+          <app-table-tanstack-resizable-example />
         </hd-example-tabs>
 
         <div class="hd-prose">
@@ -414,6 +445,13 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               building renderers outside the shell.
             </li>
             <li>
+              Column resizing: the shell renders a resize separator per header cell when the
+              caller-owned table sets TanStack's <code>enableColumnResizing: true</code> and the
+              column has a resizable neighbour. Sizes are committed to TanStack
+              <code>columnSizing</code>; <code>minSize</code>/<code>maxSize</code> bound each pair.
+              The shell reflects <code>data-hell-tanstack-resizable-columns</code> on its host.
+            </li>
+            <li>
               <b>Virtual</b> (<code>hell-ui/table-tanstack/virtual</code>):
               <code>hellTanStackVirtualRows</code> (<code>boolean</code>, default <code>true</code>),
               <code>virtualEstimateRowSize</code> (<code>number</code>, default <code>44</code>),
@@ -441,7 +479,8 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               <code>aria-valuemin</code>/<code>max</code>/<code>now</code>, and an
               <code>aria-controls</code> pointing at the two affected columns; its accessible name
               comes from the injectable <code>resizeColumn</code> label. When it has no resolvable
-              resize pair it becomes inert (<code>tabindex="-1"</code>, no separator role).
+              resize pair it becomes inert (<code>tabindex="-1"</code>, no separator role). Shell
+              separators append their column id to that label so each one is distinguishable.
             </li>
             <li>
               Row checkbox/radio controls are native inputs, so they receive native focus, keyboard,
@@ -495,5 +534,6 @@ export class TablePage {
   protected readonly tablePrimitiveExampleCode = tablePrimitiveExampleCodeRaw;
   protected readonly tableStylingExampleCode = tableStylingExampleCodeRaw;
   protected readonly tableTanStackShellExampleCode = tableTanStackShellExampleCodeRaw;
+  protected readonly tableTanStackResizableExampleCode = tableTanStackResizableExampleCodeRaw;
   protected readonly tableTanStackVirtualExampleCode = tableTanStackVirtualExampleCodeRaw;
 }

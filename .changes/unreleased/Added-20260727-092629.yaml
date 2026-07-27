@@ -1,0 +1,8 @@
+kind: Added
+body: 'The TanStack table shell now renders keyboard-operable column resize separators
+  when the caller-owned table sets TanStack `enableColumnResizing: true`; per-column
+  opt-out stays `columnDef.enableResizing`. Resizing commits to TanStack `columnSizing`
+  state, bounded by each column''s `minSize`/`maxSize` and preserving the resized
+  pair''s combined width, so the colgroup, header cells, and virtualized body cells
+  stay on one column grid.'
+time: 2026-07-27T09:26:29.826961+02:00

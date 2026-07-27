@@ -211,4 +211,198 @@ test.describe('modern resize handle browser contracts', () => {
     await expectNoTextSelection(page);
   });
 
+  test('TanStack shell column resize keeps header and virtual body on one grid in both width regimes', async ({
+    page,
+  }) => {
+    for (const viewport of [
+      // Wider than the TanStack total size, so the header grid stretches and a
+      // pointer delta is larger than the size delta TanStack records...
+      { width: 1280, height: 900, stretched: true },
+      // ...and narrower, where the table sits at its total size instead.
+      { width: 900, height: 900, stretched: false },
+    ]) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      const shell = await gotoResizableTableExample(page);
+
+      expect(await shellStretch(shell)).toBeGreaterThan(viewport.stretched ? 8 : -1);
+      if (!viewport.stretched) expect(await shellStretch(shell)).toBeLessThanOrEqual(1);
+
+      const totalBefore = await shellTotalSize(shell);
+      const serviceBefore = await columnHeaderWidth(shell, 'service');
+      const ownerBefore = await columnHeaderWidth(shell, 'owner');
+
+      await dragResizeHandle(page, shell, 'service', 70);
+
+      const serviceAfter = await columnHeaderWidth(shell, 'service');
+      const ownerAfter = await columnHeaderWidth(shell, 'owner');
+      expect(serviceAfter).toBeGreaterThan(serviceBefore + 40);
+      expect(ownerAfter).toBeLessThan(ownerBefore - 40);
+      // The pair transacts against itself, so the rest of the grid is untouched
+      // and the regression precondition the #352 alignment test relies on holds.
+      expect(Math.abs(serviceAfter + ownerAfter - (serviceBefore + ownerBefore))).toBeLessThanOrEqual(
+        1,
+      );
+      expect(Math.abs((await shellTotalSize(shell)) - totalBefore)).toBeLessThanOrEqual(0.5);
+
+      await expect.poll(() => columnGridDrift(shell)).toBeLessThanOrEqual(1);
+      // One committed width, not two channels: the colgroup the header grid
+      // resolves from and the variables the virtual body row grows by agree.
+      await expect.poll(() => sizeChannelDrift(shell)).toBeLessThanOrEqual(0.5);
+
+      const scrollport = shell.locator('[data-hell-table-virtual-scrollport="true"]');
+      await scrollport.evaluate((element) => {
+        element.scrollTop = 620;
+        element.dispatchEvent(new Event('scroll'));
+      });
+      await expect
+        .poll(() => scrollport.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(400);
+      await expect.poll(() => columnGridDrift(shell)).toBeLessThanOrEqual(1);
+      await expect.poll(() => sizeChannelDrift(shell)).toBeLessThanOrEqual(0.5);
+    }
+  });
+
+  test('TanStack shell resize separators are keyboard operable, bounded by TanStack minSize, and resettable', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const shell = await gotoResizableTableExample(page);
+
+    // Only columns with a resizable trailing neighbour carry a separator.
+    await expect(shell.locator('[hellTableResizeHandle]')).toHaveCount(3);
+    await expect(
+      shell.locator('th[data-column-id="uptime"] [hellTableResizeHandle]'),
+    ).toHaveCount(0);
+
+    const handle = shell.locator('th[data-column-id="service"] [hellTableResizeHandle]');
+    await expect(handle).toHaveAttribute('role', 'separator');
+    await expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+    await expect(handle).toHaveAttribute('aria-label', 'Resize column service');
+
+    await handle.focus();
+    const valueBefore = await numericAriaValue(handle);
+    const widthBefore = await columnHeaderWidth(shell, 'service');
+    await page.keyboard.press('ArrowLeft');
+    await expect.poll(() => columnHeaderWidth(shell, 'service')).toBeLessThan(widthBefore - 8);
+    await expect.poll(() => numericAriaValue(handle)).toBeLessThan(valueBefore);
+    // Resize is a separator interaction, not grid navigation or a sort.
+    await expect(handle).toBeFocused();
+    await expect(shell.locator('thead th[aria-sort]')).toHaveCount(0);
+
+    // Home and End run to the pair bounds, which are TanStack's own minSize
+    // values (service 120, owner 96) rather than a sizing model Hell invented.
+    await page.keyboard.press('Home');
+    await expect.poll(() => columnSizeText(shell)).toContain('service 120px');
+    await page.keyboard.press('End');
+    await expect.poll(() => columnSizeText(shell)).toContain('owner 96px');
+    await expect.poll(() => columnGridDrift(shell)).toBeLessThanOrEqual(1);
+
+    // Sizing lives in TanStack state, so an outside control can reset it and
+    // the rendered grid has to follow.
+    await page.getByRole('button', { name: 'Reset widths' }).click();
+    await expect
+      .poll(() => columnSizeText(shell))
+      .toBe('service 200px · owner 160px · region 176px · uptime 120px');
+    await expect
+      .poll(() => shell.locator('colgroup col').first().evaluate((col) => col.style.width))
+      .toBe('200px');
+    await expect.poll(() => columnGridDrift(shell)).toBeLessThanOrEqual(1);
+  });
 });
+
+async function gotoResizableTableExample(page: Page): Promise<Locator> {
+  await page.goto('/components/table');
+  await expect(page.getByRole('heading', { name: 'Table', level: 1 })).toBeVisible();
+  const shell = page.locator('app-table-tanstack-resizable-example hell-tanstack-table');
+  await expect(shell).toHaveAttribute('data-hell-tanstack-resizable-columns', 'true');
+  await shell.scrollIntoViewIfNeeded();
+  await expect(shell.locator('[data-hell-table-virtual-row-kind="row"]').first()).toBeVisible();
+  return shell;
+}
+
+async function shellTotalSize(shell: Locator): Promise<number> {
+  return shell.evaluate((element) => {
+    const table = element.querySelector('[data-hell-table-shell-table]') as HTMLElement;
+    return Number.parseFloat(getComputedStyle(table).getPropertyValue('--hell-table-total-size'));
+  });
+}
+
+async function shellStretch(shell: Locator): Promise<number> {
+  return shell.evaluate((element) => {
+    const table = element.querySelector('[data-hell-table-shell-table]') as HTMLElement;
+    const totalSize = Number.parseFloat(
+      getComputedStyle(table).getPropertyValue('--hell-table-total-size'),
+    );
+    return table.getBoundingClientRect().width - totalSize;
+  });
+}
+
+async function columnHeaderWidth(shell: Locator, columnId: string): Promise<number> {
+  return widthOf(shell.locator(`th[data-column-id="${columnId}"]`));
+}
+
+async function columnSizeText(shell: Locator): Promise<string> {
+  const readout = shell.getByTestId('resizable-width-readout');
+  return (await readout.textContent())?.trim() ?? '';
+}
+
+/** Worst header-to-body-cell offset or width difference across the grid. */
+async function columnGridDrift(shell: Locator): Promise<number> {
+  return shell.evaluate((element) => {
+    const headers = [...element.querySelectorAll('thead th')];
+    const row = element.querySelector('[data-hell-table-virtual-row-kind="row"]');
+    const cells = row ? [...row.querySelectorAll('td')] : [];
+    if (cells.length !== headers.length) {
+      throw new Error(
+        `Expected one virtual body cell per header, got ${cells.length} cells for ${headers.length} headers.`,
+      );
+    }
+    return Math.max(
+      ...headers.map((header, index) => {
+        const headerBox = header.getBoundingClientRect();
+        const cellBox = cells[index].getBoundingClientRect();
+        return Math.max(Math.abs(cellBox.x - headerBox.x), Math.abs(cellBox.width - headerBox.width));
+      }),
+    );
+  });
+}
+
+/**
+ * Worst disagreement between the three places one committed width lands: the
+ * `<colgroup>` the header grid resolves from, and the size and grow variables
+ * the virtual body row reproduces that grid with.
+ */
+async function sizeChannelDrift(shell: Locator): Promise<number> {
+  return shell.evaluate((element) => {
+    const cols = [...element.querySelectorAll('colgroup col')] as HTMLElement[];
+    const row = element.querySelector('[data-hell-table-virtual-row-kind="row"]');
+    const cells = row ? ([...row.querySelectorAll('td')] as HTMLElement[]) : [];
+    if (!cols.length || cells.length !== cols.length) {
+      throw new Error(`Expected one col per body cell, got ${cols.length} and ${cells.length}.`);
+    }
+    return Math.max(
+      ...cols.map((col, index) => {
+        const colWidth = Number.parseFloat(col.style.width);
+        const size = Number.parseFloat(cells[index].style.getPropertyValue('--hell-table-column-size'));
+        const grow = Number.parseFloat(cells[index].style.getPropertyValue('--hell-table-column-grow'));
+        return Math.max(Math.abs(size - colWidth), Math.abs(grow - colWidth));
+      }),
+    );
+  });
+}
+
+async function dragResizeHandle(
+  page: Page,
+  shell: Locator,
+  columnId: string,
+  deltaX: number,
+): Promise<void> {
+  const box = await boxFor(shell.locator(`th[data-column-id="${columnId}"] [hellTableResizeHandle]`));
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + deltaX / 2, y, { steps: 5 });
+  await page.mouse.move(x + deltaX, y, { steps: 5 });
+  await page.mouse.up();
+}

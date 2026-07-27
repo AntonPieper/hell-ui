@@ -180,6 +180,20 @@
     position: static;
   }
 
+  /*
+   * Resize separators are absolutely positioned against their header cell. A
+   * sticky header cell already establishes that containing block; a non-sticky
+   * shell header cell is static, so give it one back when the shell renders
+   * resize handles.
+   */
+  hell-tanstack-table[data-hell-tanstack-resizable-columns='true']:not(
+      [data-sticky-header='true']
+    )
+    .hell-table-shell-table
+    [data-hell-table-header-cell][data-slot='root'] {
+    position: relative;
+  }
+
   hell-tanstack-table [data-pinned='left'],
   hell-tanstack-table [data-pinned='right'] {
     position: sticky;
@@ -269,6 +283,10 @@
    * proportion to the specified column widths, which is a convention rather
    * than something CSS guarantees. The three-engine table e2e run is what
    * protects that assumption.
+   *
+   * `--hell-table-col-width`, `--hell-table-column-size`, and
+   * `--hell-table-column-grow` are written by Hell, not authored by consumers:
+   * they are shell/primitive plumbing rather than public CSS variables.
    */
   hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
