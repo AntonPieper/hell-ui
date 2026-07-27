@@ -5,6 +5,7 @@ import {
   getNextZoomStep,
   getPreviousZoomStep,
   getZoomOrigin,
+  isPdfZoomPreset,
 } from './pdf-viewer.utils';
 import {
   HellPdfAdapterBootstrapOptions,
@@ -32,6 +33,32 @@ const HELL_PDF_GESTURE_DRAWING_DELAY_MS = 400;
  * scale.
  */
 const HELL_PDF_GESTURE_SCALE_DRIFT = 0.006;
+
+/**
+ * A touch that travels further than this, or stays down longer, is a pan, a
+ * long press, or a drag — not a tap. Well inside the platform touch slop so a
+ * finger that rolls slightly on lift still counts.
+ */
+const HELL_PDF_TAP_SLOP_PX = 10;
+const HELL_PDF_TAP_MAX_MS = 500;
+
+/**
+ * How long after a tap a second one still pairs with it, and how far away it
+ * may land. 300 ms matches the platform double-tap window; the wider distance
+ * slop covers a second tap aimed by feel rather than at the same pixel.
+ */
+const HELL_PDF_DOUBLE_TAP_MS = 300;
+const HELL_PDF_DOUBLE_TAP_SLOP_PX = 30;
+
+/** How far past its fitted scale a double tap magnifies the document. */
+const HELL_PDF_DOUBLE_TAP_ZOOM_FACTOR = 2;
+
+/**
+ * How far above the fitted scale the document must sit before a double tap
+ * reads as "zoomed in" and toggles back instead of magnifying further. Wide
+ * enough that re-fitting rounding never looks like a deliberate zoom.
+ */
+const HELL_PDF_DOUBLE_TAP_ZOOMED_RATIO = 1.05;
 
 /** pdf.js quantizes gesture-driven scales to two decimals; match it exactly. */
 function quantizeGestureScale(scale: number): number {
@@ -288,6 +315,25 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private pendingZoom: { readonly scale: number; readonly origin?: [number, number] } | null = null;
   /** Last gesture-requested scale, kept unrounded so slow gestures still accumulate. */
   private gestureScale: number | null = null;
+  /** Touch that is still eligible to end as a tap. */
+  private tapCandidate: {
+    readonly pointerId: number;
+    readonly clientX: number;
+    readonly clientY: number;
+    readonly time: number;
+  } | null = null;
+  /** Completed tap waiting for a partner within the double-tap window. */
+  private lastTap: {
+    readonly clientX: number;
+    readonly clientY: number;
+    readonly time: number;
+  } | null = null;
+  /**
+   * Zoom preset the viewer last settled on and the scale it produced. Double
+   * tap toggles against this, so it returns to a re-fitting preset rather than
+   * to a frozen number.
+   */
+  private zoomBaseline: { readonly value: string; readonly scale: number } | null = null;
 
   constructor(private readonly adapter: HellPdfRuntimeAdapter = new HellPdfJsRuntimeAdapter()) {}
 
@@ -315,8 +361,10 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
         initialPage: () => this.initialPage,
         initialZoom: () => this.initialZoom,
         onPageChange: (page) => this.handlers?.onPageChange(page),
-        onZoomChange: (displayValue, emittedValue) =>
-          this.handlers?.onZoomChange(displayValue, emittedValue),
+        onZoomChange: (displayValue, emittedValue) => {
+          this.recordZoomBaseline(displayValue);
+          this.handlers?.onZoomChange(displayValue, emittedValue);
+        },
         onPagesReady: () => this.handlers?.onPagesReady(),
         onFindState: (state) => this.handlers?.onFindState(state),
       },
@@ -334,6 +382,9 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.initialPage = options.initialPage;
     this.initialZoom = options.initialZoom;
     this.cancelPendingZoom();
+    // The incoming document re-fits from its own `pagesinit`, so the outgoing
+    // document's fitted scale must not survive as a double-tap target.
+    this.zoomBaseline = null;
 
     await this.cancelActiveLoadTask();
     this.clearActiveDocument();
@@ -377,6 +428,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.session = null;
     this.handlers = null;
     this.container = null;
+    this.zoomBaseline = null;
   }
 
   goTo(page: number): void {
@@ -520,7 +572,11 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     container.addEventListener('pointermove', onPointerMove, { passive: false });
     container.addEventListener('pointerup', onPointerEnd);
     container.addEventListener('pointercancel', onPointerEnd);
-    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    // Non-passive: a second finger has to be able to take the gesture away from
+    // the browser's own two-finger pan before it starts. The handler returns
+    // immediately for a single touch, so one-finger scrolling keeps its
+    // compositor path apart from that one check.
+    container.addEventListener('touchstart', onTouchStart, { passive: false });
     container.addEventListener('touchmove', onTouchMove, { passive: false });
     container.addEventListener('touchend', onTouchEnd);
     container.addEventListener('touchcancel', onTouchEnd);
@@ -619,6 +675,8 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private onPointerDown(event: PointerEvent): void {
     if (!this.session || !this.container || event.pointerType !== 'touch') return;
 
+    this.trackTapStart(event);
+
     this.activeTouchPointers.set(event.pointerId, {
       clientX: event.clientX,
       clientY: event.clientY,
@@ -666,6 +724,11 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private onPointerEnd(event: PointerEvent): void {
     if (event.pointerType !== 'touch') return;
 
+    // A cancelled pointer is the browser claiming the gesture as a pan, so it
+    // never ends as a tap; drop the candidate either way.
+    const tapped = event.type === 'pointerup' && this.takeTap(event);
+    this.tapCandidate = null;
+
     this.activeTouchPointers.delete(event.pointerId);
     this.pinchGesture = null;
 
@@ -675,10 +738,21 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     }
 
     this.gestureScale = null;
+
+    if (tapped) this.registerTap(event);
   }
 
   private onTouchStart(event: TouchEvent): void {
-    if (!this.session || !this.container || this.activeTouchPointers.size > 0) return;
+    // A second finger means a pinch. `touch-action` cannot express "one-finger
+    // pan yes, two-finger pan no", so take the gesture from the browser here,
+    // while the event is still cancelable: once the browser owns a pan its
+    // touchmove events stop being cancelable and the pinch would fight a scroll.
+    if (event.touches.length >= 2 && event.cancelable) event.preventDefault();
+
+    // Below two live pointers the pointer path is not driving the pinch — the
+    // environment has no pointer events, or the browser cancelled them when it
+    // started a pan. Either way the touch path takes over from here.
+    if (!this.session || !this.container || this.activeTouchPointers.size >= 2) return;
 
     if (event.touches.length >= 2) {
       this.startTouchPinchGesture(event);
@@ -686,7 +760,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   private onTouchMove(event: TouchEvent): void {
-    if (!this.session || !this.container || this.activeTouchPointers.size > 0) return;
+    if (!this.session || !this.container || this.activeTouchPointers.size >= 2) return;
     if (event.touches.length < 2) {
       this.touchPinchGesture = null;
       return;
@@ -711,7 +785,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   private onTouchEnd(event: TouchEvent): void {
-    if (this.activeTouchPointers.size > 0) return;
+    if (this.activeTouchPointers.size >= 2) return;
 
     this.touchPinchGesture = null;
     if (event.touches.length >= 2) {
@@ -747,6 +821,101 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.pinchGesture = null;
     this.touchPinchGesture = null;
     this.gestureScale = null;
+    this.tapCandidate = null;
+    this.lastTap = null;
+  }
+
+  /**
+   * Start following a touch that could still end as a tap. A second finger
+   * turns the sequence into a pinch, which disqualifies both the touch in
+   * flight and any tap waiting for a partner.
+   */
+  private trackTapStart(event: PointerEvent): void {
+    if (this.activeTouchPointers.size > 0) {
+      this.tapCandidate = null;
+      this.lastTap = null;
+      return;
+    }
+
+    this.tapCandidate = {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      time: this.now(),
+    };
+  }
+
+  /** Whether the lifted touch stayed still and brief enough to count as a tap. */
+  private takeTap(event: PointerEvent): boolean {
+    const candidate = this.tapCandidate;
+    this.tapCandidate = null;
+    if (!candidate || candidate.pointerId !== event.pointerId) return false;
+    // Another finger is still down, so this lift ends a multi-touch gesture.
+    if (this.activeTouchPointers.size > 1) return false;
+
+    const travelled = Math.hypot(
+      event.clientX - candidate.clientX,
+      event.clientY - candidate.clientY,
+    );
+    return travelled <= HELL_PDF_TAP_SLOP_PX && this.now() - candidate.time <= HELL_PDF_TAP_MAX_MS;
+  }
+
+  /** Pair a completed tap with the previous one, or park it as the next pair's first half. */
+  private registerTap(event: PointerEvent): void {
+    const time = this.now();
+    const previous = this.lastTap;
+    this.lastTap = { clientX: event.clientX, clientY: event.clientY, time };
+    if (!previous) return;
+
+    const apart = Math.hypot(event.clientX - previous.clientX, event.clientY - previous.clientY);
+    if (time - previous.time > HELL_PDF_DOUBLE_TAP_MS || apart > HELL_PDF_DOUBLE_TAP_SLOP_PX) {
+      return;
+    }
+
+    // A third tap opens a new pair rather than re-triggering against this one.
+    this.lastTap = null;
+    this.toggleDoubleTapZoom(event);
+  }
+
+  /**
+   * Double tap toggles between the document's fitted scale and a magnified view
+   * anchored on the tap. Zooming back out restores the preset itself — `auto`,
+   * `page-fit`, `page-width` — so the document keeps re-fitting on rotation
+   * instead of freezing at the number that preset happened to produce.
+   */
+  private toggleDoubleTapZoom(point: { readonly clientX: number; readonly clientY: number }): void {
+    if (!this.session || !this.container) return;
+
+    const baseline = this.zoomBaseline;
+    const currentScale = this.currentScale;
+
+    if (baseline && currentScale > baseline.scale * HELL_PDF_DOUBLE_TAP_ZOOMED_RATIO) {
+      this.setZoomValue(baseline.value);
+      return;
+    }
+
+    // Without a preset to fall back on — a document opened at a fixed numeric
+    // zoom — the scale in front of the user becomes the toggle's other half.
+    this.zoomBaseline ??= { value: String(currentScale), scale: currentScale };
+    this.cancelPendingZoom();
+    this.setNumericZoom(
+      clampZoomScale((baseline?.scale ?? currentScale) * HELL_PDF_DOUBLE_TAP_ZOOM_FACTOR),
+      getZoomOrigin(this.container, point),
+    );
+  }
+
+  /**
+   * Remember the scale a preset produced. Only presets qualify: a numeric zoom
+   * is where a double tap toggles *to*, so treating one as the baseline would
+   * leave the gesture with nothing to return to.
+   */
+  private recordZoomBaseline(displayValue: string): void {
+    if (!isPdfZoomPreset(displayValue)) return;
+    this.zoomBaseline = { value: displayValue, scale: this.currentScale };
+  }
+
+  private now(): number {
+    return this.container?.ownerDocument.defaultView?.performance.now() ?? 0;
   }
 
   private getPinchPoints():

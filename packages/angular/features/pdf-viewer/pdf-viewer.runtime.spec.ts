@@ -382,6 +382,157 @@ describe('PDF Runtime', () => {
     expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
   });
 
+  it('toggles a double tap between the fitted preset and a magnified view', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // pdf.js settling on a preset is what gives the gesture something to
+    // toggle back to.
+    adapter.session.currentScale = 0.8;
+    adapter.session.handlers?.onZoomChange('auto', 'auto');
+
+    // Off-centre on purpose: the container's own middle would anchor at
+    // 150 / 200, so those coordinates could not tell the two apart.
+    doubleTap(container, 60, 100);
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(1.6, undefined);
+    // Magnifying is a discrete action like the toolbar, not a gesture stream:
+    // it applies exactly and immediately instead of deferring the redraw.
+    expect(adapter.session.setNumericZoom.mock.calls[0]?.[1]).toBeUndefined();
+    expect(container.scrollLeft).toBeCloseTo(60);
+    expect(container.scrollTop).toBeCloseTo(100);
+
+    doubleTap(container, 60, 100);
+
+    // The preset itself comes back, so the document keeps re-fitting on
+    // rotation rather than freezing at the number `auto` happened to produce.
+    expect(adapter.session.setZoomValue).toHaveBeenCalledWith('auto');
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+  });
+
+  it('magnifies from the scale in front of the user when no preset ever settled', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // A document opened at a fixed numeric zoom never reports a preset.
+    adapter.session.currentScale = 0.5;
+    adapter.session.handlers?.onZoomChange('0.5', 0.5);
+
+    doubleTap(container, 150, 200);
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(1, undefined);
+
+    doubleTap(container, 150, 200);
+    expect(adapter.session.setZoomValue).toHaveBeenCalledWith('0.5');
+  });
+
+  it('ignores a second tap that arrives after the double-tap window', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+    adapter.session.handlers?.onZoomChange('auto', 'auto');
+
+    const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+    try {
+      tap(container, 1, 150, 200);
+      clock.mockReturnValue(400);
+      tap(container, 2, 150, 200);
+    } finally {
+      clock.mockRestore();
+    }
+
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+  });
+
+  it('ignores taps that travelled far enough to be a pan', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+    adapter.session.handlers?.onZoomChange('auto', 'auto');
+
+    for (const pointerId of [1, 2]) {
+      container.dispatchEvent(touchPointer('pointerdown', pointerId, 150, 200));
+      container.dispatchEvent(touchPointer('pointerup', pointerId, 150, 260));
+    }
+
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+  });
+
+  it('does not read the two lifts that end a pinch as a double tap', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+    adapter.session.handlers?.onZoomChange('auto', 'auto');
+
+    container.dispatchEvent(touchPointer('pointerdown', 1, 150, 200));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 160, 200));
+    container.dispatchEvent(touchPointer('pointerup', 2, 160, 200));
+    container.dispatchEvent(touchPointer('pointerup', 1, 150, 200));
+
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+
+    // The tap that follows a pinch opens a fresh pair rather than closing one.
+    tap(container, 3, 150, 200);
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+  });
+
+  it('takes a two-finger gesture from the browser before it pans', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    const oneFinger = touchEvent('touchstart', [{ clientX: 150, clientY: 200 }]);
+    container.dispatchEvent(oneFinger);
+    expect(oneFinger.defaultPrevented).toBe(false);
+
+    // Even while the pointer path drives the pinch, the touch sequence is what
+    // the browser would otherwise turn into a two-finger pan.
+    container.dispatchEvent(touchPointer('pointerdown', 1, 130, 260));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 230, 260));
+    const twoFingers = touchEvent('touchstart', [
+      { clientX: 130, clientY: 260 },
+      { clientX: 230, clientY: 260 },
+    ]);
+    container.dispatchEvent(twoFingers);
+
+    expect(twoFingers.defaultPrevented).toBe(true);
+  });
+
+  it('pinches from touch events when the browser cancelled the pointer stream', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = gestureContainer();
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    // A pan the browser claimed: the first finger's pointer is cancelled, so
+    // the second finger leaves the pointer path one short of a pinch.
+    container.dispatchEvent(touchPointer('pointerdown', 1, 130, 260));
+    container.dispatchEvent(touchPointer('pointercancel', 1, 130, 260));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 230, 260));
+    container.dispatchEvent(
+      touchEvent('touchstart', [
+        { clientX: 130, clientY: 260 },
+        { clientX: 230, clientY: 260 },
+      ]),
+    );
+    container.dispatchEvent(
+      touchEvent('touchmove', [
+        { clientX: 80, clientY: 260 },
+        { clientX: 280, clientY: 260 },
+      ]),
+    );
+    await nextFrame();
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(2, expect.anything());
+  });
+
   it('keeps thumbnails behind the PDF Adapter seam', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
@@ -838,6 +989,51 @@ function touchPointer(
     bubbles: true,
     cancelable: true,
   });
+}
+
+/** A container with the geometry the gesture math reads off the real one. */
+function gestureContainer(): HTMLDivElement {
+  const container = document.createElement('div') as HTMLDivElement;
+  vi.spyOn(container, 'offsetLeft', 'get').mockReturnValue(0);
+  vi.spyOn(container, 'offsetTop', 'get').mockReturnValue(0);
+  vi.spyOn(container, 'clientWidth', 'get').mockReturnValue(300);
+  vi.spyOn(container, 'clientHeight', 'get').mockReturnValue(400);
+  vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+    x: 0,
+    y: 0,
+    width: 300,
+    height: 400,
+    top: 0,
+    right: 300,
+    bottom: 400,
+    left: 0,
+    toJSON: () => ({}),
+  } as DOMRect);
+  return container;
+}
+
+function tap(container: HTMLDivElement, pointerId: number, clientX: number, clientY: number): void {
+  container.dispatchEvent(touchPointer('pointerdown', pointerId, clientX, clientY));
+  container.dispatchEvent(touchPointer('pointerup', pointerId, clientX, clientY));
+}
+
+function doubleTap(container: HTMLDivElement, clientX: number, clientY: number): void {
+  tap(container, 1, clientX, clientY);
+  tap(container, 2, clientX, clientY);
+}
+
+/**
+ * jsdom ships no `TouchEvent` constructor, and the runtime only reads
+ * `touches`, so a plain cancelable event carrying that list is the whole
+ * contract under test.
+ */
+function touchEvent(
+  type: 'touchstart' | 'touchmove' | 'touchend',
+  points: readonly { readonly clientX: number; readonly clientY: number }[],
+): Event {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperty(event, 'touches', { value: points });
+  return event;
 }
 
 function createShortcutActions() {

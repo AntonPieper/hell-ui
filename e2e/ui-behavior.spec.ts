@@ -938,4 +938,129 @@ test.describe('Hell UI browser behavior', () => {
       .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
       .toBeGreaterThan(beforePinchBox.width * 1.2);
   });
+
+  test.describe('pdf viewer on a phone-sized touch viewport', () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+    test('toolbar controls stay finger-sized and inside the viewer box', async ({ page }) => {
+      const viewer = await openBasicPdfViewer(page);
+
+      const viewerBox = await viewer.boundingBox();
+      const toolbar = viewer.locator('[data-slot="toolbar"]');
+      const toolbarBox = await toolbar.boundingBox();
+      if (!viewerBox || !toolbarBox) {
+        throw new Error('Expected viewer and toolbar boxes on the phone viewport.');
+      }
+
+      // A wrapped toolbar is fine; one that overflows its own viewer is not.
+      expect(toolbarBox.width).toBeLessThanOrEqual(viewerBox.width + 1);
+      expect(
+        await toolbar.evaluate((el) => el.scrollWidth - el.clientWidth),
+      ).toBeLessThanOrEqual(1);
+
+      const controls = toolbar.locator('button, input, select');
+      const controlCount = await controls.count();
+      expect(controlCount).toBeGreaterThan(0);
+
+      for (let index = 0; index < controlCount; index++) {
+        const control = controls.nth(index);
+        const box = await control.boundingBox();
+        const label = await control.getAttribute('aria-label');
+        if (!box) throw new Error(`Expected a box for toolbar control ${label ?? index}.`);
+        expect(box.height, `height of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+        if ((await control.evaluate((el) => el.tagName)) === 'BUTTON') {
+          expect(box.width, `width of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+        }
+      }
+    });
+
+    test('the page overview floats over the document instead of squeezing it', async ({ page }) => {
+      const viewer = await openBasicPdfViewer(page);
+
+      const pageArea = viewer.locator('[data-slot="pageArea"]');
+      const beforeBox = await pageArea.boundingBox();
+
+      await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+      const sidebar = viewer.locator('aside[data-slot="sidebar"]');
+      await expect(sidebar).toBeVisible();
+
+      const afterBox = await pageArea.boundingBox();
+      const sidebarBox = await sidebar.boundingBox();
+      if (!beforeBox || !afterBox || !sidebarBox) {
+        throw new Error('Expected page area and sidebar boxes with the overview open.');
+      }
+
+      expect(afterBox.width).toBeCloseTo(beforeBox.width, 0);
+      // Overlapping is the point: the rail sits on top of the page area.
+      expect(sidebarBox.x).toBeLessThan(afterBox.x + afterBox.width);
+      expect(sidebarBox.height).toBeCloseTo(afterBox.height, 0);
+    });
+
+    test('double tap toggles between the fitted preset and a magnified view', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(
+        browserName !== 'chromium',
+        'Double-tap zoom regression uses Chromium DevTools Protocol touch input.',
+      );
+
+      const viewer = await openBasicPdfViewer(page);
+      const zoomSelect = viewer.getByRole('combobox', { name: /zoom/i });
+      await expect(zoomSelect).toHaveValue('auto');
+
+      const scrollContainer = viewer.locator('[data-slot="pageArea"]');
+      const firstPdfPage = viewer.locator('.pdfViewer .page').first();
+      await expect(firstPdfPage).toBeVisible();
+      const fittedBox = await firstPdfPage.boundingBox();
+      const scrollBox = await scrollContainer.boundingBox();
+      if (!fittedBox || !scrollBox) {
+        throw new Error('Expected PDF page and scroll container boxes for the double-tap test.');
+      }
+
+      const client = await page.context().newCDPSession(page);
+      const tapX = Math.round(scrollBox.x + scrollBox.width / 2);
+      const tapY = Math.round(scrollBox.y + Math.min(scrollBox.height * 0.4, scrollBox.height - 20));
+      const doubleTap = async () => {
+        for (let tap = 0; tap < 2; tap++) {
+          await client.send('Input.dispatchTouchEvent', {
+            type: 'touchStart',
+            touchPoints: [{ id: 51, x: tapX, y: tapY }],
+          });
+          await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        }
+      };
+
+      await doubleTap();
+
+      await expect
+        .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
+        .toBeGreaterThan(fittedBox.width * 1.5);
+      await expect(zoomSelect).not.toHaveValue('auto');
+
+      await doubleTap();
+
+      // Back to the preset itself, not to the number it happened to produce, so
+      // the document keeps re-fitting when the viewport changes.
+      await expect(zoomSelect).toHaveValue('auto');
+      await expect
+        .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
+        .toBeLessThan(fittedBox.width * 1.2);
+    });
+  });
 });
+
+/** Open the docs page's basic PDF example and return its viewer. */
+async function openBasicPdfViewer(page: Page): Promise<Locator> {
+  await page.goto('/components/pdf-viewer');
+
+  const example = page.locator('app-pdf-viewer-basic-example');
+  const exampleTabs = page.locator('hd-example-tabs', { has: example });
+  await exampleTabs.getByRole('tab', { name: 'Preview' }).click();
+
+  const viewer = example.locator('hell-pdf-viewer');
+  await expect(viewer).toBeVisible();
+  await viewer.scrollIntoViewIfNeeded();
+  await expect(viewer.locator('.pdfViewer .page').first()).toBeVisible();
+  return viewer;
+}
