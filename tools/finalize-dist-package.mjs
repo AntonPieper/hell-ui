@@ -1,48 +1,42 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 
-import { LIBRARY_BUILD_CONFIGURATIONS, writeLibraryBuildStamp } from './library-build-stamp.mjs';
+import { writeLibraryBuildStamp } from './library-build-stamp.mjs';
 
 const sourcePackageCondition = '@heinrich/source';
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const distRootArg = process.argv[2];
-const configuration = parseConfiguration(process.argv.slice(3));
-if (!distRootArg || !configuration) {
-  console.error(
-    `Usage: node tools/finalize-dist-package.mjs <dist-package-root> --configuration <${LIBRARY_BUILD_CONFIGURATIONS.join('|')}>`,
-  );
-  process.exit(1);
-}
+/**
+ * Strips the source-resolution conditions from the built package manifest and
+ * stamps the result.
+ *
+ * Called in-process by `tools/build-library.mjs` rather than as a separate
+ * command, because the stamp needs a source digest captured *before* the
+ * compiler ran, and only the process that ordered the build has one.
+ */
+export function finalizeDistPackage({ root, distRoot, configuration, sourceDigestBeforeBuild }) {
+  const packageJsonPath = join(distRoot, 'package.json');
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
-const packageJsonPath = resolve(process.cwd(), distRootArg, 'package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  packageJson.exports = finalizeExports(packageJson.exports);
 
-packageJson.exports = finalizeExports(packageJson.exports);
-
-const remainingSourcePaths = sourceExportPaths(packageJson.exports);
-if (remainingSourcePaths.length > 0) {
-  console.error(
-    `Dist package exports must not point at source files: ${remainingSourcePaths.join(', ')}`,
-  );
-  process.exit(1);
-}
-
-writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
-
-// Last step of the build, so the stamp exists only for a build that ran to
-// completion. Gates that consume the prepared `dist` verify it before reading
-// a single declaration.
-writeLibraryBuildStamp({ root, configuration });
-
-function parseConfiguration(args) {
-  for (let index = 0; index < args.length; index += 1) {
-    if (args[index] !== '--configuration') continue;
-    const value = args[index + 1];
-    return LIBRARY_BUILD_CONFIGURATIONS.includes(value) ? value : null;
+  const remainingSourcePaths = sourceExportPaths(packageJson.exports);
+  if (remainingSourcePaths.length > 0) {
+    throw new Error(
+      `Dist package exports must not point at source files: ${remainingSourcePaths.join(', ')}`,
+    );
   }
-  return null;
+
+  writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+
+  // Last step of the build, so the stamp exists only for a build that ran to
+  // completion. Gates that consume the prepared `dist` verify it before reading
+  // a single declaration.
+  writeLibraryBuildStamp({
+    root,
+    configuration,
+    distRoot: resolve(distRoot),
+    sourceDigestBeforeBuild,
+  });
 }
 
 function finalizeExports(exportsMap) {

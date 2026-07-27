@@ -7,7 +7,7 @@
       "ignore": ["tools/consumer-fixtures/**"],
       // tools/check-main-ruleset.mjs gathers GitHub API evidence through the
       // system GitHub CLI; it is not an npm dependency.
-      "ignoreBinaries": ["gh"],
+      "ignoreBinaries": ["gh", "ng"],
       "ignoreDependencies": [
         // Declared in pnpm packageExtensions for ng-primitives.
         "@angular/router"

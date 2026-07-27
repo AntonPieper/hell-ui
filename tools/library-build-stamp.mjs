@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 import { collectSourceFiles, digestSourceFiles } from './source-digest.mjs';
 
@@ -28,6 +28,23 @@ import { collectSourceFiles, digestSourceFiles } from './source-digest.mjs';
  */
 const LIBRARY_BUILD_STAMP_PATH = 'dist/hell.build.json';
 
+/**
+ * There is exactly one library package, and both the stamp path above and the
+ * output digest below assume it. `finalize-dist-package.mjs` accepts a
+ * `<dist-package-root>` argument, which reads as though a second package could
+ * be stamped; it cannot, and this rejects that call rather than silently
+ * stamping the wrong tree.
+ */
+function assertIsTheLibraryDistRoot(root, distRoot) {
+  const expected = join(root, LIBRARY_DIST_ROOT);
+  if (resolve(distRoot) !== expected) {
+    throw new Error(
+      `The build stamp only describes ${LIBRARY_DIST_ROOT}, but ${distRoot} was finalized. ` +
+        'Teach library-build-stamp.mjs about the new package before stamping it.',
+    );
+  }
+}
+
 /** Bump when the digest inputs change so old stamps are rejected, not trusted. */
 const STAMP_VERSION = 2;
 
@@ -52,6 +69,9 @@ function declarationInputPaths(root) {
     join(root, 'packages/angular/tsconfig.lib.prod.json'),
     join(root, 'packages/angular/angular.json'),
     join(root, 'packages/angular/package.json'),
+    // Decides the guarded package.json the report reads, so a change to it
+    // changes the artifact just as a source change does.
+    join(root, 'tools/finalize-dist-package.mjs'),
     ...collectSourceFiles(
       join(root, 'packages/angular'),
       (name) =>
@@ -87,10 +107,34 @@ function computeOutputDigest(root) {
   return digestSourceFiles(root, outputPaths(root));
 }
 
-export function writeLibraryBuildStamp({ root, configuration }) {
+/**
+ * Records the sources as they were *before* the compiler read them.
+ *
+ * The stamp is written after the build, so hashing only then would record
+ * whatever the tree looks like at that moment — including an edit made while
+ * ng-packagr was running. That produces a stamp saying "these sources produced
+ * these declarations" for a pair that never met, and the gate recomputes the
+ * same hashes and agrees. Comparing a digest taken before the build with one
+ * taken after turns that into a refusal.
+ */
+export function captureLibrarySourceDigest({ root }) {
+  return computeDeclarationInputsDigest(root);
+}
+
+export function writeLibraryBuildStamp({ root, configuration, distRoot, sourceDigestBeforeBuild }) {
+  if (distRoot !== undefined) assertIsTheLibraryDistRoot(root, distRoot);
   if (!LIBRARY_BUILD_CONFIGURATIONS.includes(configuration)) {
     throw new Error(
       `Unknown library build configuration '${configuration}'. Expected one of: ${LIBRARY_BUILD_CONFIGURATIONS.join(', ')}.`,
+    );
+  }
+
+  const afterBuild = computeDeclarationInputsDigest(root);
+  if (sourceDigestBeforeBuild !== undefined && sourceDigestBeforeBuild !== afterBuild) {
+    throw new Error(
+      'Library sources changed while the build was running, so the output does not correspond ' +
+        'to any single state of the tree. Nothing was stamped; re-run `pnpm run build:lib` with ' +
+        'the tree settled.',
     );
   }
 
@@ -102,7 +146,7 @@ export function writeLibraryBuildStamp({ root, configuration }) {
     // Informational only: never part of the digest, so two builds of the same
     // sources stay comparable.
     builtAt: new Date().toISOString(),
-    declarationInputsDigest: computeDeclarationInputsDigest(root),
+    declarationInputsDigest: afterBuild,
     outputDigest: computeOutputDigest(root),
   };
   writeFileSync(stampPath, `${JSON.stringify(stamp, null, 2)}\n`);
