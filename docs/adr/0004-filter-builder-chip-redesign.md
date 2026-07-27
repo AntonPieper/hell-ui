@@ -1,7 +1,8 @@
 # ADR: Filter Builder rides the Control Group + Chip Set pattern
 
-- Status: Proposed — awaiting maintainer approval (#362); implementation is
-  #363
+- Status: Proposed — merging PR #401 constitutes the maintainer approval
+  required by #362, at which point this ADR reads as Accepted; implementation
+  is #363
 - Date: 2026-07-27
 
 ## Context
@@ -99,9 +100,9 @@ sr-only live region ...................................... live
   inside the `md` frame, as the chip-in-group compositions already do.
 - The inline field picker keeps the existing frameless Combobox refinement
   (transparent, borderless, no own focus ring — the frame's focus-within ring
-  is the single focus presentation) and gains `hellChipInput` so the Chip
-  Input keyboard bridge applies (it is composed with `hellComboboxInput` on
-  the same real `<input>`, which both directives support).
+  is the single focus presentation) and keeps `hellChipInput` composed with
+  `hellComboboxInput` on the same real `<input>`, so the existing Chip Input
+  keyboard bridge continues to apply.
 - Clicking anywhere on empty frame space focuses the inline input (the
   click-anywhere-to-start affordance from Grafana); clicks on chips and the
   action keep their own targets.
@@ -138,9 +139,11 @@ interface HellFilterFieldDescriptor<TFilter> {
 ```
 
 - `display(filter)` stays required and stays the single source for accessible
-  names, announcements, and duplicate-label-free flows. `displayParts` is
-  presentation-only sugar; when absent, the chip renders the flat
-  `display(filter)` string exactly as today. No expression shape changes; the
+  names and announcements. Duplicate detection is unaffected by either
+  callback: it stays identity-based (`identify` plus the
+  `commitHellFilterBuilderValue` rules), never display-text-based.
+  `displayParts` is presentation-only sugar; when absent, the chip renders
+  the flat `display(filter)` string exactly as today. No expression shape changes; the
   segments are derived strings, not new state.
 - The three segments are **not individually interactive**. The whole label
   region (`tokenLabel`) remains the single edit trigger. Per-segment
@@ -234,7 +237,7 @@ fourth surface owning its own focus while open.
 | Any chip | `Escape` | Focus the inline input. |
 | Any chip | modified keys (Ctrl/Cmd/Alt) | Not intercepted; browser/platform shortcuts pass through (Chip Set contract when an input is composed). |
 | Inline input | typing | Filters field options; dropdown opens with matches. |
-| Inline input | `ArrowDown` | Opens the field dropdown; then active-descendant navigation per the Combobox contract (`keyboard-navigation-matrix.md`). |
+| Inline input | `ArrowDown` | Opens the field dropdown; then active-descendant navigation per the Combobox contract (`docs/architecture/keyboard-navigation-matrix.md`). |
 | Inline input | `Enter` (active option) | Commits the field option → opens the create editor. |
 | Inline input | `Tab` (dropdown open, active option) | Commits like `Enter` instead of leaving the field (GitLab's Tab-commits affordance, already implemented). |
 | Inline input, empty | `Backspace` | Focus the last removable chip (two-step removal). |
@@ -287,7 +290,7 @@ pieces (click-anywhere focus, group action stop).
   reuses `edit(display)`.
 - The field picker keeps the editable-Combobox ARIA pattern
   (`role="combobox"`, `aria-activedescendant`) per
-  `keyboard-navigation-matrix.md`.
+  `docs/architecture/keyboard-navigation-matrix.md`.
 - Editor popovers keep their accessible name (`edit(display)` for edit; the
   effective builder name for create).
 
