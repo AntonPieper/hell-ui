@@ -1,5 +1,6 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { ensurePageIsActive } from './utils';
 
 const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
@@ -19,8 +20,25 @@ async function gotoFilePicker(page: Page): Promise<void> {
  * part of the contract, not just border color: drag-over turns the resting
  * dashed outline solid so the armed state survives a monochrome rendering.
  */
+/**
+ * Every comparison in this file is measured against a value this returns, so it
+ * has to be a settled one. Read mid-transition, the resting background came
+ * back as `rgba(247, 248, 250, 0.494)` — a frame, not a resting state — and the
+ * poll after the drop then waited for a colour the element would never return
+ * to, on a page that was behaving correctly.
+ *
+ * Finishing and reading happen in one evaluate deliberately: as two round trips
+ * a transition starting in the gap reintroduces the same hazard.
+ */
 async function zoneStyle(picker: Locator): Promise<Record<string, string | undefined>> {
   return picker.evaluate((element) => {
+    for (const animation of element.getAnimations({ subtree: true })) {
+      try {
+        animation.finish();
+      } catch {
+        // Infinite animations cannot finish and do not gate settling.
+      }
+    }
     const view = element.ownerDocument.defaultView;
     const style = view?.getComputedStyle(element);
     const glyph = view?.getComputedStyle(element, '::before');
@@ -93,6 +111,9 @@ test.describe('File Picker browser contract', () => {
 
   test('keeps drag state across child boundaries and clears it after drop', async ({ page }) => {
     await gotoFilePicker(page);
+    // A deactivated page freezes animation clocks, so settling would never
+    // complete and every reading below would be a frozen frame.
+    await ensurePageIsActive(page);
 
     const picker = page
       .locator('app-file-picker-basic-example')
