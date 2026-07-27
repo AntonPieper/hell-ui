@@ -29,8 +29,30 @@ export interface HellFilterFieldDescriptor<
   readonly multiple?: boolean;
   /** Render a complete expression as a token label. */
   display(filter: TFilter): string;
+  /**
+   * Optional structured token presentation. When present the chip renders
+   * separate field, operator, and value segments; when absent it renders the
+   * flat `display(filter)` string. Never used for accessible names,
+   * announcements, or duplicate detection.
+   */
+  displayParts?(filter: TFilter): HellFilterDisplayParts;
   /** Decide whether a projected editor may commit a complete expression. */
   validate(filter: TFilter): boolean;
+}
+
+/**
+ * Structured token presentation for one expression: the muted field and
+ * operator segments plus the emphasized value segment. Presentation only —
+ * `display(filter)` stays the single source for accessible names, duplicate
+ * rules, and announcements.
+ */
+export interface HellFilterDisplayParts {
+  /** Human field label, rendered as the muted leading segment. */
+  readonly field: string;
+  /** Optional operator copy, rendered muted between field and value. */
+  readonly operator?: string;
+  /** Value copy, rendered as the emphasized trailing segment. */
+  readonly value: string;
 }
 
 /** Stable application identity returned for one controlled expression. */

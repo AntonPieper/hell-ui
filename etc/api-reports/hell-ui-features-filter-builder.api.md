@@ -71,14 +71,22 @@ export interface HellFilterBuilderLabels {
 }
 
 // @public
-export type HellFilterBuilderPart = 'root' | 'tokens' | 'token' | 'tokenLabel' | 'control' | 'panel' | 'fieldOption' | 'editor' | 'clear' | 'live';
+export type HellFilterBuilderPart = 'root' | 'tokens' | 'token' | 'tokenLabel' | 'tokenField' | 'tokenOperator' | 'tokenValue' | 'control' | 'panel' | 'fieldOption' | 'editor' | 'clear' | 'live';
 
 // @public
 export type HellFilterBuilderUi = HellUi<HellFilterBuilderPart>;
 
 // @public
+export interface HellFilterDisplayParts {
+    readonly field: string;
+    readonly operator?: string;
+    readonly value: string;
+}
+
+// @public
 export interface HellFilterFieldDescriptor<TFilter extends HellFilter = HellFilter> {
     display(filter: TFilter): string;
+    displayParts?(filter: TFilter): HellFilterDisplayParts;
     readonly field: TFilter['field'];
     readonly label: string;
     readonly multiple?: boolean;

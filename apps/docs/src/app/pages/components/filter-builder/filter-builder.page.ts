@@ -29,8 +29,6 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import 'hell-ui/features/filter-builder/styles.css';
-
       @media (max-width: 639px) {
         hd-filter-builder .hd-prose li code {
           overflow-wrap: anywhere;
@@ -71,13 +69,47 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
         This projected Feature replaces the retired Filter Bar contract without carrying its fixed
         field kinds, equality-only operator, value union, or built-in search policy forward.
       </p>
+      <p>
+        The rendered surface is one grouped field: a Control Group frame holding a Chip Set in which
+        filter chips and the inline field picker share a single flow, plus a trailing clear-all group
+        action. It is the reference composition of the chip-in-control-group pattern the Chip and
+        Combobox pages document, so the frame owns the border, the focus-within ring, and the
+        <code>md</code> density while chips render at <code>sm</code>.
+      </p>
+
+      <h2>Anatomy</h2>
+      <hd-code-block [code]="anatomyCode" />
+      <ul>
+        <li>
+          The <code>root</code> Public Part <em>is</em> the frame. Clicking anywhere on empty frame
+          space focuses the inline picker; chips, remove buttons, and the clear action keep their own
+          targets.
+        </li>
+        <li>
+          The chip set uses the shared <code>data-in-control-group</code> spacing recipe. The Filter
+          Builder adds no private spacing overrides.
+        </li>
+        <li>
+          The inline picker is a frameless Combobox on a real
+          <code>input[hellChipInput][hellComboboxInput]</code>, so the Chip Input keyboard bridge
+          applies unchanged.
+        </li>
+        <li>
+          Create and edit share one placement model: both render the projected template in an
+          anchored, non-modal popover — create anchored to the frame, edit anchored to its chip. The
+          frame never reflows when an editor opens.
+        </li>
+      </ul>
 
       <h2>Text, options, and a custom operator</h2>
       <p>
         These are recipes rather than built-in kinds. Three typed descriptors bind three projected
-        templates: a text input, a projection-first options Combobox, and a numeric
-        <code>atLeast</code> operator. The controlled preview shows the complete array emitted after
-        each valid commit.
+        templates: a text value plus an operator <code>select</code>, a projection-first options
+        Combobox, and a numeric <code>atLeast</code> operator. The recommended editor recipe pairs an
+        operator control with a value control and commits on <code>Enter</code>; the contract itself
+        only requires <code>commit</code> and <code>cancel</code>, and the shell never inspects
+        editor internals. The controlled preview shows the complete array emitted after each valid
+        commit.
       </p>
       <hd-example-tabs [code]="recipesCode" previewClass="min-h-[250px]">
         <app-filter-builder-recipes-example />
@@ -142,6 +174,14 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           field may produce more than one token.
         </li>
         <li>
+          Optional <code>displayParts(filter)</code> returns
+          <code>{{ '{' }} field, operator?, value {{ '}' }}</code> and renders the chip as three
+          segments — muted field, muted operator, emphasized value. It is presentation-only sugar:
+          <code>display(filter)</code> stays the single source for accessible names and
+          announcements, and duplicate detection stays identity-based. Omit it and the chip renders
+          the flat <code>display(filter)</code> string.
+        </li>
+        <li>
           Bind the descriptor directly through
           <code>&lt;ng-template [hellFilterBuilderEditor]="descriptor" let-editor&gt;</code>. The typed
           context exposes <code>descriptor</code>, the latest controlled <code>filter</code>,
@@ -155,6 +195,20 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           feature never fingerprints generic values.
         </li>
       </ul>
+
+      <h2>Migrate the Part Style Map</h2>
+      <p>
+        The redesign reshuffles the owned anatomy, so <code>ui</code> maps written against the old
+        two-surface layout need updating.
+      </p>
+      <table class="hd-doc-table">
+        <thead><tr><th>Part</th><th>What changed</th></tr></thead>
+        <tbody>
+          @for (row of partMigration; track row.before) {
+            <tr><td><code>{{ row.before }}</code></td><td>{{ row.now }}</td></tr>
+          }
+        </tbody>
+      </table>
 
       <h2>Migrate from Filter Bar</h2>
       <ul>
@@ -177,20 +231,54 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
         </li>
       </ul>
 
+      <h2>Overflow</h2>
+      <p>
+        Chips wrap and the frame grows vertically. This is the documented exception to the Control
+        Group's single-line overflow contract: the chip set is the frame's flexible surface, rows
+        wrap with in-group spacing so no row touches the border, and the inline picker claims about
+        <code>8rem</code> before wrapping to its own row after the last chip. Long values truncate —
+        <code>tokenValue</code> carries a <code>16rem</code> max width with an ellipsis, while the
+        full text stays available through the edit trigger's accessible name, the announcements, and
+        the editor.
+      </p>
+      <p>
+        There is no built-in “+N more” collapse and no max height. Cap the height in application
+        code with a Part Style Map refinement rather than asking for a mode:
+      </p>
+      <hd-code-block [code]="overflowRecipeCode" />
+
       <h2>Keyboard and focus</h2>
+      <p>
+        The frame has three tab stops — the chip set (one roving stop), the inline picker, and the
+        clear action when filters exist. An open editor popover is a transient fourth surface that
+        owns its own focus.
+      </p>
+      <table class="hd-doc-table">
+        <thead><tr><th>Focus</th><th>Key</th><th>Behavior</th></tr></thead>
+        <tbody>
+          @for (row of keyboard; track row.key + row.focus) {
+            <tr>
+              <td>{{ row.focus }}</td>
+              <td><code>{{ row.key }}</code></td>
+              <td>{{ row.behavior }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
       <ul>
         <li>
-          Use the field Combobox with Arrow keys and Enter. Escape closes its panel, then clears a
-          typed query; selecting a field focuses the projected editor's first interactive control.
+          Committing or cancelling an edit restores focus to the same stable chip; committing or
+          cancelling a create returns focus to the inline picker with the query cleared.
         </li>
         <li>
-          Tokens use Chip Set roving focus. Arrow Left/Right and Home/End navigate, Enter or Space
-          edits, Delete/Backspace removes, and printable typing returns to the field picker.
+          An application-owned child surface inside an editor consumes Escape first; otherwise
+          Escape cancels the projected editor. Nested Hell surfaces count as inside the editor's
+          Floating Scope, so opening one never dismisses the editor.
         </li>
         <li>
-          Cancelling or committing an edit restores focus to the same stable token. An
-          application-owned child popover consumes Escape first when present; otherwise Escape
-          directly cancels the projected editor.
+          Removing a focused chip follows the Chip Set focus-continuity contract: focus moves to the
+          nearest surviving chip, or back to the inline picker when the removed chip was the last
+          one.
         </li>
       </ul>
 
@@ -238,6 +326,10 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>Don't mutate the supplied array or expression objects in place.</li>
+        <li>
+          Don't try to make the chip segments individually interactive. The whole label is the one
+          edit trigger; per-segment menus would need a shell-owned operator schema.
+        </li>
         <li>Don't use <code>multiple</code> as a field-kind discriminator.</li>
         <li>Don't derive identity with <code>JSON.stringify</code> or display values.</li>
         <li>Don't build text/options/entity/date-range unions into shared infrastructure.</li>
@@ -251,6 +343,30 @@ export class FilterBuilderPage {
   protected readonly asyncEntityCode = filterBuilderAsyncEntityExampleCodeRaw;
   protected readonly serverDispatchCode = filterBuilderServerDispatchExampleCodeRaw;
   protected readonly dateRangeCode = filterBuilderDateRangeExampleCodeRaw;
+  protected readonly anatomyCode = `[hellControlGroup] .................................. root (the frame)
+  [hellChipSet] .................................... tokens
+    [hellChip] x n ................................. token
+      edit trigger ................................. tokenLabel
+        field segment .............................. tokenField
+        operator segment ........................... tokenOperator
+        value segment .............................. tokenValue
+      button[hellChipRemove]
+    inline Combobox ................................ control
+      input[hellChipInput][hellComboboxInput]
+      dropdown ..................................... panel
+        option x n ................................. fieldOption
+  button[hellControlGroupAction] ................... clear
+editor popover (portalled, anchored) ............... editor
+sr-only live region ................................ live`;
+
+  protected readonly overflowRecipeCode = `<hell-filter-builder
+  [ui]="{ tokens: 'max-h-24 overflow-y-auto' }"
+  [fields]="fields"
+  [value]="filters()"
+  [identify]="identifyFilter"
+  (valueChange)="filters.set($event)"
+>`;
+
   protected readonly contractCode = `interface PeopleFilter
   extends HellFilter<'status', 'is' | 'isNot', 'active' | 'paused'> {
   readonly id: string;
@@ -260,6 +376,8 @@ readonly statusField: HellFilterFieldDescriptor<PeopleFilter> = {
   field: 'status',
   label: 'Status',
   display: filter => \`Status \${filter.operator} \${filter.value}\`,
+  // Optional: muted field + operator segments and an emphasized value segment.
+  displayParts: filter => ({ field: 'Status', operator: filter.operator, value: filter.value }),
   validate: filter => filter.value === 'active' || filter.value === 'paused',
 };
 readonly identifyFilter = (filter: PeopleFilter) => filter.id;
@@ -276,15 +394,56 @@ readonly identifyFilter = (filter: PeopleFilter) => filter.id;
 </hell-filter-builder>`;
 
   protected readonly parts = [
-    { name: 'root', purpose: 'Feature host around tokens, control, clear action, and live status.' },
-    { name: 'tokens', purpose: 'Chip Set and Chip Input container.' },
+    { name: 'root', purpose: 'The Control Group frame holding the whole surface.' },
+    { name: 'tokens', purpose: 'Chip Set holding the chips and the inline picker.' },
     { name: 'token', purpose: 'One controlled filter expression chip.' },
-    { name: 'tokenLabel', purpose: 'Visible label and token edit trigger.' },
-    { name: 'control', purpose: 'Field-picker Control Group.' },
+    { name: 'tokenLabel', purpose: 'Chip edit trigger wrapping the display segments.' },
+    { name: 'tokenField', purpose: 'Muted field segment; present only with displayParts.' },
+    { name: 'tokenOperator', purpose: 'Muted operator segment; present only with a displayParts operator.' },
+    { name: 'tokenValue', purpose: 'Emphasized value segment, or the flat display fallback. Truncates.' },
+    { name: 'control', purpose: 'Frameless inline field-picker Combobox inside the chip flow.' },
     { name: 'panel', purpose: 'Portalled field suggestion panel.' },
     { name: 'fieldOption', purpose: 'One available typed field descriptor.' },
-    { name: 'editor', purpose: 'Host for the application-projected create or edit template.' },
-    { name: 'clear', purpose: 'Clear-all action shown when expressions exist.' },
+    { name: 'editor', purpose: 'Host for the projected create or edit template inside its popover.' },
+    { name: 'clear', purpose: 'Icon-only clear-all group action shown when expressions exist.' },
     { name: 'live', purpose: 'Polite add, update, remove, and clear announcement region.' },
+  ] as const;
+
+  protected readonly partMigration = [
+    {
+      before: 'root',
+      now: 'Was the bare flex row around everything. It is now the Control Group frame itself, so border, padding, and background refinements belong here while outer layout moves to the surrounding element.',
+    },
+    {
+      before: 'control',
+      now: 'Was the nested Control Group around the field picker. It is now the frameless inline Combobox inside the chip flow; move frame styling to root and keep only picker sizing here.',
+    },
+    {
+      before: 'clear',
+      now: 'Was a detached ghost hellButton outside the surface. It is now an icon-only button[hellControlGroupAction] at the end of the frame, so button variant utilities no longer apply.',
+    },
+    {
+      before: 'tokenLabel',
+      now: 'Still the edit trigger, but it now wraps tokenField, tokenOperator, and tokenValue. Move whole-label typography onto the segment parts when a descriptor supplies displayParts.',
+    },
+  ] as const;
+
+  protected readonly keyboard = [
+    { focus: 'Chip', key: 'ArrowLeft / ArrowRight', behavior: 'Roving focus to the previous or next enabled chip; ArrowRight on the last chip enters the inline picker.' },
+    { focus: 'Chip', key: 'Home / End', behavior: 'Roving focus to the first or last enabled chip.' },
+    { focus: 'Chip', key: 'Enter / Space', behavior: 'Open the edit editor anchored to that chip.' },
+    { focus: 'Chip', key: 'Delete / Backspace', behavior: 'Remove the chip when it is removable.' },
+    { focus: 'Chip', key: 'printable character', behavior: 'Focus the inline picker and start the query with that character.' },
+    { focus: 'Chip', key: 'Escape', behavior: 'Focus the inline picker.' },
+    { focus: 'Chip', key: 'Ctrl / Cmd / Alt combinations', behavior: 'Not intercepted; browser and platform shortcuts pass through.' },
+    { focus: 'Inline picker', key: 'typing', behavior: 'Rank and filter the field list; the dropdown opens with matches.' },
+    { focus: 'Inline picker', key: 'ArrowDown', behavior: 'Open the field dropdown, then navigate by active descendant.' },
+    { focus: 'Inline picker', key: 'Enter', behavior: 'Commit the active field option and open the create editor.' },
+    { focus: 'Inline picker', key: 'Tab', behavior: 'With an active option, commits like Enter instead of leaving the field.' },
+    { focus: 'Inline picker (empty)', key: 'Backspace', behavior: 'Focus the last removable chip; a second Backspace removes it.' },
+    { focus: 'Inline picker (empty)', key: 'ArrowLeft', behavior: 'Focus the last enabled chip.' },
+    { focus: 'Inline picker', key: 'Escape', behavior: 'Close an open dropdown, else clear a typed query, else no-op.' },
+    { focus: 'Editor', key: 'Escape', behavior: 'Cancel; the shell closes the popover and restores focus (picker for create, chip for edit).' },
+    { focus: 'Clear action', key: 'Enter / Space', behavior: 'Clear every expression and return focus to the inline picker.' },
   ] as const;
 }

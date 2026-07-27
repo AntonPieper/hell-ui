@@ -5,7 +5,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Injector,
   NO_ERRORS_SCHEMA,
   TemplateRef,
   booleanAttribute,
@@ -15,8 +14,8 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
-import { HellButton } from 'hell-ui/button';
 import { HELL_CHIP_IMPORTS } from 'hell-ui/chip';
 import { HELL_COMBOBOX_IMPORTS } from 'hell-ui/combobox';
 import { HELL_CONTROL_GROUP_IMPORTS } from 'hell-ui/control-group';
@@ -32,6 +31,7 @@ import {
 } from 'hell-ui/internal/core';
 import { HellPopover, HellPopoverTrigger } from 'hell-ui/popover';
 
+import { HellFilterBuilderEditorSurface } from './filter-builder.editor-surface';
 import {
   HELL_FILTER_BUILDER_LABELS,
   HellFilterBuilderEditor,
@@ -45,6 +45,7 @@ import {
   removeHellFilterBuilderValue,
   sameHellFilterIdentity,
   type HellFilter,
+  type HellFilterDisplayParts,
   type HellFilterFieldDescriptor,
   type HellFilterIdentity,
   type HellFilterIdentityValue,
@@ -56,6 +57,9 @@ export type HellFilterBuilderPart =
   | 'tokens'
   | 'token'
   | 'tokenLabel'
+  | 'tokenField'
+  | 'tokenOperator'
+  | 'tokenValue'
   | 'control'
   | 'panel'
   | 'fieldOption'
@@ -64,20 +68,35 @@ export type HellFilterBuilderPart =
   | 'live';
 
 const HELL_FILTER_BUILDER_RECIPE = {
-  root: 'relative flex w-full min-w-0 items-start gap-hell-2',
-  tokens: 'flex min-w-0 flex-1 flex-wrap items-center gap-hell-2',
-  token: '',
-  tokenLabel: 'border-0 bg-transparent p-0 font-[family-name:inherit] text-inherit outline-none',
-  control: 'min-w-[180px] flex-1',
+  // The root is the Control Group frame. It only adds the positioning context
+  // for the anchor-only create trigger; the frame keeps the group's stretch
+  // alignment and grows vertically because the chip set wraps inside it.
+  root: 'relative',
+  // The Chip Set owns in-group spacing through `data-in-control-group`; the
+  // Filter Builder deliberately adds no private spacing overrides.
+  tokens: '',
+  token: 'min-w-0',
+  tokenLabel:
+    'inline-flex min-w-0 items-center gap-hell-1 border-0 bg-transparent p-0 font-[family-name:inherit] text-inherit outline-none',
+  tokenField: 'shrink-0 text-hell-foreground-muted',
+  tokenOperator: 'shrink-0 text-hell-foreground-muted',
+  tokenValue: 'max-w-[16rem] truncate font-medium text-hell-foreground',
+  control:
+    'h-auto min-h-0 w-auto min-w-[8rem] flex-1 rounded-none border-0 bg-transparent p-0 shadow-none data-hover:border-transparent data-focus:border-transparent data-focus:shadow-none',
   panel: 'z-[var(--hell-z-popover,60)] max-h-[280px] shadow-hell-lg',
   fieldOption: 'data-[active]:bg-hell-surface-muted',
-  editor: 'relative min-w-[240px] flex-1',
+  editor: 'relative min-w-[240px]',
   clear: '',
   live: 'sr-only',
 } satisfies HellRecipe<HellFilterBuilderPart>;
 
-const HELL_FILTER_BUILDER_PICKER_UI =
-  'h-auto min-h-0 flex-1 rounded-none border-0 bg-transparent ps-hell-3 shadow-none data-focus:border-transparent data-focus:shadow-none';
+/**
+ * Anchor-only create trigger. It is private overlay scaffolding rather than a
+ * Public Part: the popover engine needs a `button[hellPopoverTrigger]` host,
+ * while the surface itself is anchored to and dismissed against the frame.
+ */
+const HELL_FILTER_BUILDER_CREATE_TRIGGER =
+  'pointer-events-none absolute bottom-0 start-0 h-0 w-0 overflow-hidden border-0 bg-transparent p-0 opacity-0';
 
 interface HellFilterBuilderEditorState<TFilter extends HellFilter> {
   readonly mode: 'create' | 'edit';
@@ -103,12 +122,12 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgTemplateOutlet,
-    HellButton,
     ...HELL_CHIP_IMPORTS,
     ...HELL_COMBOBOX_IMPORTS,
     ...HELL_CONTROL_GROUP_IMPORTS,
     HellPopover,
     HellPopoverTrigger,
+    HellFilterBuilderEditorSurface,
   ],
   providers: [
     {
@@ -121,138 +140,183 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
   // Packaged consumer templates still type-check against their metadata.
   schemas: [NO_ERRORS_SCHEMA],
   host: {
-    '[class]': "part('root')",
-    'data-slot': 'root',
-    '[attr.data-has-filters]': 'value().length ? "" : null',
-    '[attr.data-editing]': 'editorMode()',
+    class: 'contents',
   },
   template: `
     <div
-      hellChipSet
-      tabindex="-1"
-      data-slot="tokens"
-      [ui]="part('tokens')"
-      [attr.aria-label]="effectiveAriaLabel()"
-      (keydown)="onTokenSetKeydown($event)"
+      #frame
+      hellControlGroup
+      data-slot="root"
+      size="md"
+      [ui]="part('root')"
+      [disabled]="disabled()"
+      [attr.data-has-filters]="value().length ? '' : null"
+      [attr.data-editing]="editorMode()"
+      (mousedown)="onFrameMouseDown($event)"
     >
-      @for (filter of value(); track filterIdentity(filter)) {
-        <span
-          hellChip
-          size="sm"
-          data-slot="token"
-          [ui]="part('token')"
-          [label]="filterLabel(filter)"
-          [disabled]="disabled()"
-          [attr.data-field]="filter.field"
-          [attr.data-hell-filter-builder-id]="domIdentity(filterIdentity(filter))"
-          (remove)="removeFilter(filterIdentity(filter))"
-        >
-          <button
-            #editTrigger="hellPopoverTrigger"
-            type="button"
-            tabindex="-1"
-            data-slot="tokenLabel"
-            data-hell-filter-builder-edit
-            [class]="part('tokenLabel')"
-            [attr.aria-label]="labels.edit(filterLabel(filter))"
-            [hellPopoverTrigger]="editPopover"
+      <div
+        hellChipSet
+        tabindex="-1"
+        data-slot="tokens"
+        [ui]="part('tokens')"
+        [attr.aria-label]="effectiveAriaLabel()"
+        (keydown)="onTokenSetKeydown($event)"
+      >
+        @for (filter of value(); track filterIdentity(filter)) {
+          <span
+            hellChip
+            size="sm"
+            data-slot="token"
+            [ui]="part('token')"
+            [label]="filterLabel(filter)"
             [disabled]="disabled()"
-            [closeOnEscape]="false"
-            [trapFocus]="false"
-            (pointerdown)="beginEdit(filter, editTrigger)"
-            (click)="beginEdit(filter, editTrigger)"
-            (openChange)="onEditOpenChange($any($event), filterIdentity(filter), editTrigger)"
+            [attr.data-field]="filter.field"
+            [attr.data-hell-filter-builder-id]="domIdentity(filterIdentity(filter))"
+            (remove)="removeFilter(filterIdentity(filter))"
           >
-            <span>{{ filterLabel(filter) }}</span>
-          </button>
-          <button hellChipRemove></button>
-        </span>
-
-        <ng-template #editPopover>
-          <div hellPopover [attr.aria-label]="labels.edit(filterLabel(filter))">
-            @if (isEditing(filterIdentity(filter))) {
-              <ng-container *ngTemplateOutlet="projectedEditor" />
-            }
-          </div>
-        </ng-template>
-      }
-
-      @if (editorMode() === 'create') {
-        <ng-container *ngTemplateOutlet="projectedEditor" />
-      } @else {
-        <div
-          hellControlGroup
-          data-slot="control"
-          [ui]="part('control')"
-          [disabled]="disabled()"
-        >
-          <div
-            hellCombobox
-            [ui]="pickerUi"
-            [value]="null"
-            [options]="availableFields()"
-            [wrapNavigation]="false"
-            [disabled]="disabled()"
-            (valueChange)="activateField($any($event))"
-            (openChange)="onPickerOpenChange($any($event))"
-          >
-            <input
-              hellChipInput
-              hellComboboxInput
-              data-hell-filter-builder-input
-              type="search"
-              autocomplete="off"
-              spellcheck="false"
-              [attr.aria-label]="effectiveAriaLabel()"
-              [attr.placeholder]="effectivePlaceholder()"
-              [value]="query()"
+            <button
+              #editTrigger="hellPopoverTrigger"
+              type="button"
+              tabindex="-1"
+              data-slot="tokenLabel"
+              data-hell-filter-builder-edit
+              [class]="part('tokenLabel')"
+              [attr.aria-label]="labels.edit(filterLabel(filter))"
+              [hellPopoverTrigger]="editPopover"
               [disabled]="disabled()"
-              (input)="onPickerInput($event)"
-              (keydown)="onPickerKeydown($event)"
-            />
-            <div
-              *hellComboboxPortal
-              hellComboboxDropdown
-              data-slot="panel"
-              [ui]="part('panel')"
-              [attr.aria-label]="effectiveAriaLabel()"
+              [closeOnEscape]="false"
+              [trapFocus]="false"
+              (pointerdown)="beginEdit(filter, editTrigger)"
+              (click)="beginEdit(filter, editTrigger)"
+              (openChange)="onEditOpenChange($any($event), filterIdentity(filter), editTrigger)"
             >
-              @for (descriptor of availableFields(); track descriptor.field) {
-                <div
-                  hellComboboxOption
-                  data-slot="fieldOption"
-                  [value]="descriptor"
-                  [ui]="part('fieldOption')"
-                >
-                  {{ descriptor.label }}
-                </div>
+              @if (filterParts(filter); as parts) {
+                <span data-slot="tokenField" [class]="part('tokenField')">{{ parts.field }}</span>
+                @if (parts.operator) {
+                  <span data-slot="tokenOperator" [class]="part('tokenOperator')">
+                    {{ parts.operator }}
+                  </span>
+                }
+                <span data-slot="tokenValue" [class]="part('tokenValue')">{{ parts.value }}</span>
+              } @else {
+                <span data-slot="tokenValue" [class]="part('tokenValue')">
+                  {{ filterLabel(filter) }}
+                </span>
+              }
+            </button>
+            <button hellChipRemove></button>
+          </span>
+
+          <ng-template #editPopover>
+            <div
+              hellPopover
+              hellFilterBuilderEditorSurface
+              #editSurface="hellFilterBuilderEditorSurface"
+              [attr.aria-label]="labels.edit(filterLabel(filter))"
+            >
+              @if (isEditing(filterIdentity(filter))) {
+                <ng-container
+                  *ngTemplateOutlet="projectedEditor; context: { surface: editSurface.injector }"
+                />
               }
             </div>
+          </ng-template>
+        }
+
+        <div
+          hellCombobox
+          data-slot="control"
+          [ui]="part('control')"
+          [value]="pickerValue()"
+          [options]="availableFields()"
+          [wrapNavigation]="false"
+          [disabled]="disabled()"
+          (valueChange)="activateField($any($event))"
+          (openChange)="onPickerOpenChange($any($event))"
+        >
+          <input
+            hellChipInput
+            hellComboboxInput
+            data-hell-filter-builder-input
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            [attr.aria-label]="effectiveAriaLabel()"
+            [attr.placeholder]="effectivePlaceholder()"
+            [value]="query()"
+            [disabled]="disabled()"
+            (input)="onPickerInput($event)"
+            (keydown)="onPickerKeydown($event)"
+          />
+          <div
+            *hellComboboxPortal
+            hellComboboxDropdown
+            data-slot="panel"
+            [ui]="part('panel')"
+            [attr.aria-label]="effectiveAriaLabel()"
+          >
+            @for (descriptor of availableFields(); track descriptor.field) {
+              <div
+                hellComboboxOption
+                data-slot="fieldOption"
+                [value]="descriptor"
+                [ui]="part('fieldOption')"
+              >
+                {{ descriptor.label }}
+              </div>
+            }
           </div>
         </div>
+      </div>
+
+      @if (value().length) {
+        <button
+          hellControlGroupAction
+          data-slot="clear"
+          [ui]="part('clear')"
+          [attr.aria-label]="labels.clearAll"
+          [disabled]="disabled()"
+          (click)="clearAll()"
+        ></button>
       }
+
+      <button
+        #createTrigger="hellPopoverTrigger"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-hell-filter-builder-create-trigger
+        [class]="createTriggerClass"
+        [hellPopoverTrigger]="createPopover"
+        [anchor]="frame"
+        placement="bottom-start"
+        [closeOnEscape]="false"
+        [closeOnOutsideClick]="false"
+        [trapFocus]="false"
+        (openChange)="onCreateOpenChange($any($event))"
+      ></button>
     </div>
 
-    @if (value().length) {
-      <button
-        hellButton
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-slot="clear"
-        [ui]="part('clear')"
-        [disabled]="disabled()"
-        (click)="clearAll()"
+    <ng-template #createPopover>
+      <div
+        hellPopover
+        hellFilterBuilderEditorSurface
+        #createSurface="hellFilterBuilderEditorSurface"
+        [attr.aria-label]="effectiveAriaLabel()"
       >
-        {{ labels.clearAll }}
-      </button>
-    }
+        @if (editorMode() === 'create') {
+          <ng-container
+            *ngTemplateOutlet="projectedEditor; context: { surface: createSurface.injector }"
+          />
+        }
+      </div>
+    </ng-template>
 
     <div data-slot="live" [class]="part('live')" aria-live="polite" aria-atomic="true">
       {{ liveMessage() }}
     </div>
 
-    <ng-template #projectedEditor>
+    <ng-template #projectedEditor let-surface="surface">
       @if (activeEditorTemplate(); as template) {
         @if (editorContext(); as context) {
           <div
@@ -268,7 +332,7 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
             <ng-container
               [ngTemplateOutlet]="template"
               [ngTemplateOutletContext]="context"
-              [ngTemplateOutletInjector]="editorInjector"
+              [ngTemplateOutletInjector]="surface"
             />
           </div>
         }
@@ -304,21 +368,28 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
 
   /** @internal Template-only effective labels. */
   protected readonly labels = inject(HELL_FILTER_BUILDER_LABELS);
-  /** @internal Template-only projected-editor injector. */
-  protected readonly editorInjector = inject(Injector);
-  /** @internal Template-only Combobox Part Style Map. */
-  protected readonly pickerUi = HELL_FILTER_BUILDER_PICKER_UI;
+  /** @internal Template-only private class for the anchor-only create trigger. */
+  protected readonly createTriggerClass = HELL_FILTER_BUILDER_CREATE_TRIGGER;
   /** @internal Template-only owner marker for portalled editors. */
   protected readonly instanceId = ++nextFilterBuilderId;
   /** @internal Template-only field query. */
   protected readonly query = signal('');
   /** @internal Template-only Combobox state. */
   protected readonly pickerOpen = signal(false);
+  /**
+   * @internal Template-only field-picker Control Value Authority. The picker
+   * is a command surface, not a value surface: a committed field is mirrored
+   * here only until its editor closes, then cleared so re-picking the same
+   * field is a real change and commits again.
+   */
+  protected readonly pickerValue = signal<HellFilterFieldDescriptor<TFilter> | null>(null);
   /** @internal Template-only live-region message. */
   protected readonly liveMessage = signal('');
   private readonly editor = signal<HellFilterBuilderEditorState<TFilter> | null>(null);
   /** @internal Template-only editor mode. */
   protected readonly editorMode = computed(() => this.editor()?.mode ?? null);
+  /** Anchor-only trigger owning the create editor's popover surface. */
+  private readonly createTrigger = viewChild.required<HellPopoverTrigger>('createTrigger');
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
@@ -388,6 +459,29 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     return descriptor ? descriptor.display(filter) : String(filter.field);
   }
 
+  /**
+   * @internal Template-only structured token projection. Returns `null` when
+   * the descriptor supplies no `displayParts`, so the chip falls back to the
+   * flat `display(filter)` string.
+   */
+  protected filterParts(filter: TFilter): HellFilterDisplayParts | null {
+    return this.descriptorForField(filter.field)?.displayParts?.(filter) ?? null;
+  }
+
+  /**
+   * @internal Template event handler. Clicking empty frame space starts a new
+   * filter; chips, the remove buttons, the clear action, and the inline input
+   * keep their own targets.
+   */
+  protected onFrameMouseDown(event: MouseEvent): void {
+    if (this.disabled() || event.defaultPrevented || event.button !== 0) return;
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    if (!target) return;
+    if (target.closest('[data-slot="token"], button, a, input, select, textarea')) return;
+    event.preventDefault();
+    this.focusPickerInput();
+  }
+
   /** @internal Template event handler. */
   protected onPickerInput(event: Event): void {
     if (this.disabled()) return;
@@ -403,7 +497,26 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
 
   /** @internal Template event handler. */
   protected onPickerKeydown(event: KeyboardEvent): void {
-    if (this.disabled() || event.defaultPrevented) return;
+    if (this.disabled()) return;
+
+    // The Combobox engine already consumed Escape by the time this runs — it
+    // preventDefaults every Escape, open or not — so the second Escape layer
+    // reads the live dropdown state instead of `defaultPrevented`. The DOM
+    // attribute still holds the pre-keydown state, which keeps the layers
+    // ordered: close the dropdown first, clear the query only on the next
+    // press.
+    if (event.key === 'Escape') {
+      const input = event.currentTarget as HTMLInputElement;
+      if (this.pickerOpen() || input.getAttribute('aria-expanded') === 'true') return;
+      if (!this.query()) return;
+      this.query.set('');
+      input.value = '';
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (event.defaultPrevented) return;
 
     if (event.key === 'Tab' && this.pickerOpen()) {
       const input = event.currentTarget as HTMLInputElement;
@@ -418,22 +531,13 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
       }
       event.preventDefault();
       this.dispatchComboboxKey(input, 'Enter');
-      return;
     }
-
-    if (event.key !== 'Escape') return;
-    const input = event.currentTarget as HTMLInputElement;
-    if (this.pickerOpen() || input.getAttribute('aria-expanded') === 'true') return;
-    if (!this.query()) return;
-    this.query.set('');
-    input.value = '';
-    event.preventDefault();
-    event.stopPropagation();
   }
 
   /** @internal Template event handler. */
   protected activateField(descriptor: HellFilterFieldDescriptor<TFilter> | null): void {
     if (!descriptor || this.disabled()) return;
+    this.pickerValue.set(descriptor);
     this.beginCreate(descriptor);
   }
 
@@ -486,6 +590,19 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     ) {
       this.editor.set(null);
     }
+  }
+
+  /**
+   * @internal Template event handler. The create popover is opened by the
+   * renderer, so this only observes engine-driven closes (outside pointer or
+   * outside focus) and cancels the matching create session without stealing
+   * focus. Renderer-driven closes see a cleared editor and no-op.
+   */
+  protected onCreateOpenChange(open: boolean): void {
+    if (open) return;
+    const state = this.editor();
+    if (state?.mode !== 'create') return;
+    this.cancelEditor(state.session, false);
   }
 
   /** @internal Template-only editor state projection. */
@@ -575,16 +692,21 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     ) {
       return;
     }
+    const trigger = this.createTrigger();
     this.query.set('');
     this.pickerOpen.set(false);
+    this.resetPickerText();
+    const session = ++this.nextEditorSession;
     this.editor.set({
       mode: 'create',
       field: descriptor.field,
       identity: null,
-      trigger: null,
-      session: ++this.nextEditorSession,
+      trigger,
+      session,
     });
-    this.scheduleEditorFocus('create');
+    void trigger.show().then(() => {
+      if (this.isLatestSession(session)) this.scheduleEditorFocus('create');
+    });
   }
 
   private createEditorContext(): HellFilterBuilderEditorContext<TFilter> | null {
@@ -632,15 +754,18 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     if (!result) return false;
 
     const label = descriptor.display(filter);
+    this.pickerValue.set(null);
     this.valueChange.emit(result.value);
     this.liveMessage.set(
       state.mode === 'edit' ? this.labels.updated(label) : this.labels.added(label),
     );
     this.editor.set(null);
 
-    if (state.mode === 'edit' && state.trigger) {
-      void state.trigger.hide('keyboard').then(() => {
-        this.scheduleTokenFocus(result.identity);
+    if (state.trigger) {
+      void state.trigger.hide(state.mode === 'edit' ? 'keyboard' : 'program').then(() => {
+        if (!this.isLatestSession(state.session)) return;
+        if (state.mode === 'edit') this.scheduleTokenFocus(result.identity);
+        else this.schedulePickerFocus();
       });
     } else {
       this.schedulePickerFocus();
@@ -648,14 +773,31 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     return true;
   }
 
+  /**
+   * Whether no newer editor session has started since `session` closed. A
+   * popover's exit promise can resolve after the next editor already opened;
+   * restoring focus then would pull focus out of the live editor and cancel
+   * it through the focus-out rule.
+   */
+  private isLatestSession(session: number): boolean {
+    return this.nextEditorSession === session;
+  }
+
   private cancelEditor(session: number, restoreFocus = true): void {
     const state = this.editor();
     if (!state || state.session !== session) return;
     this.editor.set(null);
+    this.pickerValue.set(null);
 
-    if (state.mode === 'edit' && state.trigger) {
-      void state.trigger.hide(restoreFocus ? 'keyboard' : 'mouse').then(() => {
-        if (restoreFocus && state.identity !== null) this.scheduleTokenFocus(state.identity);
+    if (state.trigger) {
+      const origin = state.mode === 'edit' && restoreFocus ? 'keyboard' : 'program';
+      void state.trigger.hide(origin).then(() => {
+        if (!restoreFocus || !this.isLatestSession(state.session)) return;
+        if (state.mode === 'edit') {
+          if (state.identity !== null) this.scheduleTokenFocus(state.identity);
+        } else {
+          this.schedulePickerFocus();
+        }
       });
     } else if (restoreFocus) {
       this.schedulePickerFocus();
@@ -680,7 +822,9 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
 
   private scheduleEditorFocus(mode: 'create' | 'edit'): void {
     this.scheduleFocus(() => {
-      const root = mode === 'create' ? this.host : this.host.ownerDocument.body;
+      // Both editor surfaces are portalled popovers; the owner marker keeps
+      // the lookup scoped to this Filter Builder instance.
+      const root = this.host.ownerDocument.body;
       const editor = root.querySelector<HTMLElement>(
         `[data-slot="editor"][data-mode="${mode}"]` +
           `[data-hell-filter-builder-owner="${this.instanceId}"]`,
@@ -693,23 +837,31 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     });
   }
 
+  /**
+   * Clears the field-picker input's rendered text. The picker stays mounted
+   * across the create lifecycle now, so the engine's committed display text
+   * must be cleared explicitly rather than by destroying the control.
+   */
+  private resetPickerText(): void {
+    const input = this.host.querySelector<HTMLInputElement>('[data-hell-filter-builder-input]');
+    if (input) input.value = '';
+  }
+
+  private focusPickerInput(text = ''): void {
+    const input = this.host.querySelector<HTMLInputElement>('[data-hell-filter-builder-input]');
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    if (!text) return;
+    const InputEventCtor = input.ownerDocument.defaultView?.InputEvent;
+    const event = InputEventCtor
+      ? new InputEventCtor('input', { bubbles: true, data: text, inputType: 'insertText' })
+      : new Event('input', { bubbles: true });
+    input.value = text;
+    input.dispatchEvent(event);
+  }
+
   private schedulePickerFocus(text = ''): void {
-    this.scheduleFocus(() => {
-      const input = this.host.querySelector<HTMLInputElement>('[data-hell-filter-builder-input]');
-      if (!input) return;
-      input.focus({ preventScroll: true });
-      if (!text) return;
-      input.value = text;
-      const InputEventCtor = input.ownerDocument.defaultView?.InputEvent;
-      const event = InputEventCtor
-        ? new InputEventCtor('input', {
-            bubbles: true,
-            data: text,
-            inputType: 'insertText',
-          })
-        : new Event('input', { bubbles: true });
-      input.dispatchEvent(event);
-    });
+    this.scheduleFocus(() => this.focusPickerInput(text));
   }
 
   private scheduleTokenFocus(identity: HellFilterIdentityValue): void {

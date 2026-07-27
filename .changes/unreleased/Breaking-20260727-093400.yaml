@@ -1,0 +1,22 @@
+kind: Breaking
+body: >-
+  The experimental Filter Builder is rebuilt on the Control Group + Chip Set
+  pattern. One Control Group frame now holds the filter chips and the inline
+  field picker in a single Chip Set flow; the create editor opens in an
+  anchored popover instead of replacing the picker inline; and clear-all
+  becomes an icon-only group action at the end of the frame instead of a
+  detached ghost button. The Public Parts are reshuffled accordingly: `root`
+  is now the frame, `control` is the frameless inline picker inside the chip
+  flow, `clear` is a `button[hellControlGroupAction]`, and `tokenLabel` now
+  wraps the new `tokenField`, `tokenOperator`, and `tokenValue` segments. The
+  controlled value, identity, projected-editor, Label Contract, and
+  announcement contracts are unchanged.
+time: 2026-07-27T09:34:00.000000+02:00
+custom:
+  migration: >-
+    Rework `ui` Part Style Maps against the new anatomy. Move frame border,
+    background, and padding refinements onto `root`, and move surrounding
+    layout onto the element around `hell-filter-builder`. Keep only picker
+    sizing on `control`. Drop Button variant utilities from `clear`, which is
+    now a Control Group action. Move whole-label typography from `tokenLabel`
+    onto `tokenField`, `tokenOperator`, and `tokenValue`.
