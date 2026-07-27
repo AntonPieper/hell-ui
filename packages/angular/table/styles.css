@@ -257,12 +257,25 @@
     background-color: var(--color-hell-surface-elevated);
   }
 
+  /*
+   * The header stays in the native table grid, which stretches its columns
+   * proportionally when the shell table is wider than the TanStack total size.
+   * Virtual body cells reproduce that same grid by growing in proportion to the
+   * TanStack column size instead of pinning to the raw size, so both sides
+   * resolve to identical column geometry at any scrollport width.
+   *
+   * The equivalence relies on how user agents distribute excess width under
+   * `table-layout: fixed`: Blink, Gecko, and WebKit all share it out in
+   * proportion to the specified column widths, which is a convention rather
+   * than something CSS guarantees. The three-engine table e2e run is what
+   * protects that assumption.
+   */
   hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
     > [data-hell-table-cell][data-slot='root'] {
     display: block;
     box-sizing: border-box;
-    flex: 0 0 var(--hell-table-column-size, auto);
+    flex: var(--hell-table-column-grow, 0) 0 var(--hell-table-column-size, auto);
     width: var(--hell-table-column-size, auto);
     min-width: var(--hell-table-column-size, auto);
   }

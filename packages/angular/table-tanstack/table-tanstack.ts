@@ -581,6 +581,7 @@ interface HellColumnMeta {
                         [attr.data-pinned-last]="pinnedLast(cell.column)"
                         [attr.data-pinned-first]="pinnedFirst(cell.column)"
                         [style.--hell-table-column-size.px]="columnSize(cell.column)"
+                        [style.--hell-table-column-grow]="columnSize(cell.column)"
                         [style.--hell-table-pinned-start.px]="pinnedStart(cell.column)"
                         [style.--hell-table-pinned-after.px]="pinnedAfter(cell.column)"
                       >
