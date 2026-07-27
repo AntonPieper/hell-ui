@@ -161,10 +161,19 @@ const HELL_DIALPAD_RECIPE = {
     '(keydown)': 'onKey($event)',
   },
   template: `
+    <!--
+      The pointer is tracked on the whole display, not just the field inside
+      it. The box is styled as text, so pressing its chrome is an invited
+      gesture that focuses the field and, on WebKit and Firefox, selects the
+      number; that focus is pointer-led and its selection is the user's.
+      Presses on the field itself bubble to here.
+    -->
     <label
       data-slot="display"
       [class]="part('display')"
       [attr.data-invalid]="invalid() ? '' : null"
+      (pointerdown)="onNumberPointerDown($event)"
+      (pointerup)="onNumberSelect($event)"
     >
       <span data-slot="displayLabel" [class]="part('displayLabel')">{{ numberLabel() }}</span>
       <input
@@ -185,11 +194,9 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-invalid]="invalid() ? '' : null"
         (beforeinput)="onBeforeInput($event)"
         (input)="onNumberInput($event)"
-        (pointerdown)="onNumberPointerDown($event)"
-        (pointercancel)="onNumberPointerCancel()"
         (focus)="onNumberFocus()"
+        (blur)="onNumberBlur()"
         (keydown)="onNumberKeyDown($event)"
-        (pointerup)="onNumberSelect($event)"
         (keyup)="onNumberSelect($event)"
         (select)="onNumberSelect($event)"
       />
@@ -411,11 +418,12 @@ export class HellDialpad {
         input.setSelectionRange(edit.caret, edit.caret);
         // This edit and everything older than it have now been seen.
         this.pendingEdits.splice(0, index + 1);
-        // With nothing newer still in flight this edit is the current state,
-        // so the tracked caret is brought back in line with the field rather
-        // than left to the `select` event `setSelectionRange` happens to
-        // fire. A newer edit already owns the tracked caret, so leave it.
-        if (this.pendingEdits.length === 0) this.caret = { start: edit.caret, end: edit.caret };
+        // The number on display is this edit's, so its caret is the one the
+        // user can see, whether or not a later edit is still in flight.
+        // Every engine also fires `select` for the line above, but only on a
+        // later task, so leaving the tracked caret to that would make it
+        // disagree with the field in between.
+        this.caret = { start: edit.caret, end: edit.caret };
       } else if (value !== this.lastRendered) {
         // Nobody asked for this number, so it came from outside the dialpad.
         // Whatever caret was being tracked points into a number that is gone
@@ -621,6 +629,10 @@ export class HellDialpad {
    * backspace acts there.
    */
   protected onNumberPointerDown(event: PointerEvent): void {
+    // A right-click opens a context menu that can swallow the release, and
+    // it places no caret worth tracking either way.
+    if (this.isSecondaryMouseButton(event)) return;
+
     this.pointerInInput = true;
     // The release can land anywhere — on a key, on the page, or nowhere at
     // all when a touch turns into a scroll — and a pointer left recorded as
@@ -631,8 +643,13 @@ export class HellDialpad {
     this.disarmFocusRange();
   }
 
-  /** The browser took the pointer for a scroll or zoom; it is not down here. */
-  protected onNumberPointerCancel(): void {
+  /**
+   * Nothing can be pressed in a display that has lost focus, and no blur can
+   * fall between the press that focuses the field and that focus, so this
+   * cannot swallow a live gesture — it only catches releases the page never
+   * reported, such as one over a cross-origin frame.
+   */
+  protected onNumberBlur(): void {
     this.releaseInputPointer();
   }
 
@@ -661,13 +678,19 @@ export class HellDialpad {
    * a collapsed caret behind, which needs no exemption.
    */
   protected onNumberKeyDown(event: KeyboardEvent): void {
+    // `Ctrl`+`Alt`+`A` is AltGr+A on Windows and European layouts, which
+    // reports `a` and selects nothing; `Shift` likewise makes a different
+    // shortcut. Neither may retire the guard.
+    if (event.altKey || event.shiftKey) return;
     if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'a') return;
     this.disarmFocusRange();
   }
 
   protected onNumberSelect(event: Event): void {
-    const input = event.target;
-    if (!(input instanceof HTMLInputElement)) return;
+    // A release anywhere in the display box counts, so the event may come
+    // from the label rather than the field it wraps.
+    const input = this.numberInputRef()?.nativeElement;
+    if (!input) return;
 
     if (event.type === 'pointerup') {
       // A pointer that went down on a key and slid onto the display is

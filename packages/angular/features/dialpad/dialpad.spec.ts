@@ -590,6 +590,110 @@ describe('HellDialpad labels', () => {
       expect(displayValue(host)).toBe('1237');
     });
 
+    it('still refuses a tabbed-in selection after AltGr and A', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      tabInto(input, 3);
+
+      // AltGr reports as `Ctrl`+`Alt` and its `key` falls back to `a`, but
+      // it selects nothing, so the focus range is still all that is there.
+      const altGrA = { bubbles: true, key: 'a', ctrlKey: true, altKey: true };
+      input.dispatchEvent(new KeyboardEvent('keydown', altGrA));
+      input.dispatchEvent(new KeyboardEvent('keyup', altGrA));
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 112);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('still refuses a tabbed-in selection after a touch became a scroll', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // A touch the browser takes for a scroll is never released; only a
+      // cancel reaches the page, and it does so through the window.
+      pointer(input, 'pointerdown', 113);
+      window.dispatchEvent(new Event('pointercancel'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 114);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('forgets a press in the display that no release ever reported', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+
+      // A release over a cross-origin frame reaches neither the display nor
+      // the window, so losing focus is the last chance to retire the press.
+      pointer(input, 'pointerdown', 119, { pointerType: 'mouse', button: 0 });
+      input.dispatchEvent(new Event('focus'));
+      input.dispatchEvent(new Event('blur'));
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 120);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
+    it('adopts the selection the display makes when its chrome is pressed', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '12345');
+      const display = query<HTMLElement>(host, '[data-slot="display"]');
+
+      // The box is styled as text, so pressing its chrome is an invited
+      // gesture. It focuses the field, and WebKit and Firefox select the
+      // whole number — a selection the user can see, so it is theirs.
+      pointer(display, 'pointerdown', 115, { pointerType: 'mouse', button: 0 });
+      input.dispatchEvent(new Event('focus'));
+      input.setSelectionRange(0, 5);
+      input.dispatchEvent(new Event('select'));
+      pointer(display, 'pointerup', 115, { pointerType: 'mouse', button: 0 });
+
+      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 116);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('9');
+    });
+
+    it('ignores a right-click in the display that never reports a release', () => {
+      const fixture = TestBed.createComponent(DialpadHost);
+      const host = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const input = seedNumber(fixture, '123');
+      const display = query<HTMLElement>(host, '[data-slot="display"]');
+
+      // The context menu can swallow the release, so a right-click must not
+      // leave the display looking pressed.
+      pointer(display, 'pointerdown', 117, { pointerType: 'mouse', button: 2 });
+
+      tabInto(input, 3);
+
+      tap(query<HTMLButtonElement>(host, '[data-key="7"]'), 118);
+      fixture.detectChanges();
+
+      expect(displayValue(host)).toBe('1237');
+    });
+
     it('ignores a key slide-off that is released over the display', () => {
       const fixture = TestBed.createComponent(DialpadHost);
       const host = fixture.nativeElement;
@@ -626,15 +730,22 @@ describe('HellDialpad labels', () => {
       expect(fixture.componentInstance.queue).toEqual(['12734', '12384']);
 
       // The host now renders the first while the second is still in flight.
-      // That number came from the dialpad, so the caret survives it.
+      // That number came from the dialpad, so the caret is not discarded as
+      // an outside write; it follows the edit the display is actually
+      // showing, which puts it after the `7`.
       fixture.componentInstance.flushOne();
       fixture.detectChanges();
       expect(input.value).toBe('12734');
+      expect(caretOf(input)).toEqual([3, 3]);
+
+      // Restoring that caret makes the field fire `select` a task later in
+      // every engine. Delivering it must change nothing.
+      input.dispatchEvent(new Event('select'));
 
       tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 108);
       fixture.detectChanges();
 
-      expect(fixture.componentInstance.queue).toEqual(['12384', '127394']);
+      expect(fixture.componentInstance.queue).toEqual(['12384', '127934']);
     });
 
     it('tracks the caret of an edit that lands after a range was selected', () => {
