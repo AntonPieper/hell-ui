@@ -60,12 +60,29 @@ session, an interrupted build, or two builds sharing the directory. It names
 which case it found, because an API report from the wrong build names changes
 nobody made.
 
-Two limits worth knowing. It guards what the report reads, not all of
-`dist/hell`: an edit to a `fesm2022` bundle passes, because the report derives
-from `types/*.d.ts` and `package.json` alone. And it cannot detect a compiler
-that emits different declarations from identical sources — both builds are
-completed production builds of the same tree, and each writes a valid stamp.
-That case is handled below instead.
+Four limits worth knowing, because a stamp believed to be airtight is worse
+than one whose edges are written down.
+
+- It guards what the report reads, not all of `dist/hell`: an edit to a
+  `fesm2022` bundle passes, because the report derives from `types/*.d.ts` and
+  `package.json` alone.
+- It cannot detect a compiler that emits different declarations from identical
+  sources. Both builds are completed production builds of the same tree and
+  each writes a valid stamp. That case is handled by union sorting, below.
+- It catches sources that change and stay changed, but not A to B and back to
+  A. The digest is taken before the build and compared after, so a file edited
+  and undone while ng-packagr was reading it hashes identically both times: the
+  declarations describe B and the stamp says A. An edit-then-undo, or a
+  `git stash`, `checkout` or rebase during a 90-second build, reaches this.
+- `test:api-report` validates `dist/hell` and then re-reads it into its staging
+  copy, so a writer landing between those two steps is extracted from without
+  having been validated.
+
+The last two need isolated per-build output with atomic promotion, or a build
+lock, to close properly. That is deliberately not built: the cost is out of
+proportion to a window that requires someone to edit the tree mid-build. Know
+they exist, and rebuild rather than reason about them if a report ever looks
+impossible.
 
 ### Union member order in API reports
 

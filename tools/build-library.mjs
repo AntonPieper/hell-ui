@@ -27,15 +27,15 @@ const configuration = LIBRARY_BUILD_CONFIGURATIONS.includes(process.argv[2])
 
 const sourceDigest = captureLibrarySourceDigest({ root });
 
+// Both configurations are passed explicitly. Production was previously implied
+// by `angular.json`'s `defaultConfiguration`, which meant the stamp recorded
+// "production" on the strength of a default it never read — and a change to
+// that default would have silently restamped every build under a name that no
+// longer matched its compiler options. The stamp asserts what was built, so the
+// build must state it.
 const build = spawnSync(
   'pnpm',
-  [
-    'exec',
-    'ng',
-    'build',
-    'hell',
-    ...(configuration === 'development' ? ['--configuration', 'development'] : []),
-  ],
+  ['exec', 'ng', 'build', 'hell', '--configuration', configuration],
   { cwd: join(root, 'packages/angular'), stdio: 'inherit', shell: process.platform === 'win32' },
 );
 if (build.status !== 0) process.exit(build.status ?? 1);

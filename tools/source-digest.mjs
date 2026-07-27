@@ -48,6 +48,6 @@ export function digestSourceFiles(root, filePaths) {
   return digest.digest('hex');
 }
 
-function toPosixPath(path) {
+export function toPosixPath(path) {
   return path.split(sep).join('/');
 }

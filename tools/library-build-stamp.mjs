@@ -35,7 +35,7 @@ const LIBRARY_BUILD_STAMP_PATH = 'dist/hell.build.json';
  * be stamped; it cannot, and this rejects that call rather than silently
  * stamping the wrong tree.
  */
-function assertIsTheLibraryDistRoot(root, distRoot) {
+export function assertIsTheLibraryDistRoot(root, distRoot) {
   const expected = join(root, LIBRARY_DIST_ROOT);
   if (resolve(distRoot) !== expected) {
     throw new Error(
@@ -69,8 +69,13 @@ function declarationInputPaths(root) {
     join(root, 'packages/angular/tsconfig.lib.prod.json'),
     join(root, 'packages/angular/angular.json'),
     join(root, 'packages/angular/package.json'),
-    // Decides the guarded package.json the report reads, so a change to it
-    // changes the artifact just as a source change does.
+    // The build recipe itself. `build-library.mjs` selects the compiler
+    // configuration and `finalize-dist-package.mjs` decides the guarded
+    // package.json the report reads, so changing either changes the artifact
+    // exactly as a source change does — and leaving the orchestrator out meant
+    // altering the compiler flags produced a stamp, a source digest and an
+    // output digest that all still matched the previous recipe.
+    join(root, 'tools/build-library.mjs'),
     join(root, 'tools/finalize-dist-package.mjs'),
     ...collectSourceFiles(
       join(root, 'packages/angular'),

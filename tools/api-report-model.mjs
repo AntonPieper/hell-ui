@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, join, relative, sep } from 'node:path';
+import { basename, join, relative } from 'node:path';
 import ts from 'typescript';
+
+import { toPosixPath } from './source-digest.mjs';
 
 /**
  * Sort the members of every union type before the report is generated.
@@ -38,6 +40,18 @@ function canonicaliseUnionOrder(declarationText) {
     ts.ScriptKind.TS,
   );
 
+  /** Whether a union constituent carries an `infer U extends X` constraint. */
+  function hasConstrainedInfer(node) {
+    if (ts.isInferTypeNode(node) && node.typeParameter.constraint !== undefined) return true;
+    let found = false;
+    node.forEachChild(function walk(child) {
+      if (found) return;
+      if (ts.isInferTypeNode(child) && child.typeParameter.constraint !== undefined) found = true;
+      else child.forEachChild(walk);
+    });
+    return found;
+  }
+
   /** Union nodes under `node` that no other union under `node` already contains. */
   function outermostUnions(node) {
     const found = [];
@@ -48,14 +62,24 @@ function canonicaliseUnionOrder(declarationText) {
     return found;
   }
 
-  // Rebuilt from the original text, so everything that is not a union — spacing,
-  // comments, parentheses, generics — survives byte for byte.
+  // Rebuilt from the original text, so everything outside a union — spacing,
+  // comments, parentheses, generics — survives byte for byte. Inside one, the
+  // constituents are re-joined with a plain ` | `, so trivia sitting strictly
+  // between them is dropped: `A | /* first */ B` and `A | /* second */ B` both
+  // become `A | B`. No type change can hide there, but a change to an inline
+  // comment between constituents can.
   function render(node) {
     if (ts.isUnionTypeNode(node)) {
-      return node.types
-        .map(render)
-        .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
-        .join(' | ');
+      const parts = node.types.map(render);
+      // `infer U extends X` is the one construct whose meaning depends on its
+      // position in a union: the constraint runs to the end, so reordering
+      // `zed | infer U extends string` to `infer U extends string | zed`
+      // re-parses the constraint as `string | zed` — a different type that
+      // `tsc` resolves differently. Sorting would map both spellings to the
+      // same text and hide a real change between them. Nothing in the shipped
+      // declarations uses it today; that is not a reason to sort it.
+      if (node.types.some(hasConstrainedInfer)) return parts.join(' | ');
+      return parts.sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)).join(' | ');
     }
     let text = '';
     let cursor = node.getStart(source);
@@ -189,6 +213,26 @@ function checkUnionOrderFixture() {
     'export declare const d: string;\n',
     'a declaration with no union is returned unchanged',
   );
+
+  // `infer U extends X` takes its constraint to the end of the union, so moving
+  // it changes the parse: `zed | infer U extends string` and
+  // `infer U extends string | zed` are different types. Sorting would render
+  // both identically and hide a change between them.
+  const inferLast = 'export type T<X> = X extends zed | infer U extends string ? U : never;\n';
+  const inferFirst = 'export type T<X> = X extends infer U extends string | zed ? U : never;\n';
+  assert.equal(canonicaliseUnionOrder(inferLast), inferLast, 'a constrained infer is left in place');
+  assert.notEqual(
+    canonicaliseUnionOrder(inferLast),
+    canonicaliseUnionOrder(inferFirst),
+    'and the two spellings stay distinguishable, so a change between them still fails the gate',
+  );
+
+  // The guard is narrow: an unconstrained `infer` has nothing greedy to absorb.
+  assert.equal(
+    canonicaliseUnionOrder('export type Q<X> = X extends zed | infer U ? U : never;\n'),
+    'export type Q<X> = X extends infer U | zed ? U : never;\n',
+    'an unconstrained infer still sorts',
+  );
 }
 
 /** Self-check with a synthetic declaration; runs before the real gate. */
@@ -267,6 +311,3 @@ export function apiReportSiblingPaths({
   );
 }
 
-function toPosixPath(path) {
-  return path.split(sep).join('/');
-}
