@@ -520,6 +520,9 @@ const HELL_DATE_PICKER_LABEL_DIGIT = /\p{Nd}/u;
 // writes `tháng 4 năm 2026` with plain spaces. Without this gate `de`,
 // `del`, and `năm` — Vietnamese for *year* — land in the month button.
 const HELL_DATE_PICKER_LABEL_GLUE = /^[\u00a0\u202f\ufeff]*$/u;
+// Unit separators that can ride on the tail of an otherwise meaningful
+// marker. Deliberately excludes `.`, which ends legitimate year markers.
+const HELL_DATE_PICKER_LABEL_COMMA = /[,\u060c;]+$/u;
 
 // Structural return type: a named module-local interface here would leak
 // through the pickers' protected template members as an ae-forgotten-export.
@@ -555,6 +558,13 @@ function formatLabelSegments(
 
   for (const part of parts) {
     if (part.type !== 'literal') {
+      // A buffered marker qualifies a year — `AP 1405` — and never a month, so
+      // anything else arriving first flushes it out as plain text. Without
+      // this, `tr-u-ca-buddhist` labels its month button `BE Nisan`.
+      if (pendingPrefix && part.type !== 'year') {
+        segments.push({ type: 'literal', value: pendingPrefix });
+        pendingPrefix = '';
+      }
       segments.push({ type: part.type, value: pendingPrefix + part.value });
       pendingPrefix = '';
       boundary = false;
@@ -588,21 +598,36 @@ function formatLabelSegments(
       continue;
     }
 
+    // The gate rejects a literal whose whole core is punctuation, but a marker
+    // can still carry the unit separator on its tail: `ky` writes `-ж., ` and
+    // `tt` writes ` ел, `. Peel that comma back off so only the marker folds.
+    // Full stops stay: `ru`, `uk`, `bg`, `mk` and `lv` end their marker in one.
+    const separatorTail = HELL_DATE_PICKER_LABEL_COMMA.exec(core)?.[0] ?? '';
+    const marker = core.slice(0, core.length - separatorTail.length);
+    const tail = separatorTail + trail;
+
     const previous = segments.at(-1);
-    if (previous && previous.type !== 'literal') {
-      previous.value += lead + core;
-      if (trail) segments.push({ type: 'literal', value: trail });
+    if (marker && previous && previous.type !== 'literal') {
+      previous.value += lead + marker;
+      if (tail) segments.push({ type: 'literal', value: tail });
       boundary = false;
       continue;
     }
 
-    if (boundary) {
+    if (boundary || !marker) {
       segments.push({ type: 'literal', value: part.value });
+      boundary = true;
       continue;
     }
 
+    // Order matters: a buffered prefix was read before this lead, so it has to
+    // stay in front of it rather than being emitted after.
+    if (pendingPrefix) {
+      pendingPrefix += lead + marker + tail;
+      continue;
+    }
     if (lead) segments.push({ type: 'literal', value: lead });
-    pendingPrefix += core + trail;
+    pendingPrefix = marker + tail;
   }
 
   if (pendingPrefix) segments.push({ type: 'literal', value: pendingPrefix });

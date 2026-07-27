@@ -416,9 +416,24 @@ test.describe('date picker browser accessibility contract', () => {
 
     const paint = await dayButton(picker, 22).evaluate((button) => {
       const style = getComputedStyle(button);
-      return { color: style.color, background: style.backgroundColor };
+      return { color: style.color, background: style.backgroundColor, shadow: style.boxShadow };
     });
     expect(paint.color).not.toBe(paint.background);
+    // The today ring is scoped out of the filled states, so it stops painting
+    // inside the selection rather than ringing it from within.
+    expect(paint.shadow).toBe('none');
+
+    // A day that is only today keeps its ring: the range example selects
+    // 6–13 April, so the 22nd is today and nothing else.
+    const todayOnly = page
+      .locator('app-date-picker-range-example')
+      .locator('hell-date-range-picker');
+    await expect(dayButton(todayOnly, 22)).toHaveAttribute('data-today', '');
+    await expect(dayButton(todayOnly, 22)).not.toHaveAttribute('data-selected', '');
+    const ring = await dayButton(todayOnly, 22).evaluate(
+      (button) => getComputedStyle(button).boxShadow,
+    );
+    expect(ring).not.toBe('none');
 
     // The same clash in the drill-down: April is the month in view and today's.
     await picker.locator('[data-slot="monthTrigger"]').click();

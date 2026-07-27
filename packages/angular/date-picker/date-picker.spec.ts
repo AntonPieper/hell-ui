@@ -326,6 +326,11 @@ describe('HellDatePicker', () => {
     ['mk-MK', 'април', '2026\u202fг.'],
     ['eu-ES', 'apirila', '2026(e)ko'],
     ['ku', 'nîsana', '2026an'],
+    // A marker can carry the unit separator on its tail; only the comma
+    // class is peeled back off, never the full stop these three end in.
+    ['ky', 'апрель', '2026-ж.'],
+    ['tt', 'апрель', '2026\u202fел'],
+    ['lv', 'aprīlis', '2026. g.'],
   ];
 
   const SEPARATED_LOCALES: readonly (readonly [string, string, string])[] = [
@@ -347,6 +352,7 @@ describe('HellDatePicker', () => {
     ['hy', 'ապրիլ', '2026'],
     ['lt', 'balandis', '2026'],
     ['he-IL', 'אפריל', '2026'],
+    ['ba', 'апрель', '2026'],
   ];
 
   it.each([...GLUED_LOCALES])(
@@ -366,31 +372,40 @@ describe('HellDatePicker', () => {
   it('resolves every locale its coverage table claims', () => {
     // The per-locale cases skip when an ICU build lacks the data, so without
     // this the whole table could pass vacuously on a small-icu runtime.
-    const claimed = [...GLUED_LOCALES, ...SEPARATED_LOCALES].map(([locale]) => locale);
+    const claimed = [...GLUED_LOCALES, ...SEPARATED_LOCALES, ...CALENDAR_OVERRIDES].map(
+      ([locale]) => locale,
+    );
     const missing = claimed.filter(
       (locale) => !Intl.DateTimeFormat.supportedLocalesOf([locale]).length,
     );
 
-    expect(claimed).toHaveLength(31);
+    expect(claimed).toHaveLength(45);
     expect(missing, `ICU build is missing ${missing.join(', ')}`).toEqual([]);
   });
 
-  // A calendar override is outside the documented `locale` contract, but it
-  // must still never drop another unit's text into a trigger. `uz-u-ca-*`
-  // formats as `2569 (BE), aprel`: the era sits behind a separator, so it
-  // prefixes nothing.
+  // Calendar overrides are outside the documented `locale` contract, so these
+  // pin the two rules that keep a trigger honest rather than any particular
+  // rendering: an era never lands in a *month* trigger (it qualifies a year),
+  // and a marker behind a separator prefixes nothing. `uz-u-ca-*` formats as
+  // `2569 (BE), aprel`; `tr-u-ca-buddhist` puts its era first, before the
+  // month.
   const CALENDAR_OVERRIDES: readonly (readonly [string, string, string])[] = [
     ['uz-u-ca-buddhist', 'aprel', '2569'],
     ['uz-u-ca-japanese', 'aprel', '8'],
     ['uz-u-ca-roc', 'aprel', '115'],
     ['cv-u-ca-japanese', 'ака', '8'],
-    // A leading era with nothing before it still prefixes its year.
+    ['tr-u-ca-buddhist', 'Nisan', '2569'],
+    ['az-u-ca-japanese', 'aprel', '8'],
+    ['az-u-ca-coptic', 'Baramouda', '1742'],
+    ['lo-u-ca-buddhist', 'ເມສາ', '2569'],
+    // A leading era with nothing before it still prefixes its year, because
+    // the year is the unit that arrives next.
     ['lrc', 'Ordibehesht', 'AP ۱۴۰۵'],
     ['mzn', 'Ordibehesht', 'AP ۱۴۰۵'],
   ];
 
   it.each([...CALENDAR_OVERRIDES])(
-    'keeps a separated era out of the triggers for %s',
+    'keeps an era out of the month trigger for %s',
     (locale, month, year) => {
       expectLocaleTriggers(locale, month, year);
     },
@@ -431,8 +446,10 @@ describe('HellDatePicker', () => {
       ran += 1;
     }
 
-    // Unsupported locales are skipped, so the loop has to prove it ran.
-    expect(ran).toBeGreaterThanOrEqual(locales.length);
+    // Unsupported locales `continue`, so the loop has to prove it ran every
+    // one of them. Keep this assertion: it is what stops a thin ICU build from
+    // turning the whole sweep into a no-op that still reports green.
+    expect(ran).toBe(locales.length);
   });
 
   it('does not paint an out-of-range month in view as the selected one', () => {
