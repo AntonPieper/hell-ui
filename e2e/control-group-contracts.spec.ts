@@ -29,10 +29,15 @@ test.describe('Control Group browser contract', () => {
     await expect(group).toHaveAttribute('data-focus-within', 'true');
 
     // Activate from the keyboard: every engine leaves focus on the button it
-    // just activated, so this isolates the group's own contract — re-rendering
-    // the action's label must not drop focus-within. A pointer click cannot
-    // carry that assertion, because WebKit deliberately does not focus a button
-    // on click; that is the platform's focus policy, not this component's.
+    // just activated. A pointer click cannot carry this assertion, because
+    // WebKit deliberately does not focus a button on click — that is the
+    // platform's focus policy, not this component's, and asserting it here was
+    // reporting a browser convention as a component failure.
+    //
+    // Activation updates the label by interpolation, so the button element is
+    // never replaced and no focusout fires. This therefore pins that activating
+    // the action does not disturb focus containment; it is not a test of
+    // re-rendering, which would need a composition that replaces the node.
     await page.keyboard.press('Enter');
     await expect(example.getByRole('button', { name: 'Copied' })).toBeFocused();
     await expect(group).toHaveAttribute('data-focus-within', 'true');
