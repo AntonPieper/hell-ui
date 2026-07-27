@@ -28,9 +28,14 @@ export class DatePickerStylingExample {
     nav: 'gap-hell-2',
     navButton: 'rounded-hell-pill bg-hell-surface-muted text-hell-primary',
     label: 'text-hell-primary uppercase tracking-wide',
+    monthTrigger: 'rounded-hell-pill text-hell-primary hover:bg-hell-primary-soft',
+    yearTrigger: 'rounded-hell-pill text-hell-primary hover:bg-hell-primary-soft',
     grid: 'border-spacing-y-hell-2',
     weekdayHeader: 'text-hell-primary-soft-foreground',
     cell: 'px-hell-1',
     dateButton: 'rounded-hell-md data-[selected]:bg-hell-primary-hover data-[range-between]:bg-hell-primary-soft',
+    panel: 'border-spacing-hell-2',
+    panelCell: 'px-hell-1',
+    panelOption: 'rounded-hell-md data-[selected]:bg-hell-primary-hover',
   };
 }

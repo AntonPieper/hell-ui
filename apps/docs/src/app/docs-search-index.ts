@@ -714,7 +714,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/date-picker',
  detail:'components/date-picker/examples/basic.example.ts',
  terms:
-'date-picker hell-date-picker dateChange single calendar signal smallest usage',
+'date-picker hell-date-picker dateChange single calendar signal smallest usage month year drill-down quick navigation jump distant date',
  },
  {
  title:'Date Picker: Bounded',
@@ -749,7 +749,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/date-picker',
  detail:'components/date-picker/examples/styling.example.ts',
  terms:
-'date-picker hell-date-range-picker ui HellDateRangePickerUi part style map root header nav navButton label grid weekdayHeader cell dateButton data-selected data-range-between tokens all-parts',
+'date-picker hell-date-range-picker ui HellDateRangePickerUi part style map root header nav navButton label monthTrigger yearTrigger grid weekdayHeader cell dateButton panel panelCell panelOption data-selected data-range-between tokens all-parts',
  },
  {
  title:'Date Picker: With popover',
