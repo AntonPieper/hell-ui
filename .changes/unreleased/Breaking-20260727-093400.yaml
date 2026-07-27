@@ -7,8 +7,9 @@ body: >-
   becomes an icon-only group action at the end of the frame instead of a
   detached ghost button. The Public Parts are reshuffled accordingly: `root`
   is now the frame, `control` is the frameless inline picker inside the chip
-  flow, `clear` is a `button[hellControlGroupAction]`, and `tokenLabel` now
-  wraps the new `tokenField`, `tokenOperator`, and `tokenValue` segments. The
+  flow, `clear` is a `button[hellControlGroupAction]`, `tokenLabel` now wraps
+  the new `tokenField`, `tokenOperator`, and `tokenValue` segments, and
+  `editor` renders in a body-level popover for create as well as edit. The
   controlled value, identity, projected-editor, Label Contract, and
   announcement contracts are unchanged.
 time: 2026-07-27T09:34:00.000000+02:00
@@ -19,4 +20,9 @@ custom:
     layout onto the element around `hell-filter-builder`. Keep only picker
     sizing on `control`. Drop Button variant utilities from `clear`, which is
     now a Control Group action. Move whole-label typography from `tokenLabel`
-    onto `tokenField`, `tokenOperator`, and `tokenValue`.
+    onto `tokenField`, `tokenOperator`, and `tokenValue`; a descriptor without
+    `displayParts` now renders its flat `display(filter)` string inside
+    `tokenValue`, so a long label truncates at `16rem` and gains medium
+    weight. Replace any CSS that selected the editor through
+    `hell-filter-builder [data-slot="editor"]`: both editor modes now portal
+    to `body`, so only the `editor` entry of the `ui` map still reaches them.

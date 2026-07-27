@@ -592,6 +592,109 @@ test.describe('Filter Builder browser contract', () => {
     await expect(chip).toBeFocused();
   });
 
+  test('create editing ends when focus returns to the frame, never leaving two live surfaces', async ({
+    page,
+  }) => {
+    await gotoFilterBuilder(page);
+    const root = recipesExample(page);
+    const frame = root.locator('[hellControlGroup][data-slot="root"]');
+    const picker = root.getByRole('combobox', { name: 'People filter builder' });
+
+    await scrollNearTop(frame);
+    await selectField(page, root, 'People filter builder', 'Status');
+    const editor = createEditor(page, 'status');
+    await expect(editor).toBeVisible();
+
+    // The picker stays clickable beside the open editor, so "start another
+    // filter" is a natural move. It must close the editor, not stack a second
+    // overlay from the same builder on top of it.
+    await picker.click();
+    await expect(editor).toBeHidden();
+    await expect(picker).toBeFocused();
+
+    await picker.fill('Prio');
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[hellPopover] [data-slot="editor"]')).toHaveCount(0);
+
+    await picker.press('ArrowDown');
+    await picker.press('Enter');
+    const second = createEditor(page, 'priority');
+    await expect(second).toBeVisible();
+    // The swapped-in editor owns focus rather than stranding it on <body>.
+    await expect(second.locator(':focus')).toHaveCount(1);
+  });
+
+  test('tabbing forward off the create editor returns focus to the inline picker', async ({
+    page,
+  }) => {
+    await gotoFilterBuilder(page);
+    const root = recipesExample(page);
+    const frame = root.locator('[hellControlGroup][data-slot="root"]');
+    const picker = root.getByRole('combobox', { name: 'People filter builder' });
+
+    await scrollNearTop(frame);
+    await selectField(page, root, 'People filter builder', 'Name');
+    const editor = createEditor(page, 'name');
+    await expect(editor.getByRole('textbox', { name: 'Name text' })).toBeFocused();
+
+    // Walk the editor's own stops, then off the end of the portalled panel.
+    await page.keyboard.press('Tab');
+    await expect(editor.getByRole('combobox', { name: 'Name operator' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(editor.getByRole('button', { name: 'Apply', exact: true })).toBeFocused();
+    await page.keyboard.press('Tab');
+
+    // Chromium and WebKit strand focus on <body> when Tab runs off the end of
+    // a body-level panel; that is the case that used to drop the user at the
+    // top of the page, and the shell must hand focus back to the picker.
+    // Firefox gives that Tab to the browser chrome without blurring the
+    // document, so focus never leaves the editor and there is nothing to
+    // restore. Neither engine may leave focus anywhere else, and neither may
+    // leave it nowhere.
+    const focusHome = await page.evaluate(() => {
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || active === document.body) return 'stranded';
+      if (active.closest('[data-slot="editor"]')) return 'editor';
+      if (active.closest('app-filter-builder-recipes-example')) return 'builder';
+      return 'elsewhere';
+    });
+    expect(focusHome).not.toBe('stranded');
+    expect(focusHome).not.toBe('elsewhere');
+    if (focusHome === 'builder') {
+      await expect(editor).toBeHidden();
+      await expect(picker).toBeFocused();
+    } else {
+      await expect(editor).toBeVisible();
+    }
+    await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
+  });
+
+  test('Escape cancels a projected editor whose field is a Combobox', async ({ page }) => {
+    await gotoFilterBuilder(page);
+    const root = recipesExample(page);
+    const frame = root.locator('[hellControlGroup][data-slot="root"]');
+    const picker = root.getByRole('combobox', { name: 'People filter builder' });
+
+    await scrollNearTop(frame);
+    await selectField(page, root, 'People filter builder', 'Status');
+    const editor = createEditor(page, 'status');
+    const option = editor.getByRole('combobox', { name: 'Status option' });
+    await expect(option).toBeFocused();
+
+    // Layered: the first Escape closes the field's own dropdown only.
+    await option.press('ArrowDown');
+    await expect(option).toHaveAttribute('aria-expanded', 'true');
+    await option.press('Escape');
+    await expect(option).toHaveAttribute('aria-expanded', 'false');
+    await expect(editor).toBeVisible();
+
+    // With no layer of its own left, the field's Escape cancels the editor.
+    await option.press('Escape');
+    await expect(editor).toBeHidden();
+    await expect(picker).toBeFocused();
+    await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
+  });
+
   test('descriptors without displayParts keep the flat display string', async ({ page }) => {
     await gotoFilterBuilder(page);
     const root = dateRangeExample(page);
@@ -606,9 +709,26 @@ test.describe('Filter Builder browser contract', () => {
     const chip = root.locator('[data-slot="token"]').first();
     await expect(chip.locator('[data-slot="tokenField"]')).toHaveCount(0);
     await expect(chip.locator('[data-slot="tokenOperator"]')).toHaveCount(0);
-    await expect(chip.locator('[data-slot="tokenValue"]')).toHaveText(
-      'Created 2026-07-01 – any time',
-    );
+    const value = chip.locator('[data-slot="tokenValue"]');
+    await expect(value).toHaveText('Created 2026-07-01 – any time');
+
+    // The flat label is still one string, but it now sits inside tokenValue
+    // and therefore inherits that part's truncation and weight. Pinned here
+    // because it is the one visible behavior change for descriptors that ship
+    // no displayParts.
+    const presentation = await value.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        maxWidth: Number.parseFloat(style.maxWidth),
+        textOverflow: style.textOverflow,
+        whiteSpace: style.whiteSpace,
+        fontWeight: style.fontWeight,
+      };
+    });
+    expect(presentation.textOverflow).toBe('ellipsis');
+    expect(presentation.whiteSpace).toBe('nowrap');
+    expect(presentation.maxWidth).toBeGreaterThan(0);
+    expect(Number(presentation.fontWeight)).toBeGreaterThan(400);
   });
 
   test('projected editor composition is axe-clean', async ({ page }) => {
@@ -625,3 +745,4 @@ test.describe('Filter Builder browser contract', () => {
     expect(results.violations).toEqual([]);
   });
 });
+

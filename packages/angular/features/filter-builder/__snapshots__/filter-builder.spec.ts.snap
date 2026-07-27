@@ -140,6 +140,10 @@ exports[`HellFilterBuilder > recipes > keeps the default part classes stable > f
     "transition-[background-color,border-color,color,box-shadow]",
     "whitespace-nowrap",
   ],
+  "tokenField": [
+    "shrink-0",
+    "text-hell-foreground-muted",
+  ],
   "tokenLabel": [
     "bg-transparent",
     "border-0",
@@ -151,6 +155,10 @@ exports[`HellFilterBuilder > recipes > keeps the default part classes stable > f
     "outline-none",
     "p-0",
     "text-inherit",
+  ],
+  "tokenOperator": [
+    "shrink-0",
+    "text-hell-foreground-muted",
   ],
   "tokenValue": [
     "font-medium",

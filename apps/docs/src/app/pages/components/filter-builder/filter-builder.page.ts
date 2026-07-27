@@ -179,7 +179,8 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           segments — muted field, muted operator, emphasized value. It is presentation-only sugar:
           <code>display(filter)</code> stays the single source for accessible names and
           announcements, and duplicate detection stays identity-based. Omit it and the chip renders
-          the flat <code>display(filter)</code> string.
+          the flat <code>display(filter)</code> string inside <code>tokenValue</code>, which means it
+          truncates at <code>16rem</code> and renders at medium weight like any value segment.
         </li>
         <li>
           Bind the descriptor directly through
@@ -271,9 +272,15 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           cancelling a create returns focus to the inline picker with the query cleared.
         </li>
         <li>
-          An application-owned child surface inside an editor consumes Escape first; otherwise
-          Escape cancels the projected editor. Nested Hell surfaces count as inside the editor's
-          Floating Scope, so opening one never dismisses the editor.
+          Escape is layered. A control inside the editor that has its own layer open — a Combobox
+          dropdown, a nested popover — closes that layer first; the next Escape cancels the editor.
+          Nested Hell surfaces count as inside the editor's Floating Scope, so opening one never
+          dismisses the editor.
+        </li>
+        <li>
+          Create editing also ends when focus leaves the editor's own surface, so returning to the
+          frame never leaves the editor and the picker dropdown open at once. Tabbing off the end of
+          the editor hands focus back to the inline picker rather than out of the component.
         </li>
         <li>
           Removing a focused chip follows the Chip Set focus-continuity contract: focus moves to the
@@ -424,7 +431,11 @@ readonly identifyFilter = (filter: PeopleFilter) => filter.id;
     },
     {
       before: 'tokenLabel',
-      now: 'Still the edit trigger, but it now wraps tokenField, tokenOperator, and tokenValue. Move whole-label typography onto the segment parts when a descriptor supplies displayParts.',
+      now: 'Still the edit trigger, but it now wraps tokenField, tokenOperator, and tokenValue. Descriptors without displayParts render their flat display string inside tokenValue, so it now truncates at 16rem and renders at medium weight. Move whole-label typography onto the segment parts.',
+    },
+    {
+      before: 'editor',
+      now: 'Create editors used to render inline inside hell-filter-builder; both modes now render in a body-level popover, and the part lost its flex-1. Selectors scoped under hell-filter-builder no longer match — style the part through the ui map instead of descendant CSS.',
     },
   ] as const;
 

@@ -216,7 +216,7 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
             >
               @if (isEditing(filterIdentity(filter))) {
                 <ng-container
-                  *ngTemplateOutlet="projectedEditor; context: { surface: editSurface.injector }"
+                  *ngTemplateOutlet="projectedEditor; context: { surface: editSurface }"
                 />
               }
             </div>
@@ -291,7 +291,6 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
         [anchor]="frame"
         placement="bottom-start"
         [closeOnEscape]="false"
-        [closeOnOutsideClick]="false"
         [trapFocus]="false"
         (openChange)="onCreateOpenChange($any($event))"
       ></button>
@@ -306,7 +305,7 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
       >
         @if (editorMode() === 'create') {
           <ng-container
-            *ngTemplateOutlet="projectedEditor; context: { surface: createSurface.injector }"
+            *ngTemplateOutlet="projectedEditor; context: { surface: createSurface }"
           />
         }
       </div>
@@ -326,13 +325,14 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
             [attr.data-mode]="context.mode"
             [attr.data-field]="context.descriptor.field"
             [attr.data-hell-filter-builder-owner]="instanceId"
+            (keydown)="onEditorKeydown($event)"
             (keydown.escape)="onEditorEscape($event)"
-            (focusout)="onEditorFocusOut()"
+            (focusout)="onEditorFocusOut(surface)"
           >
             <ng-container
               [ngTemplateOutlet]="template"
               [ngTemplateOutletContext]="context"
-              [ngTemplateOutletInjector]="surface"
+              [ngTemplateOutletInjector]="surface.injector"
             />
           </div>
         }
@@ -393,10 +393,11 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
-  private readonly floatingScope = inject(HellFilterBuilderFloatingScope);
   private readonly editorTemplates = inject(HellFilterBuilderEditorRegistry).editors;
   private nextEditorSession = 0;
   private focusTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Whether the focus currently leaving an editor is leaving by Tab. */
+  private editorTabbing = false;
 
   /** @internal Template-only accessible name. */
   protected readonly effectiveAriaLabel = computed(() => this.ariaLabel() ?? this.labels.input);
@@ -644,24 +645,88 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     edit.click();
   }
 
-  /** @internal Template event handler. */
+  /**
+   * @internal Template event handler. Layered Escape for the projected
+   * editor.
+   *
+   * A composed control inside the editor keeps Escape while its own layer is
+   * open, and `defaultPrevented` normally says so. It is not enough on its
+   * own: the Combobox engine preventDefaults every Escape, open or not, so an
+   * editor whose field is a Combobox could never be cancelled from that field
+   * — the same engine quirk `onPickerKeydown` works around. Only a control
+   * that reports a closed layer overrides the prevention.
+   *
+   * Nested surfaces that portal out of the editor (an application popover or
+   * date picker) never reach this handler at all; their own Escape closes
+   * them one layer at a time.
+   */
   protected onEditorEscape(event: Event): void {
-    if (event.defaultPrevented) return;
+    if (event.defaultPrevented && !this.isSpuriousEscapePrevention(event)) return;
     event.preventDefault();
     event.stopPropagation();
     const state = this.editor();
     if (state) this.cancelEditor(state.session);
   }
 
-  /** @internal Template event handler. */
-  protected onEditorFocusOut(): void {
+  /**
+   * Whether a prevented Escape came from a composed field that had no layer
+   * of its own open.
+   *
+   * `aria-expanded` is trusted in one direction only. `"false"` is reliable:
+   * the control is telling us it had nothing to close, so its preventDefault
+   * was reflexive rather than meaningful. `"true"` is not reliable, because a
+   * trigger still reports the previous state on the task its own panel closes
+   * — asserting on it would strand the editor open after a nested layer was
+   * dismissed.
+   */
+  private isSpuriousEscapePrevention(event: Event): boolean {
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    return target?.closest('[aria-expanded]')?.getAttribute('aria-expanded') === 'false';
+  }
+
+  /**
+   * @internal Template event handler. Records that the focus about to leave
+   * the editor is leaving by Tab, so `onEditorFocusOut` can tell a keyboard
+   * exit from an outside pointer interaction. The browser moves focus while
+   * still in this task, so the flag is cleared on the next one.
+   */
+  protected onEditorKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') return;
+    this.editorTabbing = true;
+    setTimeout(() => {
+      this.editorTabbing = false;
+    }, 0);
+  }
+
+  /**
+   * @internal Template event handler. Create editing ends when focus leaves
+   * the editor's own surface.
+   *
+   * Containment is asked of the editor surface, not of the builder's Floating
+   * Scope: that scope is rooted at the renderer host, so it counts the frame
+   * as inside and would keep the create popover open while the user is back
+   * in the inline picker — leaving the picker's dropdown and the create
+   * popover live at once.
+   *
+   * Focus is pulled back to the inline picker only when Tab carried it out of
+   * the builder entirely. The panel is portalled to the end of the document,
+   * so tabbing forward off the editor lands on `<body>` or wraps to the first
+   * focusable on the page — either way the user is ejected from the
+   * component, which the three-tab-stop model does not allow. Tab that lands
+   * back inside the frame is left alone, and an outside pointer interaction
+   * dismisses without stealing focus at all.
+   */
+  protected onEditorFocusOut(surface: HellFilterBuilderEditorSurface): void {
     const state = this.editor();
     if (state?.mode !== 'create') return;
+    const byTab = this.editorTabbing;
     setTimeout(() => {
       if (this.editor()?.session !== state.session) return;
-      if (!this.floatingScope.containsFloatingTarget(this.host.ownerDocument.activeElement)) {
-        this.cancelEditor(state.session, false);
-      }
+      const active = this.host.ownerDocument.activeElement;
+      if (surface.containsTarget(active)) return;
+      const insideBuilder = active instanceof Node && this.host.contains(active);
+      if (byTab && !insideBuilder) this.focusPickerInput();
+      this.cancelEditor(state.session, false);
     }, 0);
   }
 
@@ -704,6 +769,13 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
       trigger,
       session,
     });
+    // An already-open trigger must not be shown again: `show()` resolves
+    // against the surface that is already mounted, so the focus step would
+    // run before the swapped-in editor content renders and land on `<body>`.
+    if (trigger.open()) {
+      this.scheduleEditorFocus('create');
+      return;
+    }
     void trigger.show().then(() => {
       if (this.isLatestSession(session)) this.scheduleEditorFocus('create');
     });

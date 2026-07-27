@@ -78,6 +78,15 @@ type TestFilter = NameFilter | StatusFilter | CreatedFilter;
         }
 
         <ng-template [hellFilterBuilderEditor]="statusField" let-editor>
+          <!-- Stands in for a composed Combobox field: it preventDefaults every
+               Escape whether or not its own layer is open, and reports that
+               layer through aria-expanded. -->
+          <input
+            type="text"
+            data-test-status-layer
+            [attr.aria-expanded]="statusLayerOpen()"
+            (keydown.escape)="$event.preventDefault()"
+          />
           <button
             type="button"
             data-test-status-active
@@ -158,6 +167,7 @@ class HostComponent {
     { id: 'status-1', field: 'status', operator: 'is', value: 'active' },
   ]);
   readonly identify = (filter: TestFilter) => filter.id;
+  readonly statusLayerOpen = signal(false);
   readonly ui = signal<
     | string
     | {
@@ -273,18 +283,33 @@ describe('HellFilterBuilder', () => {
     it('keeps the default part classes stable', async () => {
       const fixture = TestBed.createComponent(HostComponent);
       fixture.componentInstance.ui.set('');
+      // A segmented chip is required for the segment parts to render at all;
+      // `createdField` is the fixture descriptor that supplies `displayParts`.
+      fixture.componentInstance.value.set([
+        { id: 'status-1', field: 'status', operator: 'is', value: 'active' },
+        {
+          id: 'created-1',
+          field: 'created',
+          operator: 'between',
+          value: { from: '2026-07-01', to: '2026-07-31' },
+        },
+      ]);
       await settle(fixture);
 
       const host = fixture.nativeElement as HTMLElement;
       const partClasses = (slot: string): string[] =>
         sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 
+      expect(host.querySelector('[data-slot="tokenField"]')).not.toBeNull();
+      expect(host.querySelector('[data-slot="tokenOperator"]')).not.toBeNull();
       expect({
         host: sortClasses(query<HTMLElement>(host, 'hell-filter-builder').className),
         root: partClasses('root'),
         tokens: partClasses('tokens'),
         token: partClasses('token'),
         tokenLabel: partClasses('tokenLabel'),
+        tokenField: partClasses('tokenField'),
+        tokenOperator: partClasses('tokenOperator'),
         tokenValue: partClasses('tokenValue'),
         control: partClasses('control'),
         clear: partClasses('clear'),
@@ -416,7 +441,8 @@ describe('HellFilterBuilder', () => {
     await nextTask();
     await settle(fixture);
 
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).toBeNull();
+    // Create editors are portalled, so the host is the wrong root to assert on.
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
     const picker = query<HTMLInputElement>(
       fixture.nativeElement,
       '[data-hell-filter-builder-input]',
@@ -693,6 +719,97 @@ describe('HellFilterBuilder', () => {
       expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="root"]').dataset['editing'])
         .toBe('create');
     });
+
+  it('ends create editing when focus returns to the frame, never leaving two live surfaces',
+    async () => {
+      const fixture = TestBed.createComponent(HostComponent);
+      fixture.componentInstance.value.set([]);
+      await settle(fixture);
+
+      await openCreateEditor(fixture, 'Name');
+      await nextTask();
+      await settle(fixture);
+      const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+      expect(editor.contains(document.activeElement)).toBe(true);
+
+      // The picker is part of the frame, not of the editor's surface, so
+      // focusing it must close the create popover rather than leave the
+      // picker dropdown and the editor open at the same time.
+      const picker = query<HTMLInputElement>(
+        fixture.nativeElement,
+        '[data-hell-filter-builder-input]',
+      );
+      picker.focus();
+      await nextTask();
+      await settle(fixture);
+      await nextTask();
+      await settle(fixture);
+
+      expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+      // Dismissal by pointer or by focus must not steal focus back.
+      expect(document.activeElement).toBe(picker);
+      expect(fixture.componentInstance.changes).toEqual([]);
+    });
+
+  it('returns focus to the inline picker when Tab strands it off the create editor', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const focused = document.activeElement as HTMLElement;
+    expect(editor.contains(focused)).toBe(true);
+
+    // The panel is portalled to the end of the document, so tabbing forward
+    // off the last editor control strands focus on <body>.
+    key(focused, 'Tab');
+    focused.blur();
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+  });
+
+  it('cancels the editor on Escape from a composed field whose own layer is closed', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Status');
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const field = query<HTMLInputElement>(editor, '[data-test-status-layer]');
+
+    // Layer open: the field consumes Escape and the editor stays.
+    fixture.componentInstance.statusLayerOpen.set(true);
+    await settle(fixture);
+    key(field, 'Escape');
+    await nextTask();
+    await settle(fixture);
+    expect(document.body.querySelector('[data-slot="editor"]')).not.toBeNull();
+
+    // Layer closed: the field still preventDefaults, but the editor cancels.
+    fixture.componentInstance.statusLayerOpen.set(false);
+    await settle(fixture);
+    key(field, 'Escape');
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
 
   it('exposes the required stable identity callback', async () => {
     const fixture = TestBed.createComponent(HostComponent);
