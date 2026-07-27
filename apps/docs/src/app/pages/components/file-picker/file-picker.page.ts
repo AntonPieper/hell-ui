@@ -75,6 +75,12 @@ import filePickerValidationExampleCodeRaw from './examples/validation.example.ts
         still activate the picker. Prefer the sibling shape because the picker host is itself one
         button-like accessible target.
       </p>
+      <p>
+        The drop zone ships a decorative upload glyph on the root, rendered as a CSS mask from
+        <code>--hell-icon-upload</code>. It tracks the hover, focus, drag, and disabled states with
+        the rest of the root, never joins the accessible name, and needs no consumer markup — so
+        projected copy only has to name the two acquisition paths.
+      </p>
       <hd-example-tabs [code]="basicExampleCode" previewClass="grid max-w-xl gap-hell-3">
         <app-file-picker-basic-example />
       </hd-example-tabs>
@@ -112,8 +118,11 @@ interface HellFileRejection &#123;
 
       <h2>Application-owned upload recipe</h2>
       <p>
-        The recipe below composes File Picker with Button, Progress, Alert, ordinary list markup,
-        and a native status region. Its local <code>UploadItem</code> retains each accepted
+        The recipe below composes File Picker with Button, Icon, Progress, Alert, ordinary list
+        markup, and a native status region. File-type and status glyphs are application-owned: the
+        queue maps its own <code>UploadItem</code> status onto icons and colors, because File
+        Picker knows nothing about uploading, retrying, or completion. Its local
+        <code>UploadItem</code> retains each accepted
         <code>File</code>; queue capacity issues, progress timers, retry/removal actions,
         completion state, server errors, and lifecycle announcements all belong to the example
         application. None of that workflow is exported by
@@ -147,6 +156,11 @@ interface HellFileRejection &#123;
         <code>&#123; root?: string &#125;</code> Part Style Map. Stable
         <code>data-dragging="true"</code> and <code>data-disabled="true"</code> attributes let the
         root recipe style behavior without exposing the private native input.
+      </p>
+      <p>
+        The built-in drop glyph is a <code>::before</code> mask on the same root, so a
+        <code>before:hidden</code> refinement removes it when the host projects its own icon, and
+        <code>before:*</code> utilities resize or recolor it otherwise.
       </p>
       <hd-example-tabs [code]="stylingExampleCode" previewClass="grid max-w-xl gap-hell-3">
         <app-file-picker-styling-example />
@@ -227,6 +241,11 @@ interface HellFileRejection &#123;
         <li>
           Give the host an accessible name through visible text, <code>aria-label</code>, or
           <code>aria-labelledby</code>. The directive does not replace consumer-owned copy.
+        </li>
+        <li>
+          The built-in drop glyph and any projected file-type or status icons are decorative.
+          Keep them out of the accessible name, and give every icon-only action — retry,
+          remove — a real <code>aria-label</code>.
         </li>
         <li>
           Disabled state is reflected through <code>aria-disabled="true"</code>,

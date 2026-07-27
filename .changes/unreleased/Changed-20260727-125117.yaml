@@ -1,0 +1,7 @@
+kind: Changed
+body: 'The File Picker drop zone now ships a decorative upload glyph on its root and
+  a clearly separate drag-over treatment: the dashed border turns solid, the glyph
+  lifts and takes the primary color, and hover sharpens the projected copy. The glyph
+  is a `::before` mask that never joins the accessible name — drop it with a `before:hidden`
+  refinement through `ui` when your host projects its own icon.'
+time: 2026-07-27T12:51:17.526959+02:00

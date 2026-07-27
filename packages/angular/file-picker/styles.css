@@ -1,2 +1,36 @@
 /* File Picker root defaults are Tailwind utility recipes. */
 @source "./file-picker.ts";
+
+@layer components {
+  /* Built-in drop-zone glyph. Rendered as a CSS mask on the root's ::before so
+     a bare picker host ships a visible drop affordance with zero consumer
+     markup; it is decorative, contributes nothing to the accessible name, and
+     a `before:hidden` refinement through `ui` replaces it with consumer-owned
+     iconography. Mirrors the accordion-chevron glyph mechanism. */
+  [hellFilePicker][data-slot='root']::before {
+    content: '';
+    display: block;
+    flex: 0 0 auto;
+    height: calc(var(--spacing) * 7);
+    width: calc(var(--spacing) * 7);
+    background-color: currentcolor;
+    color: var(--color-hell-foreground-subtle);
+    -webkit-mask: var(--hell-icon-upload) center / contain no-repeat;
+    mask: var(--hell-icon-upload) center / contain no-repeat;
+    transition:
+      color var(--hell-duration-fast) var(--ease-hell-out),
+      transform var(--hell-duration-base) var(--ease-hell-out);
+  }
+
+  [hellFilePicker][data-slot='root']:hover:not([data-disabled='true'])::before,
+  [hellFilePicker][data-slot='root']:focus-visible::before {
+    color: var(--color-hell-primary);
+  }
+
+  /* Drag-over lifts the glyph so the drop target reads as armed even while the
+     dragged file preview covers part of the zone. */
+  [hellFilePicker][data-slot='root'][data-dragging='true']::before {
+    color: var(--color-hell-primary);
+    transform: translateY(calc(var(--spacing) * -1)) scale(1.1);
+  }
+}
