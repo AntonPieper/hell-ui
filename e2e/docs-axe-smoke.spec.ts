@@ -395,6 +395,10 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
         name: 'Table TanStack virtual example',
         include: ['app-table-tanstack-virtual-example'],
       },
+      {
+        name: 'Table TanStack resizable columns example',
+        include: ['app-table-tanstack-resizable-example'],
+      },
     ],
   },
   '/components/time-input': {

@@ -6,6 +6,7 @@ import {
   getExpandedRowModel,
   getPaginationRowModel,
   type ColumnDef,
+  type ColumnSizingState,
   type ExpandedState,
   type PaginationState,
   type Row,
@@ -223,6 +224,71 @@ class ColumnFilterHost {
 })
 class StyledShellHost extends ShellHost {}
 
+@Component({
+  selector: 'hell-test-resizable-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class ResizableShellHost {
+  readonly resizingEnabled = signal(true);
+  readonly columnSizing = signal<ColumnSizingState>({});
+  readonly columns: ColumnDef<Person>[] = [
+    { id: 'a', header: 'A', size: 200, minSize: 120 },
+    { id: 'b', header: 'B', size: 160 },
+    { id: 'c', header: 'C', size: 140 },
+    // Opted out of resizing, so neither it nor its leading neighbour pairs up.
+    { id: 'd', header: 'D', size: 120, enableResizing: false },
+  ];
+
+  readonly table = createAngularTable<Person>(() => ({
+    data: people,
+    columns: this.columns,
+    enableColumnResizing: this.resizingEnabled(),
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+    state: { columnSizing: this.columnSizing() },
+    onColumnSizingChange: (updater) =>
+      this.columnSizing.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+  }));
+}
+
+/**
+ * The same table with column sizing left to TanStack: no `state.columnSizing`,
+ * no `onColumnSizingChange`. Sizing then lives in the adapter's own state, which
+ * does not refresh between two synchronous writes.
+ */
+@Component({
+  selector: 'hell-test-uncontrolled-resizable-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class UncontrolledResizableShellHost {
+  readonly columns: ColumnDef<Person>[] = [
+    { id: 'a', header: 'A', size: 200, minSize: 120 },
+    { id: 'b', header: 'B', size: 160 },
+  ];
+
+  readonly table = createAngularTable<Person>(() => ({
+    data: people,
+    columns: this.columns,
+    enableColumnResizing: true,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+  }));
+}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -234,6 +300,8 @@ describe('Hell TanStack table shell', () => {
         FilterHost,
         ColumnFilterHost,
         StyledShellHost,
+        ResizableShellHost,
+        UncontrolledResizableShellHost,
       ],
     }).compileComponents();
   });
@@ -371,6 +439,135 @@ describe('Hell TanStack table shell', () => {
     // size. The grow factor lets the flex body row reproduce that same grid.
     expect(cell.style.getPropertyValue('--hell-table-column-size')).toBe(`${size}px`);
     expect(cell.style.getPropertyValue('--hell-table-column-grow')).toBe(`${size}`);
+  });
+
+  it('renders no resize separators until TanStack column resizing is turned on', () => {
+    const fixture = TestBed.createComponent(ShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    // TanStack treats an unset `enableColumnResizing` as enabled, so the shell
+    // requires an explicit opt-in rather than growing handles on every table.
+    expect(
+      root
+        .querySelector('hell-tanstack-table')
+        ?.getAttribute('data-hell-tanstack-resizable-columns'),
+    ).toBeNull();
+    expect(root.querySelectorAll('[hellTableResizeHandle]')).toHaveLength(0);
+  });
+
+  it('renders a separator per header cell that has a resizable trailing neighbour', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(
+      root
+        .querySelector('hell-tanstack-table')
+        ?.getAttribute('data-hell-tanstack-resizable-columns'),
+    ).toBe('true');
+
+    const withHandle = [...root.querySelectorAll('th[data-column-id]')]
+      .filter((header) => header.querySelector('[hellTableResizeHandle]'))
+      .map((header) => header.getAttribute('data-column-id'));
+    // "c" pairs with the opted-out "d", and "d" is trailing, so neither pairs up.
+    expect(withHandle).toEqual(['a', 'b']);
+
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+    expect(handle.getAttribute('role')).toBe('separator');
+    expect(handle.getAttribute('aria-orientation')).toBe('vertical');
+    expect(handle.getAttribute('aria-label')).toBe('Resize column a');
+  });
+
+  it('follows the live TanStack resizing option instead of a cached copy of it', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    // Rendered once with resizing off, so a snapshot of the option taken on the
+    // first read would keep the separators hidden after the caller turns it on.
+    fixture.componentInstance.resizingEnabled.set(false);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const handles = () => root.querySelectorAll('[hellTableResizeHandle]').length;
+
+    expect(handles()).toBe(0);
+
+    fixture.componentInstance.resizingEnabled.set(true);
+    fixture.detectChanges();
+    expect(handles()).toBe(2);
+
+    fixture.componentInstance.resizingEnabled.set(false);
+    fixture.detectChanges();
+    expect(handles()).toBe(0);
+  });
+
+  it('commits a keyboard resize into TanStack column sizing without changing the total', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+    const totalBefore = fixture.componentInstance.table.getTotalSize();
+
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    // The pair transacts against itself: "a" grows by the key step and "b"
+    // gives up exactly that much, so the table's total size is untouched.
+    expect(fixture.componentInstance.columnSizing()).toEqual({ a: 216, b: 144 });
+    expect(fixture.componentInstance.table.getTotalSize()).toBe(totalBefore);
+  });
+
+  it('commits both sides of a resize when TanStack owns the column sizing state', () => {
+    const fixture = TestBed.createComponent(UncontrolledResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const { table } = fixture.componentInstance;
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+    const totalBefore = table.getTotalSize();
+
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    // Both sides are written back to back with no render in between, and
+    // uncontrolled sizing state does not refresh across them. Writing one
+    // column per updater would compute the second from the same state as the
+    // first, dropping "a" and growing the table by the whole key step.
+    expect(table.getState().columnSizing).toEqual({ a: 216, b: 144 });
+    expect(table.getTotalSize()).toBe(totalBefore);
+
+    const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;
+    expect(col.style.width).toBe('216px');
+  });
+
+  it('flows a committed width into the colgroup and both body cell size variables', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    // One committed width, three consumers: the native header grid reads the
+    // colgroup, and virtual body rows reproduce it from size plus grow.
+    const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;
+    expect(col.style.width).toBe('216px');
+
+    const cell = query(root, 'td[data-column-id="a"]');
+    expect(cell.style.getPropertyValue('--hell-table-column-size')).toBe('216px');
+    expect(cell.style.getPropertyValue('--hell-table-column-grow')).toBe('216');
+  });
+
+  it('clamps a resize at the TanStack minSize of the shrinking column', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+
+    // Home drives the leading column to its minimum, which is TanStack's own
+    // `minSize` rather than a sizing bound the shell invented.
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.columnSizing()).toEqual({ a: 120, b: 240 });
   });
 
   it('exposes the shell chrome parts through public data-slot markers', () => {

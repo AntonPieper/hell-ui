@@ -57,7 +57,7 @@ test.describe('table docs regressions', () => {
     await gotoTableDocs(page);
 
     const previews = page.locator('hd-table-page hd-example-tabs .hd-example');
-    await expect(previews).toHaveCount(5);
+    await expect(previews).toHaveCount(6);
 
     const paddingTopValues = await previews.evaluateAll((elements) =>
       elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingTop)),
