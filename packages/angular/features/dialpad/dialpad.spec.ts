@@ -651,40 +651,16 @@ describe('HellDialpad labels', () => {
       expect(displayValue(host)).toBe('1237');
     });
 
-    it('adopts the selection the display makes when its chrome is pressed', () => {
-      const fixture = TestBed.createComponent(DialpadHost);
-      const host = fixture.nativeElement;
-      fixture.detectChanges();
-
-      const input = seedNumber(fixture, '12345');
-      const display = query<HTMLElement>(host, '[data-slot="display"]');
-
-      // The box is styled as text, so pressing its chrome is an invited
-      // gesture. It focuses the field, and WebKit and Firefox select the
-      // whole number — a selection the user can see, so it is theirs.
-      pointer(display, 'pointerdown', 115, { pointerType: 'mouse', button: 0 });
-      input.dispatchEvent(new Event('focus'));
-      input.setSelectionRange(0, 5);
-      input.dispatchEvent(new Event('select'));
-      pointer(display, 'pointerup', 115, { pointerType: 'mouse', button: 0 });
-
-      tap(query<HTMLButtonElement>(host, '[data-key="9"]'), 116);
-      fixture.detectChanges();
-
-      expect(displayValue(host)).toBe('9');
-    });
-
     it('ignores a right-click in the display that never reports a release', () => {
       const fixture = TestBed.createComponent(DialpadHost);
       const host = fixture.nativeElement;
       fixture.detectChanges();
 
       const input = seedNumber(fixture, '123');
-      const display = query<HTMLElement>(host, '[data-slot="display"]');
 
       // The context menu can swallow the release, so a right-click must not
       // leave the display looking pressed.
-      pointer(display, 'pointerdown', 117, { pointerType: 'mouse', button: 2 });
+      pointer(input, 'pointerdown', 117, { pointerType: 'mouse', button: 2 });
 
       tabInto(input, 3);
 

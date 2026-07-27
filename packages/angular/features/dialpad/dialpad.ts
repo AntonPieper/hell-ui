@@ -161,19 +161,10 @@ const HELL_DIALPAD_RECIPE = {
     '(keydown)': 'onKey($event)',
   },
   template: `
-    <!--
-      The pointer is tracked on the whole display, not just the field inside
-      it. The box is styled as text, so pressing its chrome is an invited
-      gesture that focuses the field and, on WebKit and Firefox, selects the
-      number; that focus is pointer-led and its selection is the user's.
-      Presses on the field itself bubble to here.
-    -->
     <label
       data-slot="display"
       [class]="part('display')"
       [attr.data-invalid]="invalid() ? '' : null"
-      (pointerdown)="onNumberPointerDown($event)"
-      (pointerup)="onNumberSelect($event)"
     >
       <span data-slot="displayLabel" [class]="part('displayLabel')">{{ numberLabel() }}</span>
       <input
@@ -194,9 +185,11 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-invalid]="invalid() ? '' : null"
         (beforeinput)="onBeforeInput($event)"
         (input)="onNumberInput($event)"
+        (pointerdown)="onNumberPointerDown($event)"
         (focus)="onNumberFocus()"
         (blur)="onNumberBlur()"
         (keydown)="onNumberKeyDown($event)"
+        (pointerup)="onNumberSelect($event)"
         (keyup)="onNumberSelect($event)"
         (select)="onNumberSelect($event)"
       />
@@ -629,9 +622,10 @@ export class HellDialpad {
    * backspace acts there.
    */
   protected onNumberPointerDown(event: PointerEvent): void {
-    // A right-click opens a context menu that can swallow the release, and
-    // it places no caret worth tracking either way.
-    if (this.isSecondaryMouseButton(event)) return;
+    // A disabled or read-only display has no edit for a caret to steer, and a
+    // right-click opens a context menu that can swallow the release without
+    // placing a caret worth tracking either way.
+    if (!this.canEdit() || this.isSecondaryMouseButton(event)) return;
 
     this.pointerInInput = true;
     // The release can land anywhere — on a key, on the page, or nowhere at
@@ -644,10 +638,11 @@ export class HellDialpad {
   }
 
   /**
-   * Nothing can be pressed in a display that has lost focus, and no blur can
-   * fall between the press that focuses the field and that focus, so this
-   * cannot swallow a live gesture — it only catches releases the page never
-   * reported, such as one over a cross-origin frame.
+   * A press in the field focuses it before it is released — every engine
+   * runs `pointerdown`, `mousedown`, `focus`, then `pointerup` — and a press
+   * in a field that already has focus moves focus nowhere. So no blur falls
+   * inside a live gesture, and this only catches a release the page never
+   * saw at all, such as one over a cross-origin frame.
    */
   protected onNumberBlur(): void {
     this.releaseInputPointer();
@@ -687,8 +682,8 @@ export class HellDialpad {
   }
 
   protected onNumberSelect(event: Event): void {
-    // A release anywhere in the display box counts, so the event may come
-    // from the label rather than the field it wraps.
+    // The field this reads is the one the component renders, not whichever
+    // element the event happens to name; the component already holds it.
     const input = this.numberInputRef()?.nativeElement;
     if (!input) return;
 
