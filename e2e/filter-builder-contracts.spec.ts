@@ -49,6 +49,27 @@ function createEditor(page: Page, field: string): Locator {
   );
 }
 
+/**
+ * The dropdown panel an open combobox input owns, resolved through the
+ * `aria-controls` the engine publishes while the panel is open.
+ *
+ * Combobox dropdowns are portalled to the document body, so a document-wide
+ * `[hellComboboxDropdown]:visible` locator matches every panel on the page at
+ * once. Choosing a field leaves the Filter Builder's own picker panel on
+ * screen for the remainder of its open animation — the overlay waits for that
+ * animation before detaching — so for about a frame or two after a field is
+ * chosen there are legitimately two visible panels, and a document-wide
+ * locator resolves to both. Addressing the panel the control under test
+ * actually owns asserts the thing the test is about and stops depending on
+ * when an unrelated panel finishes animating.
+ */
+async function ownedDropdown(page: Page, input: Locator): Promise<Locator> {
+  await expect(input).toHaveAttribute('aria-expanded', 'true');
+  const dropdownId = await input.getAttribute('aria-controls');
+  expect(dropdownId).not.toBeNull();
+  return page.locator(`#${dropdownId}[hellComboboxDropdown]`);
+}
+
 async function selectField(
   page: Page,
   root: Locator,
@@ -287,8 +308,7 @@ test.describe('Filter Builder browser contract', () => {
     await expect(input).toBeFocused();
 
     await input.press('ArrowDown');
-    let dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    let dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
     await input.fill('fail');
@@ -312,8 +332,7 @@ test.describe('Filter Builder browser contract', () => {
     );
     input = editor.getByRole('combobox', { name: 'Owner directory' });
     await input.press('ArrowDown');
-    dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
     await input.fill('linus');
@@ -338,8 +357,7 @@ test.describe('Filter Builder browser contract', () => {
     await expect(input).toBeFocused();
 
     await input.press('ArrowDown');
-    const dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    const dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
     await input.fill('error');
@@ -669,15 +687,33 @@ test.describe('Filter Builder browser contract', () => {
     // document, so focus never leaves the editor and there is nothing to
     // restore. Neither engine may leave focus anywhere else, and neither may
     // leave it nowhere.
-    const focusHome = await page.evaluate(() => {
-      const active = document.activeElement;
-      if (!(active instanceof HTMLElement) || active === document.body) return 'stranded';
-      if (active.closest('[data-slot="editor"]')) return 'editor';
-      if (active.closest('app-filter-builder-recipes-example')) return 'builder';
-      return 'elsewhere';
-    });
-    expect(focusHome).not.toBe('stranded');
-    expect(focusHome).not.toBe('elsewhere');
+    //
+    // The hand-back is decided on the task after the browser has moved focus,
+    // so `<body>` is where focus legitimately sits for that one task. Reading
+    // `document.activeElement` once, immediately after the Tab, samples that
+    // gap rather than the outcome. Polling for the settled answer keeps the
+    // contract intact: a shell that never hands focus back leaves it on
+    // `<body>`, and one that lets Tab escape leaves it outside the builder —
+    // neither ever satisfies this.
+    let focusHome = '';
+    await expect
+      .poll(
+        async () => {
+          focusHome = await page.evaluate(() => {
+            const active = document.activeElement;
+            if (!(active instanceof HTMLElement) || active === document.body) return 'stranded';
+            if (active.closest('[data-slot="editor"]')) return 'editor';
+            if (active.closest('app-filter-builder-recipes-example')) return 'builder';
+            return 'elsewhere';
+          });
+          return focusHome;
+        },
+        {
+          message:
+            'focus must settle in the inline picker or stay in the editor, never on <body> and never outside the builder',
+        },
+      )
+      .toMatch(/^(builder|editor)$/);
     if (focusHome === 'builder') {
       await expect(editor).toBeHidden();
       await expect(picker).toBeFocused();
