@@ -69,6 +69,40 @@ class SharedScopeDialogHost {}
 @Component({
   imports: [...HELL_DIALOG_IMPORTS],
   template: `
+    <section id="matrix-scope" hellDialogScope>
+      <button id="open-s1" type="button" [hellDialogTrigger]="s1">S1</button>
+      <button id="open-s2" type="button" [hellDialogTrigger]="s2">S2</button>
+    </section>
+    <button id="open-p1" type="button" [hellDialogTrigger]="p1">P1</button>
+    <button id="open-p2" type="button" [hellDialogTrigger]="p2">P2</button>
+
+    <ng-template #s1 let-close="close">
+      <div hellDialogOverlay scoped>
+        <div hellDialog><button id="close-s1" type="button" (click)="close()">x</button></div>
+      </div>
+    </ng-template>
+    <ng-template #s2 let-close="close">
+      <div hellDialogOverlay scoped>
+        <div hellDialog><button id="close-s2" type="button" (click)="close()">x</button></div>
+      </div>
+    </ng-template>
+    <ng-template #p1 let-close="close">
+      <div hellDialogOverlay>
+        <div hellDialog><button id="close-p1" type="button" (click)="close()">x</button></div>
+      </div>
+    </ng-template>
+    <ng-template #p2 let-close="close">
+      <div hellDialogOverlay>
+        <div hellDialog><button id="close-p2" type="button" (click)="close()">x</button></div>
+      </div>
+    </ng-template>
+  `,
+})
+class ModalityMatrixHost {}
+
+@Component({
+  imports: [...HELL_DIALOG_IMPORTS],
+  template: `
     <section id="nesting-scope" hellDialogScope>
       <button id="open-outer" type="button" [hellDialogTrigger]="outer">Open outer</button>
     </section>
@@ -304,6 +338,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         ScopedDialogHost,
         SharedScopeDialogHost,
         NestedDialogHost,
+        ModalityMatrixHost,
         ModalityDialogHost,
         DisabledDialogTriggerHost,
         EnabledDialogTriggerHost,
@@ -456,11 +491,12 @@ describe('HellDialogTrigger scoped overlays', () => {
     await microtask();
 
     // The inner dialog's trigger is portaled outside the scope, so it opens a
-    // page-modal dialog; the outer scope stays blocked and the shell around it
-    // stays perceivable for as long as the scoped dialog is open.
+    // page-blocking dialog. The outer scope stays blocked, and the page goes
+    // back to hidden — the inner dialog blocks everything, and scoped modality
+    // is what cleared that hiding a moment ago, so scoped modality owes it back.
     expect(document.body.querySelector('#inner-overlay')).toBeTruthy();
     expect(scope.hasAttribute('inert')).toBe(true);
-    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
     // The stacked dialog does mean to block the shell, so the focus-trap
     // release comes off while it is open and its own trap works again. Without
     // this, the scoped marker would disable focus containment for every trap
@@ -476,13 +512,79 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(document.body.querySelector('#inner-overlay')).toBeNull();
     expect(document.body.querySelector('#outer-overlay')).toBeTruthy();
     expect(scope.hasAttribute('inert')).toBe(true);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
     expect(document.body.getAttribute('data-focus-trap')).toBe('');
 
     query<HTMLButtonElement>(document.body, '#close-outer').click();
     await settleClose(fixture);
 
     expect(scope.hasAttribute('inert')).toBe(false);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
     expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+  });
+
+  // Scoped modality is a property of which dialogs are open, not of one
+  // dialog's lifetime, so every interleaving of scoped (S) and page-blocking
+  // (P) dialogs has to satisfy the same three rules — asserted here as rules
+  // rather than as hand-written per-step expectations:
+  //
+  //   any page-blocking dialog open => the page is hidden from assistive tech
+  //   scoped dialogs only           => the page is exposed and the trap released
+  //   nothing open                  => the document reads as it did before
+  describe('modality transition matrix', () => {
+    const SEQUENCES: readonly { readonly name: string; readonly steps: readonly string[] }[] = [
+      { name: 'S, close S', steps: ['+s1', '-s1'] },
+      { name: 'S1, S2, close S2, close S1', steps: ['+s1', '+s2', '-s2', '-s1'] },
+      { name: 'P, close P', steps: ['+p1', '-p1'] },
+      { name: 'P1, P2, close P2, close P1', steps: ['+p1', '+p2', '-p2', '-p1'] },
+      { name: 'P, S, close P first', steps: ['+p1', '+s1', '-p1', '-s1'] },
+      { name: 'P, S, close S first', steps: ['+p1', '+s1', '-s1', '-p1'] },
+      { name: 'S, P, close S first', steps: ['+s1', '+p1', '-s1', '-p1'] },
+      { name: 'S, P, close P first', steps: ['+s1', '+p1', '-p1', '-s1'] },
+    ];
+
+    for (const sequence of SEQUENCES) {
+      it(`holds the modality contract for: ${sequence.name}`, async () => {
+        const fixture = TestBed.createComponent(ModalityMatrixHost);
+        await settle(fixture);
+        const appRoot = attachToBody(fixture.nativeElement);
+        await settle(fixture);
+
+        const scope = query(fixture.nativeElement, '#matrix-scope');
+        const open = new Set<string>();
+
+        for (const step of sequence.steps) {
+          const id = step.slice(1);
+          if (step.startsWith('+')) {
+            query<HTMLButtonElement>(fixture.nativeElement, `#open-${id}`).click();
+            await settle(fixture);
+            await microtask();
+            open.add(id);
+          } else {
+            query<HTMLButtonElement>(document.body, `#close-${id}`).click();
+            await settleClose(fixture);
+            await microtask();
+            open.delete(id);
+          }
+
+          const scoped = [...open].filter((entry) => entry.startsWith('s')).length;
+          const blocking = [...open].filter((entry) => entry.startsWith('p')).length;
+          const where = `${sequence.name} @ ${step}`;
+
+          expect(appRoot.getAttribute('aria-hidden') === 'true', `page hidden — ${where}`).toBe(
+            blocking > 0,
+          );
+          expect(document.body.hasAttribute('data-focus-trap'), `focus released — ${where}`).toBe(
+            scoped > 0 && blocking === 0,
+          );
+          expect(scope.hasAttribute('inert'), `scope blocked — ${where}`).toBe(scoped > 0);
+        }
+
+        expect(appRoot.hasAttribute('aria-hidden')).toBe(false);
+        expect(scope.hasAttribute('inert')).toBe(false);
+        expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+      });
+    }
   });
 
   it('frees the shell from assistive technology when a page-modal dialog closes under a scoped one', async () => {

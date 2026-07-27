@@ -196,15 +196,25 @@ pull-back too (see Constraints). The replay is equally global: it edits
 `aria-hidden` on body children the whole page shares.
 
 Both are therefore gated on the same condition — every open dialog is scoped —
-and both are re-derived on every transition of the counts, in either direction.
-A dialog that blocks the whole page (one without `scoped`, a `scoped` one that
-found no scope root, or `hell-ui/confirm` opened over a scoped dialog) means to
-block the shell, so `HellDialogOverlay` reference counts those separately; the
-marker comes off and the shell stays hidden for as long as one is open, and
-both come back the moment the last one closes. Re-deriving on close is not
-optional bookkeeping: the manager restores its own `aria-hidden` map only when
-its **last** dialog closes, so a page-blocking dialog closing under a surviving
-scoped dialog restores nothing, and only this replay frees the shell.
+and both are re-derived from the whole open set on every transition, in both
+directions. `HellDialogOverlay` reference counts page-blocking dialogs (one
+without `scoped`, a `scoped` one that found no scope root, or `hell-ui/confirm`
+opened over a scoped dialog) separately from scoped ones, and the counts answer
+one question with three cases:
+
+| Open set | Page outside the dialogs | Focus-trap marker |
+| --- | --- | --- |
+| any page-blocking dialog | hidden from assistive technology | off; the delegated trap contains focus |
+| scoped dialogs only | exposed | on; the shell can hold focus |
+| empty | exactly as it was before the first dialog | off |
+
+Re-deriving in **both** directions is what makes that hold, and each direction
+has its own reason. Freeing on close: the manager restores its own
+`aria-hidden` map only when its **last** dialog closes, so a page-blocking
+dialog closing under a surviving scoped dialog restores nothing. Hiding on
+open: the manager hides only for the **first** dialog of a stack, so a
+page-blocking dialog opening over a scoped one hides nothing — and the scoped
+dialog has already cleared what the first open hid.
 
 Marking a narrower subtree than `body` does not avoid the breadth: the shell
 sits inside whatever ancestor could be marked.
@@ -214,15 +224,24 @@ the last release restores the exact prior values. A dialog without `scoped`, or
 `scoped` without a scope root, keeps ng-primitives' page-wide modality
 untouched.
 
-Known consequence: a page-blocking dialog stacked on a scoped one does not
-re-hide the page from assistive technology, because
-`hideNonDialogContentFromAssistiveTechnology` only runs for the first open in a
-stack. That is upstream behavior — page-modal-on-page-modal has the same gap
-without any Hell change — and the stacked panel still carries
-`aria-modal="true"`, which is the mechanism assistive technology actually
-honors for "everything outside this dialog is unavailable". Closing the scoped
-dialog while that stacked page-modal is still open therefore leaves it with a
-fully live, non-AT-hidden page for the rest of its lifetime.
+This was originally written up as an upstream limitation — that a page-blocking
+dialog stacked on a scoped one simply cannot re-hide the page, because
+`hideNonDialogContentFromAssistiveTechnology` runs only for the first open in a
+stack. **That was wrong, and it was measured wrong.** Two ordinary page
+dialogs in a row keep the page hidden throughout (`P1 → P2 → close P2 → close
+P1` was measured in-browser and never exposes the page), precisely because the
+first dialog's hiding is never taken away. The gap appears only where scoped
+modality took it away. Hell removed it, so Hell puts it back: the `blocked`
+phase re-applies `aria-hidden="true"` to exactly the elements it cleared, and
+nothing else. `aria-modal="true"` on the stacked panel is then a second signal
+rather than the only one.
+
+The general shape of that mistake is worth keeping: a one-directional
+invariant. Round 3 fixed "becoming scoped-only must free the page" and left
+"stopping being scoped-only must hide it again" unstated, which is how the
+mirror defect shipped. The phase function exists so the question is always
+"what does the current open set owe the page?", never "what did this dialog
+just do?".
 
 Constraints:
 
@@ -252,14 +271,19 @@ Constraints:
   surrounding shell is deliberately live — but it is a real reduction for a
   modal popover, and it is the strongest reason to keep the marker's window as
   narrow as it is.
-- The `aria-hidden` replay is document-wide for the same reason and gets the
-  same treatment: it is re-derived on every transition of the counts, in either
-  direction, so no open/close order can leave the shell hidden from assistive
-  technology while only scoped dialogs remain. The baseline it replays is
-  captured once per document by the first overlay, before the manager's pass,
-  so it always answers "what did the machinery change?" rather than "what did
-  this open change?" — the per-open form silently skipped a value an
-  already-open page-blocking dialog had set.
+- The `aria-hidden` state is document-wide for the same reason and gets the
+  same treatment: derived from the open set on every transition in both
+  directions, never latched. The baseline it replays is captured once per
+  document by the first overlay, before the manager's pass, so it always
+  answers "what did the machinery change?" rather than "what did this open
+  change?" — the per-open form silently skipped a value an already-open
+  page-blocking dialog had set. Only elements the machinery hid are ever
+  touched, and only elements scoped modality cleared are ever re-hidden.
+- The transition matrix is the test contract, not an example: every
+  interleaving of at least two dialogs, at both unit and browser level,
+  asserted as the three-case rule above rather than as per-step expectations,
+  and each mutation-verified. Both defects this ADR records shipped because
+  coverage pinned one order.
 
 ## Consequences
 

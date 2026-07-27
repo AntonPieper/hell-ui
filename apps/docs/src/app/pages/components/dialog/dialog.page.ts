@@ -134,10 +134,12 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         modality.
       </p>
       <p>
-        Stacking still works the way you would expect: a page-blocking dialog opened from inside a
-        scoped one — including <a routerLink="/components/confirm">confirm</a> — goes back to
-        blocking everything, shell included, for as long as it is open, and the scoped dialog
-        resumes when it closes.
+        Stacking works the way you would expect, in both directions. A page-blocking dialog open
+        anywhere in the document — including a <a routerLink="/components/confirm">confirm</a>
+        opened from inside a scoped dialog — blocks everything for as long as it is open: the shell
+        is hidden from assistive technology again and focus is contained again. Scoped modality
+        resumes the moment the last page-blocking dialog closes, whichever order they opened in,
+        and once nothing is open the page is exactly as it started.
       </p>
       <hd-example-tabs [code]="dialogScopedExampleCode">
         <app-dialog-scoped-example />
@@ -284,8 +286,9 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           A dialog opened from inside another dialog, and a popover, menu, or select opened from
           inside a dialog, keep their own dismissal order: Escape closes the innermost surface
           first, and interacting with a shell popover never dismisses the scoped dialog underneath.
-          A page-blocking dialog stacked on a scoped one restores full-page focus containment while
-          it is open.
+          A page-blocking dialog anywhere in the document restores both full-page focus containment
+          and page-wide <code>aria-hidden</code> while it is open, whichever order the dialogs
+          opened in.
         </li>
         <li>
           Name every dialog with <code>hellDialogTitle</code> (or an <code>aria-label</code>) and,

@@ -437,6 +437,108 @@ test.describe('Hell UI browser behavior', () => {
     expect(await anyPageHidden()).toBe(false);
   });
 
+  test('every scoped and page-blocking dialog interleaving holds the modality contract', async ({
+    page,
+  }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+
+    // Two page-blocking dialogs and one scoped dialog, all on this page. Every
+    // sequence below is driven programmatically because a blocking dialog is,
+    // by design, in the way of the next trigger.
+    const click = (label: string) =>
+      page.evaluate((text) => {
+        [...document.querySelectorAll<HTMLElement>('button')]
+          .find((button) => button.textContent?.trim() === text)
+          ?.click();
+      }, label);
+    const dismiss = (title: string) =>
+      page.evaluate((text) => {
+        const panel = [...document.querySelectorAll('[role="dialog"]')].find((dialog) =>
+          dialog.querySelector('h2')?.textContent?.includes(text),
+        );
+        [...(panel?.querySelectorAll<HTMLElement>('button') ?? [])]
+          .find((button) => ['Cancel', 'Got it'].includes(button.textContent?.trim() ?? ''))
+          ?.click();
+      }, title);
+
+    const OPEN: Record<string, () => Promise<void>> = {
+      s: () => click('Approve invoice'),
+      p1: () => click('Publish article'),
+      p2: () => click('Casual dialog'),
+    };
+    const CLOSE: Record<string, () => Promise<void>> = {
+      s: () => dismiss('Approve invoice 4021?'),
+      p1: () => dismiss('Publish this article?'),
+      p2: () => dismiss('Dismiss me freely'),
+    };
+
+    const sequences: readonly (readonly string[])[] = [
+      ['+s', '-s'],
+      ['+p1', '-p1'],
+      ['+p1', '+p2', '-p2', '-p1'],
+      ['+p1', '+s', '-p1', '-s'],
+      ['+p1', '+s', '-s', '-p1'],
+      ['+s', '+p1', '-s', '-p1'],
+      ['+s', '+p1', '-p1', '-s'],
+    ];
+
+    for (const sequence of sequences) {
+      const label = sequence.join(' ');
+      await test.step(label, async () => {
+        const open = new Set<string>();
+        for (const step of sequence) {
+          const id = step.slice(1);
+          if (step.startsWith('+')) {
+            await OPEN[id]();
+            open.add(id);
+          } else {
+            await CLOSE[id]();
+            open.delete(id);
+          }
+          const scoped = [...open].filter((entry) => entry.startsWith('s')).length;
+          const blocking = [...open].filter((entry) => entry.startsWith('p')).length;
+          const where = `${label} @ ${step}`;
+
+          // Settle the open set first: the invariant below can be satisfied by
+          // a close that has not finished, which would let the next step run
+          // against the wrong stack.
+          await expect
+            .poll(() => page.locator('[role="dialog"]').count(), {
+              message: `${where}: open dialogs`,
+              timeout: SETTLE_TIMEOUT,
+            })
+            .toBe(open.size);
+
+          await expect
+            .poll(
+              () =>
+                page.evaluate(() => ({
+                  hidden: [...document.body.children].some(
+                    (child) => child.getAttribute('aria-hidden') === 'true',
+                  ),
+                  released: document.body.hasAttribute('data-focus-trap'),
+                  blocked:
+                    document
+                      .querySelector('app-dialog-app-shell-scoped-example [hellAppContent]')
+                      ?.hasAttribute('inert') ?? false,
+                })),
+              { message: where, timeout: SETTLE_TIMEOUT },
+            )
+            .toEqual({
+              hidden: blocking > 0,
+              released: scoped > 0 && blocking === 0,
+              blocked: scoped > 0,
+            });
+        }
+        await expect(content).not.toHaveAttribute('inert', '');
+      });
+    }
+  });
+
   test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
     await page.goto('/components/dialpad');
 
