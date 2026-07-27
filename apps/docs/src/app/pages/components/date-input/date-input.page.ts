@@ -121,21 +121,33 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <p>
         Once a format is configured, Date Input writes the adapter's
         <code>placeholderHint</code> into the native <code>placeholder</code>. Four rules keep that
-        write out of your way: an input with no configured format is never touched, an input with no
-        accessible name is never touched, an adapter that omits <code>placeholderHint</code> (or
-        returns <code>null</code>) suppresses it entirely, and any authored
-        <code>placeholder</code> wins — including <code>placeholder=""</code>, which is the explicit
-        opt-out. The hint is applied after render, so server-rendered markup receives it on
+        write out of your way: an input with no configured format is never touched, an input that
+        authors no naming markup is never touched, an adapter that omits
+        <code>placeholderHint</code> (or returns <code>null</code>) suppresses it entirely, and any
+        authored <code>placeholder</code> wins — including <code>placeholder=""</code>, which is the
+        explicit opt-out. The hint is applied after render, so server-rendered markup receives it on
         hydration.
       </p>
       <p>
         A hint is a formatting affordance, never a label: <code>placeholder</code> is the last
         fallback in the accessible name computation, and automated checks such as axe's
-        <code>label</code> rule accept a non-empty one. Date Input therefore refuses to write a hint
-        onto an input with no <code>aria-label</code>, no <code>aria-labelledby</code> (including an
-        enclosing <a routerLink="/components/field">Field</a>'s), and no associated
-        <code>&lt;label&gt;</code> — a missing label stays exactly as visible to your tooling as it
-        was before. Name every Date Input, and the hint follows.
+        <code>label</code> rule accept a non-empty one. So Date Input will not write a hint onto an
+        input that names itself nowhere — no <code>aria-label</code>, no
+        <code>aria-labelledby</code> (including an enclosing
+        <a routerLink="/components/field">Field</a>'s), and no associated
+        <code>&lt;label&gt;</code>.
+      </p>
+      <p>
+        That is a check on markup, not a name computation, and it has two boundaries worth knowing.
+        Naming markup that is present but empty or dangling — <code>&lt;label
+        for="x"&gt;&lt;/label&gt;</code>, a text-less wrapping label, an <code>aria-labelledby</code>
+        whose target never renders — counts as authored, and the hint is written. And a label
+        removed after the hint was written does not take the hint with it, because only the
+        Field-supplied <code>aria-labelledby</code> is tracked reactively. Resolving label text, or
+        watching the DOM for mutations, would each trade these cases for worse ones — a label whose
+        text arrives asynchronously would lose its hint — so the rule stays deliberately simple and
+        its edges documented. It removes the common failure, not every one: keep a Field label or an
+        <code>aria-label</code> on every Date Input, and the hint follows.
       </p>
       <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-format-example />

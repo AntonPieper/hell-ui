@@ -5,9 +5,11 @@ body: >-
   or the `format` input, and only with the text the active adapter returns from
   its new optional `placeholderHint` hook. Inputs without a configured format
   keep an empty placeholder exactly as before, an adapter that omits the hook
-  suppresses the write, and authoring `placeholder=""` opts out. A placeholder is
-  also never written onto an input that has no `aria-label`, no `aria-labelledby`
-  (including an enclosing Field's), and no associated `<label>`, so a hint can
-  never become an unnamed input's accessible name and hide the missing label from
-  accessibility checks.
+  suppresses the write, and authoring `placeholder=""` opts out. Nothing is
+  written onto an input that authors no naming markup at all — no `aria-label`,
+  no `aria-labelledby` (including an enclosing Field's), and no associated
+  `<label>` — so a hint does not become the accessible name of an input that had
+  none. That check reads markup rather than computing a name, so empty or
+  dangling naming markup still counts as authored: keep a Field label or
+  `aria-label` on every Date Input.
 time: 2026-07-27T12:37:05.767453+02:00
