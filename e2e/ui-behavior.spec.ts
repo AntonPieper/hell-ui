@@ -1014,23 +1014,9 @@ test.describe('Hell UI browser behavior', () => {
       const firstPdfPage = viewer.locator('.pdfViewer .page').first();
       await expect(firstPdfPage).toBeVisible();
       const fittedBox = await firstPdfPage.boundingBox();
-      const scrollBox = await scrollContainer.boundingBox();
-      if (!fittedBox || !scrollBox) {
-        throw new Error('Expected PDF page and scroll container boxes for the double-tap test.');
-      }
+      if (!fittedBox) throw new Error('Expected a PDF page box for the double-tap test.');
 
-      const client = await page.context().newCDPSession(page);
-      const tapX = Math.round(scrollBox.x + scrollBox.width / 2);
-      const tapY = Math.round(scrollBox.y + Math.min(scrollBox.height * 0.4, scrollBox.height - 20));
-      const doubleTap = async () => {
-        for (let tap = 0; tap < 2; tap++) {
-          await client.send('Input.dispatchTouchEvent', {
-            type: 'touchStart',
-            touchPoints: [{ id: 51, x: tapX, y: tapY }],
-          });
-          await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-        }
-      };
+      const doubleTap = await doubleTapper(page, scrollContainer);
 
       await doubleTap();
 
@@ -1048,8 +1034,67 @@ test.describe('Hell UI browser behavior', () => {
         .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
         .toBeLessThan(fittedBox.width * 1.2);
     });
+
+    test('rotation keeps a magnified view and re-fits a restored preset', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(
+        browserName !== 'chromium',
+        'Rotation regression uses Chromium DevTools Protocol touch input.',
+      );
+
+      const viewer = await openBasicPdfViewer(page);
+      const zoomSelect = viewer.getByRole('combobox', { name: /zoom/i });
+      const firstPdfPage = viewer.locator('.pdfViewer .page').first();
+      const pageWidth = async () => (await firstPdfPage.boundingBox())?.width ?? 0;
+
+      const doubleTap = await doubleTapper(page, viewer.locator('[data-slot="pageArea"]'));
+      await doubleTap();
+      await expect(zoomSelect).not.toHaveValue('auto');
+      const magnified = await pageWidth();
+
+      // Landscape. A magnified view is a fixed scale, so the resize refit must
+      // leave it alone rather than re-fitting the user's zoom away.
+      await page.setViewportSize({ width: 844, height: 390 });
+      await expect(zoomSelect).not.toHaveValue('auto');
+      await expect.poll(pageWidth).toBeCloseTo(magnified, 0);
+
+      // Back to the preset, which does re-fit — to the landscape box first.
+      await doubleTap();
+      await expect(zoomSelect).toHaveValue('auto');
+      const landscapeFit = await pageWidth();
+      expect(landscapeFit).toBeLessThan(magnified);
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(zoomSelect).toHaveValue('auto');
+      await expect.poll(pageWidth).toBeLessThan(landscapeFit);
+    });
   });
 });
+
+/**
+ * Dispatch a double tap inside a target through CDP touch input. The box is
+ * measured per call so the tap follows the target across a rotation.
+ */
+async function doubleTapper(page: Page, target: Locator): Promise<() => Promise<void>> {
+  const client = await page.context().newCDPSession(page);
+
+  return async () => {
+    const box = await target.boundingBox();
+    if (!box) throw new Error('Expected a box for the double-tap target.');
+    const x = Math.round(box.x + box.width / 2);
+    const y = Math.round(box.y + Math.min(box.height * 0.4, box.height - 20));
+
+    for (let tap = 0; tap < 2; tap++) {
+      await client.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ id: 51, x, y }],
+      });
+      await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    }
+  };
+}
 
 /** Open the docs page's basic PDF example and return its viewer. */
 async function openBasicPdfViewer(page: Page): Promise<Locator> {
