@@ -326,8 +326,9 @@ describe('HellDatePicker', () => {
     ['mk-MK', 'април', '2026\u202fг.'],
     ['eu-ES', 'apirila', '2026(e)ko'],
     ['ku', 'nîsana', '2026an'],
-    // A marker can carry the unit separator on its tail; only the comma
-    // class is peeled back off, never the full stop these three end in.
+    // A marker can carry the unit separator on its tail; only the comma class
+    // is peeled back off. `ky` and `lv` end their marker in a full stop, which
+    // is never peeled; `tt`'s marker is a bare word.
     ['ky', 'апрель', '2026-ж.'],
     ['tt', 'апрель', '2026\u202fел'],
     ['lv', 'aprīlis', '2026. g.'],
@@ -385,10 +386,18 @@ describe('HellDatePicker', () => {
 
   // Calendar overrides are outside the documented `locale` contract, so these
   // pin the two rules that keep a trigger honest rather than any particular
-  // rendering: an era never lands in a *month* trigger (it qualifies a year),
-  // and a marker behind a separator prefixes nothing. `uz-u-ca-*` formats as
-  // `2569 (BE), aprel`; `tr-u-ca-buddhist` puts its era first, before the
-  // month.
+  // rendering: a buffered prefix is treated as qualifying the year, so it does
+  // not ride into a month trigger, and a marker behind a separator prefixes
+  // nothing. `uz-u-ca-*` formats as `2569 (BE), aprel`; `tr-u-ca-buddhist`
+  // puts its era first, before the month.
+  //
+  // The rule is positional, not semantic — it cannot tell an era from a month
+  // word, because the part types collapse to month/year/literal before it
+  // runs. `vi-u-ca-chinese` leads with the literal `tháng ` ("month"), which is
+  // therefore flushed out rather than folded, leaving a bare `3` in the
+  // trigger. Knowingly accepted: `-u-ca-` only, no text is lost from the
+  // heading, and plain `vi` is untouched because ICU puts `tháng 4` inside its
+  // own month part.
   const CALENDAR_OVERRIDES: readonly (readonly [string, string, string])[] = [
     ['uz-u-ca-buddhist', 'aprel', '2569'],
     ['uz-u-ca-japanese', 'aprel', '8'],

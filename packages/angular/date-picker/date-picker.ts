@@ -558,9 +558,17 @@ function formatLabelSegments(
 
   for (const part of parts) {
     if (part.type !== 'literal') {
-      // A buffered marker qualifies a year — `AP 1405` — and never a month, so
-      // anything else arriving first flushes it out as plain text. Without
+      // A buffered marker is treated as qualifying the year — `AP 1405` — so
+      // any other unit arriving first flushes it out as plain text. Without
       // this, `tr-u-ca-buddhist` labels its month button `BE Nisan`.
+      //
+      // Positional, not semantic: the part types have already collapsed to
+      // month/year/literal, so this cannot tell an era from a month word. Under
+      // `vi-u-ca-chinese`, whose leading literal is `tháng ` ("month"), it
+      // flushes a prefix that did belong to the month. Accepted — that is a
+      // `-u-ca-` calendar, outside the documented `locale` contract, and the
+      // heading still reads in full either way. Distinguishing the two would
+      // mean keeping `formatToParts`' `era` tag instead of collapsing it.
       if (pendingPrefix && part.type !== 'year') {
         segments.push({ type: 'literal', value: pendingPrefix });
         pendingPrefix = '';
