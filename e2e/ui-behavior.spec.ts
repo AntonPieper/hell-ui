@@ -331,6 +331,55 @@ test.describe('Hell UI browser behavior', () => {
     await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
   });
 
+  test('dialpad inserts, deletes, and replaces at the caret', async ({ page }) => {
+    await page.goto('/components/dialpad');
+
+    const example = page.locator('app-dialpad-basic-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    const display = dialpad.getByRole('textbox', { name: 'Number' });
+    const caret = async (): Promise<(number | null)[]> =>
+      display.evaluate((node) => {
+        const input = node as HTMLInputElement;
+        return [input.selectionStart, input.selectionEnd];
+      });
+
+    await dialpad.getByRole('button', { name: 'Digit 1' }).click();
+    await dialpad.getByRole('button', { name: 'Digit 3, DEF' }).click();
+    await expect(display).toHaveValue('13');
+
+    // Clicking past the digits puts the caret at the end; arrow-keying moves
+    // it, and the next key lands there instead of at the end.
+    await display.click();
+    expect(await caret()).toEqual([2, 2]);
+    await page.keyboard.press('ArrowLeft');
+    expect(await caret()).toEqual([1, 1]);
+
+    await dialpad.getByRole('button', { name: 'Digit 2, ABC' }).click();
+    await expect(display).toHaveValue('123');
+    expect(await caret()).toEqual([2, 2]);
+
+    // Backspace deletes at the caret, even while the tapped key holds focus.
+    await page.keyboard.press('Backspace');
+    await expect(display).toHaveValue('13');
+    expect(await caret()).toEqual([1, 1]);
+
+    // A selected range is replaced by the next press.
+    await display.click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await dialpad.getByRole('button', { name: 'Digit 9, WXYZ' }).click();
+    await expect(display).toHaveValue('9');
+    expect(await caret()).toEqual([1, 1]);
+
+    // Typing straight into the display inserts at the caret too.
+    await display.click();
+    await page.keyboard.press('ArrowLeft');
+    expect(await caret()).toEqual([0, 0]);
+    await page.keyboard.press('4');
+    await page.keyboard.press('5');
+    await expect(display).toHaveValue('459');
+    expect(await caret()).toEqual([2, 2]);
+  });
+
   test('dialpad keeps overlapping taps and still cancels a slide-off', async ({
     page,
     browserName,

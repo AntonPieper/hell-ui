@@ -5,10 +5,11 @@ import { ChangeDetectionStrategy,
   EventEmitter,
   Input,
   Output,
+  afterRenderEffect,
   booleanAttribute,
   computed,
   inject,
-  signal, input } from '@angular/core';
+  signal, input, viewChild } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
@@ -48,6 +49,20 @@ interface HellDialpadKey {
 interface HellDialpadPlusHold {
   timer: ReturnType<typeof setTimeout> | null;
   entered: boolean;
+}
+
+/** The number and caret one dialpad-owned edit expects the display to show. */
+interface HellDialpadEdit {
+  /** The number the edit produced. */
+  readonly value: string;
+  /** Where the caret belongs once that number has rendered. */
+  readonly caret: number;
+}
+
+/** A caret position or selected range inside the number input. */
+interface HellDialpadSelection {
+  readonly start: number;
+  readonly end: number;
 }
 
 /** Public parts of the HellDialpad module, styleable through its Part Style Map. */
@@ -116,9 +131,10 @@ const HELL_DIALPAD_RECIPE = {
 /**
  * Telephony dialpad. Emits `(digit)` whenever a key is pressed and maintains
  * the entered number internally. Bind `[value]` for controlled mode, listen
- * to `(valueChange)` for the running number. Backspace removes the last
- * digit; keyboard input is supported when the dialpad or one of its controls
- * has focus.
+ * to `(valueChange)` for the running number. Keys, typing, and backspace all
+ * act on the caret in the number display, so placing the caret inside the
+ * number inserts and deletes there and a selected range is replaced; keyboard
+ * input is supported when the dialpad or one of its controls has focus.
  */
 @Component({
   selector: 'hell-dialpad',
@@ -146,6 +162,7 @@ const HELL_DIALPAD_RECIPE = {
     >
       <span data-slot="displayLabel" [class]="part('displayLabel')">{{ numberLabel() }}</span>
       <input
+        #numberInput
         data-slot="numberInput"
         [class]="part('numberInput')"
         type="tel"
@@ -162,6 +179,9 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-invalid]="invalid() ? '' : null"
         (beforeinput)="onBeforeInput($event)"
         (input)="onNumberInput($event)"
+        (pointerup)="onNumberSelect($event)"
+        (keyup)="onNumberSelect($event)"
+        (select)="onNumberSelect($event)"
       />
     </label>
 
@@ -324,10 +344,40 @@ export class HellDialpad {
    */
   private readonly plusHolds = new Map<number, HellDialpadPlusHold>();
   private stopWatchingPointerRelease: (() => void) | null = null;
+  private readonly numberInputRef = viewChild<ElementRef<HTMLInputElement>>('numberInput');
+  /**
+   * The most recent dialpad-owned edit, kept until the number it produced has
+   * rendered so the caret can be put back where the edit left it.
+   */
+  private readonly pendingEdit = signal<HellDialpadEdit | null>(null);
+  /**
+   * Where the next edit lands, or `null` for the end of the number. Tracked
+   * from the number input's own interactions rather than read back on demand:
+   * a pointer drag anywhere else on the page collapses an unfocused field's
+   * native selection to `0`, and sliding off a key to cancel a tap would
+   * otherwise send the following digits to the front of the number.
+   */
+  private caret: HellDialpadSelection | null = null;
   /** Template alias for the call-button visibility signal. */
   protected readonly showCallButtonState = this.showCallButton;
 
   constructor() {
+    // Writing `[value]` moves the native caret to the end of the input, so a
+    // dialpad-owned edit only reaches its caret after the new number has
+    // rendered. A controlled value echoes back one render later than a local
+    // one, hence the `display()` dependency next to the edit itself; matching
+    // the rendered number keeps an unrelated external write from adopting a
+    // stale caret.
+    afterRenderEffect(() => {
+      const edit = this.pendingEdit();
+      const value = this.display();
+      if (!edit || edit.value !== value) return;
+
+      const input = this.numberInputRef()?.nativeElement;
+      if (!input || input.value !== value) return;
+      input.setSelectionRange(edit.caret, edit.caret);
+    });
+
     this.destroyRef.onDestroy(() => {
       this.clearActiveTimer();
       this.releaseAllPointers();
@@ -458,28 +508,42 @@ export class HellDialpad {
     this.press(digit);
   }
 
-  /** Append one digit and emit `digit`/`valueChange`. */
+  /**
+   * Insert one digit at the caret, replacing any selected range, and emit
+   * `digit`/`valueChange`.
+   */
   protected press(d: string): void {
     if (!this.canEdit()) return;
-    const next = this.display() + d;
+    const value = this.display();
+    const { start, end } = this.selection();
+    const next = value.slice(0, start) + d + value.slice(end);
     this.flash(d);
-    this.setNumber(next);
+    this.commit(next, start + d.length);
     this.digit.emit(d);
   }
 
-  /** Remove the last digit. */
+  /**
+   * Delete the selected range, or the single character before the caret when
+   * nothing is selected.
+   */
   protected backspace(): void {
     if (!this.canEdit() || !this.hasValue()) return;
-    const next = this.display().slice(0, -1);
+    const value = this.display();
+    const { start, end } = this.selection();
+    // A collapsed caret before the first character has nothing to delete.
+    if (start === end && start === 0) return;
+
+    const from = start === end ? start - 1 : start;
+    const next = value.slice(0, from) + value.slice(end);
     this.flash('back');
-    this.setNumber(next);
+    this.commit(next, from);
   }
 
   /** Clear the whole number. */
   protected clear(): void {
     if (!this.canEdit() || !this.hasValue()) return;
     this.flash('clear');
-    this.setNumber('');
+    this.commit('', 0);
   }
 
   /** Emit the call event for the current number. */
@@ -501,6 +565,26 @@ export class HellDialpad {
     }
   }
 
+  /**
+   * Adopt the caret or range the user placed in the number input by clicking,
+   * dragging, or arrow-keying, so the next key press, typed character, or
+   * backspace acts there.
+   */
+  protected onNumberSelect(event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    // An edit still on its way to the field would report the caret it had
+    // before that edit, so only a field already showing the current number
+    // can say where the caret is. A controlled host that keeps its own number
+    // still gets a caret this way, because the field agrees with it.
+    if (input.value !== this.display()) return;
+
+    const { selectionStart, selectionEnd } = input;
+    if (selectionStart === null || selectionEnd === null) return;
+    this.caret = { start: selectionStart, end: selectionEnd };
+  }
+
   /** Sync direct edits of the number input into dialpad state. */
   protected onNumberInput(event: Event): void {
     const input = event.target;
@@ -511,9 +595,19 @@ export class HellDialpad {
       return;
     }
 
-    const next = this.sanitizeNumber(input.value);
-    input.value = next;
-    this.setNumber(next);
+    // Paste, drop, and IME text reach the field unfiltered, so the round trip
+    // rewrites the field. Rewriting the whole value would drop the caret at
+    // the end, so it moves to the sanitized length of the text that preceded
+    // it instead.
+    const raw = input.value;
+    const rawCaret = input.selectionStart ?? raw.length;
+    const next = this.sanitizeNumber(raw);
+    const caret = this.sanitizeNumber(raw.slice(0, rawCaret)).length;
+    if (raw !== next) {
+      input.value = next;
+      input.setSelectionRange(caret, caret);
+    }
+    this.commit(next, caret);
   }
 
   /** Keyboard support: digits, `*`, `#`, `+`, Backspace, Delete, and Enter. */
@@ -563,6 +657,27 @@ export class HellDialpad {
         input.focus();
       }
     });
+  }
+
+  /** Record an edit's caret and publish the number it produced. */
+  private commit(value: string, caret: number): void {
+    this.caret = { start: caret, end: caret };
+    this.pendingEdit.set({ value, caret });
+    this.setNumber(value);
+  }
+
+  /**
+   * The caret or selected range the next edit acts on, clamped to the number
+   * currently on display. A dialpad nobody has clicked into stays
+   * append-only.
+   */
+  private selection(): HellDialpadSelection {
+    const length = this.display().length;
+    if (!this.caret) return { start: length, end: length };
+    return {
+      start: Math.min(this.caret.start, length),
+      end: Math.min(this.caret.end, length),
+    };
   }
 
   private setNumber(value: string): void {
