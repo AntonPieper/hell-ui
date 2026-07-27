@@ -366,12 +366,28 @@ describe('HellTimePicker', () => {
 
       expect(minutes.scrollTop).toBe(centeredScrollTop(30, 60));
 
-      // A 15-minute grid turns 60 options into 4, so minute 30 becomes index 2.
-      fixture.componentInstance.minuteStep.set(15);
+      // A 5-minute grid turns 60 options into 12, so minute 30 becomes index 6.
+      // The step has to leave the column *scrollable* for this to discriminate:
+      // at 15 minutes the column holds 4 options, its scrollable range collapses
+      // to zero, and both the expectation and any wrong answer clamp to 0.
+      fixture.componentInstance.minuteStep.set(5);
       fixture.detectChanges();
 
-      expect(optionValues(fixture, 'minute')).toEqual(['00', '15', '30', '45']);
-      expect(minutes.scrollTop).toBe(centeredScrollTop(2, 4));
+      expect(optionValues(fixture, 'minute')).toEqual([
+        '00',
+        '05',
+        '10',
+        '15',
+        '20',
+        '25',
+        '30',
+        '35',
+        '40',
+        '45',
+        '50',
+        '55',
+      ]);
+      expect(minutes.scrollTop).toBe(centeredScrollTop(6, 12));
     });
   });
 
@@ -818,10 +834,10 @@ function clampScrollTop(value: number, optionCount: number): number {
 function installStubLayout(): () => void {
   const scrollTops = new WeakMap<HTMLElement, number>();
   const originalRect = HTMLElement.prototype.getBoundingClientRect;
-  const originalScrollTop = Object.getOwnPropertyDescriptor(
-    HTMLElement.prototype,
-    'scrollTop',
-  );
+  // Restore needs the *own* descriptor, which jsdom may not define here at all;
+  // delegation needs the effective one, which jsdom puts on `Element.prototype`.
+  const ownScrollTop = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollTop');
+  const inheritedScrollTop = findDescriptor(HTMLElement.prototype, 'scrollTop');
 
   const optionCountOf = (element: HTMLElement): number =>
     element.querySelectorAll('[data-slot="option"]').length;
@@ -829,12 +845,23 @@ function installStubLayout(): () => void {
   Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
     configurable: true,
     get(this: HTMLElement) {
-      const stored = scrollTops.get(this) ?? 0;
-      // Browsers re-clamp when the content shrinks under a scrolled viewport,
-      // which is exactly what a step change does to a column.
-      return clampScrollTop(stored, optionCountOf(this));
+      // Scoped like the rect stub below: anything that is not a column viewport
+      // keeps the real behavior, rather than being pinned to 0 by a max derived
+      // from an option count it does not have.
+      if (!this.matches('[data-slot="options"]')) {
+        return (inheritedScrollTop?.get?.call(this) as number | undefined) ?? 0;
+      }
+      // Read-side clamp only. A real browser re-clamps by *writing back* when
+      // content shrinks under a scrolled viewport; this reports the clamped
+      // value but keeps the stored one, so a shrink-then-regrow would report
+      // the original offset where a browser reports the clamped one.
+      return clampScrollTop(scrollTops.get(this) ?? 0, optionCountOf(this));
     },
     set(this: HTMLElement, value: number) {
+      if (!this.matches('[data-slot="options"]')) {
+        inheritedScrollTop?.set?.call(this, value);
+        return;
+      }
       scrollTops.set(this, clampScrollTop(value, optionCountOf(this)));
     },
   });
@@ -855,12 +882,25 @@ function installStubLayout(): () => void {
 
   return () => {
     HTMLElement.prototype.getBoundingClientRect = originalRect;
-    if (originalScrollTop) {
-      Object.defineProperty(HTMLElement.prototype, 'scrollTop', originalScrollTop);
+    if (ownScrollTop) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollTop', ownScrollTop);
     } else {
+      // Nothing of ours was shadowing anything of jsdom's here, so removing the
+      // own property uncovers the inherited accessor again.
       delete (HTMLElement.prototype as unknown as { scrollTop?: unknown }).scrollTop;
     }
   };
+}
+
+/** The nearest descriptor for `key` on `start` or anything it inherits from. */
+function findDescriptor(start: object, key: string): PropertyDescriptor | undefined {
+  let prototype: object | null = start;
+  while (prototype) {
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
+    if (descriptor) return descriptor;
+    prototype = Object.getPrototypeOf(prototype) as object | null;
+  }
+  return undefined;
 }
 
 function stubRect(top: number, height: number): DOMRect {
