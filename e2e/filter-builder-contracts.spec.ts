@@ -70,6 +70,61 @@ async function ownedDropdown(page: Page, input: Locator): Promise<Locator> {
   return page.locator(`#${dropdownId}[hellComboboxDropdown]`);
 }
 
+/** Window key holding the statuses recorded by `recordStatusAnnouncements`. */
+const STATUS_LOG_KEY = '__hellFilterBuilderStatusLog';
+
+interface StatusRecorderScope {
+  [STATUS_LOG_KEY]?: string[];
+  __hellFilterBuilderStatusObserver?: MutationObserver;
+}
+
+/**
+ * Starts recording every status a dropdown announces, discarding any earlier
+ * recording. Call it immediately before the action that should produce one.
+ *
+ * `expect(locator).toHaveText(…)` samples: it asks repeatedly whether something
+ * is true *now*, which answers "does the page settle here" and not "did the
+ * page pass through here". A Search Resource's loading status exists only while
+ * its request is in flight — here for the source's 320ms, starting after a
+ * 120ms debounce — so sampling for it calls a healthy page broken whenever two
+ * consecutive polls happen to land either side of that window. Measured on
+ * this suite at roughly one run in 180, with the status confirmed present in
+ * the DOM on the run that failed. Recording what the panel rendered asks the
+ * question the test actually means and cannot miss the answer.
+ */
+async function recordStatusAnnouncements(dropdown: Locator): Promise<void> {
+  await dropdown.evaluate((panel, key) => {
+    const scope = window as unknown as StatusRecorderScope;
+    scope.__hellFilterBuilderStatusObserver?.disconnect();
+    const log: string[] = [];
+    (scope as Record<string, unknown>)[key] = log;
+    const capture = (): void => {
+      for (const node of panel.querySelectorAll('[role="status"]')) {
+        const text = (node.textContent ?? '').trim();
+        if (text && !log.includes(text)) log.push(text);
+      }
+    };
+    capture();
+    const observer = new MutationObserver(capture);
+    observer.observe(panel, { subtree: true, childList: true, characterData: true });
+    scope.__hellFilterBuilderStatusObserver = observer;
+  }, STATUS_LOG_KEY);
+}
+
+/** Fails unless the recorded dropdown announced `text` at some point. */
+async function expectStatusAnnounced(page: Page, text: string): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          (key) => ((window as unknown as Record<string, string[]>)[key] ?? []) as string[],
+          STATUS_LOG_KEY,
+        ),
+      { message: `the dropdown never announced “${text}”` },
+    )
+    .toContain(text);
+}
+
 async function selectField(
   page: Page,
   root: Locator,
@@ -311,15 +366,17 @@ test.describe('Filter Builder browser contract', () => {
     let dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('fail');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
     );
     await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('grace');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(page.getByRole('option', { name: /Grace Hopper/ })).toBeVisible();
     await input.press('ArrowDown');
     await input.press('Enter');
@@ -335,8 +392,9 @@ test.describe('Filter Builder browser contract', () => {
     dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('linus');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(page.getByRole('option', { name: /Linus Torvalds/ })).toBeVisible();
     await input.press('ArrowDown');
     await input.press('Enter');
@@ -360,15 +418,19 @@ test.describe('Filter Builder browser contract', () => {
     const dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('error');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
     );
     await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
 
+    // The 'mara' request must be in flight before 'theo' supersedes it, or the
+    // cancellation the next two assertions describe never happens.
+    await recordStatusAnnouncements(dropdown);
     await input.fill('mara');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await input.fill('theo');
     await expect(page.getByRole('option', { name: 'Theo Martin', exact: true })).toBeVisible();
     await expect(page.getByRole('option', { name: 'Mara Voss', exact: true })).toHaveCount(0);
