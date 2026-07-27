@@ -18,7 +18,7 @@ export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellLabels<HellBreadcrumbLa
 
 // @public
 export class HellBreadcrumbEllipsis {
-    readonly ariaLabel: i0.InputSignal<string | null>;
+    readonly ariaLabel: i0.InputSignal<null | string>;
     protected readonly labels: HellLabels<HellBreadcrumbLabels>;
     protected nativeButtonType(): 'button' | null;
     protected readonly part: (part: "root") => string;

@@ -27,7 +27,7 @@ export class HellCheckbox implements FormCheckboxControl {
 }
 
 // @public
-export type HellCheckboxPart = 'root' | 'indicator';
+export type HellCheckboxPart = 'indicator' | 'root';
 
 // @public
 export type HellCheckboxUi = HellUi<HellCheckboxPart>;

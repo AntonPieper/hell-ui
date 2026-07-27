@@ -32,7 +32,7 @@ export class HellMasterDetailBack {
 
 // @public
 export class HellMasterPane {
-    readonly hellMasterPane: _angular_core.InputSignal<"primary" | "detail">;
+    readonly hellMasterPane: _angular_core.InputSignal<"detail" | "primary">;
     protected readonly part: (part: "root") => string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellMasterPane, "[hellMasterPane]", never, { "hellMasterPane": { "alias": "hellMasterPane"; "required": true; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

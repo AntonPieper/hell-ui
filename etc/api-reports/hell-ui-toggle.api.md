@@ -28,7 +28,7 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
     protected readonly part: (part: "root") => string;
     protected readonly state: ng_primitives_toggle_group.NgpToggleGroupState;
     readonly touch: _angular_core.OutputEmitterRef<void>;
-    readonly type: _angular_core.InputSignal<"single" | "multiple">;
+    readonly type: _angular_core.InputSignal<"multiple" | "single">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly value: _angular_core.ModelSignal<HellToggleGroupValue>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellToggleGroup, "[hellToggleGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "type": { "alias": "type"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, never>;
@@ -46,7 +46,7 @@ export class HellToggleGroupItem {
 }
 
 // @public
-export type HellToggleGroupValue = string | null | readonly string[];
+export type HellToggleGroupValue = null | readonly string[] | string;
 
 // (No @packageDocumentation comment for this package)
 

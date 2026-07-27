@@ -1,6 +1,0 @@
-kind: Added
-body: >-
-  `HellTanStackRowClassInput` names the type the TanStack Table shell's
-  `rowClass` input accepts, so a class value or a per-row function can be typed
-  without spelling the union out.
-time: 2026-07-27T22:15:00.000Z

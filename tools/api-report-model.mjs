@@ -1,6 +1,81 @@
 import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
+import ts from 'typescript';
+
+/**
+ * Sort the members of every union type before the report is generated.
+ *
+ * The compiler does not print an inferred union in source order. It prints it
+ * in the order the constituent types happened to be created, which follows what
+ * else the program had already checked — so `'line' | 'grip'` in source emits as
+ * `"grip" | "line"` whenever some earlier declaration created `'grip'` first.
+ * `HellResizableHandlePart` does exactly that 420 lines above the member, and
+ * `hell-ui-resizable.api.md` has recorded the reversed order all along.
+ *
+ * That makes the order a fact about compilation, not about the API. Adding a
+ * private, unexported alias elsewhere in a file reorders an exported member and
+ * fails this gate with no public change at all; six exported members already
+ * print reversed today, and 33 have two or more constituents whose order the
+ * compiler chooses.
+ *
+ * Sorting loses nothing a consumer can observe. `A | B` and `B | A` are the same
+ * type, and TypeScript re-normalises union order when it reads a declaration, so
+ * the printed order never reaches consumer behaviour. Adding, removing or
+ * changing a member still shows up, because that changes the set, not the order.
+ *
+ * The alternatives were measured and rejected. `stableTypeOrdering` in
+ * TypeScript 6.0.3 does not affect this printing — with the flag on,
+ * `appearance` still emits `"grip" | "line"` — and naming all 33 unions would
+ * mint 33 public exports to work around a compiler artifact.
+ */
+function canonicaliseUnionOrder(declarationText) {
+  const source = ts.createSourceFile(
+    'staged.d.ts',
+    declarationText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  /** Union nodes under `node` that no other union under `node` already contains. */
+  function outermostUnions(node) {
+    const found = [];
+    node.forEachChild(function walk(child) {
+      if (ts.isUnionTypeNode(child)) found.push(child);
+      else child.forEachChild(walk);
+    });
+    return found;
+  }
+
+  // Rebuilt from the original text, so everything that is not a union — spacing,
+  // comments, parentheses, generics — survives byte for byte.
+  function render(node) {
+    if (ts.isUnionTypeNode(node)) {
+      return node.types
+        .map(render)
+        .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+        .join(' | ');
+    }
+    let text = '';
+    let cursor = node.getStart(source);
+    for (const union of outermostUnions(node)) {
+      text += source.text.slice(cursor, union.getStart(source));
+      text += render(union);
+      cursor = union.getEnd();
+    }
+    return text + source.text.slice(cursor, node.getEnd());
+  }
+
+  let output = '';
+  let cursor = 0;
+  for (const union of outermostUnions(source)) {
+    output += source.text.slice(cursor, union.getStart(source));
+    output += render(union);
+    cursor = union.getEnd();
+  }
+  return output + source.text.slice(cursor);
+}
 
 /**
  * Stage the built declarations as a self-contained package for API Extractor.
@@ -64,11 +139,61 @@ function normalizeApiReportDeclarations(declarationText) {
     }
     normalized.push(line);
   }
-  return normalized.join('\n');
+  return canonicaliseUnionOrder(normalized.join('\n'));
+}
+
+function checkUnionOrderFixture() {
+  const sorted = canonicaliseUnionOrder(
+    'export declare const a: "grip" | "line";\nexport declare const b: "line" | "grip";\n',
+  );
+  assert.match(sorted, /const a: "grip" \| "line";/, 'a union is emitted in sorted order');
+  assert.match(
+    sorted,
+    /const b: "grip" \| "line";/,
+    'and the reverse spelling of the same union becomes identical text',
+  );
+
+  // Nested unions sort independently, and the surrounding syntax is untouched.
+  assert.equal(
+    canonicaliseUnionOrder('type T = Map<"z" | "a", ("q" | "b")[]> | null;'),
+    'type T = Map<"a" | "z", ("b" | "q")[]> | null;',
+    'nested unions are sorted without disturbing the syntax around them',
+  );
+
+  // A pipe inside a string literal or a template must not be mistaken for a
+  // union separator, which is why this parses rather than splitting text.
+  const literal = 'export declare const c: "a|b" | "a";';
+  assert.equal(
+    canonicaliseUnionOrder(literal),
+    'export declare const c: "a" | "a|b";',
+    'a pipe inside a literal is not a separator',
+  );
+
+  // Function types carry their own parameter lists; sorting must not reach into
+  // them or reorder anything that is not a union constituent.
+  assert.equal(
+    canonicaliseUnionOrder('type F = ((row: A, b: B) => void) | string | null;'),
+    'type F = ((row: A, b: B) => void) | null | string;',
+    'function-type constituents keep their internals and sort as a whole',
+  );
+
+  // The set still matters: adding a member is still a change.
+  assert.notEqual(
+    canonicaliseUnionOrder('type U = "a" | "b";'),
+    canonicaliseUnionOrder('type U = "a" | "b" | "c";'),
+    'sorting must not hide a member appearing or disappearing',
+  );
+
+  assert.equal(
+    canonicaliseUnionOrder('export declare const d: string;\n'),
+    'export declare const d: string;\n',
+    'a declaration with no union is returned unchanged',
+  );
 }
 
 /** Self-check with a synthetic declaration; runs before the real gate. */
 export function checkApiReportInputPackageFixture() {
+  checkUnionOrderFixture();
   const declarations = [
     'export declare class Fixture {',
     '    static ɵfac: i0.ɵɵFactoryDeclaration<Fixture, never>;',

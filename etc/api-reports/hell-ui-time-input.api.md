@@ -22,21 +22,21 @@ export const HELL_TIME_INPUT_ADAPTER: InjectionToken<HellTimeInputAdapter>;
 // @public
 export class HellTimeInput implements FormValueControl<HellTimeValue | null> {
     constructor();
-    readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
+    readonly ariaDescribedby: _angular_core.InputSignal<null | string>;
+    readonly ariaLabelledby: _angular_core.InputSignal<null | string>;
     protected readonly current: Signal<HellTimeValue | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly display: _angular_core.Signal<string>;
-    protected readonly fieldAriaDescribedby: Signal<string | null>;
-    protected readonly fieldAriaLabelledby: Signal<string | null>;
+    protected readonly fieldAriaDescribedby: Signal<null | string>;
+    protected readonly fieldAriaLabelledby: Signal<null | string>;
     readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
     protected readonly isInvalid: () => boolean;
     readonly max: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
     readonly min: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
-    protected readonly nativeMax: Signal<string | null>;
-    protected readonly nativeMin: Signal<string | null>;
+    protected readonly nativeMax: Signal<null | string>;
+    protected readonly nativeMin: Signal<null | string>;
     protected readonly nativeStep: Signal<"1" | "60">;
     protected onBlur(): void;
     protected onInput(): void;

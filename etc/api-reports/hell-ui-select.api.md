@@ -18,7 +18,7 @@ export const HELL_SELECT_IMPORTS: readonly [typeof HellSelect, typeof HellSelect
 export class HellNativeSelect {
     readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;
-    readonly size: i0.InputSignal<"sm" | "md" | "lg">;
+    readonly size: i0.InputSignal<"lg" | "md" | "sm">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellNativeSelect, never>;

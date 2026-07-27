@@ -67,7 +67,7 @@ export interface HellDismissContext {
 // @public (undocumented)
 export interface HellDismissDecision {
     readonly preventDefault?: boolean;
-    readonly restoreFocus?: false | HTMLElement | (() => HTMLElement | null | undefined);
+    readonly restoreFocus?: (() => HTMLElement | null | undefined) | HTMLElement | false;
     readonly stopPropagation?: boolean;
 }
 
@@ -168,7 +168,7 @@ export class HellFloatingInteractionController {
 }
 
 // @public (undocumented)
-export interface HellFloatingInteractionOptions extends Omit<HellFloatingDismissOptions, 'root' | 'inside' | 'scope' | 'ownerDocument'> {
+export interface HellFloatingInteractionOptions extends Omit<HellFloatingDismissOptions, 'inside' | 'ownerDocument' | 'root' | 'scope'> {
     // (undocumented)
     readonly inside?: () => readonly (Node | null | undefined)[];
     // (undocumented)
@@ -237,7 +237,7 @@ export function hellFloatingTargetNode(target: EventTarget | Node | null): Node 
 export function hellGuardDismiss(rule: HellDismissRule, guard: (context: HellDismissContext, decision: HellDismissDecision) => boolean): HellDismissRule;
 
 // @public (undocumented)
-export function hellIdRefs(value: string | null | undefined): string[];
+export function hellIdRefs(value: null | string | undefined): string[];
 
 // @public
 export function hellInvalidTypedValue(): HellTypedValueInvalidParse;
@@ -246,7 +246,7 @@ export function hellInvalidTypedValue(): HellTypedValueInvalidParse;
 export abstract class HellNativeInteractiveDisabledGuard {
     // (undocumented)
     protected anchorAriaDisabled(disabled: boolean): 'true' | null;
-    protected disabledAnchorTabIndex(disabled: boolean): string | -1 | null;
+    protected disabledAnchorTabIndex(disabled: boolean): -1 | null | string;
     // (undocumented)
     protected isAnchor(): boolean;
     // (undocumented)
@@ -279,7 +279,7 @@ export const hellOutsideClick: HellDismissRule;
 export const hellOutsideFocus: HellDismissRule;
 
 // @public
-export function hellPartStyler<Part extends string>(ui: () => string | Partial<Record<Part, string>> | null | undefined, options: HellPartStylerOptions<Part>): (part: Part) => string;
+export function hellPartStyler<Part extends string>(ui: () => Partial<Record<Part, string>> | null | string | undefined, options: HellPartStylerOptions<Part>): (part: Part) => string;
 
 // @public
 export interface HellPartStylerOptions<Part extends string> {
@@ -317,7 +317,7 @@ export type HellPickMultipleValue<T = unknown> = readonly T[];
 export type HellPickSingleValue<T = unknown> = T | null;
 
 // @public
-export type HellPickValue<T = unknown> = HellPickSingleValue<T> | HellPickMultipleValue<T>;
+export type HellPickValue<T = unknown> = HellPickMultipleValue<T> | HellPickSingleValue<T>;
 
 // @public
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
@@ -378,7 +378,7 @@ export interface HellResizeItemAdapter<TItem> {
 }
 
 // @public (undocumented)
-export type HellResizeKeyIntent = 'decrement' | 'increment' | 'min' | 'max';
+export type HellResizeKeyIntent = 'decrement' | 'increment' | 'max' | 'min';
 
 // @public
 export class HellResizeOperation {
@@ -544,16 +544,16 @@ export interface HellResizeTransactionResult {
 }
 
 // @public
-export function hellResolveElementTarget(target: HTMLElement | ElementRef<HTMLElement> | null | undefined): HTMLElement | null;
+export function hellResolveElementTarget(target: ElementRef<HTMLElement> | HTMLElement | null | undefined): HTMLElement | null;
 
 // @public
 export function hellSamePickValue<T>(left: HellPickValue<T> | undefined, right: HellPickValue<T> | undefined): boolean;
 
 // @public
-export function hellSyncFormFieldDescriptions(formField: NgpFormFieldState, describedBy: Signal<string | null>): void;
+export function hellSyncFormFieldDescriptions(formField: NgpFormFieldState, describedBy: Signal<null | string>): void;
 
 // @public
-export function hellSyncFormFieldLabels(formField: NgpFormFieldState, labelledBy: Signal<string | null>): void;
+export function hellSyncFormFieldLabels(formField: NgpFormFieldState, labelledBy: Signal<null | string>): void;
 
 // @public
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
@@ -566,7 +566,7 @@ export interface HellTypedValueCommitResult<TOutput> {
     // (undocumented)
     readonly committed: boolean;
     // (undocumented)
-    readonly reason?: 'invalid' | 'stale' | 'missing-draft';
+    readonly reason?: 'invalid' | 'missing-draft' | 'stale';
     // (undocumented)
     readonly value: TOutput | null;
 }
@@ -619,7 +619,7 @@ export type HellTypedValueOutputAdapter<TValue, TOutput> = [TValue] extends [TOu
 };
 
 // @public
-export type HellTypedValueParseResult<TValue> = HellTypedValueValidParse<TValue> | HellTypedValueInvalidParse;
+export type HellTypedValueParseResult<TValue> = HellTypedValueInvalidParse | HellTypedValueValidParse<TValue>;
 
 // @public
 export interface HellTypedValueValidParse<TValue> {
@@ -630,7 +630,7 @@ export interface HellTypedValueValidParse<TValue> {
 }
 
 // @public (undocumented)
-export function hellUniqueIdRefs(value: string | null | undefined): string[];
+export function hellUniqueIdRefs(value: null | string | undefined): string[];
 
 // @public
 export function hellWithDismissEffect(rule: HellDismissRule, effect: HellDismissDecision): HellDismissRule;

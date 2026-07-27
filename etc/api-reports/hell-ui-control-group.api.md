@@ -18,7 +18,7 @@ export class HellControlGroup {
     protected onFocusIn(): void;
     protected onFocusOut(event: FocusEvent): void;
     protected readonly part: (part: "root") => string;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellControlGroup, "[hellControlGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellControlGroup, never>;

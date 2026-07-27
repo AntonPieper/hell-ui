@@ -15,7 +15,7 @@ import * as ng_primitives_slider from 'ng-primitives/slider';
 export class HellSlider implements FormValueControl<number> {
     constructor();
     protected readonly activeDrag: _angular_core.WritableSignal<boolean>;
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
     protected continueAsDrag(e: PointerEvent): void;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly grow: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -25,7 +25,7 @@ export class HellSlider implements FormValueControl<number> {
     readonly min: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: (part: HellSliderPart) => string;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
     protected readonly sliderState: ng_primitives_slider.NgpSliderState;
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly thumb: _angular_core.InputSignal<"always" | "hover">;
@@ -37,7 +37,7 @@ export class HellSlider implements FormValueControl<number> {
 }
 
 // @public
-export type HellSliderPart = 'root' | 'track' | 'range' | 'thumb';
+export type HellSliderPart = 'range' | 'root' | 'thumb' | 'track';
 
 // @public
 export type HellSliderUi = HellUi<HellSliderPart>;

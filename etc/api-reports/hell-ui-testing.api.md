@@ -130,7 +130,7 @@ export interface HellDialogDescriptionHarnessFilters extends BaseHarnessFilters 
 
 // @public
 export class HellDialogHarness extends ComponentHarness {
-    getDataSize(): Promise<string | null>;
+    getDataSize(): Promise<null | string>;
     getText(): Promise<string>;
     static hostSelector: string;
     static with(options?: HellDialogHarnessFilters): HarnessPredicate<HellDialogHarness>;
@@ -187,8 +187,8 @@ export interface HellDisabledHarnessFilters extends HellTextHarnessFilters {
 
 // @public
 export class HellFilePickerHarness extends ComponentHarness {
-    getAriaDisabled(): Promise<string | null>;
-    getTabIndex(): Promise<string | null>;
+    getAriaDisabled(): Promise<null | string>;
+    getTabIndex(): Promise<null | string>;
     getText(): Promise<string>;
     static hostSelector: string;
     isDisabled(): Promise<boolean>;
@@ -280,8 +280,8 @@ export class HellSelectOptionHarness extends ComponentHarness {
 
 // @public
 export class HellSliderHarness extends ComponentHarness {
-    getDataSize(): Promise<string | null>;
-    getValue(): Promise<string | null>;
+    getDataSize(): Promise<null | string>;
+    getValue(): Promise<null | string>;
     static hostSelector: string;
     isDisabled(): Promise<boolean>;
 }
@@ -322,7 +322,7 @@ export interface HellTableCellHarnessFilters extends BaseHarnessFilters {
 
 // @public
 export class HellTableContainerHarness extends ComponentHarness {
-    getAriaBusy(): Promise<string | null>;
+    getAriaBusy(): Promise<null | string>;
     getTable(): Promise<HellTableHarness>;
     static hostSelector: string;
     isBusy(): Promise<boolean>;
@@ -353,10 +353,10 @@ export interface HellTableHarnessFilters extends BaseHarnessFilters {
 
 // @public
 export class HellTableHeaderCellHarness extends ComponentHarness {
-    getAriaSort(): Promise<string | null>;
-    getColumnId(): Promise<string | null>;
+    getAriaSort(): Promise<null | string>;
+    getColumnId(): Promise<null | string>;
     getResizeHandle(): Promise<HellTableResizeHandleHarness | null>;
-    getSortState(): Promise<string | null>;
+    getSortState(): Promise<null | string>;
     getSortTrigger(): Promise<HellTableSortTriggerHarness | null>;
     getText(): Promise<string>;
     static hostSelector: string;
@@ -377,9 +377,9 @@ export class HellTableHeadHarness extends ComponentHarness {
 
 // @public
 export class HellTableResizeHandleHarness extends ComponentHarness {
-    getAriaControls(): Promise<string | null>;
-    getAriaLabel(): Promise<string | null>;
-    getAriaValueNow(): Promise<string | null>;
+    getAriaControls(): Promise<null | string>;
+    getAriaLabel(): Promise<null | string>;
+    getAriaValueNow(): Promise<null | string>;
     getText(): Promise<string>;
     static hostSelector: string;
     isDisabled(): Promise<boolean>;
@@ -495,7 +495,7 @@ export class HellTabPanelHarness extends ComponentHarness {
 
 // @public
 export class HellTabsetHarness extends ComponentHarness {
-    getOrientation(): Promise<string | null>;
+    getOrientation(): Promise<null | string>;
     getTabs(): Promise<HellTabHarness[]>;
     static hostSelector: string;
 }
@@ -520,7 +520,7 @@ export class HellTimeInputHarness extends ComponentHarness {
 
 // @public
 export class HellToasterHarness extends ComponentHarness {
-    getPosition(): Promise<string | null>;
+    getPosition(): Promise<null | string>;
     getToasts(): Promise<HellToastHarness[]>;
     static hostSelector: string;
 }
@@ -528,9 +528,9 @@ export class HellToasterHarness extends ComponentHarness {
 // @public
 export class HellToastHarness extends ComponentHarness {
     close(): Promise<void>;
-    getState(): Promise<string | null>;
+    getState(): Promise<null | string>;
     getText(): Promise<string>;
-    getVariant(): Promise<string | null>;
+    getVariant(): Promise<null | string>;
     static hostSelector: string;
     static with(options?: HellStateHarnessFilters): HarnessPredicate<HellToastHarness>;
 }

@@ -35,10 +35,10 @@ export class HellResizable implements AfterContentInit {
 export class HellResizableHandle implements AfterViewInit {
     constructor();
     readonly appearance: _angular_core.InputSignal<"grip" | "line">;
-    readonly ariaControls: _angular_core.InputSignal<string | readonly string[] | null>;
-    protected readonly ariaControlsValue: _angular_core.Signal<string | null>;
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    protected readonly ariaValueNow: _angular_core.WritableSignal<number | null>;
+    readonly ariaControls: _angular_core.InputSignal<null | readonly string[] | string>;
+    protected readonly ariaControlsValue: _angular_core.Signal<null | string>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
+    protected readonly ariaValueNow: _angular_core.WritableSignal<null | number>;
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
     protected readonly labels: HellLabels<HellResizableLabels>;
     ngAfterViewInit(): void;
@@ -51,7 +51,7 @@ export class HellResizableHandle implements AfterViewInit {
 }
 
 // @public
-export type HellResizableHandlePart = 'root' | 'grip';
+export type HellResizableHandlePart = 'grip' | 'root';
 
 // @public
 export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;

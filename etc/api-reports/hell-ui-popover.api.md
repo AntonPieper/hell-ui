@@ -28,11 +28,11 @@ export class HellPopover {
 // @public
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
     constructor();
-    readonly anchor: _angular_core.InputSignal<HTMLElement | ElementRef<HTMLElement> | null>;
-    readonly boundary: _angular_core.InputSignal<HTMLElement | ElementRef<HTMLElement> | null>;
+    readonly anchor: _angular_core.InputSignal<ElementRef<HTMLElement> | HTMLElement | null>;
+    readonly boundary: _angular_core.InputSignal<ElementRef<HTMLElement> | HTMLElement | null>;
     readonly closeOnEscape: _angular_core.InputSignalWithTransform<NgpDismissGuard<KeyboardEvent>, NgpDismissGuardInput<KeyboardEvent>>;
     readonly closeOnOutsideClick: _angular_core.InputSignalWithTransform<NgpDismissGuard<Element>, NgpDismissGuardInput<Element>>;
-    readonly container: _angular_core.InputSignal<string | HTMLElement | null>;
+    readonly container: _angular_core.InputSignal<HTMLElement | null | string>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly flip: _angular_core.InputSignalWithTransform<boolean | ng_primitives_portal.NgpFlipOptions | undefined, ng_primitives_portal.NgpFlipInput | null>;
     hide(origin?: FocusOrigin): Promise<void>;
