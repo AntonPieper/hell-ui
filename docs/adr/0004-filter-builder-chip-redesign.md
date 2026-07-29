@@ -1,9 +1,8 @@
 # ADR: Filter Builder rides the Control Group + Chip Set pattern
 
-- Status: Proposed — merging PR #401 constitutes the maintainer approval
-  required by #362, at which point this ADR reads as Accepted; implementation
-  is #363 (amended 2026-07-29, see "Amendment: the empty prompt is explorable,
-  and Tab leaves it")
+- Status: Accepted 2026-07-27 — PR #401 merged, which is the maintainer
+  approval required by #362; implementation is #363/#411 (amended 2026-07-29,
+  see "Amendment: the empty prompt is explorable, and Tab leaves it")
 - Date: 2026-07-27
 
 ## Context
