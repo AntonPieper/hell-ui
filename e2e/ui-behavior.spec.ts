@@ -460,30 +460,41 @@ test.describe('Hell UI browser behavior', () => {
         const panel = [...document.querySelectorAll('[role="dialog"]')].find((dialog) =>
           dialog.querySelector('h2')?.textContent?.includes(text),
         );
-        [...(panel?.querySelectorAll<HTMLElement>('button') ?? [])]
-          .find((button) => ['Cancel', 'Got it'].includes(button.textContent?.trim() ?? ''))
-          ?.click();
+        const dismissLabels = ['Cancel', 'Got it', 'Close'];
+        const button = [...(panel?.querySelectorAll<HTMLElement>('button') ?? [])].find((candidate) =>
+          dismissLabels.includes(candidate.textContent?.trim() ?? ''),
+        );
+        if (!button) throw new Error(`No dismiss control in the "${text}" dialog`);
+        button.click();
       }, title);
 
+    // Two scoped dialogs with different Dialog Scope roots, and two
+    // page-blocking ones.
     const OPEN: Record<string, () => Promise<void>> = {
-      s: () => click('Approve invoice'),
+      s1: () => click('Approve invoice'),
+      s2: () => click('Block this panel'),
       p1: () => click('Publish article'),
       p2: () => click('Casual dialog'),
     };
     const CLOSE: Record<string, () => Promise<void>> = {
-      s: () => dismiss('Approve invoice 4021?'),
+      s1: () => dismiss('Approve invoice 4021?'),
+      s2: () => dismiss('Scoped to this region'),
       p1: () => dismiss('Publish this article?'),
       p2: () => dismiss('Dismiss me freely'),
     };
 
     const sequences: readonly (readonly string[])[] = [
-      ['+s', '-s'],
+      ['+s1', '-s1'],
+      ['+s1', '+s2', '-s2', '-s1'],
+      ['+s1', '+s2', '-s1', '-s2'],
       ['+p1', '-p1'],
       ['+p1', '+p2', '-p2', '-p1'],
-      ['+p1', '+s', '-p1', '-s'],
-      ['+p1', '+s', '-s', '-p1'],
-      ['+s', '+p1', '-s', '-p1'],
-      ['+s', '+p1', '-p1', '-s'],
+      ['+p1', '+p2', '-p1', '-p2'],
+      ['+p1', '+s1', '-p1', '-s1'],
+      ['+p1', '+s1', '-s1', '-p1'],
+      ['+s1', '+p1', '-s1', '-p1'],
+      ['+s1', '+p1', '-p1', '-s1'],
+      ['+s1', '+p1', '+s2', '-p1', '-s1', '-s2'],
     ];
 
     for (const sequence of sequences) {
@@ -516,22 +527,34 @@ test.describe('Hell UI browser behavior', () => {
           await expect
             .poll(
               () =>
-                page.evaluate(() => ({
-                  hidden: [...document.body.children].some(
-                    (child) => child.getAttribute('aria-hidden') === 'true',
-                  ),
-                  released: document.body.hasAttribute('data-focus-trap'),
-                  blocked:
-                    document
-                      .querySelector('app-dialog-app-shell-scoped-example [hellAppContent]')
-                      ?.hasAttribute('inert') ?? false,
-                })),
+                page.evaluate(() => {
+                  // The application root specifically, not "some body child":
+                  // an unrelated pre-hidden sibling would satisfy that and let
+                  // an exposed shell pass.
+                  let appRoot = document.querySelector('app-dialog-app-shell-scoped-example');
+                  while (appRoot?.parentElement && appRoot.parentElement !== document.body) {
+                    appRoot = appRoot.parentElement;
+                  }
+                  return {
+                    hidden: appRoot?.getAttribute('aria-hidden') === 'true',
+                    released: document.body.hasAttribute('data-focus-trap'),
+                    blockedS1:
+                      document
+                        .querySelector('app-dialog-app-shell-scoped-example [hellAppContent]')
+                        ?.hasAttribute('inert') ?? false,
+                    blockedS2:
+                      document
+                        .querySelector('app-dialog-scoped-example [data-hell-dialog-scope-root]')
+                        ?.hasAttribute('inert') ?? false,
+                  };
+                }),
               { message: where, timeout: SETTLE_TIMEOUT },
             )
             .toEqual({
               hidden: blocking > 0,
               released: scoped > 0 && blocking === 0,
-              blocked: scoped > 0,
+              blockedS1: open.has('s1'),
+              blockedS2: open.has('s2'),
             });
         }
         await expect(content).not.toHaveAttribute('inert', '');

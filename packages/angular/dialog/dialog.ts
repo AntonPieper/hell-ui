@@ -41,9 +41,9 @@ import {
   HellDialogScopedOverlayAdapter,
   hellFindDialogScopeRoot,
   hellReleaseDialogOverlay,
-  hellReleaseDialogPageModality,
   hellRetainDialogOverlay,
-  hellRetainDialogPageModality,
+  hellSetDialogOverlayRole,
+  type HellDialogOverlayRole,
 } from './dialog-scope';
 
 const HELL_DIALOG_OVERLAY_RECIPE = {
@@ -220,7 +220,7 @@ export class HellDialogOverlay {
   private readonly doc = inject(DOCUMENT);
   private adapter: HellDialogScopedOverlayAdapter | null = null;
   private modality: HellDialogScopedModality | null = null;
-  private pageModal = false;
+  private role: HellDialogOverlayRole | null = null;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -231,23 +231,25 @@ export class HellDialogOverlay {
     effect(() => {
       if (this.scoped()) this.connectScope();
       else this.disconnectScope();
-      // Anything that is not running scoped modality blocks the whole page and
-      // must keep both the delegated focus trap and the page-wide hiding, so it
-      // holds the document out of scoped modality for as long as it is open.
-      this.setPageModal(this.modality === null);
+      // Anything not running scoped modality blocks the whole page and must
+      // keep both the delegated focus trap and the page-wide hiding. `scoped`
+      // is a public input, so this can also flip while the dialog is open; the
+      // role change is applied as one transition rather than a release and a
+      // retain, which would take the document through an empty open set.
+      this.setRole(this.modality === null ? 'blocking' : 'scoped');
     });
     destroyRef.onDestroy(() => {
       this.disconnectScope();
-      this.setPageModal(false);
+      this.setRole(null);
       hellReleaseDialogOverlay(this.doc);
     });
   }
 
-  private setPageModal(next: boolean): void {
-    if (this.pageModal === next) return;
-    this.pageModal = next;
-    if (next) hellRetainDialogPageModality(this.doc);
-    else hellReleaseDialogPageModality(this.doc);
+  private setRole(next: HellDialogOverlayRole | null): void {
+    if (this.role === next) return;
+    const previous = this.role;
+    this.role = next;
+    hellSetDialogOverlayRole(this.doc, previous, next);
   }
 
   private connectScope(): void {
@@ -256,7 +258,7 @@ export class HellDialogOverlay {
     if (!root) return;
     this.adapter = new HellDialogScopedOverlayAdapter(root, this.element.nativeElement, this.doc);
     this.adapter.connect();
-    this.modality = new HellDialogScopedModality(root, this.doc);
+    this.modality = new HellDialogScopedModality(root);
     this.modality.engage();
   }
 

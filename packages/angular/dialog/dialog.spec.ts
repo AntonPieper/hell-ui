@@ -103,6 +103,24 @@ class ModalityMatrixHost {}
 @Component({
   imports: [...HELL_DIALOG_IMPORTS],
   template: `
+    <section id="mode-scope" hellDialogScope>
+      <button id="open-mode" type="button" [hellDialogTrigger]="mode">Open</button>
+    </section>
+
+    <ng-template #mode let-close="close">
+      <div id="mode-overlay" hellDialogOverlay [scoped]="scoped()">
+        <div hellDialog><button id="close-mode" type="button" (click)="close()">x</button></div>
+      </div>
+    </ng-template>
+  `,
+})
+class ModeToggleDialogHost {
+  readonly scoped = signal(true);
+}
+
+@Component({
+  imports: [...HELL_DIALOG_IMPORTS],
+  template: `
     <section id="nesting-scope" hellDialogScope>
       <button id="open-outer" type="button" [hellDialogTrigger]="outer">Open outer</button>
     </section>
@@ -339,6 +357,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         SharedScopeDialogHost,
         NestedDialogHost,
         ModalityMatrixHost,
+        ModeToggleDialogHost,
         ModalityDialogHost,
         DisabledDialogTriggerHost,
         EnabledDialogTriggerHost,
@@ -534,13 +553,16 @@ describe('HellDialogTrigger scoped overlays', () => {
   describe('modality transition matrix', () => {
     const SEQUENCES: readonly { readonly name: string; readonly steps: readonly string[] }[] = [
       { name: 'S, close S', steps: ['+s1', '-s1'] },
-      { name: 'S1, S2, close S2, close S1', steps: ['+s1', '+s2', '-s2', '-s1'] },
+      { name: 'S1, S2, close S2 first', steps: ['+s1', '+s2', '-s2', '-s1'] },
+      { name: 'S1, S2, close S1 first', steps: ['+s1', '+s2', '-s1', '-s2'] },
       { name: 'P, close P', steps: ['+p1', '-p1'] },
-      { name: 'P1, P2, close P2, close P1', steps: ['+p1', '+p2', '-p2', '-p1'] },
+      { name: 'P1, P2, close P2 first', steps: ['+p1', '+p2', '-p2', '-p1'] },
+      { name: 'P1, P2, close P1 first', steps: ['+p1', '+p2', '-p1', '-p2'] },
       { name: 'P, S, close P first', steps: ['+p1', '+s1', '-p1', '-s1'] },
       { name: 'P, S, close S first', steps: ['+p1', '+s1', '-s1', '-p1'] },
       { name: 'S, P, close S first', steps: ['+s1', '+p1', '-s1', '-p1'] },
       { name: 'S, P, close P first', steps: ['+s1', '+p1', '-p1', '-s1'] },
+      { name: 'S1, P, S2, close P, close both scoped', steps: ['+s1', '+p1', '+s2', '-p1', '-s1', '-s2'] },
     ];
 
     for (const sequence of SEQUENCES) {
@@ -571,6 +593,15 @@ describe('HellDialogTrigger scoped overlays', () => {
           const blocking = [...open].filter((entry) => entry.startsWith('p')).length;
           const where = `${sequence.name} @ ${step}`;
 
+          // Settle the open set first. The rules below can be satisfied by a
+          // close that has not finished — closing one of two same-kind dialogs
+          // changes nothing observable — which would run the next step against
+          // the wrong stack.
+          expect(
+            document.body.querySelectorAll('[role="dialog"]').length,
+            `open dialogs — ${where}`,
+          ).toBe(open.size);
+
           expect(appRoot.getAttribute('aria-hidden') === 'true', `page hidden — ${where}`).toBe(
             blocking > 0,
           );
@@ -585,6 +616,53 @@ describe('HellDialogTrigger scoped overlays', () => {
         expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
       });
     }
+  });
+
+  it('follows the scoped input when it flips on an already-open dialog', async () => {
+    const fixture = TestBed.createComponent(ModeToggleDialogHost);
+    await settle(fixture);
+    const appRoot = attachToBody(fixture.nativeElement);
+    await settle(fixture);
+
+    const scope = query(fixture.nativeElement, '#mode-scope');
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-mode').click();
+    await settle(fixture);
+    await microtask();
+
+    const dialog = query(document.body, '[role="dialog"]');
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+    expect(dialog.getAttribute('aria-modal')).toBe('false');
+
+    // `scoped` is a public input, so the same open dialog can change what it
+    // blocks. Becoming page-blocking has to hide the page again — not merely
+    // stop clearing it.
+    fixture.componentInstance.scoped.set(false);
+    await settle(fixture);
+    await microtask();
+
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(appRoot.getAttribute('aria-hidden')).toBe('true');
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+
+    // And back again.
+    fixture.componentInstance.scoped.set(true);
+    await settle(fixture);
+    await microtask();
+
+    expect(scope.hasAttribute('inert')).toBe(true);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(document.body.getAttribute('data-focus-trap')).toBe('');
+    expect(dialog.getAttribute('aria-modal')).toBe('false');
+
+    query<HTMLButtonElement>(document.body, '#close-mode').click();
+    await settleClose(fixture);
+
+    expect(scope.hasAttribute('inert')).toBe(false);
+    expect(appRoot.getAttribute('aria-hidden')).toBeNull();
+    expect(document.body.hasAttribute('data-focus-trap')).toBe(false);
   });
 
   it('frees the shell from assistive technology when a page-modal dialog closes under a scoped one', async () => {

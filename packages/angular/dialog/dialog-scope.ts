@@ -127,7 +127,7 @@ const documentModalityStates = new WeakMap<Document, HellDialogDocumentModalityS
  *   focus out of that shell.
  *
  * The last two are document-wide decisions, so they hold only while every open
- * dialog is scoped — see `hellRetainDialogPageModality` — and they are
+ * dialog is scoped — see `hellSetDialogOverlayRole` — and they are
  * re-derived from the open set on every transition, in both directions. Which
  * order dialogs happen to open and close in therefore cannot leave either
  * stale: a page-blocking dialog joining hides the page again, and one leaving a
@@ -140,29 +140,52 @@ const documentModalityStates = new WeakMap<Document, HellDialogDocumentModalityS
 export class HellDialogScopedModality {
   private engaged = false;
 
-  constructor(
-    private readonly root: HTMLElement,
-    private readonly doc: Document,
-  ) {}
+  constructor(private readonly root: HTMLElement) {}
 
   engage(): void {
     if (this.engaged) return;
     this.engaged = true;
     engageScopeModality(this.root);
-    const state = documentModalityState(this.doc);
-    state.scoped += 1;
-    syncDocumentModality(this.doc, state);
   }
 
   release(): void {
     if (!this.engaged) return;
     this.engaged = false;
     releaseScopeModality(this.root);
-    const state = documentModalityStates.get(this.doc);
-    if (!state || state.scoped === 0) return;
-    state.scoped -= 1;
-    syncDocumentModality(this.doc, state);
   }
+}
+
+/**
+ * What one open overlay contributes to the document: it either blocks only its
+ * own region or blocks the whole page.
+ */
+export type HellDialogOverlayRole = 'scoped' | 'blocking';
+
+/**
+ * Move one overlay between roles — including in and out of the open set — as a
+ * single transition.
+ *
+ * The role of a live overlay can change: `scoped` is a public input, so
+ * `[scoped]="mode()"` can flip while the dialog is open. Adjusting one counter
+ * at a time would take the document through a phase it is never actually in;
+ * dropping to an empty open set mid-flip would restore and forget the hiding
+ * scoped modality had cleared, and the immediately following page-blocking role
+ * would then have nothing left to put back.
+ */
+export function hellSetDialogOverlayRole(
+  doc: Document,
+  previous: HellDialogOverlayRole | null,
+  next: HellDialogOverlayRole | null,
+): void {
+  if (previous === next) return;
+  const state = documentModalityState(doc);
+
+  if (previous === 'scoped' && state.scoped > 0) state.scoped -= 1;
+  if (previous === 'blocking' && state.pageModal > 0) state.pageModal -= 1;
+  if (next === 'scoped') state.scoped += 1;
+  if (next === 'blocking') state.pageModal += 1;
+
+  syncDocumentModality(doc, state);
 }
 
 /**
@@ -178,6 +201,12 @@ export class HellDialogScopedModality {
  * a value the page owned before any dialog, and only cleared elements are
  * re-hidden. The manager's own previous-value map is never written, so its
  * restore on the last close still lands on the original value.
+ *
+ * Known limit, measured as parity rather than assumed: a body child appended
+ * *after* the manager's pass is in neither the baseline nor the cleared set, so
+ * it stays exposed while a page-blocking dialog is open. ng-primitives leaves
+ * it exposed too, because it does not rerun its pass for a second dialog.
+ * Tracked in #427.
  */
 function applyDialogAriaHidden(
   state: HellDialogDocumentModalityState,
@@ -201,18 +230,12 @@ function applyDialogAriaHidden(
     return;
   }
 
-  // `idle`. The manager restores its own map when its last dialog closes, and
-  // that map covers every element scoped modality could have cleared, so this
-  // write is deliberately redundant with it — both land on the same baseline
-  // value. It is kept as the belt for the one case the manager cannot cover:
-  // an element scoped modality re-hid under `blocked` that the manager never
-  // hid itself. Removing it fails no test; see the PR's mutation table.
-  for (const element of state.cleared) {
-    const previous = state.ariaHiddenBaseline?.get(element) ?? null;
-    if (!element.isConnected) continue;
-    if (previous === null) element.removeAttribute('aria-hidden');
-    else element.setAttribute('aria-hidden', previous);
-  }
+  // `idle`. Restoring the values is the manager's job and it does it correctly:
+  // every element here came from the baseline and was seen hidden by the
+  // manager's own first pass, so its previous-value map already covers all of
+  // them and writes the same baseline value on the last close. Only the
+  // tracking is dropped, so a later page-blocking dialog re-hides what the next
+  // scoped dialog clears rather than what a previous one did.
   state.cleared.clear();
 }
 
@@ -311,32 +334,6 @@ export function hellReleaseDialogOverlay(doc: Document): void {
   // overlay is destroyed — every overlay is counted as either scoped or
   // page-blocking, so the last release drives the phase to `idle` itself.
   if (state.overlays === 0) state.ariaHiddenBaseline = null;
-}
-
-/**
- * Count an open dialog that blocks the whole page — one without `scoped`, or a
- * `scoped` one that found no scope root.
- *
- * Both the focus-trap escape marker and the `aria-hidden` state are
- * document-wide, so they are only right while every open dialog is scoped. A
- * page-blocking dialog means to block the surrounding shell, so while one is
- * open the marker comes off, the delegated trap does its job again, and the
- * page goes back to hidden — including the hiding scoped modality had already
- * cleared for a scoped dialog still open underneath.
- */
-export function hellRetainDialogPageModality(doc: Document): void {
-  const state = documentModalityState(doc);
-  state.pageModal += 1;
-  syncDocumentModality(doc, state);
-}
-
-/** Release one page-blocking dialog counted by `hellRetainDialogPageModality`. */
-export function hellReleaseDialogPageModality(doc: Document): void {
-  const state = documentModalityStates.get(doc);
-  if (!state || state.pageModal === 0) return;
-
-  state.pageModal -= 1;
-  syncDocumentModality(doc, state);
 }
 
 /** Which state the page outside the dialogs owes to the current open set. */

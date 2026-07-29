@@ -279,11 +279,31 @@ Constraints:
   change?" — the per-open form silently skipped a value an already-open
   page-blocking dialog had set. Only elements the machinery hid are ever
   touched, and only elements scoped modality cleared are ever re-hidden.
-- The transition matrix is the test contract, not an example: every
-  interleaving of at least two dialogs, at both unit and browser level,
+- The transition matrix is the test contract, not an example. Both levels cover
+  the same eleven sequences: each kind alone; two of the same kind closed in
+  either order; both mixed orders opened and closed either way; and a
+  page-blocking dialog arriving and leaving between two scoped ones. Each is
   asserted as the three-case rule above rather than as per-step expectations,
-  and each mutation-verified. Both defects this ADR records shipped because
-  coverage pinned one order.
+  each step settles the open-dialog count first — a close of one of two
+  same-kind dialogs changes nothing observable, so the rule alone cannot tell
+  a finished close from an unfinished one — and each is mutation-verified.
+  Every defect this ADR records shipped because coverage pinned one order, so
+  adding a case is cheaper than trusting a new one is symmetric.
+- `scoped` is a public input and can flip on an open dialog, so a role change
+  is applied as one transition rather than a release followed by a retain.
+  Splitting it takes the document through an empty open set, which restores and
+  forgets the hiding that the new role immediately owes back. Covered by unit
+  test and mutation-verified; the browser matrix does not repeat it because no
+  docs surface toggles the input mid-open.
+- Known limit, verified as parity rather than assumed: a direct body child
+  appended *after* the manager's hiding pass is in neither the baseline nor the
+  cleared set, so it stays exposed to assistive technology while a
+  page-blocking dialog is open. ng-primitives behaves the same way on its own —
+  measured with `P1` open, a body child appended, then `P2` opened: the late
+  child stays exposed there too, because the manager does not rerun its pass
+  for a second dialog. Closing that gap means owning the hiding pass outright,
+  which is a bigger decision than this ADR makes; tracked in #427 with the
+  measurement attached.
 
 ## Consequences
 
