@@ -5,9 +5,6 @@
       // Consumer fixtures are standalone projects compiled against the packed
       // tarball by tools/check-consumer-fixtures.mjs, not repo source.
       "ignore": ["tools/consumer-fixtures/**"],
-      // stamp-docs-build.mjs is invoked from the Playwright webServer command
-      // string, which knip cannot follow.
-      "entry": ["tools/stamp-docs-build.mjs"],
       // check-main-ruleset.mjs shells out to the system GitHub CLI, and
       // build-library.mjs to the Angular CLI; neither is an npm dependency here.
       "ignoreBinaries": ["gh", "ng"],
