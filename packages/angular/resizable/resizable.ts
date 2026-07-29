@@ -63,6 +63,18 @@ function hellElementDirection(element: HTMLElement): HellResizeDirection {
     : 'ltr';
 }
 
+/**
+ * Whether a pane still generates a box, and therefore still takes part in the
+ * group's flex line. A pane hidden by an outer module — Master Detail hides the
+ * inactive pane in a compact frame — is `display: none` and occupies no width,
+ * so any size distributed to it becomes a strip of the group that nothing can
+ * render into.
+ */
+function hellIsPaneLaidOut(host: HTMLElement): boolean {
+  const view = host.ownerDocument.defaultView;
+  return !view || view.getComputedStyle(host).display !== 'none';
+}
+
 function hellAriaControlsValue(
   value: string | readonly string[] | null | undefined,
 ): string | null {
@@ -98,6 +110,8 @@ class HellResizableController {
   private readonly destroyRef = inject(DestroyRef);
   private readonly constrained = signal(false);
   private readonly panes: HellResizablePaneRegistration[] = [];
+  private readonly parkedSizes = new Map<HellResizablePaneRegistration, number>();
+  private readonly observer: ResizeObserver | null;
   private userSized = false;
   private resizeFrame = 0;
 
@@ -106,24 +120,33 @@ class HellResizableController {
 
   constructor() {
     const ResizeObserverCtor = this.host.ownerDocument.defaultView?.ResizeObserver;
-    if (!ResizeObserverCtor) return;
+    this.observer = ResizeObserverCtor
+      ? new ResizeObserverCtor(() => this.scheduleFitPanesToAvailableSize())
+      : null;
+    if (!this.observer) return;
 
-    const observer = new ResizeObserverCtor(() => this.scheduleFitPanesToAvailableSize());
-    observer.observe(this.host);
+    // Panes are observed alongside the group: a pane entering or leaving the
+    // layout changes how the group's size has to be split even when the group
+    // itself never resizes, and the observer makes that a fact the fit reads
+    // rather than one it has to be scheduled ahead of.
+    this.observer.observe(this.host);
     this.destroyRef.onDestroy(() => {
-      observer.disconnect();
+      this.observer?.disconnect();
       this.cancelScheduledFit();
     });
   }
 
   registerPane(pane: HellResizablePaneRegistration): void {
     if (!this.panes.includes(pane)) this.panes.push(pane);
+    this.observer?.observe(pane.host);
     queueMicrotask(() => this.fitPanesToAvailableSize());
   }
 
   unregisterPane(pane: HellResizablePaneRegistration): void {
     const index = this.panes.indexOf(pane);
     if (index >= 0) this.panes.splice(index, 1);
+    this.parkedSizes.delete(pane);
+    this.observer?.unobserve(pane.host);
     queueMicrotask(() => this.fitPanesToAvailableSize());
   }
 
@@ -193,43 +216,88 @@ class HellResizableController {
     if (!this.rescaleOnResize()) return;
     if (!this.panes.length) return;
 
+    // Only panes that generate a box share the group's size. When every pane is
+    // out of layout the group itself is hidden, and nothing about its split is
+    // known yet, so committed sizes are left exactly as they are.
+    const panes = this.panes.filter((pane) => hellIsPaneLaidOut(pane.host));
+    if (!panes.length) return;
+
     const available = this.availableSize();
     if (available <= 0) return;
 
-    const minSizes = this.panes.map((pane) => pane.minSize());
+    for (const pane of this.panes) {
+      if (panes.includes(pane)) continue;
+      pane.setEffectiveMinSize(null);
+      this.parkPane(pane);
+    }
+
+    // One pane in layout has nothing to split against. It fills the group on
+    // its own, and the split the group had is parked rather than overwritten
+    // with a width that only describes this narrower frame.
+    if (panes.length < 2) {
+      this.constrained.set(available < panes[0].minSize());
+      this.parkPane(panes[0]);
+      panes[0].setEffectiveMinSize(available);
+      return;
+    }
+
+    for (const pane of panes) this.unparkPane(pane);
+
+    const minSizes = panes.map((pane) => pane.minSize());
     const minTotal = minSizes.reduce((sum, value) => sum + value, 0);
     const isConstrained = available < minTotal;
     this.constrained.set(isConstrained);
 
     if (!this.userSized && !isConstrained) {
-      for (const pane of this.panes) {
+      for (const pane of panes) {
         pane.setEffectiveMinSize(null);
         if (pane.hasSize()) pane.resetSize();
       }
       return;
     }
 
-    const hasExplicitSize = this.panes.some((pane) => pane.hasSize());
+    const hasExplicitSize = panes.some((pane) => pane.hasSize());
     if (!hasExplicitSize && !isConstrained) {
-      for (const pane of this.panes) pane.setEffectiveMinSize(null);
+      for (const pane of panes) pane.setEffectiveMinSize(null);
       return;
     }
 
-    const sourceSizes = this.panes.map(
+    const sourceSizes = panes.map(
       (pane, index) => (pane.currentSize() ?? pane.measure()) || minSizes[index],
     );
     const sourceTotal = sourceSizes.reduce((sum, value) => sum + value, 0);
     if (!isConstrained && Math.abs(sourceTotal - available) < 1) {
-      for (const pane of this.panes) pane.setEffectiveMinSize(null);
+      for (const pane of panes) pane.setEffectiveMinSize(null);
       return;
     }
 
     const fitted = hellFitResizeSizesToTotal(sourceSizes, minSizes, available);
-    for (let i = 0; i < this.panes.length; i++) {
+    for (let i = 0; i < panes.length; i++) {
       const effectiveMin = isConstrained ? Math.min(minSizes[i], fitted[i]) : null;
-      this.panes[i].setEffectiveMinSize(effectiveMin);
+      panes[i].setEffectiveMinSize(effectiveMin);
     }
-    for (let i = 0; i < this.panes.length; i++) this.panes[i].setSize(fitted[i]);
+    for (let i = 0; i < panes.length; i++) panes[i].setSize(fitted[i]);
+  }
+
+  /**
+   * Hold a pane's committed size aside and let it flex again. A pane that is
+   * not sharing the group must carry no rigid width: out of layout it would
+   * reserve space it cannot render into, and back in layout it would describe a
+   * frame it was never measured against.
+   */
+  private parkPane(pane: HellResizablePaneRegistration): void {
+    const size = pane.currentSize();
+    if (size == null) return;
+    this.parkedSizes.set(pane, size);
+    pane.resetSize();
+  }
+
+  /** Give a pane back the size it was parked with once the group can split again. */
+  private unparkPane(pane: HellResizablePaneRegistration): void {
+    const parked = this.parkedSizes.get(pane);
+    if (parked == null) return;
+    this.parkedSizes.delete(pane);
+    if (!pane.hasSize()) pane.setSize(parked);
   }
 
   private availableSize(): number {
@@ -255,8 +323,11 @@ class HellResizableController {
     const handleIndex = children.indexOf(handle);
     if (handleIndex < 0) return null;
 
+    // A pane out of layout is not a resize partner: it has no width to trade,
+    // so the handle reaches past it to the next pane that does, and no-ops when
+    // there is none.
     const paneFor = (element: HTMLElement): HellResizablePaneRegistration | null =>
-      this.panes.find((pane) => pane.host === element) ?? null;
+      this.panes.find((pane) => pane.host === element && hellIsPaneLaidOut(pane.host)) ?? null;
     const findPane = (
       start: number,
       step: 1 | -1,
@@ -274,9 +345,10 @@ class HellResizableController {
   }
 
   private lockPanes(): Map<HellResizablePaneRegistration, number> {
+    const panes = this.panes.filter((pane) => hellIsPaneLaidOut(pane.host));
     const sizes = new Map<HellResizablePaneRegistration, number>();
-    for (const pane of this.panes) sizes.set(pane, pane.measure());
-    for (const pane of this.panes) pane.setSize(sizes.get(pane) ?? pane.measure());
+    for (const pane of panes) sizes.set(pane, pane.measure());
+    for (const pane of panes) pane.setSize(sizes.get(pane) ?? pane.measure());
     return sizes;
   }
 
