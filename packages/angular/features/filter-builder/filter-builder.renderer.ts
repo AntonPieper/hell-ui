@@ -144,6 +144,11 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
     class: 'contents',
   },
   template: `
+    <!-- The frame's click affordances have first-class keyboard equivalents
+         that live on the focused inline input and bubble through this frame
+         (ArrowDown opens the same field list), which the key-events rule
+         cannot see; the disable is scoped to this opening tag only. -->
+    <!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
     <div
       #frame
       hellControlGroup
@@ -154,7 +159,9 @@ function createHellFilterBuilderFloatingScope(): HellFilterBuilderFloatingScope 
       [attr.data-has-filters]="value().length ? '' : null"
       [attr.data-editing]="editorMode()"
       (mousedown)="onFrameMouseDown($event)"
+      (click)="onFrameClick($event)"
     >
+      <!-- eslint-enable @angular-eslint/template/click-events-have-key-events -->
       <div
         hellChipSet
         tabindex="-1"
@@ -484,12 +491,40 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     this.focusPickerInput();
   }
 
+  /**
+   * @internal Template event handler. A pointer click on the empty prompt —
+   * the inline input itself or the frame's empty space — surfaces the
+   * available fields, so the builder can be explored without already knowing
+   * what to type. Chips, remove buttons, and the clear action keep their own
+   * targets, and keyboard focus alone never opens the list: tabbing through
+   * the builder and the programmatic focus restores after commit, cancel, and
+   * clear stay quiet, while `ArrowDown` remains the keyboard exploration key.
+   *
+   * The list is the field picker's own dropdown, opened exactly as the
+   * engine's `ArrowDown` contract opens it — one Interaction State Machine,
+   * no exploration twin — so the click lands in the already-specified
+   * "dropdown open" keyboard state.
+   */
+  protected onFrameClick(event: MouseEvent): void {
+    if (this.disabled() || event.defaultPrevented || event.button !== 0) return;
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    if (!target) return;
+    // `input` is deliberately missing from this list where `onFrameMouseDown`
+    // keeps it: mousedown must leave the input alone so its native focus is
+    // untouched, whereas a click *on* the input is the primary open gesture.
+    if (target.closest('[data-slot="token"], button, a, select, textarea')) return;
+    if (this.query() || this.pickerOpen() || !this.availableFields().length) return;
+    const input = this.host.querySelector<HTMLInputElement>('[data-hell-filter-builder-input]');
+    if (!input) return;
+    this.dispatchComboboxKey(input, 'ArrowDown');
+  }
+
   /** @internal Template event handler. */
   protected onPickerInput(event: Event): void {
     if (this.disabled()) return;
     const input = event.target as HTMLInputElement;
     this.query.set(input.value);
-    this.syncComboboxLayer(input, input.value, this.pickerOpen());
+    this.syncComboboxLayer(input, input.value);
   }
 
   /** @internal Template event handler. */
@@ -521,6 +556,11 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     if (event.defaultPrevented) return;
 
     if (event.key === 'Tab' && this.pickerOpen()) {
+      // The Tab-commits affordance (GitLab's) converts a *typed* query into a
+      // token. With nothing typed there is no intent to convert: the explored
+      // list's highlighted option must not turn a leave gesture into a commit,
+      // so on an empty prompt Tab falls through and leaves the field.
+      if (!this.query()) return;
       const input = event.currentTarget as HTMLInputElement;
       const activeId = input.getAttribute('aria-activedescendant');
       const activeOption = activeId ? input.ownerDocument.getElementById(activeId) : null;
@@ -976,11 +1016,18 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     this.focusTimer = null;
   }
 
-  private syncComboboxLayer(input: HTMLInputElement, value: string, open: boolean): void {
-    if (value && !open) {
+  /**
+   * Mirrors renderer-inserted query text into the Combobox engine's layer:
+   * the engine only opens on real keystrokes, so text arriving through a
+   * synthetic input event (a printable key pressed on a chip) must open the
+   * dropdown itself. A query cleared while the dropdown is open is left
+   * alone on purpose — the option list falls back to every available field,
+   * so an emptied prompt keeps the surface explorable instead of snapping
+   * the list shut.
+   */
+  private syncComboboxLayer(input: HTMLInputElement, value: string): void {
+    if (value && !this.pickerOpen()) {
       this.dispatchComboboxKey(input, 'ArrowDown');
-    } else if (!value && open) {
-      this.dispatchComboboxKey(input, 'Escape');
     }
   }
 

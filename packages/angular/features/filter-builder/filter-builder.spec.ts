@@ -349,6 +349,148 @@ describe('HellFilterBuilder', () => {
     expect(tab.defaultPrevented).toBe(false);
   });
 
+  it('surfaces the available fields when the empty prompt is clicked, never on focus alone', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    // Keyboard focus alone keeps the surface quiet: tabbing through the
+    // builder and programmatic focus restores must not pop the list open.
+    picker.focus();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('false');
+
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    const options = queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]');
+    // The single-instance status field already has an expression, so the
+    // explorable list carries exactly the fields that can still be added.
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['Name', 'Created']);
+  });
+
+  it('opens the field list from a click on empty frame space', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const host = fixture.nativeElement as HTMLElement;
+    const picker = query<HTMLInputElement>(host, '[data-hell-filter-builder-input]');
+    const frame = query<HTMLElement>(host, '[data-slot="root"]');
+
+    frame.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(picker);
+    click(frame);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('does not open the list from a click when no field can be added', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.fields.set([fixture.componentInstance.statusField]);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    // The one status expression already exists and the field is
+    // single-instance, so there is nothing to explore.
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('keeps the option list open when the query is deleted back to empty', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    picker.focus();
+    inputValue(picker, 'Nam');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]').map((option) =>
+        option.textContent?.trim(),
+      ),
+    ).toEqual(['Name']);
+
+    inputValue(picker, '');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]').map((option) =>
+        option.textContent?.trim(),
+      ),
+    ).toEqual(['Name', 'Created']);
+  });
+
+  it('lets Tab leave an explored list on an empty prompt instead of committing', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    // The engine highlights the first option on open, so without the empty-
+    // prompt gate this Tab would commit it and open an editor.
+    expect(picker.getAttribute('aria-activedescendant')).not.toBeNull();
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    picker.dispatchEvent(tab);
+    await settle(fixture);
+    expect(tab.defaultPrevented).toBe(false);
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+  });
+
+  it('keeps the Tab-commits affordance for a typed query with an active option', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    picker.focus();
+    inputValue(picker, 'Name');
+    key(picker, 'ArrowDown');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-activedescendant')).not.toBeNull();
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    picker.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    const editor = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="editor"][data-mode="create"]',
+    );
+    expect(editor.dataset['field']).toBe('name');
+  });
+
   it('uses one typed projected editor for create, rejects invalid commits, and announces add', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.value.set([]);
@@ -916,6 +1058,10 @@ async function openCreateEditor(
 function inputValue(input: HTMLInputElement, value: string): void {
   input.value = value;
   input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function click(element: HTMLElement): void {
+  element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 }
 
 function key(element: HTMLElement, keyValue: string): void {
