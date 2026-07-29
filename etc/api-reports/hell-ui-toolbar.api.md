@@ -39,7 +39,7 @@ export interface HellOverflowToolbarLabels {
 }
 
 // @public
-export type HellOverflowToolbarPart = 'root' | 'action' | 'separator' | 'widget' | 'overflowTrigger' | 'overflowMenu' | 'overflowItem' | 'overflowSeparator';
+export type HellOverflowToolbarPart = 'action' | 'overflowItem' | 'overflowMenu' | 'overflowSeparator' | 'overflowTrigger' | 'root' | 'separator' | 'widget';
 
 // @public
 export type HellOverflowToolbarUi = HellUi<HellOverflowToolbarPart>;
@@ -68,7 +68,7 @@ export class HellToolbarAction {
 }
 
 // @public
-export type HellToolbarActionOverflow = 'never' | 'auto' | 'always';
+export type HellToolbarActionOverflow = 'always' | 'auto' | 'never';
 
 // @public
 export class HellToolbarItem {

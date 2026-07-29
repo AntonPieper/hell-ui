@@ -13,13 +13,16 @@ const HD_APP_SHELL_BASIC_ICONS = {
 /**
  * Nav item recipe — plain anchors styled over the shell's stable state
  * attributes. `in-data-[collapsed=true]:*` keys off the sidenav's
- * `data-collapsed` attribute, so labels hide and icons center in rail mode.
+ * `data-collapsed` attribute, so rail mode fades the labels out and slides the
+ * icons to the rail's center. Rows take the sidenav's resting content width
+ * rather than the box the shell is interpolating, which is what keeps their
+ * contents from re-laying-out on every frame of the collapse.
  */
 const NAV_ITEM =
-  'flex cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
+  'flex w-[var(--hell-app-sidenav-content-width)] cursor-pointer items-center gap-hell-3 rounded-md px-3 py-2 text-[13px] font-medium text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary transition-[border-radius] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:rounded-none';
 const NAV_ICON =
-  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle';
-const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
+  'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle transition-[translate] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:translate-x-[calc((var(--hell-app-sidenav-collapsed-content-width)_-_100%)/2_-_calc(var(--spacing)_*_3))]';
+const NAV_LABEL = 'flex-1 truncate transition-[opacity,visibility] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:invisible in-data-[collapsed=true]:opacity-0';
 
 @Component({
   selector: 'app-app-shell-basic-example',

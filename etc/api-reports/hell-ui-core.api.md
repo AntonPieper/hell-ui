@@ -24,10 +24,10 @@ import { WritableSignal } from '@angular/core';
 export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
 
 // @public
-export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link' | 'danger' | 'success';
+export type HellButtonVariant = 'danger' | 'default' | 'ghost' | 'link' | 'primary' | 'soft' | 'success';
 
 // @public
-export type HellChipVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
+export type HellChipVariant = 'danger' | 'default' | 'info' | 'primary' | 'success' | 'warning';
 
 // @public
 export function hellCreateLabels<T extends object>(description: string, defaults: T): HellLabelToken<T>;
@@ -48,7 +48,7 @@ export type HellLabels<T extends object> = T & {
 export type HellLabelToken<T extends object> = InjectionToken<HellLabels<T>>;
 
 // @public
-export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
+export type HellMaybeAsync<T> = Observable<T> | Promise<T> | T;
 
 // @public
 export type HellOrientation = 'horizontal' | 'vertical';
@@ -76,13 +76,13 @@ export type HellSearchFieldValue = HellSearchPrimitive | readonly HellSearchPrim
 export function hellSearchKey(value: string): string;
 
 // @public
-export type HellSearchPrimitive = string | number | boolean | null | undefined | Date;
+export type HellSearchPrimitive = Date | boolean | null | number | string | undefined;
 
 // @public
 export type HellSearchRanker = <T>(items: readonly T[], request: HellSearchRankRequest<T>) => readonly HellSearchResult<T>[];
 
 // @public
-export interface HellSearchRankRequest<T> extends Pick<HellSearchSourceRequest, 'query' | 'limit'> {
+export interface HellSearchRankRequest<T> extends Pick<HellSearchSourceRequest, 'limit' | 'query'> {
     readonly fields?: readonly HellSearchField<T>[];
 }
 
@@ -111,24 +111,24 @@ export function hellSearchResource<T, P = unknown>(options: HellSearchResourceOp
 // @public
 export type HellSearchResourceOptions<T, P = unknown> = {
     readonly query: WritableSignal<string>;
-    readonly items: readonly T[] | Signal<readonly T[]>;
-    readonly source?: never;
-    readonly fields?: readonly HellSearchField<T>[];
-    readonly limit?: number;
-    readonly params?: never;
-    readonly debounce?: never;
-} | {
-    readonly query: WritableSignal<string>;
     readonly source: HellSearchResourceSource<T, P>;
     readonly items?: never;
     readonly fields?: readonly HellSearchField<T>[];
     readonly limit?: number;
     readonly params?: P;
     readonly debounce?: number;
+} | {
+    readonly query: WritableSignal<string>;
+    readonly items: Signal<readonly T[]> | readonly T[];
+    readonly source?: never;
+    readonly fields?: readonly HellSearchField<T>[];
+    readonly limit?: number;
+    readonly params?: never;
+    readonly debounce?: never;
 };
 
 // @public
-export type HellSearchResourceSource<T, P = unknown> = (request: HellSearchResourceSourceRequest<P>) => HellMaybeAsync<readonly T[] | HellSearchResponse<T>>;
+export type HellSearchResourceSource<T, P = unknown> = (request: HellSearchResourceSourceRequest<P>) => HellMaybeAsync<HellSearchResponse<T> | readonly T[]>;
 
 // @public
 export type HellSearchResourceSourceRequest<P = unknown> = Omit<HellSearchSourceRequest<P>, 'signal'> & {
@@ -149,14 +149,14 @@ export interface HellSearchResult<T> {
 
 // @public
 export class HellSearchService {
-    rank<T>(items: readonly T[], request: Pick<HellSearchRequest<T>, 'query' | 'fields' | 'limit'>): readonly HellSearchResult<T>[];
+    rank<T>(items: readonly T[], request: Pick<HellSearchRequest<T>, 'fields' | 'limit' | 'query'>): readonly HellSearchResult<T>[];
     search<T, P = unknown>(request: HellSearchRequest<T, P>): Promise<readonly HellSearchResult<T>[]>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearchService, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<HellSearchService>;
 }
 
 // @public
-export type HellSearchSource<T, P = unknown> = (request: HellSearchSourceRequest<P>) => HellMaybeAsync<readonly T[] | HellSearchResponse<T>>;
+export type HellSearchSource<T, P = unknown> = (request: HellSearchSourceRequest<P>) => HellMaybeAsync<HellSearchResponse<T> | readonly T[]>;
 
 // @public
 export interface HellSearchSourceRequest<P = unknown> {
@@ -167,13 +167,13 @@ export interface HellSearchSourceRequest<P = unknown> {
 }
 
 // @public
-export type HellSearchStatus = 'idle' | 'loading' | 'success' | 'error';
+export type HellSearchStatus = 'error' | 'idle' | 'loading' | 'success';
 
 // @public
 export function hellSearchWords(value: string): readonly string[];
 
 // @public
-export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type HellSize = 'lg' | 'md' | 'sm' | 'xl' | 'xs';
 
 // @public
 export interface HellTimeValue {
@@ -203,7 +203,7 @@ export { HellTypedValueValidParse }
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 
 // @public
-export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
+export type HellUiInput<Part extends string> = HellUi<Part> | null | string | undefined;
 
 // @public
 export function provideHellLabels<V extends object>(token: InjectionToken<V>, overrides: HellLabelOverrides<V>): Provider;

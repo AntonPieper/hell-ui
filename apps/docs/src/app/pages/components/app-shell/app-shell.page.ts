@@ -104,15 +104,36 @@ const HD_APP_SHELL_PAGE_ICONS = {
         stable attributes — <code>data-collapsed</code> on the sidenav plus
         <code>data-sidenav-collapsed</code>, <code>data-mobile-layout</code>, and friends on the
         shell root — so rail mode is pure CSS: <code>in-data-[collapsed=true]:*</code> variants
-        hide labels and center icons when the rail collapses.
+        fade labels out and slide icons into the rail when it collapses.
+      </p>
+      <p>
+        Give each row the sidenav's <code>--hell-app-sidenav-content-width</code>. Collapsing
+        interpolates the grid column, so a row sized by that box is re-laid-out on every frame:
+        labels re-wrap and re-ellipsise, and anything centered in the row slides in from wherever
+        the box happens to be. Sized against the rail's resting width instead, a row keeps one
+        layout for the whole transition and the narrowing rail simply crops it — which leaves
+        rail mode free to animate only continuous properties. Labels and trailing content fade
+        through <code>opacity</code> plus <code>visibility</code>, so they leave the accessibility
+        tree and tab order when the fade ends rather than lingering at zero opacity —
+        which is exactly why every rail entry needs its own <code>aria-label</code>: once the
+        label is hidden the link has no other name source. The icon covers the remaining distance
+        to the rail's center with <code>translate</code>, which costs no layout; its offset is half
+        of <code>--hell-app-sidenav-collapsed-content-width</code>, less half the glyph, less the
+        row's leading padding. Square the row's <code>border-radius</code> off over the same
+        duration: the rail crops the row, so a rounded highlight would otherwise reach the rail
+        edge as a pill cut off mid-curve, and a full-bleed band reads as deliberate. Drive every
+        duration from <code>--hell-duration-*</code> so the reduced-motion preference collapses the
+        whole recipe along with the shell.
       </p>
       <p>
         A collapsible group is a small disclosure recipe: the app owns the expanded state, binds
         <code>aria-expanded</code> on a heading <code>&lt;button&gt;</code>, and hides collapsed
         items with <code>visibility: hidden</code> so they leave the accessibility tree and tab
         order. Keying the same rules off <code>[hellAppSidenav][data-collapsed='true']</code>
-        hides the heading, draws a divider, and force-expands the group so every item stays
-        reachable while the rail is icon-only.
+        fades the heading out behind a divider and force-expands the group so every item stays
+        reachable while the rail is icon-only. Give the heading an explicit one-line height so
+        rail mode can animate it into the divider's height instead of dropping a row in a single
+        frame.
       </p>
       <hd-example-tabs [code]="sidenavExampleCode" flush>
         <app-app-shell-sidenav-example />
@@ -141,6 +162,15 @@ const HD_APP_SHELL_PAGE_ICONS = {
           the collapsed aside as one large click target and hides while the panel is open.
         </li>
       </ul>
+      <p>
+        The shell reserves the secondary column only when the aside is actually projected, so a
+        shell without one hands the whole trailing width to content instead of leaving a dead
+        column. Where the reserved space exists it is never shared: on desktop the rail is its own
+        grid column, and on mobile — where the aside pins itself to the inline end of the content
+        area — the content box reserves the collapsed rail's width, so main content is never laid
+        out or clicked underneath it. Only the expanded mobile panel deliberately overlays content,
+        as a dismissable drawer with a backdrop.
+      </p>
       <p class="hd-note">
         Click the <em>Activity</em> header row to hide the panel, then click the collapsed rail to
         bring it back.
@@ -209,7 +239,18 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
         <li>
           <code>hellAppSidenav</code> — sidenav slot. Input: <code>[ui]</code>. Its collapsed and
-          mobile visibility state always follows the enclosing shell.
+          mobile visibility state always follows the enclosing shell. It publishes the rail's
+          resting geometry, which a nav recipe cannot derive for itself:
+          <code>--hell-app-sidenav-content-width</code> is a real content box — expanded width
+          less both paddings and the trailing border — so a row sized by it fills the rail and
+          leaves matching gutters, and it is <code>100%</code> on the mobile drawer, which slides
+          at a fixed width rather than interpolating one.
+          <code>--hell-app-sidenav-collapsed-content-width</code> is the width a rail glyph
+          centers against: it subtracts both paddings but deliberately <em>not</em> the trailing
+          border, so a glyph centered on it lands on the center of the whole strip the rail reads
+          as. The asymmetry between the two is load bearing, not an oversight. Size rail rows and
+          center rail glyphs against these rather than against the box the shell is interpolating;
+          override them alongside any refinement of the sidenav's padding or border.
         </li>
         <li>
           <code>hellAppContent</code> — content slot. Input: <code>[ui]</code>. Its public
@@ -307,6 +348,13 @@ const HD_APP_SHELL_PAGE_ICONS = {
           Don't add free-text section headings inside the sidenav — they have no rail-mode
           treatment. Use the collapsible group recipe, whose heading hides behind a divider when
           the rail collapses.
+        </li>
+        <li>
+          Don't let rail rows take their width from the collapsing box, and don't re-center or
+          <code>display: none</code> anything in rail mode. Those are layout swaps against a
+          track that is still interpolating, so they re-wrap labels and teleport icons mid
+          transition. Size rows from
+          <code>--hell-app-sidenav-content-width</code> and animate only continuous properties.
         </li>
         <li>
           Don't apply the toggle directives to non-<code>button</code> elements; native

@@ -685,6 +685,89 @@ describe('HellCombobox', () => {
     expect(input.getAttribute('aria-activedescendant')).toBe(lastId);
   });
 
+  it('keeps the active option through pointer boundary events the pointer did not cause', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    // A panel placed asynchronously can move after it is painted, sliding an
+    // option out from under a pointer nobody touched. The keyboard's active
+    // option has to survive that, and no phantom hover may be painted.
+    first.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    second.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    first.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+    expect(first.hasAttribute('data-hover')).toBe(false);
+    expect(second.hasAttribute('data-hover')).toBe(false);
+
+    // A pointer that is actually being used owns the active option again, and
+    // the move replays the entry the option under it never received.
+    second.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse' }),
+    );
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.hasAttribute('data-hover')).toBe(true);
+
+    second.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
+  });
+
+  it('does not raise a mouse hover from a touch that opens the dropdown', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+
+    // Hover is a mouse affordance. The replayed entry has to carry the real
+    // pointer type, or a touch leave — which deliberately clears nothing —
+    // would strand the option looking hovered.
+    second.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+    fixture.detectChanges();
+    expect(second.hasAttribute('data-hover')).toBe(false);
+    // The replay still has to happen: a touch press owns the active option the
+    // same way a mouse press does, so dropping the replay altogether fails here
+    // rather than only when its pointer type regresses.
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.id).not.toBe(first.id);
+  });
+
+  it('lifts the resting-pointer guard for a legacy mouse move with no pointer events', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+
+    // The guard swallows the legacy mouse boundary names too, so an environment
+    // that emits only those — a consumer's jsdom test driving `mouseEnter` —
+    // must still be able to lift it. A mouse move that is not a PointerEvent
+    // therefore counts as the pointer being used, and its replay is a mouse.
+    second.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    second.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.hasAttribute('data-hover')).toBe(true);
+  });
+
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
     const fixture = TestBed.createComponent(ComboboxProjectedHost);
     fixture.detectChanges();

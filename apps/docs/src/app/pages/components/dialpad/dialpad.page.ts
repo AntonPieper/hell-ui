@@ -63,6 +63,12 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
 
       <h2>Basic</h2>
       <p>The default anatomy needs no configuration — drop in the component and listen to outputs.</p>
+      <p>
+        The display is the caret's home: place it inside the number and the next key press or
+        typed character inserts there, <code>Backspace</code> deletes there, and a selected range
+        is replaced. Correcting a mistyped digit therefore does not mean re-dialing the tail of
+        the number.
+      </p>
       <hd-example-tabs [code]="dialpadBasicExampleCode">
         <app-dialpad-basic-example />
       </hd-example-tabs>
@@ -198,8 +204,11 @@ import dialpadStatesExampleCodeRaw from './examples/states.example.ts?raw' with 
         <li>The host has <code>role="group"</code> and an <code>aria-label</code> from the Label Contract (default "Dial pad").</li>
         <li>The number display is a real <code>&lt;input type="tel"&gt;</code> with its own <code>aria-label</code>, so it accepts typing, paste, and screen-reader interaction like any text field.</li>
         <li>Every key, the clear/backspace controls, and the call button are native <code>&lt;button&gt;</code> elements with <code>aria-label</code>s — digit keys announce their letters (for example "Digit 2, ABC"), <code>*</code> announces "Star", <code>#</code> announces "Pound", and <code>0</code> announces the hold-for-plus affordance.</li>
-        <li>Keyboard support works from the host or the number input: digits, <code>*</code>, <code>#</code>, and <code>+</code> append to the value; <code>Backspace</code> removes one character; <code>Delete</code> clears the value; <code>Enter</code> triggers <code>(call)</code> when the call button is shown and a value is present.</li>
+        <li>Keyboard support works from the host or the number input: digits, <code>*</code>, <code>#</code>, and <code>+</code> insert at the caret; <code>Backspace</code> removes the character before the caret or the selected range; <code>Delete</code> clears the whole value; <code>Enter</code> triggers <code>(call)</code> when the call button is shown and a value is present.</li>
+        <li>The caret in the display drives every edit. Click or arrow-key into the number and the next key press, typed character, or <code>Backspace</code> acts there instead of at the end; select a range and the next key press replaces it. An untouched display keeps appending, so ordinary dialing is unchanged.</li>
+        <li>Three cases deliberately fall back to appending. Tabbing into the display selects the whole number the way any text field does, but that is the browser announcing focus rather than a range you chose, so it is ignored — the next key press or typed digit adds a digit at the caret the display already had instead of replacing everything. Pressing the box around the number reaches the field through the same kind of focus, so it places a caret and never replaces, even on the browsers that highlight the whole number while focusing it. A selection you make yourself still replaces, whether you drag across the number or use <code>Ctrl</code>/<code>Cmd</code>+<code>A</code>. Writing a new <code>[value]</code> from outside also drops the tracked caret, since the number the caret pointed into is gone.</li>
         <li>Press-and-hold <code>0</code> with pointer or touch input enters <code>+</code> instead of <code>0</code>; there is no separate <code>+</code> key in the layout.</li>
+        <li>Keys commit when the pointer lifts on the key it pressed, so overlapping taps all register during fast two-thumb dialing, and sliding off a key before lifting abandons the tap. A key held down while another key is tapped therefore records the digits in release order.</li>
         <li><code>disabled</code> sets <code>aria-disabled="true"</code> on the host and disables every native control; <code>invalid</code> sets <code>aria-invalid="true"</code> on both the host and the number input.</li>
       </ul>
 

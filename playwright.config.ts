@@ -26,6 +26,7 @@ type E2eTier = (typeof E2E_TIERS)[number];
 const ENGINE_SENSITIVE_SUITES: readonly string[] = [
   // Focus and keyboard semantics: focus traps and restoration, outside-focus
   // dismissal, Tab traversal, and selection-follows-focus differ per engine.
+  'control-group-contracts.spec.ts',
   'floating-dismissal.spec.ts',
   'listbox-a11y-contracts.spec.ts',
   'menu-select-combobox-keyboard.spec.ts',
@@ -67,9 +68,19 @@ assertEngineSensitiveSuitesExist();
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 4200);
 const externalBaseUrl = process.env.HELL_E2E_BASE_URL;
 const baseURL = externalBaseUrl ?? `http://127.0.0.1:${port}`;
+/**
+ * Builds the docs, stamps them, then serves them.
+ *
+ * The stamp is written here rather than by `build:docs` on purpose. `vercel.json`
+ * publishes `dist/hell-docs/browser` wholesale, so anything `build:docs` leaves
+ * there ships with the public site — and this file identifies the machine that
+ * produced it. Writing it as part of serving keeps it out of every build that is
+ * not this harness.
+ */
 const webServerCommand =
   process.env.HELL_E2E_WEB_SERVER_COMMAND ??
-  `pnpm run build:docs && pnpm exec vite preview --host 127.0.0.1 --port ${port} --strictPort --outDir dist/hell-docs/browser`;
+  `pnpm run build:docs && node tools/stamp-docs-build.mjs dist/hell-docs && ` +
+    `pnpm exec vite preview --host 127.0.0.1 --port ${port} --strictPort --outDir dist/hell-docs/browser`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -77,9 +88,15 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
+  globalSetup: './tools/e2e/global-setup.ts',
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'test-results/playwright-html' }],
+    // Prints what the machine and the docs server were doing while each failure
+    // ran — load during its window, and what the nearest server probe saw and
+    // when. It draws no conclusion from any of it, deliberately: see the header
+    // of that file for the six rounds of wrong conclusions that led here.
+    ['./tools/e2e/host-health-reporter.ts'],
   ],
   outputDir: 'test-results/playwright',
   use: {
@@ -92,7 +109,14 @@ export default defineConfig({
         command: webServerCommand,
         url: baseURL,
         reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
+        // The command builds the docs before serving them, and a cold docs
+        // build takes around 90s on a developer machine. At 120s that raced:
+        // with no `dist/hell-docs`, the server never came up in time and the
+        // run reported 292 failures across every suite — a suite-wide red with
+        // no defect behind it, and nothing in the output naming the cause.
+        // Sized for a cold build plus headroom on a slower runner; a warm run
+        // is unaffected because it finishes long before this.
+        timeout: 600_000,
       },
   projects: projectsForTier(tier),
 });

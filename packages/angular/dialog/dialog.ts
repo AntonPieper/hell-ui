@@ -6,6 +6,7 @@ import {
   Injector,
   TemplateRef,
   booleanAttribute,
+  computed,
   effect,
   inject,
   input,
@@ -36,8 +37,13 @@ import {
 } from 'hell-ui/internal/core';
 import {
   HELL_DIALOG_SCOPE_ROOT,
+  HellDialogScopedModality,
   HellDialogScopedOverlayAdapter,
   hellFindDialogScopeRoot,
+  hellReleaseDialogOverlay,
+  hellReleaseDialogPageModality,
+  hellRetainDialogOverlay,
+  hellRetainDialogPageModality,
 } from './dialog-scope';
 
 const HELL_DIALOG_OVERLAY_RECIPE = {
@@ -167,6 +173,19 @@ function optionalDismissGuardAttribute<T>(
   return value === undefined ? undefined : dismissGuardAttribute(value);
 }
 
+/**
+ * Whether an overlay actually blocks only a region. `scoped` without a Dialog
+ * Scope root falls back to the viewport and to page-wide modality, so the input
+ * alone does not answer it. Module-private: the overlay and the panel both need
+ * the predicate, but consumers have no use for it.
+ */
+function hellBlocksScopeOnly(
+  overlay: HellDialogOverlay | null,
+  scopeRoot: HTMLElement | null,
+): boolean {
+  return (overlay?.scoped() ?? false) && scopeRoot !== null;
+}
+
 /** Backdrop rendered behind an `hellDialog`, styled and optionally scoped to a container. */
 @Directive({
   selector: '[hellDialogOverlay]',
@@ -187,22 +206,48 @@ export class HellDialogOverlay {
     recipe: () => HELL_DIALOG_OVERLAY_RECIPE,
   });
 
-  /** When true, overlay reads bounds from nearest dialog root captured by
-   *  opening trigger. If none exists, it falls back to viewport. */
+  /**
+   * When true, the overlay reads its bounds from the nearest Dialog Scope root
+   * captured by the opening trigger and blocks only that region: the scope is
+   * made inert and stops scrolling while the surrounding shell keeps focus,
+   * pointer input, and its place in the accessibility tree. If no scope root
+   * exists it falls back to the viewport and to page-wide modality.
+   */
   readonly scoped = input(false, { transform: booleanAttribute });
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly scopeRoot = inject(HELL_DIALOG_SCOPE_ROOT, { optional: true });
   private readonly doc = inject(DOCUMENT);
   private adapter: HellDialogScopedOverlayAdapter | null = null;
+  private modality: HellDialogScopedModality | null = null;
+  private pageModal = false;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+    // Construction is still inside the manager's portal attach, before it hides
+    // the body children from assistive technology, so this is where a document
+    // records what that pass is about to overwrite.
+    hellRetainDialogOverlay(this.doc);
     effect(() => {
       if (this.scoped()) this.connectScope();
       else this.disconnectScope();
+      // Anything that is not running scoped modality blocks the whole page and
+      // must keep both the delegated focus trap and the page-wide hiding, so it
+      // holds the document out of scoped modality for as long as it is open.
+      this.setPageModal(this.modality === null);
     });
-    destroyRef.onDestroy(() => this.disconnectScope());
+    destroyRef.onDestroy(() => {
+      this.disconnectScope();
+      this.setPageModal(false);
+      hellReleaseDialogOverlay(this.doc);
+    });
+  }
+
+  private setPageModal(next: boolean): void {
+    if (this.pageModal === next) return;
+    this.pageModal = next;
+    if (next) hellRetainDialogPageModality(this.doc);
+    else hellReleaseDialogPageModality(this.doc);
   }
 
   private connectScope(): void {
@@ -211,11 +256,17 @@ export class HellDialogOverlay {
     if (!root) return;
     this.adapter = new HellDialogScopedOverlayAdapter(root, this.element.nativeElement, this.doc);
     this.adapter.connect();
+    this.modality = new HellDialogScopedModality(root, this.doc);
+    this.modality.engage();
   }
 
   private disconnectScope(): void {
     this.adapter?.destroy();
     this.adapter = null;
+    // Released before the manager restores focus to the opener, which lives
+    // inside the scope and must be focusable again by then.
+    this.modality?.release();
+    this.modality = null;
   }
 }
 
@@ -244,6 +295,10 @@ export class HellDialogScope {}
     'data-slot': 'root',
     '[attr.data-elevation]': '"3"',
     '[attr.data-size]': 'size()',
+    // Declared after the NgpDialog host directive, so this binding is the one
+    // that lands on the element; it mirrors the engine's value except when
+    // scoped modality makes the page-wide claim untrue.
+    '[attr.aria-modal]': 'ariaModal()',
     '(keydown.tab)': 'onTabKeydown($event)',
   },
 })
@@ -263,6 +318,20 @@ export class HellDialog {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly interactivityChecker = inject(InteractivityChecker);
+  private readonly overlay = inject(HellDialogOverlay, { optional: true });
+  private readonly scopeRoot = inject(HELL_DIALOG_SCOPE_ROOT, { optional: true });
+  private readonly primitive = inject(NgpDialog);
+
+  /**
+   * `aria-modal` has to describe what is actually unavailable. A scoped dialog
+   * leaves everything outside its inert scope root available — that is the
+   * whole feature — so claiming page-wide modality would tell assistive
+   * technology to confine its cursor to the panel and hide the shell this mode
+   * exists to keep usable. Anything else mirrors the primitive's own value.
+   */
+  protected readonly ariaModal = computed(() =>
+    hellBlocksScopeOnly(this.overlay, this.scopeRoot) ? 'false' : String(this.primitive.modal()),
+  );
 
   /** Traps focus by cycling Tab/Shift+Tab between the dialog's focusable candidates. */
   protected onTabKeydown(event: Event): void {

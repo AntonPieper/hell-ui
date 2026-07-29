@@ -1,5 +1,4 @@
 /* Filter Builder composes these public styled entry points. */
-@import '../../button/styles.css';
 @import '../../chip/styles.css';
 @import '../../combobox/styles.css';
 @import '../../control-group/styles.css';
@@ -8,3 +7,19 @@
 /* Filter Builder recipe defaults are Tailwind utility recipes in the component. */
 @source "./filter-builder.ts";
 @source "./filter-builder.renderer.ts";
+
+@layer components {
+  /* Built-in clear-all glyph on the Control Group action. Rendered as a CSS
+     mask on the empty button so the icon-only action ships with zero consumer
+     markup and keeps its Label Contract accessible name; sized in `em` so it
+     tracks the frame's type scale. */
+  hell-filter-builder button[data-slot='clear']:empty::before {
+    content: '';
+    display: block;
+    height: 0.9em;
+    width: 0.9em;
+    background-color: currentcolor;
+    -webkit-mask: var(--hell-icon-close) center / contain no-repeat;
+    mask: var(--hell-icon-close) center / contain no-repeat;
+  }
+}

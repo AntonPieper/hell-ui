@@ -10,6 +10,7 @@ import {
   type HellFilterFieldDescriptor,
 } from 'hell-ui/features/filter-builder';
 import { HellInput } from 'hell-ui/input';
+import { HellNativeSelect } from 'hell-ui/select';
 
 interface IdentifiedFilter<
   TField extends string,
@@ -42,6 +43,7 @@ const STATUS_OPTIONS: readonly StatusOption[] = [
     ...HELL_COMBOBOX_IMPORTS,
     HellButton,
     HellInput,
+    HellNativeSelect,
     JsonPipe,
   ],
   template: `
@@ -63,14 +65,25 @@ const STATUS_OPTIONS: readonly StatusOption[] = [
                 aria-label="Name text"
                 placeholder="e.g. Ada"
                 [value]="editor.filter?.value ?? ''"
-                (keydown.enter)="editor.commit(nameCandidate(editor, nameValue.value))"
+                (keydown.enter)="editor.commit(nameCandidate(editor, nameOperator.value, nameValue.value))"
               />
+            </label>
+            <label class="grid gap-hell-1 text-xs font-medium">
+              Match
+              <select #nameOperator hellNativeSelect aria-label="Name operator">
+                <option value="contains" [selected]="(editor.filter?.operator ?? 'contains') === 'contains'">
+                  contains
+                </option>
+                <option value="startsWith" [selected]="editor.filter?.operator === 'startsWith'">
+                  starts with
+                </option>
+              </select>
             </label>
             <button
               hellButton
               type="button"
               variant="soft"
-              (click)="editor.commit(nameCandidate(editor, nameValue.value))"
+              (click)="editor.commit(nameCandidate(editor, nameOperator.value, nameValue.value))"
             >
               Apply
             </button>
@@ -147,6 +160,11 @@ export class FilterBuilderRecipesExample {
     multiple: true,
     display: (filter) =>
       `Name ${filter.operator === 'startsWith' ? 'starts with' : 'contains'} “${filter.value}”`,
+    displayParts: (filter) => ({
+      field: 'Name',
+      operator: filter.operator === 'startsWith' ? 'starts with' : 'contains',
+      value: `“${filter.value}”`,
+    }),
     validate: (filter) => filter.value.trim().length > 0,
   };
   protected readonly statusField: HellFilterFieldDescriptor<StatusFilter> = {
@@ -154,12 +172,18 @@ export class FilterBuilderRecipesExample {
     label: 'Status',
     display: (filter) =>
       `Status ${filter.operator === 'isNot' ? 'is not' : 'is'} ${filter.value}`,
+    displayParts: (filter) => ({
+      field: 'Status',
+      operator: filter.operator === 'isNot' ? 'is not' : 'is',
+      value: filter.value,
+    }),
     validate: (filter) => STATUS_OPTIONS.some((option) => option.value === filter.value),
   };
   protected readonly priorityField: HellFilterFieldDescriptor<PriorityFilter> = {
     field: 'priority',
     label: 'Priority ≥',
     display: (filter) => `Priority ≥ ${filter.value}`,
+    displayParts: (filter) => ({ field: 'Priority', operator: '≥', value: String(filter.value) }),
     validate: (filter) => Number.isInteger(filter.value) && filter.value >= 1 && filter.value <= 5,
   };
   protected readonly fields = [this.nameField, this.statusField, this.priorityField] as const;
@@ -176,12 +200,13 @@ export class FilterBuilderRecipesExample {
 
   protected nameCandidate(
     editor: HellFilterBuilderEditorContext<NameFilter>,
+    operator: string,
     value: string,
   ): NameFilter {
     return {
       id: editor.filter?.id ?? this.createIdentity('name'),
       field: 'name',
-      operator: editor.filter?.operator ?? 'contains',
+      operator: operator === 'startsWith' ? 'startsWith' : 'contains',
       value: value.trim(),
     };
   }

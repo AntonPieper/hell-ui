@@ -34,13 +34,13 @@ export class HellAudioPlayer {
     protected readonly currentTime: _angular_core.WritableSignal<number>;
     // (undocumented)
     protected cyclePlaybackRate(): void;
-    readonly date: _angular_core.InputSignal<string | Date | null>;
+    readonly date: _angular_core.InputSignal<Date | null | string>;
     // (undocumented)
-    readonly downloadName: _angular_core.InputSignal<string | null>;
+    readonly downloadName: _angular_core.InputSignal<null | string>;
     // (undocumented)
     protected readonly duration: _angular_core.WritableSignal<number>;
     // (undocumented)
-    protected readonly error: Signal<string | null>;
+    protected readonly error: Signal<null | string>;
     // (undocumented)
     protected format(s: number): string;
     protected readonly hostElement: HTMLElement;
@@ -48,7 +48,7 @@ export class HellAudioPlayer {
     protected readonly interim: Signal<string>;
     // (undocumented)
     protected readonly labels: HellLabels<HellAudioPlayerLabels>;
-    readonly lang: _angular_core.InputSignal<string | null>;
+    readonly lang: _angular_core.InputSignal<null | string>;
     // (undocumented)
     protected readonly muted: _angular_core.WritableSignal<boolean>;
     // (undocumented)
@@ -70,13 +70,13 @@ export class HellAudioPlayer {
     protected onVolume(v: number): void;
     protected readonly part: (part: HellAudioPlayerPart) => string;
     // (undocumented)
-    protected readonly playbackRate: _angular_core.WritableSignal<1 | 1.25 | 1.5 | 2 | 0.75>;
+    protected readonly playbackRate: _angular_core.WritableSignal<0.75 | 1 | 1.25 | 1.5 | 2>;
     // (undocumented)
     protected readonly playing: _angular_core.WritableSignal<boolean>;
     // (undocumented)
     protected readonly progress: Signal<number>;
     // (undocumented)
-    protected readonly resolvedDate: Signal<string | null>;
+    protected readonly resolvedDate: Signal<null | string>;
     // (undocumented)
     protected readonly seekMax: Signal<number>;
     // (undocumented)
@@ -87,7 +87,7 @@ export class HellAudioPlayer {
     protected readonly speechTranscriptLabel: string;
     // (undocumented)
     readonly src: _angular_core.InputSignal<string>;
-    readonly title: _angular_core.InputSignal<string | null>;
+    readonly title: _angular_core.InputSignal<null | string>;
     // (undocumented)
     protected toggle(): void;
     protected toggleCaptions(): void;
@@ -101,7 +101,7 @@ export class HellAudioPlayer {
     // (undocumented)
     protected readonly volume: _angular_core.WritableSignal<number>;
     // (undocumented)
-    protected readonly volumeIcon: Signal<"faSolidVolumeXmark" | "faSolidVolumeLow" | "faSolidVolumeHigh">;
+    protected readonly volumeIcon: Signal<"faSolidVolumeHigh" | "faSolidVolumeLow" | "faSolidVolumeXmark">;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellAudioPlayer, "hell-audio-player", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "src": { "alias": "src"; "required": true; "isSignal": true; }; "crossOrigin": { "alias": "crossorigin"; "required": false; "isSignal": true; }; "downloadName": { "alias": "downloadName"; "required": false; "isSignal": true; }; "allowDownload": { "alias": "allowDownload"; "required": false; "isSignal": true; }; "allowSpeechTranscript": { "alias": "allowSpeechTranscript"; "required": false; "isSignal": true; }; "title": { "alias": "title"; "required": false; "isSignal": true; }; "date": { "alias": "date"; "required": false; "isSignal": true; }; "lang": { "alias": "lang"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAudioPlayer, never>;
 }
@@ -153,7 +153,7 @@ export interface HellAudioPlayerLabels {
 }
 
 // @public
-export type HellAudioPlayerPart = 'root' | 'meta' | 'title' | 'date' | 'controls' | 'transport' | 'playButton' | 'time' | 'seek' | 'actions' | 'muteButton' | 'volume' | 'captionToggle' | 'downloadButton' | 'captions' | 'captionsBar' | 'captionsStatus' | 'captionsDot' | 'captionsActions' | 'captionAction' | 'captionsBody' | 'captionsError' | 'captionsText' | 'captionsInterim' | 'captionsEmpty';
+export type HellAudioPlayerPart = 'actions' | 'captionAction' | 'captionToggle' | 'captions' | 'captionsActions' | 'captionsBar' | 'captionsBody' | 'captionsDot' | 'captionsEmpty' | 'captionsError' | 'captionsInterim' | 'captionsStatus' | 'captionsText' | 'controls' | 'date' | 'downloadButton' | 'meta' | 'muteButton' | 'playButton' | 'root' | 'seek' | 'time' | 'title' | 'transport' | 'volume';
 
 // @public
 export type HellAudioPlayerUi = HellUi<HellAudioPlayerPart>;

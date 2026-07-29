@@ -38,7 +38,7 @@ export class HellChip {
     protected readonly removable: _angular_core.Signal<boolean>;
     readonly remove: _angular_core.OutputEmitterRef<void>;
     readonly size: _angular_core.InputSignal<HellSize>;
-    protected tabIndex(): '0' | '-1' | null;
+    protected tabIndex(): '-1' | '0' | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly variant: _angular_core.InputSignal<HellChipVariant>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellChip, "[hellChip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, { "remove": "remove"; }, never, never, true, never>;

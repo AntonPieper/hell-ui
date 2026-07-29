@@ -228,6 +228,116 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await expect(input).toBeFocused();
   });
 
+  test('a pointer the user moves owns the combobox active option and paints hover', async ({
+    page,
+  }) => {
+    await page.goto('/components/combobox');
+
+    const example = page.locator('app-combobox-basic-example');
+    const input = example.getByRole('combobox', { name: 'Settlement currency' });
+    await input.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+    );
+
+    await input.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('option', { name: 'EUR — Euro' })).toBeVisible();
+
+    // Hover is the affordance the resting-pointer guard fronts, and it lives
+    // entirely in browser event ordering: the guard swallows boundary events
+    // until a real `pointermove` arrives, so only a real engine can prove that
+    // a pointer the user drives still behaves exactly as it did before.
+    const hovered = page.locator('[role="option"][data-hover]');
+
+    await page.getByRole('option', { name: 'CHF — Swiss Franc' }).hover();
+    await expectActiveDescendantText(
+      page,
+      input,
+      'CHF — Swiss Franc',
+      'a moved pointer takes the active option',
+    );
+    await expect(hovered).toHaveCount(1);
+    await expect(hovered).toHaveText(/CHF — Swiss Franc/);
+
+    await page.getByRole('option', { name: 'EUR — Euro' }).hover();
+    await expectActiveDescendantText(
+      page,
+      input,
+      'EUR — Euro',
+      'the active option follows the pointer across options',
+    );
+    await expect(hovered).toHaveCount(1);
+    await expect(hovered).toHaveText(/EUR — Euro/);
+  });
+
+  test('a dropdown painted under a resting pointer leaves the keyboard active option alone', async ({
+    page,
+  }) => {
+    await page.goto('/components/combobox');
+
+    const example = page.locator('app-combobox-basic-example');
+    const input = example.getByRole('combobox', { name: 'Settlement currency' });
+    await input.evaluate((element) =>
+      element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+    );
+
+    // Measure where a mid-list option is painted, then close and park the
+    // pointer there. Deriving the resting point from the real panel keeps this
+    // independent of per-engine option heights.
+    await input.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    const target = page.getByRole('option', { name: 'EUR — Euro' });
+    await expect(target).toBeVisible();
+    const box = await target.boundingBox();
+    expect(box).not.toBeNull();
+    const restX = box!.x + box!.width / 2;
+    const restY = box!.y + box!.height / 2;
+
+    await page.keyboard.press('Escape');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    // The pointer moves once, while there is no panel to move over, and is then
+    // left alone. Re-opening paints options underneath it, which the browser
+    // reports as a genuine enter — the user never moved anything.
+    await page.mouse.move(restX, restY);
+    await input.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('option', { name: 'AUD — Australian Dollar' })).toBeVisible();
+
+    // Assert the aim: an option really is under the resting pointer, and it is
+    // not the one the keyboard activated. Without this the contract below can
+    // decay into passing because the panel moved out from under the cursor.
+    const restingOptionText = await page.evaluate(
+      ([x, y]) =>
+        document
+          .elementFromPoint(x, y)
+          ?.closest('[role="option"]')
+          ?.textContent?.trim()
+          .replace(/\s+/g, ' ') ?? null,
+      [restX, restY],
+    );
+    expect(restingOptionText, 'an option must be painted under the resting pointer').not.toBeNull();
+    expect(
+      restingOptionText,
+      'the resting pointer must rest over an option other than the keyboard active one',
+    ).not.toBe('AUD — Australian Dollar');
+
+    await expectActiveDescendantText(
+      page,
+      input,
+      'AUD — Australian Dollar',
+      'a resting pointer does not take the active option from the keyboard',
+    );
+    await expect(page.locator('[role="option"][data-hover]')).toHaveCount(0);
+
+    // Enter therefore commits what the keyboard had, not what the cursor is over.
+    await page.keyboard.press('Enter');
+    await expect(input).toHaveValue('AUD — Australian Dollar');
+  });
+
   test('signal forms select shares one value with the field and reports touched on blur', async ({
     page,
   }) => {

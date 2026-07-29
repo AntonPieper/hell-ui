@@ -1,0 +1,6 @@
+kind: Changed
+body: 'Filter Builder: Tab in the inline picker commits the active field option only
+  when a query has been typed. On an empty prompt Tab now leaves the field instead
+  of committing the highlighted option, so exploring the field list never turns a
+  leave gesture into a commit.'
+time: 2026-07-29T06:42:12.413389+02:00

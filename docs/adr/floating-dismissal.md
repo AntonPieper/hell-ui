@@ -1,6 +1,6 @@
 # ADR: Floating dismissal delegation spike
 
-- Status: Accepted (amended 2026-07-14, see "Amendment: non-modal popover")
+- Status: Accepted (amended 2026-07-27, see "Amendment: scoped dialog modality")
 - Date: 2026-05-29
 
 ## Context
@@ -145,10 +145,151 @@ focus, and Escape with focus restore to the caption toggle — with the player
 host as the inside boundary. No other surface may copy this without reopening
 this ADR.
 
+## Amendment: scoped dialog modality (2026-07-27)
+
+A `scoped` dialog blocks one content region while the surrounding app shell
+stays interactive. The delegate check for that capability was run against
+`ng-primitives@0.123.0` and came out differently from the popover amendment
+above: the dialog primitive is the one Hell surface ng-primitives has **not**
+decomposed into primitive functions, so its modality decisions are not
+reachable.
+
+| Concern | Delegate available? |
+| --- | --- |
+| Portal lifecycle, dismiss guards, Escape routing through `NgpOverlayRegistry`, exit animations, focus restore to the opener, `closeOnNavigation` | Yes. `NgpDialogManager` / `NgpDialogRef` keep owning all of it; scoped modality changes none of it. |
+| Backdrop geometry | Yes — Hell-owned already, through the shared `HellFloatingScopedInsetsRuntime`. |
+| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` writes the attribute through its own host binding (declared after the `NgpDialog` host directive, so it is the one that lands) rather than binding the exposed input. |
+| Focus trap scope | **No.** `NgpDialog` applies `NgpFocusTrap` as a host directive and exposes none of its inputs, and `ng-primitives/dialog` exports no `ngpDialog` primitive function — only `provideDialogState` / `injectDialogState`. The popover path (`ngpPopover({}) + ngpFocusTrap({ disabled })`, which is how `trapFocus` works) has no dialog equivalent. Angular's host-directive input exposure is template-bound, so the library cannot drive it either. |
+| Page-wide `aria-hidden` | **No.** `NgpDialogManager.hideNonDialogContentFromAssistiveTechnology` runs unconditionally for the first open, its previous-value map is private, and `NgpDialogConfig` has no switch. Left alone it makes the still-focusable shell a descendant of `aria-hidden="true"`, which is the violation scoped modality exists to avoid. |
+| Background scroll | Partly. `NgpDialogConfig.scrollStrategy` is public, but `BlockScrollStrategy` targets the document, and inside an app shell the document does not scroll — the Dialog Scope root is the real scroll container. |
+
+Dialog modality is therefore only partly un-delegable: `aria-modal` is a public
+input Hell drives, and only the focus trap and the assistive-technology pass
+are closed.
+
+Decision: keep every delegated concern delegated, and let `HellDialogOverlay`
+own exactly the four decisions above that `scoped` changes. The runtime lives
+in `packages/angular/dialog/dialog-scope.ts`:
+
+- the Dialog Scope root gets `inert`, the single attribute that removes a
+  region from the tab order, pointer input, and the accessibility tree at once
+  — `aria-hidden` alone would leave focusable blocked content behind, and a
+  focus guard would not block pointer input;
+- the scope root's own scroll is locked, with the scrollbar width paid back as
+  trailing padding so the blocked content does not reflow;
+- the manager's page-wide `aria-hidden` pass is replayed from a baseline the
+  first overlay in the document captures before that pass runs, so only values
+  the machinery added are undone and a value the page owned beforehand is left
+  alone;
+- the owner document body is marked with ng-primitives' own `[data-focus-trap]`
+  escape hatch, which `NgpFocusTrap.isAllowedExternalTarget` documents as
+  "belongs to another focus trap … an intentional escape hatch", so the shell
+  can really hold focus. The dialog panel's Tab cycle is unchanged, so keyboard
+  focus still never walks into the blocked region.
+
+Both the marker and the replay are document-wide, not dialog-scoped.
+`isAllowedExternalTarget` is `target.closest('[data-focus-trap]')`, so a marker
+on `body` makes the predicate universally true and releases **every**
+`ngpFocusTrap` in the document — not just the scoped dialog's, and not just
+dialogs: a `HellPopover` with the default `trapFocus` true loses its
+pull-back too (see Constraints). The replay is equally global: it edits
+`aria-hidden` on body children the whole page shares.
+
+Both are therefore gated on the same condition — every open dialog is scoped —
+and both are re-derived from the whole open set on every transition, in both
+directions. `HellDialogOverlay` reference counts page-blocking dialogs (one
+without `scoped`, a `scoped` one that found no scope root, or `hell-ui/confirm`
+opened over a scoped dialog) separately from scoped ones, and the counts answer
+one question with three cases:
+
+| Open set | Page outside the dialogs | Focus-trap marker |
+| --- | --- | --- |
+| any page-blocking dialog | hidden from assistive technology | off; the delegated trap contains focus |
+| scoped dialogs only | exposed | on; the shell can hold focus |
+| empty | exactly as it was before the first dialog | off |
+
+Re-deriving in **both** directions is what makes that hold, and each direction
+has its own reason. Freeing on close: the manager restores its own
+`aria-hidden` map only when its **last** dialog closes, so a page-blocking
+dialog closing under a surviving scoped dialog restores nothing. Hiding on
+open: the manager hides only for the **first** dialog of a stack, so a
+page-blocking dialog opening over a scoped one hides nothing — and the scoped
+dialog has already cleared what the first open hid.
+
+Marking a narrower subtree than `body` does not avoid the breadth: the shell
+sits inside whatever ancestor could be marked.
+
+All of it is reference counted, so simultaneous scoped dialogs engage once and
+the last release restores the exact prior values. A dialog without `scoped`, or
+`scoped` without a scope root, keeps ng-primitives' page-wide modality
+untouched.
+
+This was originally written up as an upstream limitation — that a page-blocking
+dialog stacked on a scoped one simply cannot re-hide the page, because
+`hideNonDialogContentFromAssistiveTechnology` runs only for the first open in a
+stack. **That was wrong, and it was measured wrong.** Two ordinary page
+dialogs in a row keep the page hidden throughout (`P1 → P2 → close P2 → close
+P1` was measured in-browser and never exposes the page), precisely because the
+first dialog's hiding is never taken away. The gap appears only where scoped
+modality took it away. Hell removed it, so Hell puts it back: the `blocked`
+phase re-applies `aria-hidden="true"` to exactly the elements it cleared, and
+nothing else. `aria-modal="true"` on the stacked panel is then a second signal
+rather than the only one.
+
+The general shape of that mistake is worth keeping: a one-directional
+invariant. Round 3 fixed "becoming scoped-only must free the page" and left
+"stopping being scoped-only must hide it again" unstated, which is how the
+mirror defect shipped. The phase function exists so the question is always
+"what does the current open set owe the page?", never "what did this dialog
+just do?".
+
+Constraints:
+
+- The marker is a version-bound DOM seam like the `State<T>` channel in
+  `ng-primitives-state-adapter.md`. `tools/check-architecture.mjs`
+  (`dialog-scoped-modality-seam`) keeps it in that one file and keeps
+  `HELL_DIALOG_SCOPED_MODALITY_VERSION` matching the installed package.
+- When ng-primitives decomposes the dialog into primitive functions, or exposes
+  a focus-trap disable and an assistive-technology-hiding opt-out on
+  `NgpDialogConfig`, delete the marker and the replay and drive those inputs
+  instead — the same way select left the state adapter.
+- Scoped modality deliberately weakens document-wide focus containment while
+  every open dialog is scoped. That is the contract, not a leak: nothing
+  outside the scope root is blocked, so nothing outside it should be forcibly
+  refocused. It must never extend to a dialog that does block the page — that
+  is what the page-modal reference count is for, and
+  `e2e/ui-behavior.spec.ts` pins it by measuring where focus actually lands.
+- The weakening is not dialog-only, and naming it that way would understate it.
+  `isAllowedExternalTarget` matches `closest('[data-focus-trap]')`, so while
+  the marker is on the body **every** `ngpFocusTrap` in the document stops
+  pulling focus back — including a `HellPopover` opened with the default
+  `trapFocus` true, whose panel would otherwise reclaim focus that moved out of
+  it. Such a popover keeps its Tab wrap (that is an element-level `keydown`
+  handler, not the document listeners) and its own dismissal, so it stays
+  usable; what it loses is the safety net that re-focuses the panel when focus
+  lands outside. That is consistent with scoped modality's premise — the
+  surrounding shell is deliberately live — but it is a real reduction for a
+  modal popover, and it is the strongest reason to keep the marker's window as
+  narrow as it is.
+- The `aria-hidden` state is document-wide for the same reason and gets the
+  same treatment: derived from the open set on every transition in both
+  directions, never latched. The baseline it replays is captured once per
+  document by the first overlay, before the manager's pass, so it always
+  answers "what did the machinery change?" rather than "what did this open
+  change?" — the per-open form silently skipped a value an already-open
+  page-blocking dialog had set. Only elements the machinery hid are ever
+  touched, and only elements scoped modality cleared are ever re-hidden.
+- The transition matrix is the test contract, not an example: every
+  interleaving of at least two dialogs, at both unit and browser level,
+  asserted as the three-case rule above rather than as per-step expectations,
+  and each mutation-verified. Both defects this ADR records shipped because
+  coverage pinned one order.
+
 ## Consequences
 
 - `HellFloatingDismissController` remains internal runtime, not a promoted public abstraction.
 - New floating primitives should prefer CDK Overlay, Angular Aria, or ng-primitives first; copying `HellFlyout` dismissal is not allowed without an ADR update.
+- Scoped dialog modality is Hell-owned only for the four decisions listed in its amendment; every other dialog concern stays delegated.
 - Direct `HellFloatingInteractionController` usage is limited to the named flyout exception; omnibar may use `HellFloatingDismissController` only for the documented focus-only registered-scope rule.
 - If future browser contracts find focus/outside-click races, fix the tested race before attempting delegation.
 - If a future ng-primitives or Angular Aria release exposes an inline dismissible-layer primitive with custom inside-boundary support, reopen this ADR and replace the manual flyout path in a bounded change.

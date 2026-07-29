@@ -32,6 +32,7 @@ export {
 } from './filter-builder.contracts';
 export type {
   HellFilter,
+  HellFilterDisplayParts,
   HellFilterFieldDescriptor,
   HellFilterIdentity,
   HellFilterIdentityValue,

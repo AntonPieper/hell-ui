@@ -9,8 +9,8 @@ import { HellUiInput } from 'hell-ui/core';
 
 // @public
 export class HellIcon {
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    readonly color: _angular_core.InputSignal<string | null>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
+    readonly color: _angular_core.InputSignal<null | string>;
     readonly decorative: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly name: _angular_core.InputSignal<string>;
     protected readonly part: (part: "root") => string;

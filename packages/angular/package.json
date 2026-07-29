@@ -635,8 +635,8 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "ng build hell && node ../../tools/finalize-dist-package.mjs ../../dist/hell",
-    "build:development": "ng build hell --configuration development && node ../../tools/finalize-dist-package.mjs ../../dist/hell",
+    "build": "node ../../tools/build-library.mjs production",
+    "build:development": "node ../../tools/build-library.mjs development",
     "watch": "ng build hell --watch --configuration development",
     "test": "ng test hell"
   },

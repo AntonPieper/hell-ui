@@ -40,7 +40,7 @@
       min="1"
       [max]="totalPages() || 1"
       [value]="page()"
-      (change)="goTo(+pageInput.value)"
+      (change)="commitPageInput(pageInput)"
       [attr.aria-label]="labels.page"
     />
     <span data-slot="toolbarText" [class]="part('toolbarText')">/ {{ totalPages() || '…' }}</span>
@@ -235,26 +235,76 @@
       data-slot="sidebar"
       [class]="part('sidebar')"
       [attr.aria-label]="labels.pageOverview"
+      (scroll)="onOverviewScroll()"
+      (focusin)="onOverviewFocusIn($event)"
+      (focusout)="onOverviewFocusOut($event)"
     >
-      @for (n of pageList(); track n) {
-        <button
-          hellButton
-          variant="ghost"
-          size="sm"
-          block
-          type="button"
-          data-slot="thumb"
-          [ui]="part('thumb')"
-          [attr.data-active]="page() === n ? 'true' : null"
-          (click)="goTo(n)"
-          [attr.aria-label]="labels.goToPage(n)"
-          [attr.aria-current]="page() === n ? 'page' : null"
+      <!--
+        Only the visible window of pages is mounted, so the track claims the
+        full scroll height on their behalf and each mounted cell is placed at
+        its own page offset inside it. `role="list"` sits here rather than on
+        the rail, which stays a labelled complementary landmark, and it is what
+        lets each cell carry `aria-posinset`/`aria-setsize`: a virtualized rail
+        that mounts eight of four hundred buttons has to say so, because the
+        DOM no longer does.
+
+        The list only exists once there are pages in it. The overview toggle
+        works before a document has loaded, and an empty `role="list"` would be
+        a list that claims to contain nothing.
+      -->
+      @if (overviewWindow().items.length) {
+        <div
+          #overviewTrack
+          class="hell-pdf-thumb-track"
+          role="list"
+          [style.height.px]="overviewWindow().totalSize"
         >
-          <span class="hell-pdf-thumb-canvas-wrap">
-            <canvas #thumbCanvas [attr.data-page]="n" width="120" height="160"></canvas>
-          </span>
-          <span data-slot="thumbLabel" [class]="part('thumbLabel')">{{ n }}</span>
-        </button>
+          @for (item of overviewWindow().items; track item.page) {
+            <div
+              class="hell-pdf-thumb-cell"
+              role="listitem"
+              [attr.data-page]="item.page"
+              [attr.aria-posinset]="item.page"
+              [attr.aria-setsize]="totalPages()"
+              [style.top.px]="item.offset"
+            >
+              <button
+                hellButton
+                variant="ghost"
+                size="sm"
+                block
+                type="button"
+                data-slot="thumb"
+                [ui]="part('thumb')"
+                [attr.data-active]="page() === item.page ? 'true' : null"
+                (click)="goTo(item.page)"
+                [attr.aria-label]="labels.goToPage(item.page)"
+                [attr.aria-current]="page() === item.page ? 'page' : null"
+              >
+                <!--
+                  The canvas stays 0x0 until the thumbnail is actually painted so
+                  a page that scrolls past without being reached allocates no
+                  backing store. The placeholder box is inline rather than in the
+                  entrypoint stylesheet, which consumers may skip: without a box
+                  every canvas would collapse to 0x0 and the rail would lose the
+                  uniform row height its windowing is derived from.
+                  `renderThumbnail` overwrites both dimensions inline once a page
+                  is rasterized, always inside the same box.
+                -->
+                <span class="hell-pdf-thumb-canvas-wrap">
+                  <canvas
+                    #thumbCanvas
+                    [attr.data-page]="item.page"
+                    width="0"
+                    height="0"
+                    style="width: 120px; aspect-ratio: 3 / 4"
+                  ></canvas>
+                </span>
+                <span data-slot="thumbLabel" [class]="part('thumbLabel')">{{ item.page }}</span>
+              </button>
+            </div>
+          }
+        </div>
       }
     </aside>
   }

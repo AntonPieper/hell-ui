@@ -33,6 +33,9 @@
     background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
     flex-wrap: wrap;
+    /* Controls answer the first tap: no browser double-tap zoom and no tap
+       delay waiting to find out whether one is coming. */
+    touch-action: manipulation;
   }
 
   /* Controls wrap as whole clusters instead of orphaning single buttons. */
@@ -98,6 +101,8 @@
     border-bottom: 1px solid var(--color-hell-border);
     background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
+    flex-wrap: wrap;
+    touch-action: manipulation;
   }
 
   hell-pdf-viewer [data-slot='findInput'] {
@@ -129,17 +134,52 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: calc(var(--spacing) * 3);
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--spacing) * 2);
     background-color: var(--color-hell-surface-subtle);
     border-right: 1px solid var(--color-hell-border);
   }
 
+  /* Only the visible window of pages is mounted, so the track claims the full
+     scroll height on behalf of the pages that are not, and each mounted cell is
+     placed at its own page offset inside it. The cell carries the row gap as
+     padding rather than leaving it to a flex `gap`, so one measured cell height
+     is the stride the rail's windowing arithmetic runs on. */
+  hell-pdf-viewer .hell-pdf-thumb-track {
+    position: relative;
+    width: 100%;
+  }
+
+  /* A column flex container so the button stretches to the cell's inline size
+     and sits in block flow: as an `inline-flex` child of a block container it
+     would generate a line box and the cell would pick up the line's leading
+     underneath it, which the stride measured off this cell would then carry
+     into every page offset in the rail. */
+  hell-pdf-viewer .hell-pdf-thumb-cell {
+    position: absolute;
+    inset-inline: calc(var(--spacing) * 0);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(var(--spacing) * 2);
+  }
+
+  /* `min-height` is what makes this row as tall as its content, and it has to
+     be, because `height` cannot: the button recipe's `h-hell-control-sm`
+     (`button.ts`, size recipe) sits in the utilities layer and outranks any
+     components-layer `height`, so a thumbnail was pinned to a 28px control
+     height while its 160px preview overflowed onto the pages below it. The
+     floor meant to prevent that read
+     `calc(160px + var(--text-sm--line-height) + …)`, and that variable is a
+     unitless ratio — an invalid calc, so the declaration always computed to
+     `0px` and never did anything.
+     `max-content` states the intent without restating the box: at least as
+     tall as the thumbnail and its label, whatever a skin makes those. No
+     control recipe touches `min-height`, so this needs no `!important` and
+     stays overridable through the `thumb` Part Style Map — same reasoning as
+     the coarse-pointer sizing below. Since the thumbnail box is fixed, that
+     content height is identical for every page, which is the uniform stride
+     the rail's windowing is derived from. */
   hell-pdf-viewer [data-slot='thumb'] {
     width: 100%;
-    height: auto;
-    min-height: calc(160px + var(--text-sm--line-height) + (var(--spacing) * 4));
+    min-height: max-content;
     flex-direction: column;
     align-items: center;
     gap: calc(var(--spacing) * 1);
@@ -152,8 +192,23 @@
     }
   }
 
+  /* A fixed box, not a box that follows the page: every row is then the same
+     height whether its page is portrait, landscape, or not yet painted, which
+     is what lets the rail window itself off one measured item size — and what
+     stops the reflow that used to run down the rail as thumbnails arrived.
+     These two lengths are `PDF_THUMBNAIL_BOX` in `pdf-viewer.utils.ts`, which
+     is what the pdf.js adapter scales each page to fit; a skin that changes
+     the box here without changing that constant gets mis-scaled rasters.
+     `content-box` is explicit for the same reason — the box has to be exactly
+     that 120x160, and under a `border-box` reset the border would shrink it
+     and clamp painted canvases slightly out of aspect. */
   hell-pdf-viewer .hell-pdf-thumb-canvas-wrap {
-    display: block;
+    box-sizing: content-box;
+    width: 120px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
     background-color: white;
     border-style: solid;
@@ -164,7 +219,7 @@
     & > canvas {
       display: block;
       max-width: 100%;
-      height: auto;
+      max-height: 100%;
     }
   }
 
@@ -200,6 +255,73 @@
         0 1px 2px rgb(0 0 0 / 0.06),
         0 8px 24px -12px rgb(0 0 0 / 0.18);
       background-color: white;
+    }
+  }
+
+  /* A finger needs a bigger target than a cursor does. Height comes from
+     `min-height`, which no control recipe sets, and width from a fixed
+     flex-basis: the pagination recipe's `min-width` sits in the utilities
+     layer and would outrank a `min-width` here, but a definite basis on a
+     non-flexing item settles the used width above it either way. */
+  @media (pointer: coarse) {
+    hell-pdf-viewer :is([data-slot='toolbar'], [data-slot='findBar']) button {
+      min-height: var(--spacing-hell-control-lg);
+      flex: 0 0 var(--spacing-hell-control-lg);
+    }
+
+    hell-pdf-viewer [data-slot='pageInput'],
+    hell-pdf-viewer [data-slot='zoomSelect'],
+    hell-pdf-viewer [data-slot='findInput'] {
+      min-height: var(--spacing-hell-control-lg);
+    }
+
+    hell-pdf-viewer [data-slot='thumb'] {
+      padding-block: calc(var(--spacing) * 2);
+    }
+  }
+
+  /* On a phone the rail's fixed width leaves the document too narrow to read,
+     so it floats over the page area instead of dividing it. The toolbar toggle
+     stays in view, so dismissing it is still one tap. */
+  @media (width <= 640px) {
+    hell-pdf-viewer [data-slot='sidebar'] {
+      position: absolute;
+      inset-block: calc(var(--spacing) * 0);
+      inset-inline-start: calc(var(--spacing) * 0);
+      z-index: 1;
+      /* Floating over the document, the rail has to read as a layer above it
+         rather than as another region of the same surface. */
+      background-color: var(--color-hell-surface-elevated);
+      box-shadow: var(--shadow-hell-lg);
+    }
+
+    hell-pdf-viewer [data-slot='sidebar'] + [data-slot='pageArea'] {
+      position: absolute;
+      inset: calc(var(--spacing) * 0);
+    }
+
+    /* Spend the width on targets rather than on chrome: the rules between
+       groups are decoration the wrap already supplies, the bar tightens, and
+       the zoom field gives up its fixed width so the action group can share a
+       row with it instead of claiming a third one. */
+    hell-pdf-viewer :is([data-slot='toolbar'], [data-slot='findBar']) {
+      gap: calc(var(--spacing) * 1);
+      padding-inline: calc(var(--spacing) * 2);
+    }
+
+    hell-pdf-viewer [data-slot='divider'] {
+      display: none;
+    }
+
+    hell-pdf-viewer [data-slot='zoomSelect'] {
+      flex: 0 1 5.5rem;
+    }
+
+    /* The find field owns its row so the match count and its buttons stay on
+       one line. */
+    hell-pdf-viewer [data-slot='findInput'] {
+      flex-basis: 100%;
+      max-width: none;
     }
   }
 }

@@ -11,7 +11,7 @@
   ],
   "cssSentinels": [
     "--color-hell-surface-muted:",
-    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)",
+    "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--_hell-app-secondary-track)",
     "[hellAppTopbar][data-slot=root]>[hellSidenavToggle][data-slot=root]",
     "--hell-app-content-max-width:960px",
     "padding:var(--spacing-hell-5)",
@@ -21,13 +21,15 @@
     "max-width:65ch",
     "min-width:var(--spacing-hell-control-sm)",
     "flex:var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0)",
-    "grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr))",
+    "height:calc(var(--hell-time-picker-option-size) * 7)",
+    "--hell-time-picker-option-size:",
     "font-size:22px",
     "hell-toaster",
     "--hell-toast-offset",
     "hell-overflow-toolbar[data-slot=root]",
     "z-index:var(--hell-z-popover,60)",
-    "min-width:180px"
+    "min-width:8rem",
+    "max-width:16rem"
   ],
   "smoke": {
     "steps": [

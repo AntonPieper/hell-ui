@@ -11,6 +11,10 @@ import { DateInputBoundsAndValidationExample } from './examples/bounds-and-valid
 import dateInputBoundsAndValidationExampleCodeRaw from './examples/bounds-and-validation.example.ts?raw' with {
   loader: 'text',
 };
+import { DateInputFormatExample } from './examples/format.example';
+import dateInputFormatExampleCodeRaw from './examples/format.example.ts?raw' with {
+  loader: 'text',
+};
 import { DateInputFormsExample } from './examples/forms.example';
 import dateInputFormsExampleCodeRaw from './examples/forms.example.ts?raw' with {
   loader: 'text',
@@ -44,6 +48,7 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
     RouterLink,
     DateInputBasicExample,
     DateInputBoundsAndValidationExample,
+    DateInputFormatExample,
     DateInputFormsExample,
     DateInputReactiveFormsExample,
     DateInputSizesExample,
@@ -83,12 +88,80 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
 
       <h2>Controlled value</h2>
       <p>
-        The default adapter accepts only <code>YYYY-MM-DD</code>. A valid blur or Enter commits a
+        The default adapter accepts only the configured format, ISO <code>YYYY-MM-DD</code> until a
+        provider or a local <code>format</code> changes it. A valid blur or Enter commits a
         local-calendar date; empty text commits <code>null</code>. Partial or malformed text remains
         visible as an invalid draft without emitting a replacement value.
       </p>
       <hd-example-tabs [code]="dateInputBasicExampleCode" previewClass="grid max-w-sm gap-2">
         <app-date-input-basic-example />
+      </hd-example-tabs>
+
+      <h2>Date format</h2>
+      <p>
+        A format is one pattern written with the <code>YYYY</code>, <code>MM</code>, and
+        <code>DD</code> tokens plus literal separators.
+        <code>provideHellDateInputFormat</code> sets it for an injector scope — the application, a
+        lazy route, or a single component — and a local <code>format</code> input overrides that
+        scope for one input. Parsing, display, the native <code>min</code>/<code>max</code>
+        attributes, and the placeholder hint all follow the effective format, while the committed
+        value stays a plain <code>Date | null</code>: changing the format never changes what a form
+        receives.
+      </p>
+      <p>
+        A pattern is validated where it is written: both
+        <code>provideHellDateInputFormat</code> and the <code>format</code> input throw on an
+        unsupported pattern instead of failing later during rendering.
+        <code>HellDateInputFormat</code> is a plain <code>string</code>, so that check is
+        deliberately a runtime one. Anything a pattern cannot express — month names, locale-aware
+        output, or several accepted input shapes — belongs in a custom adapter instead.
+      </p>
+
+      <h3>Placeholder hint</h3>
+      <p>
+        Once a format is configured, Date Input writes the adapter's
+        <code>placeholderHint</code> into the native <code>placeholder</code>. Four rules keep that
+        write out of your way: an input with no configured format is never touched, an input that
+        authors no naming markup is never touched, an adapter that omits
+        <code>placeholderHint</code> (or returns <code>null</code>) suppresses it entirely, and any
+        authored <code>placeholder</code> wins — including <code>placeholder=""</code>, which is the
+        explicit opt-out. The hint is applied after render, so server-rendered markup receives it on
+        hydration.
+      </p>
+      <p>
+        A hint is a formatting affordance, never a label: <code>placeholder</code> is the last
+        fallback in the accessible name computation, and automated checks such as axe's
+        <code>label</code> rule accept a non-empty one. So Date Input will not write a hint onto an
+        input that names itself nowhere — no <code>aria-label</code>, no
+        <code>aria-labelledby</code> (including an enclosing
+        <a routerLink="/components/field">Field</a>'s), and no associated
+        <code>&lt;label&gt;</code>.
+      </p>
+      <p>
+        That is a check on markup, not a name computation, and it is checked when the input first
+        renders. Three boundaries follow. Naming markup that is present but empty or dangling —
+        <code>&lt;label for="x"&gt;&lt;/label&gt;</code>, a text-less wrapping label, an
+        <code>aria-labelledby</code> whose target never renders — counts as authored, and the hint
+        is written. Markup removed after the hint was written does not take the hint with it. And
+        markup that arrives <em>after</em> that first render, through any channel except an
+        enclosing <a routerLink="/components/field">Field</a>, never re-triggers the check, so the
+        hint is never written: an <code>[attr.aria-label]</code> bound to a translation that
+        resolves after first paint, or a <code>&lt;label for&gt;</code> inside
+        <code>&#64;if (data())</code>, leaves a correctly named input permanently without its hint.
+        Only the Field's <code>aria-labelledby</code> is tracked reactively.
+      </p>
+      <p>
+        The last case costs a formatting affordance, not accessibility — the input is properly
+        named either way. Both alternatives are worse: resolving label text moves the same
+        first-render problem from markup to text, so a label whose words arrive asynchronously
+        would lose its hint instead, and watching the DOM for mutations would mean observing every
+        date input's subtree for the life of the page. So the rule stays deliberately simple and
+        its edges documented. Two shapes are reliable: a Field wrapper, or an
+        <code>aria-label</code> authored statically in the template. Use either and the hint
+        follows.
+      </p>
+      <hd-example-tabs [code]="dateInputFormatExampleCode" previewClass="grid max-w-sm gap-2">
+        <app-date-input-format-example />
       </hd-example-tabs>
 
       <h2>Calendar composition recipe</h2>
@@ -187,7 +260,12 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
         Override parsing and display policy per injector with
         <code>provideHellDateInputAdapter</code>. A <code>HellDateInputAdapter</code> supplies
         <code>parseText</code>, <code>format</code>, and optional <code>normalize</code>,
-        <code>isSameValue</code>, and <code>isWithinBounds</code> hooks. Return
+        <code>isSameValue</code>, <code>isWithinBounds</code>, and
+        <code>placeholderHint</code> hooks. <code>parseText</code>, <code>format</code>,
+        <code>normalize</code>, <code>isWithinBounds</code>, and <code>placeholderHint</code>
+        receive the effective <code>{{ '{ format }' }}</code> context so a custom adapter can honor
+        the configured pattern; <code>isSameValue</code> compares two values and receives no
+        context. Return
         <code>hellTypedValue(value)</code> for a commit, <code>hellTypedValue(null)</code> for a
         clear, or <code>hellInvalidTypedValue()</code> to retain an invalid draft.
       </p>
@@ -233,6 +311,14 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
             <td>
               Inclusive typed bounds in stable adapter format; also driven by a bound field's
               <code>minDate()</code>/<code>maxDate()</code> metadata.
+            </td>
+          </tr>
+          <tr>
+            <td><code>format</code></td>
+            <td><code>HellDateInputFormat | undefined</code></td>
+            <td>
+              Per-instance format pattern; unset uses the nearest
+              <code>provideHellDateInputFormat</code> scope, then ISO <code>YYYY-MM-DD</code>.
             </td>
           </tr>
           <tr>
@@ -332,6 +418,7 @@ import dateInputWithFieldFilterRowExampleCodeRaw from './examples/with-field-fil
       <ul class="hd-do">
         <li>Use a visible Field label or a native <code>aria-label</code> on standalone inputs.</li>
         <li>Use the strict default ISO format for stable business dates, or replace the adapter coherently.</li>
+        <li>Set one format per app or feature scope; keep the per-input <code>format</code> for genuinely local formats.</li>
         <li>Add a picker only when calendar navigation materially helps the workflow.</li>
       </ul>
 
@@ -348,6 +435,7 @@ export class DateInputPage {
   protected readonly dateInputBasicExampleCode = dateInputBasicExampleCodeRaw;
   protected readonly dateInputBoundsAndValidationExampleCode =
     dateInputBoundsAndValidationExampleCodeRaw;
+  protected readonly dateInputFormatExampleCode = dateInputFormatExampleCodeRaw;
   protected readonly dateInputFormsExampleCode = dateInputFormsExampleCodeRaw;
   protected readonly dateInputReactiveFormsExampleCode = dateInputReactiveFormsExampleCodeRaw;
   protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;

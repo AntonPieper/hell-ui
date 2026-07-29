@@ -13,6 +13,8 @@ export default tseslint.config(
       'dist/**',
       'node_modules/**',
       'test-results/**',
+      // Generated build inputs and outputs for the API report gate.
+      'tmp/**',
     ],
   },
   {

@@ -85,6 +85,32 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
   }
 }
 
+/**
+ * Focus a shell control and report where focus settles. `contained` asserts the
+ * delegated focus trap pulled it back into a dialog, which is what a
+ * page-blocking dialog must still do even when a scoped one is open underneath.
+ */
+async function expectShellFocusIsContained(
+  page: Page,
+  contained: boolean,
+  label: string,
+): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const shellControl = document.querySelector<HTMLElement>(
+            'app-dialog-app-shell-scoped-example [hellAppSidenav] button',
+          );
+          shellControl?.focus();
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          return document.activeElement?.closest('[role="dialog"]') !== null;
+        }),
+      { message: `${label}: shell focus containment`, timeout: SETTLE_TIMEOUT },
+    )
+    .toBe(contained);
+}
+
 async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
   try {
     await expect(locator, label).toBeFocused({ timeout: SETTLE_TIMEOUT });
@@ -231,6 +257,288 @@ test.describe('Hell UI browser behavior', () => {
     });
   });
 
+  test('scoped dialog modality blocks the content region and spares the app shell', async ({
+    page,
+  }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+    const trigger = example.getByRole('button', { name: 'Approve invoice' });
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+
+    const dialog = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+    await expect(dialog).toBeVisible();
+    await finishAnimations(dialog);
+
+    // Only the Dialog Scope root is blocked, and nothing outside it is hidden
+    // from assistive technology while it still holds focusable controls.
+    await expect(content).toHaveAttribute('inert', '');
+    // `aria-modal="true"` would tell assistive technology the shell is
+    // unavailable, which is exactly the claim scoped modality retracts.
+    await expect(dialog).toHaveAttribute('aria-modal', 'false');
+    expect(
+      await page.evaluate(() =>
+        [...document.body.children].some((child) => child.getAttribute('aria-hidden') === 'true'),
+      ),
+    ).toBe(false);
+    expect(
+      await content.evaluate((element) => {
+        const button = element.querySelector('button');
+        button?.focus();
+        return document.activeElement === button;
+      }),
+    ).toBe(false);
+
+    // The shell keeps working: a sidenav press activates and keeps focus
+    // outside the dialog rather than being pulled back into it.
+    const projects = example.locator('[hellAppSidenav] button', { hasText: 'Projects' });
+    await projects.click();
+    await expect(content.locator('strong')).toHaveText('Projects');
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null),
+        { message: 'shell activation must not pull focus back into the scoped dialog' },
+      )
+      .toBe(false);
+    await expect(dialog).toBeVisible();
+
+    // A shell overlay opens over the dialog region and dismisses on its own,
+    // one layer at a time.
+    const account = example.getByRole('button', { name: 'Account' });
+    await account.scrollIntoViewIfNeeded();
+    await account.click();
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    expect(
+      await page.evaluate(() => {
+        const overlay = document.querySelector('[hellDialogOverlay][data-scoped="true"]');
+        const panel = document.querySelector('[hellMenu][data-slot="root"]');
+        if (!overlay || !panel) return null;
+        const overlayRect = overlay.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        const overlaps =
+          panelRect.left < overlayRect.right &&
+          panelRect.right > overlayRect.left &&
+          panelRect.top < overlayRect.bottom &&
+          panelRect.bottom > overlayRect.top;
+        if (!overlaps) return 'no-overlap';
+        const shared = document.elementFromPoint(
+          panelRect.left + 8,
+          Math.min(panelRect.bottom, overlayRect.bottom) - 8,
+        );
+        return shared?.closest('[hellMenu]') ? 'menu-on-top' : 'overlay-on-top';
+      }),
+    ).toBe('menu-on-top');
+
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+
+    // A surface opened from inside the dialog nests the other way: it layers
+    // above the panel and Escape closes it before the dialog.
+    await dialog.getByRole('combobox', { name: 'Cost centre' }).click();
+    const listbox = page.getByRole('listbox');
+    await expect(listbox).toBeVisible();
+    expect(
+      await page.evaluate(() => {
+        const panel = document.querySelector('[hellDialog][data-slot="root"]');
+        const dropdown = document.querySelector('[hellSelectDropdown][data-slot="root"]');
+        if (!panel || !dropdown) return null;
+        const dropdownRect = dropdown.getBoundingClientRect();
+        const shared = document.elementFromPoint(
+          dropdownRect.left + 8,
+          dropdownRect.top + 8,
+        );
+        return shared?.closest('[hellSelectDropdown]') ? 'dropdown-on-top' : 'panel-on-top';
+      }),
+    ).toBe('dropdown-on-top');
+    await page.keyboard.press('Escape');
+    await expect(listbox).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+    await expect(content).toHaveAttribute('inert', '');
+
+    // A page-blocking dialog stacked on the scoped one does mean to block the
+    // shell, so the document-wide focus-trap release comes off and the
+    // delegated trap contains focus again for as long as it is open.
+    await dialog.getByRole('button', { name: 'Approve' }).click();
+    const confirm = page.getByRole('dialog', { name: 'Release this payment?' });
+    await expect(confirm).toBeVisible();
+    await expect(confirm).toHaveAttribute('aria-modal', 'true');
+    await expectShellFocusIsContained(page, true, 'stacked page-modal dialog');
+
+    await page.keyboard.press('Escape');
+    await expect(confirm).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(dialog).toBeVisible();
+    await expectShellFocusIsContained(page, false, 'scoped dialog after the stacked one closed');
+
+    // Closing releases the blocked region before focus returns to a trigger
+    // that lived inside it.
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(content).not.toHaveAttribute('inert', '');
+    await expectFocused(page, trigger, 'scoped dialog trigger restore inside the released scope');
+  });
+
+  test('a scoped dialog left open by a closing page-modal one frees the shell', async ({ page }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+    const anyPageHidden = () =>
+      page.evaluate(() =>
+        [...document.body.children].some((child) => child.getAttribute('aria-hidden') === 'true'),
+      );
+
+    // The reverse of the stacked case: the page-modal dialog opens first, so it
+    // is the one whose open ran the manager's page-wide assistive-technology
+    // pass, and the manager restores that pass only when its last dialog goes.
+    await page.locator('app-dialog-basic-example').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'Publish article' }).click();
+    const pageModal = page.getByRole('dialog', { name: 'Publish this article?' });
+    await expect(pageModal).toBeVisible();
+    expect(await anyPageHidden()).toBe(true);
+
+    // Opening the scoped dialog underneath is a programmatic activation: the
+    // page-modal dialog is blocking the page, which is the point.
+    await example.evaluate((host) => {
+      const trigger = [...host.querySelectorAll<HTMLElement>('button')].find(
+        (button) => button.textContent?.trim() === 'Approve invoice',
+      );
+      trigger?.click();
+    });
+    const scoped = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+    await expect(scoped).toBeVisible();
+    await expect(content).toHaveAttribute('inert', '');
+    // While the page-modal dialog is open it still blocks everything.
+    expect(await anyPageHidden()).toBe(true);
+    await expectShellFocusIsContained(page, true, 'page-modal dialog open over a scoped one');
+
+    await pageModal.getByRole('button', { name: 'Cancel' }).click();
+    await expect(pageModal).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(scoped).toBeVisible();
+
+    // Only the scoped dialog is left, so the shell has to be reachable again —
+    // by assistive technology as well as by focus.
+    await expect.poll(anyPageHidden, {
+      message: 'a remaining scoped dialog must not leave the page aria-hidden',
+      timeout: SETTLE_TIMEOUT,
+    }).toBe(false);
+    await expect(content).toHaveAttribute('inert', '');
+    await expectShellFocusIsContained(page, false, 'scoped dialog left alone by the page-modal one');
+
+    await page.keyboard.press('Escape');
+    await expect(scoped).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(content).not.toHaveAttribute('inert', '');
+    expect(await anyPageHidden()).toBe(false);
+  });
+
+  test('every scoped and page-blocking dialog interleaving holds the modality contract', async ({
+    page,
+  }) => {
+    await page.goto('/components/dialog');
+    await ensurePageIsActive(page);
+
+    const example = page.locator('app-dialog-app-shell-scoped-example');
+    const content = example.locator('[hellAppContent][data-slot="root"]');
+
+    // Two page-blocking dialogs and one scoped dialog, all on this page. Every
+    // sequence below is driven programmatically because a blocking dialog is,
+    // by design, in the way of the next trigger.
+    const click = (label: string) =>
+      page.evaluate((text) => {
+        [...document.querySelectorAll<HTMLElement>('button')]
+          .find((button) => button.textContent?.trim() === text)
+          ?.click();
+      }, label);
+    const dismiss = (title: string) =>
+      page.evaluate((text) => {
+        const panel = [...document.querySelectorAll('[role="dialog"]')].find((dialog) =>
+          dialog.querySelector('h2')?.textContent?.includes(text),
+        );
+        [...(panel?.querySelectorAll<HTMLElement>('button') ?? [])]
+          .find((button) => ['Cancel', 'Got it'].includes(button.textContent?.trim() ?? ''))
+          ?.click();
+      }, title);
+
+    const OPEN: Record<string, () => Promise<void>> = {
+      s: () => click('Approve invoice'),
+      p1: () => click('Publish article'),
+      p2: () => click('Casual dialog'),
+    };
+    const CLOSE: Record<string, () => Promise<void>> = {
+      s: () => dismiss('Approve invoice 4021?'),
+      p1: () => dismiss('Publish this article?'),
+      p2: () => dismiss('Dismiss me freely'),
+    };
+
+    const sequences: readonly (readonly string[])[] = [
+      ['+s', '-s'],
+      ['+p1', '-p1'],
+      ['+p1', '+p2', '-p2', '-p1'],
+      ['+p1', '+s', '-p1', '-s'],
+      ['+p1', '+s', '-s', '-p1'],
+      ['+s', '+p1', '-s', '-p1'],
+      ['+s', '+p1', '-p1', '-s'],
+    ];
+
+    for (const sequence of sequences) {
+      const label = sequence.join(' ');
+      await test.step(label, async () => {
+        const open = new Set<string>();
+        for (const step of sequence) {
+          const id = step.slice(1);
+          if (step.startsWith('+')) {
+            await OPEN[id]();
+            open.add(id);
+          } else {
+            await CLOSE[id]();
+            open.delete(id);
+          }
+          const scoped = [...open].filter((entry) => entry.startsWith('s')).length;
+          const blocking = [...open].filter((entry) => entry.startsWith('p')).length;
+          const where = `${label} @ ${step}`;
+
+          // Settle the open set first: the invariant below can be satisfied by
+          // a close that has not finished, which would let the next step run
+          // against the wrong stack.
+          await expect
+            .poll(() => page.locator('[role="dialog"]').count(), {
+              message: `${where}: open dialogs`,
+              timeout: SETTLE_TIMEOUT,
+            })
+            .toBe(open.size);
+
+          await expect
+            .poll(
+              () =>
+                page.evaluate(() => ({
+                  hidden: [...document.body.children].some(
+                    (child) => child.getAttribute('aria-hidden') === 'true',
+                  ),
+                  released: document.body.hasAttribute('data-focus-trap'),
+                  blocked:
+                    document
+                      .querySelector('app-dialog-app-shell-scoped-example [hellAppContent]')
+                      ?.hasAttribute('inert') ?? false,
+                })),
+              { message: where, timeout: SETTLE_TIMEOUT },
+            )
+            .toEqual({
+              hidden: blocking > 0,
+              released: scoped > 0 && blocking === 0,
+              blocked: scoped > 0,
+            });
+        }
+        await expect(content).not.toHaveAttribute('inert', '');
+      });
+    }
+  });
+
   test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
     await page.goto('/components/dialpad');
 
@@ -275,6 +583,18 @@ test.describe('Hell UI browser behavior', () => {
     await page.mouse.up();
     await expect(display).toHaveValue('+');
 
+    // A single mouse press-and-release on a key enters exactly one digit, and
+    // native keyboard activation of a focused key still goes through click.
+    await display.focus();
+    await page.keyboard.press('Delete');
+    await five.click();
+    await expect(display).toHaveValue('5');
+    await five.focus();
+    await page.keyboard.press('Space');
+    await expect(display).toHaveValue('55');
+    await page.keyboard.press('Enter');
+    await expect(display).toHaveValue('555');
+
     await display.focus();
     await page.keyboard.press('Delete');
     await page.keyboard.press('3');
@@ -317,6 +637,147 @@ test.describe('Hell UI browser behavior', () => {
     await expect(statesDialpad).toHaveAttribute('aria-disabled', 'true');
     await expect(statesDisplay).toBeDisabled();
     await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
+  });
+
+  test('dialpad inserts, deletes, and replaces at the caret', async ({ page }) => {
+    await page.goto('/components/dialpad');
+
+    const example = page.locator('app-dialpad-basic-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    const display = dialpad.getByRole('textbox', { name: 'Number' });
+    const caret = async (): Promise<(number | null)[]> =>
+      display.evaluate((node) => {
+        const input = node as HTMLInputElement;
+        return [input.selectionStart, input.selectionEnd];
+      });
+
+    await dialpad.getByRole('button', { name: 'Digit 1' }).click();
+    await dialpad.getByRole('button', { name: 'Digit 3, DEF' }).click();
+    await expect(display).toHaveValue('13');
+
+    // Clicking past the digits puts the caret at the end; arrow-keying moves
+    // it, and the next key lands there instead of at the end.
+    await display.click();
+    expect(await caret()).toEqual([2, 2]);
+    await page.keyboard.press('ArrowLeft');
+    expect(await caret()).toEqual([1, 1]);
+
+    await dialpad.getByRole('button', { name: 'Digit 2, ABC' }).click();
+    await expect(display).toHaveValue('123');
+    expect(await caret()).toEqual([2, 2]);
+
+    // Backspace deletes at the caret, even while the tapped key holds focus.
+    await page.keyboard.press('Backspace');
+    await expect(display).toHaveValue('13');
+    expect(await caret()).toEqual([1, 1]);
+
+    // A selected range is replaced by the next press.
+    await display.click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await dialpad.getByRole('button', { name: 'Digit 9, WXYZ' }).click();
+    await expect(display).toHaveValue('9');
+    expect(await caret()).toEqual([1, 1]);
+
+    // Typing straight into the display inserts at the caret too.
+    await display.click();
+    await page.keyboard.press('ArrowLeft');
+    expect(await caret()).toEqual([0, 0]);
+    await page.keyboard.press('4');
+    await page.keyboard.press('5');
+    await expect(display).toHaveValue('459');
+    expect(await caret()).toEqual([2, 2]);
+
+    // Tabbing in selects the whole number the way any text field does, but a
+    // keypad key adds a digit rather than replacing all of it. The number
+    // input is the tab stop before the clear control.
+    await dialpad.getByRole('button', { name: 'Clear' }).focus();
+    await page.keyboard.press('Shift+Tab');
+    await expect(display).toBeFocused();
+    expect(await caret()).toEqual([0, 3]);
+
+    // The tabbed-in range is ignored, so the key lands on the caret the
+    // display already had rather than replacing all of "459".
+    await dialpad.getByRole('button', { name: 'Digit 8, TUV' }).click();
+    await expect(display).toHaveValue('4589');
+    expect(await caret()).toEqual([3, 3]);
+  });
+
+  test('dialpad keeps overlapping taps and still cancels a slide-off', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Overlapping multi-touch dialing uses Chromium DevTools Protocol touch input.',
+    );
+
+    await page.goto('/components/dialpad');
+
+    const example = page.locator('app-dialpad-basic-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    const display = dialpad.getByRole('textbox', { name: 'Number' });
+    await dialpad.scrollIntoViewIfNeeded();
+
+    const keyCenter = async (name: string) => {
+      const box = await dialpad.getByRole('button', { name }).boundingBox();
+      if (!box) throw new Error(`Expected a bounding box for the "${name}" key.`);
+      return { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+    };
+    const one = await keyCenter('Digit 1');
+    const two = await keyCenter('Digit 2, ABC');
+
+    // A second finger landing before the first lifts makes the browser suppress
+    // the compatibility click for both pointers, so a click-only keypad loses
+    // the whole sequence.
+    const client = await page.context().newCDPSession(page);
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 51, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [
+        { id: 51, ...one },
+        { id: 52, ...two },
+      ],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchEnd',
+      touchPoints: [{ id: 51, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+    await expect(display).toHaveValue('12');
+
+    await display.focus();
+    await page.keyboard.press('Delete');
+    await expect(display).toHaveValue('');
+
+    // A non-scrollable dialer never gets the scroll-driven `pointercancel`
+    // that hides a missing release check: implicit pointer capture retargets
+    // the release to the pressed key however far the finger travelled.
+    await dialpad.evaluate((node: HTMLElement) => {
+      node.style.touchAction = 'none';
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 53, ...one }],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ id: 53, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('');
+
+    // The same layout still commits a clean tap, so the slide-off above was
+    // cancelled rather than the whole sequence being dropped.
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ id: 54, ...two }],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(display).toHaveValue('2');
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
@@ -733,6 +1194,70 @@ test.describe('Hell UI browser behavior', () => {
     }
   });
 
+  test('pdf viewer page overview mounts a window and paints thumbnails on reveal', async ({
+    page,
+  }) => {
+    const viewer = await openBasicPdfViewer(page);
+
+    await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+    const rail = viewer.locator('aside[data-slot="sidebar"]');
+    await expect(rail).toBeVisible();
+
+    const cells = rail.locator('[role="listitem"]');
+    await expect(cells.first()).toBeVisible();
+    const totalPages = Number(await cells.first().getAttribute('aria-setsize'));
+    expect(totalPages).toBeGreaterThan(10);
+    // The rail mounts the window it can show, not one button per page, and it
+    // says how many pages there really are while doing it.
+    expect(await cells.count()).toBeLessThan(totalPages);
+
+    const canvasWidth = (n: number) =>
+      rail.locator(`canvas[data-page="${n}"]`).evaluate((el) => (el as HTMLCanvasElement).width);
+    await expect.poll(() => canvasWidth(1)).toBeGreaterThan(0);
+
+    const lastCell = rail.locator(`[role="listitem"][data-page="${totalPages}"]`);
+    await expect(lastCell).toHaveCount(0);
+
+    await rail.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+    await expect(lastCell).toHaveCount(1);
+    await expect.poll(() => canvasWidth(totalPages)).toBeGreaterThan(0);
+
+    // Clicking a revealed thumbnail still navigates the document.
+    await lastCell.getByRole('button').click();
+    await expect(viewer.getByRole('spinbutton', { name: /page/i })).toHaveValue(String(totalPages));
+
+    // …and jumping back scrolls the rail to the current page rather than
+    // leaving it stranded at the far end of a document it no longer shows.
+    await viewer.focus();
+    await page.keyboard.press('Home');
+    await expect
+      .poll(() => rail.evaluate((el) => el.scrollTop))
+      .toBeLessThan(50);
+    await expect(rail.locator('[aria-current="page"]')).toHaveAttribute(
+      'aria-label',
+      'Go to page 1',
+    );
+
+    // Tab traversal survives the window: focusing the last mounted button
+    // scrolls the rail, which advances the window and mounts the page after it,
+    // so walking does not dead-end at the edge of what is mounted.
+    const mountedAtTop = await cells.count();
+    await rail.locator('[data-slot="thumb"]').first().focus();
+    let walkedTo = 1;
+    for (let step = 0; step < mountedAtTop + 4; step++) {
+      await page.keyboard.press('Tab');
+      const label = await page.evaluate(
+        () => document.activeElement?.getAttribute('aria-label') ?? '',
+      );
+      const onPage = /^Go to page (\d+)$/.exec(label);
+      if (!onPage) break;
+      walkedTo = Number(onPage[1]);
+    }
+    expect(walkedTo).toBeGreaterThan(mountedAtTop);
+  });
+
   test('pdf viewer mobile pinch zoom scales the document', async ({ page, browserName }) => {
     test.skip(
       browserName !== 'chromium',
@@ -785,4 +1310,197 @@ test.describe('Hell UI browser behavior', () => {
       .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
       .toBeGreaterThan(beforePinchBox.width * 1.2);
   });
+
+  test.describe('pdf viewer on a phone-sized touch viewport', () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+    test('toolbar controls stay finger-sized and inside the viewer box', async ({ page }) => {
+      const viewer = await openBasicPdfViewer(page);
+
+      const viewerBox = await viewer.boundingBox();
+      const toolbar = viewer.locator('[data-slot="toolbar"]');
+      const toolbarBox = await toolbar.boundingBox();
+      if (!viewerBox || !toolbarBox) {
+        throw new Error('Expected viewer and toolbar boxes on the phone viewport.');
+      }
+
+      // A wrapped toolbar is fine; one that overflows its own viewer is not.
+      expect(toolbarBox.width).toBeLessThanOrEqual(viewerBox.width + 1);
+      expect(
+        await toolbar.evaluate((el) => el.scrollWidth - el.clientWidth),
+      ).toBeLessThanOrEqual(1);
+
+      const controls = toolbar.locator('button, input, select');
+      const controlCount = await controls.count();
+      expect(controlCount).toBeGreaterThan(0);
+
+      // 40px is `--spacing-hell-control-lg` in the default skin the docs use.
+      // The stylesheet asks for the token, not for a number, so a denser skin
+      // (`compact` resolves it to 32px) legitimately lands lower — read this as
+      // "the coarse-pointer sizing applies", not as a floor Hell guarantees.
+      for (let index = 0; index < controlCount; index++) {
+        const control = controls.nth(index);
+        const box = await control.boundingBox();
+        const label = await control.getAttribute('aria-label');
+        if (!box) throw new Error(`Expected a box for toolbar control ${label ?? index}.`);
+        // Rounded: engines disagree on the last subpixel of a token-sized box.
+        expect(Math.round(box.height), `height of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+        if ((await control.evaluate((el) => el.tagName)) === 'BUTTON') {
+          expect(Math.round(box.width), `width of ${label ?? index}`).toBeGreaterThanOrEqual(40);
+        }
+      }
+    });
+
+    test('the phone layout reports no axe WCAG smoke violations', async ({ page }) => {
+      // Two axe passes over a live pdf.js document is the slowest test in this
+      // file: ~10s alone, ~24s on firefox under parallel load. That is inside
+      // the 30s default, but with no headroom worth relying on, so it gets its
+      // own budget rather than leaning on a CI retry to absorb the variance.
+      test.setTimeout(90_000);
+
+      // The docs axe smoke only ever sees this viewer at desktop width, so the
+      // coarse-pointer sizing and the floating overview would otherwise ship
+      // with no accessibility scan at all.
+      const viewer = await openBasicPdfViewer(page);
+      await expectNoSeriousA11yIssues(page, 'app-pdf-viewer-basic-example hell-pdf-viewer');
+
+      await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+      await expect(viewer.locator('aside[data-slot="sidebar"]')).toBeVisible();
+      await expectNoSeriousA11yIssues(page, 'app-pdf-viewer-basic-example hell-pdf-viewer');
+    });
+
+    test('the page overview floats over the document instead of squeezing it', async ({ page }) => {
+      const viewer = await openBasicPdfViewer(page);
+
+      const pageArea = viewer.locator('[data-slot="pageArea"]');
+      const beforeBox = await pageArea.boundingBox();
+
+      await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+      const sidebar = viewer.locator('aside[data-slot="sidebar"]');
+      await expect(sidebar).toBeVisible();
+
+      const afterBox = await pageArea.boundingBox();
+      const sidebarBox = await sidebar.boundingBox();
+      if (!beforeBox || !afterBox || !sidebarBox) {
+        throw new Error('Expected page area and sidebar boxes with the overview open.');
+      }
+
+      expect(afterBox.width).toBeCloseTo(beforeBox.width, 0);
+      // Overlapping is the point: the rail sits on top of the page area.
+      expect(sidebarBox.x).toBeLessThan(afterBox.x + afterBox.width);
+      expect(sidebarBox.height).toBeCloseTo(afterBox.height, 0);
+    });
+
+    test('double tap toggles between the fitted preset and a magnified view', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(
+        browserName !== 'chromium',
+        'Double-tap zoom regression uses Chromium DevTools Protocol touch input.',
+      );
+
+      const viewer = await openBasicPdfViewer(page);
+      const zoomSelect = viewer.getByRole('combobox', { name: /zoom/i });
+      await expect(zoomSelect).toHaveValue('auto');
+
+      const scrollContainer = viewer.locator('[data-slot="pageArea"]');
+      const firstPdfPage = viewer.locator('.pdfViewer .page').first();
+      await expect(firstPdfPage).toBeVisible();
+      const fittedBox = await firstPdfPage.boundingBox();
+      if (!fittedBox) throw new Error('Expected a PDF page box for the double-tap test.');
+
+      const doubleTap = await doubleTapper(page, scrollContainer);
+
+      await doubleTap();
+
+      await expect
+        .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
+        .toBeGreaterThan(fittedBox.width * 1.5);
+      await expect(zoomSelect).not.toHaveValue('auto');
+
+      await doubleTap();
+
+      // Back to the preset itself, not to the number it happened to produce, so
+      // the document keeps re-fitting when the viewport changes.
+      await expect(zoomSelect).toHaveValue('auto');
+      await expect
+        .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
+        .toBeLessThan(fittedBox.width * 1.2);
+    });
+
+    test('rotation keeps a magnified view and re-fits a restored preset', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(
+        browserName !== 'chromium',
+        'Rotation regression uses Chromium DevTools Protocol touch input.',
+      );
+
+      const viewer = await openBasicPdfViewer(page);
+      const zoomSelect = viewer.getByRole('combobox', { name: /zoom/i });
+      const firstPdfPage = viewer.locator('.pdfViewer .page').first();
+      const pageWidth = async () => (await firstPdfPage.boundingBox())?.width ?? 0;
+
+      const doubleTap = await doubleTapper(page, viewer.locator('[data-slot="pageArea"]'));
+      await doubleTap();
+      await expect(zoomSelect).not.toHaveValue('auto');
+      const magnified = await pageWidth();
+
+      // Landscape. A magnified view is a fixed scale, so the resize refit must
+      // leave it alone rather than re-fitting the user's zoom away.
+      await page.setViewportSize({ width: 844, height: 390 });
+      await expect(zoomSelect).not.toHaveValue('auto');
+      await expect.poll(pageWidth).toBeCloseTo(magnified, 0);
+
+      // Back to the preset, which does re-fit — to the landscape box first.
+      await doubleTap();
+      await expect(zoomSelect).toHaveValue('auto');
+      const landscapeFit = await pageWidth();
+      expect(landscapeFit).toBeLessThan(magnified);
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(zoomSelect).toHaveValue('auto');
+      await expect.poll(pageWidth).toBeLessThan(landscapeFit);
+    });
+  });
 });
+
+/**
+ * Dispatch a double tap inside a target through CDP touch input. The box is
+ * measured per call so the tap follows the target across a rotation.
+ */
+async function doubleTapper(page: Page, target: Locator): Promise<() => Promise<void>> {
+  const client = await page.context().newCDPSession(page);
+
+  return async () => {
+    const box = await target.boundingBox();
+    if (!box) throw new Error('Expected a box for the double-tap target.');
+    const x = Math.round(box.x + box.width / 2);
+    const y = Math.round(box.y + Math.min(box.height * 0.4, box.height - 20));
+
+    for (let tap = 0; tap < 2; tap++) {
+      await client.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ id: 51, x, y }],
+      });
+      await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    }
+  };
+}
+
+/** Open the docs page's basic PDF example and return its viewer. */
+async function openBasicPdfViewer(page: Page): Promise<Locator> {
+  await page.goto('/components/pdf-viewer');
+
+  const example = page.locator('app-pdf-viewer-basic-example');
+  const exampleTabs = page.locator('hd-example-tabs', { has: example });
+  await exampleTabs.getByRole('tab', { name: 'Preview' }).click();
+
+  const viewer = example.locator('hell-pdf-viewer');
+  await expect(viewer).toBeVisible();
+  await viewer.scrollIntoViewIfNeeded();
+  await expect(viewer.locator('.pdfViewer .page').first()).toBeVisible();
+  return viewer;
+}

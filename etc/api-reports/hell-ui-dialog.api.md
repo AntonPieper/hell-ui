@@ -18,9 +18,10 @@ export const HELL_DIALOG_IMPORTS: readonly [typeof HellDialogTrigger, typeof Hel
 
 // @public
 export class HellDialog {
+    protected readonly ariaModal: _angular_core.Signal<string>;
     protected onTabKeydown(event: Event): void;
     protected readonly part: (part: "root") => string;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg" | "xl">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm" | "xl">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialog, "[hellDialog]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialog; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialog, never>;

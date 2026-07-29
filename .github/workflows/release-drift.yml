@@ -1,0 +1,71 @@
+# Read-only Release Projection drift detection (ADR 0003).
+#
+# GitHub's native immutable-release policy locks a published release's tag
+# and assets and attests them, but it does not lock the release title or note
+# text. This workflow runs when a published release is edited, re-reads the
+# release through the API, and compares it against the projection the release
+# workflow would draft today from the Released Version Notes record locked at
+# the release tag: tag, title, tagged commit, prerelease classification, exact
+# body bytes, custom assets, and immutability. Any mismatch fails the run as
+# visible drift evidence.
+#
+# Detection only: the workflow holds contents: read, so it cannot edit
+# release metadata, notes, tags, or assets, cannot publish a registry
+# package, and cannot create another release — and a rerun stays just as
+# inert. Recovery is a maintainer decision
+# (docs/release/release-immutability.md): restore an accidentally drifted
+# projection to the exact tagged bytes, or publish a corrective patch release
+# when the tagged notes themselves are wrong.
+name: Release drift
+
+on:
+  release:
+    types:
+      - edited
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  drift:
+    name: Release projection drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # For release events the default checkout is the commit the release tag
+      # points at, so .changes/<version>.md is read from the locked tag.
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+
+      # No install step: tools/release-projection.mjs and its drift entry are
+      # deliberately dependency-free, so the check runs on a bare checkout.
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      # Re-read the release instead of trusting the delivered payload so the
+      # comparison sees the current metadata, body, and asset list, and read
+      # back the commit the tag resolves to now. These are the workflow's only
+      # GitHub API calls, and they only read.
+      - name: Capture release metadata
+        env:
+          RELEASE_ID: ${{ github.event.release.id }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" > "${RUNNER_TEMP}/release.json"
+          # An unresolvable tag stays empty rather than failing here, so the
+          # drift check reports it as evidence instead of a raw API error.
+          tag_commit="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq '.sha' || true)"
+          echo "HELL_TAG_COMMIT=${tag_commit}" >> "$GITHUB_ENV"
+
+      - name: Compare the release against the tagged Released Version Notes
+        env:
+          HELL_RELEASE_JSON: ${{ runner.temp }}/release.json
+        run: node tools/check-release-drift.mjs

@@ -22,13 +22,10 @@ export class TimePickerStylingExample {
     root: 'rounded-hell-lg border-hell-primary bg-hell-surface-subtle',
     header: 'justify-center border-b border-hell-border pb-hell-2',
     readout: 'text-hell-primary',
-    units: 'gap-hell-3',
-    unit: 'gap-hell-2',
-    unitLabel: 'text-hell-primary',
-    unitControl: 'rounded-hell-md border-hell-primary',
-    unitValue: 'text-hell-primary',
-    unitStep: 'text-hell-primary hover:bg-hell-primary/10',
-    minutePresets: 'gap-hell-2',
-    minutePreset: 'rounded-hell-md border-hell-primary data-[selected=true]:bg-hell-primary',
+    columns: 'gap-hell-3',
+    column: 'gap-hell-2',
+    columnLabel: 'text-hell-primary',
+    options: 'rounded-hell-md border-hell-primary',
+    option: 'rounded-hell-md data-[selected=true]:bg-hell-primary',
   };
 }

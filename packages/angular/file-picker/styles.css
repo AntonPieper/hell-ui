@@ -1,2 +1,65 @@
 /* File Picker root defaults are Tailwind utility recipes. */
 @source "./file-picker.ts";
+
+@layer components {
+  /* Built-in drop-zone glyph. Rendered as a CSS mask on the root's ::before so
+     a bare picker host ships a visible drop affordance with zero consumer
+     markup; it is decorative, contributes nothing to the accessible name, and
+     a `before:hidden` refinement through `ui` replaces it with consumer-owned
+     iconography. Mirrors the accordion-chevron glyph mechanism. */
+  [hellFilePicker][data-slot='root']::before {
+    content: '';
+    display: block;
+    flex: 0 0 auto;
+    height: calc(var(--spacing) * 7);
+    width: calc(var(--spacing) * 7);
+    background-color: currentcolor;
+    color: var(--color-hell-foreground-subtle);
+    -webkit-mask: var(--hell-icon-upload) center / contain no-repeat;
+    mask: var(--hell-icon-upload) center / contain no-repeat;
+    transition:
+      color var(--hell-duration-fast) var(--ease-hell-out),
+      transform var(--hell-duration-base) var(--ease-hell-out);
+  }
+
+  /* Both accent states stay behind the same disabled guard: a disabled host can
+     still receive programmatic focus, and it must keep the dimmed resting
+     glyph rather than lighting up as if it were operable. */
+  [hellFilePicker][data-slot='root']:hover:not([data-disabled='true'])::before,
+  [hellFilePicker][data-slot='root']:focus-visible:not([data-disabled='true'])::before {
+    color: var(--color-hell-primary);
+  }
+
+  /* Drag-over lifts the glyph so the drop target reads as armed even while the
+     dragged file preview covers part of the zone. */
+  [hellFilePicker][data-slot='root'][data-dragging='true']::before {
+    color: var(--color-hell-primary);
+    transform: translateY(calc(var(--spacing) * -1)) scale(1.1);
+  }
+
+  /* The root is `select-none` so dragging a file across the zone does not smear
+     a text selection over its copy. Every engine already special-cases editing
+     hosts, so projected text entry stays caret-selectable either way, but the
+     value they report for it under an inherited `none` diverges — Chromium
+     `none`, Firefox `auto`, WebKit `text` — which leaks into consumer CSS and
+     into anything reading the computed style. Declaring `text` normalizes that
+     and keeps the guarantee explicit if an engine ever stops special-casing.
+     `auto` cannot do the job: it re-inherits `none`.
+
+     Scoped to text entry. Widening it to the label shapes in
+     HELL_FILE_PICKER_INTERACTIVE_SELECTOR (`button`, `a[href]`, `summary`,
+     `select`, `[tabindex]`) does change behavior: it makes their labels
+     drag-selectable inside the zone, re-enabling the smear `select-none`
+     prevents. Bare `input` is deliberate rather than exact — it also admits
+     `submit`, `button`, `reset`, and the checkbox-like types, which carry no
+     selectable text and measured inert either way, so enumerating the text
+     entry types would buy nothing but a list to keep current. The `i` flag
+     matters: `contenteditable` is ASCII case-insensitive, so an unflagged
+     `'false'` would let `contenteditable="FALSE"` — a non-editable host —
+     take the opt-out. */
+  [hellFilePicker][data-slot='root']
+    :is(input, textarea, [contenteditable]:not([contenteditable='false' i])) {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}

@@ -41,7 +41,10 @@ const HELL_CONTROL_GROUP_ACTION_RECIPE = {
  * control is the only flexible surface — give it `flex-1 min-w-0` so a long
  * unbroken value scrolls natively inside the control — while prefix and suffix
  * hold their intrinsic size and truncate with an ellipsis once the frame is too
- * narrow for them; actions never shrink.
+ * narrow for them; actions never shrink. The one documented exception is a
+ * composed `hellChipSet`: it reflects `data-in-control-group`, wraps chips
+ * across rows, and lets the frame grow vertically, with the chip flow owning
+ * that spacing so no row touches the border.
  *
  * Padding rhythm: one step per size (`hell-2` at `sm`, `hell-3` at `md`,
  * `hell-4` at `lg`). Prefix and suffix pad only their outer edge; the grouped

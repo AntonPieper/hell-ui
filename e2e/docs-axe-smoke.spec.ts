@@ -143,6 +143,42 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
   '/components/dialog': {
     extraTargets: [
       {
+        // The shell subtree is scanned together with the open dialog, so
+        // `aria-hidden-focus` can fire if the page-wide modality pass ever
+        // hides still-focusable shell chrome again.
+        //
+        // That only works because a scoped panel renders `aria-modal="false"`:
+        // axe's `focusable-modal-open` exemption suppresses `aria-hidden-focus`
+        // for the whole page while any `aria-modal="true"` dialog is open, so
+        // this scan would be vacuous against a page-modal panel. The
+        // assertions below are the direct guard and do not depend on that.
+        name: 'Dialog scoped inside the app shell open',
+        include: [
+          'app-dialog-app-shell-scoped-example > [hellAppShell][data-slot="root"]',
+          '[role="dialog"][data-slot="root"]',
+        ],
+        prepare: async (page) => {
+          const example = page.locator('app-dialog-app-shell-scoped-example');
+          await example.getByRole('button', { name: 'Approve invoice' }).click();
+          const dialog = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+          await expect(dialog).toBeVisible();
+          await expect
+            .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+          await expect(
+            example.locator('[hellAppContent][data-slot="root"]'),
+          ).toHaveAttribute('inert', '');
+          await expect(dialog).toHaveAttribute('aria-modal', 'false');
+          expect(
+            await page.evaluate(() =>
+              [...document.body.children].some(
+                (child) => child.getAttribute('aria-hidden') === 'true',
+              ),
+            ),
+          ).toBe(false);
+        },
+      },
+      {
         name: 'Dialog publish confirmation open',
         include: ['[role="dialog"][data-slot="root"]'],
         prepare: async (page) => {
@@ -331,7 +367,8 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           const picker = example.getByRole('combobox', { name: 'People filter builder' });
           await picker.fill('Status');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-mode="create"]');
+          // The create editor is portalled into an anchored popover.
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-mode="create"]');
           await editor.getByRole('combobox', { name: 'Status option' }).fill('pau');
           await editor.getByRole('combobox', { name: 'Status option' }).press('ArrowDown');
           await expect(page.getByRole('option', { name: 'Paused' })).toBeVisible();
@@ -347,7 +384,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           });
           await picker.fill('Owner');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-field="owner"]');
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-field="owner"]');
           await editor
             .getByRole('combobox', { name: 'Owner directory' })
             .fill('not in the directory');
@@ -365,7 +402,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           });
           await picker.fill('Created date');
           await picker.press('Enter');
-          const editor = example.locator('[data-slot="editor"][data-field="created"]');
+          const editor = page.locator('[hellPopover] [data-slot="editor"][data-field="created"]');
           const input = editor.getByRole('textbox', { name: 'Created from' });
           await input.fill('2026-05-01');
           await input.press('Enter');
@@ -395,6 +432,10 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
         name: 'Table TanStack virtual example',
         include: ['app-table-tanstack-virtual-example'],
       },
+      {
+        name: 'Table TanStack resizable columns example',
+        include: ['app-table-tanstack-resizable-example'],
+      },
     ],
   },
   '/components/time-input': {
@@ -407,7 +448,7 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           await expect(example.locator('#picker-time')).toBeVisible();
           await example.getByRole('button', { name: 'Choose time' }).click();
           await expect(
-            page.locator('[data-testid="time-picker-panel"]').getByRole('spinbutton', {
+            page.locator('[data-testid="time-picker-panel"]').getByRole('listbox', {
               name: 'Hours',
             }),
           ).toBeVisible();
@@ -424,6 +465,25 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           await page.getByRole('tab', { name: 'Preview' }).nth(1).click();
           await expect(
             page.locator('app-pdf-viewer-initial-view-example hell-pdf-viewer'),
+          ).toBeVisible();
+        },
+      },
+      {
+        // The rail is virtualized: a `role="list"` of mounted cells carrying
+        // `aria-posinset`/`aria-setsize` inside the rail's landmark. Closed, no
+        // automated pass ever sees that structure.
+        name: 'PDF viewer page overview open',
+        include: ['app-pdf-viewer-basic-example hell-pdf-viewer'],
+        prepare: async (page) => {
+          const example = page.locator('app-pdf-viewer-basic-example');
+          await page.locator('hd-example-tabs', { has: example }).getByRole('tab', {
+            name: 'Preview',
+          }).click();
+          const viewer = example.locator('hell-pdf-viewer');
+          await expect(viewer.locator('.pdfViewer .page').first()).toBeVisible();
+          await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+          await expect(
+            viewer.locator('aside[data-slot="sidebar"] [role="listitem"]').first(),
           ).toBeVisible();
         },
       },

@@ -67,4 +67,6 @@ claim the Consumer Change state.
 
 The checks land as ordinary, observable contexts first. Making them required
 on protected `main` is a separate, staged ruleset change once both contexts
-exist on `main` (see ADR 0003).
+exist on `main` (see ADR 0003) — the checked-in ruleset, the activation
+command, and the verification evidence are documented in
+[`pull-request-contract.md`](./pull-request-contract.md).

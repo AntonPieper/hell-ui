@@ -16,46 +16,52 @@ export const HELL_TIME_PICKER_LABELS: InjectionToken<HellLabels<HellTimePickerLa
 
 // @public
 export class HellTimePicker {
-    protected readonly current: _angular_core.Signal<HellTimeValue>;
-    protected decreaseUnitLabel(unit: keyof HellTimeValue): string;
+    constructor();
+    protected columnLabelId(unit: keyof HellTimeValue): string;
+    protected readonly columns: _angular_core.Signal<{
+        unit: keyof HellTimeValue;
+        label: string;
+        options: {
+            value: number;
+            disabled: boolean;
+        }[];
+        selectedValue: null | number;
+        activeValue: null | number;
+    }[]>;
+    protected readonly current: _angular_core.Signal<HellTimeValue | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly formattedValue: _angular_core.Signal<string>;
-    protected increaseUnitLabel(unit: keyof HellTimeValue): string;
     protected readonly labels: HellLabels<HellTimePickerLabels>;
-    protected readonly minutePresets: readonly [0, 15, 30, 45];
-    protected onSpinKeydown(event: KeyboardEvent, unit: keyof HellTimeValue): void;
+    readonly max: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
+    readonly min: _angular_core.InputSignalWithTransform<HellTimeValue | undefined, unknown>;
+    readonly minuteStep: _angular_core.InputSignalWithTransform<number, unknown>;
+    protected onOptionClick(unit: keyof HellTimeValue, value: number, optionDisabled: boolean): void;
+    protected onOptionKeydown(event: KeyboardEvent, unit: keyof HellTimeValue, value: number): void;
+    protected optionId(unit: keyof HellTimeValue, value: number): string;
     protected pad(value: number): string;
     protected readonly part: (part: HellTimePickerPart) => string;
+    protected readonly rootLabel: _angular_core.Signal<string>;
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    protected selectedTimeLabel(): string;
-    protected setUnit(unit: keyof HellTimeValue, nextUnitValue: number): void;
-    protected stepUnit(unit: keyof HellTimeValue, delta: number): void;
+    readonly secondStep: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellTimePickerPart>>;
     protected unitLabel(unit: keyof HellTimeValue): string;
-    protected unitLabelId(unit: keyof HellTimeValue): string;
-    protected unitMax(unit: keyof HellTimeValue): number;
-    protected unitValue(unit: keyof HellTimeValue): number;
-    protected unitValueText(unit: keyof HellTimeValue): string;
     readonly value: _angular_core.ModelSignal<HellTimeValue | null>;
     protected visibleUnits(): readonly (keyof HellTimeValue)[];
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellTimePicker, "hell-time-picker", never, { "value": { "alias": "value"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; }, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellTimePicker, "hell-time-picker", never, { "value": { "alias": "value"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "minuteStep": { "alias": "minuteStep"; "required": false; "isSignal": true; }; "secondStep": { "alias": "secondStep"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimePicker, never>;
 }
 
 // @public
 export interface HellTimePickerLabels {
-    readonly decreaseUnit: (unitLabel: string) => string;
     readonly hours: string;
-    readonly increaseUnit: (unitLabel: string) => string;
-    readonly minutePreset: (minute: number) => string;
-    readonly minutePresets: string;
     readonly minutes: string;
+    readonly noTimeSelected: string;
     readonly seconds: string;
     readonly selectedTime: (time: string) => string;
 }
 
 // @public
-export type HellTimePickerPart = 'root' | 'header' | 'readout' | 'units' | 'unit' | 'unitLabel' | 'unitControl' | 'unitValue' | 'unitStep' | 'minutePresets' | 'minutePreset';
+export type HellTimePickerPart = 'column' | 'columnLabel' | 'columns' | 'header' | 'option' | 'options' | 'readout' | 'root';
 
 // @public
 export type HellTimePickerUi = HellUi<HellTimePickerPart>;

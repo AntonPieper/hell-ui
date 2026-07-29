@@ -34,7 +34,7 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData> implements
     // (undocumented)
     rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[];
     // (undocumented)
-    protected readonly rowWidth: _angular_core.WritableSignal<number | null>;
+    protected readonly rowWidth: _angular_core.WritableSignal<null | number>;
     // (undocumented)
     protected readonly totalSize: _angular_core.WritableSignal<number>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTanStackVirtualRows<any>, "hell-tanstack-table[hellTanStackVirtualRows]", ["hellTanStackVirtualRows"], { "enabled": { "alias": "hellTanStackVirtualRows"; "required": false; "isSignal": true; }; "estimateRowSize": { "alias": "virtualEstimateRowSize"; "required": false; "isSignal": true; }; "overscan": { "alias": "virtualOverscan"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

@@ -17,10 +17,12 @@ import {
   inject,
   input,
   isDevMode,
+  viewChild,
   type Provider,
 } from '@angular/core';
 import {
   FlexRenderDirective,
+  defaultColumnSizing,
   type Cell,
   type Column,
   type Header,
@@ -30,7 +32,13 @@ import {
 } from '@tanstack/angular-table';
 import { HellButton } from 'hell-ui/button';
 import { HELL_EMPTY_STATE_COPY, HellEmptyState } from 'hell-ui/empty-state';
-import { HELL_TABLE_UTILITIES_IMPORTS } from 'hell-ui/table';
+import {
+  HELL_TABLE_UTILITIES_IMPORTS,
+  HELL_TABLE_UTILITIES_LABELS,
+  type HellTableResizeAdapter,
+  type HellTableResizeItem,
+  type HellTableUtilitiesLabels,
+} from 'hell-ui/table';
 import { HellInput, HELL_SEARCH_IMPORTS } from 'hell-ui/input';
 import { HellNativeSelect } from 'hell-ui/select';
 import { HellPaginationStrip } from 'hell-ui/pagination';
@@ -377,6 +385,14 @@ export interface HellTableShellExpandedRowContext<TData extends RowData = RowDat
   readonly table: Table<TData>;
 }
 
+/** Mutable state both sides of one resize transaction share while it runs. */
+interface HellColumnResizeTransaction {
+  /** Rendered pixels per TanStack unit, latched for the life of the transaction. */
+  scale: number;
+  /** Sizes this transaction has written so far, keyed by column id. */
+  writes: Readonly<Record<string, number>>;
+}
+
 interface HellColumnMeta {
   readonly hell?: {
     readonly headerClass?: HellClassValue;
@@ -401,6 +417,7 @@ interface HellColumnMeta {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-sticky-header]': 'stickyHeader() ? "true" : null',
+    '[attr.data-hell-tanstack-resizable-columns]': 'columnResizingEnabled() ? "true" : null',
     '[attr.data-status]': 'status().kind',
   },
   template: `
@@ -417,6 +434,7 @@ interface HellColumnMeta {
       [hellTanStackInternalBodyScrollport]="bodyStrategyBridge()"
     >
       <table
+        #shellTable
         hellTableRoot
         class="hell-table-shell-table"
         data-hell-table-shell-table
@@ -479,6 +497,22 @@ interface HellColumnMeta {
                           {{ rendered ?? header.column.id }}
                         </ng-container>
                       }
+                    }
+
+                    <!--
+                      Inside the placeholder guard: a placeholder header still
+                      carries the leaf column, so a separator outside it would
+                      render a second handle for the same pair in whichever
+                      grouped header row padded that column out.
+                    -->
+                    @if (resizeAdapterFor(header); as resizeAdapter) {
+                      <button
+                        hellTableResizeHandle
+                        type="button"
+                        data-hell-table-shell-resize-handle
+                        [resizeAdapter]="resizeAdapter"
+                        [aria-label]="resizeHandleLabel(header)"
+                      ></button>
                     }
                   }
                 </th>
@@ -678,6 +712,12 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   readonly rowClass = input<HellTanStackRowClass<TData> | HellClassValue>(null);
 
   protected readonly providerViews = inject(HELL_TABLE_STATUS_VIEWS);
+  private readonly tableLabels: HellTableUtilitiesLabels = inject(HELL_TABLE_UTILITIES_LABELS);
+  private readonly shellTable = viewChild<ElementRef<HTMLTableElement>>('shellTable');
+  private readonly resizePairs = new Map<
+    string,
+    { readonly afterId: string; readonly adapter: HellTableResizeAdapter }
+  >();
   protected readonly bodyStrategy = inject(ɵHELL_TANSTACK_BODY_STRATEGY, {
     optional: true,
     self: true,
@@ -724,13 +764,186 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   }
 
   protected columnSize(column: Column<TData, unknown>): number | null {
+    this.trackColumnSizing();
     const size = column.getSize();
     return Number.isFinite(size) && size > 0 ? size : null;
+  }
+
+  /**
+   * Registers the shell view as a reader of TanStack column sizing state.
+   *
+   * The Angular adapter turns `table.get*` accessors into computed signals, but
+   * `column.getSize()` is a plain column method the view cannot track. A
+   * total-preserving resize also leaves `getTotalSize()` at the same value, so
+   * without this read the shell would keep a stale grid whenever sizing changes
+   * outside its own view — a reset control in the toolbar, or restored widths.
+   */
+  private trackColumnSizing(): void {
+    void this.table().getState().columnSizing;
   }
 
   protected tableTotalSize(): number | null {
     const size = this.table().getTotalSize();
     return Number.isFinite(size) && size > 0 ? size : null;
+  }
+
+  /**
+   * Whether the caller explicitly turned on TanStack column resizing. The shell
+   * adds no resize input of its own: `enableColumnResizing` is TanStack's own
+   * option, and per-column opt-out stays `columnDef.enableResizing`. Only an
+   * explicit `true` counts, because TanStack treats the unset option as enabled
+   * and the shell must not grow resize separators on every existing table.
+   *
+   * The option is read through a header context rather than off the injected
+   * table: the Angular adapter proxies `get*` accessors into signals but caches
+   * plain properties such as `options` on first access, so that copy goes stale
+   * as soon as the caller's options recompute.
+   */
+  protected columnResizingEnabled(): boolean {
+    const header = this.table().getHeaderGroups()[0]?.headers[0];
+    return header?.getContext().table.options.enableColumnResizing === true;
+  }
+
+  /**
+   * Resize pair for one header, or `null` when the shell renders no handle:
+   * grouped headers, the trailing column, and columns TanStack marks
+   * unresizable have no adjacent pair to transact against.
+   *
+   * Adapters are memoized per leading column so the `resizeAdapter` binding
+   * keeps a stable identity across change detection.
+   */
+  protected resizeAdapterFor(header: Header<TData, unknown>): HellTableResizeAdapter | null {
+    if (!this.columnResizingEnabled()) return null;
+
+    const before = header.column;
+    const columns = this.table().getVisibleLeafColumns();
+    const index = columns.findIndex((column) => column.id === before.id);
+    const after = index >= 0 ? columns[index + 1] : undefined;
+    if (!after || !before.getCanResize() || !after.getCanResize()) return null;
+
+    const cached = this.resizePairs.get(before.id);
+    if (cached?.afterId === after.id) return cached.adapter;
+
+    // Both sides share one transaction so neither can half-convert its delta
+    // nor overwrite the other's write.
+    const transaction: HellColumnResizeTransaction = { scale: 1, writes: {} };
+    const adapter: HellTableResizeAdapter = {
+      before: this.resizeItemFor(before.id, after.id, transaction),
+      after: this.resizeItemFor(after.id, before.id, transaction),
+    };
+    this.resizePairs.set(before.id, { afterId: after.id, adapter });
+    return adapter;
+  }
+
+  /** Accessible name for one column's resize separator. */
+  protected resizeHandleLabel(header: Header<TData, unknown>): string {
+    return `${this.tableLabels.resizeColumn} ${header.column.id}`;
+  }
+
+  /**
+   * One side of a shell resize transaction. Sizes live in TanStack's
+   * `columnSizing` state — the single channel the `<colgroup>`, the header
+   * grid, and the body cell size/grow variables all read — so the shell never
+   * writes a competing width onto the header cell itself.
+   *
+   * Every value crosses the rendered/TanStack boundary through the pair's
+   * render scale, because the shell table stretches past `getTotalSize()`
+   * whenever the scrollport is wider than the columns.
+   *
+   * The scale is latched on `measure()` — the resize runtime reads both start
+   * sizes before it writes anything — and reused for the rest of the
+   * transaction. Recomputing it per call would read a `getTotalSize()` that
+   * already contains this transaction's first write, so the two sides would
+   * convert at different rates and the pair total would creep on every move.
+   * `measure()` also opens a fresh write set, so a new drag starts from
+   * TanStack's own state rather than from what the last one left behind.
+   */
+  private resizeItemFor(
+    columnId: string,
+    otherColumnId: string,
+    transaction: HellColumnResizeTransaction,
+  ): HellTableResizeItem {
+    return {
+      columnId,
+      measure: () => {
+        transaction.scale = this.columnRenderScale();
+        transaction.writes = {};
+        return this.columnUnits(columnId) * transaction.scale;
+      },
+      minSize: () => this.resizeMinUnits(columnId, otherColumnId) * transaction.scale,
+      setSize: (px) => this.writeColumnSize(transaction, columnId, px / transaction.scale),
+    };
+  }
+
+  /**
+   * Lower bound for one side in TanStack units: its own `minSize`, raised so
+   * the opposite side cannot pass its `maxSize`. Both bounds stay TanStack's;
+   * the shell only translates them into the pair contract the resize handle
+   * clamps against.
+   */
+  private resizeMinUnits(columnId: string, otherColumnId: string): number {
+    const own = this.columnBounds(columnId);
+    const other = this.columnBounds(otherColumnId);
+    const sum = this.columnUnits(columnId) + this.columnUnits(otherColumnId);
+    return Math.max(own.min, sum - other.max);
+  }
+
+  private columnUnits(columnId: string): number {
+    const size = this.table().getColumn(columnId)?.getSize() ?? 0;
+    return Number.isFinite(size) && size > 0 ? size : 0;
+  }
+
+  /**
+   * TanStack merges `defaultColumnSizing` into every `columnDef`, so a column
+   * that still exists always answers with concrete bounds. The fallbacks only
+   * cover a column disappearing between two reads, and deliberately reuse
+   * TanStack's own defaults so the shell never invents a bound of its own.
+   */
+  private columnBounds(columnId: string): { readonly min: number; readonly max: number } {
+    const columnDef = this.table().getColumn(columnId)?.columnDef;
+    return {
+      min: columnDef?.minSize ?? defaultColumnSizing.minSize,
+      max: columnDef?.maxSize ?? defaultColumnSizing.maxSize,
+    };
+  }
+
+  /**
+   * Rendered CSS pixels per TanStack size unit. Under `table-layout: fixed` the
+   * shell table stretches its columns proportionally when it is wider than
+   * `getTotalSize()`, so a pointer delta measured on screen is that much larger
+   * than the size delta TanStack should record.
+   */
+  private columnRenderScale(): number {
+    const element = this.shellTable()?.nativeElement;
+    const total = this.table().getTotalSize();
+    if (!element || !Number.isFinite(total) || total <= 0) return 1;
+    const rendered = element.getBoundingClientRect().width;
+    return rendered > 0 ? rendered / total : 1;
+  }
+
+  /**
+   * Records one side's size and republishes the whole transaction in a single
+   * `columnSizing` updater.
+   *
+   * The resize runtime writes both sides back to back with no render in
+   * between, and TanStack's own `columnSizing` state does not refresh between
+   * two synchronous updaters: the Angular adapter's `onStateChange` closes over
+   * the state captured when its options last recomputed, and the table proxy
+   * caches `setColumnSizing` after the first access. A per-side updater would
+   * therefore compute the second write from the same state as the first and
+   * drop the leading column's size, leaving the pair total — and with it
+   * `getTotalSize()` — drifting by the whole delta on every move. Carrying the
+   * accumulated writes makes each call land both sides at once, which is also
+   * correct when the caller controls `columnSizing` through a signal.
+   */
+  private writeColumnSize(
+    transaction: HellColumnResizeTransaction,
+    columnId: string,
+    size: number,
+  ): void {
+    transaction.writes = { ...transaction.writes, [columnId]: size };
+    const { writes } = transaction;
+    this.table().setColumnSizing((current) => ({ ...current, ...writes }));
   }
 
   private allBodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {

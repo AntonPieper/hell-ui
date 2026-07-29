@@ -49,7 +49,7 @@ export class HellAlertDescription {
 // @public
 export class HellAlertDismiss {
     protected readonly alert: HellAlert;
-    readonly ariaLabel: i0.InputSignal<string | null>;
+    readonly ariaLabel: i0.InputSignal<null | string>;
     protected readonly labels: HellLabels<HellAlertLabels>;
     protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
@@ -69,7 +69,7 @@ export interface HellAlertLabels {
 }
 
 // @public
-export type HellAlertPart = 'root' | 'icon' | 'content';
+export type HellAlertPart = 'content' | 'icon' | 'root';
 
 // @public
 export class HellAlertTitle {
@@ -83,7 +83,7 @@ export class HellAlertTitle {
 export type HellAlertUi = HellUi<HellAlertPart>;
 
 // @public
-export type HellAlertVariant = 'info' | 'success' | 'warning' | 'danger';
+export type HellAlertVariant = 'danger' | 'info' | 'success' | 'warning';
 
 // (No @packageDocumentation comment for this package)
 

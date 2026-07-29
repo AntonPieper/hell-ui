@@ -1,15 +1,33 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidCircleCheck,
+  faSolidFileImage,
+  faSolidFileLines,
+  faSolidFilePdf,
+  faSolidTriangleExclamation,
+} from '@ng-icons/font-awesome/solid';
 
 import {
   HellFilePicker,
   type HellFileSelection,
   type HellFileValidator,
 } from 'hell-ui/file-picker';
+import { HellIcon } from 'hell-ui/icon';
+
+const FILE_PICKER_VALIDATION_ICONS = {
+  faSolidCircleCheck,
+  faSolidFileImage,
+  faSolidFileLines,
+  faSolidFilePdf,
+  faSolidTriangleExclamation,
+};
 
 @Component({
   selector: 'app-file-picker-validation-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellFilePicker],
+  imports: [HellFilePicker, HellIcon],
+  providers: [provideIcons(FILE_PICKER_VALIDATION_ICONS)],
   template: `
     <div
       hellFilePicker
@@ -21,7 +39,7 @@ import {
       aria-describedby="file-picker-validation-hint"
       (selection)="selection.set($event)"
     >
-      <strong>Choose up to two review files</strong>
+      <strong class="text-hell-foreground">Choose up to two review files</strong>
       <span id="file-picker-validation-hint" class="hd-muted">
         PDF or image, at most 5 MB each; names containing “draft” are blocked
       </span>
@@ -29,32 +47,57 @@ import {
 
     @if (selection(); as result) {
       <div class="grid gap-hell-3 text-sm" data-file-picker-result>
-        <section>
-          <strong>Accepted ({{ result.accepted.length }})</strong>
+        <section class="grid gap-hell-2">
+          <strong class="flex items-center gap-hell-2">
+            <hell-icon name="faSolidCircleCheck" size="16px" class="text-hell-success" />
+            Accepted ({{ result.accepted.length }})
+          </strong>
           @if (result.accepted.length) {
-            <ul class="hd-muted">
+            <ul class="m-0 grid list-none gap-hell-1 p-0">
               @for (file of result.accepted; track file) {
-                <li>{{ file.name }}</li>
-              }
-            </ul>
-          } @else {
-            <p class="hd-muted">None</p>
-          }
-        </section>
-
-        <section>
-          <strong>Rejected ({{ result.rejected.length }})</strong>
-          @if (result.rejected.length) {
-            <ul class="hd-muted" data-file-picker-rejections>
-              @for (rejection of result.rejected; track rejection.file) {
-                <li [attr.data-reason]="rejection.reason">
-                  {{ rejection.file.name }} &mdash; {{ rejection.reason }}:
-                  {{ rejection.message }}
+                <li
+                  class="flex min-w-0 items-center gap-hell-2 rounded-hell-md border border-solid border-hell-success/40 bg-hell-success-soft px-hell-3 py-hell-2"
+                >
+                  <hell-icon
+                    [name]="fileIcon(file)"
+                    size="16px"
+                    class="shrink-0 text-hell-success-strong"
+                  />
+                  <span class="min-w-0 flex-1 truncate">{{ file.name }}</span>
                 </li>
               }
             </ul>
           } @else {
-            <p class="hd-muted">None</p>
+            <p class="m-0 hd-muted">None</p>
+          }
+        </section>
+
+        <section class="grid gap-hell-2">
+          <strong class="flex items-center gap-hell-2">
+            <hell-icon name="faSolidTriangleExclamation" size="16px" class="text-hell-danger" />
+            Rejected ({{ result.rejected.length }})
+          </strong>
+          @if (result.rejected.length) {
+            <ul class="m-0 grid list-none gap-hell-1 p-0" data-file-picker-rejections>
+              @for (rejection of result.rejected; track rejection.file) {
+                <li
+                  class="flex min-w-0 items-start gap-hell-2 rounded-hell-md border border-solid border-hell-danger/40 bg-hell-danger-soft px-hell-3 py-hell-2"
+                  [attr.data-reason]="rejection.reason"
+                >
+                  <hell-icon
+                    [name]="fileIcon(rejection.file)"
+                    size="16px"
+                    class="mt-hell-1 shrink-0 text-hell-danger"
+                  />
+                  <span class="grid min-w-0 gap-hell-1">
+                    <span class="truncate font-medium">{{ rejection.file.name }}</span>
+                    <span class="hd-muted">{{ rejection.reason }}: {{ rejection.message }}</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="m-0 hd-muted">None</p>
           }
         </section>
       </div>
@@ -66,4 +109,13 @@ export class FilePickerValidationExample {
   protected readonly selection = signal<HellFileSelection | null>(null);
   protected readonly validate: HellFileValidator = (file) =>
     file.name.toLowerCase().includes('draft') ? 'Draft files are not ready for review' : null;
+
+  /** Picks a decorative glyph from the browser-reported type and the name. */
+  protected fileIcon(file: File): string {
+    if (file.type.startsWith('image/')) return 'faSolidFileImage';
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      return 'faSolidFilePdf';
+    }
+    return 'faSolidFileLines';
+  }
 }

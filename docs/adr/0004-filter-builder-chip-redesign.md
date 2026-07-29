@@ -1,8 +1,8 @@
 # ADR: Filter Builder rides the Control Group + Chip Set pattern
 
-- Status: Proposed — merging PR #401 constitutes the maintainer approval
-  required by #362, at which point this ADR reads as Accepted; implementation
-  is #363
+- Status: Accepted 2026-07-27 — PR #401 merged, which is the maintainer
+  approval required by #362; implementation is #363/#411 (amended 2026-07-29,
+  see "Amendment: the empty prompt is explorable, and Tab leaves it")
 - Date: 2026-07-27
 
 ## Context
@@ -162,8 +162,9 @@ interface HellFilterFieldDescriptor<TFilter> {
    label and field id); `ArrowDown` opens the list without typing.
    Single-instance fields that already have an expression are excluded, as
    today.
-3. Committing a field option (`Enter`, `Tab` onto an active option, or click)
-   opens the **create editor** with that descriptor's projected template.
+3. Committing a field option (`Enter`, `Tab` onto an active option while a
+   query is typed, or click) opens the **create editor** with that
+   descriptor's projected template.
 4. The application editor collects operator and value (its own controls, its
    own Search Resources) and calls `commit(filter)`; a valid commit appends
    the chip, clears the query, returns focus to the inline input, and
@@ -239,7 +240,7 @@ fourth surface owning its own focus while open.
 | Inline input | typing | Filters field options; dropdown opens with matches. |
 | Inline input | `ArrowDown` | Opens the field dropdown; then active-descendant navigation per the Combobox contract (`docs/architecture/keyboard-navigation-matrix.md`). |
 | Inline input | `Enter` (active option) | Commits the field option → opens the create editor. |
-| Inline input | `Tab` (dropdown open, active option) | Commits like `Enter` instead of leaving the field (GitLab's Tab-commits affordance, already implemented). |
+| Inline input | `Tab` (dropdown open, active option, query typed) | Commits like `Enter` instead of leaving the field (GitLab's Tab-commits affordance, already implemented). With nothing typed, `Tab` leaves the field — see the 2026-07-29 amendment. |
 | Inline input, empty | `Backspace` | Focus the last removable chip (two-step removal). |
 | Inline input, empty | `ArrowLeft` | Focus the last enabled chip. |
 | Inline input | `Escape` | Dropdown open → close it; else query present → clear it; else no-op. |
@@ -319,6 +320,32 @@ pieces (click-anywhere focus, group action stop).
 - A `size` axis on the Filter Builder (frame `md` + chip `sm` is the single
   shipped density; revisit only with a real consumer need).
 - Built-in overflow collapse ("+N more") or measurement runtime.
+
+## Amendment: the empty prompt is explorable, and Tab leaves it (2026-07-29)
+
+#413 makes the empty prompt explorable by pointer: a click on the inline input
+— or on the empty frame space section 1 already routes to it — opens the field
+picker's own dropdown on the full available-field list, so the surface turns
+recall into recognition without a keystroke. This adds no new surface and no
+new focus move: the list *is* the dropdown `ArrowDown` opens, and it is
+`aria-activedescendant`-driven, so DOM focus stays in the input. Focus alone
+still never opens it, which keeps Tab passes and the commit/cancel/clear focus
+restores quiet.
+
+That changes what the section 6 `Tab` row must say. The Combobox engine
+highlights the first option on every open, so there is always an active option
+while the list is open. With the list now openable by a stray click, an
+unconditional Tab-commit would convert a leave gesture into a chip creation
+plus an editor open and focus grab — an action the user never chose. The
+affordance's actual GitLab-derived purpose is converting *typed* intent into a
+token, so it is now gated on a typed query: with a query, `Tab` still commits
+the active option like `Enter`; on an empty prompt it falls through and leaves
+the field. Section 3 step 3 and the section 6 `Tab` row above carry the
+condition.
+
+The "keep the existing behaviors listed here verbatim" instruction in section 6
+binds implementations to this amended table, not to the pre-amendment `Tab`
+row.
 
 ## Consequences
 

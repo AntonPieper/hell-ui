@@ -6,6 +6,7 @@ import {
   InjectionToken,
   NO_ERRORS_SCHEMA,
   afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   computed,
   effect,
@@ -42,6 +43,7 @@ import type {
 } from 'hell-ui/core';
 import {
   hellPartStyler,
+  isElementLike,
   type HellRecipe,
 } from 'hell-ui/internal/core';
 import { HELL_PDF_VIEWER_LABELS, type HellPdfViewerLabels } from './pdf-viewer-labels';
@@ -55,9 +57,12 @@ import {
   type HellPdfRuntimePort,
 } from './pdf-viewer.runtime';
 import {
+  PDF_OVERVIEW_ESTIMATED_ITEM_SIZE,
   PDF_ZOOM_OPTIONS,
   PDF_ZOOM_VALUES,
+  getPdfOverviewWindow,
   getZoomLabel,
+  isSamePdfOverviewWindow,
   normalizeZoomValue,
 } from './pdf-viewer.utils';
 import type { HellPdfWorkerSource } from './pdf-viewer.adapter';
@@ -77,8 +82,6 @@ export type HellPdfRuntimeFactory = () => HellPdfRuntimePort;
 export const HELL_PDF_RUNTIME_FACTORY = new InjectionToken<HellPdfRuntimeFactory>(
   'HELL_PDF_RUNTIME_FACTORY',
 );
-
-const HELL_PDF_THUMBNAIL_INITIAL_BATCH = 12;
 
 /** Public parts of the HellPdfViewer module, styleable through its Part Style Map. */
 export type HellPdfViewerPart =
@@ -149,7 +152,9 @@ const HELL_PDF_VIEWER_ICONS = {
  * page, zoom, loaded, and error events. Pass an app-owned pdf.js `worker`
  * source; Hell does not bundle one in the package tarball. Host keyboard
  * shortcuts support Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End.
- * Document-level shortcuts are opt-in via `globalShortcuts`.
+ * Document-level shortcuts are opt-in via `globalShortcuts`. On touch, one
+ * finger pans, two fingers pinch-zoom, and a double tap toggles between the
+ * fitted zoom preset and a magnified view anchored on the tap.
  *
  * @experimental This feature wraps pdf.js viewer internals and may change as
  * the PDF Runtime seam is hardened.
@@ -209,6 +214,7 @@ export class HellPdfViewer {
 
   private readonly containerRef = viewChild.required<ElementRef<HTMLDivElement>>('container');
   private readonly overviewRef = viewChild<ElementRef<HTMLElement>>('overview');
+  private readonly overviewTrackRef = viewChild<ElementRef<HTMLElement>>('overviewTrack');
   private readonly findInputRef = viewChild<ElementRef<HTMLInputElement>>('findInput');
   private readonly thumbCanvases = viewChildren<ElementRef<HTMLCanvasElement>>('thumbCanvas');
   private readonly runtime = (
@@ -227,8 +233,37 @@ export class HellPdfViewer {
   protected readonly findCurrent = signal(0);
   protected readonly findTotal = signal(0);
   protected readonly overviewOpen = signal(false);
-  protected readonly pageList = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1),
+
+  /** Scroll offset of the rail, relative to the top of its scroll track. */
+  private readonly railScrollTop = signal(0);
+  /** Visible height of the rail; `0` until it has been measured. */
+  private readonly railViewportHeight = signal(0);
+  /** Measured height of one page button plus its row gap. */
+  private readonly railItemSize = signal(PDF_OVERVIEW_ESTIMATED_ITEM_SIZE);
+  /** Page whose button currently holds focus, so scrolling cannot unmount it. */
+  private readonly railFocusedPage = signal<number | null>(null);
+  /** Bumped by the rail's ResizeObserver to ask for a fresh measurement. */
+  private readonly railMeasureGeneration = signal(0);
+  /** Distance from the rail's scroll origin to the top of the track. */
+  private railTrackOffset = 0;
+  /** Page the rail has already scrolled to; see the reveal effect. */
+  private revealedPage: number | null = null;
+
+  /**
+   * The page buttons the rail mounts right now. A four-hundred-page document
+   * used to mount four hundred buttons the moment the overview opened; it now
+   * mounts the visible window, the current page, and whatever holds focus.
+   */
+  protected readonly overviewWindow = computed(
+    () =>
+      getPdfOverviewWindow({
+        totalPages: this.totalPages(),
+        scrollTop: this.railScrollTop(),
+        viewportHeight: this.railViewportHeight(),
+        itemSize: this.railItemSize(),
+        pinnedPages: [this.page(), this.railFocusedPage()],
+      }),
+    { equal: isSamePdfOverviewWindow },
   );
   protected readonly effectiveZoomValue = computed(
     () => this.zoomValue() ?? normalizeZoomValue(this.initialZoom()),
@@ -243,7 +278,6 @@ export class HellPdfViewer {
 
   private readonly globalKeydown = inject(HellGlobalKeydownService);
   private readonly globalPointerdown = inject(HellGlobalPointerdownService);
-  private thumbRenderObserver: IntersectionObserver | null = null;
   private readonly destroyRef = inject(DestroyRef);
   private readonly bootstrapped = signal(false);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
@@ -271,7 +305,6 @@ export class HellPdfViewer {
     });
 
     this.destroyRef.onDestroy(() => {
-      this.disconnectThumbObserver();
       this.runtime.cleanup();
     });
 
@@ -287,24 +320,138 @@ export class HellPdfViewer {
       void this.loadSource(src);
     });
 
-    // When overview opens (or pages list changes), render visible thumbs.
+    // Only the visible window is mounted, so every mounted canvas is one the
+    // user can see or is about to: paint them all rather than filtering the
+    // rail's own children through an IntersectionObserver a second time.
     effect(() => {
+      if (!this.overviewOpen()) return;
+
+      const canvases = this.thumbCanvases();
+      if (!this.runtime.hasDocument || canvases.length === 0) return;
+
+      queueMicrotask(() => {
+        void this.runtime.renderThumbs(
+          canvases.map((canvasRef) => canvasRef.nativeElement),
+          () => this.overviewOpen(),
+        );
+      });
+    });
+
+    // The rail measures itself instead of trusting a constant: the page button
+    // is sized from the thumbnail box, the label's line height, and spacing
+    // tokens, all of which a skin may change.
+    effect((onCleanup) => {
       if (!this.overviewOpen()) {
-        this.disconnectThumbObserver();
+        this.railScrollTop.set(0);
+        this.railFocusedPage.set(null);
+        // A reopened rail scrolls to the current page again, even when the
+        // document never left it.
+        this.revealedPage = null;
         return;
       }
 
-      const canvases = this.thumbCanvases();
-      const overview = this.overviewRef()?.nativeElement;
-      if (!this.runtime.hasDocument || canvases.length === 0 || !overview) return;
+      const rail = this.overviewRef()?.nativeElement;
+      const ResizeObserverCtor = rail?.ownerDocument.defaultView?.ResizeObserver;
+      if (!rail || !ResizeObserverCtor) return;
 
-      queueMicrotask(() =>
-        this.renderThumbnailCanvases(
-          canvases.map((canvasRef) => canvasRef.nativeElement),
-          overview,
-        ),
+      const observer = new ResizeObserverCtor(() =>
+        this.railMeasureGeneration.update((generation) => generation + 1),
       );
+      observer.observe(rail);
+      onCleanup(() => observer.disconnect());
     });
+
+    afterRenderEffect(() => {
+      if (!this.overviewOpen()) return;
+      // Re-runs when the rail opens, when a loaded document changes the track's
+      // height, and when the ResizeObserver reports a new box — never merely
+      // because some other render happened.
+      this.totalPages();
+      this.railMeasureGeneration();
+      this.measureRail();
+    });
+
+    // Follow the document: a rail that mounts a window has to scroll to the
+    // current page, because jumping to page 350 no longer leaves its button
+    // sitting off-screen in the DOM waiting to be scrolled to.
+    afterRenderEffect(() => {
+      if (!this.overviewOpen()) return;
+      const page = this.page();
+      const itemSize = this.railItemSize();
+      // Read so the reveal retries once the first measurement lands: a rail that
+      // opens on page 350 cannot scroll to it before it knows its own box.
+      this.railViewportHeight();
+
+      // Only when the page itself moved. This effect also re-runs on a
+      // remeasure, and a window resize must not yank the rail back from
+      // wherever the user scrolled it to.
+      if (page === this.revealedPage) return;
+      if (this.revealPageInRail(page, itemSize)) this.revealedPage = page;
+    });
+  }
+
+  /**
+   * Read the rail's box, the scroll origin of its track, and the height of one
+   * mounted page button. Everything the window is derived from comes from here,
+   * so a rail that has not rendered yet reports nothing and the window falls
+   * back to its unmeasured batch.
+   */
+  private measureRail(): void {
+    const rail = this.overviewRef()?.nativeElement;
+    const track = this.overviewTrackRef()?.nativeElement;
+    if (!rail || !track) return;
+
+    this.railViewportHeight.set(rail.clientHeight);
+
+    // The rail's border and padding sit between its scroll origin and the top
+    // of the track, so item offsets and scroll offsets would otherwise be in
+    // different frames. Read straight off the box rather than from the distance
+    // between two rects: that difference moves with the scroll position, so a
+    // remeasure taken while the rail is scrolled would fold the scroll offset
+    // into the answer and snap the window back to the first page.
+    this.railTrackOffset = rail.clientTop + readPixels(rail, 'paddingTop');
+    this.railScrollTop.set(Math.max(rail.scrollTop - this.railTrackOffset, 0));
+
+    const cell = track.firstElementChild;
+    const itemSize = cell instanceof HTMLElement ? cell.offsetHeight : 0;
+    if (itemSize > 0) this.railItemSize.set(itemSize);
+  }
+
+  /**
+   * Scroll the rail the shortest distance that brings a page fully into view.
+   * Returns whether the rail was measured enough to place the page at all, so
+   * an attempt made before the first measurement is retried rather than spent.
+   */
+  private revealPageInRail(page: number, itemSize: number): boolean {
+    const rail = this.overviewRef()?.nativeElement;
+    if (!rail || itemSize <= 0) return false;
+
+    const viewport = rail.clientHeight;
+    if (viewport <= 0) return false;
+
+    const top = this.railTrackOffset + (page - 1) * itemSize;
+    const bottom = top + itemSize;
+    if (top < rail.scrollTop) rail.scrollTop = top;
+    else if (bottom > rail.scrollTop + viewport) rail.scrollTop = bottom - viewport;
+    return true;
+  }
+
+  protected onOverviewScroll(): void {
+    const rail = this.overviewRef()?.nativeElement;
+    if (!rail) return;
+    this.railScrollTop.set(Math.max(rail.scrollTop - this.railTrackOffset, 0));
+  }
+
+  protected onOverviewFocusIn(event: FocusEvent): void {
+    this.railFocusedPage.set(readOverviewPage(event.target));
+  }
+
+  protected onOverviewFocusOut(event: FocusEvent): void {
+    // Moving between two buttons inside the rail is not focus leaving it.
+    const rail = this.overviewRef()?.nativeElement;
+    const next = event.relatedTarget;
+    if (rail && next instanceof Node && rail.contains(next)) return;
+    this.railFocusedPage.set(null);
   }
 
   private async bootstrapRuntime(): Promise<void> {
@@ -343,6 +490,9 @@ export class HellPdfViewer {
       this.ready.set(false);
       this.zoomValue.set(null);
       this.totalPages.set(0);
+      // A new document's rail has to scroll to its own current page, even when
+      // that page number happens to match the one the outgoing document was on.
+      this.revealedPage = null;
       await this.runtime.loadDocument(src, {
         initialPage: this.initialPage(),
         initialZoom: this.initialZoom(),
@@ -364,6 +514,31 @@ export class HellPdfViewer {
   }
   protected goTo(n: number) {
     this.runtime.goTo(n);
+  }
+
+  /**
+   * Commit a typed page number. The input is bound to `page()`, so an
+   * out-of-range entry that clamps to the page the viewer is already on would
+   * otherwise leave the typed text sitting in the box: the binding value never
+   * changes, so Angular never rewrites the DOM value. Write the resolved page
+   * back explicitly instead.
+   */
+  protected commitPageInput(input: HTMLInputElement) {
+    // `type="number"` sanitizes anything unparseable to an empty string, so a
+    // blank field is how "not a page number" arrives here. Restore the current
+    // page rather than reading `Number('')` as page 0 and navigating away.
+    const raw = input.value.trim();
+    const parsed = raw === '' ? Number.NaN : Number(raw);
+    if (!Number.isFinite(parsed)) {
+      input.value = String(this.page());
+      return;
+    }
+
+    const total = this.totalPages() || 1;
+    const target = Math.min(Math.max(Math.trunc(parsed), 1), total);
+
+    this.goTo(target);
+    input.value = String(this.page());
   }
 
   protected zoomIn() {
@@ -398,51 +573,6 @@ export class HellPdfViewer {
     this.overviewOpen.update((v) => !v);
   }
 
-  private renderThumbnailCanvases(canvases: readonly HTMLCanvasElement[], overview: HTMLElement): void {
-    this.disconnectThumbObserver();
-
-    const firstBatch = canvases.slice(0, HELL_PDF_THUMBNAIL_INITIAL_BATCH);
-    void this.runtime.renderThumbs(firstBatch, () => this.overviewOpen());
-
-    if (!this.runtime.hasDocument || canvases.length <= firstBatch.length) return;
-
-    const IntersectionObserverCtor = overview.ownerDocument.defaultView?.IntersectionObserver;
-    if (!IntersectionObserverCtor) {
-      queueMicrotask(() => {
-        void this.runtime.renderThumbs(canvases, () => this.overviewOpen());
-      });
-      return;
-    }
-
-    const observer = new IntersectionObserverCtor(
-      (entries: IntersectionObserverEntry[]) => {
-        if (!this.overviewOpen()) return;
-
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .map((entry) => entry.target as HTMLCanvasElement);
-
-        if (visible.length > 0) {
-          void this.runtime.renderThumbs(visible, () => this.overviewOpen());
-        }
-      },
-      {
-        root: overview,
-        rootMargin: '0px 0px 256px 0px',
-        threshold: 0.1,
-      },
-    );
-
-    this.thumbRenderObserver = observer;
-    for (const canvas of canvases) {
-      observer.observe(canvas);
-    }
-  }
-
-  private disconnectThumbObserver(): void {
-    this.thumbRenderObserver?.disconnect();
-    this.thumbRenderObserver = null;
-  }
   protected openFind() {
     this.findOpen.set(true);
     const view = this.host.nativeElement.ownerDocument.defaultView;
@@ -526,4 +656,20 @@ export class HellPdfViewer {
       lastPage: () => this.goTo(this.totalPages()),
     });
   }
+}
+
+/** One resolved length off an element's computed style, or `0` if it has none. */
+function readPixels(element: HTMLElement, property: 'paddingTop'): number {
+  const value = Number.parseFloat(
+    element.ownerDocument.defaultView?.getComputedStyle(element)[property] ?? '',
+  );
+  return Number.isFinite(value) ? value : 0;
+}
+
+/** Page number of the rail cell an event target sits in, if any. */
+function readOverviewPage(target: EventTarget | null): number | null {
+  if (!isElementLike(target)) return null;
+  const cell = target.closest('[data-page]');
+  const page = Number(cell?.getAttribute('data-page'));
+  return Number.isInteger(page) && page >= 1 ? page : null;
 }

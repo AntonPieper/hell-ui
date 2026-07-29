@@ -74,6 +74,12 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           dense apps whenever a user needs to trade space between regions — list/detail inspectors,
           editor + console stacks, or a navigator beside a preview.
         </p>
+        <p>
+          Only panes that are rendered take part in the split. A pane something else has hidden —
+          Master Detail hides the inactive pane in a compact frame — reserves no width: the panes
+          still on screen fill the group, and the split it had is given back when the hidden pane
+          returns.
+        </p>
 
         <h2>Basic</h2>
         <p>
@@ -190,7 +196,9 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           <li>
             <code>rescaleOnResize</code>: <code>boolean</code>. When <code>true</code>, container
             size changes rebalance panes to fit; set <code>false</code> to freeze explicit pixel
-            sizes across container resizes. Default <code>true</code>.
+            sizes across container resizes. Freezing opts out of the hidden-pane rule above too — a
+            frozen group keeps reserving the width a hidden pane last held. Default
+            <code>true</code>.
           </li>
           <li>
             <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or

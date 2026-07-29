@@ -22,6 +22,7 @@
     "test:changelog": "node tools/check-changelog.mjs",
     "test:pr-states": "node tools/check-pr-state-policy.mjs",
     "release:prepare": "node tools/release-prepare.mjs",
+    "verify:main-ruleset": "node tools/check-main-ruleset.mjs",
     "api-report:update": "node tools/check-api-reports.mjs --local",
     "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report && pnpm run benchmark:style-bundle --skip-build",
     "benchmark:style-bundle": "node tools/check-consumer-fixtures.mjs styles-aggregate",

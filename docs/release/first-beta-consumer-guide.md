@@ -602,7 +602,7 @@ tokens.
 <hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />
 <input hellDateInput ui="tabular-nums" aria-label="Ship date" />
 <input hellNumberInput ui="tabular-nums" aria-label="Quantity" />
-<hell-time-picker [ui]="{ readout: 'text-hell-primary', minutePreset: 'rounded-hell-md' }" />
+<hell-time-picker [ui]="{ readout: 'text-hell-primary', option: 'rounded-hell-md' }" />
 <button hellCheckbox ui="rounded-hell-pill" aria-label="Accepted"></button>
 <button hellSwitch [ui]="{ root: 'bg-hell-info-soft', thumb: 'shadow-none' }" aria-label="Alerts"></button>
 <hell-slider [ui]="{ range: 'bg-hell-info', thumb: 'border-hell-info' }" aria-label="Volume" />

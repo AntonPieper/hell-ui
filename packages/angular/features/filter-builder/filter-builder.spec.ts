@@ -78,6 +78,15 @@ type TestFilter = NameFilter | StatusFilter | CreatedFilter;
         }
 
         <ng-template [hellFilterBuilderEditor]="statusField" let-editor>
+          <!-- Stands in for a composed Combobox field: it preventDefaults every
+               Escape whether or not its own layer is open, and reports that
+               layer through aria-expanded. -->
+          <input
+            type="text"
+            data-test-status-layer
+            [attr.aria-expanded]="statusLayerOpen()"
+            (keydown.escape)="$event.preventDefault()"
+          />
           <button
             type="button"
             data-test-status-active
@@ -141,6 +150,11 @@ class HostComponent {
     field: 'created',
     label: 'Created',
     display: (filter) => `Created: ${filter.value.from ?? 'Any'}–${filter.value.to ?? 'Any'}`,
+    displayParts: (filter) => ({
+      field: 'Created',
+      operator: 'between',
+      value: `${filter.value.from ?? 'Any'}–${filter.value.to ?? 'Any'}`,
+    }),
     validate: (filter) => Boolean(filter.value.from || filter.value.to),
   };
   readonly fields = signal<readonly HellFilterFieldDescriptor<TestFilter>[]>([
@@ -153,6 +167,7 @@ class HostComponent {
     { id: 'status-1', field: 'status', operator: 'is', value: 'active' },
   ]);
   readonly identify = (filter: TestFilter) => filter.id;
+  readonly statusLayerOpen = signal(false);
   readonly ui = signal<
     | string
     | {
@@ -268,18 +283,34 @@ describe('HellFilterBuilder', () => {
     it('keeps the default part classes stable', async () => {
       const fixture = TestBed.createComponent(HostComponent);
       fixture.componentInstance.ui.set('');
+      // A segmented chip is required for the segment parts to render at all;
+      // `createdField` is the fixture descriptor that supplies `displayParts`.
+      fixture.componentInstance.value.set([
+        { id: 'status-1', field: 'status', operator: 'is', value: 'active' },
+        {
+          id: 'created-1',
+          field: 'created',
+          operator: 'between',
+          value: { from: '2026-07-01', to: '2026-07-31' },
+        },
+      ]);
       await settle(fixture);
 
       const host = fixture.nativeElement as HTMLElement;
       const partClasses = (slot: string): string[] =>
         sortClasses(host.querySelector(`[data-slot="${slot}"]`)?.getAttribute('class') ?? '');
 
+      expect(host.querySelector('[data-slot="tokenField"]')).not.toBeNull();
+      expect(host.querySelector('[data-slot="tokenOperator"]')).not.toBeNull();
       expect({
         host: sortClasses(query<HTMLElement>(host, 'hell-filter-builder').className),
         root: partClasses('root'),
         tokens: partClasses('tokens'),
         token: partClasses('token'),
         tokenLabel: partClasses('tokenLabel'),
+        tokenField: partClasses('tokenField'),
+        tokenOperator: partClasses('tokenOperator'),
+        tokenValue: partClasses('tokenValue'),
         control: partClasses('control'),
         clear: partClasses('clear'),
         live: partClasses('live'),
@@ -318,13 +349,155 @@ describe('HellFilterBuilder', () => {
     expect(tab.defaultPrevented).toBe(false);
   });
 
+  it('surfaces the available fields when the empty prompt is clicked, never on focus alone', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    // Keyboard focus alone keeps the surface quiet: tabbing through the
+    // builder and programmatic focus restores must not pop the list open.
+    picker.focus();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('false');
+
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    const options = queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]');
+    // The single-instance status field already has an expression, so the
+    // explorable list carries exactly the fields that can still be added.
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['Name', 'Created']);
+  });
+
+  it('opens the field list from a click on empty frame space', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const host = fixture.nativeElement as HTMLElement;
+    const picker = query<HTMLInputElement>(host, '[data-hell-filter-builder-input]');
+    const frame = query<HTMLElement>(host, '[data-slot="root"]');
+
+    frame.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(picker);
+    click(frame);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('does not open the list from a click when no field can be added', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.fields.set([fixture.componentInstance.statusField]);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    // The one status expression already exists and the field is
+    // single-instance, so there is nothing to explore.
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('keeps the option list open when the query is deleted back to empty', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    picker.focus();
+    inputValue(picker, 'Nam');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]').map((option) =>
+        option.textContent?.trim(),
+      ),
+    ).toEqual(['Name']);
+
+    inputValue(picker, '');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      queryAll<HTMLElement>(document.body, '[data-slot="fieldOption"]').map((option) =>
+        option.textContent?.trim(),
+      ),
+    ).toEqual(['Name', 'Created']);
+  });
+
+  it('lets Tab leave an explored list on an empty prompt instead of committing', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    click(picker);
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-expanded')).toBe('true');
+    // The engine highlights the first option on open, so without the empty-
+    // prompt gate this Tab would commit it and open an editor.
+    expect(picker.getAttribute('aria-activedescendant')).not.toBeNull();
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    picker.dispatchEvent(tab);
+    await settle(fixture);
+    expect(tab.defaultPrevented).toBe(false);
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+  });
+
+  it('keeps the Tab-commits affordance for a typed query with an active option', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+
+    picker.focus();
+    inputValue(picker, 'Name');
+    key(picker, 'ArrowDown');
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+    expect(picker.getAttribute('aria-activedescendant')).not.toBeNull();
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    picker.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    const editor = await waitFor<HTMLElement>(
+      fixture,
+      document.body,
+      '[data-slot="editor"][data-mode="create"]',
+    );
+    expect(editor.dataset['field']).toBe('name');
+  });
+
   it('uses one typed projected editor for create, rejects invalid commits, and announces add', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.value.set([]);
     await settle(fixture);
 
     await openCreateEditor(fixture, 'Name');
-    let editor = query<HTMLElement>(fixture.nativeElement, '[data-slot="editor"]');
+    let editor = query<HTMLElement>(document.body, '[data-slot="editor"]');
     expect(editor.dataset['mode']).toBe('create');
     expect(editor.dataset['field']).toBe('name');
     expect(editor.classList).toContain('filter-builder-editor-refinement');
@@ -333,7 +506,7 @@ describe('HellFilterBuilder', () => {
     await settle(fixture);
     expect(fixture.componentInstance.invalidAccepted).toBe(false);
     expect(fixture.componentInstance.changes).toEqual([]);
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="editor"]')).not.toBeNull();
 
     query<HTMLButtonElement>(editor, '[data-test-name-context]').click();
     expect(fixture.componentInstance.contextDisplay).toBe('Name contains: Ada');
@@ -343,11 +516,11 @@ describe('HellFilterBuilder', () => {
     await settle(fixture);
     await nextTask();
     await settle(fixture);
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
     expect(fixture.componentInstance.changes).toEqual([]);
 
     await openCreateEditor(fixture, 'Name');
-    editor = query<HTMLElement>(fixture.nativeElement, '[data-slot="editor"]');
+    editor = query<HTMLElement>(document.body, '[data-slot="editor"]');
 
     const input = query<HTMLInputElement>(editor, '[data-test-name-input]');
     inputValue(input, 'Ada');
@@ -388,7 +561,7 @@ describe('HellFilterBuilder', () => {
     await nextTask();
     await settle(fixture);
 
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
     const picker = query<HTMLInputElement>(
       fixture.nativeElement,
       '[data-hell-filter-builder-input]',
@@ -410,7 +583,8 @@ describe('HellFilterBuilder', () => {
     await nextTask();
     await settle(fixture);
 
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).toBeNull();
+    // Create editors are portalled, so the host is the wrong root to assert on.
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
     const picker = query<HTMLInputElement>(
       fixture.nativeElement,
       '[data-hell-filter-builder-input]',
@@ -518,7 +692,7 @@ describe('HellFilterBuilder', () => {
     fixture.componentInstance.value.set([]);
     await settle(fixture);
     await openCreateEditor(fixture, 'Created');
-    const editor = query<HTMLElement>(fixture.nativeElement, '[data-slot="editor"]');
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"]');
     const trigger = query<HTMLButtonElement>(editor, '[data-test-date-layer-trigger]');
 
     trigger.click();
@@ -530,15 +704,15 @@ describe('HellFilterBuilder', () => {
     nestedAction.focus();
     await nextTask();
     await settle(fixture);
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="editor"]')).not.toBeNull();
 
     key(nestedAction, 'Escape');
     await waitForMissing(fixture, document.body, '[data-test-date-layer-action]');
-    expect(fixture.nativeElement.querySelector('[data-slot="editor"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-slot="editor"]')).not.toBeNull();
 
     trigger.focus();
     key(trigger, 'Escape');
-    await waitForMissing(fixture, fixture.nativeElement, '[data-slot="editor"]');
+    await waitForMissing(fixture, document.body, '[data-slot="editor"]');
     await nextTask();
     await settle(fixture);
     expect(document.activeElement).toBe(
@@ -588,6 +762,274 @@ describe('HellFilterBuilder', () => {
       .toBe('All filters cleared');
   });
 
+  it('renders one Control Group frame holding the chip flow, inline picker, and clear action', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const host = fixture.nativeElement as HTMLElement;
+
+    const frame = query<HTMLElement>(host, '[data-slot="root"]');
+    expect(frame.hasAttribute('hellControlGroup')).toBe(true);
+    expect(frame.getAttribute('role')).toBe('group');
+    expect(frame.getAttribute('data-size')).toBe('md');
+
+    const tokens = query<HTMLElement>(host, '[data-slot="tokens"]');
+    expect(frame.contains(tokens)).toBe(true);
+    expect(tokens.hasAttribute('data-in-control-group')).toBe(true);
+    expect(tokens.contains(query<HTMLElement>(host, '[data-slot="token"]'))).toBe(true);
+    expect(tokens.contains(query<HTMLElement>(host, '[data-slot="control"]'))).toBe(true);
+    expect(tokens.contains(query<HTMLElement>(host, '[data-hell-filter-builder-input]'))).toBe(
+      true,
+    );
+
+    const clear = query<HTMLButtonElement>(host, '[data-slot="clear"]');
+    expect(frame.contains(clear)).toBe(true);
+    expect(clear.hasAttribute('hellControlGroupAction')).toBe(true);
+    expect(clear.getAttribute('aria-label')).toBe('Clear all filters');
+    expect(clear.textContent?.trim()).toBe('');
+
+    // The clear action is only offered while filters exist.
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+    expect(host.querySelector('[data-slot="clear"]')).toBeNull();
+  });
+
+  it('renders segmented token labels from displayParts and falls back to flat display', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([
+      {
+        id: 'created-1',
+        field: 'created',
+        operator: 'between',
+        value: { from: '2026-07-01', to: '2026-07-31' },
+      },
+      { id: 'name-1', field: 'name', operator: 'contains', value: 'Ada' },
+    ]);
+    await settle(fixture);
+    const tokens = queryAll<HTMLElement>(fixture.nativeElement, '[data-slot="token"]');
+
+    const segmented = tokens[0]!;
+    expect(query<HTMLElement>(segmented, '[data-slot="tokenField"]').textContent?.trim())
+      .toBe('Created');
+    expect(query<HTMLElement>(segmented, '[data-slot="tokenOperator"]').textContent?.trim())
+      .toBe('between');
+    expect(query<HTMLElement>(segmented, '[data-slot="tokenValue"]').textContent?.trim())
+      .toBe('2026-07-01–2026-07-31');
+    // display() stays the single source of accessible names.
+    expect(query<HTMLElement>(segmented, '[data-slot="tokenLabel"]').getAttribute('aria-label'))
+      .toBe('Edit Created: 2026-07-01–2026-07-31');
+
+    const flat = tokens[1]!;
+    expect(flat.querySelector('[data-slot="tokenField"]')).toBeNull();
+    expect(flat.querySelector('[data-slot="tokenOperator"]')).toBeNull();
+    expect(query<HTMLElement>(flat, '[data-slot="tokenValue"]').textContent?.trim())
+      .toBe('Name contains: Ada');
+  });
+
+  it('focuses the inline picker when empty frame space is clicked', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    await settle(fixture);
+    const host = fixture.nativeElement as HTMLElement;
+    const picker = query<HTMLInputElement>(host, '[data-hell-filter-builder-input]');
+
+    const frame = query<HTMLElement>(host, '[data-slot="root"]');
+    const frameClick = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    frame.dispatchEvent(frameClick);
+    expect(frameClick.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(picker);
+
+    // A chip keeps its own target.
+    picker.blur();
+    const token = query<HTMLElement>(host, '[data-slot="token"]');
+    const tokenClick = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    token.dispatchEvent(tokenClick);
+    expect(tokenClick.defaultPrevented).toBe(false);
+    expect(document.activeElement).not.toBe(picker);
+  });
+
+  it('opens the create editor in an anchored popover instead of replacing the inline picker',
+    async () => {
+      const fixture = TestBed.createComponent(HostComponent);
+      fixture.componentInstance.value.set([]);
+      await settle(fixture);
+
+      await openCreateEditor(fixture, 'Name');
+      const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+      expect(editor.closest('[hellPopover]')).not.toBeNull();
+      expect(fixture.nativeElement.contains(editor)).toBe(false);
+      // The inline picker stays in the chip flow while the editor is open.
+      expect(fixture.nativeElement.querySelector('[data-hell-filter-builder-input]')).not.toBeNull();
+      expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="root"]').dataset['editing'])
+        .toBe('create');
+    });
+
+  it('ends create editing when focus returns to the frame, never leaving two live surfaces',
+    async () => {
+      const fixture = TestBed.createComponent(HostComponent);
+      fixture.componentInstance.value.set([]);
+      await settle(fixture);
+
+      await openCreateEditor(fixture, 'Name');
+      await nextTask();
+      await settle(fixture);
+      const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+      expect(editor.contains(document.activeElement)).toBe(true);
+
+      // The picker is part of the frame, not of the editor's surface, so
+      // focusing it must close the create popover rather than leave the
+      // picker dropdown and the editor open at the same time.
+      const picker = query<HTMLInputElement>(
+        fixture.nativeElement,
+        '[data-hell-filter-builder-input]',
+      );
+      picker.focus();
+      await nextTask();
+      await settle(fixture);
+      await nextTask();
+      await settle(fixture);
+
+      expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+      // Dismissal by pointer or by focus must not steal focus back.
+      expect(document.activeElement).toBe(picker);
+      expect(fixture.componentInstance.changes).toEqual([]);
+    });
+
+  it('returns focus to the inline picker when Tab strands it off the create editor', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const focused = document.activeElement as HTMLElement;
+    expect(editor.contains(focused)).toBe(true);
+
+    // The panel is portalled to the end of the document, so tabbing forward
+    // off the last editor control strands focus on <body>.
+    key(focused, 'Tab');
+    focused.blur();
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+  });
+
+  it('mounts the next create editor when it opens inside the previous teardown', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+
+    // The field option has to be mounted up front: opening the picker
+    // dropdown costs a task, and the dispose this test needs to still be
+    // pending is itself queued on a task.
+    const picker = query<HTMLInputElement>(
+      fixture.nativeElement,
+      '[data-hell-filter-builder-input]',
+    );
+    inputValue(picker, 'Status');
+    const option = await waitFor<HTMLElement>(fixture, document.body, '[data-slot="fieldOption"]');
+
+    // Cancelling only queues the popover's dispose; the trigger keeps
+    // reporting itself open until the portal has detached. Activating the next
+    // field in the same task lands inside that window, so `beginCreate` sees
+    // an open trigger that is on its way out. Only calling `show()` cancels
+    // the pending close — skipping it lets the dispose tear down the panel the
+    // new session just claimed and leaves a create session with no editor.
+    query<HTMLButtonElement>(editor, '[data-test-name-cancel]').click();
+    option.click();
+
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    const editors = queryAll<HTMLElement>(document.body, '[data-slot="editor"]');
+    expect(editors).toHaveLength(1);
+    expect(editors[0]!.dataset['mode']).toBe('create');
+    expect(editors[0]!.dataset['field']).toBe('status');
+    expect(query<HTMLElement>(fixture.nativeElement, '[data-slot="root"]').dataset['editing'])
+      .toBe('create');
+    // The focus step cannot ride on `show()`'s promise here: an already-open
+    // trigger returns without resolving it.
+    expect(editors[0]!.contains(document.activeElement)).toBe(true);
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
+
+  it('returns focus to the inline picker when Tab wraps it onto a page control', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Name');
+    await nextTask();
+    await settle(fixture);
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const focused = document.activeElement as HTMLElement;
+    expect(editor.contains(focused)).toBe(true);
+
+    // The other exit the portal allows: instead of stranding focus, Tab wraps
+    // past the end of the document onto a real focusable elsewhere on the
+    // page. The user is just as ejected from the component, so the picker must
+    // still take focus back.
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '[data-test-outside]');
+    key(focused, 'Tab');
+    outside.focus();
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
+
+  it('cancels the editor on Escape from a composed field whose own layer is closed', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.value.set([]);
+    await settle(fixture);
+
+    await openCreateEditor(fixture, 'Status');
+    const editor = query<HTMLElement>(document.body, '[data-slot="editor"][data-mode="create"]');
+    const field = query<HTMLInputElement>(editor, '[data-test-status-layer]');
+
+    // Layer open: the field consumes Escape and the editor stays.
+    fixture.componentInstance.statusLayerOpen.set(true);
+    await settle(fixture);
+    key(field, 'Escape');
+    await nextTask();
+    await settle(fixture);
+    expect(document.body.querySelector('[data-slot="editor"]')).not.toBeNull();
+
+    // Layer closed: the field still preventDefaults, but the editor cancels.
+    fixture.componentInstance.statusLayerOpen.set(false);
+    await settle(fixture);
+    key(field, 'Escape');
+    await nextTask();
+    await settle(fixture);
+    await nextTask();
+    await settle(fixture);
+
+    expect(document.body.querySelector('[data-slot="editor"]')).toBeNull();
+    expect(document.activeElement).toBe(
+      query<HTMLInputElement>(fixture.nativeElement, '[data-hell-filter-builder-input]'),
+    );
+    expect(fixture.componentInstance.changes).toEqual([]);
+  });
+
   it('exposes the required stable identity callback', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     await settle(fixture);
@@ -610,12 +1052,16 @@ async function openCreateEditor(
     `[data-slot="fieldOption"]`,
   );
   option.click();
-  await waitFor<HTMLElement>(fixture, fixture.nativeElement, '[data-slot="editor"][data-mode="create"]');
+  await waitFor<HTMLElement>(fixture, document.body, '[data-slot="editor"][data-mode="create"]');
 }
 
 function inputValue(input: HTMLInputElement, value: string): void {
   input.value = value;
   input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function click(element: HTMLElement): void {
+  element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 }
 
 function key(element: HTMLElement, keyValue: string): void {

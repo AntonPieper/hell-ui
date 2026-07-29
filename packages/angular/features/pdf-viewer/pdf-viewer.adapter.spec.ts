@@ -23,8 +23,11 @@ const pdfViewerMock = vi.hoisted(() => ({
     currentScale: number;
     currentScaleValue: string;
     currentPageNumber: number;
+    readonly scaleValueWrites: string[];
     readonly setDocument: ReturnType<typeof vi.fn>;
     readonly cleanup: ReturnType<typeof vi.fn>;
+    readonly update: ReturnType<typeof vi.fn>;
+    readonly updateScale: ReturnType<typeof vi.fn>;
   }>,
 }));
 
@@ -86,11 +89,45 @@ vi.mock('pdfjs-dist/web/pdf_viewer.mjs', () => {
   }
 
   class PDFViewer {
-    currentScale = 1;
-    currentScaleValue = 'auto';
     currentPageNumber = 1;
+    /** Writes the adapter made through the `currentScaleValue` setter. */
+    readonly scaleValueWrites: string[] = [];
+    #currentScale = 1;
+    #currentScaleValue = 'auto';
+
+    get currentScale(): number {
+      return this.#currentScale;
+    }
+
+    // Mirrors pdf.js: every applied scale is recorded as the current scale
+    // value, so a numeric zoom replaces whatever preset was active.
+    set currentScale(value: number) {
+      this.#currentScale = value;
+      this.#currentScaleValue = String(value);
+    }
+
+    get currentScaleValue(): string {
+      return this.#currentScaleValue;
+    }
+
+    set currentScaleValue(value: string) {
+      this.#currentScaleValue = value;
+      this.scaleValueWrites.push(value);
+      // Mirrors pdf.js: a numeric value applies directly, a preset is resolved
+      // from the container box (which this mock does not model).
+      const numeric = Number.parseFloat(value);
+      if (numeric > 0) this.#currentScale = numeric;
+    }
+
     readonly setDocument = vi.fn();
     readonly cleanup = vi.fn();
+    readonly update = vi.fn();
+    // Mirrors pdf.js: `updateScale` takes a ratio and quantizes to two decimals.
+    readonly updateScale = vi.fn(
+      ({ scaleFactor = 1 }: { readonly scaleFactor?: number; readonly drawingDelay?: number }) => {
+        this.currentScale = Math.round(this.#currentScale * scaleFactor * 100) / 100;
+      },
+    );
 
     constructor(
       _options: {
@@ -220,10 +257,80 @@ describe('PDF Adapter browser seam', () => {
     );
   });
 
+  it('holds a container-fitted preset back until the container has a box', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+    const container = document.createElement('div') as HTMLDivElement;
+    const session = await adapter.createViewer(container, handlers, {
+      worker: '/assets/pdf.worker.mjs',
+    });
+    const eventBus = required(pdfViewerMock.eventBuses[0]);
+    const viewer = required(pdfViewerMock.viewers[0]);
+
+    // A collapsed container makes pdf.js derive a negative scale for `auto`,
+    // `page-fit`, and `page-width`, and it never revisits that scale.
+    eventBus.emit('pagesinit');
+    expect(viewer.scaleValueWrites).toEqual([]);
+
+    session.refreshPresetZoom?.();
+    expect(viewer.scaleValueWrites).toEqual([]);
+
+    // Picking another container-fitted preset while collapsed is deferred too.
+    session.setZoomValue('page-fit');
+    expect(viewer.scaleValueWrites).toEqual([]);
+
+    sizeContainer(container);
+    session.refreshPresetZoom?.();
+
+    expect(viewer.scaleValueWrites).toEqual(['page-fit']);
+  });
+
+  it('applies a fixed numeric zoom even while the container is collapsed', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+    const container = document.createElement('div') as HTMLDivElement;
+    const session = await adapter.createViewer(container, handlers, {
+      worker: '/assets/pdf.worker.mjs',
+    });
+    const eventBus = required(pdfViewerMock.eventBuses[0]);
+    const viewer = required(pdfViewerMock.viewers[0]);
+
+    eventBus.emit('pagesinit');
+    session.setZoomValue('1.5');
+    sizeContainer(container);
+    session.refreshPresetZoom?.();
+
+    // A numeric zoom is not container-fitted, so it wins and the deferred
+    // preset from `pagesinit` must not come back and overwrite it.
+    expect(viewer.scaleValueWrites).toEqual(['1.5']);
+  });
+
+  it('lets a gesture zoom supersede a preset held back by a collapsed container', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+    const container = document.createElement('div') as HTMLDivElement;
+    const session = await adapter.createViewer(container, handlers, {
+      worker: '/assets/pdf.worker.mjs',
+    });
+    const eventBus = required(pdfViewerMock.eventBuses[0]);
+    const viewer = required(pdfViewerMock.viewers[0]);
+
+    // `pagesinit` defers `page-width`; the user then zooms with a gesture, which
+    // reaches pdf.js through `setNumericZoom` rather than `setZoomValue`. Laying
+    // the container out must not resurrect the preset and throw that zoom away.
+    eventBus.emit('pagesinit');
+    session.setNumericZoom(2, { drawingDelay: 400 });
+    sizeContainer(container);
+    session.refreshPresetZoom?.();
+
+    expect(viewer.scaleValueWrites).toEqual([]);
+    expect(viewer.currentScale).toBe(2);
+  });
+
   it('adapts pdf.js viewer events and commands behind a stable session port', async () => {
     const adapter = new HellPdfJsRuntimeAdapter();
     const handlers = createSessionHandlers();
-    const session = await adapter.createViewer(document.createElement('div'), handlers, {
+    const session = await adapter.createViewer(laidOutContainer(), handlers, {
       worker: '/assets/pdf.worker.mjs',
     });
     const eventBus = required(pdfViewerMock.eventBuses[0]);
@@ -281,10 +388,36 @@ describe('PDF Adapter browser seam', () => {
     expect(viewer.currentPageNumber).toBe(1);
 
     session.setZoomValue('auto');
-    session.setNumericZoom(2);
     expect(viewer.currentScaleValue).toBe('auto');
+
+    // A plain numeric zoom writes the scale directly; pdf.js then reports that
+    // scale as the current scale value, replacing the preset.
+    session.setNumericZoom(2);
     expect(viewer.currentScale).toBe(2);
+    expect(viewer.currentScaleValue).toBe('2');
     expect(session.currentScale).toBe(2);
+    expect(viewer.updateScale).not.toHaveBeenCalled();
+
+    // Gesture-driven writes go through `updateScale` so pdf.js can postpone the
+    // page re-render until the gesture settles.
+    session.setNumericZoom(3, { drawingDelay: 400 });
+    expect(viewer.updateScale).toHaveBeenCalledWith({ scaleFactor: 1.5, drawingDelay: 400 });
+    expect(session.currentScale).toBe(3);
+
+    // Container-fitted presets have to be re-applied after a container resize;
+    // fixed numeric scales must not be touched.
+    expect(session.refreshPresetZoom).toBeTypeOf('function');
+    viewer.currentScaleValue = 'page-width';
+    const presetWrites = viewer.scaleValueWrites.length;
+    session.refreshPresetZoom?.();
+    expect(viewer.scaleValueWrites.slice(presetWrites)).toEqual(['page-width']);
+    expect(viewer.update).toHaveBeenCalledOnce();
+
+    viewer.currentScaleValue = '1.5';
+    const numericWrites = viewer.scaleValueWrites.length;
+    session.refreshPresetZoom?.();
+    expect(viewer.scaleValueWrites.slice(numericWrites)).toEqual([]);
+    expect(viewer.update).toHaveBeenCalledTimes(2);
 
     session.dispatchFind({ source: 'findbar', type: '', query: 'needle', findPrevious: true });
     expect(eventBus.dispatch).toHaveBeenCalledWith('find', {
@@ -338,11 +471,26 @@ describe('PDF Adapter browser seam', () => {
     await session.renderThumbnail(thumbDoc, 1, canvas);
 
     expect(thumbDoc.getPage).toHaveBeenCalledWith(1);
-    expect(canvas.width).toBe(120);
-    expect(canvas.height).toBe(180);
-    expect(canvas.style.width).toBe('120px');
-    expect(canvas.style.height).toBe('180px');
+    // A portrait page fits the 120x160 thumbnail box by its height, so the
+    // rail's rows stay one uniform height instead of following the page.
+    expect(canvas.width).toBe(106);
+    expect(canvas.height).toBe(160);
+    expect(canvas.style.width).toBe('106px');
+    expect(canvas.style.height).toBe('160px');
     expect(render).toHaveBeenCalledOnce();
+
+    const landscapeCanvas = document.createElement('canvas');
+    vi.spyOn(landscapeCanvas, 'getContext').mockReturnValue({} as CanvasRenderingContext2D);
+    page.getViewport.mockImplementation(({ scale }: { readonly scale: number }) => ({
+      width: 300 * scale,
+      height: 200 * scale,
+    }));
+
+    await session.renderThumbnail(thumbDoc, 1, landscapeCanvas);
+
+    // …and a landscape page fits it by its width, into the same box.
+    expect(landscapeCanvas.width).toBe(120);
+    expect(landscapeCanvas.height).toBe(80);
 
     session.cleanup();
     expect(viewer.cleanup).toHaveBeenCalledOnce();
@@ -456,6 +604,17 @@ function createSessionHandlers(): HellPdfViewerSessionHandlers {
 
 function fakeDocument(numPages: number): HellPdfDocumentHandle {
   return { numPages, destroy: vi.fn() };
+}
+
+/** jsdom reports a zero box for every element; give the container a real one. */
+function sizeContainer(container: HTMLDivElement, width = 800, height = 600): HTMLDivElement {
+  vi.spyOn(container, 'clientWidth', 'get').mockReturnValue(width);
+  vi.spyOn(container, 'clientHeight', 'get').mockReturnValue(height);
+  return container;
+}
+
+function laidOutContainer(): HTMLDivElement {
+  return sizeContainer(document.createElement('div') as HTMLDivElement);
 }
 
 function required<T>(value: T | null | undefined): NonNullable<T> {

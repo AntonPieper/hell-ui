@@ -16,11 +16,11 @@ export const HELL_FILE_PICKER_LABELS: InjectionToken<HellLabels<HellFilePickerLa
 // @public
 export class HellFilePicker implements OnDestroy {
     constructor();
-    readonly accept: _angular_core.InputSignal<string | null>;
+    readonly accept: _angular_core.InputSignal<null | string>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
-    readonly maxBytes: _angular_core.InputSignalWithTransform<number | null, string | number | null>;
-    readonly maxFiles: _angular_core.InputSignalWithTransform<number | null, string | number | null>;
+    readonly maxBytes: _angular_core.InputSignalWithTransform<null | number, null | number | string>;
+    readonly maxFiles: _angular_core.InputSignalWithTransform<null | number, null | number | string>;
     readonly multiple: _angular_core.InputSignalWithTransform<boolean, unknown>;
     ngOnDestroy(): void;
     protected onDragEnter(event: DragEvent): void;
@@ -55,7 +55,7 @@ export interface HellFileRejection {
 }
 
 // @public
-export type HellFileRejectionReason = 'type' | 'size' | 'count' | 'custom';
+export type HellFileRejectionReason = 'count' | 'custom' | 'size' | 'type';
 
 // @public
 export interface HellFileSelection {
@@ -64,7 +64,7 @@ export interface HellFileSelection {
 }
 
 // @public
-export type HellFileValidator = (file: File) => string | null | undefined;
+export type HellFileValidator = (file: File) => null | string | undefined;
 
 // (No @packageDocumentation comment for this package)
 

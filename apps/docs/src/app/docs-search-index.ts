@@ -661,6 +661,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'date-input input hellDateInput required min max invalid disabled native attributes bounds invalid draft',
  },
  {
+ title:'Date Input: Format',
+ path:'/components/date-input',
+ detail:'components/date-input/examples/format.example.ts',
+ terms:
+'date-input format provideHellDateInputFormat HELL_DATE_INPUT_FORMAT HellDateInputFormat pattern YYYY MM DD DD.MM.YYYY MM/DD/YYYY locale order separator placeholder hint per-instance override provider scope parsing display',
+ },
+ {
  title:'Date Input: Forms',
  path:'/components/date-input',
  detail:'components/date-input/examples/forms.example.ts',
@@ -707,7 +714,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/date-picker',
  detail:'components/date-picker/examples/basic.example.ts',
  terms:
-'date-picker hell-date-picker dateChange single calendar signal smallest usage',
+'date-picker hell-date-picker dateChange single calendar signal smallest usage month year drill-down quick navigation jump distant date',
  },
  {
  title:'Date Picker: Bounded',
@@ -742,7 +749,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/date-picker',
  detail:'components/date-picker/examples/styling.example.ts',
  terms:
-'date-picker hell-date-range-picker ui HellDateRangePickerUi part style map root header nav navButton label grid weekdayHeader cell dateButton data-selected data-range-between tokens all-parts',
+'date-picker hell-date-range-picker ui HellDateRangePickerUi part style map root header nav navButton label monthTrigger yearTrigger grid weekdayHeader cell dateButton panel panelCell panelOption data-selected data-range-between tokens all-parts',
  },
  {
  title:'Date Picker: With popover',
@@ -750,6 +757,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  detail:'components/date-picker/examples/with-popover.example.ts',
  terms:
 'date-picker with-popover composite hell-date-range-picker hellButton hellPopover hellPopoverTrigger hell-icon block placement min ui trip dates booking field',
+ },
+ {
+ title:'Dialog: Scoped inside the app shell',
+ path:'/components/dialog',
+ detail:'components/dialog/examples/app-shell-scoped.example.ts',
+ terms:
+'scoped modality hellDialogOverlay hellDialogTrigger hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellMenuTrigger hellMenu inert app-shell shell chrome sidebar topbar interactive z-index layering focus',
  },
  {
  title:'Dialog: Basic',
@@ -1809,6 +1823,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'tanstack components/table/examples/tanstack-virtual.example components/table hell-ui/table-tanstack/virtual hellTanStackVirtualRows virtualEstimateRowSize virtualOverscan hellTableShellExpandedRow hellTableShellCell hellTableShellToolbar hell-tanstack-table hell-omnibar hellMenu expanded',
  },
  {
+ title:'Table: Resizable columns',
+ path:'/components/table',
+ detail:'components/table/examples/tanstack-resizable.example.ts',
+ terms:
+'resize resizable columns components/table/examples/tanstack-resizable.example components/table hell-tanstack-table hellTableResizeHandle enableColumnResizing enableResizing columnSizing setColumnSizing resetColumnSizing minSize maxSize colgroup separator drag keyboard ArrowLeft ArrowRight Home End hellTanStackVirtualRows column width',
+ },
+ {
  title:'Tabs: Basic',
  path:'/components/tabs',
  detail:'components/tabs/examples/basic.example.ts',
@@ -1918,21 +1939,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/time-picker',
  detail:'components/time-picker/examples/basic.example.ts',
  terms:
-'time-picker hell-time-picker HellTimePicker HellTimeValue structured time valueChange midnight spinbutton minute presets smallest usage',
+'time-picker hell-time-picker HellTimePicker HellTimeValue structured time valueChange column listbox option scroll select smallest usage',
+ },
+ {
+ title:'Time Picker: Steps And Bounds',
+ path:'/components/time-picker',
+ detail:'components/time-picker/examples/steps-and-bounds.example.ts',
+ terms:
+'time-picker hell-time-picker minuteStep secondStep min max inclusive bounds disabled options granularity quarter hour booking slots null placeholder first commit earliest in range',
  },
  {
  title:'Time Picker: Seconds And Disabled',
  path:'/components/time-picker',
  detail:'components/time-picker/examples/seconds-and-disabled.example.ts',
  terms:
-'time-picker hell-time-picker HellTimePicker HellTimeValue seconds disabled fixed bounds precision locked schedule',
+'time-picker hell-time-picker HellTimePicker HellTimeValue seconds disabled precision locked schedule off-step option',
  },
  {
  title:'Time Picker: Styling',
  path:'/components/time-picker',
  detail:'components/time-picker/examples/styling.example.ts',
  terms:
-'time-picker hell-time-picker ui HellTimePickerUi part style map root header readout units unit unitLabel unitControl unitValue unitStep minutePresets minutePreset tailwind tokens',
+'time-picker hell-time-picker ui HellTimePickerUi part style map root header readout columns column columnLabel options option tailwind tokens',
  },
  {
  title:'Number Input: Basic',
@@ -2288,7 +2316,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
  path:'/components/date-input',
  detail:'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
  terms:
-'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal strict ISO YYYY-MM-DD',
+'date-input input hellDateInput adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format normalize bounds locale temporal placeholderHint HellDateInputAdapterContext configured format ISO YYYY-MM-DD default',
  },
  {
  title:'Date input forms value',

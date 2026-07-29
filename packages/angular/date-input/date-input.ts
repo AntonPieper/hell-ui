@@ -2,6 +2,8 @@ import {
   Directive,
   ElementRef,
   InjectionToken,
+  Renderer2,
+  afterRenderEffect,
   booleanAttribute,
   computed,
   effect,
@@ -37,17 +39,74 @@ import {
 } from 'hell-ui/internal/core';
 
 /**
- * Strategy for parsing, formatting, normalizing, and bounds-checking dates.
+ * Date format pattern for parsing, display, native bound attributes, and the
+ * placeholder hint. It is written with the `YYYY` (four-digit year), `MM`
+ * (two-digit month), and `DD` (two-digit day) tokens — each used exactly once —
+ * plus literal separators: `YYYY-MM-DD`, `DD.MM.YYYY`, and `MM/DD/YYYY` are all
+ * valid patterns. Anything a pattern cannot express (month names, locale
+ * formatting, several accepted input shapes) belongs in a custom
+ * `HellDateInputAdapter` instead.
  */
-export type HellDateInputAdapter = HellTypedInputAdapter<Date>;
+export type HellDateInputFormat = string;
 
-/** Default ISO `YYYY-MM-DD` date adapter. */
+/** Business-default ISO date format, used when nothing configures one. */
+export const HELL_DEFAULT_DATE_INPUT_FORMAT: HellDateInputFormat = 'YYYY-MM-DD';
+
+/**
+ * Injection token resolving to the configured date input format for a scope.
+ * It has no factory: absence means "nothing configured a format", which is what
+ * keeps Date Input's unconfigured behavior (including its silent placeholder)
+ * identical to before formats existed. Inject it with `{ optional: true }`.
+ */
+export const HELL_DATE_INPUT_FORMAT = new InjectionToken<HellDateInputFormat>(
+  'HELL_DATE_INPUT_FORMAT',
+);
+
+/**
+ * Set the date input format for an injector scope. The nearest provider wins
+ * over ancestor providers, and a local `format` input wins over every provider.
+ * Unsupported patterns throw here rather than at the first keystroke.
+ */
+export function provideHellDateInputFormat(format: HellDateInputFormat): Provider {
+  hellCompileDateInputFormat(format);
+  return { provide: HELL_DATE_INPUT_FORMAT, useValue: format };
+}
+
+/** Contextual date format passed to date adapter hooks. */
+export interface HellDateInputAdapterContext {
+  /** Effective format for parsing, formatting, and the placeholder hint. */
+  readonly format: HellDateInputFormat;
+}
+
+/**
+ * Strategy for parsing, formatting, normalizing, and bounds-checking dates.
+ *
+ * `parseText`, `format`, `normalize`, and `isWithinBounds` receive the
+ * `HellDateInputAdapterContext`; `isSameValue` compares two values and receives
+ * no context.
+ */
+export interface HellDateInputAdapter
+  extends HellTypedInputAdapter<Date, HellDateInputAdapterContext> {
+  /**
+   * Text hint for the accepted input shape. Date Input writes it to an
+   * unauthored native `placeholder` only when a format is configured and the
+   * host already authors naming markup (an `aria-label`, an `aria-labelledby`,
+   * or an associated `<label>`); return `null` (or omit the hook) to write no
+   * placeholder at all. An adapter that accepts text its context format cannot
+   * describe should omit it rather than let the field advertise a shape it will
+   * reject.
+   */
+  readonly placeholderHint?: (context: HellDateInputAdapterContext) => string | null;
+}
+
+/** Default adapter for the configured `YYYY`/`MM`/`DD` format. */
 export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
   parseText: hellParseDateInputText,
   format: hellFormatDateInputValue,
   normalize: hellCoerceDateInputValue,
   isSameValue: hellSameDateInputValue,
   isWithinBounds: hellIsDateInputValueWithinBounds,
+  placeholderHint: (context) => context.format,
 };
 
 /** Injection token resolving to the effective date input adapter. */
@@ -61,34 +120,139 @@ export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Prov
   return { provide: HELL_DATE_INPUT_ADAPTER, useValue: adapter };
 }
 
+/** Calendar field a format token stands for. */
+type HellDateInputFormatPart = 'year' | 'month' | 'day';
+
+/** One literal separator or one calendar field of a compiled format. */
+type HellDateInputFormatSegment =
+  | { readonly literal: string }
+  | { readonly part: HellDateInputFormatPart };
+
+interface HellCompiledDateInputFormat {
+  /** Literal and token segments in pattern order, used for formatting. */
+  readonly segments: readonly HellDateInputFormatSegment[];
+  /** Anchored strict matcher whose capture groups follow `order`. */
+  readonly matcher: RegExp;
+  /** Calendar fields in the order their capture groups appear. */
+  readonly order: readonly HellDateInputFormatPart[];
+}
+
+const HELL_DATE_INPUT_FORMAT_TOKENS: Readonly<
+  Record<string, { readonly part: HellDateInputFormatPart; readonly digits: number }>
+> = {
+  YYYY: { part: 'year', digits: 4 },
+  MM: { part: 'month', digits: 2 },
+  DD: { part: 'day', digits: 2 },
+};
+
+const compiledDateInputFormats = new Map<string, HellCompiledDateInputFormat>();
+
+/** Compile — and memoize — one format pattern into its formatter and matcher. */
+function hellCompileDateInputFormat(format: HellDateInputFormat): HellCompiledDateInputFormat {
+  const cached = compiledDateInputFormats.get(format);
+  if (cached) return cached;
+
+  const segments: HellDateInputFormatSegment[] = [];
+  const order: HellDateInputFormatPart[] = [];
+  let source = '';
+  let literalStart = 0;
+
+  for (const match of format.matchAll(/YYYY|MM|DD/g)) {
+    const literal = format.slice(literalStart, match.index);
+    if (literal) {
+      segments.push({ literal });
+      source += escapeDateInputFormatLiteral(literal);
+    }
+    const token = HELL_DATE_INPUT_FORMAT_TOKENS[match[0]];
+    segments.push({ part: token.part });
+    order.push(token.part);
+    source += `(\\d{${token.digits}})`;
+    literalStart = match.index + match[0].length;
+  }
+
+  const tail = format.slice(literalStart);
+  if (tail) {
+    segments.push({ literal: tail });
+    source += escapeDateInputFormatLiteral(tail);
+  }
+
+  // Leftover `Y`/`M`/`D` means a mistyped token (`YYYYY`, `DDD`) that would
+  // format and be typed literally, and edge whitespace makes the pattern
+  // unable to parse its own output, because parsing trims first.
+  const literalToken = segments.some(
+    (segment) => 'literal' in segment && /[YMD]/.test(segment.literal),
+  );
+  if (
+    order.length !== 3 ||
+    new Set(order).size !== 3 ||
+    literalToken ||
+    format !== format.trim()
+  ) {
+    throw new Error(
+      `Unsupported hell date input format "${format}": use YYYY, MM, and DD exactly once each, keep Y, M, and D out of the literal separators, and leave no leading or trailing whitespace on the pattern.`,
+    );
+  }
+
+  const compiled: HellCompiledDateInputFormat = {
+    segments,
+    order,
+    matcher: new RegExp(`^${source}$`),
+  };
+  compiledDateInputFormats.set(format, compiled);
+  return compiled;
+}
+
+function escapeDateInputFormatLiteral(literal: string): string {
+  return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
- * Parse the business-default ISO `YYYY-MM-DD` format. Empty text commits a
- * nullable clear; unparseable text remains an invalid draft.
+ * Parse the configured format. Empty text commits a nullable clear; text that
+ * does not match the pattern, or that names a day the calendar does not have,
+ * remains an invalid draft.
  */
-function hellParseDateInputText(text: string): HellTypedValueParseResult<Date> {
+function hellParseDateInputText(
+  text: string,
+  context: HellDateInputAdapterContext,
+): HellTypedValueParseResult<Date> {
   const value = text.trim();
   if (!value) return hellTypedValue<Date>(null);
 
-  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!iso) return hellInvalidTypedValue();
+  const compiled = hellCompileDateInputFormat(context.format);
+  const match = compiled.matcher.exec(value);
+  if (!match) return hellInvalidTypedValue();
 
-  const year = Number(iso[1]);
-  const month = Number(iso[2]);
-  const day = Number(iso[3]);
-  const date = new Date(year, month - 1, day);
+  const parts: Record<HellDateInputFormatPart, number> = { year: 0, month: 0, day: 0 };
+  compiled.order.forEach((part, index) => {
+    parts[part] = Number(match[index + 1]);
+  });
+  const date = new Date(parts.year, parts.month - 1, parts.day);
 
-  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+  return date.getFullYear() === parts.year &&
+    date.getMonth() === parts.month - 1 &&
+    date.getDate() === parts.day
     ? hellTypedValue(date)
     : hellInvalidTypedValue();
 }
 
-/** Format a date as a stable local-calendar `YYYY-MM-DD` string. */
-function hellFormatDateInputValue(date: Date | null): string {
+/** Format a date as a stable local-calendar string in the configured format. */
+function hellFormatDateInputValue(
+  date: Date | null,
+  context: HellDateInputAdapterContext,
+): string {
   if (!date) return '';
-  const year = date.getFullYear().toString().padStart(4, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const parts: Record<HellDateInputFormatPart, number> = {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+  };
+  return hellCompileDateInputFormat(context.format)
+    .segments.map((segment) =>
+      'literal' in segment
+        ? segment.literal
+        : parts[segment.part].toString().padStart(segment.part === 'year' ? 4 : 2, '0'),
+    )
+    .join('');
 }
 
 function dateDayTime(date: Date): number {
@@ -131,6 +295,20 @@ function hellDateInputBoundAttribute(value: unknown): Date | undefined {
   return value instanceof Date ? value : undefined;
 }
 
+/**
+ * Coerces an optional format pattern; `''`, `null`, and `undefined` stay unset
+ * and fall through to the scoped format. Compiling here makes an unsupported
+ * local pattern throw at the binding, exactly like `provideHellDateInputFormat`
+ * throws at the provider, instead of surfacing later from a render computation.
+ */
+function hellOptionalDateInputFormat(
+  value: string | null | undefined,
+): HellDateInputFormat | undefined {
+  if (!value) return undefined;
+  hellCompileDateInputFormat(value);
+  return value;
+}
+
 let nextDateInputId = 0;
 
 /**
@@ -146,6 +324,16 @@ let nextDateInputId = 0;
  * incomplete or invalid text never commits, and commit attempts report parse
  * failures through `transformedValue` as `invalidDateInputDraft` errors on the
  * nearest Signal Forms field.
+ *
+ * Typed text, display, and native bound attributes follow the effective date
+ * format: the local `format` input when set, otherwise the nearest
+ * `provideHellDateInputFormat` scope, otherwise ISO `YYYY-MM-DD`. The committed
+ * `Date | null` contract is unaffected by the format. An unauthored native
+ * `placeholder` receives the adapter's `placeholderHint` only when a format is
+ * configured *and* the host authors naming markup of its own — an `aria-label`,
+ * an `aria-labelledby`, or an associated `<label>` — so a hint does not become
+ * the accessible name of an input that names itself nowhere. Author
+ * `placeholder=""` to keep it empty.
  */
 @Directive({
   selector: 'input[hellDateInput]',
@@ -201,6 +389,12 @@ export class HellDateInput implements FormValueControl<Date | null> {
    * driven by a bound Signal Forms field's `maxDate()` validator metadata.
    */
   readonly max = input(undefined, { transform: hellDateInputBoundAttribute });
+  /**
+   * Date format for this input, overriding the scoped
+   * `provideHellDateInputFormat` policy. Unset (or empty) keeps the scoped
+   * format, then ISO `YYYY-MM-DD`.
+   */
+  readonly format = input(undefined, { transform: hellOptionalDateInputFormat });
   /** Additional `aria-describedby` ids merged with an enclosing Field. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
   /** Additional `aria-labelledby` ids merged with an enclosing Field. */
@@ -213,7 +407,9 @@ export class HellDateInput implements FormValueControl<Date | null> {
   readonly touch = output<void>();
 
   private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef).nativeElement;
+  private readonly renderer = inject(Renderer2);
   private readonly adapter = inject(HELL_DATE_INPUT_ADAPTER);
+  private readonly scopedFormat = inject(HELL_DATE_INPUT_FORMAT, { optional: true });
   /**
    * The Signal Forms `FormField` directive bound to this host, when present.
    * Parse failures are reported only into its field: classic
@@ -233,12 +429,24 @@ export class HellDateInput implements FormValueControl<Date | null> {
 
   private hasExternalSnapshot = false;
   private externalSnapshot: Date | null = null;
+  /** Last placeholder hint this directive wrote, so consumer text is never replaced. */
+  private appliedPlaceholder: string | null = null;
+
+  /**
+   * Explicitly configured format — the local input, then the scoped provider.
+   * `null` means nothing configured one, which keeps the placeholder unwritten.
+   */
+  private readonly configuredFormat = computed(() => this.format() ?? this.scopedFormat);
+  /** Effective format: the configured one, otherwise the ISO default. */
+  private readonly dateFormat = computed(
+    () => this.configuredFormat() ?? HELL_DEFAULT_DATE_INPUT_FORMAT,
+  );
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.value(),
     parseExternal: (value) => this.normalizeValue(value),
     parseText: (text) => this.parseText(text),
-    format: (value) => this.adapter.format(value),
+    format: (value) => this.adapter.format(value, this.context()),
     externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
@@ -254,7 +462,7 @@ export class HellDateInput implements FormValueControl<Date | null> {
       if (!parsed.valid) return { error: { kind: 'invalidDateInputDraft' } };
       return { value: parsed.value };
     },
-    format: (value) => this.adapter.format(this.normalizeValue(value)),
+    format: (value) => this.adapter.format(this.normalizeValue(value), this.context()),
   });
 
   /** Current committed date, normalized to the adapter's value policy. */
@@ -326,6 +534,33 @@ export class HellDateInput implements FormValueControl<Date | null> {
       this.externalSnapshot = external;
       this.hasExternalSnapshot = true;
     });
+
+    afterRenderEffect(() => {
+      // Four gates before the directive touches a consumer's markup: a format
+      // must be configured (so unconfigured apps keep their empty field), the
+      // host must author naming markup (see `authorsNamingMarkup`), the adapter
+      // must supply the hint (so the field never advertises a shape it
+      // rejects), and the attribute must be absent or previously ours (so an
+      // authored `placeholder`, including `placeholder=""`, always wins).
+      // Reading after render sees static attributes and bindings alike.
+      const hint =
+        this.configuredFormat() === null || !this.authorsNamingMarkup()
+          ? null
+          : this.adapter.placeholderHint?.(this.context()) || null;
+      const current = this.host.getAttribute('placeholder');
+      if (current !== null && current !== this.appliedPlaceholder) return;
+      if (hint === null) {
+        // A hint the directive owns is removed again once it would stop being
+        // true, rather than left behind advertising a format no longer in use.
+        if (this.appliedPlaceholder === null) return;
+        this.renderer.removeAttribute(this.host, 'placeholder');
+        this.appliedPlaceholder = null;
+        return;
+      }
+      if (current === hint) return;
+      this.renderer.setAttribute(this.host, 'placeholder', hint);
+      this.appliedPlaceholder = hint;
+    });
   }
 
   /** Records the native field value as a draft while preserving the input event. */
@@ -357,22 +592,63 @@ export class HellDateInput implements FormValueControl<Date | null> {
   private applyCommit(result: HellTypedValueCommitResult<Date | null>, text: string): void {
     if (result.committed) {
       // Native submission can run before Angular renders the committed display.
-      this.host.value = this.adapter.format(result.value);
+      this.host.value = this.adapter.format(result.value, this.context());
       this.rawCommitText.set(text);
     } else if (result.reason === 'invalid' && this.signalFormField !== null) {
       this.rawCommitText.set(text);
     }
   }
 
+  private context(): HellDateInputAdapterContext {
+    return { format: this.dateFormat() };
+  }
+
+  /**
+   * Whether the host authors naming markup that outranks a placeholder: a
+   * native `aria-label`, merged `aria-labelledby` ids (including an enclosing
+   * Field's), or an associated `<label>`.
+   *
+   * A placeholder is the last fallback in the accessible name computation, and
+   * axe's `label` rule accepts a non-empty one, so writing a hint onto an input
+   * that names itself nowhere would hand it a name and silence the violation
+   * that reports the real defect.
+   *
+   * This is deliberately a structural check and not a name computation, and it
+   * runs against whatever has rendered, so it has three known boundaries.
+   * Empty or dangling naming markup — `<label for="x"></label>`, a text-less
+   * wrapping label, an `aria-labelledby` whose target never renders — counts as
+   * authored, and the hint is written. Markup removed after a hint was written
+   * does not take the hint with it. And markup that arrives after the first
+   * pass through any channel but `fieldAriaLabelledby()` — the only reactive
+   * one — never re-triggers the check, so an `[attr.aria-label]` resolved from
+   * a late i18n bundle or a `@if`-guarded `<label for>` leaves a correctly
+   * named input permanently hintless.
+   *
+   * The last case loses a formatting affordance, not accessibility. Neither
+   * alternative is better: resolving label text moves the same first-render
+   * problem from markup arrival to text arrival, and a `MutationObserver` would
+   * watch every date input's subtree for the life of the page. So the boundary
+   * is documented rather than papered over. What this gate does guarantee is
+   * the case that matters: an input that authors no naming markup at all is
+   * never handed an accessible name it did not have.
+   */
+  private authorsNamingMarkup(): boolean {
+    return (
+      (this.host.getAttribute('aria-label') ?? '').trim() !== '' ||
+      this.fieldAriaLabelledby() !== null ||
+      (this.host.labels?.length ?? 0) > 0
+    );
+  }
+
   private parseText(text: string): HellTypedValueParseResult<Date> {
-    const parsed = this.adapter.parseText(text);
+    const parsed = this.adapter.parseText(text, this.context());
     if (!parsed.valid || parsed.value === null) return parsed;
     return this.isWithinBounds(parsed.value) ? parsed : hellInvalidTypedValue();
   }
 
   private normalizeValue(value: Date | null | undefined): Date | null {
     return this.adapter.normalize
-      ? this.adapter.normalize(value)
+      ? this.adapter.normalize(value, this.context())
       : hellCoerceDateInputValue(value);
   }
 
@@ -381,15 +657,17 @@ export class HellDateInput implements FormValueControl<Date | null> {
   }
 
   private isWithinBounds(value: Date | null): boolean {
+    const min = this.min() ?? null;
+    const max = this.max() ?? null;
     return (
-      this.adapter.isWithinBounds?.(value, this.min() ?? null, this.max() ?? null) ??
-      hellIsDateInputValueWithinBounds(value, this.min() ?? null, this.max() ?? null)
+      this.adapter.isWithinBounds?.(value, min, max, this.context()) ??
+      hellIsDateInputValueWithinBounds(value, min, max)
     );
   }
 
   private formatBound(value: Date | null): string | null {
     const normalized = this.normalizeValue(value);
-    return normalized ? this.adapter.format(normalized) : null;
+    return normalized ? this.adapter.format(normalized, this.context()) : null;
   }
 
   private mergeIdRefs(explicit: string | null, fieldIds: readonly string[] | undefined): string | null {

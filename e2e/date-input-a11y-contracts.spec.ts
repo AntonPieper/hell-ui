@@ -141,6 +141,46 @@ test.describe('date input native behavior and composition contracts', () => {
     await expect(input).not.toHaveAttribute('aria-invalid', 'true');
   });
 
+  test('follows the provided format and a per-instance override on one value', async ({
+    page,
+  }) => {
+    await gotoDateInput(page);
+
+    const example = page.locator('app-date-input-format-example');
+    const scoped = example.getByRole('textbox', { name: 'German invoice date' });
+    const overridden = example.getByRole('textbox', { name: 'US invoice date' });
+    const state = example.locator('[data-date-input-format-state]');
+
+    // The provider drives display and the placeholder hint; the local input wins.
+    await expect(scoped).toHaveValue('22.04.2026');
+    await expect(scoped).toHaveAttribute('placeholder', 'DD.MM.YYYY', {
+      timeout: HYDRATION_TIMEOUT,
+    });
+    await expect(overridden).toHaveValue('04/22/2026');
+    await expect(overridden).toHaveAttribute('placeholder', 'MM/DD/YYYY');
+
+    // Typed text parses in the configured format and commits one shared Date.
+    await scoped.fill('06.05.2026');
+    await scoped.press('Enter');
+    await expect(state).toContainText('May 06 2026');
+    await expect(overridden).toHaveValue('05/06/2026');
+    await expect(scoped).not.toHaveAttribute('aria-invalid', 'true');
+
+    // The default ISO shape is an invalid draft under the provided format.
+    await scoped.fill('2026-05-07');
+    await scoped.blur();
+    await expect(scoped).toHaveValue('2026-05-07');
+    await expect(scoped).toHaveAttribute('aria-invalid', 'true');
+    await expect(state).toContainText('May 06 2026');
+
+    // Inputs outside a configured format keep the empty placeholder they had
+    // before formats existed; the hint never leaks across the page.
+    const sizes = page.locator('app-date-input-sizes-example');
+    for (const name of ['Small date input', 'Medium date input', 'Large date input']) {
+      await expect(sizes.getByRole('textbox', { name })).not.toHaveAttribute('placeholder');
+    }
+  });
+
   test('serializes canonical committed text for click and Enter native form submissions', async ({
     page,
   }) => {

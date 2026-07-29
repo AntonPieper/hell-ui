@@ -18,10 +18,10 @@ const HD_APP_SHELL_STYLING_ICONS = {
  * the neutral tokens for primary-tinted ones.
  */
 const NAV_ITEM =
-  'flex cursor-pointer items-center gap-hell-3 rounded-hell-lg px-3 py-2 text-[13px] font-semibold text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary aria-[current=page]:text-white in-data-[collapsed=true]:justify-center in-data-[collapsed=true]:px-0';
-const NAV_ICON = 'inline-flex w-4 shrink-0 items-center justify-center text-hell-primary';
-const NAV_LABEL = 'flex-1 truncate in-data-[collapsed=true]:hidden';
-const NAV_TRAILING = 'font-bold text-hell-primary in-data-[collapsed=true]:hidden';
+  'flex w-[var(--hell-app-sidenav-content-width)] cursor-pointer items-center gap-hell-3 rounded-hell-lg px-3 py-2 text-[13px] font-semibold text-hell-foreground-muted no-underline hover:bg-hell-surface-subtle hover:text-hell-foreground aria-[current=page]:bg-hell-primary aria-[current=page]:text-white transition-[border-radius] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:rounded-none';
+const NAV_ICON = 'inline-flex w-4 shrink-0 items-center justify-center text-hell-primary transition-[translate] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:translate-x-[calc((var(--hell-app-sidenav-collapsed-content-width)_-_100%)/2_-_calc(var(--spacing)_*_3))]';
+const NAV_LABEL = 'flex-1 truncate transition-[opacity,visibility] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:invisible in-data-[collapsed=true]:opacity-0';
+const NAV_TRAILING = 'font-bold text-hell-primary transition-[opacity,visibility] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] in-data-[collapsed=true]:invisible in-data-[collapsed=true]:opacity-0';
 
 @Component({
   selector: 'app-app-shell-styling-example',

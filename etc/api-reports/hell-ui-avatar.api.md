@@ -15,9 +15,9 @@ export const HELL_AVATAR_GROUP_IMPORTS: readonly [typeof HellAvatarGroup, typeof
 
 // @public
 export class HellAvatar {
-    readonly alt: _angular_core.InputSignal<string | null>;
+    readonly alt: _angular_core.InputSignal<null | string>;
     readonly fallback: _angular_core.InputSignal<string>;
-    readonly image: _angular_core.InputSignal<string | null>;
+    readonly image: _angular_core.InputSignal<null | string>;
     protected readonly part: (part: HellAvatarPart) => string;
     readonly shape: _angular_core.InputSignal<"round" | "square">;
     readonly size: _angular_core.InputSignal<HellSize>;
@@ -53,7 +53,7 @@ export class HellAvatarGroupOverflow {
 }
 
 // @public
-export type HellAvatarPart = 'root' | 'image' | 'fallback';
+export type HellAvatarPart = 'fallback' | 'image' | 'root';
 
 // @public
 export type HellAvatarUi = HellUi<HellAvatarPart>;

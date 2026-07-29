@@ -26,7 +26,7 @@ class HellTable {
     set contentWidthInput(value: boolean);
     static ngAcceptInputType_contentWidthInput: unknown;
     protected readonly part: (part: "root") => string;
-    protected role(): string | null;
+    protected role(): null | string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTable, "[hellTableRoot], table[hellTable]", ["hellTableRoot"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "contentWidthInput": { "alias": "contentWidth"; "required": false; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTable, never>;
@@ -38,7 +38,7 @@ export { HellTable as HellTableRoot }
 export class HellTableBody {
     constructor();
     protected readonly part: (part: "root") => string;
-    protected role(): string | null;
+    protected role(): null | string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableBody, "[hellTableBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableBody, never>;
@@ -47,15 +47,15 @@ export class HellTableBody {
 // @public
 export class HellTableCell {
     constructor();
-    readonly align: _angular_core.WritableSignal<"start" | "center" | "end">;
-    get alignInput(): 'start' | 'center' | 'end';
-    set alignInput(value: 'start' | 'center' | 'end');
+    readonly align: _angular_core.WritableSignal<"center" | "end" | "start">;
+    get alignInput(): 'center' | 'end' | 'start';
+    set alignInput(value: 'center' | 'end' | 'start');
     readonly host: any;
     protected readonly part: (part: "root") => string;
-    protected role(): string | null;
-    readonly space: _angular_core.WritableSignal<"normal" | "empty">;
-    get spaceInput(): 'normal' | 'empty';
-    set spaceInput(value: 'normal' | 'empty');
+    protected role(): null | string;
+    readonly space: _angular_core.WritableSignal<"empty" | "normal">;
+    get spaceInput(): 'empty' | 'normal';
+    set spaceInput(value: 'empty' | 'normal');
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableCell, "[hellTableCell]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "alignInput": { "alias": "align"; "required": false; }; "spaceInput": { "alias": "space"; "required": false; }; }, {}, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableCell, never>;
@@ -77,7 +77,7 @@ class HellTableHead {
     nextSibling(cell: HellTableHeaderCell): HellTableHeaderCell | null;
     protected readonly part: (part: "root") => string;
     register(c: HellTableHeaderCell): void;
-    protected role(): string | null;
+    protected role(): null | string;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     unregister(c: HellTableHeaderCell): void;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableHead, "[hellTableHeader], thead[hellTableHead]", ["hellTableHeader", "hellTableHead"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
@@ -90,9 +90,9 @@ export { HellTableHead as HellTableHeader }
 export class HellTableHeaderCell implements OnDestroy {
     constructor();
     protected readonly ariaSort: _angular_core.Signal<"ascending" | "descending" | null>;
-    readonly columnId: _angular_core.WritableSignal<string | null>;
-    get columnIdInput(): string | null;
-    set columnIdInput(value: string | null);
+    readonly columnId: _angular_core.WritableSignal<null | string>;
+    get columnIdInput(): null | string;
+    set columnIdInput(value: null | string);
     commit(px: number): void;
     readonly head: HellTableHead | null;
     readonly host: any;
@@ -101,7 +101,7 @@ export class HellTableHeaderCell implements OnDestroy {
     ngOnDestroy(): void;
     protected readonly part: (part: "root") => string;
     resizeItem(minSize: number): HellTableResizeItem | null;
-    protected role(): string | null;
+    protected role(): null | string;
     setLiveWidth(px: number): void;
     readonly sort: _angular_core.WritableSignal<"asc" | "desc" | null>;
     readonly sortable: _angular_core.WritableSignal<boolean>;
@@ -109,8 +109,8 @@ export class HellTableHeaderCell implements OnDestroy {
     set sortableInput(value: boolean);
     get sortInput(): 'asc' | 'desc' | null;
     set sortInput(value: 'asc' | 'desc' | null);
-    readonly sortToggle: _angular_core.OutputEmitterRef<MouseEvent | KeyboardEvent>;
-    toggleSortFrom(e: MouseEvent | KeyboardEvent): void;
+    readonly sortToggle: _angular_core.OutputEmitterRef<KeyboardEvent | MouseEvent>;
+    toggleSortFrom(e: KeyboardEvent | MouseEvent): void;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableHeaderCell, "[hellTableHeaderCell]", ["hellTableHeaderCell"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "sortInput": { "alias": "sort"; "required": false; }; "sortableInput": { "alias": "sortable"; "required": false; }; "columnIdInput": { "alias": "columnId"; "required": false; }; }, { "sortToggle": "sortToggle"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableHeaderCell, never>;
@@ -118,7 +118,7 @@ export class HellTableHeaderCell implements OnDestroy {
 
 // @public
 export interface HellTableMeasurableItem {
-    readonly key?: string | number | null;
+    readonly key?: null | number | string;
 }
 
 // @public
@@ -129,9 +129,9 @@ export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDe
     readonly measureRow: _angular_core.InputSignal<((measurement: HellTableRowMeasurement<TItem>) => void) | null>;
     ngAfterViewInit(): void;
     ngOnDestroy(): void;
-    protected readonly partKey: _angular_core.Signal<string | null>;
+    protected readonly partKey: _angular_core.Signal<null | string>;
     readonly rowPart: _angular_core.InputSignal<TItem | null>;
-    readonly rowPartKey: _angular_core.InputSignal<string | null>;
+    readonly rowPartKey: _angular_core.InputSignal<null | string>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTableMeasureRow<any>, "[hellTableMeasureRow]", ["hellTableMeasureRow"], { "rowPart": { "alias": "hellTableMeasureRow"; "required": false; "isSignal": true; }; "rowPartKey": { "alias": "hellTableMeasureRowKey"; "required": false; "isSignal": true; }; "measureRow": { "alias": "hellTableMeasureRowCallback"; "required": false; "isSignal": true; }; }, { "measured": "measured"; }, never, never, true, never>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTableMeasureRow<any>, never>;
 }
@@ -157,10 +157,10 @@ export interface HellTableResizeEvent {
 // @public
 export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     constructor();
-    readonly ariaControls: _angular_core.InputSignal<string | readonly string[] | null>;
-    protected readonly ariaControlsValue: _angular_core.Signal<string | null>;
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    protected readonly ariaValueNow: _angular_core.WritableSignal<number | null>;
+    readonly ariaControls: _angular_core.InputSignal<null | readonly string[] | string>;
+    protected readonly ariaControlsValue: _angular_core.Signal<null | string>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
+    protected readonly ariaValueNow: _angular_core.WritableSignal<null | number>;
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
     protected isDisabled(): boolean;
     protected readonly labels: HellLabels<HellTableUtilitiesLabels>;
@@ -180,14 +180,14 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
 }
 
 // @public
-export type HellTableResizeHandlePart = 'root' | 'grip';
+export type HellTableResizeHandlePart = 'grip' | 'root';
 
 // @public
 export type HellTableResizeHandleUi = HellUi<HellTableResizeHandlePart>;
 
 // @public
 export interface HellTableResizeItem {
-    readonly ariaControls?: string | readonly string[] | null;
+    readonly ariaControls?: null | readonly string[] | string;
     readonly columnId: string;
     commitSize?(px: number): void;
     measure(): number;
@@ -211,7 +211,7 @@ export class HellTableRow {
     static ngAcceptInputType_activeInput: unknown;
     static ngAcceptInputType_selectedInput: unknown;
     protected readonly part: (part: "root") => string;
-    protected role(): string | null;
+    protected role(): null | string;
     readonly selected: _angular_core.WritableSignal<boolean>;
     get selectedInput(): boolean;
     set selectedInput(value: boolean);

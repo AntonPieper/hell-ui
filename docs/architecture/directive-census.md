@@ -450,7 +450,7 @@ the sidenav's `data-collapsed`).
 
 | Directive | Selector | Kind | Role | Notes |
 | --- | --- | --- | --- | --- |
-| `HellTimePicker` | `hell-time-picker` | component | behavior | Owned segmented time-selection anatomy: keyboard navigation, clock bounds, presets, disabled reflection. |
+| `HellTimePicker` | `hell-time-picker` | component | behavior | Owned column-picker anatomy: roving listbox columns, selection-follows-focus, typed-digit entry, min/max bounds, scroll centering, disabled reflection. |
 
 ### toast
 

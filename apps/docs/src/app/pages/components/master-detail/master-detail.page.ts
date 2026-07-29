@@ -72,6 +72,11 @@ import masterDetailResizableExampleCodeRaw from './examples/resizable.example.ts
           keyboard behavior, and its own styles. The consumer hides the separator when the exported
           controller reports <code>compact()</code>; Master Detail does not query or render a handle.
         </p>
+        <p>
+          The pane Master Detail hides in a compact frame drops out of the Resizable split, so the
+          active pane fills the frame however the two were sized before. Crossing back to the wide
+          frame restores that split.
+        </p>
       </div>
 
       <hd-example-tabs class="hd-doc-wide" [code]="resizableCode">

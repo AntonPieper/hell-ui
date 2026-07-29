@@ -1,6 +1,13 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { SETTLE_TIMEOUT, ensurePageIsActive, finishAnimations } from './utils';
 
+interface Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 interface AppShellParts {
   readonly topbar: Locator;
   readonly sidenavToggle: Locator;
@@ -42,6 +49,174 @@ async function expectFocused(locator: Locator, label: string): Promise<void> {
       timeout: SETTLE_TIMEOUT,
     })
     .toBe(true);
+}
+
+async function boundingBoxOf(locator: Locator, label: string): Promise<Rect> {
+  const box = await locator.boundingBox();
+  expect(box, `${label} needs a rendered box`).not.toBeNull();
+  return box!;
+}
+
+/**
+ * The shell must reserve the secondary rail's width instead of letting main
+ * content run underneath it, so the content box always ends at or before the
+ * rail's leading edge.
+ */
+async function expectContentClearOfRailEdge(
+  parts: AppShellParts,
+  railLeadingEdge: number,
+  label: string,
+): Promise<void> {
+  const content = await boundingBoxOf(parts.content, `${label} content`);
+  expect(
+    Math.round(content.x + content.width),
+    `${label}: main content must stay clear of the secondary rail`,
+  ).toBeLessThanOrEqual(Math.round(railLeadingEdge) + 1);
+}
+
+/**
+ * Every duration in the shell and in its navigation recipe reads
+ * `--hell-duration-base`, so stretching that one token stretches the whole
+ * transition coherently. Frame sampling then resolves the motion even when a
+ * loaded runner starves `requestAnimationFrame`, and the geometry under test is
+ * duration-independent. An inline custom property outranks the theme rules that
+ * would otherwise supply it.
+ */
+const SAMPLED_RAIL_DURATION_MS = 1_200;
+
+async function stretchRailDuration(page: Page): Promise<void> {
+  await page.evaluate((duration) => {
+    document.documentElement.style.setProperty('--hell-duration-base', `${duration}ms`);
+    document.documentElement.style.setProperty('--hell-duration-fast', `${duration}ms`);
+  }, SAMPLED_RAIL_DURATION_MS);
+}
+
+interface RailMotionSamples {
+  readonly frames: number;
+  /** Distinct rail widths seen. A low count means the sample missed the animation. */
+  readonly trackWidths: number;
+  /** How far the rail actually travelled over the sample. */
+  readonly trackTravel: number;
+  /** Spread of a nav row's width across the transition; 0 means it never re-laid-out. */
+  readonly rowWidthSpread: number;
+  readonly labelWidthSpread: number;
+  /** Frames where a label's own text was being clipped or ellipsised. */
+  readonly labelClipFrames: number;
+  /** Frames where a label left layout outright instead of fading. */
+  readonly labelDisplayNoneFrames: number;
+  readonly labelOpacityLevels: number;
+  /** Largest single-frame move of a rail icon — a jump shows up here. */
+  readonly worstIconStep: number;
+  readonly finalIconOffCenter: number;
+  /** Frames where a section heading grew past the single line it rests at. */
+  readonly headingOverflowFrames: number;
+}
+
+/** Height of an expanded section heading — one line, by the recipe's contract. */
+async function singleLineHeadingHeight(page: Page): Promise<number> {
+  return page
+    .locator('hd-root [hellAppSidenav] .hd-nav-section-toggle')
+    .first()
+    .evaluate((heading) => heading.getBoundingClientRect().height);
+}
+
+/**
+ * Sample every animation frame of one sidenav collapse or expand.
+ *
+ * The click is dispatched from inside the frame loop: driving it from the test
+ * process races the recorder and loses the opening frames of an ease-out,
+ * which is exactly where a mid-transition jump would hide.
+ */
+async function recordRailMotion(
+  page: Page,
+  options: { readonly sampleMs?: number; readonly singleLineHeading: number },
+): Promise<RailMotionSamples> {
+  return page.evaluate(async ({ sampleMs, singleLineHeading }) => {
+    const ms = sampleMs ?? 1_700;
+    const shell = document.querySelector('hd-root > [hellAppShell][data-slot="root"]')!;
+    const nav = shell.querySelector(':scope > [hellAppSidenav][data-slot="root"]')!;
+    const toggle = shell.querySelector<HTMLElement>(
+      ':scope > [hellAppTopbar] > button[hellSidenavToggle]',
+    )!;
+    const rows = [...nav.querySelectorAll<HTMLElement>('.hd-nav-item')];
+    const headings = [...nav.querySelectorAll<HTMLElement>('.hd-nav-section-toggle')];
+
+    const sample = () => {
+      const navBox = nav.getBoundingClientRect();
+      return {
+        navWidth: navBox.width,
+        navCenter: navBox.x + navBox.width / 2,
+        rows: rows.map((row) => {
+          const label = row.querySelector<HTMLElement>('.hd-nav-item-label')!;
+          const icon = row.querySelector<HTMLElement>('.hd-nav-item-icon')!;
+          const iconBox = icon.getBoundingClientRect();
+          const labelStyle = getComputedStyle(label);
+          return {
+            width: row.getBoundingClientRect().width,
+            labelWidth: label.getBoundingClientRect().width,
+            labelClipped: label.scrollWidth > label.clientWidth,
+            labelDisplayNone: labelStyle.display === 'none',
+            labelOpacity: Number(labelStyle.opacity),
+            iconX: iconBox.x,
+            iconCenter: iconBox.x + iconBox.width / 2,
+          };
+        }),
+        headings: headings.map((heading) => heading.getBoundingClientRect().height),
+      };
+    };
+
+    const captured: (ReturnType<typeof sample>)[] = [];
+    await new Promise<void>((resolve) => {
+      let started = 0;
+      const step = () => {
+        captured.push(sample());
+        if (!started) {
+          started = performance.now();
+          toggle.click();
+        }
+        if (performance.now() - started < ms) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+
+    const distinct = (values: number[], epsilon: number) =>
+      values.reduce<number[]>((seen, value) => {
+        if (!seen.some((other) => Math.abs(other - value) <= epsilon)) seen.push(value);
+        return seen;
+      }, []).length;
+    const spread = (values: number[]) => Math.max(...values) - Math.min(...values);
+    const worstStep = (values: number[]) =>
+      values.reduce((worst, value, index) =>
+        index === 0 ? worst : Math.max(worst, Math.abs(value - values[index - 1])), 0);
+
+    const perRow = rows.map((_, index) => captured.map((frame) => frame.rows[index]));
+    return {
+      frames: captured.length,
+      trackWidths: distinct(captured.map((frame) => frame.navWidth), 0.5),
+      trackTravel: spread(captured.map((frame) => frame.navWidth)),
+      rowWidthSpread: Math.max(...perRow.map((row) => spread(row.map((f) => f.width)))),
+      labelWidthSpread: Math.max(...perRow.map((row) => spread(row.map((f) => f.labelWidth)))),
+      labelClipFrames: perRow.reduce(
+        (total, row) => total + row.filter((f) => f.labelClipped).length,
+        0,
+      ),
+      labelDisplayNoneFrames: perRow.reduce(
+        (total, row) => total + row.filter((f) => f.labelDisplayNone).length,
+        0,
+      ),
+      labelOpacityLevels: Math.max(
+        ...perRow.map((row) => distinct(row.map((f) => f.labelOpacity), 0.001)),
+      ),
+      worstIconStep: Math.max(...perRow.map((row) => worstStep(row.map((f) => f.iconX)))),
+      finalIconOffCenter: Math.max(
+        ...perRow.map((row) => Math.abs(row.at(-1)!.iconCenter - captured.at(-1)!.navCenter)),
+      ),
+      headingOverflowFrames: captured.filter((frame) =>
+        frame.headings.some((height) => height > singleLineHeading + 1),
+      ).length,
+    };
+  }, options);
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
@@ -131,6 +306,243 @@ test.describe('App Shell responsive contracts', () => {
     await expect(parts.headerToggle).toBeVisible();
     await expect(parts.headerToggle).toHaveAttribute('aria-expanded', 'true');
     await expectNoHorizontalOverflow(page);
+  });
+
+  test('the shell reserves the secondary rail so main content is never overlapped', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const shell = page
+      .locator('app-app-shell-secondary-panel-example')
+      .locator('> [hellAppShell][data-slot="root"]');
+    const parts = appShellParts(shell);
+
+    await expect(shell).toBeVisible();
+    await finishAnimations(shell);
+    await expectContentClearOfRailEdge(
+      parts,
+      (await boundingBoxOf(parts.secondary, 'desktop open secondary')).x,
+      'desktop, secondary open',
+    );
+
+    await parts.headerToggle.click();
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await finishAnimations(shell);
+    const collapsedRail = await boundingBoxOf(parts.secondary, 'desktop collapsed rail');
+    await expectContentClearOfRailEdge(parts, collapsedRail.x, 'desktop, secondary collapsed');
+
+    // Both rails collapsed at once has no declaration of its own — it is
+    // reconstructed from the shared track — so it needs its own measurement.
+    await parts.sidenavToggle.click();
+    await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await finishAnimations(shell);
+    const bothCollapsedRail = await boundingBoxOf(parts.secondary, 'desktop both rails collapsed');
+    await expectContentClearOfRailEdge(
+      parts,
+      bothCollapsedRail.x,
+      'desktop, sidenav and secondary collapsed',
+    );
+    expect(
+      Math.round(bothCollapsedRail.width),
+      'collapsing the sidenav as well must not change the secondary track',
+    ).toBe(Math.round(collapsedRail.width));
+    await parts.sidenavToggle.click();
+    await expect(shell).not.toHaveAttribute('data-sidenav-collapsed', 'true');
+    await finishAnimations(shell);
+
+    // A shell without a secondary panel must not reserve a dead rail column.
+    const bareShell = page
+      .locator('app-app-shell-basic-example')
+      .locator('> [hellAppShell][data-slot="root"]');
+    const bareParts = appShellParts(bareShell);
+    await expect(bareParts.secondary).toHaveCount(0);
+    await finishAnimations(bareShell);
+    const [bareShellBox, bareContentBox] = await Promise.all([
+      boundingBoxOf(bareShell, 'bare shell'),
+      boundingBoxOf(bareParts.content, 'bare shell content'),
+    ]);
+    expect(
+      Math.round(bareShellBox.x + bareShellBox.width - (bareContentBox.x + bareContentBox.width)),
+      'a shell with no secondary panel must give the trailing width to content',
+      // The docs example draws a 1px border around the shell.
+    ).toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(shell).toHaveAttribute('data-mobile-layout', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await finishAnimations(shell);
+    const mobileRail = await boundingBoxOf(parts.railToggle, 'mobile collapsed rail');
+    expect(mobileRail.width, 'the mobile rail stays an operable click target').toBeGreaterThan(0);
+    await expectContentClearOfRailEdge(parts, mobileRail.x, 'mobile, secondary collapsed');
+
+    // The mobile rail reservation is guarded by the projected aside, so a shell
+    // without one must not grow a phantom gutter there either.
+    await finishAnimations(bareShell);
+    const [mobileBareShellBox, mobileBareContentBox] = await Promise.all([
+      boundingBoxOf(bareShell, 'mobile bare shell'),
+      boundingBoxOf(bareParts.content, 'mobile bare shell content'),
+    ]);
+    expect(
+      Math.round(
+        mobileBareShellBox.x +
+          mobileBareShellBox.width -
+          (mobileBareContentBox.x + mobileBareContentBox.width),
+      ),
+      'a mobile shell with no secondary panel must not reserve the rail strip',
+    ).toBeLessThanOrEqual(1);
+
+    // The expanded mobile panel is a deliberate drawer overlay, but the rail
+    // strip it collapses back into must stay reserved underneath it.
+    await parts.railToggle.click();
+    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
+    await finishAnimations(shell);
+    await expectContentClearOfRailEdge(parts, mobileRail.x, 'mobile, secondary open');
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test('the rail transition animates without re-laying out the navigation it carries', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    const parts = appShellParts(shell);
+    await expect(parts.sidenav).toBeVisible();
+    await finishAnimations(shell);
+    const singleLineHeading = await singleLineHeadingHeight(page);
+    await stretchRailDuration(page);
+
+    for (const phase of ['collapse', 'expand'] as const) {
+      const motion = await recordRailMotion(page, { singleLineHeading });
+      const at = (message: string) => `${phase}: ${message}`;
+
+      // Without a real interpolation the stability assertions below are vacuous.
+      expect(motion.trackTravel, at('the rail must cross most of its range')).toBeGreaterThan(150);
+      expect(
+        motion.trackWidths,
+        at('the rail width must be sampled while it interpolates'),
+      ).toBeGreaterThan(3);
+
+      // Rows are sized from the rail's resting content width, so the box the
+      // shell is interpolating never re-lays-out what the rows carry.
+      expect(motion.rowWidthSpread, at('nav rows must keep one width')).toBeLessThanOrEqual(1);
+      expect(motion.labelWidthSpread, at('labels must keep one width')).toBeLessThanOrEqual(1);
+      expect(motion.labelClipFrames, at('no label may re-ellipsise mid transition')).toBe(0);
+      expect(
+        motion.headingOverflowFrames,
+        at('no section heading may wrap to a second line mid transition'),
+      ).toBe(0);
+
+      // Labels fade rather than leaving layout outright.
+      expect(motion.labelDisplayNoneFrames, at('labels must fade, not disappear')).toBe(0);
+      expect(motion.labelOpacityLevels, at('the label fade must be interpolated')).toBeGreaterThan(
+        2,
+      );
+
+      // Icons travel continuously between their row and rail positions.
+      expect(motion.worstIconStep, at('rail icons must not jump between positions')).toBeLessThan(
+        4,
+      );
+    }
+
+    // The row stays anchored to the rail's leading edge, so the glyph itself has
+    // to land centered once the collapse settles.
+    await parts.sidenavToggle.click();
+    await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
+    await finishAnimations(shell);
+    const [railBox, iconBox] = await Promise.all([
+      boundingBoxOf(parts.sidenav, 'collapsed rail'),
+      boundingBoxOf(page.locator('hd-root [hellAppSidenav] .hd-nav-item-icon').first(), 'rail icon'),
+    ]);
+    expect(
+      Math.abs(iconBox.x + iconBox.width / 2 - (railBox.x + railBox.width / 2)),
+      'a collapsed rail icon ends up centered in the rail',
+    ).toBeLessThanOrEqual(1);
+
+    // The rail crops the row, so a row that kept its radius would present a
+    // pill cut off mid-curve at the rail edge instead of a full-bleed band.
+    await expect(page.locator('hd-root [hellAppSidenav] .hd-nav-item').first()).toHaveCSS(
+      'border-radius',
+      '0px',
+    );
+
+    // Rows overflow the collapsed rail on purpose, which leaves it inline
+    // scroll range the user can neither see nor reach. "Scroll the active nav
+    // item into view" is the realistic caller, and without matching
+    // scroll-padding it comes to rest one inline padding off, shunting every
+    // glyph sideways for the rest of the session.
+    const restingScrollLeft = await parts.sidenav.evaluate((rail) => {
+      rail.scrollLeft = 0;
+      rail.querySelectorAll('.hd-nav-item')[3]?.scrollIntoView();
+      return rail.scrollLeft;
+    });
+    expect(
+      restingScrollLeft,
+      'scrolling a rail row into view must leave the rail at its resting inline position',
+    ).toBe(0);
+  });
+
+  test('rail rows fill the sidenav without overflowing its scrollport', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    await expect(appShellParts(shell).sidenav).toBeVisible();
+    await finishAnimations(shell);
+
+    // The published content width must be a real content box: the sidenav's
+    // padding *and* its trailing border subtracted. A row one pixel too wide
+    // leaves mismatched gutters and eats into the trailing padding that absorbs
+    // a platform scrollbar.
+    const geometry = await appShellParts(shell).sidenav.evaluate((rail) => {
+      const row = rail.querySelector<HTMLElement>('.hd-nav-item')!;
+      const railBox = rail.getBoundingClientRect();
+      const rowBox = row.getBoundingClientRect();
+      return {
+        leadingGutter: Math.round(rowBox.x - railBox.x),
+        trailingGutter: Math.round(railBox.x + rail.clientWidth - (rowBox.x + rowBox.width)),
+        inlineOverflow: rail.scrollWidth - rail.clientWidth,
+      };
+    });
+    expect(geometry.inlineOverflow, 'an expanded row must fit the sidenav scrollport').toBe(0);
+    expect(geometry.trailingGutter, 'row gutters must match on both sides').toBe(
+      geometry.leadingGutter,
+    );
+  });
+
+  test('the rail recipe takes its motion from the shell duration tokens', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/app-shell');
+
+    const row = page.locator('hd-root [hellAppSidenav] .hd-nav-item').first();
+    const label = page.locator('hd-root [hellAppSidenav] .hd-nav-item-label').first();
+    const icon = page.locator('hd-root [hellAppSidenav] .hd-nav-item-icon').first();
+    await expect(label).toBeVisible();
+
+    // Every property the rail recipe animates belongs here. A transition added
+    // to the recipe but left out of this list is exactly the gap the list is
+    // meant to close.
+    const durations = () =>
+      Promise.all(
+        [row, label, icon].map((part) =>
+          part.evaluate((element) => getComputedStyle(element).transitionDuration),
+        ),
+      );
+
+    // `--hell-duration-base` is 180ms by default and 1ms under reduced motion;
+    // hardcoded recipe durations would survive the preference unchanged.
+    expect(await durations()).toEqual(['0.18s', '0.18s, 0.18s', '0.18s']);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    expect(await durations()).toEqual(['0.001s', '0.001s, 0.001s', '0.001s']);
+
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    await appShellParts(shell).sidenavToggle.click();
+    await expect(shell).toHaveAttribute('data-sidenav-collapsed', 'true');
+    await expect(label).toBeHidden();
   });
 
   test('collapsed docs navigation links keep stable accessible names', async ({ page }) => {

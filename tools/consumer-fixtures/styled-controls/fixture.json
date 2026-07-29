@@ -27,6 +27,8 @@
     "flex-basis:100%",
     "border-style:dashed",
     "min-height:140px",
+    "mask:var(--hell-icon-upload) center/contain no-repeat",
+    "[hellFilePicker][data-slot=root]:before",
     "height:var(--spacing-hell-control-md)",
     ".aria-selected\\:bg-hell-primary-soft",
     "[hellMenu][data-slot=root][popover]{inset:auto",

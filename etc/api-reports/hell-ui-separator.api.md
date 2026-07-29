@@ -14,7 +14,7 @@ import * as i1 from 'ng-primitives/separator';
 export class HellSeparator {
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: (part: "root") => string;
-    readonly spacing: _angular_core.InputSignal<HellSize | "none">;
+    readonly spacing: _angular_core.InputSignal<"none" | HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSeparator, "[hellSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "spacing": { "alias": "spacing"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSeparator; inputs: { "ngpSeparatorOrientation": "orientation"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSeparator, never>;

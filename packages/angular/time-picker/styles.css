@@ -1,2 +1,54 @@
 /* Time picker default visuals are Tailwind utility recipes in the component. */
 @source "./time-picker.ts";
+
+/*
+ * Structural, non-recipe rules per docs/adr/part-style-map.md: cross-part
+ * geometry and scroll machinery that cannot sensibly live as utility classes.
+ * `--hell-time-picker-option-size` is internal plumbing, not a public theming
+ * variable — the recipe derives column height, scroll padding, and option
+ * height from it so the coarse-pointer bump below moves all three at once.
+ */
+hell-time-picker {
+  --hell-time-picker-option-size: var(--spacing-hell-control-sm);
+}
+
+/*
+ * Touch targets stay at or above 44px on coarse pointers. The floor is an
+ * absolute length because a host with a sub-16px root font would otherwise
+ * shrink a rem-based minimum below 44px; `max()` still lets a larger root
+ * font scale the target up.
+ */
+@media (pointer: coarse) {
+  hell-time-picker {
+    --hell-time-picker-option-size: max(2.75rem, 44px);
+  }
+}
+
+hell-time-picker [data-slot='options'] {
+  /* Reveal by scrolling; selection stays an explicit tap or arrow. */
+  scroll-snap-type: y proximity;
+  overscroll-behavior: contain;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black calc(var(--hell-time-picker-option-size) * 1.5),
+    black calc(100% - var(--hell-time-picker-option-size) * 1.5),
+    transparent 100%
+  );
+}
+
+hell-time-picker [data-slot='option'] {
+  scroll-snap-align: center;
+}
+
+/*
+ * A disabled picker takes every option out of the tab order, which would
+ * leave a scrollable region no keyboard user can reach
+ * (axe `scrollable-region-focusable`). Nothing in it is selectable anyway, so
+ * the columns stop being user-scrollable and just show the centered selection.
+ * Programmatic centering still works because `scrollTop` applies to hidden
+ * overflow.
+ */
+hell-time-picker[data-disabled='true'] [data-slot='options'] {
+  overflow-y: hidden;
+}

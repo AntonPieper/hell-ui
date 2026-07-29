@@ -48,6 +48,8 @@ import { HellTimePicker } from 'hell-ui/time-picker';
           placeholder="HH:mm"
           [formControl]="control"
           [invalid]="control.invalid"
+          [min]="opens"
+          [max]="closes"
           [ui]="controlUi"
         />
         <button
@@ -75,9 +77,13 @@ import { HellTimePicker } from 'hell-ui/time-picker';
         aria-label="Choose time"
         ui="w-auto max-w-none p-0"
       >
+        <!-- Bounds and precision stay identical on both surfaces. -->
         <hell-time-picker
           ui="max-w-none rounded-none border-0 shadow-none"
           [value]="control.value"
+          [min]="opens"
+          [max]="closes"
+          [minuteStep]="5"
           (valueChange)="selectTime($event)"
         />
         <div class="flex justify-end border-t border-hell-border p-hell-2">
@@ -95,6 +101,8 @@ export class TimeInputWithTimePickerExample {
     minute: 30,
     second: 0,
   });
+  protected readonly opens: HellTimeValue = { hour: 8, minute: 0, second: 0 };
+  protected readonly closes: HellTimeValue = { hour: 18, minute: 0, second: 0 };
   protected readonly pickerShift = { padding: 8 } as const;
   protected readonly controlUi =
     'h-auto min-h-0 min-w-0 max-w-none flex-1 rounded-none border-0 bg-transparent shadow-none focus:border-transparent focus:shadow-none data-focus:border-transparent data-focus:shadow-none disabled:bg-transparent data-disabled:bg-transparent';

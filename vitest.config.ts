@@ -18,6 +18,13 @@ export default defineConfig({
     setupFiles: [resolve(workspaceRoot, 'packages/angular/test-setup.ts')],
     reporters,
     testTimeout: 30_000,
+    // Spies and global stubs are per-test state. Without these, a spy on a
+    // shared object (`console`, `HTMLMediaElement.prototype`) outlives the test
+    // that installed it whenever a restore is skipped — including every time an
+    // assertion throws before the restore line — so a single failure silently
+    // changes what later tests in the same file measure.
+    restoreMocks: true,
+    unstubGlobals: true,
     coverage: {
       provider: 'v8',
       reportsDirectory: coveragePath,

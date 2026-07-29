@@ -1,5 +1,5 @@
 import { provideHellLabels } from 'hell-ui/core';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi, HELL_RESIZABLE_LABELS } from './resizable';
@@ -32,6 +32,38 @@ class ResizableHost {}
 })
 class ResizableLabelContractHost {}
 
+/** Two panes with Master Detail's pane minimums, the shape that surfaced #424. */
+@Component({
+  imports: [...HELL_RESIZABLE_IMPORTS],
+  template: `
+    <div id="pair-group" hellResizable>
+      <section id="pair-primary" hellResizablePane [minSize]="220">A</section>
+      <div id="pair-handle" hellResizableHandle></div>
+      <section id="pair-detail" hellResizablePane [minSize]="260">B</section>
+    </div>
+  `,
+})
+class ResizablePairHost {}
+
+/** A group whose last pane can leave the DOM, so registration teardown is observable. */
+@Component({
+  imports: [...HELL_RESIZABLE_IMPORTS],
+  template: `
+    <div id="toggle-group" hellResizable>
+      <section id="toggle-a" hellResizablePane [minSize]="40">A</section>
+      <div id="toggle-handle-a" hellResizableHandle></div>
+      <section id="toggle-b" hellResizablePane [minSize]="40">B</section>
+      @if (thirdPane()) {
+        <div id="toggle-handle-b" hellResizableHandle></div>
+        <section id="toggle-c" hellResizablePane [minSize]="40">C</section>
+      }
+    </div>
+  `,
+})
+class ResizableToggleHost {
+  readonly thirdPane = signal(true);
+}
+
 @Component({
   imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
@@ -61,7 +93,13 @@ describe('HellResizable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResizableHost, ResizableLabelContractHost, ResizableUiHost],
+      imports: [
+        ResizableHost,
+        ResizableLabelContractHost,
+        ResizablePairHost,
+        ResizableToggleHost,
+        ResizableUiHost,
+      ],
     }).compileComponents();
   });
 
@@ -306,6 +344,156 @@ describe('HellResizable', () => {
     expect(afterResize[2]).toBeGreaterThan(beforeResize[2]);
   });
 
+  it('gives the whole group to the panes still in layout when an outer module hides one', () => {
+    const scheduled = stubResizeFrames();
+    const fixture = TestBed.createComponent(ResizableHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'group');
+    const paneA = byId(fixture.nativeElement, 'pane-a');
+    const paneB = byId(fixture.nativeElement, 'pane-b');
+    const paneC = byId(fixture.nativeElement, 'pane-c');
+    vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    byId(fixture.nativeElement, 'handle-a').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(panePixelSize(paneC)).toBe(100);
+
+    hidePane(paneC);
+    const observer = resizeObserverFor(group);
+    expect(observer.targets.has(paneC)).toBe(true);
+    observer.trigger();
+    flushFrames(scheduled);
+
+    // The hidden pane keeps no width of its own, and the two that are still
+    // rendered share the group instead of leaving its last third empty.
+    expect(paneFlex(paneC)).toBe('1 1 0');
+    expect(panePixelSize(paneA) + panePixelSize(paneB)).toBeCloseTo(300, 5);
+    expect(panePixelSize(paneA) / panePixelSize(paneB)).toBeCloseTo(116 / 84, 5);
+  });
+
+  it('parks the split while a pane is out of layout and restores it when the pane returns', () => {
+    const scheduled = stubResizeFrames();
+    const fixture = TestBed.createComponent(ResizablePairHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'pair-group');
+    const primary = byId(fixture.nativeElement, 'pair-primary');
+    const detail = byId(fixture.nativeElement, 'pair-detail');
+    const handle = byId(fixture.nativeElement, 'pair-handle');
+    const groupWidth = vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(900);
+    mockElementSize(primary, 540);
+    mockElementSize(detail, 360);
+
+    handle.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(paneFlex(primary)).toBe('0 0 556px');
+    expect(paneFlex(detail)).toBe('0 0 344px');
+
+    // The compact frame: one pane left in layout, far narrower than the pixels
+    // the pair committed to in the wide one.
+    hidePane(detail);
+    groupWidth.mockReturnValue(310);
+    resizeObserverFor(group).trigger();
+    flushFrames(scheduled);
+
+    expect(paneFlex(primary)).toBe('1 1 0');
+    expect(paneMinSize(primary)).toBe('310px');
+    expect(paneFlex(detail)).toBe('1 1 0');
+
+    // A handle whose partner is out of layout has no pair to move, so it stops
+    // offering itself as one: it leaves the tab order and reports disabled
+    // rather than swallowing arrow keys that now do nothing.
+    fixture.detectChanges();
+    expect(handle.getAttribute('aria-disabled')).toBe('true');
+    expect(handle.getAttribute('tabindex')).toBe('-1');
+    const arrow = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
+    handle.dispatchEvent(arrow);
+    expect(arrow.defaultPrevented).toBe(false);
+    expect(paneFlex(primary)).toBe('1 1 0');
+
+    showPane(detail, 344);
+    groupWidth.mockReturnValue(900);
+    resizeObserverFor(group).trigger();
+    flushFrames(scheduled);
+    fixture.detectChanges();
+
+    expect(paneFlex(primary)).toBe('0 0 556px');
+    expect(paneFlex(detail)).toBe('0 0 344px');
+    expect(handle.getAttribute('aria-disabled')).toBe(null);
+    expect(handle.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('stops observing a removed pane and refits the group without it', async () => {
+    // A pane leaving the DOM refits on a microtask rather than a frame, so no
+    // scheduled frame has to be flushed here.
+    stubResizeFrames();
+    const fixture = TestBed.createComponent(ResizableToggleHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'toggle-group');
+    const paneA = byId(fixture.nativeElement, 'toggle-a');
+    const paneB = byId(fixture.nativeElement, 'toggle-b');
+    const paneC = byId(fixture.nativeElement, 'toggle-c');
+    vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    byId(fixture.nativeElement, 'toggle-handle-a').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    const observer = resizeObserverFor(group);
+    expect(observer.targets.has(paneC)).toBe(true);
+
+    fixture.componentInstance.thirdPane.set(false);
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(observer.targets.has(paneC)).toBe(false);
+    expect(panePixelSize(paneA) + panePixelSize(paneB)).toBeCloseTo(300, 5);
+
+    fixture.componentInstance.thirdPane.set(true);
+    fixture.detectChanges();
+    const restored = byId(fixture.nativeElement, 'toggle-c');
+    mockElementSize(restored, 0);
+    await Promise.resolve();
+
+    expect(observer.targets.has(restored)).toBe(true);
+    expect(
+      panePixelSize(paneA) + panePixelSize(paneB) + panePixelSize(restored),
+    ).toBeCloseTo(300, 5);
+  });
+
+  it('keeps a single laid-out pane inside a frame narrower than its own minimum', () => {
+    const scheduled = stubResizeFrames();
+    const fixture = TestBed.createComponent(ResizablePairHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'pair-group');
+    const primary = byId(fixture.nativeElement, 'pair-primary');
+    const detail = byId(fixture.nativeElement, 'pair-detail');
+    const groupWidth = vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(900);
+    mockElementSize(primary, 540);
+    mockElementSize(detail, 360);
+
+    hidePane(detail);
+    groupWidth.mockReturnValue(180);
+    resizeObserverFor(group).trigger();
+    flushFrames(scheduled);
+
+    expect(paneMinSize(primary)).toBe('180px');
+  });
+
   it('marks a fully constrained group as disabled for handle interaction', () => {
     const fixture = TestBed.createComponent(ResizableHost);
     fixture.detectChanges();
@@ -342,8 +530,43 @@ function mockElementSize(element: HTMLElement, size: number): void {
   vi.spyOn(element, 'offsetWidth', 'get').mockReturnValue(size);
 }
 
+/** Take a pane out of layout the way an outer module does: `display: none`. */
+function hidePane(pane: HTMLElement): void {
+  pane.hidden = true;
+  mockElementSize(pane, 0);
+}
+
+function showPane(pane: HTMLElement, size: number): void {
+  pane.hidden = false;
+  mockElementSize(pane, size);
+}
+
+/** Capture the frames the controller schedules so a fit can be run on demand. */
+function stubResizeFrames(): FrameRequestCallback[] {
+  const scheduled: FrameRequestCallback[] = [];
+  vi.stubGlobal('ResizeObserver', TestResizeObserver);
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
+    (callback: FrameRequestCallback) => scheduled.push(callback),
+  );
+  return scheduled;
+}
+
+function flushFrames(scheduled: FrameRequestCallback[]): void {
+  for (const frame of scheduled.splice(0, scheduled.length)) frame(0);
+}
+
+function resizeObserverFor(host: HTMLElement): TestResizeObserver {
+  const observer = TestResizeObserver.instances.find((candidate) => candidate.observed === host);
+  if (!observer) throw new Error('Expected the resizable ResizeObserver.');
+  return observer;
+}
+
 function paneFlex(pane: HTMLElement): string {
   return pane.style.getPropertyValue('--_hell-resizable-pane-flex');
+}
+
+function paneMinSize(pane: HTMLElement): string {
+  return pane.style.getPropertyValue('--_hell-resizable-pane-min-size');
 }
 
 function panePixelSize(pane: HTMLElement): number {
@@ -354,17 +577,26 @@ function panePixelSize(pane: HTMLElement): number {
 
 class TestResizeObserver {
   static instances: TestResizeObserver[] = [];
+  /** First observed element — the group host, which the controller observes first. */
   observed: Element | null = null;
+  readonly targets = new Set<Element>();
 
   constructor(private readonly callback: ResizeObserverCallback) {
     TestResizeObserver.instances.push(this);
   }
 
   observe(element: Element): void {
-    this.observed = element;
+    this.observed ??= element;
+    this.targets.add(element);
   }
 
-  disconnect(): void {}
+  unobserve(element: Element): void {
+    this.targets.delete(element);
+  }
+
+  disconnect(): void {
+    this.targets.clear();
+  }
 
   trigger(): void {
     this.callback([], this as unknown as ResizeObserver);

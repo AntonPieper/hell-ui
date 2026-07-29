@@ -23,8 +23,8 @@ import { TemplateRef } from '@angular/core';
 export class HellTooltip {
     constructor();
     readonly anchor: _angular_core.InputSignal<HTMLElement | null>;
-    readonly container: _angular_core.InputSignal<string | HTMLElement | null | undefined>;
-    readonly content: _angular_core.InputSignal<string | TemplateRef<unknown> | null | undefined>;
+    readonly container: _angular_core.InputSignal<HTMLElement | null | string | undefined>;
+    readonly content: _angular_core.InputSignal<TemplateRef<unknown> | null | string | undefined>;
     readonly cooldown: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
     readonly flip: _angular_core.InputSignalWithTransform<NgpFlip, NgpFlipInput | null>;
     hide(): void;
@@ -34,7 +34,7 @@ export class HellTooltip {
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
     readonly placement: _angular_core.InputSignal<NgpTooltipPlacement | undefined>;
     readonly position: _angular_core.InputSignal<NgpPosition | null>;
-    readonly scrollBehavior: _angular_core.InputSignal<"reposition" | "close" | undefined>;
+    readonly scrollBehavior: _angular_core.InputSignal<"close" | "reposition" | undefined>;
     readonly shift: _angular_core.InputSignalWithTransform<NgpShift, NgpShiftInput | null>;
     show(): void;
     readonly showDelay: _angular_core.InputSignalWithTransform<number | undefined, unknown>;
@@ -46,13 +46,13 @@ export class HellTooltip {
 
 // @public
 export interface HellTooltipDefaults {
-    readonly container?: HTMLElement | string | null;
+    readonly container?: HTMLElement | null | string;
     readonly cooldown?: number;
     readonly flip?: NgpFlip;
     readonly hideDelay?: number;
     readonly offset?: NgpOffset;
     readonly placement?: NgpTooltipPlacement;
-    readonly scrollBehavior?: 'reposition' | 'close';
+    readonly scrollBehavior?: 'close' | 'reposition';
     readonly shift?: NgpShift;
     readonly showDelay?: number;
     readonly showOnOverflow?: boolean;
