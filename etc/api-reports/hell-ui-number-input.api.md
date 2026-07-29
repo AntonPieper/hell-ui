@@ -27,15 +27,15 @@ export const HELL_NUMBER_INPUT_IMPORTS: readonly [typeof HellNumberInput, typeof
 export const HELL_NUMBER_INPUT_LABELS: InjectionToken<HellLabels<HellNumberInputLabels>>;
 
 // @public
-export class HellNumberInput implements FormValueControl<number | null> {
+export class HellNumberInput implements FormValueControl<null | number> {
     constructor();
-    readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    protected readonly current: Signal<number | null>;
+    readonly ariaDescribedby: _angular_core.InputSignal<null | string>;
+    readonly ariaLabelledby: _angular_core.InputSignal<null | string>;
+    protected readonly current: Signal<null | number>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly display: _angular_core.Signal<string>;
-    protected readonly fieldAriaDescribedby: Signal<string | null>;
-    protected readonly fieldAriaLabelledby: Signal<string | null>;
+    protected readonly fieldAriaDescribedby: Signal<null | string>;
+    protected readonly fieldAriaLabelledby: Signal<null | string>;
     readonly id: _angular_core.InputSignal<string>;
     readonly integer: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -53,7 +53,7 @@ export class HellNumberInput implements FormValueControl<number | null> {
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly stepMultiplier: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly touch: _angular_core.OutputEmitterRef<void>;
-    readonly value: _angular_core.ModelSignal<number | null>;
+    readonly value: _angular_core.ModelSignal<null | number>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNumberInput, "input[hellNumberInput]", ["hellNumberInput"], { "id": { "alias": "id"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "step": { "alias": "step"; "required": false; "isSignal": true; }; "stepMultiplier": { "alias": "stepMultiplier"; "required": false; "isSignal": true; }; "integer": { "alias": "integer"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.HellInput; inputs: { "size": "size"; "ui": "ui"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNumberInput, never>;
 }
@@ -77,7 +77,7 @@ export interface HellNumberInputLabels {
 // @public
 export class HellNumberStep {
     constructor();
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
     readonly direction: _angular_core.InputSignal<HellNumberStepDirection>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly isDisabled: Signal<boolean>;
@@ -94,7 +94,7 @@ export class HellNumberStep {
 }
 
 // @public
-export type HellNumberStepDirection = 'increment' | 'decrement';
+export type HellNumberStepDirection = 'decrement' | 'increment';
 
 // @public
 export function provideHellNumberInputAdapter(adapter: HellNumberInputAdapter): Provider;

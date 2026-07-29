@@ -15,7 +15,7 @@ export const HELL_SPINNER_LABELS: InjectionToken<HellLabels<HellSpinnerLabels>>;
 
 // @public
 export class HellSpinner {
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
     protected readonly labels: HellLabels<HellSpinnerLabels>;
     protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
@@ -31,7 +31,7 @@ export interface HellSpinnerLabels {
 }
 
 // @public
-export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
+export type HellSpinnerVariant = 'bars' | 'dots' | 'pulse' | 'ring';
 
 // (No @packageDocumentation comment for this package)
 

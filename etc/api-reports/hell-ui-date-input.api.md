@@ -27,22 +27,22 @@ export const HELL_DEFAULT_DATE_INPUT_FORMAT: HellDateInputFormat;
 // @public
 export class HellDateInput implements FormValueControl<Date | null> {
     constructor();
-    readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
+    readonly ariaDescribedby: _angular_core.InputSignal<null | string>;
+    readonly ariaLabelledby: _angular_core.InputSignal<null | string>;
     protected readonly current: Signal<Date | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly display: _angular_core.Signal<string>;
-    protected readonly fieldAriaDescribedby: Signal<string | null>;
-    protected readonly fieldAriaLabelledby: Signal<string | null>;
-    readonly format: _angular_core.InputSignalWithTransform<string | undefined, string | null | undefined>;
+    protected readonly fieldAriaDescribedby: Signal<null | string>;
+    protected readonly fieldAriaLabelledby: Signal<null | string>;
+    readonly format: _angular_core.InputSignalWithTransform<string | undefined, null | string | undefined>;
     readonly id: _angular_core.InputSignal<string>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
     protected readonly isInvalid: () => boolean;
     readonly max: _angular_core.InputSignalWithTransform<Date | undefined, unknown>;
     readonly min: _angular_core.InputSignalWithTransform<Date | undefined, unknown>;
-    protected readonly nativeMax: Signal<string | null>;
-    protected readonly nativeMin: Signal<string | null>;
+    protected readonly nativeMax: Signal<null | string>;
+    protected readonly nativeMin: Signal<null | string>;
     protected onBlur(): void;
     protected onInput(): void;
     protected onKeydown(event: KeyboardEvent): void;
@@ -57,7 +57,7 @@ export class HellDateInput implements FormValueControl<Date | null> {
 
 // @public
 export interface HellDateInputAdapter extends HellTypedInputAdapter<Date, HellDateInputAdapterContext> {
-    readonly placeholderHint?: (context: HellDateInputAdapterContext) => string | null;
+    readonly placeholderHint?: (context: HellDateInputAdapterContext) => null | string;
 }
 
 // @public

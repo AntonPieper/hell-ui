@@ -25,8 +25,8 @@ export class HellTimePicker {
             value: number;
             disabled: boolean;
         }[];
-        selectedValue: number | null;
-        activeValue: number | null;
+        selectedValue: null | number;
+        activeValue: null | number;
     }[]>;
     protected readonly current: _angular_core.Signal<HellTimeValue | null>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
@@ -61,7 +61,7 @@ export interface HellTimePickerLabels {
 }
 
 // @public
-export type HellTimePickerPart = 'root' | 'header' | 'readout' | 'columns' | 'column' | 'columnLabel' | 'options' | 'option';
+export type HellTimePickerPart = 'column' | 'columnLabel' | 'columns' | 'header' | 'option' | 'options' | 'readout' | 'root';
 
 // @public
 export type HellTimePickerUi = HellUi<HellTimePickerPart>;

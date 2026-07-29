@@ -11,7 +11,7 @@ import { HellUiInput } from 'hell-ui/core';
 export class HellSkeleton {
     readonly height: _angular_core.InputSignal<string>;
     protected readonly part: (part: "root") => string;
-    readonly shape: _angular_core.InputSignal<"text" | "circle" | "rect">;
+    readonly shape: _angular_core.InputSignal<"circle" | "rect" | "text">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     readonly width: _angular_core.InputSignal<string>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSkeleton, "[hellSkeleton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "width": { "alias": "width"; "required": false; "isSignal": true; }; "height": { "alias": "height"; "required": false; "isSignal": true; }; "shape": { "alias": "shape"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;

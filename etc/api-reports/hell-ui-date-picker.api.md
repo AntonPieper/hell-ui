@@ -17,14 +17,14 @@ export const HELL_DATE_PICKER_LABELS: InjectionToken<HellLabels<HellDatePickerLa
 
 // @public
 export class HellDatePicker {
-    protected readonly activeOptionIndex: Signal<number | null>;
+    protected readonly activeOptionIndex: Signal<null | number>;
     protected readonly label: Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected readonly labelSegments: Signal<{
-        readonly type: "month" | "year" | "literal";
+        readonly type: "literal" | "month" | "year";
         readonly value: string;
     }[]>;
-    readonly locale: i0.InputSignal<string | null>;
+    readonly locale: i0.InputSignal<null | string>;
     protected readonly nextPageDisabled: Signal<boolean>;
     protected readonly nextPageLabel: Signal<string>;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
@@ -37,7 +37,7 @@ export class HellDatePicker {
         readonly index: number;
         readonly value: number;
         readonly label: string;
-        readonly name: string | null;
+        readonly name: null | string;
         readonly selected: boolean;
         readonly today: boolean;
         readonly disabled: boolean;
@@ -49,7 +49,7 @@ export class HellDatePicker {
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;
     readonly ui: i0.InputSignal<HellUiInput<HellDatePickerPart>>;
-    protected readonly view: Signal<"month" | "year" | "day">;
+    protected readonly view: Signal<"day" | "month" | "year">;
     protected readonly weekdayLabels: Signal<{
         readonly abbr: string;
         readonly narrow: string;
@@ -81,7 +81,7 @@ export class HellDatePickerNextYear {
 }
 
 // @public
-export type HellDatePickerPart = 'root' | 'header' | 'nav' | 'navButton' | 'label' | 'monthTrigger' | 'yearTrigger' | 'grid' | 'weekdayHeader' | 'cell' | 'dateButton' | 'panel' | 'panelCell' | 'panelOption';
+export type HellDatePickerPart = 'cell' | 'dateButton' | 'grid' | 'header' | 'label' | 'monthTrigger' | 'nav' | 'navButton' | 'panel' | 'panelCell' | 'panelOption' | 'root' | 'weekdayHeader' | 'yearTrigger';
 
 // @public
 export class HellDatePickerPreviousYear {
@@ -98,14 +98,14 @@ export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
 // @public
 export class HellDateRangePicker {
-    protected readonly activeOptionIndex: Signal<number | null>;
+    protected readonly activeOptionIndex: Signal<null | number>;
     protected readonly label: Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected readonly labelSegments: Signal<{
-        readonly type: "month" | "year" | "literal";
+        readonly type: "literal" | "month" | "year";
         readonly value: string;
     }[]>;
-    readonly locale: i0.InputSignal<string | null>;
+    readonly locale: i0.InputSignal<null | string>;
     protected readonly nextPageDisabled: Signal<boolean>;
     protected readonly nextPageLabel: Signal<string>;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
@@ -118,7 +118,7 @@ export class HellDateRangePicker {
         readonly index: number;
         readonly value: number;
         readonly label: string;
-        readonly name: string | null;
+        readonly name: null | string;
         readonly selected: boolean;
         readonly today: boolean;
         readonly disabled: boolean;
@@ -131,7 +131,7 @@ export class HellDateRangePicker {
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;
     readonly ui: i0.InputSignal<HellUiInput<HellDatePickerPart>>;
-    protected readonly view: Signal<"month" | "year" | "day">;
+    protected readonly view: Signal<"day" | "month" | "year">;
     protected readonly weekdayLabels: Signal<{
         readonly abbr: string;
         readonly narrow: string;

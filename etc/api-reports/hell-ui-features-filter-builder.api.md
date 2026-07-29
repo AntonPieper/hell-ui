@@ -25,11 +25,11 @@ export interface HellFilter<TField extends string = string, TOperator extends st
 
 // @public
 export class HellFilterBuilder<TFilter extends HellFilter = HellFilter> {
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
+    readonly ariaLabel: _angular_core.InputSignal<null | string>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly fields: _angular_core.InputSignal<readonly HellFilterFieldDescriptor<TFilter>[]>;
     readonly identify: _angular_core.InputSignal<HellFilterIdentity<TFilter>>;
-    readonly placeholder: _angular_core.InputSignal<string | null>;
+    readonly placeholder: _angular_core.InputSignal<null | string>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellFilterBuilderPart>>;
     readonly value: _angular_core.InputSignal<readonly TFilter[]>;
     readonly valueChange: _angular_core.OutputEmitterRef<readonly TFilter[]>;
@@ -71,7 +71,7 @@ export interface HellFilterBuilderLabels {
 }
 
 // @public
-export type HellFilterBuilderPart = 'root' | 'tokens' | 'token' | 'tokenLabel' | 'tokenField' | 'tokenOperator' | 'tokenValue' | 'control' | 'panel' | 'fieldOption' | 'editor' | 'clear' | 'live';
+export type HellFilterBuilderPart = 'clear' | 'control' | 'editor' | 'fieldOption' | 'live' | 'panel' | 'root' | 'token' | 'tokenField' | 'tokenLabel' | 'tokenOperator' | 'tokenValue' | 'tokens';
 
 // @public
 export type HellFilterBuilderUi = HellUi<HellFilterBuilderPart>;
@@ -97,7 +97,7 @@ export interface HellFilterFieldDescriptor<TFilter extends HellFilter = HellFilt
 export type HellFilterIdentity<TFilter extends HellFilter = HellFilter> = (filter: TFilter) => HellFilterIdentityValue;
 
 // @public
-export type HellFilterIdentityValue = string | number;
+export type HellFilterIdentityValue = number | string;
 
 // (No @packageDocumentation comment for this package)
 

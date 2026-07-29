@@ -16,7 +16,7 @@ export class HellButton {
     readonly block: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected disabledAnchorTabIndex(): -1 | null;
     readonly iconOnly: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    protected nativeButtonType(): string | null;
+    protected nativeButtonType(): null | string;
     protected readonly part: (part: "root") => string;
     protected preventDisabledAnchor(event: Event): void;
     readonly size: _angular_core.InputSignal<HellSize>;

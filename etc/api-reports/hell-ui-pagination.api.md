@@ -35,7 +35,7 @@ export class HellPageLink {
 }
 
 // @public
-export type HellPageLinkTarget = 'first' | 'previous' | 'next' | 'last' | number;
+export type HellPageLinkTarget = 'first' | 'last' | 'next' | 'previous' | number;
 
 // @public
 export class HellPagination {
@@ -73,7 +73,7 @@ export class HellPaginationStrip {
 }
 
 // @public
-export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph';
+export type HellPaginationStripPart = 'control' | 'controlGlyph' | 'root';
 
 // @public
 export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;

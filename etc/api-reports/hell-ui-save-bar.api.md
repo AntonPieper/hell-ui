@@ -49,7 +49,7 @@ export interface HellSaveBarLabels {
 export type HellSaveBarMode = 'contextual' | 'persistent';
 
 // @public
-export type HellSaveBarPart = 'root' | 'message' | 'actions' | 'save' | 'discard';
+export type HellSaveBarPart = 'actions' | 'discard' | 'message' | 'root' | 'save';
 
 // @public
 export type HellSaveBarSaveType = 'button' | 'submit';

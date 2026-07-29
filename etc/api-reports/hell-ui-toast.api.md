@@ -36,7 +36,7 @@ export class HellToaster {
 }
 
 // @public
-export type HellToasterPart = 'root' | 'region' | 'viewport' | 'list' | 'toast' | 'glyph' | 'body' | 'title' | 'description' | 'action' | 'close' | 'toolbar' | 'dismissAll';
+export type HellToasterPart = 'action' | 'body' | 'close' | 'description' | 'dismissAll' | 'glyph' | 'list' | 'region' | 'root' | 'title' | 'toast' | 'toolbar' | 'viewport';
 
 // @public
 export type HellToasterUi = HellUi<HellToasterPart>;
@@ -65,7 +65,7 @@ export interface HellToastOptions {
 }
 
 // @public
-export type HellToastPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+export type HellToastPosition = 'bottom-center' | 'bottom-left' | 'bottom-right' | 'top-center' | 'top-left' | 'top-right';
 
 // @public
 export interface HellToastRef {
@@ -90,18 +90,18 @@ export class HellToastService {
 // @public
 export interface HellToastUpdate {
     action?: HellToastAction | null;
-    description?: string | null;
+    description?: null | string;
     dismissible?: boolean;
     duration?: number;
     template?: TemplateRef<{
         $implicit: HellToastRef;
     }> | null;
-    title?: string | null;
+    title?: null | string;
     variant?: HellToastVariant;
 }
 
 // @public
-export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
+export type HellToastVariant = 'danger' | 'default' | 'info' | 'success' | 'warning';
 
 // (No @packageDocumentation comment for this package)
 

@@ -17,7 +17,7 @@ export const HELL_SEARCH_IMPORTS: readonly [typeof HellSearch, typeof HellSearch
 export class HellInput {
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellInput, "input[hellInput]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellInput, never>;
@@ -44,7 +44,7 @@ export class HellTextarea {
     readonly autoGrow: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "autoGrow": { "alias": "autoGrow"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;

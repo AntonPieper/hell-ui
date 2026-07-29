@@ -16,7 +16,7 @@ export const HELL_EMPTY_STATE_IMPORTS: readonly [typeof HellEmptyState, typeof H
 
 // @public
 export class HellEmptyState {
-    readonly description: i0.InputSignal<string | null>;
+    readonly description: i0.InputSignal<null | string>;
     readonly glyph: i0.InputSignal<HellEmptyStateGlyph | null>;
     protected readonly hasActions: i0.Signal<boolean>;
     protected readonly hasCustomDescription: i0.Signal<boolean>;
@@ -24,7 +24,7 @@ export class HellEmptyState {
     protected readonly hasCustomTitle: i0.Signal<boolean>;
     readonly headingLevel: i0.InputSignal<HellEmptyStateHeadingLevel | null>;
     protected readonly part: (part: HellEmptyStatePart) => string;
-    readonly title: i0.InputSignal<string | null>;
+    readonly title: i0.InputSignal<null | string>;
     readonly ui: i0.InputSignal<HellUiInput<HellEmptyStatePart>>;
     static ɵcmp: i0.ɵɵComponentDeclaration<HellEmptyState, "hell-empty-state", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "glyph": { "alias": "glyph"; "required": false; "isSignal": true; }; "title": { "alias": "title"; "required": false; "isSignal": true; }; "description": { "alias": "description"; "required": false; "isSignal": true; }; "headingLevel": { "alias": "headingLevel"; "required": false; "isSignal": true; }; }, {}, ["customMedia", "customTitle", "customDescription", "customActions"], ["[hellEmptyStateMedia]", "[hellEmptyStateTitle]", "[hellEmptyStateDescription]", "[hellEmptyStateActions]"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellEmptyState, never>;
@@ -49,7 +49,7 @@ export class HellEmptyStateDescription {
 }
 
 // @public
-export type HellEmptyStateGlyph = 'noData' | 'noResults' | 'error' | 'forbidden';
+export type HellEmptyStateGlyph = 'error' | 'forbidden' | 'noData' | 'noResults';
 
 // @public
 export type HellEmptyStateHeadingLevel = 2 | 3 | 4 | 5 | 6;
@@ -61,7 +61,7 @@ export class HellEmptyStateMedia {
 }
 
 // @public
-export type HellEmptyStatePart = 'root' | 'media' | 'title' | 'description' | 'actions';
+export type HellEmptyStatePart = 'actions' | 'description' | 'media' | 'root' | 'title';
 
 // @public
 export class HellEmptyStateTitle {

@@ -56,9 +56,9 @@ export class HellAppShell implements OnDestroy {
     closeMobilePanels(): void;
     ngOnDestroy(): void;
     protected readonly part: (part: "root") => string;
-    readonly secondaryHidden: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
+    readonly secondaryHidden: i0.InputSignalWithTransform<boolean | null, boolean | null | string | undefined>;
     readonly secondaryHiddenChange: i0.OutputEmitterRef<boolean>;
-    readonly sidenavCollapsed: i0.InputSignalWithTransform<boolean | null, string | boolean | null | undefined>;
+    readonly sidenavCollapsed: i0.InputSignalWithTransform<boolean | null, boolean | null | string | undefined>;
     readonly sidenavCollapsedChange: i0.OutputEmitterRef<boolean>;
     toggleSecondary(): void;
     toggleSidenav(): void;

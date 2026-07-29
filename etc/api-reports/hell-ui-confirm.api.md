@@ -21,19 +21,19 @@ export interface HellConfirmLabels {
 
 // @public
 export interface HellPrompt {
-    choose<TValue>(prompt: string | Readonly<{
+    choose<TValue>(prompt: Readonly<{
         title: string;
         description?: string;
-    }>, actions: ReadonlyArray<HellPromptAction<TValue>>, options?: Readonly<{
+    }> | string, actions: ReadonlyArray<HellPromptAction<TValue>>, options?: Readonly<{
         anchor?: HTMLElement;
         placement?: Placement;
     }>): Promise<TValue | null>;
-    confirm(prompt: string | Readonly<{
+    confirm(prompt: Readonly<{
         title: string;
         description?: string;
-    }>, options?: Readonly<{
-        action?: Omit<HellPromptAction<boolean>, 'value' | 'dismissEquivalent'>;
-        cancelAction?: Omit<HellPromptAction<boolean>, 'value' | 'dismissEquivalent'>;
+    }> | string, options?: Readonly<{
+        action?: Omit<HellPromptAction<boolean>, 'dismissEquivalent' | 'value'>;
+        cancelAction?: Omit<HellPromptAction<boolean>, 'dismissEquivalent' | 'value'>;
         anchor?: HTMLElement;
         placement?: Placement;
     }>): Promise<boolean>;

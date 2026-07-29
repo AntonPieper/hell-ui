@@ -13,7 +13,7 @@ export const HELL_FIELD_IMPORTS: readonly [typeof HellField, typeof HellFieldLab
 
 // @public
 export class HellField {
-    readonly orientation: i0.InputSignal<"vertical" | "horizontal">;
+    readonly orientation: i0.InputSignal<"horizontal" | "vertical">;
     protected readonly part: (part: "root") => string;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellField, "[hellField]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpFormField; inputs: {}; outputs: {}; }]>;

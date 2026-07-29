@@ -32,7 +32,7 @@ export class HellPageHeader {
 
 // @public
 export class HellPageHeaderBack {
-    readonly ariaLabel: i0.InputSignal<string | null>;
+    readonly ariaLabel: i0.InputSignal<null | string>;
     readonly back: i0.OutputEmitterRef<void>;
     protected readonly part: (part: "root") => string;
     protected readonly resolvedLabel: i0.Signal<string>;
@@ -68,7 +68,7 @@ export class HellPageHeaderMeta {
 }
 
 // @public
-export type HellPageHeaderPart = 'root' | 'leading' | 'titleGroup' | 'title' | 'meta' | 'description' | 'toolbar';
+export type HellPageHeaderPart = 'description' | 'leading' | 'meta' | 'root' | 'title' | 'titleGroup' | 'toolbar';
 
 // @public
 export class HellPageHeaderTitle {

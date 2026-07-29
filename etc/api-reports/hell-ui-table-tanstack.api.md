@@ -31,7 +31,7 @@ export const HELL_TABLE_STATUS_VIEWS: InjectionToken<HellTableStatusViews>;
 export const HELL_TANSTACK_TABLE_IMPORTS: readonly [typeof HellTanStackTable, typeof HellTableShellHeader, typeof HellTableShellCell, typeof HellTableShellFooterCell, typeof HellTableShellExpandedRow, typeof HellTableShellLoading, typeof HellTableShellEmpty, typeof HellTableShellError, typeof HellTableShellToolbar, typeof HellTableShellFooter, typeof HellTanStackPagination, typeof HellTanStackGlobalFilter, typeof HellTanStackColumnFilter, typeof FlexRenderDirective];
 
 // @public
-export type HellClassValue = string | readonly string[] | Readonly<Record<string, boolean | null | undefined>> | null | undefined;
+export type HellClassValue = Readonly<Record<string, boolean | null | undefined>> | null | readonly string[] | string | undefined;
 
 // @public (undocumented)
 export class HellDefaultTableEmptyState {
@@ -176,12 +176,12 @@ export const HellTableStatus: {
 
 // @public (undocumented)
 export type HellTableStatusValue = {
-    readonly kind: 'ready';
+    readonly kind: 'error';
+    readonly error: unknown;
 } | {
     readonly kind: 'loading';
 } | {
-    readonly kind: 'error';
-    readonly error: unknown;
+    readonly kind: 'ready';
 };
 
 // @public (undocumented)
@@ -262,7 +262,7 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
 }
 
 // @public
-export type HellTanStackPaginationPart = 'root' | 'pageSize';
+export type HellTanStackPaginationPart = 'pageSize' | 'root';
 
 // @public
 export type HellTanStackPaginationUi = HellUi<HellTanStackPaginationPart>;
@@ -279,9 +279,9 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     protected bodyItems(): readonly ɵHellTanStackBodyItem<TData>[];
     // (undocumented)
-    protected readonly bodyStrategy: ɵHellTanStackBodyStrategy<TData> | null;
+    protected readonly bodyStrategy: null | ɵHellTanStackBodyStrategy<TData>;
     // (undocumented)
-    protected bodyStrategyBridge(): ɵHellTanStackBodyStrategy | null;
+    protected bodyStrategyBridge(): null | ɵHellTanStackBodyStrategy;
     // (undocumented)
     protected cellClass(cell: Cell<TData, unknown>): string;
     // (undocumented)
@@ -290,9 +290,9 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     protected cellTemplateFor(cell: Cell<TData, unknown>): HellTableShellCell<TData, unknown> | null;
     protected columnResizingEnabled(): boolean;
     // (undocumented)
-    protected columnSize(column: Column<TData, unknown>): number | null;
+    protected columnSize(column: Column<TData, unknown>): null | number;
     // (undocumented)
-    protected readonly displayState: i0.Signal<"ready" | "loading" | "error" | "empty">;
+    protected readonly displayState: i0.Signal<"empty" | "error" | "loading" | "ready">;
     // (undocumented)
     protected emptyTemplate(): HellTableShellEmpty | null;
     // (undocumented)
@@ -330,7 +330,7 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     protected loadingTemplate(): HellTableShellLoading | null;
     protected readonly part: (part: HellTanStackTablePart) => string;
     // (undocumented)
-    protected pinnedAfter(column: Column<TData, unknown>): number | null;
+    protected pinnedAfter(column: Column<TData, unknown>): null | number;
     // (undocumented)
     protected pinnedFirst(column: Column<TData, unknown>): 'true' | null;
     // (undocumented)
@@ -338,13 +338,13 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     protected pinnedSide(column: Column<TData, unknown>): 'left' | 'right' | null;
     // (undocumented)
-    protected pinnedStart(column: Column<TData, unknown>): number | null;
+    protected pinnedStart(column: Column<TData, unknown>): null | number;
     // (undocumented)
     protected readonly providerViews: HellTableStatusViews;
     protected resizeAdapterFor(header: Header<TData, unknown>): HellTableResizeAdapter | null;
     protected resizeHandleLabel(header: Header<TData, unknown>): string;
     // (undocumented)
-    readonly rowClass: i0.InputSignal<HellClassValue | ((row: Row<TData>) => HellClassValue)>;
+    readonly rowClass: i0.InputSignal<((row: Row<TData>) => HellClassValue) | HellClassValue>;
     // (undocumented)
     protected rowClassValue(row: Row<TData>): string;
     // (undocumented)
@@ -360,7 +360,7 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     readonly table: i0.InputSignal<Table<TData>>;
     // (undocumented)
-    protected tableTotalSize(): number | null;
+    protected tableTotalSize(): null | number;
     // (undocumented)
     protected toggleSorting(header: Header<TData, unknown>, event: MouseEvent): void;
     readonly ui: i0.InputSignal<HellUiInput<HellTanStackTablePart>>;
@@ -371,7 +371,7 @@ export class HellTanStackTable<TData extends RowData = RowData> {
 }
 
 // @public
-export type HellTanStackTablePart = 'root' | 'toolbar' | 'footer' | 'scrollport';
+export type HellTanStackTablePart = 'footer' | 'root' | 'scrollport' | 'toolbar';
 
 // @public
 export type HellTanStackTableUi = HellUi<HellTanStackTablePart>;
@@ -387,9 +387,9 @@ export class ɵHellDomWriter {
     // (undocumented)
     cleanup(_el?: HTMLElement): void;
     // (undocumented)
-    cssVar(el: HTMLElement, name: string, value: string | null | undefined): void;
+    cssVar(el: HTMLElement, name: string, value: null | string | undefined): void;
     // (undocumented)
-    data(el: HTMLElement, name: string, value: string | null | undefined): void;
+    data(el: HTMLElement, name: string, value: null | string | undefined): void;
 }
 
 // @public
@@ -404,7 +404,7 @@ export class ɵHellTanStackBodyConnector implements AfterViewInit, OnChanges, On
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<ɵHellTanStackBodyStrategy<unknown> | null>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyConnector, "[hellTanStackInternalBody]", never, { "strategy": { "alias": "hellTanStackInternalBody"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyConnector, never>;
 }
@@ -430,13 +430,13 @@ export class ɵHellTanStackBodyItemConnector implements AfterViewInit, OnChanges
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<ɵHellTanStackBodyStrategy<unknown> | null>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyItemConnector, "[hellTanStackInternalBodyItemConnector]", never, { "strategy": { "alias": "hellTanStackInternalBodyItemConnector"; "required": false; "isSignal": true; }; "item": { "alias": "hellTanStackInternalBodyItem"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyItemConnector, never>;
 }
 
 // @public (undocumented)
-export type ɵHellTanStackBodyItemKind = 'row' | 'expanded';
+export type ɵHellTanStackBodyItemKind = 'expanded' | 'row';
 
 // @public (undocumented)
 export class ɵHellTanStackBodyScrollportConnector implements AfterViewInit, OnChanges, OnDestroy {
@@ -447,7 +447,7 @@ export class ɵHellTanStackBodyScrollportConnector implements AfterViewInit, OnC
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<ɵHellTanStackBodyStrategy<unknown> | null>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyScrollportConnector, "[hellTanStackInternalBodyScrollport]", never, { "strategy": { "alias": "hellTanStackInternalBodyScrollport"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyScrollportConnector, never>;
 }

@@ -21,14 +21,14 @@ export const HELL_OMNIBAR_LABELS: InjectionToken<HellLabels<HellOmnibarLabels>>;
 // @public
 export class HellOmnibar {
     constructor();
-    protected readonly activeDescendantId: _angular_core.Signal<string | null>;
+    protected readonly activeDescendantId: _angular_core.Signal<null | string>;
     readonly ariaLabel: _angular_core.InputSignal<string>;
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     floatingContainer(): HTMLElement;
     focus(): void;
     protected readonly hasActions: _angular_core.Signal<boolean>;
     protected readonly hasListboxResults: _angular_core.Signal<boolean>;
-    readonly hotkey: _angular_core.InputSignal<string | null>;
+    readonly hotkey: _angular_core.InputSignal<null | string>;
     protected readonly inputId: string;
     protected readonly isEmpty: _angular_core.Signal<boolean>;
     protected readonly isOpen: _angular_core.Signal<boolean>;
@@ -51,7 +51,7 @@ export class HellOmnibar {
     protected readonly part: (part: HellOmnibarPart) => string;
     readonly placeholder: _angular_core.InputSignal<string>;
     readonly query: _angular_core.ModelSignal<string>;
-    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
     readonly submit: _angular_core.OutputEmitterRef<HellOmnibarSubmitEvent<unknown>>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOmnibarPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "query": { "alias": "query"; "required": false; "isSignal": true; }; "open": { "alias": "open"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "query": "queryChange"; "open": "openChange"; "submit": "submit"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, never>;
@@ -79,7 +79,7 @@ export class HellOmnibarActionsStrip {
 }
 
 // @public
-export type HellOmnibarActivationSource = 'mouse' | 'keyboard';
+export type HellOmnibarActivationSource = 'keyboard' | 'mouse';
 
 // @public
 export class HellOmnibarGroup {
@@ -123,7 +123,7 @@ export interface HellOmnibarLabels {
 }
 
 // @public
-export type HellOmnibarPart = 'root' | 'control' | 'inputWrap' | 'input' | 'clear' | 'panel' | 'actions' | 'results';
+export type HellOmnibarPart = 'actions' | 'clear' | 'control' | 'input' | 'inputWrap' | 'panel' | 'results' | 'root';
 
 // @public
 export interface HellOmnibarSubmitEvent<T = unknown> {

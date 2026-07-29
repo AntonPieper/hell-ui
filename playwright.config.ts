@@ -26,6 +26,7 @@ type E2eTier = (typeof E2E_TIERS)[number];
 const ENGINE_SENSITIVE_SUITES: readonly string[] = [
   // Focus and keyboard semantics: focus traps and restoration, outside-focus
   // dismissal, Tab traversal, and selection-follows-focus differ per engine.
+  'control-group-contracts.spec.ts',
   'floating-dismissal.spec.ts',
   'listbox-a11y-contracts.spec.ts',
   'menu-select-combobox-keyboard.spec.ts',
