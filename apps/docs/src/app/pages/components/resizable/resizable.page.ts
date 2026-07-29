@@ -196,7 +196,9 @@ import resizableStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
           <li>
             <code>rescaleOnResize</code>: <code>boolean</code>. When <code>true</code>, container
             size changes rebalance panes to fit; set <code>false</code> to freeze explicit pixel
-            sizes across container resizes. Default <code>true</code>.
+            sizes across container resizes. Freezing opts out of the hidden-pane rule above too — a
+            frozen group keeps reserving the width a hidden pane last held. Default
+            <code>true</code>.
           </li>
           <li>
             <code>ui</code>: <code>HellUiInput&lt;'root'&gt;</code> — shorthand string or

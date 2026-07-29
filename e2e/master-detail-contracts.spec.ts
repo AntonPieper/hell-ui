@@ -41,8 +41,10 @@ async function fillsFrame(
     const panes = rendered.filter((box) => box.matches('[hellMasterPane]'));
     const widest = Math.max(...panes.map((pane) => pane.getBoundingClientRect().width));
     return {
-      // Sub-pixel layout rounds either way, so only a whole pixel counts.
-      deadStrip: Math.max(0, Math.round(frame.clientWidth - covered)),
+      // Signed, so boxes that together overrun the frame fail as loudly as ones
+      // that leave it short. Sub-pixel layout rounds either way, so only a whole
+      // pixel counts, and `+ 0` keeps a rounded-down overrun from reporting -0.
+      deadStrip: Math.round(frame.clientWidth - covered) + 0,
       paneEscapesFrame: Math.round(widest - frame.clientWidth) > 0,
     };
   });

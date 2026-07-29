@@ -64,11 +64,23 @@ function hellElementDirection(element: HTMLElement): HellResizeDirection {
 }
 
 /**
- * Whether a pane still generates a box, and therefore still takes part in the
- * group's flex line. A pane hidden by an outer module — Master Detail hides the
- * inactive pane in a compact frame — is `display: none` and occupies no width,
- * so any size distributed to it becomes a strip of the group that nothing can
- * render into.
+ * Whether a pane still takes part in the group's flex line. A pane hidden by an
+ * outer module — Master Detail hides the inactive pane in a compact frame — is
+ * `display: none` and occupies no width, so any size distributed to it becomes a
+ * strip of the group that nothing can render into.
+ *
+ * This reads the pane's own computed `display` rather than asking whether it
+ * generates a box (`getClientRects()`), which keeps the check meaningful under a
+ * DOM implementation that has no layout: the unit tests can then hide a pane the
+ * way a consumer does instead of stubbing rectangles. Two blind spots come with
+ * that, both harmless here:
+ *
+ * - A pane hidden by an ancestor between it and the group still reads as laid
+ *   out. Panes are the group's own flex items, so such an ancestor takes the
+ *   group down with it and `availableSize()` returns 0, which stops the fit one
+ *   step earlier.
+ * - `content-visibility: hidden` skips a pane's contents but keeps its box, and
+ *   the box is what the split is about, so counting it is correct.
  */
 function hellIsPaneLaidOut(host: HTMLElement): boolean {
   const view = host.ownerDocument.defaultView;
@@ -216,9 +228,9 @@ class HellResizableController {
     if (!this.rescaleOnResize()) return;
     if (!this.panes.length) return;
 
-    // Only panes that generate a box share the group's size. When every pane is
-    // out of layout the group itself is hidden, and nothing about its split is
-    // known yet, so committed sizes are left exactly as they are.
+    // Only panes that generate a box share the group's size. With none of them
+    // in layout there is no split to describe — whether the group is hidden or
+    // everything inside it is — so committed sizes are left exactly as they are.
     const panes = this.panes.filter((pane) => hellIsPaneLaidOut(pane.host));
     if (!panes.length) return;
 
@@ -233,9 +245,11 @@ class HellResizableController {
 
     // One pane in layout has nothing to split against. It fills the group on
     // its own, and the split the group had is parked rather than overwritten
-    // with a width that only describes this narrower frame.
+    // with a width that only describes this narrower frame. No handle can find
+    // a pair in that state, so the group reports itself unresizable and its
+    // handles stop being interactive until a second pane is back in layout.
     if (panes.length < 2) {
-      this.constrained.set(available < panes[0].minSize());
+      this.constrained.set(true);
       this.parkPane(panes[0]);
       panes[0].setEffectiveMinSize(available);
       return;

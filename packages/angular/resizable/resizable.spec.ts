@@ -1,5 +1,5 @@
 import { provideHellLabels } from 'hell-ui/core';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_RESIZABLE_IMPORTS, type HellResizableHandleUi, HELL_RESIZABLE_LABELS } from './resizable';
@@ -45,6 +45,25 @@ class ResizableLabelContractHost {}
 })
 class ResizablePairHost {}
 
+/** A group whose last pane can leave the DOM, so registration teardown is observable. */
+@Component({
+  imports: [...HELL_RESIZABLE_IMPORTS],
+  template: `
+    <div id="toggle-group" hellResizable>
+      <section id="toggle-a" hellResizablePane [minSize]="40">A</section>
+      <div id="toggle-handle-a" hellResizableHandle></div>
+      <section id="toggle-b" hellResizablePane [minSize]="40">B</section>
+      @if (thirdPane()) {
+        <div id="toggle-handle-b" hellResizableHandle></div>
+        <section id="toggle-c" hellResizablePane [minSize]="40">C</section>
+      }
+    </div>
+  `,
+})
+class ResizableToggleHost {
+  readonly thirdPane = signal(true);
+}
+
 @Component({
   imports: [...HELL_RESIZABLE_IMPORTS],
   template: `
@@ -74,7 +93,13 @@ describe('HellResizable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResizableHost, ResizableLabelContractHost, ResizablePairHost, ResizableUiHost],
+      imports: [
+        ResizableHost,
+        ResizableLabelContractHost,
+        ResizablePairHost,
+        ResizableToggleHost,
+        ResizableUiHost,
+      ],
     }).compileComponents();
   });
 
@@ -381,19 +406,72 @@ describe('HellResizable', () => {
     expect(paneMinSize(primary)).toBe('310px');
     expect(paneFlex(detail)).toBe('1 1 0');
 
-    // A handle whose partner is out of layout has no pair to move.
-    handle.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
+    // A handle whose partner is out of layout has no pair to move, so it stops
+    // offering itself as one: it leaves the tab order and reports disabled
+    // rather than swallowing arrow keys that now do nothing.
+    fixture.detectChanges();
+    expect(handle.getAttribute('aria-disabled')).toBe('true');
+    expect(handle.getAttribute('tabindex')).toBe('-1');
+    const arrow = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
+    handle.dispatchEvent(arrow);
+    expect(arrow.defaultPrevented).toBe(false);
     expect(paneFlex(primary)).toBe('1 1 0');
 
     showPane(detail, 344);
     groupWidth.mockReturnValue(900);
     resizeObserverFor(group).trigger();
     flushFrames(scheduled);
+    fixture.detectChanges();
 
     expect(paneFlex(primary)).toBe('0 0 556px');
     expect(paneFlex(detail)).toBe('0 0 344px');
+    expect(handle.getAttribute('aria-disabled')).toBe(null);
+    expect(handle.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('stops observing a removed pane and refits the group without it', async () => {
+    // A pane leaving the DOM refits on a microtask rather than a frame, so no
+    // scheduled frame has to be flushed here.
+    stubResizeFrames();
+    const fixture = TestBed.createComponent(ResizableToggleHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'toggle-group');
+    const paneA = byId(fixture.nativeElement, 'toggle-a');
+    const paneB = byId(fixture.nativeElement, 'toggle-b');
+    const paneC = byId(fixture.nativeElement, 'toggle-c');
+    vi.spyOn(group, 'clientWidth', 'get').mockReturnValue(300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    byId(fixture.nativeElement, 'toggle-handle-a').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    const observer = resizeObserverFor(group);
+    expect(observer.targets.has(paneC)).toBe(true);
+
+    fixture.componentInstance.thirdPane.set(false);
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(observer.targets.has(paneC)).toBe(false);
+    expect(panePixelSize(paneA) + panePixelSize(paneB)).toBeCloseTo(300, 5);
+
+    fixture.componentInstance.thirdPane.set(true);
+    fixture.detectChanges();
+    const restored = byId(fixture.nativeElement, 'toggle-c');
+    mockElementSize(restored, 0);
+    await Promise.resolve();
+
+    expect(observer.targets.has(restored)).toBe(true);
+    expect(
+      panePixelSize(paneA) + panePixelSize(paneB) + panePixelSize(restored),
+    ).toBeCloseTo(300, 5);
   });
 
   it('keeps a single laid-out pane inside a frame narrower than its own minimum', () => {
