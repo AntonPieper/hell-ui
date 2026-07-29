@@ -468,6 +468,25 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
           ).toBeVisible();
         },
       },
+      {
+        // The rail is virtualized: a `role="list"` of mounted cells carrying
+        // `aria-posinset`/`aria-setsize` inside the rail's landmark. Closed, no
+        // automated pass ever sees that structure.
+        name: 'PDF viewer page overview open',
+        include: ['app-pdf-viewer-basic-example hell-pdf-viewer'],
+        prepare: async (page) => {
+          const example = page.locator('app-pdf-viewer-basic-example');
+          await page.locator('hd-example-tabs', { has: example }).getByRole('tab', {
+            name: 'Preview',
+          }).click();
+          const viewer = example.locator('hell-pdf-viewer');
+          await expect(viewer.locator('.pdfViewer .page').first()).toBeVisible();
+          await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+          await expect(
+            viewer.locator('aside[data-slot="sidebar"] [role="listitem"]').first(),
+          ).toBeVisible();
+        },
+      },
     ],
   },
 };

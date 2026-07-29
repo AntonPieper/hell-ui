@@ -9,11 +9,16 @@ import type {
   HellPdfRuntimePort,
   HellPdfSource,
 } from './pdf-viewer.runtime';
+import {
+  PDF_OVERVIEW_ESTIMATED_ITEM_SIZE,
+  PDF_OVERVIEW_UNMEASURED_PAGES,
+} from './pdf-viewer.utils';
 import { sortClasses } from '../../spec-helpers';
 
 class FakePdfRuntime implements HellPdfRuntimePort {
   hasDocument = false;
   currentScale = 1;
+  pageCount = 3;
   bootstrappedWith: HTMLDivElement | null = null;
   bootstrapOptions: { readonly worker?: unknown } | undefined;
   loadedSource: HellPdfSource | null = null;
@@ -34,7 +39,7 @@ class FakePdfRuntime implements HellPdfRuntimePort {
 
   async loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void> {
     this.loadedSource = src;
-    options.onLoaded(3);
+    options.onLoaded(this.pageCount);
     this.handlers?.onPagesReady();
   }
 
@@ -58,7 +63,15 @@ class FakePdfRuntime implements HellPdfRuntimePort {
   ): Promise<void> {
     this.printedWith = typeof options === 'object' ? options.fetch : undefined;
   }
-  async renderThumbs(): Promise<void> {}
+  private readonly renderedThumbs = new Set<number>();
+
+  async renderThumbs(canvases: readonly HTMLCanvasElement[]): Promise<void> {
+    for (const canvas of canvases) this.renderedThumbs.add(Number(canvas.dataset['page']));
+  }
+
+  renderedThumbPages(): readonly number[] {
+    return [...this.renderedThumbs];
+  }
 }
 
 @Component({
@@ -249,6 +262,201 @@ describe('HellPdfViewer', () => {
     expect(thumbnail.getAttribute('aria-current')).toBe('page');
   });
 
+  describe('page overview virtualization', () => {
+    // The workspace vitest config sets `restoreMocks`, so the prototype spies
+    // below are already reverted between tests; this is the same explicit
+    // restore the sibling PDF specs keep, so a config change cannot quietly
+    // leak a stubbed `clientHeight` into every test that follows.
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Pretend the rail has a real box: jsdom has no layout to measure. */
+    function stubRailLayout(): void {
+      vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(600);
+      vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(200);
+    }
+
+    async function openOverview(fixture: {
+      nativeElement: HTMLElement;
+      detectChanges(): void;
+      whenStable(): Promise<unknown>;
+    }): Promise<HTMLElement> {
+      (
+        fixture.nativeElement.querySelector(
+          'button[aria-label="Toggle page overview"]',
+        ) as HTMLButtonElement
+      ).click();
+      await settle(fixture);
+      return fixture.nativeElement.querySelector('aside[data-slot="sidebar"]') as HTMLElement;
+    }
+
+    function mountedPages(rail: HTMLElement): number[] {
+      return [...rail.querySelectorAll('[role="listitem"]')].map((cell) =>
+        Number(cell.getAttribute('data-page')),
+      );
+    }
+
+    function scrollRailTo(rail: HTMLElement, scrollTop: number): void {
+      Object.defineProperty(rail, 'scrollTop', {
+        value: scrollTop,
+        writable: true,
+        configurable: true,
+      });
+      rail.dispatchEvent(new Event('scroll'));
+    }
+
+    it('mounts a window rather than one button per page on a long document', async () => {
+      runtime.pageCount = 400;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+      const pages = mountedPages(rail);
+
+      expect(pages).toHaveLength(PDF_OVERVIEW_UNMEASURED_PAGES);
+      expect(pages.length).toBeLessThan(400);
+      expect(pages[0]).toBe(1);
+
+      // The track still claims the whole document's height, so the scrollbar
+      // describes four hundred pages even though six are mounted.
+      const track = rail.querySelector('[role="list"]') as HTMLElement;
+      expect(track.style.height).toBe(`${400 * PDF_OVERVIEW_ESTIMATED_ITEM_SIZE}px`);
+
+      // …and each mounted cell says where it sits, because the DOM no longer
+      // does that on its own.
+      const first = rail.querySelector('[role="listitem"]') as HTMLElement;
+      expect(first.getAttribute('aria-posinset')).toBe('1');
+      expect(first.getAttribute('aria-setsize')).toBe('400');
+    });
+
+    it('follows the rail scroll offset and keeps the current page mounted', async () => {
+      stubRailLayout();
+      runtime.pageCount = 400;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+      expect(mountedPages(rail)).toEqual([1, 2, 3, 4, 5, 6]);
+
+      scrollRailTo(rail, 20_000);
+      await settle(fixture);
+
+      const scrolled = mountedPages(rail);
+      expect(scrolled).toContain(100);
+      expect(scrolled.length).toBeLessThan(20);
+      // The current page is pinned wherever the window sits, so its
+      // `aria-current` never leaves the accessibility tree.
+      expect(scrolled).toContain(1);
+      expect(rail.querySelector('[aria-current="page"]')?.getAttribute('aria-label')).toBe(
+        'Go to page 1',
+      );
+    });
+
+    it('keeps a focused page button mounted after the rail scrolls away from it', async () => {
+      stubRailLayout();
+      runtime.pageCount = 400;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+      const third = rail.querySelectorAll<HTMLButtonElement>('[data-slot="thumb"]')[2];
+      third.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      await settle(fixture);
+
+      scrollRailTo(rail, 20_000);
+      await settle(fixture);
+
+      // Unmounting the focused button would drop focus to the document body.
+      expect(mountedPages(rail)).toContain(3);
+    });
+
+    it('scrolls the rail to a page the viewer jumped to', async () => {
+      stubRailLayout();
+      runtime.pageCount = 400;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+      Object.defineProperty(rail, 'scrollTop', { value: 0, writable: true, configurable: true });
+
+      const pageInput = fixture.nativeElement.querySelector(
+        '[data-slot="pageInput"]',
+      ) as HTMLInputElement;
+      pageInput.value = '300';
+      pageInput.dispatchEvent(new Event('change', { bubbles: true }));
+      await settle(fixture);
+
+      // Page 300 ends at 60000px; the shortest scroll that shows it fully in a
+      // 600px rail leaves its bottom edge on the bottom edge of the rail.
+      expect(rail.scrollTop).toBe(59_400);
+      expect(mountedPages(rail)).toContain(300);
+      expect(rail.querySelector('[aria-current="page"]')?.getAttribute('aria-label')).toBe(
+        'Go to page 300',
+      );
+    });
+
+    it('mounts no list at all before a document has loaded', async () => {
+      runtime.pageCount = 0;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+
+      // The toggle works before a document loads, and an empty `role="list"`
+      // would be a list claiming to contain nothing.
+      expect(rail).toBeInstanceOf(HTMLElement);
+      expect(rail.querySelector('[role="list"]')).toBeNull();
+      expect(mountedPages(rail)).toEqual([]);
+    });
+
+    it('leaves a user-chosen rail scroll position alone when the rail is resized', async () => {
+      stubRailLayout();
+      const resizes = stubResizeObserver();
+      runtime.pageCount = 400;
+
+      try {
+        const fixture = TestBed.createComponent(PdfViewerHost);
+        await settle(fixture);
+
+        const rail = await openOverview(fixture);
+        expect(resizes.observed()).toContain(rail);
+
+        scrollRailTo(rail, 20_000);
+        await settle(fixture);
+        expect(mountedPages(rail)).toContain(100);
+
+        // A resize remeasures the rail, which re-runs the effect that scrolls to
+        // the current page. The page has not moved, so the rail has to stay
+        // where the user left it rather than snapping back to page 1.
+        resizes.trigger(rail);
+        await settle(fixture);
+
+        expect(rail.scrollTop).toBe(20_000);
+        expect(mountedPages(rail)).toContain(100);
+      } finally {
+        resizes.restore();
+      }
+    });
+
+    it('renders thumbnails for the pages a scroll brought into the window', async () => {
+      stubRailLayout();
+      runtime.pageCount = 400;
+      const fixture = TestBed.createComponent(PdfViewerHost);
+      runtime.hasDocument = true;
+      await settle(fixture);
+
+      const rail = await openOverview(fixture);
+      await settle(fixture);
+      expect(runtime.renderedThumbPages()).toContain(1);
+
+      scrollRailTo(rail, 20_000);
+      await settle(fixture);
+
+      expect(runtime.renderedThumbPages()).toContain(100);
+    });
+  });
+
   it('announces PDF find status updates through a live region', async () => {
     const fixture = TestBed.createComponent(PdfViewerHost);
     await settle(fixture);
@@ -398,6 +606,54 @@ describe('HellPdfViewer', () => {
     expect(viewer.classList.contains('custom-toolbar')).toBe(false);
   });
 });
+
+/** jsdom has no ResizeObserver; the rail uses one to know when to remeasure. */
+function stubResizeObserver() {
+  const view = window as unknown as { ResizeObserver?: typeof ResizeObserver };
+  const previous = Object.getOwnPropertyDescriptor(view, 'ResizeObserver');
+  const instances: {
+    targets: Set<Element>;
+    notify: (entries: ResizeObserverEntry[]) => void;
+  }[] = [];
+
+  class TestResizeObserver {
+    private readonly targets = new Set<Element>();
+
+    constructor(notify: ResizeObserverCallback) {
+      instances.push({ targets: this.targets, notify: (entries) => notify(entries, this as never) });
+    }
+
+    observe(target: Element): void {
+      this.targets.add(target);
+    }
+
+    unobserve(target: Element): void {
+      this.targets.delete(target);
+    }
+
+    disconnect(): void {
+      this.targets.clear();
+    }
+  }
+
+  view.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+
+  return {
+    observed: () => instances.flatMap((entry) => [...entry.targets]),
+    // Only the observer watching this element: ng-primitives installs its own,
+    // and notifying that one with a synthetic entry list is not this test's
+    // business.
+    trigger: (target: Element) => {
+      for (const entry of instances) {
+        if (entry.targets.has(target)) entry.notify([{ target } as ResizeObserverEntry]);
+      }
+    },
+    restore: () => {
+      if (previous) Object.defineProperty(view, 'ResizeObserver', previous);
+      else delete view.ResizeObserver;
+    },
+  };
+}
 
 async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
   fixture.detectChanges();

@@ -10,7 +10,7 @@ import {
   type HellPdfPrintOptions,
   type HiddenPdfPrintHandle,
 } from './pdf-viewer.print';
-import { normalizeZoomEventValue } from './pdf-viewer.utils';
+import { PDF_THUMBNAIL_BOX, normalizeZoomEventValue } from './pdf-viewer.utils';
 
 /** Loaded document handle owned by the active runtime adapter. */
 export interface HellPdfDocumentHandle {
@@ -555,8 +555,14 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
   ): Promise<void> {
     const page = await (doc as HellPdfThumbnailDocumentHandle).getPage(pageNumber);
     const baseViewport = page.getViewport({ scale: 1 });
-    const targetW = 120;
-    const scale = targetW / baseViewport.width;
+    // Fit the page inside the thumbnail box rather than only matching its
+    // width: a landscape page scaled to 120px wide is short and a portrait one
+    // is tall, and rows of different heights would leave the rail's windowing
+    // measuring one page to place four hundred.
+    const scale = Math.min(
+      PDF_THUMBNAIL_BOX.width / baseViewport.width,
+      PDF_THUMBNAIL_BOX.height / baseViewport.height,
+    );
     const dpr = canvas.ownerDocument.defaultView?.devicePixelRatio || 1;
     const viewport = page.getViewport({ scale: scale * dpr });
     canvas.width = Math.floor(viewport.width);

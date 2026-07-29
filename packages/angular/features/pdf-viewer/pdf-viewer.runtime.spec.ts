@@ -14,6 +14,21 @@ import type {
 } from './pdf-viewer.adapter';
 
 describe('PDF Runtime', () => {
+  const mountedCanvases: HTMLCanvasElement[] = [];
+
+  afterEach(() => {
+    for (const canvas of mountedCanvases.splice(0)) canvas.remove();
+  });
+
+  /** An attached thumbnail canvas; the runtime skips detached ones on purpose. */
+  function mountedThumbCanvas(page: number): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.dataset['page'] = String(page);
+    document.body.append(canvas);
+    mountedCanvases.push(canvas);
+    return canvas;
+  }
+
   it('keeps download and print browser work behind the PDF Adapter seam', async () => {
     const printSession: HellPdfPrintSession = {
       cleanup: vi.fn(),
@@ -572,11 +587,140 @@ describe('PDF Runtime', () => {
       onLoaded: vi.fn(),
     });
 
-    const canvas = document.createElement('canvas');
-    canvas.dataset['page'] = '2';
+    const canvas = mountedThumbCanvas(2);
     await runtime.renderThumbs([canvas], () => true);
 
     expect(adapter.session.renderThumbnail).toHaveBeenCalledWith(doc, 2, canvas);
+  });
+
+  it('runs one thumbnail batch at a time', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
+    const doc = fakeDocument(400);
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    // A virtualized rail hands over a batch per scroll step. Hold the first
+    // render open and check the second batch waits rather than joining it.
+    let releaseFirst!: () => void;
+    let inFlight = 0;
+    let maxInFlight = 0;
+    adapter.session.renderThumbnail.mockImplementation(async () => {
+      maxInFlight = Math.max(maxInFlight, ++inFlight);
+      if (!releaseFirst) {
+        await new Promise<void>((resolve) => {
+          releaseFirst = resolve;
+        });
+      }
+      inFlight--;
+    });
+
+    const first = runtime.renderThumbs([mountedThumbCanvas(1)], () => true);
+    await Promise.resolve();
+    const second = runtime.renderThumbs([mountedThumbCanvas(2)], () => true);
+    await Promise.resolve();
+
+    expect(maxInFlight).toBe(1);
+
+    releaseFirst();
+    await Promise.all([first, second]);
+
+    expect(maxInFlight).toBe(1);
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not leave a blank thumbnail when a reload lands mid-batch', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
+
+    // pdf.js keeps a WeakSet of the canvases its live render tasks own and
+    // throws for a second render against one of them.
+    const drawing = new Set<HTMLCanvasElement>();
+    const paintedWith = new Map<HTMLCanvasElement, HellPdfDocumentHandle>();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    adapter.session.renderThumbnail.mockImplementation(
+      async (doc: HellPdfDocumentHandle, _page: number, canvas: HTMLCanvasElement) => {
+        if (drawing.has(canvas)) {
+          throw new Error('Cannot use the same canvas during multiple render() operations.');
+        }
+        drawing.add(canvas);
+        await gate;
+        drawing.delete(canvas);
+        paintedWith.set(canvas, doc);
+      },
+    );
+
+    const load = async (src: string) => {
+      const doc = fakeDocument(400);
+      adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
+      await runtime.loadDocument(src, { initialPage: 1, initialZoom: 'auto', onLoaded: vi.fn() });
+      return doc;
+    };
+    await load('thumbs.pdf');
+
+    // The rail keeps its canvases across a reload, and the painted marker is
+    // keyed on the load token so fresh ones are never mistaken for painted
+    // ones. That is also what lets a batch from before the reload and one from
+    // after disagree about this canvas: unqueued they both claim it, the
+    // newcomer's render is rejected, and its `catch` clears the marker.
+    const canvas = mountedThumbCanvas(7);
+    const before = runtime.renderThumbs([canvas], () => true);
+    await Promise.resolve();
+    const reloaded = await load('reloaded.pdf');
+    const after = runtime.renderThumbs([canvas], () => true);
+
+    release();
+    await Promise.all([before, after]);
+
+    // Which document the row ended up showing is what discriminates, and it is
+    // what "not left blank" has to mean after a reload: queued, the second batch
+    // waits and repaints from the new document. Unqueued, its render is the one
+    // pdf.js rejects, so the only paint that lands is the outgoing document's
+    // and the row shows a page from a file the viewer has already left.
+    expect(paintedWith.get(canvas)).toBe(reloaded);
+    // Both batches reach the canvas — the point is that they do not overlap.
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
+  });
+
+  it('skips thumbnails whose canvas the rail already unmounted', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
+    const doc = fakeDocument(400);
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    // A window the rail scrolled past before the batch reached it.
+    const scrolledAway = mountedThumbCanvas(120);
+    scrolledAway.remove();
+    const stillMounted = mountedThumbCanvas(121);
+
+    await runtime.renderThumbs([scrolledAway, stillMounted], () => true);
+
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledOnce();
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledWith(doc, 121, stillMounted);
   });
 
   it('retries thumbnails after adapter render failures', async () => {
@@ -595,8 +739,7 @@ describe('PDF Runtime', () => {
     });
     adapter.session.renderThumbnail.mockRejectedValueOnce(new Error('canvas unavailable'));
 
-    const canvas = document.createElement('canvas');
-    canvas.dataset['page'] = '2';
+    const canvas = mountedThumbCanvas(2);
     await runtime.renderThumbs([canvas], () => true);
     await runtime.renderThumbs([canvas], () => true);
 
@@ -618,8 +761,7 @@ describe('PDF Runtime', () => {
       onLoaded: vi.fn(),
     });
 
-    const opened = document.createElement('canvas');
-    opened.dataset['page'] = '2';
+    const opened = mountedThumbCanvas(2);
     await runtime.renderThumbs([opened], () => true);
     await runtime.renderThumbs([opened], () => true);
 
@@ -627,8 +769,8 @@ describe('PDF Runtime', () => {
 
     // Closing the overview discards the canvases; reopening builds new blank
     // ones for the same page numbers, and those have to be painted again.
-    const reopened = document.createElement('canvas');
-    reopened.dataset['page'] = '2';
+    opened.remove();
+    const reopened = mountedThumbCanvas(2);
     await runtime.renderThumbs([reopened], () => true);
 
     expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
@@ -931,7 +1073,13 @@ class FakePdfSession implements HellPdfViewerSession {
   currentScale = 1;
   document: HellPdfDocumentHandle | null = null;
   handlers: HellPdfViewerSessionHandlers | null = null;
-  renderThumbnail = vi.fn(async () => undefined);
+  renderThumbnail = vi.fn(
+    async (
+      _doc: HellPdfDocumentHandle,
+      _pageNumber: number,
+      _canvas: HTMLCanvasElement,
+    ): Promise<void> => undefined,
+  );
   cleanup = vi.fn();
   dispatchFind = vi.fn();
   closeFind = vi.fn();

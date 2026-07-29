@@ -303,6 +303,8 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
    * weak so detached canvases stay collectable.
    */
   private readonly renderedThumbs = new WeakMap<HTMLCanvasElement, number>();
+  /** Tail of the thumbnail batch queue; see `renderThumbs`. */
+  private thumbRenderQueue: Promise<void> = Promise.resolve();
   private handlers: HellPdfRuntimeHandlers | null = null;
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
@@ -503,7 +505,39 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     }
   }
 
-  async renderThumbs(
+  /**
+   * Paint a batch of thumbnail canvases, one batch at a time.
+   *
+   * A virtualized rail hands over a fresh batch on every scroll step, so
+   * batches overlap by default, and two of them can reach the same canvas.
+   * pdf.js refuses that: `InternalRenderTask` keeps a `WeakSet` of the canvases
+   * its live tasks own and throws for a second render against one of them. The
+   * throw lands in the newcomer's own task, so the batch already drawing is
+   * unaffected — but the newcomer's `catch` below clears the painted marker,
+   * and nothing repaints that row until it is unmounted and mounted again, so
+   * the user is left with one permanently blank page in the rail.
+   *
+   * Within a single document load the marker written before the `await` already
+   * keeps a second batch off a canvas. What defeats it is a reload: the marker
+   * is keyed on `loadToken` so fresh canvases are never mistaken for painted
+   * ones, which means a batch that started before the reload and one that
+   * starts after disagree about the same canvas and both claim it.
+   *
+   * Serializing removes the overlap outright. It also keeps a fast scroll from
+   * rasterizing several windows at once, and it is what gives the mounted check
+   * below its value: by the time a queued batch runs, everything the rail
+   * scrolled past is detached and skipped instead of drawn.
+   */
+  renderThumbs(
+    canvases: readonly HTMLCanvasElement[],
+    shouldContinue: () => boolean,
+  ): Promise<void> {
+    const batch = this.thumbRenderQueue.then(() => this.renderThumbBatch(canvases, shouldContinue));
+    this.thumbRenderQueue = batch.catch(() => undefined);
+    return batch;
+  }
+
+  private async renderThumbBatch(
     canvases: readonly HTMLCanvasElement[],
     shouldContinue: () => boolean,
   ): Promise<void> {
@@ -513,6 +547,9 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     for (const canvas of canvases) {
       if (!shouldContinue()) return;
+      // Rasterizing a page onto a canvas the rail already unmounted is pure
+      // waste, and during a fast scroll it is most of the work.
+      if (!canvas.isConnected) continue;
       const n = Number(canvas.dataset['page']);
       if (!Number.isFinite(n) || this.renderedThumbs.get(canvas) === token) continue;
       this.renderedThumbs.set(canvas, token);
