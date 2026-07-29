@@ -460,11 +460,29 @@ test.describe('Filter Builder browser contract', () => {
       'Edit Name contains “Ada”',
     );
 
-    // Clicking empty frame space focuses the inline picker.
+    // Clicking empty frame space focuses the inline picker. Raw pointer
+    // coordinates only mean something while the frame is inside the viewport,
+    // so scroll it up first instead of relying on an earlier action having
+    // scrolled the docs content.
+    await scrollNearTop(frame);
     await picker.blur();
     await expect(picker).not.toBeFocused();
     const frameBox = (await frame.boundingBox())!;
-    await page.mouse.click(frameBox.x + frameBox.width - 60, frameBox.y + frameBox.height / 2);
+    const chipBox = (await chip.boundingBox())!;
+    // The chips and the inline input share one row, so the empty space is the
+    // frame's band above that row. Aim at its middle and assert the aim: a
+    // point landing on the input, a chip, or the clear action would prove
+    // nothing about the frame's click-anywhere affordance.
+    const emptyPoint = {
+      x: frameBox.x + frameBox.width / 2,
+      y: (frameBox.y + chipBox.y) / 2,
+    };
+    const hitSlot = await page.evaluate(
+      ({ x, y }) => document.elementFromPoint(x, y)?.getAttribute('data-slot') ?? null,
+      emptyPoint,
+    );
+    expect(['root', 'tokens']).toContain(hitSlot);
+    await page.mouse.click(emptyPoint.x, emptyPoint.y);
     await expect(picker).toBeFocused();
   });
 
