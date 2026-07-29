@@ -49,6 +49,93 @@ function createEditor(page: Page, field: string): Locator {
   );
 }
 
+/**
+ * The dropdown panel an open combobox input owns, resolved through the
+ * `aria-controls` the engine publishes while the panel is open.
+ *
+ * Combobox dropdowns are portalled to the document body, so a document-wide
+ * `[hellComboboxDropdown]:visible` locator matches every panel on the page at
+ * once. Choosing a field leaves the Filter Builder's own picker panel on
+ * screen for the remainder of its open animation — the overlay waits for that
+ * animation before detaching — so for about a frame or two after a field is
+ * chosen there are legitimately two visible panels, and a document-wide
+ * locator resolves to both. Addressing the panel the control under test
+ * actually owns asserts the thing the test is about and stops depending on
+ * when an unrelated panel finishes animating.
+ */
+async function ownedDropdown(page: Page, input: Locator): Promise<Locator> {
+  await expect(input).toHaveAttribute('aria-expanded', 'true');
+  // Both attributes are polled rather than read once: `getAttribute` does not
+  // retry, so reading `aria-controls` straight after `aria-expanded` would rely
+  // on ng-primitives publishing the two together. It does today — the id is set
+  // as the panel is portalled — but that ordering is the engine's business, not
+  // a contract this suite should silently depend on.
+  await expect(input).toHaveAttribute('aria-controls', /\S/);
+  const dropdownId = await input.getAttribute('aria-controls');
+  expect(dropdownId).not.toBeNull();
+  return page.locator(`#${dropdownId}[hellComboboxDropdown]`);
+}
+
+/** Window key holding the statuses recorded by `recordStatusAnnouncements`. */
+const STATUS_LOG_KEY = '__hellFilterBuilderStatusLog';
+
+interface StatusRecorderScope {
+  [STATUS_LOG_KEY]?: string[];
+  __hellFilterBuilderStatusObserver?: MutationObserver;
+}
+
+/**
+ * Starts recording every status a dropdown announces, discarding any earlier
+ * recording. Call it immediately before the action that should produce one.
+ *
+ * `expect(locator).toHaveText(…)` samples: it asks repeatedly whether something
+ * is true *now*, which answers "does the page settle here" and not "did the
+ * page pass through here". A Search Resource's loading status exists only while
+ * its request is in flight — here for the source's 320ms, starting after a
+ * 120ms debounce — so sampling for it calls a healthy page broken whenever two
+ * consecutive polls happen to land either side of that window. Measured on
+ * this suite at roughly one run in 180, with the status confirmed present in
+ * the DOM on the run that failed. Recording what the panel rendered asks the
+ * question the test actually means and cannot miss the answer.
+ *
+ * The log seeds with whatever statuses are already on screen at install time,
+ * so a call site must let the previous cycle settle before recording the next
+ * one — otherwise a leftover status satisfies the assertion for a request that
+ * never announced anything. Every call site below does.
+ */
+async function recordStatusAnnouncements(dropdown: Locator): Promise<void> {
+  await dropdown.evaluate((panel, key) => {
+    const scope = window as unknown as StatusRecorderScope;
+    scope.__hellFilterBuilderStatusObserver?.disconnect();
+    const log: string[] = [];
+    (scope as Record<string, unknown>)[key] = log;
+    const capture = (): void => {
+      for (const node of panel.querySelectorAll('[role="status"]')) {
+        const text = (node.textContent ?? '').trim();
+        if (text && !log.includes(text)) log.push(text);
+      }
+    };
+    capture();
+    const observer = new MutationObserver(capture);
+    observer.observe(panel, { subtree: true, childList: true, characterData: true });
+    scope.__hellFilterBuilderStatusObserver = observer;
+  }, STATUS_LOG_KEY);
+}
+
+/** Fails unless the recorded dropdown announced `text` at some point. */
+async function expectStatusAnnounced(page: Page, text: string): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          (key) => ((window as unknown as Record<string, string[]>)[key] ?? []) as string[],
+          STATUS_LOG_KEY,
+        ),
+      { message: `the dropdown never announced “${text}”` },
+    )
+    .toContain(text);
+}
+
 async function selectField(
   page: Page,
   root: Locator,
@@ -287,19 +374,20 @@ test.describe('Filter Builder browser contract', () => {
     await expect(input).toBeFocused();
 
     await input.press('ArrowDown');
-    let dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    let dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('fail');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
     );
     await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('grace');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(page.getByRole('option', { name: /Grace Hopper/ })).toBeVisible();
     await input.press('ArrowDown');
     await input.press('Enter');
@@ -312,12 +400,12 @@ test.describe('Filter Builder browser contract', () => {
     );
     input = editor.getByRole('combobox', { name: 'Owner directory' });
     await input.press('ArrowDown');
-    dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('linus');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(page.getByRole('option', { name: /Linus Torvalds/ })).toBeVisible();
     await input.press('ArrowDown');
     await input.press('Enter');
@@ -338,19 +426,22 @@ test.describe('Filter Builder browser contract', () => {
     await expect(input).toBeFocused();
 
     await input.press('ArrowDown');
-    const dropdown = page.locator('[hellComboboxDropdown]:visible');
-    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    const dropdown = await ownedDropdown(page, input);
     await expect(dropdown).toBeVisible();
 
+    await recordStatusAnnouncements(dropdown);
     await input.fill('error');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await expect(dropdown.getByRole('alert')).toHaveText(
       'Owner directory unavailable. Try another query.',
     );
     await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
 
+    // The 'mara' request must be in flight before 'theo' supersedes it, or the
+    // cancellation the next two assertions describe never happens.
+    await recordStatusAnnouncements(dropdown);
     await input.fill('mara');
-    await expect(dropdown.getByRole('status')).toHaveText('Loading owners…');
+    await expectStatusAnnounced(page, 'Loading owners…');
     await input.fill('theo');
     await expect(page.getByRole('option', { name: 'Theo Martin', exact: true })).toBeVisible();
     await expect(page.getByRole('option', { name: 'Mara Voss', exact: true })).toHaveCount(0);
@@ -669,15 +760,33 @@ test.describe('Filter Builder browser contract', () => {
     // document, so focus never leaves the editor and there is nothing to
     // restore. Neither engine may leave focus anywhere else, and neither may
     // leave it nowhere.
-    const focusHome = await page.evaluate(() => {
-      const active = document.activeElement;
-      if (!(active instanceof HTMLElement) || active === document.body) return 'stranded';
-      if (active.closest('[data-slot="editor"]')) return 'editor';
-      if (active.closest('app-filter-builder-recipes-example')) return 'builder';
-      return 'elsewhere';
-    });
-    expect(focusHome).not.toBe('stranded');
-    expect(focusHome).not.toBe('elsewhere');
+    //
+    // The hand-back is decided on the task after the browser has moved focus,
+    // so `<body>` is where focus legitimately sits for that one task. Reading
+    // `document.activeElement` once, immediately after the Tab, samples that
+    // gap rather than the outcome. Polling for the settled answer keeps the
+    // contract intact: a shell that never hands focus back leaves it on
+    // `<body>`, and one that lets Tab escape leaves it outside the builder —
+    // neither ever satisfies this.
+    let focusHome = '';
+    await expect
+      .poll(
+        async () => {
+          focusHome = await page.evaluate(() => {
+            const active = document.activeElement;
+            if (!(active instanceof HTMLElement) || active === document.body) return 'stranded';
+            if (active.closest('[data-slot="editor"]')) return 'editor';
+            if (active.closest('app-filter-builder-recipes-example')) return 'builder';
+            return 'elsewhere';
+          });
+          return focusHome;
+        },
+        {
+          message:
+            'focus must settle in the inline picker or stay in the editor, never on <body> and never outside the builder',
+        },
+      )
+      .toMatch(/^(builder|editor)$/);
     if (focusHome === 'builder') {
       await expect(editor).toBeHidden();
       await expect(picker).toBeFocused();

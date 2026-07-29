@@ -73,6 +73,37 @@ const HELL_COMBOBOX_EMPTY_RECIPE = {
 } satisfies HellRecipe<'root'>;
 
 /**
+ * Pointer boundary events the option engine reads as "the pointer moved onto
+ * or off this option". Both the pointer and legacy mouse names are covered
+ * because `ngpInteractions` listens to both.
+ */
+const HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS = [
+  'pointerenter',
+  'pointerleave',
+  'pointerover',
+  'pointerout',
+  'mouseenter',
+  'mouseleave',
+  'mouseover',
+  'mouseout',
+] as const;
+
+/**
+ * Events that prove the pointer is being used rather than merely resting.
+ *
+ * The legacy mouse names are listed for the same reason they are swallowed: an
+ * environment that produces mouse events without pointer events — a consumer's
+ * jsdom test driving `fireEvent.mouseEnter`, say — would otherwise have its
+ * boundary events swallowed by a guard that nothing it can send ever lifts.
+ */
+const HELL_COMBOBOX_POINTER_USE_EVENTS = [
+  'pointermove',
+  'pointerdown',
+  'mousemove',
+  'mousedown',
+] as const;
+
+/**
  * Combobox-local coordination for the touched focus boundary, boundary
  * clamping, and portaled dropdown containment. Projected directives
  * coordinate through DI so none of the registration or containment machinery
@@ -122,10 +153,72 @@ class HellComboboxController {
     };
     this.scope.registerDropdown(dropdown);
     dropdown.addEventListener('focusout', onFocusOut);
+    const releasePointerRest = this.ignorePointerAtRest(dropdown);
     destroyRef.onDestroy(() => {
       dropdown.removeEventListener('focusout', onFocusOut);
+      releasePointerRest();
       this.scope.unregisterDropdown(dropdown);
     });
+  }
+
+  /**
+   * Keeps a pointer that is not being used from changing which option is
+   * active.
+   *
+   * A floating dropdown can move after it is already painted and hit-testable:
+   * the placement is recomputed asynchronously, so a panel that first lands
+   * below its input can flip above it once its real height is known. Options
+   * then slide under — or out from beneath — a pointer the user never touched,
+   * and the browser reports that as a genuine enter or leave. The combobox
+   * engine answers by activating the option now under the cursor, or by
+   * clearing the active option entirely when one slides away. A keyboard user
+   * who opened the dropdown and pressed Enter then finds that nothing
+   * happened, because the option they were on is no longer the active one.
+   *
+   * Boundary events on a freshly attached dropdown are therefore ignored until
+   * the pointer is actually used. The first real move or press lifts the guard
+   * for the rest of that dropdown's life and replays the entry the option
+   * under the pointer missed, so pointer interaction that the user is driving
+   * behaves exactly as it did before.
+   */
+  private ignorePointerAtRest(dropdown: HTMLElement): () => void {
+    let pointerUsed = false;
+    const swallowWhileAtRest = (event: Event): void => {
+      if (pointerUsed) return;
+      event.stopImmediatePropagation();
+    };
+    const markPointerUsed = (event: Event): void => {
+      if (pointerUsed) return;
+      pointerUsed = true;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const option = target?.closest<HTMLElement>('[role="option"]');
+      if (!option) return;
+      const PointerEventCtor = dropdown.ownerDocument.defaultView?.PointerEvent;
+      if (!PointerEventCtor) return;
+      // The replay carries the real pointer's type: hover is a mouse-only
+      // affordance, and a touch entry that claimed to be a mouse would raise a
+      // hover state that the matching touch leave then refuses to clear.
+      option.dispatchEvent(
+        new PointerEventCtor('pointerenter', {
+          bubbles: false,
+          pointerType: event instanceof PointerEventCtor ? event.pointerType : 'mouse',
+        }),
+      );
+    };
+    for (const type of HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS) {
+      dropdown.addEventListener(type, swallowWhileAtRest, { capture: true });
+    }
+    for (const type of HELL_COMBOBOX_POINTER_USE_EVENTS) {
+      dropdown.addEventListener(type, markPointerUsed, { capture: true });
+    }
+    return () => {
+      for (const type of HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS) {
+        dropdown.removeEventListener(type, swallowWhileAtRest, { capture: true });
+      }
+      for (const type of HELL_COMBOBOX_POINTER_USE_EVENTS) {
+        dropdown.removeEventListener(type, markPointerUsed, { capture: true });
+      }
+    };
   }
 
   private markControlTouched(event: FocusEvent): void {
