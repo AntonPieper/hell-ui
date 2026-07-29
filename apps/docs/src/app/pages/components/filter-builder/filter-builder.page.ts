@@ -276,6 +276,12 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
           clear stay quiet. Fields whose single expression already exists are not offered.
         </li>
         <li>
+          <code>Tab</code> commits the active option only when a query has been typed. An option is
+          always highlighted while the list is open, so without that condition exploring the list
+          would turn a leave gesture into a commit — a new chip and an open editor the user never
+          asked for.
+        </li>
+        <li>
           Committing or cancelling an edit restores focus to the same stable chip; committing or
           cancelling a create returns focus to the inline picker with the query cleared.
         </li>
@@ -458,7 +464,7 @@ readonly identifyFilter = (filter: PeopleFilter) => filter.id;
     { focus: 'Inline picker', key: 'typing', behavior: 'Rank and filter the field list; the dropdown opens with matches.' },
     { focus: 'Inline picker', key: 'ArrowDown', behavior: 'Open the field dropdown, then navigate by active descendant.' },
     { focus: 'Inline picker', key: 'Enter', behavior: 'Commit the active field option and open the create editor.' },
-    { focus: 'Inline picker', key: 'Tab', behavior: 'With a typed query and an active option, commits like Enter instead of leaving the field. On an empty prompt Tab always leaves, so exploring the list never turns a leave gesture into a commit.' },
+    { focus: 'Inline picker', key: 'Tab', behavior: 'With a typed query and an active option, commits like Enter; on an empty prompt it leaves the field.' },
     { focus: 'Inline picker (empty)', key: 'Backspace', behavior: 'Focus the last removable chip; a second Backspace removes it.' },
     { focus: 'Inline picker (empty)', key: 'ArrowLeft', behavior: 'Focus the last enabled chip.' },
     { focus: 'Inline picker', key: 'Escape', behavior: 'Close an open dropdown, else clear a typed query, else no-op.' },

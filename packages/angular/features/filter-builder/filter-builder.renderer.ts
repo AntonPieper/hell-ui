@@ -509,6 +509,9 @@ export class HellFilterBuilderRenderer<TFilter extends HellFilter = HellFilter> 
     if (this.disabled() || event.defaultPrevented || event.button !== 0) return;
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
+    // `input` is deliberately missing from this list where `onFrameMouseDown`
+    // keeps it: mousedown must leave the input alone so its native focus is
+    // untouched, whereas a click *on* the input is the primary open gesture.
     if (target.closest('[data-slot="token"], button, a, select, textarea')) return;
     if (this.query() || this.pickerOpen() || !this.availableFields().length) return;
     const input = this.host.querySelector<HTMLInputElement>('[data-hell-filter-builder-input]');
