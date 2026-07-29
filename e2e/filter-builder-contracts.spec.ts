@@ -65,6 +65,12 @@ function createEditor(page: Page, field: string): Locator {
  */
 async function ownedDropdown(page: Page, input: Locator): Promise<Locator> {
   await expect(input).toHaveAttribute('aria-expanded', 'true');
+  // Both attributes are polled rather than read once: `getAttribute` does not
+  // retry, so reading `aria-controls` straight after `aria-expanded` would rely
+  // on ng-primitives publishing the two together. It does today — the id is set
+  // as the panel is portalled — but that ordering is the engine's business, not
+  // a contract this suite should silently depend on.
+  await expect(input).toHaveAttribute('aria-controls', /\S/);
   const dropdownId = await input.getAttribute('aria-controls');
   expect(dropdownId).not.toBeNull();
   return page.locator(`#${dropdownId}[hellComboboxDropdown]`);
@@ -91,6 +97,11 @@ interface StatusRecorderScope {
  * this suite at roughly one run in 180, with the status confirmed present in
  * the DOM on the run that failed. Recording what the panel rendered asks the
  * question the test actually means and cannot miss the answer.
+ *
+ * The log seeds with whatever statuses are already on screen at install time,
+ * so a call site must let the previous cycle settle before recording the next
+ * one — otherwise a leftover status satisfies the assertion for a request that
+ * never announced anything. Every call site below does.
  */
 async function recordStatusAnnouncements(dropdown: Locator): Promise<void> {
   await dropdown.evaluate((panel, key) => {

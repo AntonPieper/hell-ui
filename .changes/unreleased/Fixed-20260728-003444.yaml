@@ -1,10 +1,6 @@
 kind: Fixed
-body: 'Combobox: a dropdown that repositions itself no longer discards the option
-  the keyboard had selected. A panel is placed asynchronously, so one that first lands
-  below its input can flip above it a frame later; options then slide under, or out
-  from beneath, a pointer the user never moved. The browser reports that as a real
-  enter or leave, and the combobox answered by activating whichever option had arrived
-  under the cursor or by clearing the active option entirely, so Enter selected nothing.
-  Pointer boundary events on a freshly opened dropdown are now ignored until the pointer
-  is actually moved or pressed.'
+body: 'Combobox: a resting pointer no longer changes which option is active. A dropdown
+  that repositions itself after opening could move options under a pointer the user
+  never moved, hijacking or clearing the keyboard''s active option so Enter committed
+  the wrong one.'
 time: 2026-07-28T00:34:44.982923+02:00
