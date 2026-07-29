@@ -50,8 +50,9 @@ const LOAD_AVERAGE_AVAILABLE = platform() !== 'win32';
  * most constrained.
  */
 const CPU_CAVEAT =
-  'load is per logical CPU from os.cpus().length, which ignores container CPU ' +
-  "limits and is not the machine's parallelism; loadavg is unavailable on Windows";
+  'load is os.loadavg()[0], a trailing one-minute average, divided by os.cpus().length — ' +
+  'so it lags the window it is reported for, ignores container CPU limits, and is not the ' +
+  "machine's parallelism; loadavg is unavailable on Windows";
 
 interface Sample {
   readonly at: number;
@@ -63,6 +64,12 @@ interface FailureRecord {
   readonly status: string;
   readonly startedAt: number;
   readonly endedAt: number;
+}
+
+/** A failed attempt that Playwright's `retries` budget still allowed to be retried. */
+interface RetryableAttempt {
+  readonly record: FailureRecord;
+  readonly retry: number;
 }
 
 type ProbeOutcome =
@@ -120,6 +127,33 @@ interface RunFacts {
  */
 function countsAsFailure(status: TestResult['status']): boolean {
   return status !== 'passed' && status !== 'skipped' && status !== 'interrupted';
+}
+
+/**
+ * Splits attempts a retry actually followed from attempts the run merely ended
+ * on.
+ *
+ * Having a retry budget left is not the same as having been retried. A run cut
+ * short by `--max-failures` or SIGINT stops after an attempt and never runs the
+ * retry it had budgeted, and labelling that "covered up" would claim a retry
+ * that never happened — the report's one rule is that it states only what was
+ * observed. An attempt nothing followed is the outcome that test ended on, so
+ * it belongs with the failures rather than in a list of things a retry hid.
+ *
+ * `lastAttempt` is the highest attempt index seen for each title, counting
+ * passes: a retry that went green is still a retry that ran.
+ */
+function partitionRetryableAttempts(
+  attempts: readonly RetryableAttempt[],
+  lastAttempt: ReadonlyMap<string, number>,
+): { covered: FailureRecord[]; unretried: FailureRecord[] } {
+  const covered: FailureRecord[] = [];
+  const unretried: FailureRecord[] = [];
+  for (const attempt of attempts) {
+    const last = lastAttempt.get(attempt.record.title) ?? attempt.retry;
+    (last > attempt.retry ? covered : unretried).push(attempt.record);
+  }
+  return { covered, unretried };
 }
 
 /** Extracted so the window it records is testable without driving Playwright. */
@@ -456,6 +490,35 @@ function checkReportStaysDescriptiveFixture(): void {
     'and a swap must stay reachable',
   );
 
+  // "Covered up by a retry" may only be said of an attempt a retry followed.
+  // A run cut short by --max-failures or SIGINT leaves a budgeted retry unrun,
+  // and that attempt is where the test ended, so it must reach the failures
+  // instead of a list claiming something hid it.
+  const firstAttempt = { record: failure('f › failed first', 0, 100), retry: 0 };
+  const abandoned = { record: failure('g › never retried', 200, 100), retry: 0 };
+  const partitioned = partitionRetryableAttempts(
+    [firstAttempt, abandoned],
+    new Map([
+      ['f › failed first', 1],
+      ['g › never retried', 0],
+    ]),
+  );
+  assert.deepEqual(
+    partitioned.covered,
+    [firstAttempt.record],
+    'only an attempt a later attempt followed was covered up',
+  );
+  assert.deepEqual(
+    partitioned.unretried,
+    [abandoned.record],
+    'an attempt the run ended on is a failure, not something a retry hid',
+  );
+  assert.deepEqual(
+    partitionRetryableAttempts([abandoned], new Map()).unretried,
+    [abandoned.record],
+    'a title that recorded no attempt at all cannot have been retried',
+  );
+
   // A failure record must carry the duration the run measured, not a zero that
   // would make every window empty and every load figure "not sampled".
   const record = toFailureRecord('t › x', 'failed', new Date(at), 2_500);
@@ -478,12 +541,24 @@ function cpuCount(): number | null {
   return count > 0 ? count : null;
 }
 
+/**
+ * A reporter must not be able to decide a run. `readServedBuild` handles every
+ * error it can raise today and returns an outcome instead, so nothing in the
+ * probe chain rejects — but the chain is awaited in `onEnd`, so the day someone
+ * adds a call that can reject, an unmeasured probe would stop being a missing
+ * line in the report and start being a failed run. A dropped probe is reported
+ * as "not probed"; that is the worst it may cost.
+ */
+function ignoreProbeFailure(): void {}
+
 class HostHealthReporter implements Reporter {
   private readonly samples: Sample[] = [];
   private readonly failures: FailureRecord[] = [];
   private readonly observations: ServerObservation[] = [];
   private readonly retriedToGreen: string[] = [];
-  private readonly retriedFailures: FailureRecord[] = [];
+  private readonly retryableAttempts: RetryableAttempt[] = [];
+  /** Highest attempt index seen per title, so a retry can be shown to have run. */
+  private readonly lastAttempt = new Map<string, number>();
   private readonly startedAt = Date.now();
   private timer: NodeJS.Timeout | undefined;
   private baseURL: string | undefined;
@@ -506,9 +581,11 @@ class HostHealthReporter implements Reporter {
 
   onBegin(config: FullConfig): void {
     this.baseURL = config.projects[0]?.use?.baseURL;
-    this.probes = this.probes.then(async () => {
-      this.startBuild = (await this.readServedBuild()).digest;
-    });
+    this.probes = this.probes
+      .then(async () => {
+        this.startBuild = (await this.readServedBuild()).digest;
+      })
+      .catch(ignoreProbeFailure);
   }
 
   /**
@@ -551,19 +628,25 @@ class HostHealthReporter implements Reporter {
   private queueServerProbe(at: number): void {
     if (at - this.lastProbeAt < SERVER_PROBE_INTERVAL_MS) return;
     this.lastProbeAt = at;
-    this.probes = this.probes.then(async () => {
-      // Stamped when the probe is issued, not when it answers. A probe that
-      // starts immediately and aborts five seconds later was an observation
-      // about the moment it started; timestamping it on return reported it as
-      // five seconds further from the failure than it was.
-      const startedAt = Date.now();
-      const { outcome } = await this.readServedBuild();
-      this.observations.push({ at: startedAt, outcome });
-    });
+    this.probes = this.probes
+      .then(async () => {
+        // Stamped when the probe is issued, not when it answers. A probe that
+        // starts immediately and aborts five seconds later was an observation
+        // about the moment it started; timestamping it on return reported it as
+        // five seconds further from the failure than it was.
+        const startedAt = Date.now();
+        const { outcome } = await this.readServedBuild();
+        this.observations.push({ at: startedAt, outcome });
+      })
+      .catch(ignoreProbeFailure);
   }
 
   onTestEnd(test: TestCase, result: TestResult): void {
     const title = test.titlePath().filter(Boolean).join(' › ');
+    // Every attempt counts, passes included: what makes an earlier attempt
+    // "covered up" is that a later one ran, whatever that later one did.
+    this.lastAttempt.set(title, Math.max(this.lastAttempt.get(title) ?? -1, result.retry));
+
     if (!countsAsFailure(result.status)) {
       if (result.retry > 0 && result.status === 'passed') this.retriedToGreen.push(title);
       return;
@@ -574,7 +657,9 @@ class HostHealthReporter implements Reporter {
     // measurements that make a retried failure interpretable, and the thing
     // `retries` is hiding.
     const record = toFailureRecord(title, result.status, result.startTime, result.duration);
-    if (result.retry < test.retries) this.retriedFailures.push(record);
+    // Only the budget is known here; whether a retry actually followed is not
+    // decided until the run ends. `onEnd` sorts that out.
+    if (result.retry < test.retries) this.retryableAttempts.push({ record, retry: result.retry });
     else this.failures.push(record);
     this.queueServerProbe(Date.now());
   }
@@ -584,7 +669,16 @@ class HostHealthReporter implements Reporter {
     // Every observation must come from during the run: Playwright stops the
     // `webServer` in its teardown phase, which runs before onEnd, so a probe
     // here would always find nothing listening.
-    await this.probes;
+    await this.probes.catch(ignoreProbeFailure);
+
+    const { covered, unretried } = partitionRetryableAttempts(
+      this.retryableAttempts,
+      this.lastAttempt,
+    );
+    // An attempt nothing followed is where that test ended, so it joins the
+    // failures. Chronological order keeps a reclassified attempt next to the
+    // rest of the run rather than appended after later failures.
+    const failures = [...this.failures, ...unretried].sort((a, b) => a.startedAt - b.startedAt);
 
     const report = formatRunReport({
       platform: platform(),
@@ -592,10 +686,10 @@ class HostHealthReporter implements Reporter {
       loadAvailable: LOAD_AVERAGE_AVAILABLE,
       durationMs: Date.now() - this.startedAt,
       samples: this.samples,
-      failures: this.failures,
+      failures,
       observations: this.observations,
       retriedToGreen: this.retriedToGreen,
-      retriedFailures: this.retriedFailures,
+      retriedFailures: covered,
       baseURL: this.baseURL,
     });
     console.log(`\n${report.join('\n')}`);
