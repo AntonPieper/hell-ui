@@ -114,8 +114,8 @@ _Avoid_: Page-wide `aria-hidden` for a scoped dialog, `aria-modal="true"` on a s
 
 **Resize Behavior**
 The pointer, keyboard, sizing, and minimum-size rules shared by resizable panes and table column resizing, independent of the layout adapter that renders it.
-Only items that are in layout take part in a split. An item another module has hidden reserves no size, is not a resize partner, and has its committed size parked rather than discarded: a group down to one item in layout lets that item fill the frame, and the split is restored when the hidden items return. This is a consumer contract, not a Master Detail detail — a user's split survives a responsive excursion that hides a pane.
-_Avoid_: Reserving size for a hidden item, dropping a split to fill a frame.
+In a pane split, only panes that are in layout take part. A pane another module has hidden reserves no size, is not a resize partner, and has its committed size parked rather than discarded: a group down to one pane in layout lets that pane fill the frame, and the split is restored when the hidden panes return. This is a consumer contract, not a Master Detail detail — a user's split survives a responsive excursion that hides a pane.
+_Avoid_: Reserving size for a hidden pane, dropping a split to fill a frame.
 
 **PDF Runtime**
 The pdf.js lifecycle behind the PDF viewer: bootstrapping, worker ownership, document loading, viewer events, find state, thumbnails, printing, and cleanup.
