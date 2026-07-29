@@ -108,6 +108,10 @@ The set of DOM targets that count as "inside" one floating interaction, even whe
 **Dialog Scope**
 The content region that a scoped dialog should cover while leaving surrounding app shell chrome interactive. Each Dialog Scope root owns independent scoped inset state; scoped dialog overlays receive copied vars from their owning root through an overlay Adapter so simultaneous scoped dialogs do not override each other.
 
+**Scoped Modality**
+The blocking contract of a scoped dialog: the Dialog Scope root is the whole blocked region — inert and scroll-locked — while everything outside it keeps focus, pointer input, and its place in the accessibility tree, the panel reports `aria-modal="false"` so assistive technology is not told to ignore that region, and every surface the surrounding shell can open layers above the dialog. It is reference counted per scope root, so simultaneous scoped dialogs block once and the last close restores the exact prior state. It never applies while a page-blocking dialog is open in the same document: that dialog means to block the shell, so the page is hidden from assistive technology again, focus is contained again, and it keeps `aria-modal="true"`. It is a property of the open set, not of one dialog's lifetime, so it is re-derived in both directions whenever any dialog opens or closes: whichever order they happen in, a document whose open dialogs are all scoped leaves the shell reachable, one with any page-blocking dialog hides the page, and an empty one reads exactly as it did before the first dialog.
+_Avoid_: Page-wide `aria-hidden` for a scoped dialog, `aria-modal="true"` on a scoped panel, focus guard instead of `inert`, document-wide focus-trap release while any page-blocking dialog is open, per-open state that only one open/close order restores, one-directional transition handling.
+
 **Resize Behavior**
 The pointer, keyboard, sizing, and minimum-size rules shared by resizable panes and table column resizing, independent of the layout adapter that renders it.
 

@@ -1,8 +1,15 @@
 @layer components {
+  /*
+   * Overlay stacking. A scoped dialog blocks one content region while the
+   * surrounding shell stays live, so every surface the shell can open —
+   * popovers, menus, CDK-portaled panels (z-index 1000 by default) and the
+   * mobile drawer — layers above it. A page-modal dialog blocks everything and
+   * therefore sits on top.
+   */
   :root {
+    --hell-z-dialog-scoped: 900;
     --hell-z-popover: 1000;
     --hell-z-menu: 1010;
-    --hell-z-dialog-scoped: 1020;
     --hell-z-app-backdrop: 1080;
     --hell-z-app-drawer: 1090;
     --hell-z-dialog: 1200;

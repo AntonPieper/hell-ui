@@ -143,6 +143,42 @@ const DOCS_AXE_OVERRIDES: Readonly<Record<string, DocsAxePageOverride>> = {
   '/components/dialog': {
     extraTargets: [
       {
+        // The shell subtree is scanned together with the open dialog, so
+        // `aria-hidden-focus` can fire if the page-wide modality pass ever
+        // hides still-focusable shell chrome again.
+        //
+        // That only works because a scoped panel renders `aria-modal="false"`:
+        // axe's `focusable-modal-open` exemption suppresses `aria-hidden-focus`
+        // for the whole page while any `aria-modal="true"` dialog is open, so
+        // this scan would be vacuous against a page-modal panel. The
+        // assertions below are the direct guard and do not depend on that.
+        name: 'Dialog scoped inside the app shell open',
+        include: [
+          'app-dialog-app-shell-scoped-example > [hellAppShell][data-slot="root"]',
+          '[role="dialog"][data-slot="root"]',
+        ],
+        prepare: async (page) => {
+          const example = page.locator('app-dialog-app-shell-scoped-example');
+          await example.getByRole('button', { name: 'Approve invoice' }).click();
+          const dialog = page.getByRole('dialog', { name: 'Approve invoice 4021?' });
+          await expect(dialog).toBeVisible();
+          await expect
+            .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+            .toBe('1');
+          await expect(
+            example.locator('[hellAppContent][data-slot="root"]'),
+          ).toHaveAttribute('inert', '');
+          await expect(dialog).toHaveAttribute('aria-modal', 'false');
+          expect(
+            await page.evaluate(() =>
+              [...document.body.children].some(
+                (child) => child.getAttribute('aria-hidden') === 'true',
+              ),
+            ),
+          ).toBe(false);
+        },
+      },
+      {
         name: 'Dialog publish confirmation open',
         include: ['[role="dialog"][data-slot="root"]'],
         prepare: async (page) => {

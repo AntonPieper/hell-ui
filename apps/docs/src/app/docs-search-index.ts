@@ -759,6 +759,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
 'date-picker with-popover composite hell-date-range-picker hellButton hellPopover hellPopoverTrigger hell-icon block placement min ui trip dates booking field',
  },
  {
+ title:'Dialog: Scoped inside the app shell',
+ path:'/components/dialog',
+ detail:'components/dialog/examples/app-shell-scoped.example.ts',
+ terms:
+'scoped modality hellDialogOverlay hellDialogTrigger hellAppShell hellAppTopbar hellAppSidenav hellAppContent hellMenuTrigger hellMenu inert app-shell shell chrome sidebar topbar interactive z-index layering focus',
+ },
+ {
  title:'Dialog: Basic',
  path:'/components/dialog',
  detail:'components/dialog/examples/basic.example.ts',
