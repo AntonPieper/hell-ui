@@ -52,6 +52,16 @@ Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
 `pnpm run test:consumer-fixtures`, `pnpm run test:api-report`, or
 `pnpm run release:dry-run` when the touched surface warrants it.
 
+`pnpm run e2e` runs a preflight that refuses to start on a host with no
+headroom, or against a docs server it cannot identify as this checkout's
+current build. Two escape hatches exist, and both make the run say so:
+
+- `HELL_E2E_ALLOW_LOADED_HOST=1` starts anyway on a saturated host. The
+  reporter still records the load measured during each failure.
+- `HELL_E2E_ALLOW_UNVERIFIED_BUILD=1` measures an external
+  `HELL_E2E_BASE_URL` that serves no build stamp, accepting that the run
+  cannot say which build it measured.
+
 `pnpm run test:api-report` reads the built library, so it needs a current
 `pnpm run build:lib`. It refuses any `dist/hell` that was not produced by a
 completed production build of the working tree, and refuses one whose emitted
