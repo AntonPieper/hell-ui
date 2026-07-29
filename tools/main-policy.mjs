@@ -93,6 +93,7 @@ export function readMainPolicy(text) {
   }
 
   const errors = [];
+  checkRootFields(document, errors);
   checkPosture(document, errors);
   checkProjectSettings(document, errors);
   const branches = checkRules(document, 'protected_branches', ['push_access_levels', 'merge_access_levels'], errors);
@@ -478,6 +479,22 @@ function describeEvidence(policy, drifts) {
 
 function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// Closed at the root too, like the settings, rules, and labels below it. A
+// field the comparison never reads is a claim the file cannot back — and one
+// named like enforcement (`required_approvals`) reads to the next person as
+// though something is enforcing it.
+function checkRootFields(document, errors) {
+  const known = ['posture', 'project', 'protected_branches', 'protected_tags', 'labels'];
+  for (const key of Object.keys(document)) {
+    if (!known.includes(key)) {
+      errors.push(
+        `${policyRelativePath} records the unknown top-level field ${key}, which nothing compares ` +
+          `or restores; remove it, or teach tools/main-policy.mjs to enforce it.`,
+      );
+    }
+  }
 }
 
 function checkPosture(document, errors) {

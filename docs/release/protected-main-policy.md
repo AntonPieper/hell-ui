@@ -57,8 +57,9 @@ push level:
 
 Flipping posture means editing the word and the level in the same commit, and
 applying the same change live. An edit to one without the other fails
-`--local`, before anything touches a project — a half-done flip is the failure
-worth engineering against, because it is the one that looks fine.
+`pnpm test:main-policy`, before anything touches a project — a half-done flip
+is the failure worth engineering against, because it is the one that looks
+fine.
 
 ## Verifying
 

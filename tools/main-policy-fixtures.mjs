@@ -171,6 +171,11 @@ const readFixtures = [
     expect: { errors: ['only_allow_merge_if_pipeline_succeeds'] },
   },
   {
+    name: 'an enforcement-looking field at the root cannot sit in the file unenforced',
+    document: { ...policyDocument(), required_approvals: 2 },
+    expect: { errors: ['required_approvals', 'nothing compares'] },
+  },
+  {
     name: 'an unrecorded project setting is rejected rather than compared blindly',
     document: (() => {
       const document = policyDocument();
