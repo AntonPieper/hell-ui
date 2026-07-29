@@ -5,9 +5,10 @@
       // Consumer fixtures are standalone projects compiled against the packed
       // tarball by tools/check-consumer-fixtures.mjs, not repo source.
       "ignore": ["tools/consumer-fixtures/**"],
-      // check-main-ruleset.mjs shells out to the system GitHub CLI, and
-      // build-library.mjs to the Angular CLI; neither is an npm dependency here.
-      "ignoreBinaries": ["gh", "ng"],
+      // check-main-ruleset.mjs shells out to the system GitHub CLI,
+      // gitlab-api.mjs to the GitLab CLI, and build-library.mjs to the Angular
+      // CLI; none is an npm dependency here.
+      "ignoreBinaries": ["gh", "glab", "ng"],
       "ignoreDependencies": [
         // Declared in pnpm packageExtensions for ng-primitives.
         "@angular/router"

@@ -1,0 +1,39 @@
+{
+  "posture": "window",
+  "project": {
+    "merge_method": "ff",
+    "squash_option": "always",
+    "squash_commit_template": "%{title} (%{reference})",
+    "only_allow_merge_if_pipeline_succeeds": true,
+    "allow_merge_on_skipped_pipeline": false,
+    "only_allow_merge_if_all_discussions_are_resolved": true,
+    "ci_allow_fork_pipelines_to_run_in_parent_project": false,
+    "ci_pipeline_variables_minimum_override_role": "developer"
+  },
+  "protected_branches": [
+    {
+      "name": "main",
+      "push_access_levels": ["maintainer"],
+      "merge_access_levels": ["maintainer"],
+      "allow_force_push": false
+    }
+  ],
+  "protected_tags": [
+    {
+      "name": "v*",
+      "create_access_levels": ["maintainer"]
+    }
+  ],
+  "labels": [
+    {
+      "name": "no-consumer-change",
+      "color": "#c5def5",
+      "description": "Explicit assertion that this merge request contains no Consumer Change"
+    },
+    {
+      "name": "release-preparation",
+      "color": "#5319e7",
+      "description": "Assembles reviewed Change Fragments into one published-version candidate"
+    }
+  ]
+}
