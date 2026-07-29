@@ -87,9 +87,34 @@ if (!apply) {
 }
 
 console.log('');
-for (const request of requests) {
-  await apiSend(request.method, request.path, request.body);
-  console.log(`Applied: ${request.method} ${request.path}`);
+const applied = [];
+try {
+  for (const request of requests) {
+    await apiSend(request.method, request.path, request.body);
+    applied.push(request);
+    console.log(`Applied: ${request.method} ${request.path}`);
+  }
+} catch (error) {
+  // A rule is replaced by a delete followed by a create. If the create is what
+  // failed, the ref is unprotected right now — that has to be the first thing
+  // the maintainer reads, not a stack trace they have to interpret.
+  const failed = requests[applied.length];
+  console.error(`\nFailed: ${failed.method} ${failed.path}`);
+  console.error(error.message);
+
+  const orphaned = applied.at(-1);
+  if (orphaned?.method === 'DELETE' && failed.method === 'POST') {
+    console.error(
+      `\nThe "${orphaned.path.split('/').pop()}" rule was deleted and could not be recreated. ` +
+        'That ref is unprotected now. Re-run `pnpm restore:main-policy --apply` once the API is ' +
+        'reachable, and check the result before anyone pushes.',
+    );
+  }
+  console.error(
+    `\n${applied.length} of ${requests.length} requests were applied; the rest were not. ` +
+      'Re-running is safe: the plan is recomputed from what the project actually looks like.',
+  );
+  process.exit(1);
 }
 
 const { failures } = verifyMainPolicy({ policy, live: await readPolicySurfaces(projectPath) });

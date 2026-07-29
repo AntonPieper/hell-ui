@@ -27,8 +27,17 @@ export function resolveProjectPath() {
   const project = process.env.HELL_POLICY_PROJECT || process.env.CI_PROJECT_ID;
   if (!project) {
     throw new Error(
-      'Set HELL_POLICY_PROJECT to the GitLab project id (or URL-encoded path) this policy ' +
-        'protects. CI_PROJECT_ID is used when the command runs inside a pipeline.',
+      'Set HELL_POLICY_PROJECT to the project id, or to the project path as you would write it ' +
+        '(group/project). CI_PROJECT_ID is used when the command runs inside a pipeline.',
+    );
+  }
+  // The path is encoded here, so a value that arrives already encoded would be
+  // encoded twice and 404. Say so, rather than sending a request that fails
+  // for a reason nobody would guess from the response.
+  if (/%2f/i.test(project)) {
+    throw new Error(
+      `HELL_POLICY_PROJECT is ${JSON.stringify(project)}, which is already URL-encoded. Pass the ` +
+        'path as you would write it (group/project); encoding is applied here.',
     );
   }
   return `projects/${encodeURIComponent(project)}`;

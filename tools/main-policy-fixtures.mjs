@@ -188,6 +188,68 @@ const readFixtures = [
     expect: { errors: ['releaser'] },
   },
   {
+    name: 'a level the protected-tags endpoint cannot accept is rejected',
+    document: {
+      ...policyDocument(),
+      protected_tags: [{ name: 'v*', create_access_levels: ['owner'] }],
+    },
+    expect: { errors: ['owner'] },
+  },
+  {
+    name: 'a project setting outside the values the platform accepts is rejected',
+    document: (() => {
+      const document = policyDocument();
+      document.project.merge_method = 'banana';
+      return document;
+    })(),
+    expect: { errors: ['merge_method', 'banana'] },
+  },
+  {
+    name: 'a nulled boolean setting is rejected rather than compared as a value',
+    document: (() => {
+      const document = policyDocument();
+      document.project.only_allow_merge_if_pipeline_succeeds = null;
+      return document;
+    })(),
+    expect: { errors: ['only_allow_merge_if_pipeline_succeeds', 'true or false'] },
+  },
+  {
+    name: 'an enforcement-looking field on a rule cannot sit in the file unenforced',
+    document: {
+      ...policyDocument(),
+      protected_branches: [
+        {
+          name: 'main',
+          push_access_levels: ['maintainer'],
+          merge_access_levels: ['maintainer'],
+          allow_force_push: false,
+          unprotect_access_levels: ['maintainer'],
+        },
+      ],
+    },
+    expect: { errors: ['unprotect_access_levels', 'nothing compares'] },
+  },
+  {
+    name: 'an unenforced field on a label is rejected too',
+    document: {
+      ...policyDocument(),
+      labels: [
+        {
+          name: 'no-consumer-change',
+          color: '#c5def5',
+          description: 'No Consumer Change assertion',
+          archived: false,
+        },
+        {
+          name: 'release-preparation',
+          color: '#5319e7',
+          description: 'Release Preparation candidate',
+        },
+      ],
+    },
+    expect: { errors: ['archived', 'nothing compares'] },
+  },
+  {
     name: 'dropping the main branch rule is rejected',
     document: { ...policyDocument(), protected_branches: [] },
     expect: { errors: ['main'] },
@@ -344,12 +406,46 @@ const verifyFixtures = [
     restores: ['DELETE projects/7/protected_branches/main', 'POST projects/7/protected_branches'],
   },
   {
-    name: 'force push turned on is drift',
+    name: 'force push turned on is repaired in place — main is never left unprotected',
     live: live({
       protectedBranches: [{ ...liveProtectedBranches()[0], allow_force_push: true }],
     }),
     expect: { failures: ['allow_force_push'] },
+    restores: ['PATCH projects/7/protected_branches/main'],
+  },
+  {
+    name: 'force push plus an access-level change still needs the replacement',
+    live: live({
+      protectedBranches: [
+        {
+          ...liveProtectedBranches()[0],
+          push_access_levels: [level(30, 'Developers + Maintainers')],
+          allow_force_push: true,
+        },
+      ],
+    }),
+    expect: { failures: ['allow_force_push', 'push_access_levels'] },
     restores: ['DELETE projects/7/protected_branches/main', 'POST projects/7/protected_branches'],
+  },
+  {
+    name: 'an access-level surface the policy does not record reads as drift',
+    live: live({
+      protectedBranches: [
+        { ...liveProtectedBranches()[0], unprotect_access_levels: [level(30, 'Developers')] },
+      ],
+    }),
+    expect: { failures: ['unprotect_access_levels', 'cannot vouch for'] },
+    restores: ['DELETE projects/7/protected_branches/main', 'POST projects/7/protected_branches'],
+  },
+  {
+    name: 'an archived state label cannot carry the assertion, so it is drift',
+    live: live({
+      labels: liveLabels().map((label) =>
+        label.name === 'release-preparation' ? { ...label, archived: true } : label,
+      ),
+    }),
+    expect: { failures: ['release-preparation', 'archived'] },
+    restores: ['PUT projects/7/labels/release-preparation'],
   },
   {
     name: 'an unrecorded protected-branch rule is drift, but restoration refuses to delete it',
@@ -383,6 +479,24 @@ const verifyFixtures = [
     manual: ['archive/*'],
   },
   {
+    name: 'a second rule under a recorded name never hides behind the first',
+    live: live({
+      protectedBranches: [
+        ...liveProtectedBranches(),
+        {
+          id: 20,
+          name: 'main',
+          push_access_levels: [level(30, 'Developers + Maintainers')],
+          merge_access_levels: [level(30, 'Developers + Maintainers')],
+          allow_force_push: true,
+        },
+      ],
+    }),
+    expect: { failures: ['main', 'ambiguous', '2 rules'] },
+    restores: [],
+    manual: ['main'],
+  },
+  {
     name: 'a deleted v* tag rule is drift — CE deletes it silently, so this is the audit trail',
     live: live({ protectedTags: [] }),
     expect: { failures: ['v*', 'no protected-tag rule'] },
@@ -410,6 +524,16 @@ const verifyFixtures = [
       ),
     }),
     expect: { failures: ['no-consumer-change', 'description'] },
+    restores: ['PUT projects/7/labels/no-consumer-change'],
+  },
+  {
+    name: 'an inherited group label does not stand in for the project label',
+    live: live({
+      labels: liveLabels().map((label) =>
+        label.name === 'no-consumer-change' ? { ...label, is_project_label: false } : label,
+      ),
+    }),
+    expect: { failures: ['no-consumer-change', 'group label'] },
     restores: ['PUT projects/7/labels/no-consumer-change'],
   },
   {

@@ -22,6 +22,17 @@ nothing anywhere says it used to be otherwise. The file says so, and
 | Protected tags | Every rule; `v*` is the standing rule that stands in for tag immutability | `GET projects/:id/protected_tags` |
 | State labels | `no-consumer-change` and `release-preparation`, with colour and description | `GET projects/:id/labels` |
 
+A recorded label must be a label *on this project* and must not be archived.
+The labels endpoint also returns labels inherited from the parent group, and
+an archived label is hidden from the picker — either would otherwise answer to
+the right name while being unable to carry the assertion the contract reads it
+for.
+
+An access-level surface the policy does not record — `unprotect_access_levels`,
+which this edition does not expose but a licence change would — reads as drift
+rather than being ignored, so a new bypass surface announces itself instead of
+arriving silently.
+
 Protected branches and tags are recorded exhaustively: a rule on the project
 that the file does not record is drift, because an unrecorded protection rule
 is one nobody agreed to. It is reported, never removed — see *Restoring*.
@@ -67,7 +78,7 @@ name:
 
 | Variable | Meaning |
 | --- | --- |
-| `HELL_POLICY_PROJECT` | Project id or URL-encoded path. Falls back to `CI_PROJECT_ID` in a pipeline. |
+| `HELL_POLICY_PROJECT` | Project id, or the path as you would write it (`group/project`) — encoding is applied for you, and an already-encoded value is refused. Falls back to `CI_PROJECT_ID` in a pipeline. |
 | `CI_API_V4_URL` + `HELL_POLICY_TOKEN` | Direct REST transport, for CI. Setting the URL without a token fails rather than falling back. |
 | neither | The authenticated `glab` CLI supplies host and credentials. |
 
@@ -94,10 +105,18 @@ their intent, not a repair, so the command lists those rules and leaves them
 alone — even while it fixes everything else. Record the rule in the policy if
 it belongs there, or remove it by hand if it does not.
 
-One sharp edge: this edition has no partial update for protected branch and
-tag rules, so a drifted rule is deleted and recreated. The ref is unprotected
-between those two requests. The command says so before it writes; run it when
-nobody is pushing.
+One sharp edge worth knowing exactly. A protected branch takes a partial
+update for its flags, so drift confined to `allow_force_push` is repaired in
+place and the branch is never unprotected. Everything else means replacement —
+access levels are not updatable on this edition (the parameters are accepted
+and ignored), and protected tags have no update endpoint at all — so the rule
+is deleted and recreated, and the ref is unprotected between those two
+requests. The command says which of the two it is going to do before it
+writes.
+
+If the recreate fails, the command says so, names the ref that is unprotected
+right now, and exits nonzero. Re-running is safe: the plan is recomputed from
+what the project actually looks like.
 
 ## Changing the policy
 

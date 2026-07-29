@@ -32,6 +32,20 @@ export const recordedProjectSettings = [
   'ci_pipeline_variables_minimum_override_role',
 ];
 
+// What each recorded setting is allowed to hold. `'boolean'` means exactly
+// that; a list means an enum the platform accepts. `squash_commit_template` is
+// free text and carries its own check.
+const settingValues = new Map([
+  ['merge_method', ['ff', 'rebase_merge', 'merge']],
+  ['squash_option', ['always', 'never', 'default_on', 'default_off']],
+  ['squash_commit_template', 'template'],
+  ['only_allow_merge_if_pipeline_succeeds', 'boolean'],
+  ['allow_merge_on_skipped_pipeline', 'boolean'],
+  ['only_allow_merge_if_all_discussions_are_resolved', 'boolean'],
+  ['ci_allow_fork_pipelines_to_run_in_parent_project', 'boolean'],
+  ['ci_pipeline_variables_minimum_override_role', ['no_one_allowed', 'owner', 'maintainer', 'developer']],
+]);
+
 // The two state labels the merge-request contract decides state from, taken
 // from the policy module that owns their names rather than spelled again here.
 const recordedLabels = [noConsumerChangeLabel, releasePreparationLabel];
@@ -39,11 +53,15 @@ const recordedLabels = [noConsumerChangeLabel, releasePreparationLabel];
 const protectedBranchName = 'main';
 const protectedTagPattern = 'v*';
 
+// The levels a policy may record. Deliberately only the three that protected
+// branches and tags both accept: 60 is Administrator on a self-managed
+// instance rather than Owner, and the protected-tags endpoint rejects it, so a
+// policy that recorded it could be verified but never restored. Live values
+// outside this set are still described, by `levelName`.
 const accessLevels = new Map([
   ['no-one', 0],
   ['developer', 30],
   ['maintainer', 40],
-  ['owner', 60],
 ]);
 
 // The push level `main` carries in each posture. The transition window needs
@@ -111,11 +129,14 @@ export function verifyMainPolicy({ policy, live }) {
 export function mainPolicyRestorePlan({ policy, live, projectPath }) {
   const drifts = diffMainPolicy({ policy, live });
   const requests = [];
-  // A protection rule nobody recorded is drift worth reporting, but removing
-  // it is a judgement about someone else's intent. Restoration writes what the
-  // policy says; it never deletes a protection the policy is simply silent
-  // about.
-  const manual = drifts.filter((drift) => drift.kind === 'unexpected').map(describeDrift);
+  // Drift this command reports but will not act on: a protection rule nobody
+  // recorded (removing it is a judgement about someone else's intent), and a
+  // name carrying more than one rule (which of them to keep is not a
+  // mechanical answer). Restoration writes what the policy says; it never
+  // removes a protection the policy is silent about.
+  const manual = drifts
+    .filter((drift) => drift.kind === 'unexpected' || drift.kind === 'ambiguous')
+    .map(describeDrift);
 
   const settings = drifts.filter((drift) => drift.surface === 'project');
   if (settings.length > 0) {
@@ -138,6 +159,9 @@ export function mainPolicyRestorePlan({ policy, live, projectPath }) {
     const body = {
       color: drift.expected.color,
       description: drift.expected.description,
+      // A state label that exists but is archived is hidden from the picker,
+      // so it cannot carry the assertion the contract reads it for.
+      archived: false,
     };
     requests.push(
       drift.kind === 'missing'
@@ -160,7 +184,7 @@ export function mainPolicyRestorePlan({ policy, live, projectPath }) {
 }
 
 function ruleRequests(drift, collectionPath, toBody) {
-  if (drift.kind === 'unexpected') return [];
+  if (drift.kind === 'unexpected' || drift.kind === 'ambiguous') return [];
 
   const create = {
     method: 'POST',
@@ -170,13 +194,29 @@ function ruleRequests(drift, collectionPath, toBody) {
   };
   if (drift.kind === 'missing') return [create];
 
-  // This edition has no partial update for protected branches or tags, so a
-  // drifted rule is replaced. The window between the two requests is real, and
-  // the restoration command names it before it writes.
+  // A protected branch takes a partial update for its flags, so drift confined
+  // to those is repaired in place and the ref is never unprotected. Access
+  // levels are not updatable on this edition (the parameters exist but are
+  // ignored), and protected tags have no update endpoint at all, so those
+  // still mean replacement.
+  const rulePath = `${collectionPath}/${encodeURIComponent(drift.name)}`;
+  if (drift.patchableFields.length > 0 && drift.patchableFields.length === drift.driftedFields.length) {
+    return [
+      {
+        method: 'PATCH',
+        path: rulePath,
+        body: Object.fromEntries(
+          drift.patchableFields.map((field) => [field, drift.expected[field]]),
+        ),
+        summary: `Reset ${drift.patchableFields.join(', ')} on the "${drift.name}" rule in place.`,
+      },
+    ];
+  }
+
   return [
     {
       method: 'DELETE',
-      path: `${collectionPath}/${encodeURIComponent(drift.name)}`,
+      path: rulePath,
       body: null,
       summary: `Remove the drifted "${drift.name}" rule.`,
     },
@@ -208,12 +248,14 @@ function diffMainPolicy({ policy, live }) {
       noun: 'protected-branch',
       levelFields: ['push_access_levels', 'merge_access_levels'],
       flagFields: ['allow_force_push'],
+      patchableFields: ['allow_force_push'],
     }),
     ...diffRules(policy.protected_tags, live.protectedTags ?? [], {
       surface: 'protected_tags',
       noun: 'protected-tag',
       levelFields: ['create_access_levels'],
       flagFields: [],
+      patchableFields: [],
     }),
     ...diffLabels(policy.labels, live.labels ?? []),
   ];
@@ -231,29 +273,68 @@ function diffProjectSettings(policy, project) {
   return drifts;
 }
 
-function diffRules(recorded, liveRules, { surface, noun, levelFields, flagFields }) {
+function diffRules(recorded, liveRules, { surface, noun, levelFields, flagFields, patchableFields }) {
   const drifts = [];
   for (const rule of recorded) {
-    const liveRule = liveRules.find((candidate) => candidate.name === rule.name);
-    if (!liveRule) {
+    const matches = liveRules.filter((candidate) => candidate.name === rule.name);
+    if (matches.length === 0) {
       drifts.push({ surface, noun, name: rule.name, kind: 'missing', reasons: [], expected: rule });
       continue;
     }
+    // Comparing only the first match would let a second, weaker rule under the
+    // same name pass unseen. Which of them to keep is not this command's
+    // decision, so it reports and leaves them alone.
+    if (matches.length > 1) {
+      drifts.push({
+        surface,
+        noun,
+        name: rule.name,
+        kind: 'ambiguous',
+        reasons: [`the project carries ${matches.length} rules named "${rule.name}"`],
+        expected: rule,
+      });
+      continue;
+    }
+    const liveRule = matches[0];
     const reasons = [];
+    const driftedFields = [];
     for (const field of levelFields) {
       const actual = describeLiveLevels(liveRule[field]);
       const expected = [...rule[field]].sort();
       if (actual.join(',') !== expected.join(',')) {
         reasons.push(`${field} are [${actual.join(', ')}], expected [${expected.join(', ')}]`);
+        driftedFields.push(field);
       }
     }
     for (const field of flagFields) {
       if (liveRule[field] !== rule[field]) {
         reasons.push(`${field} is ${JSON.stringify(liveRule[field])}, expected ${JSON.stringify(rule[field])}`);
+        driftedFields.push(field);
+      }
+    }
+    // An access-level surface this policy does not compare is one it cannot
+    // vouch for — `unprotect_access_levels`, say, which this edition does not
+    // expose but a licence change would. Reporting it red is how a new bypass
+    // surface announces itself instead of arriving silently.
+    for (const field of Object.keys(liveRule)) {
+      if (field.endsWith('_access_levels') && !levelFields.includes(field)) {
+        reasons.push(
+          `the rule carries ${field}, which this policy does not record and therefore cannot vouch for`,
+        );
+        driftedFields.push(field);
       }
     }
     if (reasons.length > 0) {
-      drifts.push({ surface, noun, name: rule.name, kind: 'drifted', reasons, expected: rule });
+      drifts.push({
+        surface,
+        noun,
+        name: rule.name,
+        kind: 'drifted',
+        reasons,
+        driftedFields,
+        patchableFields: patchableFields.filter((field) => driftedFields.includes(field)),
+        expected: rule,
+      });
     }
   }
 
@@ -295,6 +376,18 @@ function diffLabels(recorded, liveLabels) {
       continue;
     }
     const reasons = [];
+    // The labels endpoint also returns labels inherited from the parent group.
+    // Without this, deleting the project label would still read as green as
+    // long as a group label answered to the same name — and the label update
+    // this command would issue does not edit a group label anyway.
+    if (liveLabel.is_project_label === false) {
+      reasons.push('it is a group label, not a label on this project');
+    }
+    // An archived label is hidden from the picker, so it exists historically
+    // but can no longer carry the assertion the contract reads it for.
+    if (liveLabel.archived === true) {
+      reasons.push('it is archived, so it cannot be applied to a merge request');
+    }
     // GitLab stores the colour as written, so parity is case-insensitive:
     // `#C5DEF5` and `#c5def5` are the same label, not drift worth a red.
     if ((liveLabel.color ?? '').toLowerCase() !== label.color.toLowerCase()) {
@@ -336,6 +429,12 @@ function describeDrift(drift) {
     return (
       `${capitalize(drift.noun)} rule "${drift.name}" is not recorded in ${policyRelativePath}; ` +
       'every rule on this project is part of the policy.'
+    );
+  }
+  if (drift.kind === 'ambiguous') {
+    return (
+      `${capitalize(drift.noun)} rule "${drift.name}" is ambiguous: ${drift.reasons.join('; ')}. ` +
+      'The policy records one; remove the duplicates so parity has a single answer.'
     );
   }
   return `${capitalize(drift.noun)} rule "${drift.name}" drifted: ${drift.reasons.join('; ')}.`;
@@ -410,6 +509,21 @@ function checkProjectSettings(document, errors) {
         `${policyRelativePath} records the unknown project setting ${key}; add it to ` +
           'recordedProjectSettings in tools/main-policy.mjs, or drop it.',
       );
+      continue;
+    }
+    // A value the platform would reject is worth catching in review rather
+    // than at the moment restoration tries to write it.
+    const allowed = settingValues.get(key);
+    const value = project[key];
+    if (allowed === 'boolean' && typeof value !== 'boolean') {
+      errors.push(`${policyRelativePath} records ${key} as ${JSON.stringify(value)}; expected true or false.`);
+    } else if (allowed === 'template' && (typeof value !== 'string' || value.trim() === '')) {
+      errors.push(`${policyRelativePath} records ${key} as ${JSON.stringify(value)}; expected a nonblank template.`);
+    } else if (Array.isArray(allowed) && !allowed.includes(value)) {
+      errors.push(
+        `${policyRelativePath} records ${key} as ${JSON.stringify(value)}; allowed values are ` +
+          `${allowed.map((entry) => JSON.stringify(entry)).join(', ')}.`,
+      );
     }
   }
 }
@@ -432,6 +546,17 @@ function checkRules(document, field, levelFields, errors) {
     seen.add(rule.name);
     for (const levelField of levelFields) {
       checkAccessLevels(rule, field, levelField, errors);
+    }
+    // Closed, like the project settings: a field the comparison does not read
+    // must not be able to sit in the file looking enforced.
+    const known = ['name', ...levelFields, ...(field === 'protected_branches' ? ['allow_force_push'] : [])];
+    for (const key of Object.keys(rule)) {
+      if (!known.includes(key)) {
+        errors.push(
+          `${field} rule "${rule.name}" records ${key}, which nothing compares or restores; ` +
+            `remove it, or teach tools/main-policy.mjs to enforce it.`,
+        );
+      }
     }
   }
   return rules;
@@ -518,6 +643,14 @@ function checkLabels(document, errors) {
     }
     if (typeof label.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(label.color)) {
       errors.push(`Label "${label.name}" must record a six-digit hex color; got ${JSON.stringify(label.color)}.`);
+    }
+    for (const key of Object.keys(label)) {
+      if (!['name', 'color', 'description'].includes(key)) {
+        errors.push(
+          `Label "${label.name}" records ${key}, which nothing compares or restores; remove it, ` +
+            'or teach tools/main-policy.mjs to enforce it.',
+        );
+      }
     }
   }
   for (const name of recordedLabels) {
