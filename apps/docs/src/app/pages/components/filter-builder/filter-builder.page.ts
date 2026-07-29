@@ -82,8 +82,9 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
       <ul>
         <li>
           The <code>root</code> Public Part <em>is</em> the frame. Clicking anywhere on empty frame
-          space focuses the inline picker; chips, remove buttons, and the clear action keep their own
-          targets.
+          space focuses the inline picker and, while the prompt is empty, opens the list of
+          available fields — the surface is explorable without knowing what to type. Chips, remove
+          buttons, and the clear action keep their own targets.
         </li>
         <li>
           The chip set uses the shared <code>data-in-control-group</code> spacing recipe. The Filter
@@ -268,6 +269,13 @@ import filterBuilderTanStackExampleCodeRaw from './examples/tanstack.example.ts?
       </table>
       <ul>
         <li>
+          The empty prompt is explorable. A pointer click on the inline picker or on empty frame
+          space opens the full available-field list, deleting a typed query back to empty keeps the
+          list open, and <code>ArrowDown</code> opens it from the keyboard. Focus alone never opens
+          the list: tabbing through the builder and the focus restores after commit, cancel, and
+          clear stay quiet. Fields whose single expression already exists are not offered.
+        </li>
+        <li>
           Committing or cancelling an edit restores focus to the same stable chip; committing or
           cancelling a create returns focus to the inline picker with the query cleared.
         </li>
@@ -450,7 +458,7 @@ readonly identifyFilter = (filter: PeopleFilter) => filter.id;
     { focus: 'Inline picker', key: 'typing', behavior: 'Rank and filter the field list; the dropdown opens with matches.' },
     { focus: 'Inline picker', key: 'ArrowDown', behavior: 'Open the field dropdown, then navigate by active descendant.' },
     { focus: 'Inline picker', key: 'Enter', behavior: 'Commit the active field option and open the create editor.' },
-    { focus: 'Inline picker', key: 'Tab', behavior: 'With an active option, commits like Enter instead of leaving the field.' },
+    { focus: 'Inline picker', key: 'Tab', behavior: 'With a typed query and an active option, commits like Enter instead of leaving the field. On an empty prompt Tab always leaves, so exploring the list never turns a leave gesture into a commit.' },
     { focus: 'Inline picker (empty)', key: 'Backspace', behavior: 'Focus the last removable chip; a second Backspace removes it.' },
     { focus: 'Inline picker (empty)', key: 'ArrowLeft', behavior: 'Focus the last enabled chip.' },
     { focus: 'Inline picker', key: 'Escape', behavior: 'Close an open dropdown, else clear a typed query, else no-op.' },

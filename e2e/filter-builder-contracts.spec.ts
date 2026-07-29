@@ -575,6 +575,99 @@ test.describe('Filter Builder browser contract', () => {
     expect(['root', 'tokens']).toContain(hitSlot);
     await page.mouse.click(emptyPoint.x, emptyPoint.y);
     await expect(picker).toBeFocused();
+    // A click on the empty prompt is also the pointer entry into exploration:
+    // the available-field list opens without typing.
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('the empty prompt surfaces the available fields on click, quietly on focus alone', async ({
+    page,
+  }) => {
+    await gotoFilterBuilder(page);
+    const root = recipesExample(page);
+    const frame = root.locator('[hellControlGroup][data-slot="root"]');
+    const picker = root.getByRole('combobox', { name: 'People filter builder' });
+
+    await scrollNearTop(frame);
+    // Keyboard focus alone keeps the surface quiet.
+    await picker.focus();
+    await expect(picker).toBeFocused();
+    await expect(picker).toHaveAttribute('aria-expanded', 'false');
+
+    // Pointer: clicking the empty prompt opens the full field list without
+    // typing, and options commit by click.
+    await picker.click();
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[hellComboboxDropdown]:visible [role="option"]')).toHaveText([
+      'Name',
+      'Status',
+      'Priority ≥',
+    ]);
+    await page.getByRole('option', { name: 'Status', exact: true }).click();
+    const editor = createEditor(page, 'status');
+    await expect(editor).toBeVisible();
+
+    // Cancelling returns focus to the picker without popping the list back
+    // open — programmatic focus restores stay quiet.
+    await editor.getByRole('combobox', { name: 'Status option' }).press('Escape');
+    await expect(editor).toBeHidden();
+    await expect(picker).toBeFocused();
+    await expect(picker).toHaveAttribute('aria-expanded', 'false');
+
+    // The pointer is still parked where the Status option was clicked, and
+    // the reopened list renders under it; the engine's hover activation would
+    // then race the keyboard activation. Park the pointer off the surface so
+    // the keyboard path is observed alone.
+    await page.mouse.move(1, 1);
+
+    // Keyboard: ArrowDown explores the same list and Enter commits the
+    // active option.
+    await picker.press('ArrowDown');
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    const firstField = page.getByRole('option', { name: 'Name', exact: true });
+    const firstFieldId = await firstField.getAttribute('id');
+    expect(firstFieldId).not.toBeNull();
+    await expect(picker).toHaveAttribute('aria-activedescendant', firstFieldId!);
+    await picker.press('Enter');
+    await expect(createEditor(page, 'name')).toBeVisible();
+  });
+
+  test('an emptied query keeps the explored list open and Tab leaves it without committing', async ({
+    page,
+  }) => {
+    await gotoFilterBuilder(page);
+    const root = recipesExample(page);
+    const frame = root.locator('[hellControlGroup][data-slot="root"]');
+    const picker = root.getByRole('combobox', { name: 'People filter builder' });
+    const options = page.locator('[hellComboboxDropdown]:visible [role="option"]');
+
+    await scrollNearTop(frame);
+    await picker.click();
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    await picker.fill('Prio');
+    await expect(options).toHaveText(['Priority ≥']);
+
+    // Deleting the query back to empty keeps the list open and falls back to
+    // every available field instead of snapping shut.
+    await picker.fill('');
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    await expect(options).toHaveText(['Name', 'Status', 'Priority ≥']);
+
+    // An option is highlighted, but nothing was typed: Tab must leave the
+    // field instead of committing the highlighted option.
+    await picker.press('ArrowDown');
+    await expect(picker).toHaveAttribute('aria-activedescendant', /.+/);
+    await picker.press('Tab');
+    await expect(picker).not.toBeFocused();
+    await expect(page.locator('[hellPopover] [data-slot="editor"]')).toHaveCount(0);
+    await expect(root.locator('[data-slot="token"]')).toHaveCount(0);
+
+    // A typed query keeps the Tab-commits affordance.
+    await picker.click();
+    await picker.fill('Name');
+    await picker.press('ArrowDown');
+    await picker.press('Tab');
+    await expect(createEditor(page, 'name')).toBeVisible();
   });
 
   test('the create editor opens in a popover anchored to the frame instead of replacing the picker', async ({

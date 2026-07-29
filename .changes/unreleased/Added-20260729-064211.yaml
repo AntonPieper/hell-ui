@@ -1,0 +1,8 @@
+kind: Added
+body: 'Filter Builder: the available fields are explorable on an empty prompt. A pointer
+  click on the inline picker or on empty frame space opens the full field list without
+  typing, deleting a typed query back to empty keeps the list open with every available
+  field, and ArrowDown keeps opening it from the keyboard. Focus alone never opens
+  the list, so tabbing through the builder and the focus restores after commit, cancel,
+  and clear stay quiet.'
+time: 2026-07-29T06:42:11.653012+02:00
