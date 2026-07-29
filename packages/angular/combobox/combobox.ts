@@ -88,8 +88,20 @@ const HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS = [
   'mouseout',
 ] as const;
 
-/** Events that prove the pointer is being used rather than merely resting. */
-const HELL_COMBOBOX_POINTER_USE_EVENTS = ['pointermove', 'pointerdown'] as const;
+/**
+ * Events that prove the pointer is being used rather than merely resting.
+ *
+ * The legacy mouse names are listed for the same reason they are swallowed: an
+ * environment that produces mouse events without pointer events — a consumer's
+ * jsdom test driving `fireEvent.mouseEnter`, say — would otherwise have its
+ * boundary events swallowed by a guard that nothing it can send ever lifts.
+ */
+const HELL_COMBOBOX_POINTER_USE_EVENTS = [
+  'pointermove',
+  'pointerdown',
+  'mousemove',
+  'mousedown',
+] as const;
 
 /**
  * Combobox-local coordination for the touched focus boundary, boundary

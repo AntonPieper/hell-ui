@@ -728,14 +728,44 @@ describe('HellCombobox', () => {
 
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     const dropdown = await waitForDropdown(fixture);
-    const first = query<HTMLElement>(dropdown, '[role="option"]');
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
 
     // Hover is a mouse affordance. The replayed entry has to carry the real
     // pointer type, or a touch leave — which deliberately clears nothing —
     // would strand the option looking hovered.
-    first.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+    second.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
     fixture.detectChanges();
-    expect(first.hasAttribute('data-hover')).toBe(false);
+    expect(second.hasAttribute('data-hover')).toBe(false);
+    // The replay still has to happen: a touch press owns the active option the
+    // same way a mouse press does, so dropping the replay altogether fails here
+    // rather than only when its pointer type regresses.
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.id).not.toBe(first.id);
+  });
+
+  it('lifts the resting-pointer guard for a legacy mouse move with no pointer events', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+
+    // The guard swallows the legacy mouse boundary names too, so an environment
+    // that emits only those — a consumer's jsdom test driving `mouseEnter` —
+    // must still be able to lift it. A mouse move that is not a PointerEvent
+    // therefore counts as the pointer being used, and its replay is a mouse.
+    second.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    second.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.hasAttribute('data-hover')).toBe(true);
   });
 
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
