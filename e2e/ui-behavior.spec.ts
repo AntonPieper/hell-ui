@@ -1194,6 +1194,70 @@ test.describe('Hell UI browser behavior', () => {
     }
   });
 
+  test('pdf viewer page overview mounts a window and paints thumbnails on reveal', async ({
+    page,
+  }) => {
+    const viewer = await openBasicPdfViewer(page);
+
+    await viewer.getByRole('button', { name: /Toggle page overview/i }).click();
+    const rail = viewer.locator('aside[data-slot="sidebar"]');
+    await expect(rail).toBeVisible();
+
+    const cells = rail.locator('[role="listitem"]');
+    await expect(cells.first()).toBeVisible();
+    const totalPages = Number(await cells.first().getAttribute('aria-setsize'));
+    expect(totalPages).toBeGreaterThan(10);
+    // The rail mounts the window it can show, not one button per page, and it
+    // says how many pages there really are while doing it.
+    expect(await cells.count()).toBeLessThan(totalPages);
+
+    const canvasWidth = (n: number) =>
+      rail.locator(`canvas[data-page="${n}"]`).evaluate((el) => (el as HTMLCanvasElement).width);
+    await expect.poll(() => canvasWidth(1)).toBeGreaterThan(0);
+
+    const lastCell = rail.locator(`[role="listitem"][data-page="${totalPages}"]`);
+    await expect(lastCell).toHaveCount(0);
+
+    await rail.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+    await expect(lastCell).toHaveCount(1);
+    await expect.poll(() => canvasWidth(totalPages)).toBeGreaterThan(0);
+
+    // Clicking a revealed thumbnail still navigates the document.
+    await lastCell.getByRole('button').click();
+    await expect(viewer.getByRole('spinbutton', { name: /page/i })).toHaveValue(String(totalPages));
+
+    // …and jumping back scrolls the rail to the current page rather than
+    // leaving it stranded at the far end of a document it no longer shows.
+    await viewer.focus();
+    await page.keyboard.press('Home');
+    await expect
+      .poll(() => rail.evaluate((el) => el.scrollTop))
+      .toBeLessThan(50);
+    await expect(rail.locator('[aria-current="page"]')).toHaveAttribute(
+      'aria-label',
+      'Go to page 1',
+    );
+
+    // Tab traversal survives the window: focusing the last mounted button
+    // scrolls the rail, which advances the window and mounts the page after it,
+    // so walking does not dead-end at the edge of what is mounted.
+    const mountedAtTop = await cells.count();
+    await rail.locator('[data-slot="thumb"]').first().focus();
+    let walkedTo = 1;
+    for (let step = 0; step < mountedAtTop + 4; step++) {
+      await page.keyboard.press('Tab');
+      const label = await page.evaluate(
+        () => document.activeElement?.getAttribute('aria-label') ?? '',
+      );
+      const onPage = /^Go to page (\d+)$/.exec(label);
+      if (!onPage) break;
+      walkedTo = Number(onPage[1]);
+    }
+    expect(walkedTo).toBeGreaterThan(mountedAtTop);
+  });
+
   test('pdf viewer mobile pinch zoom scales the document', async ({ page, browserName }) => {
     test.skip(
       browserName !== 'chromium',

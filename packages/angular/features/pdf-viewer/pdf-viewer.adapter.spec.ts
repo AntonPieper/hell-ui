@@ -471,11 +471,26 @@ describe('PDF Adapter browser seam', () => {
     await session.renderThumbnail(thumbDoc, 1, canvas);
 
     expect(thumbDoc.getPage).toHaveBeenCalledWith(1);
-    expect(canvas.width).toBe(120);
-    expect(canvas.height).toBe(180);
-    expect(canvas.style.width).toBe('120px');
-    expect(canvas.style.height).toBe('180px');
+    // A portrait page fits the 120x160 thumbnail box by its height, so the
+    // rail's rows stay one uniform height instead of following the page.
+    expect(canvas.width).toBe(106);
+    expect(canvas.height).toBe(160);
+    expect(canvas.style.width).toBe('106px');
+    expect(canvas.style.height).toBe('160px');
     expect(render).toHaveBeenCalledOnce();
+
+    const landscapeCanvas = document.createElement('canvas');
+    vi.spyOn(landscapeCanvas, 'getContext').mockReturnValue({} as CanvasRenderingContext2D);
+    page.getViewport.mockImplementation(({ scale }: { readonly scale: number }) => ({
+      width: 300 * scale,
+      height: 200 * scale,
+    }));
+
+    await session.renderThumbnail(thumbDoc, 1, landscapeCanvas);
+
+    // …and a landscape page fits it by its width, into the same box.
+    expect(landscapeCanvas.width).toBe(120);
+    expect(landscapeCanvas.height).toBe(80);
 
     session.cleanup();
     expect(viewer.cleanup).toHaveBeenCalledOnce();
