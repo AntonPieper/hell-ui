@@ -597,13 +597,9 @@ test.describe('Filter Builder browser contract', () => {
     // Pointer: clicking the empty prompt opens the full field list without
     // typing, and options commit by click.
     await picker.click();
-    await expect(picker).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.locator('[hellComboboxDropdown]:visible [role="option"]')).toHaveText([
-      'Name',
-      'Status',
-      'Priority ≥',
-    ]);
-    await page.getByRole('option', { name: 'Status', exact: true }).click();
+    const explored = await ownedDropdown(page, picker);
+    await expect(explored.locator('[role="option"]')).toHaveText(['Name', 'Status', 'Priority ≥']);
+    await explored.getByRole('option', { name: 'Status', exact: true }).click();
     const editor = createEditor(page, 'status');
     await expect(editor).toBeVisible();
 
@@ -614,17 +610,15 @@ test.describe('Filter Builder browser contract', () => {
     await expect(picker).toBeFocused();
     await expect(picker).toHaveAttribute('aria-expanded', 'false');
 
-    // The pointer is still parked where the Status option was clicked, and
-    // the reopened list renders under it; the engine's hover activation would
-    // then race the keyboard activation. Park the pointer off the surface so
-    // the keyboard path is observed alone.
-    await page.mouse.move(1, 1);
-
-    // Keyboard: ArrowDown explores the same list and Enter commits the
-    // active option.
+    // Keyboard: ArrowDown explores the same list and Enter commits the active
+    // option — with the pointer left exactly where the Status option was
+    // clicked, so the reopened panel paints a *non-active* option under a
+    // pointer the user never moved. #431's resting-pointer guard is what keeps
+    // those boundary events from reassigning the active option away from
+    // `Name`, so this case doubles as the Filter Builder's coverage of it.
     await picker.press('ArrowDown');
-    await expect(picker).toHaveAttribute('aria-expanded', 'true');
-    const firstField = page.getByRole('option', { name: 'Name', exact: true });
+    const reopened = await ownedDropdown(page, picker);
+    const firstField = reopened.getByRole('option', { name: 'Name', exact: true });
     const firstFieldId = await firstField.getAttribute('id');
     expect(firstFieldId).not.toBeNull();
     await expect(picker).toHaveAttribute('aria-activedescendant', firstFieldId!);
@@ -639,11 +633,10 @@ test.describe('Filter Builder browser contract', () => {
     const root = recipesExample(page);
     const frame = root.locator('[hellControlGroup][data-slot="root"]');
     const picker = root.getByRole('combobox', { name: 'People filter builder' });
-    const options = page.locator('[hellComboboxDropdown]:visible [role="option"]');
 
     await scrollNearTop(frame);
     await picker.click();
-    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    const options = (await ownedDropdown(page, picker)).locator('[role="option"]');
     await picker.fill('Prio');
     await expect(options).toHaveText(['Priority ≥']);
 
