@@ -45,15 +45,24 @@ function servedDocsRoot(distRoot) {
  * unstyled while leaving this digest byte-identical.
  *
  * So the rule is inverted: everything counts unless there is a reason it
- * cannot reach a rendered page. Two such reasons exist, and both are about the
- * file rather than its name — specs, and the snapshots specs write, which
- * `test:unit` rewrites and which no page imports.
+ * cannot reach a rendered page. Three such reasons exist, and each is about the
+ * file rather than its name — specs, the snapshots specs write, which
+ * `test:unit` rewrites and which no page imports, and Finder metadata.
  *
  * Over-inclusion costs a rebuild. Under-inclusion accepts a stale build as
  * current, which is the failure this guard exists for.
  */
 function docsInputPaths(root) {
-  const buildable = (name) => !name.endsWith('.spec.ts') && !name.endsWith('.snap');
+  // Finder metadata is the third such reason, and the only one that appears
+  // without anybody touching the tree: browsing a directory writes `.DS_Store`,
+  // and copying to a non-native filesystem leaves `._*` AppleDouble sidecars.
+  // One written between the stamp and the preflight changes the digest and
+  // forces a ~90s docs rebuild for a file no page can import. AGENTS.md already
+  // names them a repo nuisance. This stays a decision about what these files
+  // are, not about the dot that starts their names.
+  const finderMetadata = (name) => name === '.DS_Store' || name.startsWith('._');
+  const buildable = (name) =>
+    !name.endsWith('.spec.ts') && !name.endsWith('.snap') && !finderMetadata(name);
   return [
     join(root, 'pnpm-lock.yaml'),
     join(root, 'tsconfig.base.json'),
@@ -148,7 +157,7 @@ export function describeForeignDocsBuild({
   }
   if (stamp.sourcesDigest !== currentDigest) {
     return [
-      `the docs server is serving a build made from different sources than the working tree${stamp.commit ? ` (built at ${stamp.commit.slice(0, 12)}${stamp.dirty ? ', dirty' : ''})` : ''}. Rebuild the docs before measuring them.`,
+      `the docs server is serving a build made from different sources than the working tree${stamp.commit ? ` (built at ${stamp.commit.slice(0, 12)}${stamp.dirty ? ', dirty' : ''})` : ''}. Outside CI Playwright reuses whatever already holds this port, so rebuilding on its own will not replace what is being served: stop it and let Playwright start its own.`,
     ];
   }
   return [];
