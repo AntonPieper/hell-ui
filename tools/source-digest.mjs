@@ -22,14 +22,23 @@ import { join, relative, sep } from 'node:path';
 export function collectSourceFiles(folder, matches, collected = []) {
   if (!existsSync(folder)) return collected;
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
-    // Dot-directories hold build and test caches, not sources. `.angular/cache`
-    // in particular carries a Vitest results file that every `test:unit` run
-    // rewrites, which made "build docs, run unit tests, run e2e" refuse with
-    // "rebuild the docs" on an unchanged tree.
-    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
     const path = join(folder, entry.name);
-    if (entry.isDirectory()) collectSourceFiles(path, matches, collected);
-    else if (matches(entry.name)) collected.push(path);
+    if (entry.isDirectory()) {
+      // Dot-*directories* hold build and test caches. `.angular/cache` carries
+      // a Vitest results file that every `test:unit` run rewrites, which made
+      // "build docs, run unit tests, run e2e" refuse an unchanged tree.
+      if (entry.name === 'node_modules' || entry.name === 'dist') continue;
+      if (entry.name.startsWith('.')) continue;
+      collectSourceFiles(path, matches, collected);
+      continue;
+    }
+    // Dot-*files* are configuration, and configuration builds the artifact.
+    // Skipping them cost `.postcssrc.json`, the only place
+    // `@tailwindcss/postcss` is registered: emptying it drops the docs
+    // stylesheet from 237kB to 132kB — the site renders unstyled — while the
+    // digest stayed byte-identical. Whatever this excludes, it must be a
+    // decision about that file, not a side effect of its name.
+    if (matches(entry.name)) collected.push(path);
   }
   return collected;
 }
