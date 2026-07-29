@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { apiGet, apiList, apiSend, describeTransport, resolveProjectPath } from './gitlab-api.mjs';
+import { apiSend, describeTransport, readPolicySurfaces, resolveProjectPath } from './gitlab-api.mjs';
 import { mainPolicyRestorePlan, policyRelativePath, readMainPolicy, verifyMainPolicy } from './main-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -37,10 +37,13 @@ if (!policy) {
 }
 
 const projectPath = resolveProjectPath();
-const live = await readSurfaces();
-const plan = mainPolicyRestorePlan({ policy, live, projectPath });
+const { requests, manual } = mainPolicyRestorePlan({
+  policy,
+  live: await readPolicySurfaces(projectPath),
+  projectPath,
+});
 
-if (plan.length === 0) {
+if (requests.length === 0 && manual.length === 0) {
   console.log(
     `No drift: the project already matches ${policyRelativePath} in ${policy.posture} posture. ` +
       'Nothing to restore.',
@@ -48,45 +51,55 @@ if (plan.length === 0) {
   process.exit(0);
 }
 
-console.log(`Restoration plan for ${policyRelativePath} (${policy.posture} posture), via ${describeTransport()}:`);
-for (const [index, request] of plan.entries()) {
-  console.log(`${index + 1}. ${request.summary}`);
-  console.log(`   ${request.method} ${request.path}${request.body ? ` ${JSON.stringify(request.body)}` : ''}`);
+if (requests.length > 0) {
+  console.log(
+    `Restoration plan for ${policyRelativePath} (${policy.posture} posture), via ${describeTransport()}:`,
+  );
+  for (const [index, request] of requests.entries()) {
+    console.log(`${index + 1}. ${request.summary}`);
+    console.log(
+      `   ${request.method} ${request.path}${request.body ? ` ${JSON.stringify(request.body)}` : ''}`,
+    );
+  }
+  if (requests.some((request) => request.method === 'DELETE')) {
+    console.log(
+      '\nProtected branch and tag rules have no partial update on this edition, so a drifted rule ' +
+        'is deleted and recreated. The ref is unprotected between those two requests; do this from ' +
+        'a session nobody is pushing into.',
+    );
+  }
 }
 
-const replacements = plan.filter((request) => request.method === 'DELETE');
-if (replacements.length > 0) {
+// Drift this command will not decide on its own. Removing a protection rule
+// the policy is silent about is a judgement about someone else's intent, so it
+// is reported and left alone — including when everything else is repaired.
+if (manual.length > 0) {
+  console.log(`\nLeft alone — decide these yourself:`);
+  for (const entry of manual) console.log(`- ${entry}`);
   console.log(
-    '\nProtected branch and tag rules have no partial update on this edition, so a drifted rule is ' +
-      'deleted and recreated. The ref is unprotected between those two requests; do this from a ' +
-      'session nobody is pushing into.',
+    'Record the rule in the policy if it belongs there, or remove it from the project by hand.',
   );
 }
 
 if (!apply) {
-  console.log('\nNothing written. Re-run with --apply to restore.');
+  if (requests.length > 0) console.log('\nNothing written. Re-run with --apply to restore.');
   process.exit(0);
 }
 
 console.log('');
-for (const request of plan) {
+for (const request of requests) {
   await apiSend(request.method, request.path, request.body);
   console.log(`Applied: ${request.method} ${request.path}`);
 }
 
-const { failures } = verifyMainPolicy({ policy, live: await readSurfaces() });
-if (failures.length > 0) {
+const { failures } = verifyMainPolicy({ policy, live: await readPolicySurfaces(projectPath) });
+const unrepaired = failures.filter((failure) => !manual.includes(failure));
+if (unrepaired.length > 0) {
   console.error('\nThe project still differs from the policy after restoration:');
-  for (const failure of failures) console.error(`- ${failure}`);
+  for (const failure of unrepaired) console.error(`- ${failure}`);
   process.exit(1);
 }
-console.log(`\nRestored: the project matches ${policyRelativePath} in ${policy.posture} posture.`);
-
-async function readSurfaces() {
-  return {
-    project: await apiGet(projectPath),
-    protectedBranches: await apiList(`${projectPath}/protected_branches`),
-    protectedTags: await apiList(`${projectPath}/protected_tags`),
-    labels: await apiList(`${projectPath}/labels`),
-  };
-}
+console.log(
+  `\nRestored: the project matches ${policyRelativePath} in ${policy.posture} posture` +
+    `${manual.length > 0 ? ', apart from the rules left alone above' : ''}.`,
+);

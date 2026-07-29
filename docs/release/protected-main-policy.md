@@ -24,8 +24,9 @@ nothing anywhere says it used to be otherwise. The file says so, and
 
 Protected branches and tags are recorded exhaustively: a rule on the project
 that the file does not record is drift, because an unrecorded protection rule
-is one nobody agreed to. Labels are a floor, not a census — the tracker
-carries triage labels this policy has no opinion about.
+is one nobody agreed to. It is reported, never removed — see *Restoring*.
+Labels are a floor, not a census: the tracker carries triage labels this
+policy has no opinion about.
 
 The list of recorded project settings is closed in both directions. Dropping
 a key from the file is an error rather than a silent decision to stop
@@ -51,14 +52,15 @@ worth engineering against, because it is the one that looks fine.
 ## Verifying
 
 ```bash
-pnpm verify:main-policy          # local coherence + live API evidence
-pnpm verify:main-policy --local  # coherence and policy fixtures only, no network
+pnpm test:main-policy    # document coherence and policy fixtures, no network
+pnpm verify:main-policy  # live parity across all four surfaces
 ```
 
-The local half runs in the static-contract job; it needs no credentials. The
-live half reads all four surfaces and reports every difference, including
-access-level grants to a single user, group, or deploy key — the exception
-grants that defeat the rule they sit on.
+`test:main-policy` runs in the static-contract job and needs no credentials:
+it proves the checked-in document is a coherent posture, which is what makes
+a posture change safe to review. `verify:main-policy` reads all four surfaces
+and reports every difference, including access-level grants to a single user,
+group, or deploy key — the exception grants that defeat the rule they sit on.
 
 Point the commands at a project through the environment, never a checked-in
 name:
@@ -83,9 +85,14 @@ only evidence that it happened. Read the plan, then decide whether the
 project is wrong or the file is.
 
 The plan is derived from the same comparison the verifier reports, so it can
-only touch surfaces the verifier checks, and every drift it reports has a
-named repair. After writing, the command re-reads all four surfaces and fails
-if anything still differs.
+only touch surfaces the verifier checks. After writing, the command re-reads
+all four surfaces and fails if anything it meant to repair still differs.
+
+One drift it will not repair: a protected branch or tag rule the policy does
+not record. Removing a protection someone else added is a judgement about
+their intent, not a repair, so the command lists those rules and leaves them
+alone — even while it fixes everything else. Record the rule in the policy if
+it belongs there, or remove it by hand if it does not.
 
 One sharp edge: this edition has no partial update for protected branch and
 tag rules, so a drifted rule is deleted and recreated. The ref is unprotected

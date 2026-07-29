@@ -13,13 +13,15 @@
 // Reading the API, and any writing at all, belongs to the two commands that
 // wrap this file — tools/check-main-policy.mjs and tools/restore-main-policy.mjs.
 
+import { noConsumerChangeLabel, releasePreparationLabel } from './pr-state-policy.mjs';
+
 export const policyRelativePath = '.gitlab/policy/protect-main.json';
 
 // The enforcement-relevant project settings. This list is closed in both
 // directions: a document that drops a key is rejected rather than quietly
 // stopping to check it, and one that adds a key is rejected rather than
 // comparing a setting nobody agreed to enforce.
-const recordedProjectSettings = [
+export const recordedProjectSettings = [
   'merge_method',
   'squash_option',
   'squash_commit_template',
@@ -30,9 +32,9 @@ const recordedProjectSettings = [
   'ci_pipeline_variables_minimum_override_role',
 ];
 
-// The two pull-request state labels from CONTEXT.md; the merge-request
-// contract decides state from them.
-const recordedLabels = ['no-consumer-change', 'release-preparation'];
+// The two state labels the merge-request contract decides state from, taken
+// from the policy module that owns their names rather than spelled again here.
+const recordedLabels = [noConsumerChangeLabel, releasePreparationLabel];
 
 const protectedBranchName = 'main';
 const protectedTagPattern = 'v*';
@@ -97,16 +99,23 @@ export function verifyMainPolicy({ policy, live }) {
 }
 
 /**
- * Turn the same comparison into the requests that write the policy back.
- * Nothing here performs a request; the restoration command does, and only
- * when a maintainer asks it to.
+ * Turn the same comparison into the requests that write the policy back, and
+ * the drift that restoration refuses to decide on its own.
+ *
+ * Nothing here performs a request; the restoration command does, and only when
+ * a maintainer asks it to.
  *
  * @param {{policy: object, live: object, projectPath: string}} input
- * @returns {{method: string, path: string, body: object, summary: string}[]}
+ * @returns {{requests: {method: string, path: string, body: object, summary: string}[], manual: string[]}}
  */
 export function mainPolicyRestorePlan({ policy, live, projectPath }) {
   const drifts = diffMainPolicy({ policy, live });
   const requests = [];
+  // A protection rule nobody recorded is drift worth reporting, but removing
+  // it is a judgement about someone else's intent. Restoration writes what the
+  // policy says; it never deletes a protection the policy is simply silent
+  // about.
+  const manual = drifts.filter((drift) => drift.kind === 'unexpected').map(describeDrift);
 
   const settings = drifts.filter((drift) => drift.surface === 'project');
   if (settings.length > 0) {
@@ -147,29 +156,32 @@ export function mainPolicyRestorePlan({ policy, live, projectPath }) {
     );
   }
 
-  return requests;
+  return { requests, manual };
 }
 
 function ruleRequests(drift, collectionPath, toBody) {
-  const remove = {
-    method: 'DELETE',
-    path: `${collectionPath}/${encodeURIComponent(drift.name)}`,
-    body: null,
-    summary: `Remove the "${drift.name}" rule.`,
-  };
+  if (drift.kind === 'unexpected') return [];
+
   const create = {
     method: 'POST',
     path: collectionPath,
-    body: drift.expected === null ? null : toBody(drift.expected),
+    body: toBody(drift.expected),
     summary: `Create the "${drift.name}" rule from the policy.`,
   };
-
-  // CE has no partial update for protected branches or tags: a drifted rule
-  // is replaced. The window between the two requests is real, and the
-  // restoration command names it before it writes.
   if (drift.kind === 'missing') return [create];
-  if (drift.kind === 'unexpected') return [remove];
-  return [remove, create];
+
+  // This edition has no partial update for protected branches or tags, so a
+  // drifted rule is replaced. The window between the two requests is real, and
+  // the restoration command names it before it writes.
+  return [
+    {
+      method: 'DELETE',
+      path: `${collectionPath}/${encodeURIComponent(drift.name)}`,
+      body: null,
+      summary: `Remove the drifted "${drift.name}" rule.`,
+    },
+    create,
+  ];
 }
 
 function branchBody(rule) {
@@ -333,16 +345,12 @@ function describeEvidence(policy, drifts) {
   const clean = (surface) => !drifts.some((drift) => drift.surface === surface);
   const evidence = [];
   if (clean('project')) {
-    evidence.push(
-      `Merge settings match the policy: ${policy.project.merge_method} with squash ` +
-        `${policy.project.squash_option}, pipeline-succeeds and discussions-resolved gates on, ` +
-        `merge on skipped pipeline off.`,
-    );
-    evidence.push(
-      `Fork pipelines in the parent project: ` +
-        `${policy.project.ci_allow_fork_pipelines_to_run_in_parent_project}; variable-override ` +
-        `role: ${policy.project.ci_pipeline_variables_minimum_override_role}.`,
-    );
+    // Every recorded setting is named with the value that was actually
+    // compared. Evidence that summarises from memory is how a check comes to
+    // assert a posture nobody is enforcing any more.
+    for (const key of recordedProjectSettings) {
+      evidence.push(`Project setting ${key} is ${JSON.stringify(policy.project[key])}.`);
+    }
   }
   if (clean('protected_branches')) {
     for (const rule of policy.protected_branches) {

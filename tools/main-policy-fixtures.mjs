@@ -7,7 +7,12 @@
 // restoration plan derived from the same comparison writes the policy back.
 // Nothing here talks to a server.
 
-import { mainPolicyRestorePlan, readMainPolicy, verifyMainPolicy } from './main-policy.mjs';
+import {
+  mainPolicyRestorePlan,
+  readMainPolicy,
+  recordedProjectSettings,
+  verifyMainPolicy,
+} from './main-policy.mjs';
 
 const policyDocument = () => ({
   posture: 'window',
@@ -103,8 +108,9 @@ const withProject = (overrides) => live({ project: { ...liveProject(), ...overri
 
 // `expect` is `{ failures: [] }` for a clean surface, or
 // `{ failures: [substring, ...] }` where every substring must appear in the
-// reported failures. `restores` lists `METHOD path` request lines the
-// restoration plan must contain, in order.
+// reported failures. `restores` lists the `METHOD path` request lines the
+// restoration plan must contain, in order; `manual` lists substrings of the
+// drift it reports but refuses to repair.
 const readFixtures = [
   {
     name: 'the window-posture document is self-consistent',
@@ -285,8 +291,14 @@ const verifyFixtures = [
     restores: ['PUT projects/7'],
   },
   {
-    name: 'lowering the variable-override role is drift',
+    name: 'tightening the variable-override role is drift too — the file is the record, not a floor',
     live: withProject({ ci_pipeline_variables_minimum_override_role: 'no_one_allowed' }),
+    expect: { failures: ['ci_pipeline_variables_minimum_override_role'] },
+    restores: ['PUT projects/7'],
+  },
+  {
+    name: 'widening the variable-override role is drift',
+    live: withProject({ ci_pipeline_variables_minimum_override_role: 'maintainer' }),
     expect: { failures: ['ci_pipeline_variables_minimum_override_role'] },
     restores: ['PUT projects/7'],
   },
@@ -340,7 +352,7 @@ const verifyFixtures = [
     restores: ['DELETE projects/7/protected_branches/main', 'POST projects/7/protected_branches'],
   },
   {
-    name: 'an unrecorded protected-branch rule is drift, and restoration removes it',
+    name: 'an unrecorded protected-branch rule is drift, but restoration refuses to delete it',
     live: live({
       protectedBranches: [
         ...liveProtectedBranches(),
@@ -354,7 +366,21 @@ const verifyFixtures = [
       ],
     }),
     expect: { failures: ['release/*', 'not recorded'] },
-    restores: ['DELETE projects/7/protected_branches/release%2F*'],
+    restores: [],
+    manual: ['release/*'],
+  },
+  {
+    name: 'an unrecorded rule is left alone even while other surfaces are repaired',
+    live: {
+      ...withProject({ merge_method: 'merge' }),
+      protectedTags: [
+        ...liveProtectedTags(),
+        { id: 22, name: 'archive/*', create_access_levels: [level(30, 'Developers')] },
+      ],
+    },
+    expect: { failures: ['merge_method', 'archive/*'] },
+    restores: ['PUT projects/7'],
+    manual: ['archive/*'],
   },
   {
     name: 'a deleted v* tag rule is drift — CE deletes it silently, so this is the audit trail',
@@ -452,20 +478,45 @@ function runVerifyFixture(fixture) {
     return [`the fixture policy document must be valid; got: ${errors.join(' | ')}`];
   }
 
-  const { failures: reported } = verifyMainPolicy({ policy, live: fixture.live });
+  const { failures: reported, evidence } = verifyMainPolicy({ policy, live: fixture.live });
   const failures = matchExpectations('failure', reported, fixture.expect.failures);
+
+  // A green run's evidence has to name the value it actually compared.
+  // Evidence that summarises from memory is how a check comes to assert a
+  // posture nobody enforces any more, while still printing "ok".
+  if (fixture.expect.failures.length === 0) {
+    for (const key of recordedProjectSettings) {
+      const claim = `${key} is ${JSON.stringify(policy.project[key])}`;
+      if (!evidence.some((line) => line.includes(claim))) {
+        failures.push(`expected the evidence to state "${claim}"; got: ${evidence.join(' | ')}`);
+      }
+    }
+  }
 
   const plan = mainPolicyRestorePlan({
     policy,
     live: fixture.live,
     projectPath: 'projects/7',
   });
-  const lines = plan.map((request) => `${request.method} ${request.path}`);
+  const lines = plan.requests.map((request) => `${request.method} ${request.path}`);
   const expectedRestores = fixture.restores ?? [];
   if (lines.join('\n') !== expectedRestores.join('\n')) {
     failures.push(
       `expected the restoration plan to be [${expectedRestores.join(', ')}]; got [${lines.join(', ')}].`,
     );
+  }
+
+  const expectedManual = fixture.manual ?? [];
+  if (plan.manual.length !== expectedManual.length) {
+    failures.push(
+      `expected ${expectedManual.length} drifts left for a human; got ${plan.manual.length}: ` +
+        `${plan.manual.join(' | ')}`,
+    );
+  }
+  for (const needle of expectedManual) {
+    if (!plan.manual.some((entry) => entry.includes(needle))) {
+      failures.push(`expected a left-alone drift mentioning "${needle}"; got: ${plan.manual.join(' | ')}`);
+    }
   }
   return failures;
 }

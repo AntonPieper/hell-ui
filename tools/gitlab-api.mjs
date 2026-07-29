@@ -47,7 +47,7 @@ export function describeTransport() {
  * @param {string} path API v4 path, without a leading slash.
  * @returns {Promise<object>}
  */
-export async function apiGet(path) {
+async function apiGet(path) {
   return request('GET', path, null);
 }
 
@@ -57,17 +57,32 @@ export async function apiGet(path) {
  * @param {string} path API v4 path, without a leading slash or query string.
  * @returns {Promise<object[]>}
  */
-export async function apiList(path) {
+async function apiList(path) {
   const entries = [];
   for (let page = 1; ; page += 1) {
-    const separator = path.includes('?') ? '&' : '?';
-    const batch = await request('GET', `${path}${separator}per_page=${perPage}&page=${page}`, null);
+    const batch = await request('GET', `${path}?per_page=${perPage}&page=${page}`, null);
     if (!Array.isArray(batch)) {
       throw new Error(`Expected a collection from ${path}; got ${typeof batch}.`);
     }
     entries.push(...batch);
     if (batch.length < perPage) return entries;
   }
+}
+
+/**
+ * Read the four surfaces the protected-`main` policy spans, in the shape the
+ * policy seam compares against.
+ *
+ * @param {string} projectPath
+ * @returns {Promise<{project: object, protectedBranches: object[], protectedTags: object[], labels: object[]}>}
+ */
+export async function readPolicySurfaces(projectPath) {
+  return {
+    project: await apiGet(projectPath),
+    protectedBranches: await apiList(`${projectPath}/protected_branches`),
+    protectedTags: await apiList(`${projectPath}/protected_tags`),
+    labels: await apiList(`${projectPath}/labels`),
+  };
 }
 
 /**
