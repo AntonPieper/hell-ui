@@ -38,7 +38,18 @@ header width transactions.
 
 The kept contract is intentionally small:
 
-- Split-pane handles may resize the panes immediately before and after the handle.
+- Split-pane handles may resize the panes immediately before and after the handle
+  **in layout**. A pane another module has hidden is `display: none`: it holds no
+  width to trade, so a handle reaches past it to the nearest pane that has a box,
+  and a handle left with no pair reports itself non-interactive like any other
+  non-resizable separator.
+- A pane out of layout leaves the split entirely rather than reserving width in
+  it, and the size it was committed to is **parked, not discarded**: a group down
+  to one pane in layout lets that pane fill the frame, and the pane widths the
+  group last split are restored when the panes come back. Consumers may rely on a
+  user's split surviving a responsive excursion that hides a pane. Groups with
+  `rescaleOnResize="false"` have opted out of container-driven refitting and out
+  of this rule with it.
 - Table resize handles may resize only adjacent header/cell layout items in the same semantic or adapter-rendered row contract.
 - The shared runtime may own pointer capture/listener cleanup, key-to-intent mapping, min-size math, RTL horizontal inversion, and commit/value callbacks.
 - Caller-specific code owns layout storage: flex pane CSS variables for resizable panes; table column ids, width CSS variables, and committed resize payloads for modern table primitives/adapters.

@@ -1,0 +1,6 @@
+kind: Fixed
+body: A Resizable pane that another module has hidden — such as the inactive pane
+  in a compact Master Detail frame — no longer reserves width in the group. The panes
+  still on screen fill the frame, and the split the group had before is restored when
+  the hidden pane comes back.
+time: 2026-07-29T07:05:36.848792+02:00
