@@ -8,6 +8,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/.angular/**',
+      // Job-local tool caches on CI (corepack, pnpm store).
+      '.cache/**',
       '.claude/**',
       'coverage/**',
       'dist/**',
