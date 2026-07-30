@@ -1,0 +1,7 @@
+kind: Fixed
+body: PDF viewer page-overview thumbnails now paint the window the rail is showing
+  instead of working through every window it scrolled past, and each thumbnail
+  rasterizes without yielding to requestAnimationFrame between operator chunks. On
+  a busy machine — Firefox especially — revealing the end of a document no longer
+  leaves its thumbnails blank for many seconds.
+time: 2026-07-30T15:45:00.000000+02:00

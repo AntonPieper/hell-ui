@@ -119,6 +119,8 @@ _Avoid_: Reserving size for a hidden pane, dropping a split to fill a frame.
 
 **PDF Runtime**
 The pdf.js lifecycle behind the PDF viewer: bootstrapping, worker ownership, document loading, viewer events, find state, thumbnails, printing, and cleanup.
+Thumbnail paints serve what the rail shows now. Every batch snapshots the mounted window, a newer snapshot supersedes queued ones after at most the one in-flight render, and thumbnails rasterize with pdf.js print intent, which completes without yielding to requestAnimationFrame between operator chunks.
+_Avoid_: Painting windows the rail has scrolled away from before the one it shows, display-intent (rAF-stepped) rasterization for thumbnails.
 
 **Docs Catalog**
 The docs app source of truth for pages, navigation, routes, icons, sections, and searchable entries.

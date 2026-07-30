@@ -637,6 +637,58 @@ describe('PDF Runtime', () => {
     expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
   });
 
+  it('drops superseded batches so the newest window paints next', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
+    const doc = fakeDocument(400);
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    let releaseFirst!: () => void;
+    const rendered: number[] = [];
+    adapter.session.renderThumbnail.mockImplementation(async (_doc, page: number) => {
+      rendered.push(page);
+      if (!releaseFirst) {
+        await new Promise<void>((resolve) => {
+          releaseFirst = resolve;
+        });
+      }
+    });
+
+    // Every batch snapshots all mounted canvases, so once the rail scrolls on
+    // while page 1 is still drawing, the batches queued behind the newest one
+    // only describe windows the rail has already left.
+    const first = runtime.renderThumbs(
+      [mountedThumbCanvas(1), mountedThumbCanvas(2)],
+      () => true,
+    );
+    await Promise.resolve();
+    const second = runtime.renderThumbs(
+      [mountedThumbCanvas(3), mountedThumbCanvas(4)],
+      () => true,
+    );
+    const third = runtime.renderThumbs(
+      [mountedThumbCanvas(5), mountedThumbCanvas(6)],
+      () => true,
+    );
+
+    releaseFirst();
+    await Promise.all([first, second, third]);
+
+    // The in-flight render lands; the rest of its batch and the whole
+    // superseded middle batch never draw, so the newest window is not stuck
+    // behind renders of pages the user is no longer looking at.
+    expect(rendered).toEqual([1, 5, 6]);
+  });
+
   it('does not leave a blank thumbnail when a reload lands mid-batch', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
