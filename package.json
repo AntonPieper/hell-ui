@@ -39,6 +39,7 @@
     "ci:test:release-notes": "pnpm run test:changelog",
     "ci:test:e2e": "pnpm exec playwright test",
     "ci:test:consumer-fixtures": "pnpm run test:consumer-fixtures",
+    "ci:test:consumer-fixtures:shard": "node tools/run-consumer-fixture-shard.mjs",
     "ci:build:lib": "pnpm run build:lib",
     "ci:build:docs:prepared": "pnpm run build:docs",
     "ci:check:entrypoints": "node tools/generate-entrypoint-manifests.mjs --check",
