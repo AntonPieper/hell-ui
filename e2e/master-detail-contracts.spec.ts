@@ -207,6 +207,18 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
     await expect(example).not.toHaveAttribute('data-compact', 'true');
     await expect.poll(() => fillsFrame(example)).toEqual(FILLS_FRAME);
 
+    // Leaving the compact viewport is two reflows, not one: the frame drops
+    // `data-compact` as soon as its own box widens, but the docs shell
+    // re-expands its sidenav a breakpoint tick later and animates its grid
+    // columns, so the frame is transiently wider than the wide layout it
+    // settles into. WebKit keeps that window open long enough for a pixel
+    // baseline to be read inside it — and a baseline taken there is one no
+    // settled layout can ever grow past, because the settle itself shrinks
+    // the frame. Every return to the wide viewport below therefore waits for
+    // the frame to come back to this settled width before measuring panes.
+    const wideFrame = await widthOf(example);
+    const frameSettled = async () => Math.abs((await widthOf(example)) - wideFrame) < 1;
+
     // Never resized: the panes have only ever flexed.
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(example).toHaveAttribute('data-compact', 'true');
@@ -225,6 +237,7 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
     // frame more than four times wider than the compact one.
     await page.setViewportSize({ width: 1440, height: 1000 });
     await expect(example).not.toHaveAttribute('data-compact', 'true');
+    await expect.poll(frameSettled).toBe(true);
     await handle.focus();
     const relaxed = await widthOf(primary);
     for (let step = 0; step < 12; step += 1) await page.keyboard.press('ArrowRight');
@@ -249,6 +262,7 @@ test.describe('Master Detail responsive, focus, keyboard, and axe contracts', ()
     // wide frame was left with are the ones it gets back.
     await page.setViewportSize({ width: 1440, height: 1000 });
     await expect(example).not.toHaveAttribute('data-compact', 'true');
+    await expect.poll(frameSettled).toBe(true);
     await expect(detail).toBeVisible();
     await expect.poll(() => fillsFrame(example)).toEqual(FILLS_FRAME);
     await expect
