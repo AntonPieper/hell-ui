@@ -5,10 +5,30 @@ import { defineConfig } from 'vitest/config';
 const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 const coveragePath = resolve(workspaceRoot, 'coverage');
 
-const reporters = ['default', 'hanging-process'];
+const reporters: (string | [string, Record<string, unknown>])[] = [
+  'default',
+  'hanging-process',
+];
 
 if (process.env.GITHUB_ACTIONS === 'true') {
   reporters.splice(1, 0, 'github-actions');
+}
+
+// The merge-request test widget reads a JUnit report; written only on the
+// GitLab runner so local runs leave no stray file.
+if (process.env.GITLAB_CI === 'true') {
+  reporters.push([
+    'junit',
+    { outputFile: resolve(workspaceRoot, 'test-results/vitest-junit.xml') },
+  ]);
+}
+
+const coverageReporters = ['text', 'html'];
+
+// Cobertura feeds the merge-request coverage visualization; the text
+// reporter's "All files" row is what the job's coverage regex reads.
+if (process.env.GITLAB_CI === 'true') {
+  coverageReporters.push('cobertura');
 }
 
 export default defineConfig({
@@ -28,7 +48,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reportsDirectory: coveragePath,
-      reporter: ['text', 'html'],
+      reporter: coverageReporters,
       reportOnFailure: true,
       thresholds: {
         statements: 75,

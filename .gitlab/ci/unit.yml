@@ -7,8 +7,16 @@ unit:
     - !reference [.caches, angular]
   script:
     - pnpm run ci:test:unit
+  # The "All files" row of the coverage text reporter; first column is
+  # statement coverage.
+  coverage: '/All files[^|]*\|\s*([\d.]+)/'
   artifacts:
     when: always
     paths:
       - coverage/
+    reports:
+      junit: test-results/vitest-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
     expire_in: 7 days
