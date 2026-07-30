@@ -38,6 +38,11 @@ import {
   loadStyleBundleBudget,
   measureCompiledCss,
 } from './style-bundle-benchmark.mjs';
+import {
+  readLockCatalogVersions,
+  readWorkspaceCatalog,
+  readWorkspaceOverrides,
+} from './workspace-versions.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
@@ -57,8 +62,8 @@ const allPackagePeerNames = new Set(
   Object.values(peerGroupContracts).flatMap((contract) => contract.peers),
 );
 
-const workspaceCatalog = readWorkspaceScalarMap('catalog');
-const workspaceOverrides = readWorkspaceScalarMap('overrides');
+const workspaceCatalog = readWorkspaceCatalog();
+const workspaceOverrides = readWorkspaceOverrides();
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 // Later sources win. The workspace catalog holds ranges, so the lockfile's
 // resolved catalog versions overlay it: a range written into a fixture
@@ -681,56 +686,6 @@ function preparePackedTarball() {
   const tarballName = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarballName) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarballName) };
-}
-
-function readWorkspaceScalarMap(sectionName) {
-  const workspacePath = join(root, 'pnpm-workspace.yaml');
-  const source = readFileSync(workspacePath, 'utf8');
-  const map = {};
-  let inSection = false;
-
-  for (const line of source.split(/\r?\n/)) {
-    if (/^\S/.test(line)) inSection = line === `${sectionName}:`;
-    if (!inSection || !line.startsWith('  ')) continue;
-    if (/^\s*#/.test(line)) continue;
-
-    const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
-    if (match) map[match[2]] = match[4];
-  }
-
-  return map;
-}
-
-// The `catalogs:` snapshot in pnpm-lock.yaml records the exact version each
-// workspace-catalog range resolved to — the tested version the fixture
-// contract pins to. Parsed with the same line discipline as
-// readWorkspaceScalarMap: catalog names sit at one indent level, package
-// names at two, their resolved fields at three.
-function readLockCatalogVersions() {
-  const source = readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8');
-  const map = {};
-  let inCatalogs = false;
-  let currentName = null;
-
-  for (const line of source.split(/\r?\n/)) {
-    if (/^\S/.test(line)) {
-      inCatalogs = line === 'catalogs:';
-      currentName = null;
-      continue;
-    }
-    if (!inCatalogs) continue;
-
-    const nameMatch = line.match(/^ {4}(['"]?)([^'":]+)\1:\s*$/);
-    if (nameMatch) {
-      currentName = nameMatch[2];
-      continue;
-    }
-
-    const versionMatch = line.match(/^ {6}version:\s+(['"]?)([^'"()\s]+)/);
-    if (versionMatch && currentName) map[currentName] = versionMatch[2];
-  }
-
-  return map;
 }
 
 function exactInstalledVersion(name) {
