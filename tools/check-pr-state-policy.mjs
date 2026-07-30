@@ -11,6 +11,7 @@
 
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runMrStateInputFixtures } from './mr-state-input-fixtures.mjs';
 import { runPrStatePolicyFixtures } from './pr-state-policy-fixtures.mjs';
 import { runWorkflowTrustContractFixtures } from './workflow-trust-contract-fixtures.mjs';
 import { collectWorkflowTrustContractErrors } from './workflow-trust-contracts.mjs';
@@ -18,9 +19,15 @@ import { collectWorkflowTrustContractErrors } from './workflow-trust-contracts.m
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const fixtures = runPrStatePolicyFixtures();
+const adapterFixtures = runMrStateInputFixtures();
 const trustErrors = collectWorkflowTrustContractErrors({ root });
 const trustFixtures = runWorkflowTrustContractFixtures({ root });
-const failures = [...fixtures.failures, ...trustErrors, ...trustFixtures.failures];
+const failures = [
+  ...fixtures.failures,
+  ...adapterFixtures.failures,
+  ...trustErrors,
+  ...trustFixtures.failures,
+];
 
 if (failures.length > 0) {
   console.error('PR-state contract check failed:');
@@ -29,6 +36,8 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `PR states ok: ${fixtures.total} policy fixtures passed, the workflow trust contracts hold, ` +
-    `and ${trustFixtures.total} adversarial workflow fixtures were rejected.`,
+  `PR states ok: ${fixtures.total} policy fixtures passed (${adapterFixtures.replayed} replayed ` +
+    `through the GitLab input adapter, plus ${adapterFixtures.total} adapter fixtures), the ` +
+    `workflow trust contracts hold, and ${trustFixtures.total} adversarial workflow fixtures ` +
+    'were rejected.',
 );

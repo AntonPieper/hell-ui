@@ -35,8 +35,10 @@ const preparationCandidate = ({ record = '.changes/0.3.0.md', extras = [] } = {}
 
 // `expect` is either `{ state }` for a passing decision or
 // `{ state, errors: [substring, ...] }` for a failing one; every listed
-// substring must appear in the reported errors.
-const fixtures = [
+// substring must appear in the reported errors. The corpus is exported so the
+// GitLab input adapter (tools/mr-state-input-fixtures.mjs) replays the same
+// scenarios through its own encoding.
+export const prStatePolicyFixtures = [
   {
     name: 'one added fragment is a Consumer Change',
     labels: [],
@@ -269,28 +271,33 @@ const fixtures = [
 
 export function runPrStatePolicyFixtures() {
   const failures = [];
-  for (const fixture of fixtures) {
+  for (const fixture of prStatePolicyFixtures) {
     for (const failure of runFixture(fixture)) {
       failures.push(`pr-state policy fixture "${fixture.name}": ${failure}`);
     }
   }
-  return { failures, total: fixtures.length };
+  return { failures, total: prStatePolicyFixtures.length };
 }
 
 function runFixture(fixture) {
-  const failures = [];
   const files = fixture.pages ? fixture.pages.flat() : fixture.files;
-  const { state, errors } = evaluatePullRequestState({
+  const verdict = evaluatePullRequestState({
     labels: fixture.labels,
     files,
     expectedFileCount: fixture.expectedFileCount ?? null,
   });
+  return collectVerdictFailures(fixture.expect, verdict);
+}
 
-  if (state !== fixture.expect.state) {
-    failures.push(`expected state ${JSON.stringify(fixture.expect.state)}, got ${JSON.stringify(state)}.`);
+// Compares one policy verdict against a fixture's expectation. Exported so
+// the GitLab input-adapter fixtures assert the replayed corpus the same way.
+export function collectVerdictFailures(expect, { state, errors }) {
+  const failures = [];
+  if (state !== expect.state) {
+    failures.push(`expected state ${JSON.stringify(expect.state)}, got ${JSON.stringify(state)}.`);
   }
 
-  const expectedErrors = fixture.expect.errors ?? [];
+  const expectedErrors = expect.errors ?? [];
   if (expectedErrors.length === 0) {
     if (errors.length > 0) {
       failures.push(`expected a passing decision; got: ${errors.join(' | ')}`);

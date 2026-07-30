@@ -1,0 +1,31 @@
+# The merge-request contract (ADR 0003): two jobs, two diagnostics. pr-state
+# decides that exactly one state is claimed from labels plus the merge-base
+# diff; release-notes validates the release-note content itself. A present but
+# malformed Change Fragment satisfies the state and fails the content check,
+# so each failure names its own half. Both gate merge requests only.
+#
+# Known degradation: label edits never start a new merge-request pipeline.
+# After applying or removing a state label, re-run the pipeline — pr-state
+# reads the labels captured at pipeline creation and says so when it fails.
+
+pr-state:
+  extends: .node-job
+  stage: test
+  timeout: 5 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  # Dependency-free like the policy it runs: git metadata in, verdict out —
+  # no install, no caches.
+  cache: []
+  before_script: []
+  script:
+    - node tools/decide-mr-state.mjs
+
+release-notes:
+  extends: .node-job
+  stage: test
+  timeout: 15 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - pnpm run ci:test:release-notes
