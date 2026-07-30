@@ -95,3 +95,12 @@ Browser artifact policy:
 - Built docs are served by nginx (`tools/ci/nginx-spa.conf`) with
   `HELL_E2E_BASE_URL`. The nginx config returns 404 for missing static assets
   and falls back to `index.html` only for SPA routes.
+
+`e2e-image/` derives a job image for a container-based CI provider — the
+pinned Playwright base plus nginx, using the same `nginx-spa.conf` — so that
+provider's browser jobs run the tests and the docs server in one image from
+its project container registry, with no public-registry pull at job time.
+The workflow above does not consume it: these GitHub Actions jobs keep
+pulling their images directly, exactly as documented in this file. The image
+contract, build/push procedure, and the rebuild-on-Playwright-bump rule live
+in [`e2e-image/README.md`](./e2e-image/README.md).
