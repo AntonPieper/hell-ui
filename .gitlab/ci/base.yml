@@ -30,13 +30,14 @@
     - docker
   interruptible: true
   # Retry infrastructure failures only — a failing test or script exits with
-  # the job's own error and must stay red on the first run.
+  # the job's own error and must stay red on the first run. A hung job is
+  # deliberately not retried: a timeout deserves eyes, not a second slot.
   retry:
     max: 1
     when:
       - runner_system_failure
-      - stuck_or_timeout
       - api_failure
+      - scheduler_failure
   variables:
     COREPACK_HOME: "$CI_PROJECT_DIR/.cache/corepack"
     COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
