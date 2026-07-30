@@ -402,10 +402,17 @@ jobs:
             process.exit(1);
           ' || { cat docs-server.log; exit 1; }
 
+      # HOME=/root: container-job steps run as root, but the runner sets HOME
+      # to /github/home, which the Playwright image's pwuser owns — and firefox
+      # refuses to launch from a $HOME the current user does not own (every
+      # firefox test fails in milliseconds with a launch error). Scoped to this
+      # step so the setup steps keep resolving their caches under the runner's
+      # HOME.
       - name: Browser tests
         env:
           HELL_E2E_TIER: ${{ needs.e2e-plan.outputs.tier }}
           HELL_E2E_BASE_URL: http://127.0.0.1:4200
+          HOME: /root
         run: pnpm run ci:test:e2e --shard="${{ matrix.shard }}/${{ needs.e2e-plan.outputs.shard-total }}"
 
       - name: Upload browser reports
