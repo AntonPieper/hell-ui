@@ -35,6 +35,7 @@
     "ci:playwright:chromium": "pnpm exec playwright install --with-deps chromium",
     "ci:test:unit": "pnpm run test:coverage",
     "ci:test:static": "pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:pr-states && pnpm run test:main-policy",
+    "ci:test:release-notes": "pnpm run test:changelog",
     "ci:test:e2e": "pnpm exec playwright test",
     "ci:test:consumer-fixtures": "pnpm run test:consumer-fixtures",
     "ci:build:lib": "pnpm run build:lib",

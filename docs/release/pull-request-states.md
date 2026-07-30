@@ -44,6 +44,13 @@ Applying or removing `no-consumer-change` or `release-preparation` re-runs
 `Release notes (content)` does not depend on labels; it re-runs when commits
 change the proposed content.
 
+On a GitLab merge request the same contract runs as the `pr-state` and
+`release-notes` pipeline jobs (`.gitlab/ci/mr-contract.yml`), with one known
+degradation: **label edits do not start a new pipeline**. After applying or
+removing a state label, re-run the merge-request pipeline — `pr-state` reads
+the labels captured at pipeline creation, and its failure output repeats this
+reminder. Fixing a state mistake still never requires a new commit.
+
 ## What the metadata check enforces
 
 - Exactly one state: added fragments under `.changes/unreleased/`, or exactly

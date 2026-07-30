@@ -48,6 +48,7 @@ stages:
 
 include:
   - local: .gitlab/ci/base.yml
+  - local: .gitlab/ci/mr-contract.yml
   - local: .gitlab/ci/static.yml
   - local: .gitlab/ci/unit.yml
   - local: .gitlab/ci/build.yml
