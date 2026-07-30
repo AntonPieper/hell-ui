@@ -2,9 +2,9 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      // The pr-state merge-request job runs this entry point from
-      // .gitlab/ci/mr-contract.yml, which knip does not read.
-      "entry": ["tools/decide-mr-state.mjs"],
+      // The pr-state and secret-detection-gate merge-request jobs run these
+      // entry points from .gitlab/ci/*.yml, which knip does not read.
+      "entry": ["tools/decide-mr-state.mjs", "tools/gate-secret-detection.mjs"],
       // Consumer fixtures are standalone projects compiled against the packed
       // tarball by tools/check-consumer-fixtures.mjs, not repo source.
       "ignore": ["tools/consumer-fixtures/**"],
