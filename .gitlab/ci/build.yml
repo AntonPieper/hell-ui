@@ -1,0 +1,31 @@
+# Single producer of built output: builds the library and docs fresh, audits
+# and packs the tarball, and publishes both as job artifacts. dist/ is never
+# stored in or restored from a cache; downstream jobs (package consumers, the
+# E2E tiers) consume these artifacts and rebuild nothing.
+
+build:
+  extends: .node-job
+  stage: test
+  timeout: 25 minutes
+  cache:
+    - !reference [.caches, pnpm]
+    - !reference [.caches, angular]
+  script:
+    # Built output must come from this job, never a reused workspace.
+    - test ! -e dist
+    - test ! -e artifacts
+    - pnpm run ci:check:entrypoints
+    - pnpm run ci:build:lib
+    - pnpm run ci:test:api-report:prepared
+    - pnpm run ci:pack:lib
+    - pnpm run ci:build:docs:prepared
+    # E2E shards serve this bundle from their own container, and their
+    # preflight refuses a server it cannot identify — the stamp has to be
+    # baked into the artifact because the Playwright webServer command that
+    # writes it locally never runs in CI.
+    - node tools/stamp-docs-build.mjs dist/hell-docs
+  artifacts:
+    paths:
+      - artifacts/package/
+      - dist/hell-docs/
+    expire_in: 30 days

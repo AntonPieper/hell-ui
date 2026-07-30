@@ -1,0 +1,14 @@
+unit:
+  extends: .node-job
+  stage: test
+  timeout: 15 minutes
+  cache:
+    - !reference [.caches, pnpm]
+    - !reference [.caches, angular]
+  script:
+    - pnpm run ci:test:unit
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    expire_in: 7 days

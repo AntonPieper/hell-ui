@@ -1,0 +1,53 @@
+# Slim root: pipeline topology and dispatch hooks only. Jobs live in the
+# .gitlab/ci/ include files, one file per concern — never a monolith.
+
+# Exactly five pipeline sources:
+#
+#   merge_request_event   MR pipeline — the merge gate
+#   push to main          branch pipeline
+#   push of a v* tag      tag pipeline (release machinery attaches here)
+#   schedule              behavior selected by $PIPELINE_KIND / $E2E_TIER
+#   web / api             manual dispatch hatch, $E2E_TIER selectable
+#
+# Anything else — in particular a plain branch push without an open MR —
+# creates no pipeline.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
+    - when: never
+
+# Hooks for the schedule and web/api sources. Declared here so the
+# run-pipeline form offers them; schedules set them as plain variables.
+variables:
+  E2E_TIER:
+    value: "full"
+    options:
+      - "pr"
+      - "main"
+      - "full"
+    description: >-
+      Browser-risk tier for dispatched E2E runs. Tier semantics are owned by
+      playwright.config.ts (HELL_E2E_TIER); event-driven pipelines derive
+      their tier from the source and ignore this.
+  PIPELINE_KIND:
+    value: "default"
+    options:
+      - "default"
+      - "policy-sweep"
+    description: >-
+      Scheduled-pipeline selector. policy-sweep runs the daily policy and
+      release drift audit instead of the test pipeline.
+
+stages:
+  - test
+
+include:
+  - local: .gitlab/ci/base.yml
+  - local: .gitlab/ci/static.yml
+  - local: .gitlab/ci/unit.yml
+  - local: .gitlab/ci/build.yml

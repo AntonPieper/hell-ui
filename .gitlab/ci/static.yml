@@ -1,0 +1,9 @@
+# Lint and the repository's static contracts (dead code, architecture, PR
+# state policy, main-policy document).
+
+static:
+  extends: .node-job
+  stage: test
+  timeout: 15 minutes
+  script:
+    - pnpm run ci:test:static
