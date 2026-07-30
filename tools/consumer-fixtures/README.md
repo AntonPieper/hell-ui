@@ -26,8 +26,12 @@ Every fixture is a real project: open it, read it, edit it like any consumer
 app. Two rules keep fixtures honest:
 
 - Dependency versions are always `"*"`. The runner pins each dependency to the
-  repo's tested version (installed version, else `pnpm-workspace.yaml` catalog,
-  else root `package.json`), so fixtures cannot drift onto untested versions.
+  repo's tested version — the root-installed version, else the exact version
+  the lockfile's `catalogs:` snapshot records for the `pnpm-workspace.yaml`
+  catalog entry, else the root `package.json` — so fixtures cannot drift onto
+  untested versions. A dependency that still resolves to a range fails the run
+  rather than being written through: a range re-resolves at install time,
+  which is exactly the drift this contract exists to prevent.
 - `hell-ui` is declared like any other dependency and is replaced at
   run time with the packed tarball. Fixtures never install workspace links, and
   they never commit lockfiles.

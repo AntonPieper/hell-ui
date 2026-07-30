@@ -60,10 +60,15 @@ const allPackagePeerNames = new Set(
 const workspaceCatalog = readWorkspaceScalarMap('catalog');
 const workspaceOverrides = readWorkspaceScalarMap('overrides');
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+// Later sources win. The workspace catalog holds ranges, so the lockfile's
+// resolved catalog versions overlay it: a range written into a fixture
+// manifest re-resolves at install time, and the fixture drifts onto a
+// release this repository has never tested.
 const knownVersions = {
   ...(rootPackage.dependencies ?? {}),
   ...(rootPackage.devDependencies ?? {}),
   ...workspaceCatalog,
+  ...readLockCatalogVersions(),
 };
 
 const fixtures = discoverFixtures();
@@ -235,6 +240,14 @@ function resolveDependencyVersion(name) {
 
   const version = knownVersions[name];
   if (!version) fail(`Fixture dependency ${name} is not in the workspace catalog or root package.json`);
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(version)) {
+    fail(
+      `Fixture dependency ${name} resolves to "${version}", which is not an exact version. ` +
+        'A range re-resolves at install time, so the fixture could drift onto an untested ' +
+        'release; record the tested version where the runner can read it (the lockfile ' +
+        'catalogs snapshot, an installed root dependency, or an exact root manifest entry).',
+    );
+  }
   return version;
 }
 
@@ -683,6 +696,38 @@ function readWorkspaceScalarMap(sectionName) {
 
     const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
     if (match) map[match[2]] = match[4];
+  }
+
+  return map;
+}
+
+// The `catalogs:` snapshot in pnpm-lock.yaml records the exact version each
+// workspace-catalog range resolved to — the tested version the fixture
+// contract pins to. Parsed with the same line discipline as
+// readWorkspaceScalarMap: catalog names sit at one indent level, package
+// names at two, their resolved fields at three.
+function readLockCatalogVersions() {
+  const source = readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8');
+  const map = {};
+  let inCatalogs = false;
+  let currentName = null;
+
+  for (const line of source.split(/\r?\n/)) {
+    if (/^\S/.test(line)) {
+      inCatalogs = line === 'catalogs:';
+      currentName = null;
+      continue;
+    }
+    if (!inCatalogs) continue;
+
+    const nameMatch = line.match(/^ {4}(['"]?)([^'":]+)\1:\s*$/);
+    if (nameMatch) {
+      currentName = nameMatch[2];
+      continue;
+    }
+
+    const versionMatch = line.match(/^ {6}version:\s+(['"]?)([^'"()\s]+)/);
+    if (versionMatch && currentName) map[currentName] = versionMatch[2];
   }
 
   return map;
