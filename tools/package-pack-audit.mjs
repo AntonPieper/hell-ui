@@ -9,6 +9,7 @@ import {
   entrypointPublicApiFiles,
   entrypointStyleExports,
 } from './entrypoint-manifest.mjs';
+import { readWorkspaceCatalog } from './workspace-versions.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const angularPackageName = 'hell-ui';
@@ -846,23 +847,6 @@ function assertSameSet(label, expected, actual, failures) {
 
 function uniqueSorted(values) {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b));
-}
-
-function readWorkspaceCatalog() {
-  const workspacePath = join(root, 'pnpm-workspace.yaml');
-  const source = readFileSync(workspacePath, 'utf8');
-  const catalog = {};
-  let inCatalog = false;
-
-  for (const line of source.split(/\r?\n/)) {
-    if (/^\S/.test(line)) inCatalog = line === 'catalog:';
-    if (!inCatalog || !line.startsWith('  ')) continue;
-
-    const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
-    if (match) catalog[match[2]] = match[4];
-  }
-
-  return catalog;
 }
 
 function normalizeExportTarget(target) {

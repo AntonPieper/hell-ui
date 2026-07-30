@@ -20,6 +20,7 @@ import {
   sourcePackageCondition,
   styleBundlePolicies,
 } from './entrypoint-manifest.mjs';
+import { readWorkspaceCatalog } from './workspace-versions.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -2253,22 +2254,6 @@ function parseJsonWithComments(source) {
 
 function readFile(path) {
   return readFileSync(path, 'utf8');
-}
-
-function readWorkspaceCatalog() {
-  const source = readFile(join(root, 'pnpm-workspace.yaml'));
-  const catalog = {};
-  let inCatalog = false;
-
-  for (const line of source.split(/\r?\n/)) {
-    if (/^\S/.test(line)) inCatalog = line === 'catalog:';
-    if (!inCatalog || !line.startsWith('  ')) continue;
-
-    const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
-    if (match) catalog[match[2]] = match[4];
-  }
-
-  return catalog;
 }
 
 function walk(path) {
