@@ -163,6 +163,14 @@ jobs:
           path: artifacts/package
 
       # The fixture smoke loads the built consumer app in headless chromium.
+      # The browser download is cached; `playwright install` skips anything
+      # already present and still apt-installs system deps each run.
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright chromium
         run: pnpm run ci:playwright:chromium
 
@@ -253,7 +261,7 @@ jobs:
       - name: Build docs
         run: pnpm run ci:build:docs:prepared
 
-      # The E2E shards serve this artifact from their own nginx container, so
+      # The E2E shards serve this artifact from their own static server, so
       # the provenance the preflight reads has to be baked in here: the
       # Playwright `webServer` command that writes the stamp locally never runs
       # in CI, and without it every shard refuses to start against a server it
@@ -332,6 +340,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, e2e-plan]
     timeout-minutes: 10
+    # The tests run directly in the pinned Playwright image instead of
+    # docker-running it from inside a VM job: the browsers are simply present,
+    # so there is no image tar to cache, load, or save per shard. Bump the tag
+    # together with the `@playwright/test` catalog entry (and
+    # tools/ci/e2e-image, which derives from the same base).
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     strategy:
       fail-fast: false
       matrix:
@@ -355,24 +372,6 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
-      - name: Restore Playwright image cache
-        uses: actions/cache@v5
-        with:
-          path: .ci-cache/playwright-image-v1.59.1-noble.tar
-          key: playwright-image-${{ runner.os }}-v1.59.1-noble
-
-      - name: Prepare Playwright image
-        run: |
-          image="mcr.microsoft.com/playwright:v1.59.1-noble"
-          image_tar=".ci-cache/playwright-image-v1.59.1-noble.tar"
-          mkdir -p .ci-cache
-          if [ -f "${image_tar}" ]; then
-            docker load --input "${image_tar}"
-          else
-            docker pull "${image}"
-            docker save --output "${image_tar}" "${image}"
-          fi
-
       # E2E serves the exact docs artifact the build job produced; nothing is
       # rebuilt or restored from a cache here.
       - name: Download docs dist
@@ -381,52 +380,33 @@ jobs:
           name: docs-dist
           path: dist/hell-docs
 
+      # The same static server local runs use (the `webServer` command in
+      # playwright.config.ts), pointed at the downloaded artifact instead of a
+      # fresh build. HELL_E2E_BASE_URL keeps the preflight in external-target
+      # mode: it identifies the served build by the stamp the build job baked
+      # in, and must not compare checkout identity — this checkout did not
+      # produce the artifact.
       - name: Start docs server
         run: |
-          docs_root="dist/hell-docs/browser"
-          if [ ! -f "${docs_root}/index.html" ]; then
-            docs_root="dist/hell-docs"
-          fi
-
-          test -f "${docs_root}/index.html"
-          docker run --detach --name hell-docs \
-            --publish 127.0.0.1:4200:80 \
-            --volume "${PWD}/${docs_root}:/usr/share/nginx/html:ro" \
-            --volume "${PWD}/tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro" \
-            nginx:1.27-alpine
-
-      - name: Wait for docs server
-        run: |
-          for attempt in 1 2 3 4 5; do
-            if curl --fail --silent --show-error http://127.0.0.1:4200/ >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          curl --fail --show-error http://127.0.0.1:4200/
+          test -f dist/hell-docs/browser/index.html
+          nohup pnpm exec vite preview --host 127.0.0.1 --port 4200 --strictPort \
+            --outDir dist/hell-docs/browser >docs-server.log 2>&1 &
+          node --input-type=module --eval '
+            for (let attempt = 1; attempt <= 30; attempt += 1) {
+              try {
+                if ((await fetch("http://127.0.0.1:4200/")).ok) process.exit(0);
+              } catch {}
+              await new Promise((resolve) => setTimeout(resolve, 1_000));
+            }
+            console.error("docs server did not answer on http://127.0.0.1:4200");
+            process.exit(1);
+          ' || { cat docs-server.log; exit 1; }
 
       - name: Browser tests
         env:
           HELL_E2E_TIER: ${{ needs.e2e-plan.outputs.tier }}
-          PLAYWRIGHT_SHARD: ${{ matrix.shard }}
-          PLAYWRIGHT_SHARD_TOTAL: ${{ needs.e2e-plan.outputs.shard-total }}
-        run: |
-          docker run --rm --network host \
-            --volume "${PWD}:/workspace" \
-            --workdir /workspace \
-            --env CI=true \
-            --env HOME=/root \
-            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-            --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
-            --env HELL_E2E_TIER \
-            --env PLAYWRIGHT_SHARD \
-            --env PLAYWRIGHT_SHARD_TOTAL \
-            mcr.microsoft.com/playwright:v1.59.1-noble \
-            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --shard="${PLAYWRIGHT_SHARD}/${PLAYWRIGHT_SHARD_TOTAL}"'
-
-      - name: Stop docs server
-        if: always()
-        run: docker rm --force hell-docs || true
+          HELL_E2E_BASE_URL: http://127.0.0.1:4200
+        run: pnpm run ci:test:e2e --shard="${{ matrix.shard }}/${{ needs.e2e-plan.outputs.shard-total }}"
 
       - name: Upload browser reports
         if: always()
