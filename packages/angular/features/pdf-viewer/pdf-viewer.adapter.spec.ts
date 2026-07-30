@@ -478,6 +478,9 @@ describe('PDF Adapter browser seam', () => {
     expect(canvas.style.width).toBe('106px');
     expect(canvas.style.height).toBe('160px');
     expect(render).toHaveBeenCalledOnce();
+    // Print intent, so the raster completes without yielding to rAF between
+    // operator chunks; a display-intent render starves on a busy main thread.
+    expect(render).toHaveBeenCalledWith(expect.objectContaining({ intent: 'print' }));
 
     const landscapeCanvas = document.createElement('canvas');
     vi.spyOn(landscapeCanvas, 'getContext').mockReturnValue({} as CanvasRenderingContext2D);

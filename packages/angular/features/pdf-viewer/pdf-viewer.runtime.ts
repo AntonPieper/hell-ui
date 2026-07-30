@@ -305,6 +305,8 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private readonly renderedThumbs = new WeakMap<HTMLCanvasElement, number>();
   /** Tail of the thumbnail batch queue; see `renderThumbs`. */
   private thumbRenderQueue: Promise<void> = Promise.resolve();
+  /** Identity of the newest queued batch; see `renderThumbs`. */
+  private thumbBatchGeneration = 0;
   private handlers: HellPdfRuntimeHandlers | null = null;
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
@@ -527,12 +529,23 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
    * rasterizing several windows at once, and it is what gives the mounted check
    * below its value: by the time a queued batch runs, everything the rail
    * scrolled past is detached and skipped instead of drawn.
+   *
+   * Serialized, the queue's other hazard is backlog. Every batch is a complete
+   * snapshot of the canvases the rail has mounted, so the moment a newer one is
+   * queued, the older batches describe windows the rail has scrolled away from
+   * — yet unsuperseded they would still paint them, one render at a time, while
+   * the pages actually on screen sit blank behind them. A batch therefore stops
+   * as soon as it is no longer the newest one: at most one in-flight render
+   * lands before the current window starts painting.
    */
   renderThumbs(
     canvases: readonly HTMLCanvasElement[],
     shouldContinue: () => boolean,
   ): Promise<void> {
-    const batch = this.thumbRenderQueue.then(() => this.renderThumbBatch(canvases, shouldContinue));
+    const generation = ++this.thumbBatchGeneration;
+    const batch = this.thumbRenderQueue.then(() =>
+      this.renderThumbBatch(canvases, shouldContinue, generation),
+    );
     this.thumbRenderQueue = batch.catch(() => undefined);
     return batch;
   }
@@ -540,12 +553,14 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private async renderThumbBatch(
     canvases: readonly HTMLCanvasElement[],
     shouldContinue: () => boolean,
+    generation: number,
   ): Promise<void> {
     if (!this.doc || !this.session || !shouldContinue()) return;
 
     const token = this.loadToken;
 
     for (const canvas of canvases) {
+      if (generation !== this.thumbBatchGeneration) return;
       if (!shouldContinue()) return;
       // Rasterizing a page onto a canvas the rail already unmounted is pure
       // waste, and during a fast scroll it is most of the work.

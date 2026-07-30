@@ -220,6 +220,7 @@ interface HellPdfPageHandle {
   render(options: {
     readonly canvasContext: CanvasRenderingContext2D;
     readonly viewport: HellPdfPageViewport;
+    readonly intent?: 'display' | 'print';
   }): HellPdfRenderTask;
 }
 
@@ -571,7 +572,12 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     canvas.style.height = `${Math.floor(viewport.height / dpr)}px`;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    // Print intent: pdf.js steps a display-intent render one operator chunk
+    // per requestAnimationFrame, so on a busy main thread — or a hidden tab,
+    // where rAF stops entirely — one small thumbnail can take seconds. Print
+    // renders run the operator list without yielding to rAF, and a thumbnail
+    // wants exactly that: the finished raster, not incremental display.
+    await page.render({ canvasContext: ctx, viewport, intent: 'print' }).promise;
   }
 
   cleanup(): void {
