@@ -71,8 +71,8 @@ and packs the tarball (`ci:pack:lib` keeps the audited `.tgz` under
 immutable run artifacts. Package-consumer jobs download and test exactly that
 tarball (`HELL_PACKAGE_CONSUMER_TARBALL` points the runners at the artifact
 directory); E2E jobs serve exactly that docs artifact. Provider caches hold
-only the pnpm store, the Angular compiler cache, and the Playwright browser
-image.
+only the pnpm store, the Angular compiler cache, and the consumer jobs'
+Playwright chromium download.
 
 Jobs publish these shared artifacts from the repository root:
 
@@ -92,9 +92,14 @@ Unit artifact policy:
 Browser artifact policy:
 
 - Playwright writes HTML, traces, and screenshots under `test-results/`.
-- Built docs are served by nginx (`tools/ci/nginx-spa.conf`) with
-  `HELL_E2E_BASE_URL`. The nginx config returns 404 for missing static assets
-  and falls back to `index.html` only for SPA routes.
+- E2E shards run inside the pinned Playwright container image, so the browsers
+  are present without a per-shard install or image cache. The worker count
+  lives in `playwright.config.ts` (one worker per core on CI), not in the
+  workflow.
+- Built docs are served by `vite preview` — the same server the local
+  `webServer` command uses — with `HELL_E2E_BASE_URL` keeping the preflight in
+  external-target mode, since the shard's checkout did not produce the
+  artifact it serves.
 
 `e2e-image/` derives a job image for a container-based CI provider — the
 pinned Playwright base plus nginx, using the same `nginx-spa.conf` — so that

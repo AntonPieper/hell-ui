@@ -88,6 +88,15 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
+  // Every worker is a browser plus a runner process, so workers beyond the
+  // core count oversubscribe the host. CI once forced 8 workers onto 4-core
+  // runners; the host-health reporter read a median load of up to 7.6 per
+  // logical core on the shards carrying the CPU-bound suites (axe scans,
+  // pdf.js rasterization), which inflated every measured duration and tipped
+  // the animation-sampling contracts over. One worker per core keeps the
+  // wait-bound majority parallel without starving those. Outside CI,
+  // Playwright's default (half the cores) stands.
+  workers: process.env.CI ? '100%' : undefined,
   globalSetup: './tools/e2e/global-setup.ts',
   reporter: [
     ['list'],
