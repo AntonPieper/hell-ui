@@ -16,11 +16,13 @@
 package-consumer:
   extends: .node-job
   stage: test
-  image: $CI_REGISTRY_IMAGE/e2e:v1.59.1-noble
+  image: $CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG
   timeout: 45 minutes
   parallel: 3
   needs:
     - build
+    - job: e2e-image
+      optional: true
   variables:
     HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
     HELL_CONSUMER_FIXTURE_SMOKE: "1"

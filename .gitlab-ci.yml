@@ -53,5 +53,6 @@ include:
   - local: .gitlab/ci/static.yml
   - local: .gitlab/ci/unit.yml
   - local: .gitlab/ci/build.yml
+  - local: .gitlab/ci/e2e-image.yml
   - local: .gitlab/ci/e2e.yml
   - local: .gitlab/ci/package-consumer.yml

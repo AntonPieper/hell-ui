@@ -1,0 +1,66 @@
+# Builds the browser-job image (tools/ci/e2e-image) in the pipeline and
+# pushes it to the project's container registry — the image the e2e tiers
+# and package-consumer run. GitOps: the derivation lives in-tree, the
+# pipeline rebuilds it only when its inputs change, and nothing is ever
+# built or pushed from a workstation. dind + BuildKit is the instance's
+# established pattern for image builds on the shared runner.
+#
+# The two pins below are the image's identity and travel together:
+# E2E_PLAYWRIGHT_VERSION must equal the workspace's locked @playwright/test
+# version (deliberately not parsed out of pnpm-lock.yaml — raw pin here,
+# loud validation at point of use: Playwright refuses to start against
+# browsers installed for a different version, so a drifted pin fails the
+# first e2e shard with an exact message). E2E_IMAGE_TAG is
+# v<playwright>-node<major>[-rN]; bump it in the same change that moves a
+# pin or edits the derivation — the build job refuses to touch an existing
+# tag, so an unbumped tag change surfaces as "skipped, tag exists", never
+# as a silent overwrite.
+
+variables:
+  E2E_PLAYWRIGHT_VERSION: "1.59.1"
+  E2E_IMAGE_TAG: v1.59.1-node22-r1
+
+e2e-image:
+  stage: test
+  image: docker:28
+  services:
+    - docker:28-dind
+  tags:
+    - docker
+  interruptible: true
+  retry: !reference [.retries, infra-only]
+  timeout: 30 minutes
+  needs: []
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - tools/ci/e2e-image/**/*
+        - tools/ci/nginx-spa.conf
+        - .gitlab/ci/e2e-image.yml
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
+      changes:
+        - tools/ci/e2e-image/**/*
+        - tools/ci/nginx-spa.conf
+        - .gitlab/ci/e2e-image.yml
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    # Tags are immutable: a tag that exists means exactly one thing forever.
+    # An already-present tag is a completed earlier run of this same
+    # derivation (or a derivation edit that forgot the E2E_IMAGE_TAG bump —
+    # which this refusal makes visible instead of silently overwriting).
+    - |
+      if docker manifest inspect "$CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG" >/dev/null 2>&1; then
+        echo "Tag $E2E_IMAGE_TAG already exists in the registry — not overwriting."
+        echo "If you changed the derivation, bump E2E_IMAGE_TAG in .gitlab/ci/e2e-image.yml."
+        exit 0
+      fi
+    - >
+      docker build
+      --build-arg "PLAYWRIGHT_VERSION=$E2E_PLAYWRIGHT_VERSION"
+      --tag "$CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG"
+      --file tools/ci/e2e-image/Dockerfile
+      tools/ci
+    - docker push "$CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG"

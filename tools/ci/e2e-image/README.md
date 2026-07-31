@@ -1,9 +1,10 @@
-# The e2e job image
+# The browser job image
 
 Browser jobs must pull only from the project's own container registry — never
 Docker Hub or `mcr.microsoft.com` at job time. This directory derives the one
-image those jobs run: the pinned Playwright browser image with nginx added, so
-the same container serves the built docs bundle and runs the tests against it.
+image those jobs run: the workspace's Node runtime with the locked Playwright
+browsers installed and nginx added, so the same container serves the built
+docs bundle and runs the tests against it.
 
 ## Image contract
 
@@ -11,65 +12,61 @@ the same container serves the built docs bundle and runs the tests against it.
   `$CI_REGISTRY_IMAGE/e2e`. The registry path itself is shown on the
   project's Container Registry page and is deliberately never written in this
   repository.
-- **Tag**: the Playwright base tag, e.g. `v1.59.1-noble` — always the
-  workspace's locked `@playwright/test` version (`pnpm-lock.yaml`) plus the
-  base image's OS suffix. The tag says exactly which Playwright the browsers
-  inside it belong to.
-- **Contents**: the base plus `nginx` and `curl`. The repository's
+- **Tag**: `v<playwright>-node<major>[-rN]`, e.g. `v1.59.1-node22-r1` —
+  the workspace's locked `@playwright/test` version (`pnpm-lock.yaml`) plus
+  the Node major from `.node-version`, with an optional revision suffix for
+  derivation changes that move neither pin. The tag says exactly which
+  Playwright the browsers belong to and which Node runtime jobs get. The
+  authoritative value is `E2E_IMAGE_TAG` in `.gitlab/ci/e2e-image.yml`.
+- **Base**: `node:22` — the workspace runtime, not Playwright's own image.
+  Toolchains enforce per-major Node floors at runtime (the Angular CLI
+  refused the Playwright base's bundled Node outright), and Playwright's
+  installer reproduces everything that base provided: `install --with-deps`
+  fetches the browsers for the pinned version and apt-installs the same
+  system packages the upstream image ships.
+- **Contents on top**: `nginx` and `curl`. The repository's
   [`nginx-spa.conf`](../nginx-spa.conf) is copied verbatim to
   `/etc/nginx/conf.d/default.conf`, the distro default site is removed so the
   SPA server is the only one on port 80, and the docs root
   `/usr/share/nginx/html` starts empty — a job copies the built docs bundle
-  there before starting nginx. Because the config is the same file the
-  standalone nginx container mounted, its serving behavior is byte-identical
-  by construction.
-- **Platform**: `linux/amd64`, the runner architecture.
+  there before starting nginx. Browsers live at `/ms-playwright`
+  (`PLAYWRIGHT_BROWSERS_PATH`, baked into the image and repeated by the
+  jobs).
+- **Platform**: `linux/amd64`, the runner architecture — built on the runner
+  itself, so there is no cross-architecture emulation anywhere in the path.
 
-## Running it
+## How it is built — in the pipeline, never on a workstation
 
-The image sets no entrypoint or command of its own: a CI runner injects the
-job script, which copies the built docs bundle into `/usr/share/nginx/html`,
-starts `nginx` (it daemonizes by default), curl-waits on `http://127.0.0.1/`
-until it answers, and runs Playwright against that address — which is why
-`curl` is part of the derivation. Locally the same thing is one container:
-mount the bundle read-only over the docs root and run
-`nginx -g "daemon off;"` as the container command.
+The `e2e-image` job (`.gitlab/ci/e2e-image.yml`) builds and pushes the image
+with dind + BuildKit — the instance's established pattern — using the
+CI-provided registry credentials. It instantiates only when the derivation's
+inputs change (this directory, `nginx-spa.conf`, or the pins in
+`.gitlab/ci/e2e-image.yml`); the browser jobs order themselves behind it with
+an optional `needs`, so a pipeline that rebuilds the image tests against the
+fresh tag and every other pipeline just pulls.
 
-## Build and push
+Tags are immutable: the build job refuses to touch a tag that already exists
+in the registry. A derivation change therefore always travels with an
+`E2E_IMAGE_TAG` bump in the same commit — forget it and the job says
+"tag exists, not overwriting" instead of silently replacing bits under a
+name other pipelines trust. Superseded tags are garbage-collected by the
+project's registry cleanup policy (newest kept unconditionally, older tags
+deleted 90 days after push), so rollback stays possible for a quarter and
+dead tags stop costing storage.
 
-Rebuilds are rare and maintainer-run; there is no build job. From the
-repository root, with the registry path from the project's Container Registry
-page and a `docker login` that can write it:
+The Playwright pin (`E2E_PLAYWRIGHT_VERSION`) is written out explicitly next
+to the tag rather than parsed from `pnpm-lock.yaml`. Validation happens
+loudly at point of use: Playwright refuses to run against browsers installed
+for a different version, so a pin that drifts from the lockfile fails the
+first e2e shard with an exact message naming both versions.
 
-```bash
-REGISTRY_IMAGE=<the project's container-registry path>
-PLAYWRIGHT_TAG=v1.59.1-noble  # the locked @playwright/test version + OS suffix
-docker buildx build --platform linux/amd64 \
-  --file tools/ci/e2e-image/Dockerfile \
-  --tag "${REGISTRY_IMAGE}/e2e:${PLAYWRIGHT_TAG}" \
-  --push tools/ci
-```
+## When to bump
 
-## Rebuild rule
-
-The image is rebuilt **only on Playwright bumps**. When the locked
-`@playwright/test` version changes, build and push the tag for the new
-version as part of the same change that bumps the lockfile, and point the CI
-jobs at it — a version bump whose image was never pushed fails its first
-pipeline at pull time, which is the desired loud failure. Existing tags are
-never overwritten or retagged: like the upstream version pin they mirror, a
-tag that exists means exactly one thing forever.
-
-Nothing else triggers a rebuild. In particular, docs-bundle changes do not:
-the bundle is a pipeline artifact the job copies in at run time, never baked
-into the image.
-
-Superseded tags do not live forever: the project's container-registry cleanup
-policy keeps the newest tag unconditionally and deletes older ones 90 days
-after they were pushed, so a rolled-past Playwright version stays available
-for rollback for a quarter and then stops costing storage. That does not
-soften the immutability rule — a tag that exists still means exactly one
-thing; it just does not exist indefinitely.
+| Change | What to do |
+| --- | --- |
+| `@playwright/test` bump in the lockfile | Set `E2E_PLAYWRIGHT_VERSION` and `E2E_IMAGE_TAG` to the new version in the same MR. |
+| Node major bump (`.node-version`) | Update the Dockerfile base and the `-node<major>` tag segment in the same MR. |
+| Any other derivation edit | Bump the `-rN` suffix in the same MR. |
 
 ## What "serves the docs bundle" means
 

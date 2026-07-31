@@ -26,10 +26,15 @@
 .e2e-tier:
   extends: .node-job
   stage: test
-  image: $CI_REGISTRY_IMAGE/e2e:v1.59.1-noble
+  image: $CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG
   timeout: 45 minutes
   needs:
     - build
+    # When the derivation changed in this very pipeline, run behind its
+    # rebuild; in every other pipeline the job does not instantiate and the
+    # tag is pulled as-is.
+    - job: e2e-image
+      optional: true
   cache:
     - !reference [.caches, pnpm-readonly]
   variables:
