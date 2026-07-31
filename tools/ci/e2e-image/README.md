@@ -64,6 +64,13 @@ Nothing else triggers a rebuild. In particular, docs-bundle changes do not:
 the bundle is a pipeline artifact the job copies in at run time, never baked
 into the image.
 
+Superseded tags do not live forever: the project's container-registry cleanup
+policy keeps the newest tag unconditionally and deletes older ones 90 days
+after they were pushed, so a rolled-past Playwright version stays available
+for rollback for a quarter and then stops costing storage. That does not
+soften the immutability rule — a tag that exists still means exactly one
+thing; it just does not exist indefinitely.
+
 ## What "serves the docs bundle" means
 
 The acceptance behavior, with a built docs bundle in

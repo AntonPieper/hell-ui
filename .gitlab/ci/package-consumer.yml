@@ -4,10 +4,19 @@
 # (tools/run-consumer-fixture-shard.mjs), so adding a fixture never edits CI;
 # the shard count is capacity tuning, not coverage. Per-fixture collapsible
 # log sections carry each fixture's result inside a shard.
+#
+# The fixture smoke loads each built consumer app in headless chromium, so
+# the shards run the derived e2e image (tools/ci/e2e-image): the browsers and
+# their system packages are baked in at the pinned Playwright version — the
+# per-run `playwright install --with-deps` and the browser-binary cache it
+# needed are gone, exactly as Playwright's CI guidance recommends. The smoke
+# resolves @playwright/test from the workspace lockfile, which is the same
+# version the image tag pins.
 
 package-consumer:
   extends: .node-job
   stage: test
+  image: $CI_REGISTRY_IMAGE/e2e:v1.59.1-noble
   timeout: 45 minutes
   parallel: 3
   needs:
@@ -15,18 +24,10 @@ package-consumer:
   variables:
     HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
     HELL_CONSUMER_FIXTURE_SMOKE: "1"
-    PLAYWRIGHT_BROWSERS_PATH: "$CI_PROJECT_DIR/.cache/ms-playwright"
-  cache:
-    - !reference [.caches, pnpm]
-    # The fixture smoke loads each built consumer app in headless chromium;
-    # the browser download is cached, `playwright install` skips anything
-    # already present and still apt-installs system deps each run.
-    - key:
-        files:
-          - pnpm-lock.yaml
-        prefix: playwright-chromium
-      paths:
-        - .cache/ms-playwright
+    # The browsers baked into the image, at the base image's path.
+    PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+  # Deliberately not the read-only pnpm cache: fixture installs can pull
+  # packages the workspace lockfile does not cover, and pushing them back
+  # keeps the next run's fixture installs warm.
   script:
-    - pnpm run ci:playwright:chromium
     - pnpm run ci:test:consumer-fixtures:shard

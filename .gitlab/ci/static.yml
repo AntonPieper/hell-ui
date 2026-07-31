@@ -5,5 +5,7 @@ static:
   extends: .node-job
   stage: test
   timeout: 15 minutes
+  cache:
+    - !reference [.caches, pnpm-readonly]
   script:
     - pnpm run ci:test:static

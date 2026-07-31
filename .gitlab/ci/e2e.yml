@@ -12,9 +12,16 @@
 # gate job: the merge gate is the pipeline itself, and silent-shrink
 # protection is the pipeline-shape contract's job.
 #
-# Shard counts are capacity tuning, not coverage — tuned to keep every shard
-# inside the runner's 60-minute cap with at least 25% headroom on the fewest
-# shards that fit.
+# Shard and worker counts are capacity tuning, not coverage. Unlike hosted
+# runners that give every shard its own machine, all shards here land on one
+# shared docker host — so sharding adds retry granularity and room under the
+# runner's 60-minute job cap, never compute. The config's CI default of one
+# worker per core is sized for a dedicated machine; with N shards sharing
+# this host it becomes N workers per core and the tests starve (measured:
+# five full-tier shards drove the 8-core host to a median load of 17.5 per
+# core, and frame-driven waits timed out suite-wide). Each tier therefore
+# caps --workers so that shards × workers stays at roughly the host's core
+# count.
 
 .e2e-tier:
   extends: .node-job
@@ -23,6 +30,8 @@
   timeout: 45 minutes
   needs:
     - build
+  cache:
+    - !reference [.caches, pnpm-readonly]
   variables:
     # The browsers baked into the image, at the base image's path — never a
     # per-job download.
@@ -39,12 +48,17 @@
     # nginx daemonizes by default; wait until it answers before testing.
     - nginx
     - timeout 30 sh -c 'until curl --silent --fail --output /dev/null http://127.0.0.1/; do sleep 1; done'
-    - pnpm run ci:test:e2e --shard="${CI_NODE_INDEX}/${CI_NODE_TOTAL}"
+    - pnpm run ci:test:e2e --shard="${CI_NODE_INDEX}/${CI_NODE_TOTAL}" --workers="${HELL_E2E_WORKERS}"
+  # Reports and traces exist to diagnose a red shard; a green run's timings
+  # are already in the job log, so uploading its report would only spend
+  # storage on every healthy pipeline. Only the HTML report is uploaded: it
+  # copies every trace and screenshot into its own data/ directory, so also
+  # archiving the raw test-results doubles the payload — a badly red shard
+  # blew past the instance's artifact size cap with a 413 exactly that way.
   artifacts:
-    when: always
+    when: on_failure
     paths:
       - test-results/playwright-html/
-      - test-results/playwright/
     expire_in: 7 days
 
 e2e:pr:
@@ -52,6 +66,7 @@ e2e:pr:
   parallel: 2
   variables:
     HELL_E2E_TIER: pr
+    HELL_E2E_WORKERS: "4"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "pr"
@@ -62,6 +77,7 @@ e2e:main:
   parallel: 3
   variables:
     HELL_E2E_TIER: main
+    HELL_E2E_WORKERS: "3"
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "main"
@@ -72,6 +88,7 @@ e2e:full:
   parallel: 5
   variables:
     HELL_E2E_TIER: full
+    HELL_E2E_WORKERS: "2"
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "full"

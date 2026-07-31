@@ -27,5 +27,7 @@ release-notes:
   timeout: 15 minutes
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  cache:
+    - !reference [.caches, pnpm-readonly]
   script:
     - pnpm run ci:test:release-notes
