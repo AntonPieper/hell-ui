@@ -1,27 +1,27 @@
 # Browser tests, tiered by risk. playwright.config.ts owns what each tier
-# runs (HELL_E2E_TIER); here a tier is one job with a static shard count,
-# selected by pipeline source: `e2e:pr` gates MRs, `e2e:main` runs on pushes
-# to main, `e2e:full` runs on v* tags and is the default for scheduled and
-# dispatched pipelines ($E2E_TIER picks a different tier there). Exactly one
-# tier job instantiates per test pipeline.
+# runs (HELL_E2E_TIER); here a tier is one job, selected by pipeline source:
+# `e2e:pr` gates MRs, `e2e:main` runs on pushes to main, `e2e:full` runs on
+# v* tags and is the default for scheduled and dispatched pipelines
+# ($E2E_TIER picks a different tier there). Exactly one tier job
+# instantiates per test pipeline.
 #
-# Every shard runs the derived image from the project's container registry
+# The job runs the derived image from the project's container registry
 # (tools/ci/e2e-image): the pinned Playwright browsers plus nginx, so the
 # same container serves the built docs bundle and tests against it — no pull
 # from Docker Hub or mcr.microsoft.com at job time. There is no aggregate
 # gate job: the merge gate is the pipeline itself, and silent-shrink
 # protection is the pipeline-shape contract's job.
 #
-# Shard and worker counts are capacity tuning, not coverage. Unlike hosted
-# runners that give every shard its own machine, all shards here land on one
-# shared docker host — so sharding adds retry granularity and room under the
-# runner's 60-minute job cap, never compute. The config's CI default of one
-# worker per core is sized for a dedicated machine; with N shards sharing
-# this host it becomes N workers per core and the tests starve (measured:
-# five full-tier shards drove the 8-core host to a median load of 17.5 per
-# core, and frame-driven waits timed out suite-wide). Each tier therefore
-# caps --workers so that shards × workers stays at roughly the host's core
-# count.
+# One job per tier, deliberately unsharded. Every job lands on the same
+# shared 8-core docker host, so N shard jobs buy no compute over one job
+# whose in-process workers already use every core — they only multiply
+# setup (checkout, install, nginx) and multiply the worker count by N,
+# which starves the tests (measured: five full-tier shards at the config's
+# one-worker-per-core default drove the host to a median load of 17.5 per
+# logical core, and frame-driven waits timed out suite-wide). In-process
+# Playwright retries handle test flake; job retry stays infrastructure-only.
+# The slowest tier (full, ~25 minutes solo) sits inside the 45-minute
+# timeout with headroom, well under the runner's 60-minute cap.
 
 .e2e-tier:
   extends: .node-job
@@ -53,7 +53,7 @@
     # nginx daemonizes by default; wait until it answers before testing.
     - nginx
     - timeout 30 sh -c 'until curl --silent --fail --output /dev/null http://127.0.0.1/; do sleep 1; done'
-    - pnpm run ci:test:e2e --shard="${CI_NODE_INDEX}/${CI_NODE_TOTAL}" --workers="${HELL_E2E_WORKERS}"
+    - pnpm run ci:test:e2e
   # Reports and traces exist to diagnose a red shard; a green run's timings
   # are already in the job log, so uploading its report would only spend
   # storage on every healthy pipeline. Only the HTML report is uploaded: it
@@ -68,10 +68,8 @@
 
 e2e:pr:
   extends: .e2e-tier
-  parallel: 2
   variables:
     HELL_E2E_TIER: pr
-    HELL_E2E_WORKERS: "4"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "pr"
@@ -79,10 +77,8 @@ e2e:pr:
 
 e2e:main:
   extends: .e2e-tier
-  parallel: 3
   variables:
     HELL_E2E_TIER: main
-    HELL_E2E_WORKERS: "3"
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "main"
@@ -90,10 +86,8 @@ e2e:main:
 
 e2e:full:
   extends: .e2e-tier
-  parallel: 5
   variables:
     HELL_E2E_TIER: full
-    HELL_E2E_WORKERS: "2"
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
     - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "full"
