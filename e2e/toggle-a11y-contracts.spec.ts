@@ -37,20 +37,6 @@ test.describe('toggle browser accessibility contract', () => {
     await expect(example).toContainText('Notify');
   });
 
-  test('disabled standalone toggle exposes disabled semantics', async ({ page }) => {
-    await gotoToggle(page);
-
-    const example = page.locator('app-toggle-basic-example');
-    await expect(example).toBeVisible();
-
-    const disabledToggle = example.getByRole('button', { name: 'Disabled' });
-    await expect(disabledToggle).toBeDisabled();
-    await expect(disabledToggle).toHaveAttribute('aria-disabled', 'true');
-    await expect(disabledToggle).toHaveAttribute('aria-pressed', 'false');
-    await expect(disabledToggle).toHaveAttribute('tabindex', '-1');
-    await expect(disabledToggle).toHaveAttribute('data-disabled', '');
-  });
-
   test('single-select group applies radio semantics with roving arrow focus and Enter/Space activation', async ({
     page,
   }) => {

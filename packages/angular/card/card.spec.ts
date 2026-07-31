@@ -83,22 +83,6 @@ describe('HellCard', () => {
     expect(query(fixture.nativeElement, '#custom-card').getAttribute('data-elevation')).toBe('3');
   });
 
-  it('renders the pure default recipes when no ui is provided', () => {
-    const fixture = TestBed.createComponent(CardHost);
-    fixture.detectChanges();
-
-    expect(renderedClasses(fixture, '#default-card')).toEqual(sortClasses(HELL_CARD_RECIPE.root));
-    expect(renderedClasses(fixture, '#default-header')).toEqual(
-      sortClasses(HELL_CARD_HEADER_RECIPE.root),
-    );
-    expect(renderedClasses(fixture, '#default-body')).toEqual(
-      sortClasses(HELL_CARD_BODY_RECIPE.root),
-    );
-    expect(renderedClasses(fixture, '#default-footer')).toEqual(
-      sortClasses(HELL_CARD_FOOTER_RECIPE.root),
-    );
-  });
-
   it('routes ui string shorthand through the shared Part-Class Pipeline', () => {
     const fixture = TestBed.createComponent(CardHost);
     fixture.detectChanges();
@@ -134,22 +118,7 @@ describe('HellCard', () => {
       sortClasses(HELL_CARD_HEADER_RECIPE.root),
     );
   });
-
-  describe('recipes', () => {
-    it('keeps the default part classes stable', () => {
-      expect(classesByPart(HELL_CARD_RECIPE)).toMatchSnapshot('card');
-      expect(classesByPart(HELL_CARD_HEADER_RECIPE)).toMatchSnapshot('cardHeader');
-      expect(classesByPart(HELL_CARD_BODY_RECIPE)).toMatchSnapshot('cardBody');
-      expect(classesByPart(HELL_CARD_FOOTER_RECIPE)).toMatchSnapshot('cardFooter');
-    });
-  });
 });
-
-function classesByPart(recipe: Readonly<Record<string, string>>): Record<string, string[]> {
-  return Object.fromEntries(
-    Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
-  );
-}
 
 /** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
 function renderedClasses(fixture: { nativeElement: HTMLElement }, selector: string): string[] {

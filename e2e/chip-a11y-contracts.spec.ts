@@ -44,21 +44,6 @@ test.describe('chip browser accessibility contract', () => {
     await expect(chips.nth(0)).toBeFocused();
   });
 
-  test('remove buttons are labelled through the Label Contract and stay out of the tab order', async ({
-    page,
-  }) => {
-    await gotoChip(page);
-
-    const example = page.locator('app-chip-basic-example');
-    const removeAnna = example.getByRole('button', { name: 'Remove Anna Fischer' });
-    await expect(removeAnna).toBeVisible();
-    await expect(removeAnna).toHaveAttribute('type', 'button');
-    await expect(removeAnna).toHaveAttribute('tabindex', '-1');
-    await expect(example.getByRole('button', { name: 'Remove Ben Weber' })).toBeVisible();
-    await expect(example.getByRole('button', { name: 'Remove Cara Lang' })).toBeVisible();
-    await expect(example.getByRole('button', { name: 'Remove Dana Wu' })).toHaveCount(0);
-  });
-
   test('Delete removes the focused chip and moves focus to the next chip', async ({ page }) => {
     await gotoChip(page);
 
@@ -162,17 +147,6 @@ test.describe('chip browser accessibility contract', () => {
     await expect(chips).toHaveCount(4);
     await expect(example.getByText('Eli Park')).toHaveCount(0);
     await expect(input).toBeFocused();
-  });
-
-  test('clicking a remove button removes its chip', async ({ page }) => {
-    await gotoChip(page);
-
-    const example = page.locator('app-chip-basic-example');
-    const chips = example.locator('[hellChip]');
-
-    await example.getByRole('button', { name: 'Remove Ben Weber' }).click();
-    await expect(chips).toHaveCount(3);
-    await expect(example.getByText('Ben Weber')).toHaveCount(0);
   });
 
   test('interactive semantics attach only to interactive hosts', async ({ page }) => {

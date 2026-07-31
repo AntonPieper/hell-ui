@@ -25,31 +25,29 @@ type E2eTier = (typeof E2E_TIERS)[number];
  */
 const ENGINE_SENSITIVE_SUITES: readonly string[] = [
   // Focus and keyboard semantics: focus traps and restoration, outside-focus
-  // dismissal, Tab traversal, and selection-follows-focus differ per engine.
+  // dismissal, Tab traversal, and hover/pointer event ordering differ per
+  // engine. Suites whose assertions are JS-driven roving focus or ARIA state
+  // render identically per engine and are deliberately NOT listed (checkbox,
+  // switch, radio, toggle, listbox, tabs, number-input, multi-select): the
+  // membership bar is that a test asserts behavior the engine itself owns,
+  // not that the widget is keyboard-operable.
   'control-group-contracts.spec.ts',
   'floating-dismissal.spec.ts',
-  'listbox-a11y-contracts.spec.ts',
   'menu-select-combobox-keyboard.spec.ts',
-  'tabs-a11y-contracts.spec.ts',
   'ui-behavior.spec.ts', // dialog focus trap/restore, submenus, audio + pdf runtimes
   // Overlays: floating positioning, anchoring, and dismissal.
   'combobox-chip-input-a11y-contracts.spec.ts',
   'confirm-a11y-contracts.spec.ts',
   'date-picker-a11y-contracts.spec.ts',
   'filter-builder-contracts.spec.ts',
-  'multi-select-menu-button-contracts.spec.ts',
   'omnibar-a11y-contracts.spec.ts',
   'popover-a11y-contracts.spec.ts',
   'popover-contracts.spec.ts',
   'time-picker-a11y-contracts.spec.ts',
   'tooltip-a11y-contracts.spec.ts',
   // Native inputs: native control focus, editing, and chooser behavior.
-  'checkbox-a11y-contracts.spec.ts',
   'date-input-a11y-contracts.spec.ts',
   'file-picker-contracts.spec.ts',
-  'number-input-a11y-contracts.spec.ts',
-  'radio-a11y-contracts.spec.ts',
-  'switch-a11y-contracts.spec.ts',
   'time-input-a11y-contracts.spec.ts',
   // Media and motion: media queries and animation policy.
   'reduced-motion-contracts.spec.ts',
