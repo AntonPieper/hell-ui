@@ -27,11 +27,11 @@ const ENGINE_SENSITIVE_SUITES: readonly string[] = [
   // Focus and keyboard semantics: focus traps and restoration, outside-focus
   // dismissal, Tab traversal, and selection-follows-focus differ per engine.
   'control-group-contracts.spec.ts',
+  'dialog-modality-contracts.spec.ts', // focus trap/restore, inert + aria-hidden interleavings
   'floating-dismissal.spec.ts',
   'listbox-a11y-contracts.spec.ts',
   'menu-select-combobox-keyboard.spec.ts',
   'tabs-a11y-contracts.spec.ts',
-  'ui-behavior.spec.ts', // dialog focus trap/restore, submenus, audio + pdf runtimes
   // Overlays: floating positioning, anchoring, and dismissal.
   'combobox-chip-input-a11y-contracts.spec.ts',
   'confirm-a11y-contracts.spec.ts',
@@ -53,6 +53,9 @@ const ENGINE_SENSITIVE_SUITES: readonly string[] = [
   'time-input-a11y-contracts.spec.ts',
   // Media and motion: media queries and animation policy.
   'reduced-motion-contracts.spec.ts',
+  // Embedded runtimes: pdf.js rasterization, windowed Tab traversal through
+  // the overview rail, and coarse-pointer toolbar sizing.
+  'pdf-viewer-behavior.spec.ts',
   // Measured layout: responsive transitions, overflow measurement, geometry.
   'app-shell-contracts.spec.ts',
   'master-detail-contracts.spec.ts',
