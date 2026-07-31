@@ -258,7 +258,7 @@ Constraints:
   outside the scope root is blocked, so nothing outside it should be forcibly
   refocused. It must never extend to a dialog that does block the page — that
   is what the page-modal reference count is for, and
-  `e2e/ui-behavior.spec.ts` pins it by measuring where focus actually lands.
+  `e2e/dialog-modality-contracts.spec.ts` pins it by measuring where focus actually lands.
 - The weakening is not dialog-only, and naming it that way would understate it.
   `isAllowedExternalTarget` matches `closest('[data-focus-trap]')`, so while
   the marker is on the body **every** `ngpFocusTrap` in the document stops
