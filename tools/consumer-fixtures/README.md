@@ -129,13 +129,16 @@ app. Two rules keep fixtures honest:
 
 Copy an existing fixture directory, adjust `fixture.json`, `package.json`, and
 `src/`, and run `pnpm run test:consumer-fixtures <fixture-name>`. Discovery is
-directory-based: no runner or CI changes are needed. In CI the
+directory-based: no runner or CI changes are needed. In GitHub CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by
-rulesets). The shared release gate in `.github/workflows/release-gate.yml`
-(called by both publish workflows) runs the whole set serially against the
-audited release tarball.
+rulesets). In GitLab CI one sharded `package-consumer` job
+(`.gitlab/ci/package-consumer.yml`) discovers fixtures in-job and deals them
+round-robin across its shards via `tools/run-consumer-fixture-shard.mjs`, with
+one collapsible log section per fixture. The shared release gate in
+`.github/workflows/release-gate.yml` (called by both publish workflows) runs
+the whole set serially against the audited release tarball.
 
 ## Current fixtures
 

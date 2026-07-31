@@ -1,0 +1,32 @@
+# Consumer fixtures verified against the packed tarball the build job
+# audited and published — nothing is rebuilt here. One sharded job: fixtures
+# are discovered in-job and dealt round-robin across the shards
+# (tools/run-consumer-fixture-shard.mjs), so adding a fixture never edits CI;
+# the shard count is capacity tuning, not coverage. Per-fixture collapsible
+# log sections carry each fixture's result inside a shard.
+
+package-consumer:
+  extends: .node-job
+  stage: test
+  timeout: 45 minutes
+  parallel: 3
+  needs:
+    - build
+  variables:
+    HELL_PACKAGE_CONSUMER_TARBALL: artifacts/package
+    HELL_CONSUMER_FIXTURE_SMOKE: "1"
+    PLAYWRIGHT_BROWSERS_PATH: "$CI_PROJECT_DIR/.cache/ms-playwright"
+  cache:
+    - !reference [.caches, pnpm]
+    # The fixture smoke loads each built consumer app in headless chromium;
+    # the browser download is cached, `playwright install` skips anything
+    # already present and still apt-installs system deps each run.
+    - key:
+        files:
+          - pnpm-lock.yaml
+        prefix: playwright-chromium
+      paths:
+        - .cache/ms-playwright
+  script:
+    - pnpm run ci:playwright:chromium
+    - pnpm run ci:test:consumer-fixtures:shard
