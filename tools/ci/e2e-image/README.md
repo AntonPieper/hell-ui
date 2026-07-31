@@ -18,12 +18,14 @@ docs bundle and runs the tests against it.
   derivation changes that move neither pin. The tag says exactly which
   Playwright the browsers belong to and which Node runtime jobs get. The
   authoritative value is `E2E_IMAGE_TAG` in `.gitlab/ci/e2e-image.yml`.
-- **Base**: `node:22` — the workspace runtime, not Playwright's own image.
-  Toolchains enforce per-major Node floors at runtime (the Angular CLI
-  refused the Playwright base's bundled Node outright), and Playwright's
-  installer reproduces everything that base provided: `install --with-deps`
+- **Base**: `ubuntu:noble` with the workspace's pinned Node installed on
+  top — neither Playwright's own image (its bundled Node major fails
+  toolchain floors: the Angular CLI refused it outright) nor a Node image
+  (Debian under WebKit produced hard browser crashes; noble is the platform
+  Playwright builds and tests Linux WebKit against). Playwright's installer
+  reproduces everything the upstream image provided: `install --with-deps`
   fetches the browsers for the pinned version and apt-installs the same
-  system packages the upstream image ships.
+  system packages.
 - **Contents on top**: `nginx` and `curl`. The repository's
   [`nginx-spa.conf`](../nginx-spa.conf) is copied verbatim to
   `/etc/nginx/conf.d/default.conf`, the distro default site is removed so the
