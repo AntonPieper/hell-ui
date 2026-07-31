@@ -13,6 +13,18 @@
     paths:
       - .cache/corepack
       - .cache/pnpm-store
+  # The same pnpm cache, read-only. The store's contents are fully determined
+  # by the lockfile the key is derived from, so a job that only installs the
+  # workspace can never add anything a peer would miss — but with the default
+  # pull-push policy it still re-archives and re-uploads the unchanged store
+  # after every run (~25s/job). One pull-push holder per pipeline (build, which
+  # every pipeline runs) repopulates the cache when the lockfile changes;
+  # everything else pulls. A job that installs beyond the workspace lockfile
+  # (package-consumer's fixtures) keeps pull-push.
+  pnpm-readonly:
+    key: !reference [.caches, pnpm, key]
+    paths: !reference [.caches, pnpm, paths]
+    policy: pull
   # The Angular build cache is content-addressed and self-invalidating, so a
   # coarse lockfile key is enough — a stale entry costs time, never
   # correctness.

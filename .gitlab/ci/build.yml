@@ -24,8 +24,17 @@ build:
     # baked into the artifact because the Playwright webServer command that
     # writes it locally never runs in CI.
     - node tools/stamp-docs-build.mjs dist/hell-docs
+  # Two days, not thirty: downstream jobs consume these artifacts within
+  # minutes, so the expiry only has to cover a short debugging-and-retry
+  # window — a ~52 MiB docs bundle per pipeline adds up on shared storage.
+  # The deliverable copies live longer through the project's
+  # keep-latest-artifact setting, which locks the newest pipeline's
+  # artifacts per ref: the current docs bundle on main (the stand-in for
+  # the dropped per-MR deploys until Pages exists) and every tag's build
+  # stay downloadable past this expiry. (expire_in cannot vary by pipeline
+  # source: the instance rejects variables in it at lint time.)
   artifacts:
     paths:
       - artifacts/package/
       - dist/hell-docs/
-    expire_in: 30 days
+    expire_in: 2 days
