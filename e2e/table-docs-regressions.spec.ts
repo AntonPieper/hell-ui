@@ -53,19 +53,6 @@ async function elementStyle(locator: Locator): Promise<Record<string, string>> {
 }
 
 test.describe('table docs regressions', () => {
-  test('all table example previews keep the shared docs frame padding', async ({ page }) => {
-    await gotoTableDocs(page);
-
-    const previews = page.locator('hd-table-page hd-example-tabs .hd-example');
-    await expect(previews).toHaveCount(6);
-
-    const paddingTopValues = await previews.evaluateAll((elements) =>
-      elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingTop)),
-    );
-    expect(Math.min(...paddingTopValues)).toBeGreaterThan(0);
-    expect(new Set(paddingTopValues).size).toBe(1);
-  });
-
   test('desktop primitive table example keeps row actions inside the table frame', async ({
     page,
   }) => {

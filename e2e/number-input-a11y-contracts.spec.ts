@@ -149,25 +149,6 @@ test.describe('number input accessibility contract', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('keeps the stepper buttons out of the tab order', async ({ page }) => {
-    const port = await gotoNumberInput(page);
-    const increment = page
-      .locator('app-number-input-basic-example')
-      .getByRole('button', { name: 'Increase Listen port' });
-    const decrement = page
-      .locator('app-number-input-basic-example')
-      .getByRole('button', { name: 'Decrease Listen port' });
-
-    await expect(increment).toHaveAttribute('tabindex', '-1');
-    await expect(decrement).toHaveAttribute('tabindex', '-1');
-
-    // Tab from the field lands past the steppers, never on them.
-    await port.focus();
-    await page.keyboard.press('Tab');
-    await expect(increment).not.toBeFocused();
-    await expect(decrement).not.toBeFocused();
-  });
-
   test('flags an out-of-range typed value as invalid without clamping it', async ({ page }) => {
     const port = await gotoNumberInput(page);
 

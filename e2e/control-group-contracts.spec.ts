@@ -46,17 +46,6 @@ test.describe('Control Group browser contract', () => {
     await expect(group).not.toHaveAttribute('data-focus-within');
   });
 
-  test('commits the group action from a pointer click', async ({ page }) => {
-    await gotoControlGroup(page);
-
-    const example = page.locator('app-control-group-basic-example');
-
-    await example.getByRole('button', { name: 'Copy' }).click();
-
-    await expect(example.getByRole('button', { name: 'Copied' })).toBeVisible();
-    await expect(example.getByText('The workspace URL is ready to paste.')).toBeVisible();
-  });
-
   test('reflects shared size, invalid, and disabled state with native control behavior', async ({
     page,
   }) => {

@@ -126,6 +126,25 @@ test.describe('pagination browser accessibility contract', () => {
     await expect(example.getByText('Page 2 of 9')).toBeVisible();
     await expect(previous).toBeEnabled();
   });
+
+  test('page-jump recipe exposes a labelled, keyboard-reachable select that commits a jump', async ({
+    page,
+  }) => {
+    await gotoPagination(page);
+
+    const jump = page.locator('app-pagination-jump-example');
+    const select = jump.getByRole('combobox', { name: 'Page' });
+    await expect(jump.getByRole('navigation', { name: 'Pagination' })).toBeVisible();
+    await expect(jump.getByText('of 40')).toBeVisible();
+    await expect(select).toHaveValue('6');
+
+    await jump.getByRole('button', { name: 'Previous page' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(select).toBeFocused();
+
+    await select.selectOption('12');
+    await expect(select).toHaveValue('12');
+  });
 });
 
 async function expectDisabledEdge(control: Locator): Promise<void> {
