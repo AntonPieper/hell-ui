@@ -1,0 +1,78 @@
+# Browser tests, tiered by risk. playwright.config.ts owns what each tier
+# runs (HELL_E2E_TIER); here a tier is one job with a static shard count,
+# selected by pipeline source: `e2e:pr` gates MRs, `e2e:main` runs on pushes
+# to main, `e2e:full` runs on v* tags and is the default for scheduled and
+# dispatched pipelines ($E2E_TIER picks a different tier there). Exactly one
+# tier job instantiates per test pipeline.
+#
+# Every shard runs the derived image from the project's container registry
+# (tools/ci/e2e-image): the pinned Playwright browsers plus nginx, so the
+# same container serves the built docs bundle and tests against it — no pull
+# from Docker Hub or mcr.microsoft.com at job time. There is no aggregate
+# gate job: the merge gate is the pipeline itself, and silent-shrink
+# protection is the pipeline-shape contract's job.
+#
+# Shard counts are capacity tuning, not coverage — tuned to keep every shard
+# inside the runner's 60-minute cap with at least 25% headroom on the fewest
+# shards that fit.
+
+.e2e-tier:
+  extends: .node-job
+  stage: test
+  image: $CI_REGISTRY_IMAGE/e2e:v1.59.1-noble
+  timeout: 45 minutes
+  needs:
+    - build
+  variables:
+    # The browsers baked into the image, at the base image's path — never a
+    # per-job download.
+    PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    # External-target mode for the preflight: it identifies the served build
+    # by the stamp the build job baked into the artifact, not by comparing
+    # against this checkout.
+    HELL_E2E_BASE_URL: http://127.0.0.1
+  script:
+    # Serve the exact artifact the build job produced; nothing is rebuilt
+    # here, and a missing bundle must fail as a missing bundle.
+    - test -f dist/hell-docs/browser/index.html
+    - cp -R dist/hell-docs/browser/. /usr/share/nginx/html/
+    # nginx daemonizes by default; wait until it answers before testing.
+    - nginx
+    - timeout 30 sh -c 'until curl --silent --fail --output /dev/null http://127.0.0.1/; do sleep 1; done'
+    - pnpm run ci:test:e2e --shard="${CI_NODE_INDEX}/${CI_NODE_TOTAL}"
+  artifacts:
+    when: always
+    paths:
+      - test-results/playwright-html/
+      - test-results/playwright/
+    expire_in: 7 days
+
+e2e:pr:
+  extends: .e2e-tier
+  parallel: 2
+  variables:
+    HELL_E2E_TIER: pr
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "pr"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "pr"
+
+e2e:main:
+  extends: .e2e-tier
+  parallel: 3
+  variables:
+    HELL_E2E_TIER: main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "main"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "main"
+
+e2e:full:
+  extends: .e2e-tier
+  parallel: 5
+  variables:
+    HELL_E2E_TIER: full
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "full"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "full"
