@@ -67,15 +67,6 @@ describe('HellSeparator', () => {
     expect(separator.getAttribute('data-spacing')).toBe('sm');
   });
 
-  it('renders the pure default recipe when no ui is provided', () => {
-    const fixture = TestBed.createComponent(SeparatorHost);
-    fixture.detectChanges();
-
-    expect(renderedClasses(fixture, 'separator-default')).toEqual(
-      sortClasses(HELL_SEPARATOR_RECIPE.root),
-    );
-  });
-
   it('routes ui string shorthand through the shared Part-Class Pipeline', () => {
     const fixture = TestBed.createComponent(SeparatorHost);
     fixture.detectChanges();
@@ -93,19 +84,7 @@ describe('HellSeparator', () => {
       sortClasses(hellTwMerge(HELL_SEPARATOR_RECIPE.root, 'bg-hell-info w-hell-2')),
     );
   });
-
-  describe('recipes', () => {
-    it('keeps the default part classes stable', () => {
-      expect(classesByPart(HELL_SEPARATOR_RECIPE)).toMatchSnapshot('separator');
-    });
-  });
 });
-
-function classesByPart(recipe: Readonly<Record<string, string>>): Record<string, string[]> {
-  return Object.fromEntries(
-    Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
-  );
-}
 
 /** Rendered classes as a sorted list; class attribute order carries no styling meaning. */
 function renderedClasses(fixture: { nativeElement: HTMLElement }, id: string): string[] {

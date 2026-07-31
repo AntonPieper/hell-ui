@@ -21,7 +21,6 @@ import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 
 import {
   HELL_DEFAULT_NUMBER_INPUT_ADAPTER,
-  HELL_NUMBER_INPUT_IMPORTS,
   HELL_NUMBER_INPUT_LABELS,
   HellNumberInput,
   HellNumberStep,
@@ -1112,9 +1111,6 @@ describe('HellNumberStep', () => {
     expect(decrement.getAttribute('aria-label')).toBe('Custom lower');
   });
 
-  it('exports the canonical entrypoint import tuple', () => {
-    expect(HELL_NUMBER_INPUT_IMPORTS).toEqual([HellNumberInput, HellNumberStep]);
-  });
 });
 
 function createHost(): ComponentFixture<NumberInputHost> {

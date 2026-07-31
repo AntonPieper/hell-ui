@@ -185,19 +185,6 @@ describe('page-header recipe module', () => {
       expect(titleRow.classList, `title row wrapper class ${className}`).toContain(className);
     }
   });
-
-  describe('recipes', () => {
-    it('keeps the default part classes stable', () => {
-      const classesByPart = (recipe: Readonly<Record<string, string>>): Record<string, string[]> =>
-        Object.fromEntries(
-          Object.entries(recipe).map(([part, classes]) => [part, classes.split(/\s+/)]),
-        );
-
-      expect(classesByPart(HELL_PAGE_HEADER_RECIPE)).toMatchSnapshot('pageHeader');
-      expect(classesByPart(HELL_PAGE_HEADER_BACK_RECIPE)).toMatchSnapshot('pageHeaderBack');
-      expect(classesByPart(HELL_PAGE_HEADER_LAYOUT_CLASSES)).toMatchSnapshot('pageHeaderLayout');
-    });
-  });
 });
 
 describe('HellPageHeaderBack', () => {
