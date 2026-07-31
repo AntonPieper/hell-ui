@@ -20,6 +20,17 @@ import {
   type HellUi as HellCoreUi,
   type HellUiInput as HellCoreUiInput,
 } from 'hell-ui/core';
+import {
+  HellButtonHarness,
+  HellComboboxHarness,
+  HellDateInputHarness,
+  HellDialogHarness,
+  HellDialogOverlayHarness,
+  HellMenuTriggerHarness,
+  HellSelectHarness,
+  HellTableHarness,
+  HellTimeInputHarness,
+} from 'hell-ui/testing';
 
 interface SearchItem {
   readonly label: string;
@@ -46,6 +57,22 @@ const chipDirectives: readonly [
   typeof HellChipRemove,
 ] = HELL_CHIP_IMPORTS;
 
+// The /testing harness entry sits on the same install as the root/core
+// contract: the same `core` peer group and no CSS. The harness classes are
+// referenced from the template so the bundle keeps the import instead of
+// tree-shaking the entry point away.
+const harnessTypes = [
+  HellButtonHarness,
+  HellComboboxHarness,
+  HellDateInputHarness,
+  HellDialogHarness,
+  HellDialogOverlayHarness,
+  HellMenuTriggerHarness,
+  HellSelectHarness,
+  HellTableHarness,
+  HellTimeInputHarness,
+];
+
 // Foundation boundary: behavior-only Part Style Map entries compile and run
 // without tailwindcss or any entrypoint stylesheet.
 @Component({
@@ -54,6 +81,9 @@ const chipDirectives: readonly [
   template: `
     <p data-test-id="root-core-status">Root core contract: {{ search.items().length }} result</p>
     <p>Core entry contract: {{ coreSearch.items().length }} result</p>
+    <p data-test-id="testing-entry-status">
+      Testing entry contract: {{ harnessTypes.length }} harnesses
+    </p>
     <button hellButton type="button" ui="rounded-hell-pill">Save</button>
     <a hellButton href="#details" [disabled]="disabled" [ui]="linkUi">Details</a>
     <div hellChipSet aria-label="Assignees">
@@ -73,6 +103,7 @@ const chipDirectives: readonly [
   `,
 })
 class App {
+  protected readonly harnessTypes = harnessTypes;
   protected readonly disabled = true;
   protected readonly linkUi = { root: 'underline-offset-[5px]' };
   protected readonly query = signal('core');

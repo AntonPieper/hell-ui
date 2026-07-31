@@ -1,2 +1,2 @@
-/* The root/core contract ships no CSS: the root entry point must compile and
-   run without tailwindcss or any entrypoint stylesheet. */
+/* The root/core/testing contract ships no CSS: these entry points must compile
+   and run without tailwindcss or any entrypoint stylesheet. */

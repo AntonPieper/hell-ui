@@ -69,9 +69,13 @@ app. Two rules keep fixtures honest:
   built CSS, compared with all whitespace stripped. Keep one or two sentinels
   per imported stylesheet export: they prove the export resolved from the
   packed tarball and shipped compiled output. Exhaustive fragment lists belong
-  to unit tests, not the packaging boundary. Projection-first entries whose
-  stylesheets emit no distinctive output (for example `master-detail`) need no
-  sentinel — a broken export path already fails the build. Note that the
+  to unit tests, not the packaging boundary. Entries whose stylesheets emit no
+  distinctive output need no sentinel — a broken export path already fails the
+  build. That covers projection-first entries (for example `master-detail`) and
+  entries that only re-register another entry's recipe source: `input`,
+  `date-input`, and `time-input` all register `input/input.ts`, so their
+  compiled output is indistinguishable and no fragment can prove one of them
+  specifically. Note that the
   production minifier collapses `::before`/`::after` to `:before`/`:after` and
   drops quotes in attribute selectors.
 - `forbiddenCssSentinels` (optional) — distinctive fragments that must NOT
@@ -142,12 +146,14 @@ the whole set serially against the audited release tarball.
 
 ## Current fixtures
 
-- `root-core` — foundation without CSS: the root entry (`hell-ui`)
-  and `/core` plus behavior-only Part Style Map controls (Button `ui`, Chip
-  Input bridge) compile and boot with only the package-wide light peers
-  (`core` peer group), no CSS or Tailwind.
-- `testing` — the `/testing` harness entry compiles with the `core` peer
-  group and no CSS.
+- `root-core` — foundation without CSS: the root entry (`hell-ui`),
+  `/core`, and the `/testing` harness entry plus behavior-only Part Style Map
+  controls (Button `ui`, Chip Input bridge) compile and boot with only the
+  package-wide light peers (`core` peer group), no CSS or Tailwind. The
+  `/testing` harness classes ride on this install rather than a fixture of
+  their own: the harness entry sits on the same `core` peer group and the same
+  no-CSS boundary, so a separate project would install the same dependency set
+  twice.
 - `styled-controls` — normal styled controls: the styled primitive, mixed,
   and table-primitive entries with `core` peers plus `tailwindcss`
   (`primitive` peer group), entrypoint CSS sentinels per imported stylesheet,
