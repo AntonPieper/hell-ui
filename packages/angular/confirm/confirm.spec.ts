@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHellLabels } from 'hell-ui/core';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
+import { stubCountdownInterval } from '../spec-helpers';
 import {
   HELL_CONFIRM_LABELS,
   injectHellPrompt,
@@ -244,7 +245,7 @@ describe('HellPrompt modal presentation', () => {
   });
 
   it('gates a countdown action and never auto-confirms', async () => {
-    vi.useRealTimers();
+    const tickCountdown = stubCountdownInterval();
     const { fixture, host } = setup();
     let resolved = false;
     const promise = host.prompt.confirm('Delete everything?', {
@@ -257,7 +258,7 @@ describe('HellPrompt modal presentation', () => {
     expect(confirm.disabled).toBe(true);
     expect(confirm.textContent).toContain('(1)');
 
-    await delay(1150);
+    tickCountdown();
     flush();
     await settle(fixture);
 
@@ -547,10 +548,6 @@ function animationFrame(): Promise<void> {
 
 function macrotask(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function deferred(): { readonly promise: Promise<void>; resolve(): void } {

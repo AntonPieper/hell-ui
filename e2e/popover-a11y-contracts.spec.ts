@@ -1,13 +1,11 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
-/**
- * Loaded CI runners (webkit especially) can deactivate the page long enough for
- * the default 5s focus expectations to flake: a dropped page activation both
- * freezes CSS animation clocks (the popover enter animation's computed opacity
- * sticks just below 1) and makes toBeFocused report "inactive". Focus
- * predicates therefore get extra headroom, mirroring the dialog focus contract.
- */
-const FOCUS_SETTLE_TIMEOUT = 10_000;
+import {
+  SETTLE_TIMEOUT,
+  ensurePageIsActive,
+  expectFocused,
+  settleEnterAnimation,
+} from './utils';
 
 test.describe('popover browser accessibility contract', () => {
   test.beforeEach(async ({ page }) => {
@@ -39,7 +37,7 @@ test.describe('popover browser accessibility contract', () => {
     // A throttled WebKit page can freeze the enter animation's clock just below
     // full opacity, wedging focus on <body>; finish it deterministically before
     // asserting the settled focus trap.
-    await settlePopoverAnimations(popover);
+    await settleEnterAnimation(popover);
 
     const viewProfile = popover.getByRole('button', { name: 'View profile' });
     const reassign = popover.getByRole('button', { name: 'Reassign' });
@@ -82,14 +80,14 @@ test.describe('popover browser accessibility contract', () => {
     const popover = profilePopover(page);
     const reassign = popover.getByRole('button', { name: 'Reassign' });
     await expect(popover).toBeVisible();
-    await settlePopoverAnimations(popover);
+    await settleEnterAnimation(popover);
     await reassign.focus();
-    await expect(reassign).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(reassign).toBeFocused({ timeout: SETTLE_TIMEOUT });
 
     await page.keyboard.press('Escape');
 
-    await expect(popover).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
-    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(popover).toBeHidden({ timeout: SETTLE_TIMEOUT });
+    await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await expect(trigger).not.toHaveAttribute('aria-describedby', /.+/);
   });
@@ -103,7 +101,7 @@ test.describe('popover browser accessibility contract', () => {
 
     await page.getByRole('heading', { name: 'Popover', level: 1 }).click();
 
-    await expect(popover).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(popover).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 });
@@ -111,77 +109,6 @@ test.describe('popover browser accessibility contract', () => {
 async function gotoPopoverDocs(page: Page): Promise<void> {
   await page.goto('/components/popover');
   await expect(page.getByRole('heading', { name: 'Popover', level: 1 })).toBeVisible();
-}
-
-/**
- * Headless WebKit on a loaded runner can drop page activation, which both
- * freezes CSS animation clocks and makes toBeFocused report "inactive". Bring
- * the page to the front and wait until it is genuinely visible and focused
- * before asserting any focus contract.
- */
-async function ensurePageIsActive(page: Page): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return page.evaluate(() => {
-          window.focus();
-          return document.visibilityState === 'visible' && document.hasFocus();
-        });
-      },
-      {
-        message: 'page should be visible and focused before asserting the focus contract',
-        timeout: FOCUS_SETTLE_TIMEOUT,
-      },
-    )
-    .toBe(true);
-}
-
-/**
- * Assert that `locator` is the document's active element.
- *
- * `toBeFocused` reports "inactive" (never matching) whenever the page has lost
- * OS-level activation, which headless WebKit on a loaded runner does mid Tab
- * sequence. Re-assert activation on every poll so the check reflects the real
- * focus state instead of the deactivated one — the guarantee is unchanged:
- * this element, and no other, holds focus.
- */
-async function expectFocused(page: Page, locator: Locator, message: string): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return locator.evaluate((element) => {
-          window.focus();
-          return element === document.activeElement;
-        });
-      },
-      { message, timeout: FOCUS_SETTLE_TIMEOUT },
-    )
-    .toBe(true);
-}
-
-/**
- * Finish the popover's enter animation deterministically. A throttled WebKit
- * page can freeze the animation clock just below full opacity, which wedges
- * focus on <body> instead of letting the trap grab the first control, so drive
- * the timeline to its final frame instead of waiting on the frozen clock.
- */
-async function settlePopoverAnimations(popover: Locator): Promise<void> {
-  await popover.evaluate((element) => {
-    for (const animation of element.getAnimations({ subtree: true })) {
-      try {
-        animation.finish();
-      } catch {
-        // Infinite animations cannot finish and do not gate settling.
-      }
-    }
-  });
-  await expect
-    .poll(() => popover.evaluate((element) => getComputedStyle(element).opacity), {
-      timeout: FOCUS_SETTLE_TIMEOUT,
-    })
-    .toBe('1');
 }
 
 function popoverExample(page: Page): {

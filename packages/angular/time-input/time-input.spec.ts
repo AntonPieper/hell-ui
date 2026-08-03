@@ -1,12 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import {
-  FormControl,
-  FormsModule,
-  NgModel,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormField, disabled as disabledSchema, form, validate } from '@angular/forms/signals';
 import { By } from '@angular/platform-browser';
 import { NgpInput } from 'ng-primitives/input';
@@ -66,23 +60,6 @@ class ControlledHost {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellTimeInput],
-  template: `
-    <input
-      hellTimeInput
-      aria-label="Two-way time"
-      [(value)]="value"
-      (valueChange)="values.push($event)"
-    />
-  `,
-})
-class TwoWayHost {
-  readonly value = signal<HellTimeValue | null>(time(8, 30));
-  readonly values: Array<HellTimeValue | null> = [];
-}
-
-@Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, HellTimeInput],
   template: `
     <input
@@ -108,24 +85,6 @@ class BlurFormHost {
   readonly control = new FormControl<HellTimeValue | null>(time(8, 30), {
     updateOn: 'blur',
   });
-}
-
-@Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, HellTimeInput],
-  template: `
-    <input
-      hellTimeInput
-      aria-label="Model time"
-      [(ngModel)]="value"
-      (valueChange)="values.push($event)"
-    />
-  `,
-})
-class NgModelHost {
-  readonly value = signal<HellTimeValue | null>(time(8, 30));
-  readonly model = viewChild.required(NgModel);
-  readonly values: Array<HellTimeValue | null> = [];
 }
 
 @Component({
@@ -287,15 +246,18 @@ class CustomAdapterHost {
   readonly values: Array<HellTimeValue | null> = [];
 }
 
+/**
+ * Time input specs assert parsing, formatting, and native input behavior.
+ * The shared forms-integration Value Authority contract is owned centrally by
+ * `internal/core/forms-integration-conformance.spec.ts`.
+ */
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         ControlledHost,
-        TwoWayHost,
         FormHost,
         BlurFormHost,
-        NgModelHost,
         SignalFormsHost,
         StaticDisabledHost,
         NativeFormHost,
@@ -364,30 +326,6 @@ describe('HellTimeInput', () => {
 
     expect(host.values).toEqual([time(21, 5)]);
     expect(input.value).toBe('21:05');
-  });
-
-  it('synchronizes two-way binding through one value authority without duplicate commits', async () => {
-    const fixture = TestBed.createComponent(TwoWayHost);
-    fixture.detectChanges();
-    const host = fixture.componentInstance;
-    const input = timeInput(fixture.nativeElement);
-    expect(input.value).toBe('08:30');
-
-    // External parent write flows in without echoing a change event.
-    host.value.set(time(12, 45));
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(input.value).toBe('12:45');
-    expect(host.values).toEqual([]);
-
-    // One user commit updates parent state and emits exactly one event.
-    typeText(input, '13:15');
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
-    expect(host.value()).toEqual(time(13, 15));
-    expect(host.values.length).toBe(1);
-    expect(host.values[0]).toEqual(time(13, 15));
-    expect(input.value).toBe('13:15');
   });
 
   it('parses separated, compact, and 12-hour default time text', () => {
@@ -606,27 +544,6 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('09:10:11');
   });
 
-  it('integrates with Reactive Forms without echoing programmatic writes', async () => {
-    const fixture = TestBed.createComponent(FormHost);
-    fixture.detectChanges();
-    const host = fixture.componentInstance;
-    const input = timeInput(fixture.nativeElement);
-    expect(input.value).toBe('08:30');
-
-    host.control.setValue(time(9, 5));
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(input.value).toBe('09:05');
-    expect(host.values).toEqual([]);
-
-    typeText(input, '10:06');
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
-    expect(host.control.value).toEqual(time(10, 6));
-    expect(host.values).toEqual([time(10, 6)]);
-    expect(host.control.touched).toBe(true);
-  });
-
   it('preserves a form draft across an equivalent form write but replaces it on change', async () => {
     const fixture = TestBed.createComponent(FormHost);
     fixture.detectChanges();
@@ -671,69 +588,6 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
     expect(input.disabled).toBe(true);
     expect(input.hasAttribute('data-disabled')).toBe(true);
-  });
-
-  it('integrates with template-driven forms through ngModel', async () => {
-    const fixture = TestBed.createComponent(NgModelHost);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const input = timeInput(fixture.nativeElement);
-    expect(input.value).toBe('08:30');
-    expect(host.values).toEqual([]);
-
-    // Enter commits without touching; blur marks the model touched.
-    typeText(input, '09:40');
-    input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    expect(host.value()).toEqual(time(9, 40));
-    expect(host.values.length).toBe(1);
-    expect(host.model().touched).toBe(false);
-
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
-    expect(host.model().touched).toBe(true);
-
-    host.value.set(time(12, 15));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(input.value).toBe('12:15');
-    expect(host.values.length).toBe(1);
-  });
-
-  it('participates in Signal Forms as a FormValueControl through formField', async () => {
-    const fixture = TestBed.createComponent(SignalFormsHost);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const input = timeInput(fixture.nativeElement);
-    expect(input.value).toBe('08:30');
-
-    // Form-driven writes flow in without echoing an interaction commit.
-    host.scheduleForm.time().value.set(time(9, 15));
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(input.value).toBe('09:15');
-    expect(host.values).toEqual([]);
-    expect(host.scheduleForm.time().dirty()).toBe(false);
-
-    // One user commit updates the field and the model exactly once.
-    typeText(input, '10:45');
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(host.scheduleForm.time().value()).toEqual(time(10, 45));
-    expect(host.model().time).toEqual(time(10, 45));
-    expect(host.values.length).toBe(1);
-    expect(host.scheduleForm.time().dirty()).toBe(true);
-    expect(host.scheduleForm.time().touched()).toBe(true);
   });
 
   it('reports parse failures to the Signal Forms field through transformedValue', async () => {
