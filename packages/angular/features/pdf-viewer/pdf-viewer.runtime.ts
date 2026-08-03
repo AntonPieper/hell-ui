@@ -904,7 +904,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
       pointerId: event.pointerId,
       clientX: event.clientX,
       clientY: event.clientY,
-      time: this.now(),
+      time: this.inputTime(event),
     };
   }
 
@@ -920,12 +920,15 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
       event.clientX - candidate.clientX,
       event.clientY - candidate.clientY,
     );
-    return travelled <= HELL_PDF_TAP_SLOP_PX && this.now() - candidate.time <= HELL_PDF_TAP_MAX_MS;
+    return (
+      travelled <= HELL_PDF_TAP_SLOP_PX &&
+      this.inputTime(event) - candidate.time <= HELL_PDF_TAP_MAX_MS
+    );
   }
 
   /** Pair a completed tap with the previous one, or park it as the next pair's first half. */
   private registerTap(event: PointerEvent): void {
-    const time = this.now();
+    const time = this.inputTime(event);
     const previous = this.lastTap;
     this.lastTap = { clientX: event.clientX, clientY: event.clientY, time };
     if (!previous) return;
@@ -979,6 +982,17 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
   private now(): number {
     return this.container?.ownerDocument.defaultView?.performance.now() ?? 0;
+  }
+
+  /**
+   * Tap timing must come from the input pipeline, not from when the handler
+   * got to run: on a busy main thread handlers run late and spread, and a
+   * crisp double tap measured handler-to-handler misses the pairing window.
+   * Synthetic events cannot carry controlled timestamps, so they keep the
+   * handler-time clock as the test seam.
+   */
+  private inputTime(event: PointerEvent): number {
+    return event.isTrusted && event.timeStamp > 0 ? event.timeStamp : this.now();
   }
 
   private getPinchPoints():

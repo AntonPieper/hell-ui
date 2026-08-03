@@ -287,14 +287,14 @@ test.describe('PDF viewer runtime behavior', () => {
 
       const doubleTap = await doubleTapper(page, scrollContainer);
 
-      await doubleTap(async () => (await zoomSelect.inputValue()) !== 'auto');
+      await doubleTap();
 
       await expect
         .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
         .toBeGreaterThan(fittedBox.width * 1.5);
       await expect(zoomSelect).not.toHaveValue('auto');
 
-      await doubleTap(async () => (await zoomSelect.inputValue()) === 'auto');
+      await doubleTap();
 
       // Back to the preset itself, not to the number it happened to produce, so
       // the document keeps re-fitting when the viewport changes.
@@ -319,7 +319,7 @@ test.describe('PDF viewer runtime behavior', () => {
       const pageWidth = async () => (await firstPdfPage.boundingBox())?.width ?? 0;
 
       const doubleTap = await doubleTapper(page, viewer.locator('[data-slot="pageArea"]'));
-      await doubleTap(async () => (await zoomSelect.inputValue()) !== 'auto');
+      await doubleTap();
       await expect(zoomSelect).not.toHaveValue('auto');
       const magnified = await pageWidth();
 
@@ -330,7 +330,7 @@ test.describe('PDF viewer runtime behavior', () => {
       await expect.poll(pageWidth).toBeCloseTo(magnified, 0);
 
       // Back to the preset, which does re-fit — to the landscape box first.
-      await doubleTap(async () => (await zoomSelect.inputValue()) === 'auto');
+      await doubleTap();
       await expect(zoomSelect).toHaveValue('auto');
       const landscapeFit = await pageWidth();
       expect(landscapeFit).toBeLessThan(magnified);
@@ -344,49 +344,27 @@ test.describe('PDF viewer runtime behavior', () => {
 
 /**
  * Dispatch a double tap inside a target through CDP touch input. The box is
- * measured per call so the tap follows the target across a rotation.
- *
- * Each call takes a predicate for the state the double tap produces and
- * re-taps (bounded) until it holds. The runtime pairs taps inside a
- * 300ms window (HELL_PDF_DOUBLE_TAP_MS), and the two taps here are four
- * awaited CDP round-trips — on a loaded CI host, scheduling gaps between
- * them can stretch past the window, so the runtime correctly sees two
- * single taps and does nothing. A real user whose double tap landed as two
- * singles taps again; so does this. The re-tap is bounded so a genuinely
- * broken double-tap path still fails, just with three attempts of evidence.
+ * measured per call so the tap follows the target across a rotation. All
+ * four messages are queued on the session before any is awaited: the taps
+ * must reach the input pipeline back-to-back, not spaced by round-trips.
  */
-async function doubleTapper(
-  page: Page,
-  target: Locator,
-): Promise<(took: () => Promise<boolean>) => Promise<void>> {
+async function doubleTapper(page: Page, target: Locator): Promise<() => Promise<void>> {
   const client = await page.context().newCDPSession(page);
 
-  const dispatchDoubleTap = async () => {
+  return async () => {
     const box = await target.boundingBox();
     if (!box) throw new Error('Expected a box for the double-tap target.');
     const x = Math.round(box.x + box.width / 2);
     const y = Math.round(box.y + Math.min(box.height * 0.4, box.height - 20));
 
-    for (let tap = 0; tap < 2; tap++) {
-      await client.send('Input.dispatchTouchEvent', {
+    const tap = () => [
+      client.send('Input.dispatchTouchEvent', {
         type: 'touchStart',
         touchPoints: [{ id: 51, x, y }],
-      });
-      await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    }
-  };
-
-  return async (took) => {
-    const attempts = 3;
-    for (let attempt = 1; attempt <= attempts; attempt++) {
-      await dispatchDoubleTap();
-      const deadline = Date.now() + 1_000;
-      while (Date.now() < deadline) {
-        if (await took()) return;
-        await page.waitForTimeout(50);
-      }
-    }
-    throw new Error(`Double tap produced no effect after ${attempts} attempts.`);
+      }),
+      client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }),
+    ];
+    await Promise.all([...tap(), ...tap()]);
   };
 }
 
