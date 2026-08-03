@@ -1,15 +1,26 @@
 // Packed-tarball consumer fixture runner.
 //
-// Fixtures are real consumer projects checked in under
-// tools/consumer-fixtures/<name>/. The runner builds and packs the library
-// once, then for every fixture: copies the project to a temp workspace,
-// pins the fixture's declared dependencies to the repo's tested versions,
-// installs the packed tarball with strict peers (never workspace links),
-// compiles the fixture, and optionally runs one runtime smoke.
+// Fixtures are consumer scenarios checked in under
+// tools/consumer-fixtures/<name>/: a fixture.json manifest and the src/ the
+// scenario needs. Everything a real Angular consumer project also needs but
+// no scenario varies — the workspace scaffolding in _base/ and the
+// package.json around it — is owned by this runner and synthesized per run,
+// so a fixture directory holds only what makes it that scenario.
+//
+// The runner builds and packs the library once, then for every fixture:
+// materializes the project into a temp workspace (base overlay first, the
+// fixture's own files on top), pins every dependency to the repo's tested
+// version, installs the packed tarball with strict peers (never workspace
+// links), compiles the fixture, and optionally runs one runtime smoke.
 //
 // Adding a fixture requires no runner changes: create a directory with a
-// fixture.json manifest next to the project files. See
+// fixture.json manifest next to its src/. See
 // tools/consumer-fixtures/README.md for the full contract.
+//
+// Two entry shapes share this module. `tools/run-consumer-fixture-shard.mjs`
+// imports it and runs one shard's fixtures as a batch; a direct
+// `node tools/check-consumer-fixtures.mjs [fixture...]` runs the named
+// fixtures (or all of them) fail-fast.
 
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -50,17 +61,88 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
 const distHell = join(root, 'dist', 'hell');
 
-const args = process.argv.slice(2);
 const prebuiltTarballSelection = (process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim() || null;
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
-const skipPackageBuild = args.includes('--skip-build');
 const smokeEnabled = process.env.HELL_CONSUMER_FIXTURE_SMOKE === '1';
-const selectedNames = args.filter((arg) => !arg.startsWith('--'));
+
+// Directories under tools/consumer-fixtures/ whose name starts with "_" hold
+// shared material, not fixtures. _base/project/ is overlaid onto every
+// workspace; _base/tailwind/ only onto workspaces whose composed dependencies
+// include the style peer, so the no-Tailwind fixture gets no PostCSS config.
+const sharedDirectoryPrefix = '_';
+const baseProjectRoot = join(fixturesRoot, '_base', 'project');
+const baseTailwindRoot = join(fixturesRoot, '_base', 'tailwind');
+const stylePeerName = 'tailwindcss';
+
+// The consumer manifest every fixture would otherwise repeat. The library
+// itself is appended from the packed tarball's own name, and the fixture's
+// manifest adds the dependencies that make it its scenario.
+const fixturePackageScaffold = Object.freeze({
+  private: true,
+  type: 'module',
+  scripts: Object.freeze({ build: 'ng build consumer --configuration production' }),
+});
+const commonFixtureDependencies = Object.freeze([
+  '@angular/cdk',
+  '@angular/common',
+  '@angular/compiler',
+  '@angular/core',
+  '@angular/forms',
+  '@angular/platform-browser',
+  '@floating-ui/dom',
+  'ng-primitives',
+  'rxjs',
+  'tslib',
+]);
+const commonFixtureDevDependencies = Object.freeze([
+  '@angular/build',
+  '@angular/cli',
+  '@angular/compiler-cli',
+  'typescript',
+]);
+// The Tailwind/PostCSS build toolchain rides along with the style peer rather
+// than being declared per fixture: a fixture that imports Hell stylesheets
+// needs exactly this pair, and one that does not must not install it.
+const stylePipelineDevDependencies = Object.freeze(['@tailwindcss/postcss', 'postcss']);
+
+const manifestKeys = new Set([
+  'description',
+  'peerGroup',
+  'dependencies',
+  'cssSentinels',
+  'forbiddenCssSentinels',
+  'styleBundleBudget',
+  'smoke',
+]);
 
 const copyExcludedDirectories = new Set(['node_modules', 'dist', '.angular', 'out-tsc']);
-const allPackagePeerNames = new Set(
-  Object.values(peerGroupContracts).flatMap((contract) => contract.peers),
+// fixture.json is the runner's input, not part of the consumer project, and a
+// lockfile would pin what the runner exists to resolve.
+const copyExcludedFiles = new Set(['fixture.json', 'pnpm-lock.yaml']);
+const packagePeerContracts = Object.values(peerGroupContracts);
+const allPackagePeerNames = new Set(packagePeerContracts.flatMap((contract) => contract.peers));
+// The closed pool of peer-group markers: every package some peer group
+// installs that another does not. A fixture's forbidden set is this pool minus
+// its own group's peers, so each boundary proves the peers it does not need
+// stay out of the install — including through the pnpm store. Deriving it
+// beats a hand-written list per fixture, which drifted: the core fixture
+// forbade the table, editor, and pdf.js markers but not the icon or style
+// peers its siblings forbade.
+const optionalPackagePeerNames = uniqueSorted([...allPackagePeerNames]).filter((name) =>
+  packagePeerContracts.some((contract) => !contract.peers.includes(name)),
 );
+
+// Semantic Theme Tokens are the one CSS fragment every fixture that emits CSS
+// must carry: a stylesheet export that resolved from the packed tarball always
+// pulls the token layer with it. Fixtures list only their scenario's
+// sentinels on top of this.
+const defaultCssSentinels = Object.freeze(['--color-hell-surface-muted:']);
+
+// The one accepted size baseline for the compiled Default Style Bundle. A
+// fixture opts into the gate with `styleBundleBudget: true`; the path is the
+// runner's, so no fixture can point the gate at another file (or outside the
+// fixture root) and measure a bundle the baseline was never taken from.
+const styleBundleBudgetPath = join(fixturesRoot, 'style-bundle-budget.json');
 
 const workspaceCatalog = readWorkspaceCatalog();
 const workspaceOverrides = readWorkspaceOverrides();
@@ -97,28 +179,83 @@ function fail(message) {
   throw new ConsumerFixtureFailure(message);
 }
 
-try {
-  await main();
-} catch (error) {
-  // Reached only after the unwind ran every cleanup, so exiting here is safe.
-  if (error instanceof ConsumerFixtureFailure) {
-    console.error(`[consumer-fixtures] ${error.message}`);
-  } else {
-    // A crash in the runner itself still carries the prefix a log scan looks
-    // for, followed by the full stack.
-    console.error('[consumer-fixtures] unexpected error');
-    console.error(error);
+if (invokedDirectly()) await runCommandLine();
+
+// The `node tools/check-consumer-fixtures.mjs [fixture...] [--skip-build]`
+// entry: the named fixtures, or every fixture when none is named, fail-fast.
+async function runCommandLine() {
+  const args = process.argv.slice(2);
+  const named = args.filter((arg) => !arg.startsWith('--'));
+  try {
+    const failures = await runConsumerFixtures({
+      names: named.length ? named : discoverFixtureNames(),
+      skipPackageBuild: args.includes('--skip-build'),
+    });
+    if (failures.length) process.exit(1);
+  } catch (error) {
+    // Reached only after the unwind ran every cleanup, so exiting here is safe.
+    reportRunnerError(error);
+    process.exit(1);
   }
-  process.exit(1);
 }
 
-async function main() {
-  const fixtures = discoverFixtures();
-  const selectedFixtures = selectFixtures(fixtures, selectedNames);
+// True when this file is the script node was told to run, false when another
+// module imported it. import.meta.main would say the same thing, but it is
+// newer than the Node version CI pins.
+function invokedDirectly() {
+  const invokedPath = process.argv[1];
+  if (!invokedPath) return false;
+  return resolve(invokedPath) === fileURLToPath(import.meta.url);
+}
+
+export function reportRunnerError(error) {
+  if (error instanceof ConsumerFixtureFailure) {
+    console.error(`[consumer-fixtures] ${error.message}`);
+    return;
+  }
+  // A crash in the runner itself still carries the prefix a log scan looks
+  // for, followed by the full stack.
+  console.error('[consumer-fixtures] unexpected error');
+  console.error(error);
+}
+
+// Every fixture name, validated and sorted. Callers that need the set before
+// running it — the CI shard deals them across parallel jobs — read it from
+// here rather than re-implementing discovery.
+export function discoverFixtureNames() {
+  return discoverFixtures().map((fixture) => fixture.name);
+}
+
+// Runs `names` against one packed tarball and returns the fixtures that
+// failed. A problem with the run itself — an unusable manifest, a tarball that
+// does not audit — throws instead; that is not a fixture's verdict.
+//
+// `batch` is the CI shard mode: each fixture runs inside its own collapsible
+// log section, a failing fixture never stops the ones after it, and a prebuilt
+// tarball is mandatory — in CI the audited artifact the build job published is
+// the only thing consumers are meant to test. Without it the run stops at the
+// first broken fixture, which is what a local run or a single-fixture CI job
+// wants.
+export async function runConsumerFixtures({ names, skipPackageBuild = false, batch = false } = {}) {
+  const selectedFixtures = selectFixtures(discoverFixtures(), names ?? []);
   for (const fixture of selectedFixtures) assertFixturePeerContract(fixture);
 
-  const packedPackage = preparePackedTarball();
+  if (batch && !prebuiltTarballSelection) {
+    fail(
+      'HELL_PACKAGE_CONSUMER_TARBALL must point at a packed tarball or a directory holding one. ' +
+        'Locally: pnpm run ci:build:lib && pnpm run ci:pack:lib, then set it to artifacts/package.',
+    );
+  }
+  // Checked after the tarball requirement so a misconfigured shard still fails
+  // loudly, and before the pack so an empty shard does no work.
+  if (!selectedFixtures.length) {
+    console.log('[consumer-fixtures] ok: no fixtures selected');
+    return [];
+  }
+
+  const packedPackage = preparePackedTarball(skipPackageBuild);
   packedTarball = packedPackage.tarball;
+  const failures = [];
   try {
     let auditedPackedPackage;
     try {
@@ -134,15 +271,32 @@ async function main() {
     }
 
     for (const fixture of selectedFixtures) {
-      await runFixture(fixture);
+      openLogSection(batch, fixture);
+      try {
+        await runFixture(fixture);
+      } catch (error) {
+        failures.push(fixture.name);
+        reportRunnerError(error);
+        console.error(`[consumer-fixtures] FAILED: ${fixture.name}`);
+      } finally {
+        closeLogSection(batch, fixture);
+      }
+      if (failures.length && !batch) break;
     }
   } finally {
     discardPackedPackage(packedPackage);
   }
 
+  if (failures.length) {
+    console.error(
+      `[consumer-fixtures] ${failures.length}/${selectedFixtures.length} fixture(s) failed: ${failures.join(', ')}`,
+    );
+    return failures;
+  }
   console.log(
     `[consumer-fixtures] ok: ${selectedFixtures.map((fixture) => fixture.name).join(', ')}`,
   );
+  return failures;
 }
 
 function discoverFixtures() {
@@ -151,70 +305,111 @@ function discoverFixtures() {
   const discovered = [];
   for (const entry of readdirSync(fixturesRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith(sharedDirectoryPrefix)) continue;
 
     const dir = join(fixturesRoot, entry.name);
     const manifestPath = join(dir, 'fixture.json');
     if (!existsSync(manifestPath)) {
       fail(`Fixture ${entry.name} is missing its fixture.json manifest: ${manifestPath}`);
     }
-    // The same rule the sharded CI entry enforces, so a fixture whose name
-    // cannot label a GitLab log section fails on the run that added it rather
-    // than in CI. Kept in step by hand with discoverFixtureNames in
-    // tools/run-consumer-fixture-shard.mjs until the shard collapse merges the
-    // two discovery paths.
+    // A fixture name labels a collapsible CI log section, so a name that
+    // cannot be labeled fails on the run that added it rather than corrupting
+    // a job log later.
     if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
       fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
     }
-    const packageJsonPath = join(dir, 'package.json');
-    if (!existsSync(packageJsonPath)) {
-      fail(`Fixture ${entry.name} is missing its package.json: ${packageJsonPath}`);
-    }
 
-    discovered.push({
+    const fixture = {
       name: entry.name,
       dir,
       manifest: JSON.parse(readFileSync(manifestPath, 'utf8')),
-      packageJson: JSON.parse(readFileSync(packageJsonPath, 'utf8')),
-    });
+    };
+    assertFixtureManifest(fixture);
+    discovered.push(fixture);
   }
 
   if (!discovered.length) fail(`No consumer fixtures found under ${fixturesRoot}`);
-  return discovered;
+  return discovered.sort((a, b) => (a.name < b.name ? -1 : 1));
+}
+
+// The manifest is the fixture's whole declaration, so an unusable one fails
+// discovery instead of being read past. Unknown keys fail too: a field the
+// runner does not read is a promise the fixture is not keeping — a mistyped
+// sentinel list would otherwise assert nothing.
+function assertFixtureManifest(fixture) {
+  const manifest = fixture.manifest;
+  const unknown = Object.keys(manifest).filter((key) => !manifestKeys.has(key));
+  if (unknown.length) {
+    fail(
+      `Fixture ${fixture.name} fixture.json has unknown key(s) ${formatList(unknown)}; supported keys are ${formatList([...manifestKeys])}`,
+    );
+  }
+  if (typeof manifest.description !== 'string' || !manifest.description.trim()) {
+    fail(`Fixture ${fixture.name} fixture.json needs a non-empty description`);
+  }
+  if (!(manifest.peerGroup in peerGroupContracts)) {
+    fail(
+      `Fixture ${fixture.name} fixture.json needs a peerGroup from tools/package-pack-audit.mjs, got ${JSON.stringify(manifest.peerGroup)}`,
+    );
+  }
+  if ('styleBundleBudget' in manifest && manifest.styleBundleBudget !== true) {
+    fail(
+      `Fixture ${fixture.name} fixture.json styleBundleBudget is an opt-in flag; set it to true or drop it (the runner owns the budget file path)`,
+    );
+  }
+  const extraDependencies = manifest.dependencies ?? [];
+  if (!Array.isArray(extraDependencies)) {
+    fail(`Fixture ${fixture.name} fixture.json dependencies must be an array of package names`);
+  }
+  for (const name of extraDependencies) {
+    if (typeof name !== 'string' || !name.trim()) {
+      fail(`Fixture ${fixture.name} declares ${JSON.stringify(name)} as an extra dependency`);
+    }
+    if (commonFixtureDependencies.includes(name)) {
+      fail(
+        `Fixture ${fixture.name} declares ${name}, which the runner already gives every fixture`,
+      );
+    }
+  }
 }
 
 function selectFixtures(allFixtures, names) {
-  if (!names.length) return allFixtures;
-
   const byName = new Map(allFixtures.map((fixture) => [fixture.name, fixture]));
   const missing = names.filter((name) => !byName.has(name));
   if (missing.length) fail(`Unknown consumer fixture(s): ${missing.join(', ')}`);
   return [...new Set(names)].map((name) => byName.get(name));
 }
 
-// A fixture that names a peer group must declare exactly that group's package
+// A fixture's composed dependencies must be exactly its peer group's package
 // peers, so peer-tier guarantees (for example: the root/core contract needs no
-// styling, icon, table, or feature peers) survive the move out of the legacy
-// embedded scenarios.
+// styling, icon, table, or feature peers) hold per boundary. The manifest
+// declares the group and the extra dependencies separately; this is what
+// keeps the two honest about each other.
 function assertFixturePeerContract(fixture) {
   const groupName = fixture.manifest.peerGroup;
-  if (!groupName) return;
+  const declaredPeers = fixtureDependencyNames(fixture).filter((name) =>
+    allPackagePeerNames.has(name),
+  );
+  assertSameSet(
+    `fixture ${fixture.name} peer group ${groupName}`,
+    peerGroupContracts[groupName].peers,
+    declaredPeers,
+  );
+}
 
-  const contract = peerGroupContracts[groupName];
-  if (!contract) fail(`Fixture ${fixture.name} references unknown peer group ${groupName}`);
-
-  const declared = Object.keys(fixture.packageJson.dependencies ?? {});
-  const declaredPeers = declared.filter((name) => allPackagePeerNames.has(name));
-  assertSameSet(`fixture ${fixture.name} peer group ${groupName}`, contract.peers, declaredPeers);
+// Every dependency the fixture's consumer manifest will declare except the
+// library itself, whose name comes from the packed tarball.
+function fixtureDependencyNames(fixture) {
+  return uniqueSorted([...commonFixtureDependencies, ...(fixture.manifest.dependencies ?? [])]);
 }
 
 async function runFixture(fixture) {
   const label = `consumer-fixtures:${fixture.name}`;
-  console.log(`[${label}] ${fixture.manifest.description ?? fixture.name}`);
+  console.log(`[${label}] ${fixture.manifest.description}`);
 
   const workspace = mkdtempSync(join(tmpdir(), `hell-consumer-fixture-${fixture.name}-`));
   try {
-    copyFixtureProject(fixture, workspace);
-    materializeFixturePackageJson(fixture, workspace);
+    materializeFixtureWorkspace(fixture, workspace, label);
     writeWorkspaceOverrides(workspace);
 
     runPnpm(['install', '--strict-peer-dependencies', '--ignore-scripts'], workspace, label);
@@ -248,48 +443,70 @@ function discardTempDirectory(path) {
   }
 }
 
-function copyFixtureProject(fixture, workspace) {
-  cpSync(fixture.dir, workspace, {
+// Assembles the real consumer project the fixture describes: the shared
+// workspace scaffolding, then the Tailwind/PostCSS config when the fixture
+// installs the style peer, then the fixture's own files — which win on
+// collision, so a scenario that needs a different angular.json or index.html
+// simply checks one in. The synthesized package.json completes it, which is
+// why HELL_KEEP_PACKAGE_CONSUMER=1 hands back a project that opens and builds
+// on its own.
+function materializeFixtureWorkspace(fixture, workspace, label) {
+  const overlays = [baseProjectRoot];
+  if (fixtureDependencyNames(fixture).includes(stylePeerName)) overlays.push(baseTailwindRoot);
+
+  for (const overlay of overlays) {
+    if (!existsSync(overlay)) fail(`Fixture base overlay missing: ${overlay}`);
+    copyProjectFiles(overlay, workspace);
+  }
+  copyProjectFiles(fixture.dir, workspace);
+  writeFixturePackageJson(fixture, workspace);
+
+  console.log(
+    `[${label}] materialized from ${overlays.map((overlay) => relative(fixturesRoot, overlay)).join(' + ')} + ${fixture.name}`,
+  );
+}
+
+function copyProjectFiles(source, workspace) {
+  cpSync(source, workspace, {
     recursive: true,
-    filter: (source) => {
-      const relativePath = relative(fixture.dir, source);
+    filter: (candidate) => {
+      const relativePath = relative(source, candidate);
       if (!relativePath) return true;
       const segments = relativePath.split(sep);
       if (segments.some((segment) => copyExcludedDirectories.has(segment))) return false;
-      return basename(relativePath) !== 'pnpm-lock.yaml';
+      return !copyExcludedFiles.has(basename(relativePath));
     },
   });
 }
 
-// The checked-in fixture declares dependency names with "*" versions; the
-// runner pins every dependency to the repo's tested version and swaps the
-// library itself for the packed tarball. Fixtures can never drift onto
-// untested dependency versions or workspace links.
-function materializeFixturePackageJson(fixture, workspace) {
-  const source = fixture.packageJson;
-  if (!(packageName in (source.dependencies ?? {}))) {
-    fail(`Fixture ${fixture.name} package.json must declare ${packageName} as a dependency`);
-  }
+// Composes the fixture's consumer manifest: the scaffold and the dependency
+// set every fixture shares, the fixture's own extra dependencies, and the
+// Tailwind/PostCSS toolchain when the style peer is among them. Every
+// dependency is pinned to the repo's tested version and the library itself
+// resolves to the packed tarball, so a fixture can never drift onto an
+// untested dependency version or a workspace link.
+function writeFixturePackageJson(fixture, workspace) {
+  const dependencies = uniqueSorted([...fixtureDependencyNames(fixture), packageName]);
+  const devDependencies = uniqueSorted([
+    ...commonFixtureDevDependencies,
+    ...(dependencies.includes(stylePeerName) ? stylePipelineDevDependencies : []),
+  ]);
 
-  const materialized = { ...source };
-  materialized.dependencies = pinDependencyVersions(fixture, source.dependencies);
-  if (source.devDependencies) {
-    materialized.devDependencies = pinDependencyVersions(fixture, source.devDependencies);
-  }
+  const composed = {
+    name: `hell-consumer-fixture-${fixture.name}`,
+    ...fixturePackageScaffold,
+    dependencies: pinDependencyVersions(dependencies),
+    devDependencies: pinDependencyVersions(devDependencies),
+  };
   if (Object.keys(workspaceOverrides).length) {
-    materialized.pnpm = { ...(source.pnpm ?? {}), overrides: workspaceOverrides };
+    composed.pnpm = { overrides: workspaceOverrides };
   }
-  writeJson(join(workspace, 'package.json'), materialized);
+  writeJson(join(workspace, 'package.json'), composed);
 }
 
-function pinDependencyVersions(fixture, section) {
+function pinDependencyVersions(names) {
   const pinned = {};
-  for (const [name, declared] of Object.entries(section ?? {})) {
-    if (declared !== '*') {
-      fail(
-        `Fixture ${fixture.name} must declare ${name} as "*"; the runner pins the repo's tested version`,
-      );
-    }
+  for (const name of names) {
     pinned[name] =
       name === packageName ? pathToFileURL(packedTarball).href : resolveDependencyVersion(name);
   }
@@ -360,11 +577,15 @@ function assertInstalledFromTarball(fixture, workspace) {
   );
 }
 
+// Every peer-group marker outside the fixture's own group must be absent —
+// from node_modules and from the pnpm store, so a transitive leak counts too.
 function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
   const storeRoot = join(workspace, 'node_modules', '.pnpm');
   const storeEntries = existsSync(storeRoot) ? readdirSync(storeRoot) : [];
+  const contract = peerGroupContracts[fixture.manifest.peerGroup];
+  const forbidden = optionalPackagePeerNames.filter((name) => !contract.peers.includes(name));
 
-  for (const dependency of fixture.manifest.forbiddenDependencies ?? []) {
+  for (const dependency of forbidden) {
     const dependencyPath = join(workspace, 'node_modules', dependency);
     if (existsSync(dependencyPath)) {
       fail(
@@ -390,18 +611,30 @@ function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
 // not the packaging boundary. Forbidden CSS sentinels are the inverse:
 // distinctive markers of heavy/optional stylesheets that must never reach the
 // built CSS unless the fixture selected them explicitly.
+//
+// The token sentinel every stylesheet export carries is the runner's, asserted
+// for every fixture whose build emitted CSS bytes. A fixture that emits none
+// (the no-CSS core boundary, whose configured stylesheet compiles to an empty
+// bundle) has nothing to probe, so only a scenario sentinel it declared itself
+// can demand CSS.
 function assertFixtureCssSentinels(fixture, workspace, label) {
-  const sentinels = fixture.manifest.cssSentinels ?? [];
+  const declaredSentinels = fixture.manifest.cssSentinels ?? [];
   const forbiddenSentinels = fixture.manifest.forbiddenCssSentinels ?? [];
-  if (!sentinels.length && !forbiddenSentinels.length) return;
 
   const distRoot = join(workspace, 'dist');
   const cssFiles = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
-  if (!cssFiles.length) fail(`Fixture ${fixture.name} build did not emit CSS under ${distRoot}`);
-
   const builtCss = normalizeCssForSentinels(
     cssFiles.map((file) => readFileSync(file, 'utf8')).join('\n'),
   );
+  if (!builtCss) {
+    if (declaredSentinels.length || forbiddenSentinels.length) {
+      fail(`Fixture ${fixture.name} build did not emit CSS under ${distRoot}`);
+    }
+    console.log(`[${label}] ok: build emitted no CSS, so no CSS sentinel applies`);
+    return;
+  }
+
+  const sentinels = [...defaultCssSentinels, ...declaredSentinels];
   const missing = sentinels.filter(
     (sentinel) => !builtCss.includes(normalizeCssForSentinels(sentinel)),
   );
@@ -433,30 +666,24 @@ function normalizeCssForSentinels(css) {
   return css.replace(/\s+/g, '');
 }
 
-// The style bundle size benchmark: a fixture that declares
-// `styleBundleBudget` (a budget file path resolved against the fixture
-// directory, staying inside tools/consumer-fixtures/) has every CSS byte its
-// production build emitted measured — compiled and minified through the
-// supported Tailwind/PostCSS path, never source files or an unprocessed
-// concatenation — and gated against the accepted release budget recorded in
-// that file. Nothing is filtered or excluded from the measurement; the
-// fixture's forbidden CSS sentinels are what prove heavy/optional styles
-// stay out of the bundle being measured.
+// The style bundle size benchmark: a fixture that sets
+// `styleBundleBudget: true` has every CSS byte its production build emitted
+// measured — compiled and minified through the supported Tailwind/PostCSS
+// path, never source files or an unprocessed concatenation — and gated against
+// the accepted release budget in the runner's budget file, which names the
+// fixture its baseline was measured from. Nothing is filtered or excluded from
+// the measurement; the fixture's forbidden CSS sentinels are what prove
+// heavy/optional styles stay out of the bundle being measured.
 function assertFixtureStyleBundleBudget(fixture, workspace, label) {
-  const budgetFile = fixture.manifest.styleBundleBudget;
-  if (!budgetFile) return;
+  if (!fixture.manifest.styleBundleBudget) return;
 
-  const budgetPath = resolve(fixture.dir, budgetFile);
-  if (!budgetPath.startsWith(`${fixturesRoot}${sep}`)) {
-    fail(`Fixture ${fixture.name} styleBundleBudget must stay inside ${fixturesRoot}`);
-  }
-  if (!existsSync(budgetPath)) {
-    fail(`Fixture ${fixture.name} styleBundleBudget file is missing: ${budgetPath}`);
+  if (!existsSync(styleBundleBudgetPath)) {
+    fail(`Fixture ${fixture.name} style bundle budget file is missing: ${styleBundleBudgetPath}`);
   }
 
   let budget;
   try {
-    budget = loadStyleBundleBudget(budgetPath);
+    budget = loadStyleBundleBudget(styleBundleBudgetPath, fixture.name);
   } catch (error) {
     fail(error instanceof Error ? error.message : String(error));
   }
@@ -482,7 +709,7 @@ function assertFixtureStyleBundleBudget(fixture, workspace, label) {
   const overBudget = evaluateStyleBundleBudget({ measurement, budget: budget.budget });
   if (overBudget.length) {
     fail(
-      `Fixture ${fixture.name} compiled style bundle exceeds the accepted budget in ${relative(root, budgetPath)}: ` +
+      `Fixture ${fixture.name} compiled style bundle exceeds the accepted budget in ${relative(root, styleBundleBudgetPath)}: ` +
         `${overBudget.join('; ')}. If this increase is intentional, follow docs/release/style-bundle-budget.md ` +
         `to review it and update the baseline and budget together.`,
     );
@@ -771,7 +998,30 @@ function existingFiles(rootPath) {
     .map((entry) => join(entry.parentPath, entry.name));
 }
 
-function preparePackedTarball() {
+// Collapsible per-fixture log sections, so a batch run's log opens as one line
+// per fixture. GitLab reads the marker protocol; anywhere else a plain header
+// keeps the same shape readable.
+function openLogSection(batch, fixture) {
+  if (!batch) return;
+  if (process.env.GITLAB_CI !== 'true') {
+    console.log(`[consumer-fixtures] --- consumer fixture ${fixture.name} ---`);
+    return;
+  }
+  console.log(
+    `\x1b[0Ksection_start:${unixTime()}:fixture_${fixture.name}[collapsed=true]\r\x1b[0Kconsumer fixture ${fixture.name}`,
+  );
+}
+
+function closeLogSection(batch, fixture) {
+  if (!batch || process.env.GITLAB_CI !== 'true') return;
+  console.log(`\x1b[0Ksection_end:${unixTime()}:fixture_${fixture.name}\r\x1b[0K`);
+}
+
+function unixTime() {
+  return Math.floor(Date.now() / 1000);
+}
+
+function preparePackedTarball(skipPackageBuild) {
   if (prebuiltTarballSelection) {
     let tarball;
     try {

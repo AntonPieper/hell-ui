@@ -1,12 +1,6 @@
 {
   "description": "foundation without CSS: root, /core, and /testing entries plus behavior-only Part Style Map controls with package-wide light peers",
   "peerGroup": "core",
-  "forbiddenDependencies": [
-    "@tanstack/angular-table",
-    "@tanstack/virtual-core",
-    "@codemirror/view",
-    "pdfjs-dist"
-  ],
   "smoke": {
     "steps": [
       {
