@@ -59,13 +59,6 @@ export function secondaryPackageEntrypoints() {
   }));
 }
 
-function entrypointTsconfigPaths() {
-  return entrypointPublicApiFiles().map((entrypoint) => ({
-    specifier: entrypoint.specifier,
-    path: `./${entrypoint.publicApiPath}`,
-  }));
-}
-
 function entrypointPackageExports() {
   return Object.fromEntries(
     entrypointPublicApiFiles().map((entrypoint) => [
@@ -156,7 +149,7 @@ function entrypointPackageStyleExports() {
   );
 }
 
-export function renderPackageJsonExports() {
+function renderPackageJsonExports() {
   return {
     ...entrypointPackageExports(),
     ...entrypointPackageStyleExports(),
@@ -167,7 +160,7 @@ export function renderPackageJsonFile(packageJson) {
   return `${JSON.stringify({ ...packageJson, exports: renderPackageJsonExports() }, null, 2)}\n`;
 }
 
-export function packageExportPath(specifier) {
+function packageExportPath(specifier) {
   return specifier === packageName ? '.' : `.${specifier.slice(packageName.length)}`;
 }
 
