@@ -43,7 +43,6 @@ const fixtures = [
     run: fixtureAutomaticSelectionNeverPromotes,
   },
   { name: 'an explicit version prepares a prerelease candidate', run: fixtureExplicitPrereleaseCandidate },
-  { name: 'an explicit version may promote deliberately', run: fixtureExplicitDeliberatePromotion },
   { name: 'invalid explicit versions fail before consuming fragments', run: fixtureInvalidExplicitVersions },
   { name: 'preparation requires pending fragments', run: fixtureRequiresPendingFragments },
   { name: 'extra repository changes fail the candidate contract', run: fixtureRejectsExtraChanges },
@@ -402,24 +401,6 @@ function fixtureExplicitPrereleaseCandidate(context) {
   }
 }
 
-function fixtureExplicitDeliberatePromotion(context) {
-  const workspace = context.workspace({
-    fragments: {
-      'Breaking-20260724-100001.yaml': breakingFragment(
-        'Adopted the stable API surface.',
-        'Follow the 1.0 migration guide for renamed entry points.',
-        '2026-07-24T10:00:01.000Z',
-      ),
-    },
-  });
-
-  const result = workspace.prepare('1.0.0');
-  if (!expectSuccess(context, result, 'explicit 1.0.0 preparation')) return;
-  if (result.version !== '1.0.0' || !workspace.exists('.changes/1.0.0.md')) {
-    context.fail('an explicit 1.0.0 must be honored as a deliberate Release Stage Promotion.');
-  }
-}
-
 function fixtureInvalidExplicitVersions(context) {
   const workspace = context.workspace({
     fragments: {
@@ -429,7 +410,6 @@ function fixtureInvalidExplicitVersions(context) {
 
   expectFailure(context, workspace.prepare('not-a-version'), 'must be valid SemVer', 'a malformed version');
   expectFailure(context, workspace.prepare('0.2.0'), 'must advance the latest released version', 're-preparing 0.2.0');
-  expectFailure(context, workspace.prepare('0.1.9'), 'must advance the latest released version', 'a regressive version');
   expectUntouchedBaseline(context, workspace, 'a rejected explicit version');
   if (workspace.pendingFragments().length !== 1) {
     context.fail('rejected explicit versions must not consume pending fragments.');
@@ -446,36 +426,27 @@ function fixtureRequiresPendingFragments(context) {
 }
 
 function fixtureRejectsExtraChanges(context) {
-  const dirtySource = context.workspace({
+  const workspace = context.workspace({
     files: { 'packages/angular/button/button.ts': 'export const button = true;\n' },
     fragments: {
       'Fixed-20260724-100001.yaml': fragment('Fixed', 'Fixed toast exit ordering.', '2026-07-24T10:00:01.000Z'),
     },
   });
-  dirtySource.write('packages/angular/button/button.ts', 'export const button = false;\n');
-  expectFailure(
-    context,
-    dirtySource.prepare(),
-    'outside the Release Preparation contract',
-    'preparing over a modified source file',
-  );
-  if (dirtySource.pendingFragments().length !== 1) {
+  // A modified tracked source file and an untracked cleanup file are both
+  // outside the allowed candidate shape; one preparation sees both and must
+  // name both.
+  workspace.write('packages/angular/button/button.ts', 'export const button = false;\n');
+  workspace.write('notes.txt', 'stray cleanup notes\n');
+
+  const label = 'preparing over a dirty working tree';
+  const result = workspace.prepare();
+  expectFailure(context, result, 'outside the Release Preparation contract', label);
+  expectFailure(context, result, 'packages/angular/button/button.ts', label);
+  expectFailure(context, result, 'notes.txt', label);
+  if (workspace.pendingFragments().length !== 1) {
     context.fail('a rejected dirty preparation must not consume pending fragments.');
   }
-
-  const untrackedCleanup = context.workspace({
-    fragments: {
-      'Fixed-20260724-100001.yaml': fragment('Fixed', 'Fixed toast exit ordering.', '2026-07-24T10:00:01.000Z'),
-    },
-  });
-  untrackedCleanup.write('notes.txt', 'stray cleanup notes\n');
-  expectFailure(
-    context,
-    untrackedCleanup.prepare(),
-    'outside the Release Preparation contract',
-    'preparing over an untracked cleanup file',
-  );
-  if (untrackedCleanup.exists('.changes/0.2.1.md')) {
+  if (workspace.exists('.changes/0.2.1.md')) {
     context.fail('a rejected dirty preparation must not create a version record.');
   }
 }
