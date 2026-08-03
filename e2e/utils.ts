@@ -48,21 +48,27 @@ export async function expectFocused(
   locator: Locator,
   message: string,
 ): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return locator.evaluate((element) => {
-          window.focus();
-          const active = document.activeElement;
-          if (element === active) return 'expected';
-          if (!(active instanceof HTMLElement)) return String(active);
-          return `${active.tagName.toLowerCase()}#${active.id || '(no-id)'}`;
-        });
-      },
-      { message, timeout: SETTLE_TIMEOUT },
-    )
-    .toBe('expected');
+  try {
+    await expect
+      .poll(
+        async () => {
+          await page.bringToFront();
+          return locator.evaluate((element) => {
+            window.focus();
+            const active = document.activeElement;
+            if (element === active) return 'expected';
+            if (!(active instanceof HTMLElement)) return String(active);
+            return `${active.tagName.toLowerCase()}#${active.id || '(no-id)'}`;
+          });
+        },
+        { message, timeout: SETTLE_TIMEOUT },
+      )
+      .toBe('expected');
+  } catch (error) {
+    // A CI-only miss should say where focus actually went, not just `false`.
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`${detail}\n\n${await collectFocusDiagnostics(page)}`, { cause: error });
+  }
 }
 
 /**
@@ -114,19 +120,6 @@ export async function finishPageAnimations(page: Page): Promise<void> {
       }
     }
   });
-}
-
-/**
- * Assert focus with settle headroom, and attach a focus-state dump to the
- * failure so a CI-only miss says where focus actually went.
- */
-export async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
-  try {
-    await expect(locator, label).toBeFocused({ timeout: SETTLE_TIMEOUT });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`${message}\n\n${await collectFocusDiagnostics(page)}`, { cause: error });
-  }
 }
 
 export async function collectFocusDiagnostics(page: Page): Promise<string> {
