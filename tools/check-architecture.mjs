@@ -867,36 +867,6 @@ function checkPackageResolution() {
   }
 }
 
-// The two library file lists the checks below share. Both are absolute-path
-// lists built once per run and frozen, like the walk cache they come from.
-let libraryPackageFileList;
-let libraryProductionTsFileList;
-
-function libraryPackageFiles() {
-  libraryPackageFileList ??= collectLibraryPackageFiles();
-  return libraryPackageFileList;
-}
-
-function collectLibraryPackageFiles() {
-  const files = [join(root, 'packages/angular/public-api.ts')];
-  for (const dir of new Set(
-    secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packageDir),
-  )) {
-    const fullDir = join(root, dir);
-    if (existsSync(fullDir)) files.push(...walk(fullDir));
-  }
-  return Object.freeze([...new Set(files)]);
-}
-
-function libraryProductionTsFiles() {
-  libraryProductionTsFileList ??= Object.freeze(
-    libraryPackageFiles().filter(
-      (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
-    ),
-  );
-  return libraryProductionTsFileList;
-}
-
 // The transcript runtime terms are browser globals and element methods, not
 // module imports, so the ESLint boundary layer cannot see them.
 function checkAudioTranscriptRuntimeIsolationContract() {
@@ -966,7 +936,10 @@ function checkOptionalPeerIsolationContract() {
   // Every peer that must be declared optional, by the consumer class that pays
   // for it. The label spells the class in both messages it appears in
   // ("optional for <label>-only consumers", "missing optional <label> peer
-  // dependency"), and the order is the order failures report in.
+  // dependency"). Order carries different weight in the two loops below: in the
+  // per-peer loop it is find() precedence, so a peer listed in two classes is
+  // reported under the first one that matches; in the declaration-coverage loop
+  // it is the order the failures report in.
   const optionalPeerClasses = [
     {
       label: 'feature',
@@ -1145,35 +1118,30 @@ function checkComponentContract() {
   const publicStyleableModules = new Map();
 
   for (const file of files) {
-    const rel = relPath(file);
-    const source = readFile(file);
-    for (const module of decoratedClassModulesForFile(file).map((candidate) => ({
-      ...candidate,
-      rel,
-      source,
-    }))) {
+    for (const module of decoratedClassModulesForFile(file)) {
       const styleInfo = partStyleInfoForClass(module, classIndex);
       if (!styleInfo) continue;
 
       const { className } = module;
       if (publicStyleableModules.has(className)) {
-        failures.push(`Duplicate public styled Module ${className} in ${rel}`);
+        failures.push(`Duplicate public styled Module ${className} in ${relPath(file)}`);
       }
-      publicStyleableModules.set(className, rel);
+      publicStyleableModules.set(className, file);
 
       checkPartStylePipeline(module, styleInfo);
-      checkPartSlotUnionContract(file, module, styleInfo);
+      checkPartSlotUnionContract(module, styleInfo);
     }
   }
 }
 
+// The index holds the same cached records the loop above walks: a module record
+// already names the file it came from, so the owner of an inherited part type is
+// reachable without a second copy carrying its own path and source.
 function partStyleClassIndex(files) {
   const index = new Map();
   for (const file of files) {
-    const rel = relPath(file);
-    const source = readFile(file);
     for (const module of decoratedClassModulesForFile(file)) {
-      index.set(module.className, { ...module, rel, source });
+      index.set(module.className, module);
     }
   }
   return index;
@@ -1205,15 +1173,15 @@ function localPartStyleInfo(module) {
     partType: uiPart ?? stylerPart,
     uiPart,
     stylerPart,
-    source: module.source,
-    rel: module.rel,
+    file: module.file,
   };
 }
 
 function checkPartStylePipeline(module, styleInfo) {
   if (styleInfo.ownerClassName !== module.className) return;
 
-  const { className, moduleSource, rel } = module;
+  const { className, moduleSource } = module;
+  const rel = relPath(module.file);
   if (!styleInfo.uiPart) {
     failures.push(`${rel} ${className} must declare its typed [ui] signal input`);
   }
@@ -1234,15 +1202,15 @@ function checkPartStylePipeline(module, styleInfo) {
   }
 }
 
-function checkPartSlotUnionContract(file, module, styleInfo) {
-  const { rel, source } = module;
-  const partNames = literalUnionMembers(styleInfo.source, styleInfo.partType);
+function checkPartSlotUnionContract(module, styleInfo) {
+  const partNames = literalUnionMembers(readFile(styleInfo.file), styleInfo.partType);
   if (!partNames.length) {
-    failures.push(`${styleInfo.rel} must export literal union ${styleInfo.partType}`);
+    failures.push(`${relPath(styleInfo.file)} must export literal union ${styleInfo.partType}`);
     return;
   }
 
-  const templateSource = partStyleTemplateSource(source, module.moduleSource, file);
+  const rel = relPath(module.file);
+  const templateSource = partStyleTemplateSource(module);
   if (hasDynamicDataSlot(templateSource)) {
     failures.push(
       `${rel} ${module.className} must not compute data-slot dynamically; it must match public parts`,
@@ -1313,7 +1281,8 @@ function literalDataSlots(source) {
   ];
 }
 
-function partStyleTemplateSource(source, moduleSource, file) {
+function partStyleTemplateSource(module) {
+  const { file, moduleSource } = module;
   const templateUrl = /templateUrl\s*:\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
   if (templateUrl) {
     const templatePath = join(dirname(file), templateUrl);
@@ -1324,20 +1293,8 @@ function partStyleTemplateSource(source, moduleSource, file) {
   if (!templateRef) return moduleSource;
 
   const pattern = new RegExp(`const\\s+${escapeRegExp(templateRef)}\\s*=\\s*\`([\\s\\S]*?)\`;`);
-  const template = pattern.exec(source)?.[1];
+  const template = pattern.exec(readFile(file))?.[1];
   return template ? `${moduleSource}\n${template}` : moduleSource;
-}
-
-// Four checks scan the same production sources for decorated classes, so the
-// scan is cached per file alongside the file's contents. decoratedClassModules
-// stays pure over a source string; this is the file-backed reader over it.
-function decoratedClassModulesForFile(file) {
-  let modules = fileClassModules.get(file);
-  if (!modules) {
-    modules = Object.freeze(decoratedClassModules(readFile(file)));
-    fileClassModules.set(file, modules);
-  }
-  return modules;
 }
 
 function decoratedClassModules(source) {
@@ -1833,16 +1790,23 @@ function escapeRegExp(value) {
 // relPath() — so no function body has to track which spelling it holds.
 //
 // Reads are memoized for the life of the process: one directory listing per
-// directory, one read per file. The checks sweep the same trees over and over
+// directory, one read per file, one decorated-class scan per file, one library
+// file list per run. The checks sweep the same trees over and over
 // (packages/angular whole and per entrypoint, apps/docs/src at three depths),
 // and the checker never writes, so a cached read is the same snapshot the check
-// would have taken itself. Parsed values are deliberately not cached: handing
-// two checks the same mutable object would let one corrupt the other's view,
-// and the cost this layer exists to remove is the file I/O.
+// would have taken itself. Parsed JSON is deliberately not cached: handing two
+// checks the same mutable object would let one corrupt the other's view, and the
+// cost this layer exists to remove is the file I/O.
+//
+// Everything cached here is shared with every later caller, so everything cached
+// here is frozen — the class-scan records too, not just the listings holding
+// them, since their fields are all strings.
 const walkedDirectories = new Map();
 const fileContents = new Map();
 const fileClassModules = new Map();
 let workspaceCatalogSnapshot;
+let libraryPackageFileList;
+let libraryProductionTsFileList;
 
 // Plain JSON: package.json, angular.json, and installed package manifests are
 // strict JSON, so nothing may quietly strip content from them.
@@ -1866,8 +1830,10 @@ function readTsconfigFile(path) {
 
 // JSONC to JSON, character by character. Comment openers inside string values
 // (`"./features/*/styles.css"`) and escaped quotes (`"\\"`) must survive, which
-// is what the string/escape states below track. It takes the source rather than
-// a path so that escape handling can be exercised without a file on disk.
+// is what the string/escape states below track. Taking the source rather than a
+// path keeps the state machine independent of the filesystem; this module still
+// exports nothing and runs main() on load, so a spec cannot reach it yet — the
+// in-flight tools vitest work owns exporting it and pinning these states.
 function parseJsonc(source) {
   let json = '';
   let inString = false;
@@ -1954,9 +1920,9 @@ function readFile(path) {
 //
 // The cache is per directory, so it pays off across nesting too: once one check
 // has walked packages/angular/dialog, the next walk of packages/angular reuses
-// that listing instead of re-reading it. Results are frozen because they are
-// shared with every later caller — a caller that needs to reorder or extend a
-// listing makes its own array, and one that forgets fails loudly here.
+// that listing instead of re-reading it. A caller that needs to reorder or
+// extend a listing makes its own array; one that forgets fails loudly on the
+// frozen result.
 function walk(path) {
   let files = walkedDirectories.get(path);
   if (!files) {
@@ -1971,6 +1937,49 @@ function walk(path) {
     walkedDirectories.set(path, files);
   }
   return files;
+}
+
+// Four checks scan the same production sources for decorated classes, so the
+// scan is cached per file alongside the file's contents. decoratedClassModules
+// stays pure over a source string; this is the file-backed reader over it, and
+// it is what stamps each record with the file it came from so a check can
+// resolve a template or name the file without a second path spelling.
+function decoratedClassModulesForFile(file) {
+  let modules = fileClassModules.get(file);
+  if (!modules) {
+    modules = Object.freeze(
+      decoratedClassModules(readFile(file)).map((module) => Object.freeze({ ...module, file })),
+    );
+    fileClassModules.set(file, modules);
+  }
+  return modules;
+}
+
+// The two library file lists the checks share: every shipped package file, and
+// the production TypeScript subset of it.
+function libraryPackageFiles() {
+  libraryPackageFileList ??= collectLibraryPackageFiles();
+  return libraryPackageFileList;
+}
+
+function collectLibraryPackageFiles() {
+  const files = [join(root, 'packages/angular/public-api.ts')];
+  for (const dir of new Set(
+    secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packageDir),
+  )) {
+    const fullDir = join(root, dir);
+    if (existsSync(fullDir)) files.push(...walk(fullDir));
+  }
+  return Object.freeze([...new Set(files)]);
+}
+
+function libraryProductionTsFiles() {
+  libraryProductionTsFileList ??= Object.freeze(
+    libraryPackageFiles().filter(
+      (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+    ),
+  );
+  return libraryProductionTsFileList;
 }
 
 main();
