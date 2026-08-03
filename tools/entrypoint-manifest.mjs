@@ -30,6 +30,12 @@ export const entrypointCategories = {
   TANSTACK_TABLE_BODY_STRATEGY: 'tanstack-table-body-strategy',
 };
 
+// Manifest ordering, kept separate from the declaration above so regrouping
+// those constants for readability cannot silently reorder every generated
+// manifest. Two lists only stay in step if something says so, and an
+// unranked category would otherwise sort by an invented rank: refuse to load
+// instead, at the moment the category is added rather than whenever the first
+// entrypoint claims it.
 const categorySort = new Map(
   [
     entrypointCategories.ROOT,
@@ -45,6 +51,16 @@ const categorySort = new Map(
     entrypointCategories.FEATURE,
   ].map((category, index) => [category, index]),
 );
+
+const unrankedCategories = Object.values(entrypointCategories).filter(
+  (category) => !categorySort.has(category),
+);
+if (unrankedCategories.length) {
+  throw new Error(
+    `Entrypoint categories without a manifest sort rank: ${unrankedCategories.join(', ')}. ` +
+      'Add them to categorySort in tools/entrypoint-manifest.mjs.',
+  );
+}
 
 const entrypointManifest = readEntrypointManifest();
 
@@ -404,14 +420,12 @@ function defaultExports(packageDir, category) {
   return [`./${basename(packageDir)}`];
 }
 
+// Every category is ranked (checked above) and the loader rejects unknown
+// categories before anything reaches this sort, so both lookups resolve.
 function compareEntrypoints(a, b) {
-  const categoryDelta = categoryRank(a.category) - categoryRank(b.category);
+  const categoryDelta = categorySort.get(a.category) - categorySort.get(b.category);
   if (categoryDelta) return categoryDelta;
   return a.packageDir.localeCompare(b.packageDir);
-}
-
-function categoryRank(category) {
-  return categorySort.get(category) ?? Number.MAX_SAFE_INTEGER;
 }
 
 function relativeToLibrary(path) {
