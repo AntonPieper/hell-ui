@@ -9,6 +9,11 @@
 // verdict — proving the ported policy behaves the same behind the adapter.
 // Nothing here talks to GitLab or runs git.
 
+import {
+  collectExpectationFailures,
+  jsonEquals,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
 import { evaluatePullRequestState } from './pr-state-policy.mjs';
 import { collectVerdictFailures, prStatePolicyFixtures } from './pr-state-policy-fixtures.mjs';
 import { parseMergeRequestLabels, parseNameStatusDiff } from './mr-state-input.mjs';
@@ -121,22 +126,46 @@ function encodeCorpusFixture(fixture) {
 }
 
 export function runMrStateInputFixtures() {
+  const labels = runNamedFixtures(labelFixtures, runLabelFixture, 'mr-state label fixture');
+  const diffs = runNamedFixtures(diffFixtures, runDiffFixture, 'mr-state diff fixture');
+  const replay = runCorpusReplay();
+
+  return {
+    failures: [...labels.failures, ...diffs.failures, ...replay.failures],
+    total: labels.total + diffs.total,
+    replayed: replay.replayed,
+  };
+}
+
+function runLabelFixture(fixture) {
+  const labels = parseMergeRequestLabels(fixture.raw);
+  if (jsonEquals(labels, fixture.expect)) return [];
+  return [`expected ${JSON.stringify(fixture.expect)}, got ${JSON.stringify(labels)}.`];
+}
+
+const diffDialect = {
+  pass: (errors) => `expected a pass; got: ${errors.join(' | ')}`,
+  none: (expected) => `expected a rejection mentioning ${expected.join(', ')}; got a pass.`,
+  missing: (needle, errors) => `expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`,
+};
+
+function runDiffFixture(fixture) {
+  const { files, errors } = parseNameStatusDiff(fixture.raw);
+  const expectedErrors = fixture.expect.errors ?? [];
+  if (expectedErrors.length > 0 || errors.length > 0) {
+    return collectExpectationFailures(errors, expectedErrors, diffDialect);
+  }
+  // A clean parse only counts if it decoded the exact records expected.
+  return jsonEquals(files, fixture.expect.files)
+    ? []
+    : [`expected ${JSON.stringify(fixture.expect.files)}, got ${JSON.stringify(files)}.`];
+}
+
+// Re-encodes every representable policy fixture as GitLab inputs and asserts
+// the identical verdict, so the ported policy is proven behind the adapter
+// rather than only in front of it.
+function runCorpusReplay() {
   const failures = [];
-
-  for (const fixture of labelFixtures) {
-    const labels = parseMergeRequestLabels(fixture.raw);
-    if (JSON.stringify(labels) !== JSON.stringify(fixture.expect)) {
-      failures.push(
-        `mr-state label fixture "${fixture.name}": expected ${JSON.stringify(fixture.expect)}, ` +
-          `got ${JSON.stringify(labels)}.`,
-      );
-    }
-  }
-
-  for (const fixture of diffFixtures) {
-    failures.push(...runDiffFixture(fixture));
-  }
-
   let replayed = 0;
   for (const fixture of prStatePolicyFixtures) {
     const encoded = encodeCorpusFixture(fixture);
@@ -162,43 +191,5 @@ export function runMrStateInputFixtures() {
   if (replayed === 0) {
     failures.push('mr-state corpus replay: no policy fixture was representable as GitLab input.');
   }
-
-  return { failures, total: labelFixtures.length + diffFixtures.length, replayed };
-}
-
-function runDiffFixture(fixture) {
-  const failures = [];
-  const { files, errors } = parseNameStatusDiff(fixture.raw);
-
-  const expectedErrors = fixture.expect.errors ?? [];
-  if (expectedErrors.length > 0) {
-    if (errors.length === 0) {
-      failures.push(
-        `mr-state diff fixture "${fixture.name}": expected a rejection mentioning ` +
-          `${expectedErrors.join(', ')}; got a pass.`,
-      );
-      return failures;
-    }
-    for (const needle of expectedErrors) {
-      if (!errors.some((error) => error.includes(needle))) {
-        failures.push(
-          `mr-state diff fixture "${fixture.name}": expected an error mentioning "${needle}"; ` +
-            `got: ${errors.join(' | ')}`,
-        );
-      }
-    }
-    return failures;
-  }
-
-  if (errors.length > 0) {
-    failures.push(`mr-state diff fixture "${fixture.name}": expected a pass; got: ${errors.join(' | ')}`);
-    return failures;
-  }
-  if (JSON.stringify(files) !== JSON.stringify(fixture.expect.files)) {
-    failures.push(
-      `mr-state diff fixture "${fixture.name}": expected ${JSON.stringify(fixture.expect.files)}, ` +
-        `got ${JSON.stringify(files)}.`,
-    );
-  }
-  return failures;
+  return { failures, replayed };
 }

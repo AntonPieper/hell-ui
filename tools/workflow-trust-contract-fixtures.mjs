@@ -6,9 +6,8 @@
 // keeps the contracts honest: a check that only ever sees compliant workflows
 // could silently stop catching violations.
 
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { runMutatedTreeFixture, runNamedFixtures } from './fixture-harness.mjs';
 import { collectWorkflowTrustContractErrors } from './workflow-trust-contracts.mjs';
 
 const trustedWorkflowPath = join('.github', 'workflows', 'pr-state.yml');
@@ -47,39 +46,19 @@ const fixtures = [
 ];
 
 export function runWorkflowTrustContractFixtures({ root }) {
-  const failures = [];
-  for (const fixture of fixtures) {
-    for (const failure of runFixture(root, fixture)) {
-      failures.push(`workflow trust-contract fixture "${fixture.name}": ${failure}`);
-    }
-  }
-  return { failures, total: fixtures.length };
-}
-
-function runFixture(root, fixture) {
-  const dir = mkdtempSync(join(tmpdir(), 'hell-workflow-trust-'));
-  try {
-    mkdirSync(join(dir, '.github'), { recursive: true });
-    cpSync(join(root, '.github', 'workflows'), join(dir, '.github', 'workflows'), {
-      recursive: true,
-    });
-
-    const original = readFileSync(join(root, trustedWorkflowPath), 'utf8');
-    const mutated = fixture.mutate(original);
-    if (mutated === original) {
-      return ['the mutation did not change the workflow; the fixture no longer tests anything.'];
-    }
-    writeFileSync(join(dir, trustedWorkflowPath), mutated);
-
-    const errors = collectWorkflowTrustContractErrors({ root: dir });
-    if (!errors.some((error) => error.includes(fixture.needle))) {
-      return [
-        `expected a contract error mentioning "${fixture.needle}"; got: ` +
-          `${errors.join(' | ') || '(no errors)'}`,
-      ];
-    }
-    return [];
-  } finally {
-    rmSync(dir, { force: true, recursive: true });
-  }
+  return runNamedFixtures(
+    fixtures,
+    (fixture) =>
+      runMutatedTreeFixture({
+        root,
+        copy: [join('.github', 'workflows')],
+        tmpPrefix: 'hell-workflow-trust-',
+        path: trustedWorkflowPath,
+        mutate: fixture.mutate,
+        collectErrors: collectWorkflowTrustContractErrors,
+        needle: fixture.needle,
+        subject: 'workflow',
+      }),
+    'workflow trust-contract fixture',
+  );
 }

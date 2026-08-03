@@ -8,6 +8,11 @@
 // Nothing here talks to a server.
 
 import {
+  collectExpectationFailures,
+  jsonEquals,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
+import {
   mainPolicyRestorePlan,
   readMainPolicy,
   recordedProjectSettings,
@@ -540,23 +545,30 @@ const verifyFixtures = [
 ];
 
 export function runMainPolicyFixtures() {
-  const failures = [];
-  for (const fixture of readFixtures) {
-    for (const failure of runReadFixture(fixture)) {
-      failures.push(`main-policy document fixture "${fixture.name}": ${failure}`);
-    }
-  }
-  for (const fixture of verifyFixtures) {
-    for (const failure of runVerifyFixture(fixture)) {
-      failures.push(`main-policy parity fixture "${fixture.name}": ${failure}`);
-    }
-  }
-  return { failures, total: readFixtures.length + verifyFixtures.length };
+  const documents = runNamedFixtures(readFixtures, runReadFixture, 'main-policy document fixture');
+  const parity = runNamedFixtures(verifyFixtures, runVerifyFixture, 'main-policy parity fixture');
+  return {
+    failures: [...documents.failures, ...parity.failures],
+    total: documents.total + parity.total,
+  };
 }
+
+// The seam reports rejections as "errors" when it reads the document and as
+// "failures" when it compares against a live project; the fixtures name the
+// surface they are about, so the noun follows.
+const policyDialect = (what) => ({
+  pass: (reported) => `expected no ${what}s; got: ${reported.join(' | ')}`,
+  none: (expected) => `expected ${what}s mentioning ${expected.join(', ')}; got none.`,
+  missing: (needle, reported) =>
+    `expected a ${what} mentioning "${needle}"; got: ${reported.join(' | ')}`,
+});
+
+const documentDialect = policyDialect('error');
+const parityDialect = policyDialect('failure');
 
 function runReadFixture(fixture) {
   const { policy, errors } = readMainPolicy(JSON.stringify(fixture.document));
-  const failures = matchExpectations('error', errors, fixture.expect.errors);
+  const failures = collectExpectationFailures(errors, fixture.expect.errors, documentDialect);
   if (fixture.expect.errors.length === 0 && policy === null) {
     failures.push('expected a parsed policy; got null.');
   }
@@ -573,7 +585,7 @@ function runVerifyFixture(fixture) {
   }
 
   const { failures: reported, evidence } = verifyMainPolicy({ policy, live: fixture.live });
-  const failures = matchExpectations('failure', reported, fixture.expect.failures);
+  const failures = collectExpectationFailures(reported, fixture.expect.failures, parityDialect);
 
   // A green run's evidence has to name the value it actually compared.
   // Evidence that summarises from memory is how a check comes to assert a
@@ -594,7 +606,7 @@ function runVerifyFixture(fixture) {
   });
   const lines = plan.requests.map((request) => `${request.method} ${request.path}`);
   const expectedRestores = fixture.restores ?? [];
-  if (lines.join('\n') !== expectedRestores.join('\n')) {
+  if (!jsonEquals(lines, expectedRestores)) {
     failures.push(
       `expected the restoration plan to be [${expectedRestores.join(', ')}]; got [${lines.join(', ')}].`,
     );
@@ -610,26 +622,6 @@ function runVerifyFixture(fixture) {
   for (const needle of expectedManual) {
     if (!plan.manual.some((entry) => entry.includes(needle))) {
       failures.push(`expected a left-alone drift mentioning "${needle}"; got: ${plan.manual.join(' | ')}`);
-    }
-  }
-  return failures;
-}
-
-function matchExpectations(what, reported, expected) {
-  const failures = [];
-  if (expected.length === 0) {
-    if (reported.length > 0) {
-      failures.push(`expected no ${what}s; got: ${reported.join(' | ')}`);
-    }
-    return failures;
-  }
-  if (reported.length === 0) {
-    failures.push(`expected ${what}s mentioning ${expected.join(', ')}; got none.`);
-    return failures;
-  }
-  for (const needle of expected) {
-    if (!reported.some((entry) => entry.includes(needle))) {
-      failures.push(`expected a ${what} mentioning "${needle}"; got: ${reported.join(' | ')}`);
     }
   }
   return failures;
