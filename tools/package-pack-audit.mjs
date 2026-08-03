@@ -841,12 +841,18 @@ function assertSameSet(label, expected, actual, failures) {
   }
 
   failures.push(
-    `${label} mismatch; expected ${expectedList.join(', ') || '(none)'}, found ${actualList.join(', ') || '(none)'}`,
+    `${label} mismatch; expected ${formatList(expectedList)}, found ${formatList(actualList)}`,
   );
 }
 
-function uniqueSorted(values) {
+// Exported for the consumer fixture runner, which compares its own declared
+// peer sets and needs the same normalization and rendering as the audit.
+export function uniqueSorted(values) {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+}
+
+export function formatList(values) {
+  return values.length ? values.join(', ') : '(none)';
 }
 
 function normalizeExportTarget(target) {
