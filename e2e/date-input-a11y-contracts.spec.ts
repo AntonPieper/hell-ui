@@ -1,6 +1,8 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+import { freezeBrowserDate } from './clock';
+
 const NAV_TIMEOUT = 60_000;
 const HYDRATION_TIMEOUT = 15_000;
 const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -14,42 +16,6 @@ async function gotoDateInput(page: Page): Promise<void> {
   });
   await expect(page.getByRole('heading', { name: 'Date input', level: 1 })).toBeVisible({
     timeout: HYDRATION_TIMEOUT,
-  });
-}
-
-async function freezeBrowserDate(page: Page): Promise<void> {
-  await page.addInitScript({
-    content: `
-      (() => {
-        const RealDate = Date;
-        const fixedTime = new RealDate(2026, 3, 22, 12, 0, 0, 0).getTime();
-
-        class FixedDate extends RealDate {
-          constructor(...args) {
-            if (args.length === 0) {
-              super(fixedTime);
-            } else {
-              super(...args);
-            }
-          }
-
-          static now() {
-            return fixedTime;
-          }
-
-          static parse(value) {
-            return RealDate.parse(value);
-          }
-
-          static UTC(...args) {
-            return RealDate.UTC(...args);
-          }
-        }
-
-        Object.defineProperty(FixedDate, 'name', { value: 'Date' });
-        globalThis.Date = FixedDate;
-      })();
-    `,
   });
 }
 

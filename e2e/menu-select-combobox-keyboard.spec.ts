@@ -402,4 +402,23 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await page.keyboard.press('Shift+Tab');
     await expect(example).toContainText('Touched: true');
   });
+
+  test('menu submenu opens, returns focus, and can be dismissed', async ({ page }) => {
+    await page.goto('/components/menu');
+
+    const trigger = page.getByRole('button', { name: 'File' }).first();
+    await trigger.click();
+
+    const openRecent = page.getByRole('menuitem', { name: 'Open recent' }).first();
+    await expect(openRecent).toBeVisible();
+    await openRecent.hover();
+    const nested = page.getByRole('menuitem', { name: 'Project Atlas' }).first();
+    if (!(await nested.isVisible())) {
+      await openRecent.click();
+    }
+    await expect(nested).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+  });
 });

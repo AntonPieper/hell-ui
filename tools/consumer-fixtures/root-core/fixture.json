@@ -1,5 +1,5 @@
 {
-  "description": "foundation without CSS: root and /core entries plus behavior-only Part Style Map controls with package-wide light peers",
+  "description": "foundation without CSS: root, /core, and /testing entries plus behavior-only Part Style Map controls with package-wide light peers",
   "peerGroup": "core",
   "forbiddenDependencies": [
     "@tanstack/angular-table",
@@ -12,6 +12,10 @@
       {
         "selector": "[data-test-id=\"root-core-status\"]",
         "textIncludes": "Root core contract: 1 result"
+      },
+      {
+        "selector": "[data-test-id=\"testing-entry-status\"]",
+        "textIncludes": "Testing entry contract: 9 harnesses"
       }
     ]
   }
