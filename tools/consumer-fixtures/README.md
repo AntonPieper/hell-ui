@@ -113,12 +113,12 @@ the fixture is not keeping.
   none.
 - `cssSentinels` (optional) — the scenario's distinctive fragments that must
   appear in the built CSS, compared with all whitespace stripped, on top of the
-  runner's own `--color-hell-surface-muted:` token probe. That probe is
-  asserted for every fixture whose build emitted CSS bytes, because a
-  stylesheet export that resolved from the packed tarball always pulls the token
-  layer with it; a fixture whose build emits none (the no-CSS `root-core`
-  boundary) has nothing to probe, so only a sentinel it declared itself can
-  demand CSS. Keep one or two sentinels
+  runner's own `--color-hell-surface-muted:` token probe. That probe applies to
+  every fixture that installs the `tailwindcss` peer, because a stylesheet
+  export that resolved from the packed tarball always pulls the token layer with
+  it — and for those fixtures a build that emits no CSS is a failure. A fixture
+  without the style peer and without sentinels of its own (the no-CSS
+  `root-core` boundary) is exempt by contract. Keep one or two sentinels
   per imported stylesheet export: they prove the export resolved from the
   packed tarball and shipped compiled output. Exhaustive fragment lists belong
   to unit tests, not the packaging boundary. Entries whose stylesheets emit no
@@ -183,6 +183,9 @@ the fixture is not keeping.
    enforces the style bundle size budget when the fixture opts in, and,
    when enabled, runs the smoke.
 
+This entry stops at the first failing fixture and names the ones it therefore
+did not run — a red local run tells you about one fixture, not the whole set.
+
 `HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging — each
 is a complete, openable consumer project.
 
@@ -192,10 +195,11 @@ discovery, deals it round-robin across `CI_NODE_TOTAL` shards, and runs its
 slice by importing the runner in-process. One shard therefore audits the packed
 tarball once rather than once per fixture, and both entries share one discovery
 and validation path. In that batch mode each fixture runs inside its own
-collapsible log section, a failing fixture never stops the ones after it, the
-summary names every failure, and a prebuilt tarball is mandatory — in CI the
-audited artifact the build job published is the only thing consumers are meant
-to test.
+collapsible log section, a failing fixture never stops the ones after it, and a
+prebuilt tarball is mandatory — in CI the audited artifact the build job
+published is the only thing consumers are meant to test. Per-fixture verdicts
+and the closing summary print outside the collapsed sections, so a red job names
+its failures without anyone expanding anything.
 
 ## Adding a fixture
 

@@ -124,10 +124,23 @@ const allPackagePeerNames = new Set(packagePeerContracts.flatMap((contract) => c
 // The closed pool of peer-group markers: every package some peer group
 // installs that another does not. A fixture's forbidden set is this pool minus
 // its own group's peers, so each boundary proves the peers it does not need
-// stay out of the install — including through the pnpm store. Deriving it
-// beats a hand-written list per fixture, which drifted: the core fixture
-// forbade the table, editor, and pdf.js markers but not the icon or style
-// peers its siblings forbade.
+// stay out of the install. Deriving it beats a hand-written list per fixture,
+// which drifted: the core fixture forbade the table, editor, and pdf.js markers
+// but not the icon or style peers its siblings forbade.
+//
+// The check matches the whole installed tree — node_modules plus a prefix scan
+// of the .pnpm store — so a pool member that arrives transitively fails the
+// fixture even though nothing declared it. Two facts make the full pool safe to
+// forbid today, and a future pool member needs the same question asked of it:
+//
+//   - @angular/router is a peer of ng-primitives only through this repo's
+//     pnpm-workspace.yaml packageExtensions. A fixture workspace inherits the
+//     repo's `overrides` and nothing else, so the extension does not apply
+//     there and no non-router fixture pulls the router in.
+//   - tailwindcss travels with @tailwindcss/postcss, which depends on it. That
+//     is why the PostCSS devDependencies are coupled to the style peer
+//     (usesStylePipeline): a fixture without the peer installs neither, so
+//     forbidding tailwindcss for the core boundary holds.
 const optionalPackagePeerNames = uniqueSorted([...allPackagePeerNames]).filter((name) =>
   packagePeerContracts.some((contract) => !contract.peers.includes(name)),
 );
@@ -146,6 +159,7 @@ const styleBundleBudgetPath = join(fixturesRoot, 'style-bundle-budget.json');
 
 const workspaceCatalog = readWorkspaceCatalog();
 const workspaceOverrides = readWorkspaceOverrides();
+const hasWorkspaceOverrides = Object.keys(workspaceOverrides).length > 0;
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 // Later sources win. The workspace catalog holds ranges, so the lockfile's
 // resolved catalog versions overlay it: a range written into a fixture
@@ -182,11 +196,19 @@ function fail(message) {
 if (invokedDirectly()) await runCommandLine();
 
 // The `node tools/check-consumer-fixtures.mjs [fixture...] [--skip-build]`
-// entry: the named fixtures, or every fixture when none is named, fail-fast.
+// entry: the named fixtures, or every fixture when none is named, stopping at
+// the first failure.
 async function runCommandLine() {
   const args = process.argv.slice(2);
   const named = args.filter((arg) => !arg.startsWith('--'));
   try {
+    // A misspelled flag used to be dropped silently, so a run that was asked to
+    // skip the build did it anyway and only the wall time said so.
+    const unknownFlags = args.filter((arg) => arg.startsWith('--') && arg !== '--skip-build');
+    if (unknownFlags.length) {
+      fail(`Unknown option(s): ${formatList(unknownFlags)}; only --skip-build is supported`);
+    }
+
     const failures = await runConsumerFixtures({
       names: named.length ? named : discoverFixtureNames(),
       skipPackageBuild: args.includes('--skip-build'),
@@ -270,18 +292,38 @@ export async function runConsumerFixtures({ names, skipPackageBuild = false, bat
       fail('Packed package.json is missing name or version');
     }
 
-    for (const fixture of selectedFixtures) {
+    for (const [position, fixture] of selectedFixtures.entries()) {
+      let failure;
       openLogSection(batch, fixture);
       try {
         await runFixture(fixture);
       } catch (error) {
-        failures.push(fixture.name);
-        reportRunnerError(error);
-        console.error(`[consumer-fixtures] FAILED: ${fixture.name}`);
+        failure = error;
       } finally {
         closeLogSection(batch, fixture);
       }
-      if (failures.length && !batch) break;
+
+      // Verdicts land after the section closes, never inside it: a collapsed
+      // section hides its own contents, so a red job whose failures were
+      // reported inside showed nothing at top level but the trailing summary.
+      if (!failure) {
+        if (batch) console.log(`[consumer-fixtures] ok: ${fixture.name}`);
+        continue;
+      }
+      failures.push(fixture.name);
+      reportRunnerError(failure);
+      console.error(`[consumer-fixtures] FAILED: ${fixture.name}`);
+
+      if (batch) continue;
+      // The direct entry stops here, so it says what it did not run rather
+      // than leaving the summary's "1/N failed" to imply N-1 passed.
+      const notRun = selectedFixtures.slice(position + 1).map((remaining) => remaining.name);
+      if (notRun.length) {
+        console.error(
+          `[consumer-fixtures] stopping after the first failure; ${notRun.length} fixture(s) not run: ${notRun.join(', ')}`,
+        );
+      }
+      break;
     }
   } finally {
     discardPackedPackage(packedPackage);
@@ -357,20 +399,42 @@ function assertFixtureManifest(fixture) {
       `Fixture ${fixture.name} fixture.json styleBundleBudget is an opt-in flag; set it to true or drop it (the runner owns the budget file path)`,
     );
   }
-  const extraDependencies = manifest.dependencies ?? [];
-  if (!Array.isArray(extraDependencies)) {
-    fail(`Fixture ${fixture.name} fixture.json dependencies must be an array of package names`);
-  }
+  // Every list field gets the same shape check. A bare string passes
+  // `manifest.cssSentinels ?? []` and then spreads to single characters, which
+  // are found in any stylesheet — the fixture would assert nothing and say ok.
+  const extraDependencies = assertManifestStringArray(fixture, 'dependencies');
+  assertManifestStringArray(fixture, 'cssSentinels');
+  assertManifestStringArray(fixture, 'forbiddenCssSentinels');
+
   for (const name of extraDependencies) {
-    if (typeof name !== 'string' || !name.trim()) {
-      fail(`Fixture ${fixture.name} declares ${JSON.stringify(name)} as an extra dependency`);
-    }
-    if (commonFixtureDependencies.includes(name)) {
+    // Both sections, because a name the runner already puts in devDependencies
+    // would otherwise land in this fixture's dependencies as well and install
+    // twice over.
+    if (commonFixtureDependencies.includes(name) || commonFixtureDevDependencies.includes(name)) {
       fail(
         `Fixture ${fixture.name} declares ${name}, which the runner already gives every fixture`,
       );
     }
+    if (stylePipelineDevDependencies.includes(name)) {
+      fail(
+        `Fixture ${fixture.name} declares ${name}, which the runner adds with the ${stylePeerName} peer`,
+      );
+    }
   }
+}
+
+function assertManifestStringArray(fixture, key) {
+  const value = fixture.manifest[key];
+  if (value === undefined) return [];
+  if (
+    !Array.isArray(value) ||
+    value.some((entry) => typeof entry !== 'string' || !entry.trim())
+  ) {
+    fail(
+      `Fixture ${fixture.name} fixture.json ${key} must be an array of non-empty strings, got ${JSON.stringify(value)}`,
+    );
+  }
+  return value;
 }
 
 function selectFixtures(allFixtures, names) {
@@ -403,6 +467,15 @@ function fixtureDependencyNames(fixture) {
   return uniqueSorted([...commonFixtureDependencies, ...(fixture.manifest.dependencies ?? [])]);
 }
 
+// The one question the style peer answers, asked in one place: it decides the
+// PostCSS overlay, the PostCSS devDependencies, and whether the runner's token
+// sentinel applies. All three have to agree — a fixture with the peer but no
+// PostCSS config would build no Hell CSS, and one whose CSS went unprobed would
+// prove nothing — so they read the same predicate rather than three lookalikes.
+function usesStylePipeline(fixture) {
+  return fixtureDependencyNames(fixture).includes(stylePeerName);
+}
+
 async function runFixture(fixture) {
   const label = `consumer-fixtures:${fixture.name}`;
   console.log(`[${label}] ${fixture.manifest.description}`);
@@ -413,8 +486,8 @@ async function runFixture(fixture) {
     writeWorkspaceOverrides(workspace);
 
     runPnpm(['install', '--strict-peer-dependencies', '--ignore-scripts'], workspace, label);
-    assertInstalledFromTarball(fixture, workspace);
-    assertForbiddenDependenciesNotInstalled(fixture, workspace);
+    assertInstalledFromTarball(fixture, workspace, label);
+    assertForbiddenDependenciesNotInstalled(fixture, workspace, label);
 
     runPnpm(['run', 'build'], workspace, label);
     assertFixtureCssSentinels(fixture, workspace, label);
@@ -452,7 +525,7 @@ function discardTempDirectory(path) {
 // on its own.
 function materializeFixtureWorkspace(fixture, workspace, label) {
   const overlays = [baseProjectRoot];
-  if (fixtureDependencyNames(fixture).includes(stylePeerName)) overlays.push(baseTailwindRoot);
+  if (usesStylePipeline(fixture)) overlays.push(baseTailwindRoot);
 
   for (const overlay of overlays) {
     if (!existsSync(overlay)) fail(`Fixture base overlay missing: ${overlay}`);
@@ -489,7 +562,7 @@ function writeFixturePackageJson(fixture, workspace) {
   const dependencies = uniqueSorted([...fixtureDependencyNames(fixture), packageName]);
   const devDependencies = uniqueSorted([
     ...commonFixtureDevDependencies,
-    ...(dependencies.includes(stylePeerName) ? stylePipelineDevDependencies : []),
+    ...(usesStylePipeline(fixture) ? stylePipelineDevDependencies : []),
   ]);
 
   const composed = {
@@ -498,9 +571,7 @@ function writeFixturePackageJson(fixture, workspace) {
     dependencies: pinDependencyVersions(dependencies),
     devDependencies: pinDependencyVersions(devDependencies),
   };
-  if (Object.keys(workspaceOverrides).length) {
-    composed.pnpm = { overrides: workspaceOverrides };
-  }
+  if (hasWorkspaceOverrides) composed.pnpm = { overrides: workspaceOverrides };
   writeJson(join(workspace, 'package.json'), composed);
 }
 
@@ -539,7 +610,7 @@ function resolveDependencyVersion(name) {
 }
 
 function writeWorkspaceOverrides(workspace) {
-  if (!Object.keys(workspaceOverrides).length) return;
+  if (!hasWorkspaceOverrides) return;
 
   // pnpm >= 10.14 reads overrides from pnpm-workspace.yaml, not from
   // package.json "pnpm.overrides"; emit both so every toolchain applies the
@@ -550,7 +621,7 @@ function writeWorkspaceOverrides(workspace) {
   writeFileSync(join(workspace, 'pnpm-workspace.yaml'), `overrides:\n${overrideLines}\n`);
 }
 
-function assertInstalledFromTarball(fixture, workspace) {
+function assertInstalledFromTarball(fixture, workspace, label) {
   const installedRoot = join(workspace, 'node_modules', ...packageName.split('/'));
   if (!existsSync(installedRoot)) {
     fail(`Fixture ${fixture.name} did not install ${packageName}`);
@@ -572,16 +643,19 @@ function assertInstalledFromTarball(fixture, workspace) {
       `Fixture ${fixture.name} installed ${packageName}@${installedVersion}, expected packed ${packageVersion}`,
     );
   }
-  console.log(
-    `[consumer-fixtures:${fixture.name}] ok: ${packageName}@${installedVersion} installed from the packed tarball`,
-  );
+  console.log(`[${label}] ok: ${packageName}@${installedVersion} installed from the packed tarball`);
 }
 
 // Every peer-group marker outside the fixture's own group must be absent —
 // from node_modules and from the pnpm store, so a transitive leak counts too.
-function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
+function assertForbiddenDependenciesNotInstalled(fixture, workspace, label) {
   const storeRoot = join(workspace, 'node_modules', '.pnpm');
-  const storeEntries = existsSync(storeRoot) ? readdirSync(storeRoot) : [];
+  const storeExists = existsSync(storeRoot);
+  const storeEntries = storeExists ? readdirSync(storeRoot) : [];
+  // Said on every line rather than left implied: with no store to scan, the
+  // absence claim covers node_modules only, which is a weaker statement than
+  // the one this check normally makes.
+  const scanned = storeExists ? '' : ' (node_modules only; no pnpm store to scan)';
   const contract = peerGroupContracts[fixture.manifest.peerGroup];
   const forbidden = optionalPackagePeerNames.filter((name) => !contract.peers.includes(name));
 
@@ -599,9 +673,7 @@ function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
         `Fixture ${fixture.name} must not install forbidden dependency ${dependency}; found it in ${storeRoot}`,
       );
     }
-    console.log(
-      `[consumer-fixtures:${fixture.name}] ok: forbidden dependency ${dependency} is not installed`,
-    );
+    console.log(`[${label}] ok: forbidden dependency ${dependency} is not installed${scanned}`);
   }
 }
 
@@ -612,29 +684,30 @@ function assertForbiddenDependenciesNotInstalled(fixture, workspace) {
 // distinctive markers of heavy/optional stylesheets that must never reach the
 // built CSS unless the fixture selected them explicitly.
 //
-// The token sentinel every stylesheet export carries is the runner's, asserted
-// for every fixture whose build emitted CSS bytes. A fixture that emits none
-// (the no-CSS core boundary, whose configured stylesheet compiles to an empty
-// bundle) has nothing to probe, so only a scenario sentinel it declared itself
-// can demand CSS.
+// The token sentinel every stylesheet export carries is the runner's, applied to
+// every fixture that installs the style peer — which is also what makes CSS
+// mandatory for those fixtures. Keying on the peer rather than on whether the
+// build happened to emit bytes settles both directions: the no-CSS core
+// boundary is exempt by contract instead of by the minifier happening to strip
+// its comment-only stylesheet, and a style-peer fixture whose CSS came out
+// empty fails instead of passing on a sentinel nothing checked.
 function assertFixtureCssSentinels(fixture, workspace, label) {
   const declaredSentinels = fixture.manifest.cssSentinels ?? [];
   const forbiddenSentinels = fixture.manifest.forbiddenCssSentinels ?? [];
+  const stylePipeline = usesStylePipeline(fixture);
+  if (!stylePipeline && !declaredSentinels.length && !forbiddenSentinels.length) {
+    console.log(`[${label}] ok: no style peer and no CSS sentinel declared, so none applies`);
+    return;
+  }
 
   const distRoot = join(workspace, 'dist');
   const cssFiles = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
   const builtCss = normalizeCssForSentinels(
     cssFiles.map((file) => readFileSync(file, 'utf8')).join('\n'),
   );
-  if (!builtCss) {
-    if (declaredSentinels.length || forbiddenSentinels.length) {
-      fail(`Fixture ${fixture.name} build did not emit CSS under ${distRoot}`);
-    }
-    console.log(`[${label}] ok: build emitted no CSS, so no CSS sentinel applies`);
-    return;
-  }
+  if (!builtCss) fail(`Fixture ${fixture.name} build did not emit CSS under ${distRoot}`);
 
-  const sentinels = [...defaultCssSentinels, ...declaredSentinels];
+  const sentinels = [...(stylePipeline ? defaultCssSentinels : []), ...declaredSentinels];
   const missing = sentinels.filter(
     (sentinel) => !builtCss.includes(normalizeCssForSentinels(sentinel)),
   );
@@ -642,9 +715,6 @@ function assertFixtureCssSentinels(fixture, workspace, label) {
     fail(
       `Fixture ${fixture.name} built CSS is missing sentinel(s): ${missing.join(' | ')}`,
     );
-  }
-  if (sentinels.length) {
-    console.log(`[${label}] ok: ${sentinels.length} CSS sentinel(s) found in built CSS`);
   }
 
   const present = forbiddenSentinels.filter((sentinel) =>
@@ -655,11 +725,10 @@ function assertFixtureCssSentinels(fixture, workspace, label) {
       `Fixture ${fixture.name} built CSS contains forbidden sentinel(s): ${present.join(' | ')}`,
     );
   }
-  if (forbiddenSentinels.length) {
-    console.log(
-      `[${label}] ok: ${forbiddenSentinels.length} forbidden CSS sentinel(s) absent from built CSS`,
-    );
-  }
+
+  console.log(
+    `[${label}] ok: ${sentinels.length} CSS sentinel(s) present, ${forbiddenSentinels.length} absent`,
+  );
 }
 
 function normalizeCssForSentinels(css) {
