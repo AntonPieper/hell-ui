@@ -103,20 +103,20 @@ app. Two rules keep fixtures honest:
   `tools/consumer-fixtures/`); a shared steps file lets two fixtures assert
   byte-identical expectations, which is how the aggregate and granular
   style-mode fixtures prove computed-style equivalence. Runs only when
-  `HELL_CONSUMER_FIXTURE_SMOKE=1` (or `--smoke`) because it needs an installed
-  Playwright Chromium.
+  `HELL_CONSUMER_FIXTURE_SMOKE=1` because it needs an installed Playwright
+  Chromium.
 
 ## Runner
 
 `tools/check-consumer-fixtures.mjs` (`pnpm run test:consumer-fixtures`):
 
-1. Builds the library once (`build:lib`), unless
-   `HELL_PACKAGE_CONSUMER_SKIP_BUILD=1` or `--skip-build` reuses `dist/hell`.
+1. Builds the library once (`build:lib`), unless `--skip-build` reuses
+   `dist/hell`.
 2. Packs `dist/hell` once with `pnpm pack` and audits the tarball with
    `auditPackedPackage`. Alternatively, `HELL_PACKAGE_CONSUMER_TARBALL=<path>`
-   (or `--tarball <path>`) skips both build and pack and audits a prebuilt
-   tarball instead; the path is a `.tgz` file or a directory holding exactly
-   one, such as a downloaded CI artifact directory.
+   skips both build and pack and audits a prebuilt tarball instead; the path is
+   a `.tgz` file or a directory holding exactly one, such as a downloaded CI
+   artifact directory.
 3. For every fixture directory (or the fixture names passed as arguments):
    copies the project to a temp workspace, pins dependency versions, applies
    the repo's pnpm overrides, and runs
@@ -133,7 +133,10 @@ app. Two rules keep fixtures honest:
 
 Copy an existing fixture directory, adjust `fixture.json`, `package.json`, and
 `src/`, and run `pnpm run test:consumer-fixtures <fixture-name>`. Discovery is
-directory-based: no runner or CI changes are needed. In GitHub CI the
+directory-based: no runner or CI changes are needed. The directory name must
+match `[A-Za-z0-9_.-]+` because it labels a collapsible GitLab log section;
+both the runner and the sharded CI entry reject anything else, so a name that
+cannot be labeled fails on the run that adds it. In GitHub CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by

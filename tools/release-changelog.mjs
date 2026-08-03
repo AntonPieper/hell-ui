@@ -22,7 +22,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { collectUnreleasedFragmentErrors, listUnreleasedFragments } from './change-fragments.mjs';
 
-export const changelogBaselineVersion = '0.2.0';
+const changelogBaselineVersion = '0.2.0';
 
 export const packageManifestPath = 'packages/angular/package.json';
 
