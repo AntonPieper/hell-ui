@@ -12,7 +12,7 @@
     "change": "changie new",
     "test:unit": "pnpm --filter hell-ui exec ng test hell --watch=false --progress=false --runner-config ../../vitest.config.ts",
     "test:coverage": "pnpm --filter hell-ui exec ng test hell --watch=false --progress=false --runner-config ../../vitest.config.ts --coverage",
-    "test": "pnpm run test:unit && pnpm run test:dead-code && pnpm run test:architecture",
+    "test": "pnpm run test:unit && pnpm run test:dead-code && pnpm run test:architecture && pnpm run ci:check:entrypoints",
     "lint": "eslint .",
     "test:dead-code": "knip",
     "e2e": "playwright test",
