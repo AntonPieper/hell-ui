@@ -27,6 +27,12 @@
   extends: .node-job
   stage: test
   image: $CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG
+  # One browser job at a time, across pipelines: every job shares the same
+  # 8-core host, and two tier jobs running concurrently (an MR's pr run next
+  # to a dispatched full run) double the worker count the single-job design
+  # sized to the machine — measured at 7.5+ load per core, which is where
+  # the pdf-rasterization and measured-layout suites start timing out.
+  resource_group: browser-host
   timeout: 45 minutes
   needs:
     - build
