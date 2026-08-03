@@ -1,45 +1,11 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
-async function gotoDatePicker(page: Page, today = '2026, 3, 22'): Promise<void> {
+import { freezeBrowserDate, type FrozenDate } from './clock';
+
+async function gotoDatePicker(page: Page, today?: FrozenDate): Promise<void> {
   await freezeBrowserDate(page, today);
   await page.goto('/components/date-picker');
   await expect(page.getByRole('heading', { name: 'Date picker', level: 1 })).toBeVisible();
-}
-
-async function freezeBrowserDate(page: Page, today: string): Promise<void> {
-  await page.addInitScript({
-    content: `
-      (() => {
-        const RealDate = Date;
-        const fixedTime = new RealDate(${today}, 12, 0, 0, 0).getTime();
-
-        class FixedDate extends RealDate {
-          constructor(...args) {
-            if (args.length === 0) {
-              super(fixedTime);
-            } else {
-              super(...args);
-            }
-          }
-
-          static now() {
-            return fixedTime;
-          }
-
-          static parse(value) {
-            return RealDate.parse(value);
-          }
-
-          static UTC(...args) {
-            return RealDate.UTC(...args);
-          }
-        }
-
-        Object.defineProperty(FixedDate, 'name', { value: 'Date' });
-        globalThis.Date = FixedDate;
-      })();
-    `,
-  });
 }
 
 test.describe('date picker browser accessibility contract', () => {
@@ -372,7 +338,7 @@ test.describe('date picker browser accessibility contract', () => {
     // Today outside the bounded example's window (Apr 6 – May 15 2026).
     // ng-primitives leaves focusedDate on today, so July is the month in view
     // while being unselectable — the state that made it paint as "your month".
-    await gotoDatePicker(page, '2026, 6, 22');
+    await gotoDatePicker(page, { year: 2026, month: 6, day: 22 });
 
     const picker = page.locator('app-date-picker-bounded-example').locator('hell-date-picker');
     await picker.locator('[data-slot="monthTrigger"]').click();

@@ -32,6 +32,40 @@ export async function ensurePageIsActive(page: Page): Promise<void> {
 }
 
 /**
+ * Assert that `locator` is the document's active element, and nothing else is.
+ *
+ * `toBeFocused` reports "inactive" (never matching) whenever the page has lost
+ * OS-level activation, which headless WebKit on a loaded runner does mid Tab
+ * sequence. Re-assert activation on every poll so the check reflects the real
+ * focus state instead of the deactivated one.
+ *
+ * The predicate resolves to a description of whatever actually holds focus
+ * rather than a bare boolean, so a failure names the offending element instead
+ * of only reporting `false`.
+ */
+export async function expectFocused(
+  page: Page,
+  locator: Locator,
+  message: string,
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        await page.bringToFront();
+        return locator.evaluate((element) => {
+          window.focus();
+          const active = document.activeElement;
+          if (element === active) return 'expected';
+          if (!(active instanceof HTMLElement)) return String(active);
+          return `${active.tagName.toLowerCase()}#${active.id || '(no-id)'}`;
+        });
+      },
+      { message, timeout: SETTLE_TIMEOUT },
+    )
+    .toBe('expected');
+}
+
+/**
  * A throttled WebKit page can freeze a CSS animation or transition clock
  * mid-flight, so finish running animations deterministically instead of
  * waiting for a possibly-frozen timeline to reach the final frame on its own.
@@ -46,6 +80,24 @@ export async function finishAnimations(locator: Locator): Promise<void> {
       }
     }
   });
+}
+
+/**
+ * Settle an overlay's enter animation before asserting a focus contract.
+ *
+ * A throttled WebKit page can freeze the enter animation's clock just below
+ * full opacity, which wedges focus on `<body>` instead of letting the focus
+ * trap grab the initial control. Drive the timeline to its final frame, then
+ * confirm the panel really reached full opacity rather than trusting that
+ * finishing the animations was enough.
+ */
+export async function settleEnterAnimation(overlay: Locator): Promise<void> {
+  await finishAnimations(overlay);
+  await expect
+    .poll(() => overlay.evaluate((element) => getComputedStyle(element).opacity), {
+      timeout: SETTLE_TIMEOUT,
+    })
+    .toBe('1');
 }
 
 /**
