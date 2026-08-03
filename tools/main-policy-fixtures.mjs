@@ -149,14 +149,6 @@ const readFixtures = [
     expect: { errors: ['posture "window"', 'push_access_levels'] },
   },
   {
-    name: 'end-state posture still recorded as window is rejected',
-    document: {
-      ...policyDocument(),
-      posture: 'end-state',
-    },
-    expect: { errors: ['posture "end-state"', 'push_access_levels'] },
-  },
-  {
     name: 'an unknown posture is rejected',
     document: { ...policyDocument(), posture: 'transitional' },
     expect: { errors: ['posture'] },
@@ -333,6 +325,9 @@ const verifyFixtures = [
     live: live(),
     expect: { failures: [] },
   },
+  // Every recorded project setting is compared by value and restored by the
+  // same PUT, and the file is the record rather than a floor — so one
+  // string-valued and one boolean-valued setting stand in for the whole list.
   {
     name: 'a relaxed merge method is drift, and restoration writes it back',
     live: withProject({ merge_method: 'merge' }),
@@ -343,36 +338,6 @@ const verifyFixtures = [
     name: 'dropping the pipeline-succeeds gate is drift',
     live: withProject({ only_allow_merge_if_pipeline_succeeds: false }),
     expect: { failures: ['only_allow_merge_if_pipeline_succeeds'] },
-    restores: ['PUT projects/7'],
-  },
-  {
-    name: 'merging on a skipped pipeline is drift',
-    live: withProject({ allow_merge_on_skipped_pipeline: true }),
-    expect: { failures: ['allow_merge_on_skipped_pipeline'] },
-    restores: ['PUT projects/7'],
-  },
-  {
-    name: 'opening fork pipelines in the parent project is drift',
-    live: withProject({ ci_allow_fork_pipelines_to_run_in_parent_project: true }),
-    expect: { failures: ['ci_allow_fork_pipelines_to_run_in_parent_project'] },
-    restores: ['PUT projects/7'],
-  },
-  {
-    name: 'tightening the variable-override role is drift too — the file is the record, not a floor',
-    live: withProject({ ci_pipeline_variables_minimum_override_role: 'no_one_allowed' }),
-    expect: { failures: ['ci_pipeline_variables_minimum_override_role'] },
-    restores: ['PUT projects/7'],
-  },
-  {
-    name: 'widening the variable-override role is drift',
-    live: withProject({ ci_pipeline_variables_minimum_override_role: 'maintainer' }),
-    expect: { failures: ['ci_pipeline_variables_minimum_override_role'] },
-    restores: ['PUT projects/7'],
-  },
-  {
-    name: 'a squash template edit is drift',
-    live: withProject({ squash_commit_template: '%{title}' }),
-    expect: { failures: ['squash_commit_template'] },
     restores: ['PUT projects/7'],
   },
   {

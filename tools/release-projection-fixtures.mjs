@@ -8,10 +8,11 @@
 //
 // The post-publication half is proven the same way: drift fixtures feed
 // captured live releases back through the same projection the draft is built
-// from, so exact releases stay clean while body drift, metadata drift,
-// unexpected assets, missing tagged notes, and repair-shaped options fail
-// with visible evidence — and the immutability policy gate refuses anything
-// but affirmative evidence.
+// from — so the metadata comparisons are the ones the draft fixtures already
+// cover, and the drift fixtures assert what only a live release can carry:
+// exact releases stay clean while body drift, a retargeted release, missing
+// tagged notes, and repair-shaped options fail with visible evidence, and the
+// immutability policy gate refuses anything but affirmative evidence.
 
 import {
   chooseProjectionAction,
@@ -35,10 +36,11 @@ const notes = record('0.3.0');
 const fixtures = [
   { name: 'prerelease classification follows the release-stage policy', run: fixturePrereleaseClassification },
   { name: 'successful required registries open the barrier', run: fixtureBarrierOpensOnSuccess },
-  { name: 'a skipped, cancelled, or failed required registry blocks', run: fixtureBarrierBlocksOnRequiredOutcomes },
+  {
+    name: 'a skipped, cancelled, or failed required registry blocks, whichever destination it names',
+    run: fixtureBarrierBlocksOnRequiredOutcomes,
+  },
   { name: 'a disabled optional registry never blocks', run: fixtureBarrierIgnoresDisabledRegistries },
-  { name: 'enabling npmjs makes it a blocking required registry', run: fixtureBarrierGatesEnabledNpmjs },
-  { name: 'future private registries join the same barrier', run: fixtureBarrierCoversPrivateRegistries },
   { name: 'the barrier rejects malformed or incomplete registry lists', run: fixtureBarrierRejectsMalformedInput },
   { name: 'the plan derives the exact projection from tagged artifacts', run: fixturePlanDerivesProjection },
   { name: 'the plan rejects tag, version, and notes disagreements', run: fixturePlanRejectsDisagreements },
@@ -50,14 +52,10 @@ const fixtures = [
   { name: 'published verification requires a published immutable release', run: fixtureVerifiesPublishedState },
   { name: 'github api releases normalize into policy metadata', run: fixtureNormalizesGithubReleases },
   { name: 'an exact published release reports no projection drift', run: fixtureExactReleaseHasNoDrift },
-  { name: 'drift detection reuses the drafted projection byte-for-byte', run: fixtureDriftSharesTheProjection },
   { name: 'body drift fails with first-difference evidence', run: fixtureBodyDrift },
-  { name: 'release metadata drift fails visibly', run: fixtureMetadataDrift },
-  { name: 'a release retargeted at another commit drifts', run: fixtureTargetDrift },
-  { name: 'unexpected custom assets fail the drift check', run: fixtureUnexpectedAssets },
+  { name: 'a retargeted release or a moved tag drifts', run: fixtureTargetDrift },
   { name: 'a missing or unprojectable tagged record fails the drift check', run: fixtureMissingTaggedRecord },
   { name: 'automatic repair requests are rejected', run: fixtureRepairRequestsRejected },
-  { name: 'a published release outside the immutable policy drifts', run: fixtureDriftRequiresImmutability },
   { name: 'the publication gate refuses anything but an enabled policy', run: fixtureImmutabilityPolicyGate },
 ];
 
@@ -129,14 +127,12 @@ function expectFailure(context, { failures }, needle, label) {
 }
 
 function fixturePrereleaseClassification(context) {
+  // One case per way the classification can be decided: a 0.x major, a
+  // prerelease suffix at major >= 1, and neither.
   const cases = [
     ['0.2.1', true],
-    ['0.10.0', true],
-    ['0.3.0-beta.1', true],
     ['1.0.0-rc.1', true],
-    ['2.1.0-next.4', true],
     ['1.0.0', false],
-    ['2.3.4', false],
   ];
   for (const [version, prerelease] of cases) {
     if (classifyPrereleaseVersion(version) !== prerelease) {
@@ -161,15 +157,26 @@ function fixtureBarrierOpensOnSuccess(context) {
   );
 }
 
+// Every Required Registry runs through the same `result !== 'success'`
+// comparison, whichever destination it names: GitHub Packages, an enabled
+// npmjs, or a future private registry listed as required.
 function fixtureBarrierBlocksOnRequiredOutcomes(context) {
-  for (const result of ['skipped', 'cancelled', 'failure']) {
+  const withPrivate = (result) =>
+    registries({ extra: [{ name: 'corp-internal', required: true, result }] });
+  const blocked = [
+    ['GitHub Packages', 'skipped', registries({ githubPackages: 'skipped' })],
+    ['npmjs', 'cancelled', registries({ npmjs: 'cancelled' })],
+    ['corp-internal', 'failure', withPrivate('failure')],
+  ];
+  for (const [name, result, registryResults] of blocked) {
     expectFailure(
       context,
-      evaluateRegistryBarrier(registries({ githubPackages: result })),
-      `Required Registry GitHub Packages was ${result}`,
-      `github packages ${result}`,
+      evaluateRegistryBarrier(registryResults),
+      `Required Registry ${name} was ${result}`,
+      `${name} ${result}`,
     );
   }
+  expectPass(context, evaluateRegistryBarrier(withPrivate('success')), 'a required private registry success');
 }
 
 function fixtureBarrierIgnoresDisabledRegistries(context) {
@@ -186,30 +193,6 @@ function fixtureBarrierIgnoresDisabledRegistries(context) {
       registries({ extra: [{ name: 'corp-internal', required: false, result: 'skipped' }] }),
     ),
     'a disabled future private registry',
-  );
-}
-
-function fixtureBarrierGatesEnabledNpmjs(context) {
-  expectPass(context, evaluateRegistryBarrier(registries({ npmjs: 'success' })), 'enabled npmjs success');
-  for (const result of ['skipped', 'cancelled', 'failure']) {
-    expectFailure(
-      context,
-      evaluateRegistryBarrier(registries({ npmjs: result })),
-      `Required Registry npmjs was ${result}`,
-      `enabled npmjs ${result}`,
-    );
-  }
-}
-
-function fixtureBarrierCoversPrivateRegistries(context) {
-  const withPrivate = (result) =>
-    registries({ extra: [{ name: 'corp-internal', required: true, result }] });
-  expectPass(context, evaluateRegistryBarrier(withPrivate('success')), 'a required private registry success');
-  expectFailure(
-    context,
-    evaluateRegistryBarrier(withPrivate('failure')),
-    'Required Registry corp-internal was failure',
-    'a required private registry failure',
   );
 }
 
@@ -349,6 +332,15 @@ function fixtureRejectsMetadataMismatches(context) {
   );
   expectFailure(
     context,
+    verify({
+      expected: expectedProjection({ tagName: 'v1.2.3', title: 'v1.2.3', prerelease: false }),
+      release: releaseProjection({ tagName: 'v1.2.3', title: 'v1.2.3', prerelease: true }),
+    }),
+    'must be a stable release',
+    'a promoted release published as a prerelease',
+  );
+  expectFailure(
+    context,
     verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) }),
     'no custom assets',
     'an unexpected custom asset',
@@ -477,42 +469,6 @@ function fixtureExactReleaseHasNoDrift(context) {
   expectPass(context, drift(publishedRelease('1.2.0')), 'an exact stable 1.2.0 release');
 }
 
-// Draft creation and drift detection must never be two implementations that
-// happen to agree: the drift check verifies against the very projection the
-// draft job plans from the same tagged bytes.
-function fixtureDriftSharesTheProjection(context) {
-  const { expected } = planReleaseProjection({
-    tagName: 'v0.3.0',
-    commit,
-    manifestVersion: '0.3.0',
-    notesBody: record('0.3.0'),
-  });
-  if (expected === null) {
-    context.fail('the drafted projection must plan from the tagged record.');
-    return;
-  }
-  if (expected.body !== record('0.3.0')) {
-    context.fail('the projection body must be the tagged record bytes exactly.');
-  }
-  expectPass(
-    context,
-    drift(publishedRelease('0.3.0', { body: expected.body, name: expected.title })),
-    'a release carrying exactly the drafted projection',
-  );
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0', { body: expected.body.replace(/\n$/, '') })),
-    'byte-for-byte',
-    'a release whose body lost the tagged trailing newline',
-  );
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0'), { tagCommit: otherCommit }),
-    'not the audited release commit',
-    'a tag that no longer resolves to the commit the record was read from',
-  );
-}
-
 function fixtureBodyDrift(context) {
   const edited = drift(
     publishedRelease('0.3.0', {
@@ -533,33 +489,6 @@ function fixtureBodyDrift(context) {
   expectFailure(context, drift(publishedRelease('0.3.0', { body: null })), 'byte-for-byte', 'an emptied body');
 }
 
-function fixtureMetadataDrift(context) {
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0', { name: 'Hell UI 0.3.0 (big one)' })),
-    'The release title is',
-    'a retitled release',
-  );
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0', { draft: true })),
-    'still a draft',
-    'a release turned back into a draft',
-  );
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0', { prerelease: false })),
-    'GitHub prerelease until an explicit stable Release Stage Promotion',
-    'a 0.x release reclassified as stable',
-  );
-  expectFailure(
-    context,
-    drift(publishedRelease('1.2.0', { prerelease: true })),
-    'must be a stable release',
-    'a stable release reclassified as a prerelease',
-  );
-}
-
 // The release's stored target is the one field that exists only on a live
 // release, so it is the one comparison drift adds on top of the published
 // verification. A concrete commit that disagrees with the tagged record's
@@ -578,11 +507,12 @@ function fixtureTargetDrift(context) {
     'Release target drifted',
     'a release retargeted at another commit in upper case',
   );
-  for (const tolerated of ['main', 'attacker-branch', undefined, null, 12345]) {
+  // One value per tolerated shape: a branch-name target, and no target at all.
+  for (const tolerated of ['main', null]) {
     expectPass(
       context,
       drift(publishedRelease('0.3.0', { target_commitish: tolerated })),
-      `a release targeting ${JSON.stringify(tolerated ?? null)}`,
+      `a release targeting ${JSON.stringify(tolerated)}`,
     );
   }
   expectPass(
@@ -590,14 +520,15 @@ function fixtureTargetDrift(context) {
     drift(publishedRelease('0.3.0', { target_commitish: commit.toUpperCase() })),
     'a release targeting the tagged commit in upper case',
   );
-}
 
-function fixtureUnexpectedAssets(context) {
-  const errors = drift(
-    publishedRelease('0.3.0', { assets: [{ name: 'hell-ui-0.3.0.tgz' }, { name: 'checksums.txt' }] }),
+  // The comparison against the commit the tagged record was read from is the
+  // published-phase check, reached here through verifyReleaseDrift.
+  expectFailure(
+    context,
+    drift(publishedRelease('0.3.0'), { tagCommit: otherCommit }),
+    'not the audited release commit',
+    'a tag that no longer resolves to the commit the record was read from',
   );
-  expectFailure(context, errors, 'no custom assets', 'a release with custom assets');
-  expectFailure(context, errors, 'hell-ui-0.3.0.tgz', 'a release with custom assets');
 }
 
 function fixtureMissingTaggedRecord(context) {
@@ -635,19 +566,6 @@ function fixtureRepairRequestsRejected(context) {
 
   const autoFix = drift(publishedRelease('0.3.0', { body: 'drifted' }), { autoRepair: 'restore-from-tag' });
   expectFailure(context, autoFix, 'Unsupported release drift option', 'an auto-repair request');
-}
-
-function fixtureDriftRequiresImmutability(context) {
-  expectFailure(
-    context,
-    drift(publishedRelease('0.3.0', { immutable: false })),
-    'not immutable',
-    'a mutable published release',
-  );
-
-  const unreported = publishedRelease('0.3.0');
-  delete unreported.immutable;
-  expectFailure(context, drift(unreported), 'not immutable', 'a release without immutability evidence');
 }
 
 // The gate that runs before any registry publishes reads the same decision

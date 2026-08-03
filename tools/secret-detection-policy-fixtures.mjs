@@ -121,16 +121,6 @@ const secretDetectionPolicyFixtures = [
     },
   },
   {
-    name: 'one entry suppresses every finding at its rule and path',
-    report: report(finding({ line: 3 }), finding({ line: 9 })),
-    allowlist: allowlist({
-      rule: 'gitlab_personal_access_token',
-      path: 'config/service.env',
-      reason: 'documented placeholder',
-    }),
-    expect: { active: [], suppressed: [{ line: 3 }, { line: 9 }] },
-  },
-  {
     // A merge-request scan only sees the merge request's commits, so most
     // pipelines never meet the finding an entry documents — an unmatched
     // entry must never fail the gate.

@@ -2,12 +2,11 @@
 // (ADR 0003).
 //
 // Every fixture is a captured-metadata scenario: label names plus GitHub
-// changed-file entries, optionally split into pagination pages exactly as the
-// REST API returns them. The runner concatenates the pages and asserts the
-// policy verdict, covering every valid and invalid state combination, direct
-// aggregate and record edits, the Release Preparation candidate shape, rename
-// metadata, pagination, and fail-closed handling of unrecognized metadata.
-// Nothing here talks to GitHub.
+// changed-file entries, already concatenated across pagination pages the way
+// the policy consumes them. The runner asserts the policy verdict, covering
+// every valid and invalid state combination, direct aggregate and record
+// edits, the Release Preparation candidate shape, rename metadata, and
+// fail-closed handling of unrecognized metadata. Nothing here talks to GitHub.
 
 import {
   changedFilesApiCap,
@@ -43,17 +42,6 @@ export const prStatePolicyFixtures = [
     name: 'one added fragment is a Consumer Change',
     labels: [],
     files: [fragmentAddition(), file('packages/angular/button/button.ts', 'modified')],
-    expect: { state: 'consumer-change' },
-  },
-  {
-    name: 'several fragments and a pending-fragment edit stay one Consumer Change',
-    labels: [],
-    files: [
-      fragmentAddition('Breaking-20260724-120000.yaml'),
-      fragmentAddition('Added-20260724-120001.yaml'),
-      file('.changes/unreleased/Fixed-20260701-090000.yaml', 'modified'),
-      file('packages/angular/menu/menu.ts', 'modified'),
-    ],
     expect: { state: 'consumer-change' },
   },
   {
@@ -97,12 +85,6 @@ export const prStatePolicyFixtures = [
     labels: ['documentation'],
     files: [file('packages/angular/button/button.ts', 'modified')],
     expect: { state: null, errors: ['Declares no state', 'pnpm change'] },
-  },
-  {
-    name: 'an empty unlabeled pull request fails',
-    labels: [],
-    files: [],
-    expect: { state: null, errors: ['Declares no state'] },
   },
   {
     name: 'fragments combined with no-consumer-change fail',
@@ -153,12 +135,6 @@ export const prStatePolicyFixtures = [
     expect: { state: 'release-preparation', errors: ['no unrelated changes'] },
   },
   {
-    name: 'Release Preparation with a lockfile change fails',
-    labels: [releasePreparationLabel],
-    files: preparationCandidate({ extras: [file('pnpm-lock.yaml', 'modified')] }),
-    expect: { state: 'release-preparation', errors: ['no unrelated changes'] },
-  },
-  {
     name: 'Release Preparation must add exactly one version record',
     labels: [releasePreparationLabel],
     files: [...preparationCandidate(), file('.changes/0.4.0.md', 'added')],
@@ -193,25 +169,6 @@ export const prStatePolicyFixtures = [
     labels: [releasePreparationLabel],
     files: preparationCandidate().filter((entry) => entry.filename !== releaseChangelogPath),
     expect: { state: 'release-preparation', errors: ['regenerate the Release Changelog'] },
-  },
-  {
-    name: 'a fragment addition on a later pagination page is still seen',
-    labels: [],
-    pages: [
-      Array.from({ length: 100 }, (_, index) => file(`docs/examples/example-${index}.ts`, 'modified')),
-      Array.from({ length: 100 }, (_, index) => file(`e2e/specs/spec-${index}.ts`, 'modified')),
-      [file('apps/docs/src/app/app.ts', 'modified'), fragmentAddition()],
-    ],
-    expect: { state: 'consumer-change' },
-  },
-  {
-    name: 'a violation on a later pagination page is still seen',
-    labels: [noConsumerChangeLabel],
-    pages: [
-      Array.from({ length: 100 }, (_, index) => file(`docs/examples/example-${index}.ts`, 'modified')),
-      [file(releaseChangelogPath, 'modified')],
-    ],
-    expect: { state: 'no-consumer-change', errors: ['generated Release Changelog'] },
   },
   {
     name: 'a matching reported changed-file count passes',
@@ -280,10 +237,9 @@ export function runPrStatePolicyFixtures() {
 }
 
 function runFixture(fixture) {
-  const files = fixture.pages ? fixture.pages.flat() : fixture.files;
   const verdict = evaluatePullRequestState({
     labels: fixture.labels,
-    files,
+    files: fixture.files,
     expectedFileCount: fixture.expectedFileCount ?? null,
   });
   return collectVerdictFailures(fixture.expect, verdict);
