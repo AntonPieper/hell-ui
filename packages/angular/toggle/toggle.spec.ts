@@ -1,6 +1,5 @@
-import { Component, signal, viewChild } from '@angular/core';
-import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
-import { FormField, disabled as disabledSchema, form } from '@angular/forms/signals';
+import { Component, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
 
 import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupValue } from './toggle';
@@ -8,6 +7,8 @@ import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Toggle specs assert behavior, forms integration, and state attributes.
+ * The shared forms-integration Value Authority contract is owned centrally by
+ * `internal/core/forms-integration-conformance.spec.ts`.
  * Part-Class Pipeline merge semantics are owned centrally by
  * `internal/core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
  * classes reach each part and that nothing outside the default render and the
@@ -120,53 +121,6 @@ class ToggleGroupSingleFormsHost {
 }
 
 @Component({
-  imports: [FormsModule, HellToggleGroup, HellToggleGroupItem],
-  template: `
-    <div
-      id="ng-model-group"
-      hellToggleGroup
-      type="multiple"
-      [(ngModel)]="value"
-      (valueChange)="valueEvents.push($event)"
-    >
-      <button id="bold" hellToggleGroupItem value="bold" type="button">Bold</button>
-      <button id="italic" hellToggleGroupItem value="italic" type="button">Italic</button>
-    </div>
-    <button id="outside" type="button">Outside</button>
-  `,
-})
-class ToggleGroupNgModelHost {
-  readonly value = signal<HellToggleGroupValue>(['bold']);
-  readonly model = viewChild.required(NgModel);
-  readonly valueEvents: HellToggleGroupValue[] = [];
-}
-
-@Component({
-  imports: [FormField, HellToggleGroup, HellToggleGroupItem],
-  template: `
-    <div
-      id="signal-forms-group"
-      hellToggleGroup
-      type="single"
-      [formField]="alignForm.align"
-      (valueChange)="valueEvents.push($event)"
-    >
-      <button id="left" hellToggleGroupItem value="left" type="button">Left</button>
-      <button id="right" hellToggleGroupItem value="right" type="button">Right</button>
-    </div>
-    <button id="outside" type="button">Outside</button>
-  `,
-})
-class ToggleGroupSignalFormsHost {
-  readonly formDisabled = signal(false);
-  readonly model = signal<{ align: string | null }>({ align: null });
-  readonly alignForm = form(this.model, (path) => {
-    disabledSchema(path.align, () => this.formDisabled());
-  });
-  readonly valueEvents: HellToggleGroupValue[] = [];
-}
-
-@Component({
   imports: [HellToggle, HellToggleGroup, HellToggleGroupItem],
   template: `
     <button
@@ -208,8 +162,6 @@ describe('HellToggleGroup', () => {
         ToggleGroupModeHost,
         ToggleGroupFormsHost,
         ToggleGroupSingleFormsHost,
-        ToggleGroupNgModelHost,
-        ToggleGroupSignalFormsHost,
         TogglePartStyleHost,
       ],
     }).compileComponents();
@@ -381,93 +333,6 @@ describe('HellToggleGroup', () => {
     );
 
     expect(host.control.touched).toBe(true);
-  });
-
-  it('integrates with template-driven forms through ngModel', async () => {
-    const fixture = TestBed.createComponent(ToggleGroupNgModelHost);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-
-    expect(button(fixture.nativeElement, 'bold').hasAttribute('data-selected')).toBe(true);
-    expect(host.valueEvents).toEqual([]);
-
-    button(fixture.nativeElement, 'italic').click();
-    fixture.detectChanges();
-
-    expect(host.value()).toEqual(['bold', 'italic']);
-    expect(host.valueEvents).toEqual([['bold', 'italic']]);
-    expect(host.model().touched).toBe(false);
-
-    button(fixture.nativeElement, 'italic').dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: button(fixture.nativeElement, 'outside'),
-      }),
-    );
-    fixture.detectChanges();
-
-    expect(host.model().touched).toBe(true);
-
-    host.value.set(['italic']);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(button(fixture.nativeElement, 'bold').hasAttribute('data-selected')).toBe(false);
-    expect(host.valueEvents).toEqual([['bold', 'italic']]);
-  });
-
-  it('participates in Signal Forms as a FormValueControl through formField', () => {
-    const fixture = TestBed.createComponent(ToggleGroupSignalFormsHost);
-    const host = fixture.componentInstance;
-    fixture.detectChanges();
-
-    expect(button(fixture.nativeElement, 'left').hasAttribute('data-selected')).toBe(false);
-
-    // Form-driven writes flow in without echoing an interaction commit.
-    host.alignForm.align().value.set('right');
-    fixture.detectChanges();
-
-    expect(button(fixture.nativeElement, 'right').hasAttribute('data-selected')).toBe(true);
-    expect(host.valueEvents).toEqual([]);
-    expect(host.alignForm.align().dirty()).toBe(false);
-
-    // One user interaction commits exactly once into the field and the model.
-    button(fixture.nativeElement, 'left').click();
-    fixture.detectChanges();
-
-    expect(host.alignForm.align().value()).toBe('left');
-    expect(host.model().align).toBe('left');
-    expect(host.valueEvents).toEqual(['left']);
-    expect(host.alignForm.align().dirty()).toBe(true);
-    expect(host.alignForm.align().touched()).toBe(false);
-
-    button(fixture.nativeElement, 'left').dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: button(fixture.nativeElement, 'outside'),
-      }),
-    );
-    fixture.detectChanges();
-
-    expect(host.alignForm.align().touched()).toBe(true);
-
-    // Field-driven disabled state reaches interaction and visible state.
-    host.formDisabled.set(true);
-    fixture.detectChanges();
-
-    expect(groupById(fixture.nativeElement, 'signal-forms-group').hasAttribute('data-disabled')).toBe(
-      true,
-    );
-
-    button(fixture.nativeElement, 'right').click();
-    fixture.detectChanges();
-
-    expect(host.alignForm.align().value()).toBe('left');
-    expect(host.valueEvents).toEqual(['left']);
   });
 
   it('exposes pressed toggle-button semantics for multiple-select items', () => {
