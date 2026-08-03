@@ -8,6 +8,7 @@ import {
   entrypointCategories,
   entrypointPublicApiFiles,
   entrypointStyleExports,
+  packageExportPath,
 } from './entrypoint-manifest.mjs';
 import { readWorkspaceCatalog } from './workspace-versions.mjs';
 
@@ -165,7 +166,7 @@ export function resolvePackedTarball(selection) {
   return join(target, tarballs[0]);
 }
 
-export function auditPackedPackage({ tarball, logger = console, verbose = false } = {}) {
+export function auditPackedPackage({ tarball } = {}) {
   if (!tarball) throw new Error('Package pack audit requires a tarball path.');
   if (!existsSync(tarball)) throw new Error(`Package pack audit tarball missing: ${tarball}`);
 
@@ -174,20 +175,21 @@ export function auditPackedPackage({ tarball, logger = console, verbose = false 
   const packageJson = readPackedJson(tarball, 'package.json');
   const failures = [];
 
-  if (verbose) logPackedFiles(files, logger);
   failures.push(...findForbiddenPackedFileFailures(files));
   checkApfPackageJson(packageJson, fileSet, tarball, failures);
   checkPackageMetadata(packageJson, failures);
   checkPackagePeers(packageJson, failures);
   checkPackedFileAccounting(packageJson, tarball, files, fileSet, failures);
-  checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures);
+  checkPackedDefaultStyleBundle(tarball, fileSet, failures);
   checkInternalEntrypointPrivacy(packageJson, failures);
 
   if (failures.length) {
     throw new Error(['Package pack audit failed:', ...failures.map((failure) => `- ${failure}`)].join('\n'));
   }
 
-  logger.log(`[package-pack-audit] ok: ${files.length} packed files audited for ${packageJson.name}`);
+  console.log(
+    `[package-pack-audit] ok: ${files.length} packed files audited for ${packageJson.name}`,
+  );
   return { files, packageJson };
 }
 
@@ -235,11 +237,6 @@ function readPackedJsonOrFail(tarball, file, failures) {
     failures.push(error instanceof Error ? error.message : String(error));
     return null;
   }
-}
-
-function logPackedFiles(files, logger) {
-  logger.log(`[package-pack-audit] packed files (${files.length}):`);
-  for (const file of files) logger.log(`[package-pack-audit] - ${file}`);
 }
 
 function findForbiddenPackedFileFailures(files) {
@@ -302,23 +299,23 @@ function checkApfPackageJson(packageJson, fileSet, tarball, failures) {
 
   checkPublishMetadata(packageJson, failures);
 
-  const expectedCodeExports = expectedCodeExportKeys(packageJson.name);
+  const expectedCodeExports = expectedCodeExportKeys();
   for (const key of expectedCodeExports) {
-    checkCodeExport(packageJson.name, key, exportsMap[key], fileSet, tarball, failures);
+    checkCodeExport(key, exportsMap[key], fileSet, tarball, failures);
   }
 
-  checkExpectedStyleExports(packageJson, exportsMap, fileSet, failures);
+  checkExpectedStyleExports(exportsMap, fileSet, failures);
 
   for (const key of Object.keys(exportsMap)) {
     if (
       key === './package.json' ||
       expectedCodeExports.has(key) ||
-      expectedStyleExportKeys(packageJson.name).has(key)
+      expectedStyleExportKeys().has(key)
     ) {
       continue;
     }
 
-    if (packageJson.name === angularPackageName && (key === './styles' || key.startsWith('./styles/'))) {
+    if (key === './styles' || key.startsWith('./styles/')) {
       failures.push(`hell-ui must not include legacy category style export ${key}`);
       continue;
     }
@@ -327,20 +324,17 @@ function checkApfPackageJson(packageJson, fileSet, tarball, failures) {
   }
 }
 
-function checkExpectedStyleExports(packageJson, exportsMap, fileSet, failures) {
-  const expectedStyleExports = expectedStyleExportTargets(packageJson.name);
-  for (const [key, expectedTarget] of expectedStyleExports) {
+function checkExpectedStyleExports(exportsMap, fileSet, failures) {
+  for (const [key, expectedTarget] of expectedStyleExportTargets()) {
     checkStyleExport(key, exportsMap[key], fileSet, failures, { expectedTarget });
   }
 }
 
-function expectedStyleExportKeys(packageName) {
-  return new Set(expectedStyleExportTargets(packageName).keys());
+function expectedStyleExportKeys() {
+  return new Set(expectedStyleExportTargets().keys());
 }
 
-function expectedStyleExportTargets(packageName) {
-  if (packageName !== angularPackageName) return new Map();
-
+function expectedStyleExportTargets() {
   return new Map(
     entrypointStyleExports().map((styleEntry) => [styleEntry.exportPath, styleEntry.sourcePath]),
   );
@@ -350,9 +344,8 @@ function checkPublishMetadata(packageJson, failures) {
   if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
     failures.push('APF package.json repository.url must match the trusted-publishing GitHub repository');
   }
-  const expectedDirectory = expectedRepositoryDirectory(packageJson.name);
-  if (packageJson.repository?.directory !== expectedDirectory) {
-    failures.push(`APF package.json repository.directory must be ${expectedDirectory}`);
+  if (packageJson.repository?.directory !== 'packages/angular') {
+    failures.push('APF package.json repository.directory must be packages/angular');
   }
   if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
     failures.push('APF package.json publishConfig.registry must be https://registry.npmjs.org/');
@@ -365,44 +358,34 @@ function checkPublishMetadata(packageJson, failures) {
   }
 }
 
-function expectedRepositoryDirectory() {
-  return 'packages/angular';
-}
-
 function checkPackageMetadata(packageJson, failures) {
   if (!packageJson.version) failures.push('APF package.json must declare a version');
   if (!packageJson.description) failures.push('APF package.json must declare a description');
 
-  const expectedFiles = expectedPackageFiles(packageJson.name);
-  if (expectedFiles) {
-    assertSameSet(
-      `${packageJson.name} package.json files`,
-      expectedFiles,
-      packageJson.files ?? [],
-      failures,
-    );
-  }
+  assertSameSet(
+    `${packageJson.name} package.json files`,
+    expectedPackageFiles(),
+    packageJson.files ?? [],
+    failures,
+  );
 
   const dependencies = Object.keys(packageJson.dependencies ?? {});
   const expectedDependencies = ['tailwind-merge', 'tslib'];
   assertSameSet(`${packageJson.name} package dependencies`, expectedDependencies, dependencies, failures);
 }
 
-function expectedPackageFiles(packageName) {
-  if (packageName === angularPackageName) {
-    return [
-      'README.md',
-      'LICENSE',
-      'package.json',
-      '**/package.json',
-      'fesm2022/*.mjs',
-      'types/*.d.ts',
-      '**/*.css',
-      ...angularRecipeSourceFiles,
-      'assets/**',
-    ];
-  }
-  return null;
+function expectedPackageFiles() {
+  return [
+    'README.md',
+    'LICENSE',
+    'package.json',
+    '**/package.json',
+    'fesm2022/*.mjs',
+    'types/*.d.ts',
+    '**/*.css',
+    ...angularRecipeSourceFiles,
+    'assets/**',
+  ];
 }
 
 function checkPackagePeers(packageJson, failures) {
@@ -418,8 +401,6 @@ function checkPackagePeers(packageJson, failures) {
       failures.push(`${packageJson.name} peerDependenciesMeta for ${metaPeer} must set optional true`);
     }
   }
-
-  if (packageJson.name !== angularPackageName) return;
 
   const expectedOptionalPeers = [
     ...packagePeerGroups.style,
@@ -467,21 +448,13 @@ function requiredPeerNames(packageJson) {
   return Object.keys(packageJson.peerDependencies ?? {}).filter((peer) => !optionalPeers.has(peer));
 }
 
-function expectedCodeExportKeys(packageName) {
-  if (packageName !== angularPackageName) return new Set();
-
+function expectedCodeExportKeys() {
   return new Set(
-    entrypointPublicApiFiles().map((entrypoint) => {
-      if (entrypoint.specifier === packageName) return '.';
-      if (entrypoint.specifier.startsWith(`${packageName}/`)) {
-        return `.${entrypoint.specifier.slice(packageName.length)}`;
-      }
-      throw new Error(`Entrypoint ${entrypoint.id} does not belong to package ${packageName}`);
-    }),
+    entrypointPublicApiFiles().map((entrypoint) => packageExportPath(entrypoint.specifier)),
   );
 }
 
-function checkCodeExport(packageName, key, exportValue, fileSet, tarball, failures) {
+function checkCodeExport(key, exportValue, fileSet, tarball, failures) {
   if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) {
     failures.push(`APF code export ${key} must be an object with types/default conditions`);
     return;
@@ -489,7 +462,7 @@ function checkCodeExport(packageName, key, exportValue, fileSet, tarball, failur
 
   checkExportConditions(key, exportValue, ['types', 'default'], failures);
 
-  const expected = expectedCodeExportTargets(packageName, key);
+  const expected = expectedCodeExportTargets(key);
   const types = checkExportTarget(
     key,
     'types',
@@ -540,9 +513,13 @@ function checkCodeExport(packageName, key, exportValue, fileSet, tarball, failur
   }
 }
 
-function expectedCodeExportTargets(packageName, key) {
-  const packageSlug = packageName.replace(/^@/, '').replace(/\//g, '-');
-  const exportSlug = key === '.' ? packageSlug : `${packageSlug}-${key.slice(2).replace(/\//g, '-')}`;
+// ng-packagr flattens every entry point into one file stem: the package name
+// followed by the subpath, slashes turned to dashes. hell-ui carries no scope,
+// so the package name doubles as the unscoped stem; a scoped rename would have
+// to strip the scope back off.
+function expectedCodeExportTargets(key) {
+  const exportSlug =
+    key === '.' ? angularPackageName : `${angularPackageName}-${key.slice(2).replace(/\//g, '-')}`;
   return {
     types: `types/${exportSlug}.d.ts`,
     default: `fesm2022/${exportSlug}.mjs`,
@@ -635,7 +612,7 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
   const packageJsonExportTarget = normalizeExportTarget(exportsMap['./package.json']?.default);
   if (packageJsonExportTarget) allowed.add(packageJsonExportTarget);
 
-  for (const key of expectedCodeExportKeys(packageJson.name)) {
+  for (const key of expectedCodeExportKeys()) {
     const exportValue = exportsMap[key];
     if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) continue;
 
@@ -647,7 +624,7 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
     if (key !== '.') allowed.add(`${key.slice(2)}/package.json`);
   }
 
-  for (const key of expectedStyleExportKeys(packageJson.name)) {
+  for (const key of expectedStyleExportKeys()) {
     const exportValue = exportsMap[key];
     if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) continue;
 
@@ -662,7 +639,7 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
     }
   }
 
-  for (const file of expectedExplicitPackedFiles(packageJson.name)) {
+  for (const file of expectedExplicitPackedFiles()) {
     allowed.add(file);
     if (!fileSet.has(file)) failures.push(`${packageJson.name} package is missing expected packed file ${file}`);
   }
@@ -675,20 +652,15 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
   }
 }
 
-function expectedExplicitPackedFiles(packageName) {
-  if (packageName === angularPackageName) {
-    return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
-  }
-  return [];
+function expectedExplicitPackedFiles() {
+  return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
 }
 
 // The packed Default Style Bundle must reproduce the entrypoint styleBundle
 // metadata exactly: the Shared Style Substrate first, then every standard
 // component stylesheet, and never a Heavy Feature Stylesheet or Theme Adapter
 // Stylesheet.
-function checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures) {
-  if (packageJson.name !== angularPackageName) return;
-
+function checkPackedDefaultStyleBundle(tarball, fileSet, failures) {
   const bundleFile = 'styles.css';
   if (!fileSet.has(bundleFile)) {
     failures.push(`Packed package is missing Default Style Bundle ${bundleFile}`);
@@ -725,15 +697,13 @@ function checkPackedDefaultStyleBundle(packageJson, tarball, fileSet, failures) 
 // every ./internal/ export resolves to an internal-category entrypoint, and
 // no ./internal/ path is presented as a supported style or shorthand surface.
 function checkInternalEntrypointPrivacy(packageJson, failures) {
-  if (packageJson.name !== angularPackageName) return;
-
   const exportsMap = packageJson.exports;
   if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) return;
 
   const internalExportKeys = new Set(
     entrypointPublicApiFiles()
       .filter((entrypoint) => entrypoint.category === entrypointCategories.INTERNAL)
-      .map((entrypoint) => `.${entrypoint.specifier.slice(angularPackageName.length)}`),
+      .map((entrypoint) => packageExportPath(entrypoint.specifier)),
   );
 
   for (const key of internalExportKeys) {

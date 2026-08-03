@@ -239,7 +239,7 @@ function main() {
 function checkCheckManifest(manifest) {
   const kinds = new Set(['permanent', 'migration']);
   const releasePattern = /^\d+\.\d+\.\d+$/;
-  const packageVersion = readJsonFile('packages/angular/package.json').version;
+  const packageVersion = readJsonFile(join(root, 'packages/angular/package.json')).version;
   const seenNames = new Set();
 
   for (const entry of manifest) {
@@ -845,20 +845,20 @@ function checkEntrypointManifestIntegrity() {
 // import-path-first Angular workspace layout. The generated exports map itself
 // is byte-pinned by tools/generate-entrypoint-manifests.mjs --check.
 function checkPackageResolution() {
-  const tsconfig = readTsconfigFile('tsconfig.json');
+  const tsconfig = readTsconfigFile(join(root, 'tsconfig.json'));
   if (tsconfig.compilerOptions?.paths) {
     failures.push(
       'Root tsconfig.json must not define Hell package path aliases; package exports with @heinrich/source are the local source-resolution contract',
     );
   }
 
-  const tsconfigBase = readTsconfigFile('tsconfig.base.json');
+  const tsconfigBase = readTsconfigFile(join(root, 'tsconfig.base.json'));
   const customConditions = tsconfigBase.compilerOptions?.customConditions ?? [];
   if (!customConditions.includes(sourcePackageCondition)) {
     failures.push(`tsconfig.base.json must include custom condition ${sourcePackageCondition}`);
   }
 
-  const angularWorkspace = readJsonFile('packages/angular/angular.json');
+  const angularWorkspace = readJsonFile(join(root, 'packages/angular/angular.json'));
   const angularSourceRoot = angularWorkspace.projects?.hell?.sourceRoot;
   if (angularSourceRoot !== '.') {
     failures.push(
@@ -867,33 +867,18 @@ function checkPackageResolution() {
   }
 }
 
-function libraryPackageFiles() {
-  const files = [join(root, 'packages/angular/public-api.ts')];
-  for (const dir of new Set(secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packageDir))) {
-    const fullDir = join(root, dir);
-    if (existsSync(fullDir)) files.push(...walk(fullDir));
-  }
-  return [...new Set(files)];
-}
-
-function libraryProductionTsFiles() {
-  return libraryPackageFiles()
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'))
-    .map(relPath);
-}
-
 // The transcript runtime terms are browser globals and element methods, not
 // module imports, so the ESLint boundary layer cannot see them.
 function checkAudioTranscriptRuntimeIsolationContract() {
   const libraryProductionPaths = [
-    'packages/angular/public-api.ts',
-    ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.publicApiPath),
+    join(root, 'packages/angular/public-api.ts'),
+    ...entrypointPublicApiFiles().map((entrypoint) => join(root, entrypoint.publicApiPath)),
     ...libraryProductionTsFiles(),
   ];
 
-  for (const rel of [...new Set(libraryProductionPaths)].sort()) {
+  for (const file of [...new Set(libraryProductionPaths)].sort()) {
+    const rel = relPath(file);
     if (isAudioTranscriptFeatureSeamPath(rel)) continue;
-    const file = join(root, rel);
     if (!existsSync(file)) continue;
 
     const source = readFile(file);
@@ -920,8 +905,8 @@ function isAudioTranscriptFeatureSeamPath(rel) {
 // isolation (which sources may import an optional peer) is enforced by
 // tools/eslint/hell-boundaries.mjs.
 function checkOptionalPeerIsolationContract() {
-  const packageJson = readJsonFile('packages/angular/package.json');
-  const workspaceCatalog = readWorkspaceCatalog();
+  const packageJson = readJsonFile(join(root, 'packages/angular/package.json'));
+  const catalog = workspaceCatalog();
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
     failures.push(
@@ -929,7 +914,7 @@ function checkOptionalPeerIsolationContract() {
     );
   }
 
-  const sourceFiles = libraryProductionTsFiles().map((file) => join(root, file));
+  const sourceFiles = libraryProductionTsFiles();
   const peerDependencies = packageJson.peerDependencies ?? {};
   const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
   const dependencies = packageJson.dependencies ?? {};
@@ -948,19 +933,37 @@ function checkOptionalPeerIsolationContract() {
     'ng-primitives',
     'rxjs',
   ]);
-  // Icon-backed entry points only; non-icon consumers install without them.
-  const iconOnlyPeers = new Set(['@ng-icons/core', '@ng-icons/font-awesome']);
-  const transitiveOnlyPeers = new Set(['@angular/router']);
-  const featureOnlyPeers = new Set([
-    '@codemirror/commands',
-    '@codemirror/language',
-    '@codemirror/state',
-    '@codemirror/view',
-    '@lezer/highlight',
-    'pdfjs-dist',
-  ]);
-  const adapterOnlyPeers = new Set(['@tanstack/angular-table', '@tanstack/virtual-core']);
-  const styleOnlyPeers = new Set(['tailwindcss']);
+  // Every peer that must be declared optional, by the consumer class that pays
+  // for it. The label spells the class in both messages it appears in
+  // ("optional for <label>-only consumers", "missing optional <label> peer
+  // dependency"). Order carries different weight in the two loops below: in the
+  // per-peer loop it is find() precedence, so a peer listed in two classes is
+  // reported under the first one that matches; in the declaration-coverage loop
+  // it is the order the failures report in.
+  const optionalPeerClasses = [
+    {
+      label: 'feature',
+      peers: new Set([
+        '@codemirror/commands',
+        '@codemirror/language',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@lezer/highlight',
+        'pdfjs-dist',
+      ]),
+    },
+    { label: 'adapter', peers: new Set(['@tanstack/angular-table', '@tanstack/virtual-core']) },
+    { label: 'style', peers: new Set(['tailwindcss']) },
+    // Icon-backed entry points only; non-icon consumers install without them.
+    { label: 'icon', peers: new Set(['@ng-icons/core', '@ng-icons/font-awesome']) },
+    { label: 'transitive', peers: new Set(['@angular/router']) },
+  ];
+  // Declaration coverage, light stack first: every peer of every class must be
+  // declared, required or optional as its class says.
+  const declaredPeerClasses = [
+    { requirement: 'required', label: 'light', peers: lightStackPeers },
+    ...optionalPeerClasses.map((peerClass) => ({ requirement: 'optional', ...peerClass })),
+  ];
 
   for (const dependency of importedPackages) {
     if (!peerDependencies[dependency] && !dependencies[dependency]) {
@@ -989,37 +992,13 @@ function checkOptionalPeerIsolationContract() {
       );
     }
 
-    if (featureOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+    const missedOptionalClass = optionalPeerClasses.find(
+      (peerClass) =>
+        peerClass.peers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true,
+    );
+    if (missedOptionalClass) {
       failures.push(
-        `Package dependency contract must keep ${dependency} optional for feature-only consumers`,
-      );
-    } else if (
-      adapterOnlyPeers.has(dependency) &&
-      peerDependenciesMeta[dependency]?.optional !== true
-    ) {
-      failures.push(
-        `Package dependency contract must keep ${dependency} optional for adapter-only consumers`,
-      );
-    } else if (
-      styleOnlyPeers.has(dependency) &&
-      peerDependenciesMeta[dependency]?.optional !== true
-    ) {
-      failures.push(
-        `Package dependency contract must keep ${dependency} optional for style-only consumers`,
-      );
-    } else if (
-      iconOnlyPeers.has(dependency) &&
-      peerDependenciesMeta[dependency]?.optional !== true
-    ) {
-      failures.push(
-        `Package dependency contract must keep ${dependency} optional for icon-only consumers`,
-      );
-    } else if (
-      transitiveOnlyPeers.has(dependency) &&
-      peerDependenciesMeta[dependency]?.optional !== true
-    ) {
-      failures.push(
-        `Package dependency contract must keep ${dependency} optional for transitive-only consumers`,
+        `Package dependency contract must keep ${dependency} optional for ${missedOptionalClass.label}-only consumers`,
       );
     }
   }
@@ -1030,11 +1009,7 @@ function checkOptionalPeerIsolationContract() {
         `Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`,
       );
     } else if (
-      !featureOnlyPeers.has(dependency) &&
-      !adapterOnlyPeers.has(dependency) &&
-      !styleOnlyPeers.has(dependency) &&
-      !iconOnlyPeers.has(dependency) &&
-      !transitiveOnlyPeers.has(dependency) &&
+      !optionalPeerClasses.some((peerClass) => peerClass.peers.has(dependency)) &&
       peerDependenciesMeta[dependency]?.optional
     ) {
       failures.push(
@@ -1043,57 +1018,19 @@ function checkOptionalPeerIsolationContract() {
     }
   }
 
-  for (const dependency of lightStackPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing required light peer dependency ${dependency}`,
-      );
+  for (const { requirement, label, peers } of declaredPeerClasses) {
+    for (const dependency of peers) {
+      if (!peerDependencies[dependency]) {
+        failures.push(
+          `Package dependency contract is missing ${requirement} ${label} peer dependency ${dependency}`,
+        );
+      }
     }
   }
 
-  for (const dependency of featureOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing optional feature peer dependency ${dependency}`,
-      );
-    }
-  }
-
-  for (const dependency of adapterOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing optional adapter peer dependency ${dependency}`,
-      );
-    }
-  }
-
-  for (const dependency of styleOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing optional style peer dependency ${dependency}`,
-      );
-    }
-  }
-
-  for (const dependency of iconOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing optional icon peer dependency ${dependency}`,
-      );
-    }
-  }
-
-  for (const dependency of transitiveOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(
-        `Package dependency contract is missing optional transitive peer dependency ${dependency}`,
-      );
-    }
-  }
-
-  if (peerDependencies['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
+  if (peerDependencies['pdfjs-dist'] !== catalog['pdfjs-dist']) {
     failures.push(
-      `Package dependency contract must pin the optional pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+      `Package dependency contract must pin the optional pdfjs-dist peer to workspace catalog version ${catalog['pdfjs-dist']}`,
     );
   }
 }
@@ -1177,38 +1114,34 @@ function checkTokenSubstrateDoesNotOwnComponentSkins() {
 function checkComponentContract() {
   const productionFiles = libraryProductionTsFiles();
   const classIndex = partStyleClassIndex(productionFiles);
-  const files = productionFiles.filter((file) => !file.includes('/core/'));
+  const files = productionFiles.filter((file) => !relPath(file).includes('/core/'));
   const publicStyleableModules = new Map();
 
-  for (const rel of files) {
-    const file = join(root, rel);
-    const source = readFile(file);
-    for (const module of decoratedClassModules(source).map((candidate) => ({
-      ...candidate,
-      rel,
-      source,
-    }))) {
+  for (const file of files) {
+    for (const module of decoratedClassModulesForFile(file)) {
       const styleInfo = partStyleInfoForClass(module, classIndex);
       if (!styleInfo) continue;
 
       const { className } = module;
       if (publicStyleableModules.has(className)) {
-        failures.push(`Duplicate public styled Module ${className} in ${rel}`);
+        failures.push(`Duplicate public styled Module ${className} in ${relPath(file)}`);
       }
-      publicStyleableModules.set(className, rel);
+      publicStyleableModules.set(className, file);
 
-      checkPartStylePipeline(rel, module, styleInfo);
-      checkPartSlotUnionContract(rel, source, module, styleInfo);
+      checkPartStylePipeline(module, styleInfo);
+      checkPartSlotUnionContract(module, styleInfo);
     }
   }
 }
 
-function partStyleClassIndex(relFiles) {
+// The index holds the same cached records the loop above walks: a module record
+// already names the file it came from, so the owner of an inherited part type is
+// reachable without a second copy carrying its own path and source.
+function partStyleClassIndex(files) {
   const index = new Map();
-  for (const rel of relFiles) {
-    const source = readFile(join(root, rel));
-    for (const module of decoratedClassModules(source)) {
-      index.set(module.className, { ...module, rel, source });
+  for (const file of files) {
+    for (const module of decoratedClassModulesForFile(file)) {
+      index.set(module.className, module);
     }
   }
   return index;
@@ -1240,15 +1173,15 @@ function localPartStyleInfo(module) {
     partType: uiPart ?? stylerPart,
     uiPart,
     stylerPart,
-    source: module.source,
-    rel: module.rel,
+    file: module.file,
   };
 }
 
-function checkPartStylePipeline(rel, module, styleInfo) {
+function checkPartStylePipeline(module, styleInfo) {
   if (styleInfo.ownerClassName !== module.className) return;
 
   const { className, moduleSource } = module;
+  const rel = relPath(module.file);
   if (!styleInfo.uiPart) {
     failures.push(`${rel} ${className} must declare its typed [ui] signal input`);
   }
@@ -1269,19 +1202,15 @@ function checkPartStylePipeline(rel, module, styleInfo) {
   }
 }
 
-function checkPartSlotUnionContract(
-  rel,
-  source,
-  module,
-  styleInfo,
-) {
-  const partNames = literalUnionMembers(styleInfo.source, styleInfo.partType);
+function checkPartSlotUnionContract(module, styleInfo) {
+  const partNames = literalUnionMembers(readFile(styleInfo.file), styleInfo.partType);
   if (!partNames.length) {
-    failures.push(`${styleInfo.rel} must export literal union ${styleInfo.partType}`);
+    failures.push(`${relPath(styleInfo.file)} must export literal union ${styleInfo.partType}`);
     return;
   }
 
-  const templateSource = partStyleTemplateSource(source, module.moduleSource, rel);
+  const rel = relPath(module.file);
+  const templateSource = partStyleTemplateSource(module);
   if (hasDynamicDataSlot(templateSource)) {
     failures.push(
       `${rel} ${module.className} must not compute data-slot dynamically; it must match public parts`,
@@ -1352,10 +1281,11 @@ function literalDataSlots(source) {
   ];
 }
 
-function partStyleTemplateSource(source, moduleSource, rel) {
+function partStyleTemplateSource(module) {
+  const { file, moduleSource } = module;
   const templateUrl = /templateUrl\s*:\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
   if (templateUrl) {
-    const templatePath = join(root, dirname(rel), templateUrl);
+    const templatePath = join(dirname(file), templateUrl);
     if (existsSync(templatePath)) return `${moduleSource}\n${readFile(templatePath)}`;
   }
 
@@ -1363,7 +1293,7 @@ function partStyleTemplateSource(source, moduleSource, rel) {
   if (!templateRef) return moduleSource;
 
   const pattern = new RegExp(`const\\s+${escapeRegExp(templateRef)}\\s*=\\s*\`([\\s\\S]*?)\`;`);
-  const template = pattern.exec(source)?.[1];
+  const template = pattern.exec(readFile(file))?.[1];
   return template ? `${moduleSource}\n${template}` : moduleSource;
 }
 
@@ -1421,12 +1351,9 @@ function checkTooltipVocabularyContract() {
 }
 
 function checkNativeButtonSelectorContract() {
-  const files = libraryProductionTsFiles().map((file) => join(root, file));
-
-  for (const file of files) {
-    const source = readFile(file);
-    const rel = file.slice(root.length + 1);
-    for (const module of decoratedClassModules(source)) {
+  for (const file of libraryProductionTsFiles()) {
+    const rel = relPath(file);
+    for (const module of decoratedClassModulesForFile(file)) {
       if (!/\btype:\s*['"]button['"]/.test(module.moduleSource)) continue;
 
       const selector = /selector:\s*['"]([^'"]+)['"]/.exec(module.moduleSource)?.[1];
@@ -1455,12 +1382,10 @@ function checkInteractiveTriggerSelectorContract() {
     'hellMenuTrigger',
     'hellFlyoutTrigger',
   ]);
-  const files = libraryProductionTsFiles().map((file) => join(root, file));
 
-  for (const file of files) {
-    const source = readFile(file);
-    const rel = file.slice(root.length + 1);
-    for (const module of decoratedClassModules(source)) {
+  for (const file of libraryProductionTsFiles()) {
+    const rel = relPath(file);
+    for (const module of decoratedClassModulesForFile(file)) {
       const selector = /selector:\s*['"]([^'"]+)['"]/.exec(module.moduleSource)?.[1];
       if (!selector) continue;
       const trigger = [...nativeInteractiveTriggers].find((name) => selector.includes(`[${name}]`));
@@ -1484,16 +1409,18 @@ function checkNgpStateWriterContract() {
   const adapterRelPath = 'packages/angular/internal/ng-primitives/ngp-state-adapters.ts';
   const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
-  const ngpPackage = readJsonFile('packages/angular/node_modules/ng-primitives/package.json');
-  const workspaceCatalog = readWorkspaceCatalog();
-  const libraryPackage = readJsonFile('packages/angular/package.json');
+  const ngpPackage = readJsonFile(
+    join(root, 'packages/angular/node_modules/ng-primitives/package.json'),
+  );
+  const catalog = workspaceCatalog();
+  const libraryPackage = readJsonFile(join(root, 'packages/angular/package.json'));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
     failures.push(`ng-primitives state writer version must match installed ${expectedVersion}`);
   }
 
-  if (workspaceCatalog['ng-primitives'] !== ngpPackage.version) {
+  if (catalog['ng-primitives'] !== ngpPackage.version) {
     failures.push(
       `workspace ng-primitives catalog entry must be pinned to ${ngpPackage.version} while the state writer fallback is version-bound`,
     );
@@ -1521,63 +1448,46 @@ function checkNgpStateWriterContract() {
     'writeRadioGroupStateDisabled',
     'writeRovingFocusActiveItem',
   ];
-  const indexedStateWritePatterns = [
-    {
-      token: 'state[\'value\'].set(...) or state["value"].set(...)',
-      pattern: /\bstate\[['"]value['"]\]\.set\(/,
-    },
-    {
-      token: 'state[\'disabled\'].set(...) or state["disabled"].set(...)',
-      pattern: /\bstate\[['"]disabled['"]\]\.set\(/,
-    },
-    {
-      token: 'state[\'activeItem\'].set(...) or state["activeItem"].set(...)',
-      pattern: /\bstate\[['"]activeItem['"]\]\.set\(/,
-    },
-    {
-      token: 'state()[\'value\'].set(...) or state()["value"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]value['"]\]\.set\(/,
-    },
-    {
-      token: 'state()[\'disabled\'].set(...) or state()["disabled"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]disabled['"]\]\.set\(/,
-    },
-    {
-      token: 'state()[\'activeItem\'].set(...) or state()["activeItem"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]activeItem['"]\]\.set\(/,
-    },
-  ];
+  // Both write tables below are the same three State<T> channels crossed with
+  // the receiver shapes a write can take, so they are built from one channel
+  // list and one receiver per shape instead of twelve hand-written literals.
+  //
   // `(?!this\b)` keeps the receiver an actual state holder: a bare
   // `this.value.set(...)` is the component writing its own `value`
   // ModelSignal (the Control Value Authority), not an ng-primitives
   // State<T> channel — the channel container would have to be `this`
   // itself. `this.<holder>.value.set(...)` and `<holder>().value.set(...)`
   // still match.
+  const stateChannels = ['value', 'disabled', 'activeItem'];
+  const stateIdentifierReceiver = '\\bstate';
+  const calledHolderReceiver = '\\b(?:this\\.)?[A-Za-z_$][\\w$]*\\(\\)';
+  const holderReceiver = '\\b(?:this\\.)?[A-Za-z_$][\\w$]*(?:\\(\\))?';
+  const nonThisHolderReceiver = '\\b(?:this\\.)?(?!this\\b)[A-Za-z_$][\\w$]*(?:\\(\\))?';
+  const indexedWrites = (receiver, label) =>
+    stateChannels.map((channel) => ({
+      token: `${label}['${channel}'].set(...) or ${label}["${channel}"].set(...)`,
+      pattern: new RegExp(`${receiver}\\[['"]${channel}['"]\\]\\.set\\(`),
+    }));
+  const dottedWrites = (receiver, label) =>
+    stateChannels.map((channel) => ({
+      token: `${label}.${channel}.set(...)`,
+      pattern: new RegExp(`${receiver}\\.${channel}\\.set\\(`),
+    }));
+
+  // The two tables are not interchangeable even though the direct table's
+  // indexed rows accept everything the indexed table accepts (they differ only
+  // by the optional `(?:\(\))?`): the indexed table runs on every non-spec
+  // source, while the direct table only runs on sources that touch guarded form
+  // state, and each reports its own message. Collapsing them would stop
+  // reporting an `state['value'].set(...)` write in a file that never mentions
+  // the guarded primitives.
+  const indexedStateWritePatterns = [
+    ...indexedWrites(stateIdentifierReceiver, 'state'),
+    ...indexedWrites(calledHolderReceiver, 'state()'),
+  ];
   const directStateChannelWritePatterns = [
-    {
-      token: 'State<T>.value.set(...)',
-      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.value\.set\(/,
-    },
-    {
-      token: 'State<T>.disabled.set(...)',
-      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.disabled\.set\(/,
-    },
-    {
-      token: 'State<T>.activeItem.set(...)',
-      pattern: /\b(?:this\.)?(?!this\b)[A-Za-z_$][\w$]*(?:\(\))?\.activeItem\.set\(/,
-    },
-    {
-      token: 'State<T>[\'value\'].set(...) or State<T>["value"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]value['"]\]\.set\(/,
-    },
-    {
-      token: 'State<T>[\'disabled\'].set(...) or State<T>["disabled"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]disabled['"]\]\.set\(/,
-    },
-    {
-      token: 'State<T>[\'activeItem\'].set(...) or State<T>["activeItem"].set(...)',
-      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]activeItem['"]\]\.set\(/,
-    },
+    ...dottedWrites(nonThisHolderReceiver, 'State<T>'),
+    ...indexedWrites(holderReceiver, 'State<T>'),
   ];
   const directPrimitiveStateAccessPattern = /\b(?:this\.)?[A-Za-z_$][\w$]*\.state\b/;
   const guardedFormStateTokens = [
@@ -1598,7 +1508,7 @@ function checkNgpStateWriterContract() {
 
   for (const file of sourceFiles) {
     const source = readFile(file);
-    const rel = file.slice(root.length + 1);
+    const rel = relPath(file);
     const isSpec = rel.endsWith('.spec.ts');
     const isAdapter = rel === adapterRelPath;
     const usesGuardedFormState = guardedFormStateTokens.some((token) => source.includes(token));
@@ -1652,7 +1562,9 @@ function checkNgpStateWriterContract() {
 function checkDialogScopedModalitySeam() {
   const seamRelPath = 'packages/angular/dialog/dialog-scope.ts';
   const seamSource = readFile(join(root, seamRelPath));
-  const ngpPackage = readJsonFile('packages/angular/node_modules/ng-primitives/package.json');
+  const ngpPackage = readJsonFile(
+    join(root, 'packages/angular/node_modules/ng-primitives/package.json'),
+  );
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!seamSource.includes(`HELL_DIALOG_SCOPED_MODALITY_VERSION = '${expectedVersion}'`)) {
@@ -1680,7 +1592,7 @@ function checkDialogScopedModalitySeam() {
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'),
   );
   for (const path of productionSources) {
-    const rel = relative(root, path);
+    const rel = relPath(path);
     if (rel === seamRelPath || !readFile(path).includes(marker)) continue;
     failures.push(
       `ng-primitives focus-trap escape marker is only owned by ${seamRelPath}; found in ${rel}`,
@@ -1818,7 +1730,7 @@ function checkEntrypointManifestSourceCoverage() {
 
   const packageMetadataPaths = walk(join(root, libraryRoot))
     .filter((path) => basename(path) === 'ng-package.json')
-    .map((path) => `${relative(root, dirname(path))}/${entrypointMetadataFileName}`);
+    .map((path) => `${relPath(dirname(path))}/${entrypointMetadataFileName}`);
   for (const metadataPath of packageMetadataPaths) {
     if (!existsSync(join(root, metadataPath))) {
       failures.push(`Package Entry Point is missing entrypoint metadata ${metadataPath}`);
@@ -1870,18 +1782,59 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Repo read layer.
+//
+// One path spelling: every reader here takes an absolute path, because `walk`
+// produces absolute paths. A repo-relative string is a presentation concern —
+// failure messages and repo-relative pattern tests derive one explicitly with
+// relPath() — so no function body has to track which spelling it holds.
+//
+// Reads are memoized for the life of the process: one directory listing per
+// directory, one read per file, one decorated-class scan per file, one library
+// file list per run. The checks sweep the same trees over and over
+// (packages/angular whole and per entrypoint, apps/docs/src at three depths),
+// and the checker never writes, so a cached read is the same snapshot the check
+// would have taken itself. Parsed JSON is deliberately not cached: handing two
+// checks the same mutable object would let one corrupt the other's view, and the
+// cost this layer exists to remove is the file I/O.
+//
+// Everything cached here is shared with every later caller, so everything cached
+// here is frozen — the class-scan records too, not just the listings holding
+// them, since their fields are all strings.
+const walkedDirectories = new Map();
+const fileContents = new Map();
+const fileClassModules = new Map();
+let workspaceCatalogSnapshot;
+let libraryPackageFileList;
+let libraryProductionTsFileList;
+
 // Plain JSON: package.json, angular.json, and installed package manifests are
 // strict JSON, so nothing may quietly strip content from them.
-function readJsonFile(relativePath) {
-  return JSON.parse(readFile(join(root, relativePath)));
+function readJsonFile(path) {
+  return JSON.parse(readFile(path));
+}
+
+// The pnpm catalog is a YAML parse of a file outside every walked tree, and two
+// checks pin versions against it. It is a flat string map, so freezing it once
+// makes the shared snapshot as immutable as a cached file's contents.
+function workspaceCatalog() {
+  workspaceCatalogSnapshot ??= Object.freeze(readWorkspaceCatalog());
+  return workspaceCatalogSnapshot;
 }
 
 // tsconfig files are the one JSONC surface the checker reads, so the
-// comment-stripping scanner exists for them alone. Comment openers inside
-// string values (`"./features/*/styles.css"`) and escaped quotes
-// (`"\\"`) must survive, which is what the string/escape states below track.
-function readTsconfigFile(relativePath) {
-  const source = readFile(join(root, relativePath));
+// comment-stripping scanner exists for them alone.
+function readTsconfigFile(path) {
+  return parseJsonc(readFile(path));
+}
+
+// JSONC to JSON, character by character. Comment openers inside string values
+// (`"./features/*/styles.css"`) and escaped quotes (`"\\"`) must survive, which
+// is what the string/escape states below track. Taking the source rather than a
+// path keeps the state machine independent of the filesystem; this module still
+// exports nothing and runs main() on load, so a spec cannot reach it yet — the
+// in-flight tools vitest work owns exporting it and pinning these states.
+function parseJsonc(source) {
   let json = '';
   let inString = false;
   let escaped = false;
@@ -1951,7 +1904,12 @@ function readTsconfigFile(relativePath) {
 }
 
 function readFile(path) {
-  return readFileSync(path, 'utf8');
+  let contents = fileContents.get(path);
+  if (contents === undefined) {
+    contents = readFileSync(path, 'utf8');
+    fileContents.set(path, contents);
+  }
+  return contents;
 }
 
 // Repo-source walk with lstat semantics: Dirent classifies a symlink as
@@ -1959,15 +1917,69 @@ function readFile(path) {
 // pnpm's symlink farm (packages/angular/node_modules/*) are never followed.
 // Installed dependencies are not repo sources, and reading them turns any
 // text sweep into a scan of thousands of published .d.ts files.
+//
+// The cache is per directory, so it pays off across nesting too: once one check
+// has walked packages/angular/dialog, the next walk of packages/angular reuses
+// that listing instead of re-reading it. A caller that needs to reorder or
+// extend a listing makes its own array; one that forgets fails loudly on the
+// frozen result.
 function walk(path) {
-  const out = [];
-  for (const dirent of readdirSync(path, { withFileTypes: true })) {
-    if (dirent.name === 'node_modules') continue;
-    const fullPath = join(path, dirent.name);
-    if (dirent.isDirectory()) out.push(...walk(fullPath));
-    else if (dirent.isFile()) out.push(fullPath);
+  let files = walkedDirectories.get(path);
+  if (!files) {
+    const out = [];
+    for (const dirent of readdirSync(path, { withFileTypes: true })) {
+      if (dirent.name === 'node_modules') continue;
+      const fullPath = join(path, dirent.name);
+      if (dirent.isDirectory()) out.push(...walk(fullPath));
+      else if (dirent.isFile()) out.push(fullPath);
+    }
+    files = Object.freeze(out);
+    walkedDirectories.set(path, files);
   }
-  return out;
+  return files;
+}
+
+// Four checks scan the same production sources for decorated classes, so the
+// scan is cached per file alongside the file's contents. decoratedClassModules
+// stays pure over a source string; this is the file-backed reader over it, and
+// it is what stamps each record with the file it came from so a check can
+// resolve a template or name the file without a second path spelling.
+function decoratedClassModulesForFile(file) {
+  let modules = fileClassModules.get(file);
+  if (!modules) {
+    modules = Object.freeze(
+      decoratedClassModules(readFile(file)).map((module) => Object.freeze({ ...module, file })),
+    );
+    fileClassModules.set(file, modules);
+  }
+  return modules;
+}
+
+// The two library file lists the checks share: every shipped package file, and
+// the production TypeScript subset of it.
+function libraryPackageFiles() {
+  libraryPackageFileList ??= collectLibraryPackageFiles();
+  return libraryPackageFileList;
+}
+
+function collectLibraryPackageFiles() {
+  const files = [join(root, 'packages/angular/public-api.ts')];
+  for (const dir of new Set(
+    secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packageDir),
+  )) {
+    const fullDir = join(root, dir);
+    if (existsSync(fullDir)) files.push(...walk(fullDir));
+  }
+  return Object.freeze([...new Set(files)]);
+}
+
+function libraryProductionTsFiles() {
+  libraryProductionTsFileList ??= Object.freeze(
+    libraryPackageFiles().filter(
+      (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+    ),
+  );
+  return libraryProductionTsFileList;
 }
 
 main();

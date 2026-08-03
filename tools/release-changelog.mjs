@@ -218,9 +218,8 @@ function readPackageVersion(root, errors) {
 
 // Copies the committed Changie configuration and records into a fresh
 // isolated workspace, runs the real `changie merge` there, and returns the
-// regenerated aggregate. `mutateWorkspace` lets fixtures edit the copied
-// records before merging; the repository itself is never touched.
-export function regenerateReleaseChangelog({ root, changieBinary, mutateWorkspace }) {
+// regenerated aggregate. The repository itself is never touched.
+export function regenerateReleaseChangelog({ root, changieBinary }) {
   const workspace = mkdtempSync(join(tmpdir(), 'hell-release-changelog-'));
   try {
     copyFileSync(join(root, '.changie.yaml'), join(workspace, '.changie.yaml'));
@@ -230,7 +229,6 @@ export function regenerateReleaseChangelog({ root, changieBinary, mutateWorkspac
     for (const name of listReleasedVersionFiles(join(root, '.changes'))) {
       copyFileSync(join(root, '.changes', name), join(changesDir, name));
     }
-    mutateWorkspace?.(workspace);
 
     const result = spawnSync(changieBinary, ['merge'], {
       cwd: workspace,
