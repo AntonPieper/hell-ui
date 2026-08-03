@@ -29,8 +29,10 @@ import { basename, dirname, extname, join, relative, resolve, sep } from 'node:p
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   auditPackedPackage,
+  formatList,
   peerGroupContracts,
   resolvePackedTarball,
+  uniqueSorted,
 } from './package-pack-audit.mjs';
 import {
   evaluateStyleBundleBudget,
@@ -48,13 +50,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
 const distHell = join(root, 'dist', 'hell');
 
-const { prebuiltTarballSelection, remainingArgs } = extractPrebuiltTarballSelection(
-  process.argv.slice(2),
-);
-const args = remainingArgs;
+const args = process.argv.slice(2);
+const prebuiltTarballSelection = (process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim() || null;
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
-const skipPackageBuild = parseSkipPackageBuild(args);
-const smokeEnabled = process.env.HELL_CONSUMER_FIXTURE_SMOKE === '1' || args.includes('--smoke');
+const skipPackageBuild = args.includes('--skip-build');
+const smokeEnabled = process.env.HELL_CONSUMER_FIXTURE_SMOKE === '1';
 const selectedNames = args.filter((arg) => !arg.startsWith('--'));
 
 const copyExcludedDirectories = new Set(['node_modules', 'dist', '.angular', 'out-tsc']);
@@ -76,40 +76,71 @@ const knownVersions = {
   ...readLockCatalogVersions(),
 };
 
-const fixtures = discoverFixtures();
-const selectedFixtures = selectFixtures(fixtures, selectedNames);
-for (const fixture of selectedFixtures) assertFixturePeerContract(fixture);
+// Set once the packed package is known; every fixture is checked against the
+// one tarball this run produced or was handed.
+let packedTarball;
+let packageName;
+let packageVersion;
 
-const packedPackage = preparePackedTarball();
-const packedTarball = packedPackage.tarball;
-
-let auditedPackedPackage;
-try {
-  auditedPackedPackage = auditPackedPackage({ tarball: packedTarball });
-} catch (error) {
-  fail(error instanceof Error ? error.message : String(error));
-}
-
-const packageName = auditedPackedPackage.packageJson.name;
-const packageVersion = auditedPackedPackage.packageJson.version;
-if (!packageName || !packageVersion) {
-  fail('Packed package.json is missing name or version');
-}
-
-try {
-  for (const fixture of selectedFixtures) {
-    await runFixture(fixture);
+// Every runner failure unwinds as this error rather than exiting in place.
+// process.exit() skipped the finally blocks that discard the temp workspaces,
+// so a red run left its mkdtemp trees — hundreds of megabytes of fixture
+// installs — behind in the temp directory.
+class ConsumerFixtureFailure extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ConsumerFixtureFailure';
   }
-} finally {
-  if (!packedPackage.root) {
-    // The prebuilt tarball belongs to the caller; leave it in place.
-  } else if (keep) console.log(`[consumer-fixtures] kept packed package ${packedPackage.root}`);
-  else rmSync(packedPackage.root, { force: true, recursive: true });
 }
 
-console.log(
-  `[consumer-fixtures] ok: ${selectedFixtures.map((fixture) => fixture.name).join(', ')}`,
-);
+function fail(message) {
+  throw new ConsumerFixtureFailure(message);
+}
+
+try {
+  await main();
+} catch (error) {
+  // Reached only after the unwind ran every cleanup, so exiting here is safe.
+  if (error instanceof ConsumerFixtureFailure) {
+    console.error(`[consumer-fixtures] ${error.message}`);
+  } else {
+    console.error(error);
+  }
+  process.exit(1);
+}
+
+async function main() {
+  const fixtures = discoverFixtures();
+  const selectedFixtures = selectFixtures(fixtures, selectedNames);
+  for (const fixture of selectedFixtures) assertFixturePeerContract(fixture);
+
+  const packedPackage = preparePackedTarball();
+  packedTarball = packedPackage.tarball;
+  try {
+    let auditedPackedPackage;
+    try {
+      auditedPackedPackage = auditPackedPackage({ tarball: packedTarball });
+    } catch (error) {
+      fail(error instanceof Error ? error.message : String(error));
+    }
+
+    packageName = auditedPackedPackage.packageJson.name;
+    packageVersion = auditedPackedPackage.packageJson.version;
+    if (!packageName || !packageVersion) {
+      fail('Packed package.json is missing name or version');
+    }
+
+    for (const fixture of selectedFixtures) {
+      await runFixture(fixture);
+    }
+  } finally {
+    discardPackedPackage(packedPackage);
+  }
+
+  console.log(
+    `[consumer-fixtures] ok: ${selectedFixtures.map((fixture) => fixture.name).join(', ')}`,
+  );
+}
 
 function discoverFixtures() {
   if (!existsSync(fixturesRoot)) fail(`Fixture root missing: ${fixturesRoot}`);
@@ -122,6 +153,13 @@ function discoverFixtures() {
     const manifestPath = join(dir, 'fixture.json');
     if (!existsSync(manifestPath)) {
       fail(`Fixture ${entry.name} is missing its fixture.json manifest: ${manifestPath}`);
+    }
+    // The same rule the sharded CI entry enforces
+    // (tools/run-consumer-fixture-shard.mjs): a fixture whose name cannot label
+    // a GitLab log section must fail here too, so it fails locally on the run
+    // that added it rather than in CI.
+    if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
+      fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
     }
     const packageJsonPath = join(dir, 'package.json');
     if (!existsSync(packageJsonPath)) {
@@ -243,8 +281,16 @@ function resolveDependencyVersion(name) {
   const exact = exactInstalledVersion(name);
   if (exact) return exact;
 
+  if (!(name in knownVersions)) {
+    fail(`Fixture dependency ${name} is not in the workspace catalog or root package.json`);
+  }
   const version = knownVersions[name];
-  if (!version) fail(`Fixture dependency ${name} is not in the workspace catalog or root package.json`);
+  if (typeof version !== 'string' || !version.trim()) {
+    fail(
+      `Fixture dependency ${name} is recorded in the workspace catalog or root package.json with ` +
+        `an empty version (${JSON.stringify(version)}); the runner has no tested version to pin`,
+    );
+  }
   if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(version)) {
     fail(
       `Fixture dependency ${name} resolves to "${version}", which is not an exact version. ` +
@@ -440,8 +486,9 @@ async function runFixtureSmoke(fixture, workspace, label) {
   if (!steps.length) fail(`Fixture ${fixture.name} smoke declares no steps`);
 
   let chromium;
+  let expect;
   try {
-    ({ chromium } = await import('@playwright/test'));
+    ({ chromium, expect } = await import('@playwright/test'));
   } catch (error) {
     fail(
       `Fixture ${fixture.name} smoke requires @playwright/test: ${
@@ -469,24 +516,47 @@ async function runFixtureSmoke(fixture, workspace, label) {
     await page.goto(server.url, { waitUntil: 'networkidle' });
 
     for (const step of steps) {
-      await assertSmokeStep(fixture, page, step);
+      await assertSmokeStep(fixture, page, step, expect);
       console.log(`[${label}] smoke ok: ${describeSmokeStep(step)}`);
     }
   } catch (error) {
-    const evidence = pageEvidence.length
-      ? `\nPage evidence (last ${Math.min(pageEvidence.length, 40)} events):\n  ${pageEvidence
-          .slice(-40)
-          .join('\n  ')}`
-      : '\nPage evidence: no console output, page errors, or failed requests recorded.';
+    // A message this runner composed already names the fixture and the
+    // expectation; only foreign failures (a Playwright timeout, a navigation
+    // error) need the buffered evidence to be readable.
+    if (error instanceof ConsumerFixtureFailure) throw error;
+
     fail(
       `Fixture ${fixture.name} smoke failed: ${
         error instanceof Error ? error.message : String(error)
-      }${evidence}`,
+      }${describeSmokeEvidence(pageEvidence, server.errors)}`,
     );
   } finally {
     if (browser) await browser.close();
     await server.close();
   }
+
+  // Reported after the browser and server are down: an error the static server
+  // raised while serving the app is a packaging failure even when no step
+  // happened to observe it.
+  if (server.errors.length) {
+    fail(
+      `Fixture ${fixture.name} smoke static server failed after start: ${server.errors.join('; ')}`,
+    );
+  }
+}
+
+// Printed only on a red smoke: what the app actually did, plus anything the
+// static server reported while serving it.
+function describeSmokeEvidence(pageEvidence, serverErrors) {
+  const serverBlock = serverErrors.length
+    ? `\nStatic server error(s):\n  ${serverErrors.join('\n  ')}`
+    : '';
+  const pageBlock = pageEvidence.length
+    ? `\nPage evidence (last ${Math.min(pageEvidence.length, 40)} events):\n  ${pageEvidence
+        .slice(-40)
+        .join('\n  ')}`
+    : '\nPage evidence: no console output, page errors, or failed requests recorded.';
+  return `${serverBlock}${pageBlock}`;
 }
 
 // Smoke steps come inline (smoke.steps) or from a shared JSON file
@@ -518,8 +588,8 @@ function resolveSmokeSteps(fixture, smoke) {
 // A smoke step asserts either projected text ({ selector, textIncludes }) or a
 // resolved computed style ({ selector, computedStyle: { property, equals } });
 // the computed form proves semantic token overrides survive the packed build.
-async function assertSmokeStep(fixture, page, step) {
-  if (step.selector && step.textIncludes) return assertSmokeTextStep(fixture, page, step);
+async function assertSmokeStep(fixture, page, step, expect) {
+  if (step.selector && step.textIncludes) return assertSmokeTextStep(fixture, page, step, expect);
   if (step.selector && step.computedStyle?.property && step.computedStyle.equals !== undefined) {
     return assertSmokeComputedStyleStep(fixture, page, step);
   }
@@ -529,21 +599,15 @@ async function assertSmokeStep(fixture, page, step) {
   );
 }
 
-async function assertSmokeTextStep(fixture, page, step) {
-  const locator = page.locator(step.selector);
-  const deadline = Date.now() + 15_000;
-  let lastText = '';
-  for (;;) {
-    lastText = (await locator.textContent()) ?? '';
-    if (lastText.includes(step.textIncludes)) return;
-    if (Date.now() > deadline) break;
-    await new Promise((resolveDelay) => setTimeout(resolveDelay, 200));
-  }
-  fail(
+async function assertSmokeTextStep(fixture, page, step, expect) {
+  // The web-first assertion retries the read for us and reports the text it
+  // last saw; the message keeps the fixture and the expectation in the failure.
+  await expect(
+    page.locator(step.selector),
     `Fixture ${fixture.name} smoke expected ${step.selector} to contain ${JSON.stringify(
       step.textIncludes,
-    )} but found ${JSON.stringify(lastText)}`,
-  );
+    )}`,
+  ).toContainText(step.textIncludes, { timeout: 15_000 });
 }
 
 async function assertSmokeComputedStyleStep(fixture, page, step) {
@@ -603,10 +667,21 @@ function startStaticServer(staticRoot) {
     response.end(readFileSync(filePath));
   });
 
+  // A server 'error' with no listener is an uncaught exception, so the handler
+  // stays attached for the server's whole life: an error raised after listen
+  // fails the fixture through `errors` instead of crashing the run.
+  const errors = [];
   return new Promise((resolveServer, reject) => {
-    server.once('error', reject);
+    let listening = false;
+    server.on('error', (error) => {
+      if (!listening) {
+        reject(error);
+        return;
+      }
+      errors.push(error instanceof Error ? error.message : String(error));
+    });
     server.listen(0, '127.0.0.1', () => {
-      server.off('error', reject);
+      listening = true;
       const address = server.address();
       if (!address || typeof address === 'string') {
         reject(new Error('Static server did not expose a TCP address.'));
@@ -614,6 +689,7 @@ function startStaticServer(staticRoot) {
       }
       resolveServer({
         url: `http://127.0.0.1:${address.port}/`,
+        errors,
         close: () =>
           new Promise((resolveClose) => {
             server.close(() => resolveClose());
@@ -643,45 +719,9 @@ function staticContentType(filePath) {
 function existingFiles(rootPath) {
   if (!existsSync(rootPath)) return [];
 
-  const results = [];
-  for (const entry of readdirSync(rootPath)) {
-    const fullPath = join(rootPath, entry);
-    const stat = statSync(fullPath);
-    if (stat.isDirectory()) results.push(...existingFiles(fullPath));
-    else if (stat.isFile()) results.push(fullPath);
-  }
-  return results;
-}
-
-function parseSkipPackageBuild(rawArgs) {
-  const envMode = process.env.HELL_PACKAGE_CONSUMER_SKIP_BUILD;
-  if (envMode === '1' || envMode === 'true') return true;
-
-  return rawArgs.some((arg) => arg === '--skip-build' || arg === '--prebuilt');
-}
-
-function extractPrebuiltTarballSelection(rawArgs) {
-  const remaining = [];
-  let selection = (process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim() || null;
-
-  for (let i = 0; i < rawArgs.length; i += 1) {
-    const arg = rawArgs[i];
-    if (arg === '--tarball') {
-      const next = rawArgs[i + 1];
-      if (!next || next.startsWith('--')) fail('--tarball requires a tarball or directory path');
-      selection = next;
-      i += 1;
-      continue;
-    }
-    if (arg.startsWith('--tarball=')) {
-      selection = arg.slice('--tarball='.length);
-      if (!selection) fail('--tarball requires a tarball or directory path');
-      continue;
-    }
-    remaining.push(arg);
-  }
-
-  return { prebuiltTarballSelection: selection, remainingArgs: remaining };
+  return readdirSync(rootPath, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name));
 }
 
 function preparePackedTarball() {
@@ -709,10 +749,26 @@ function preparePackedTarball() {
   }
 
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-consumer-fixtures-pack-'));
-  runPnpm(['pack', '--pack-destination', packRoot], distHell, 'pack');
-  const tarballName = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
-  if (!tarballName) fail(`Packed package missing in ${packRoot}`);
-  return { root: packRoot, tarball: join(packRoot, tarballName) };
+  try {
+    runPnpm(['pack', '--pack-destination', packRoot], distHell, 'pack');
+    const tarballName = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
+    if (!tarballName) fail(`Packed package missing in ${packRoot}`);
+    return { root: packRoot, tarball: join(packRoot, tarballName) };
+  } catch (error) {
+    // The caller's finally only covers a packed package it was handed.
+    discardPackedPackage({ root: packRoot });
+    throw error;
+  }
+}
+
+function discardPackedPackage(packedPackage) {
+  // A prebuilt tarball belongs to the caller; leave it in place.
+  if (!packedPackage.root) return;
+  if (keep) {
+    console.log(`[consumer-fixtures] kept packed package ${packedPackage.root}`);
+    return;
+  }
+  rmSync(packedPackage.root, { force: true, recursive: true });
 }
 
 function exactInstalledVersion(name) {
@@ -734,14 +790,6 @@ function assertSameSet(label, expected, actual) {
   }
 
   fail(`${label} expected ${formatList(expectedList)} but found ${formatList(actualList)}`);
-}
-
-function uniqueSorted(values) {
-  return [...new Set(values)].sort();
-}
-
-function formatList(values) {
-  return values.length ? values.join(', ') : '(none)';
 }
 
 function runPnpm(pnpmArgs, cwd, label) {
@@ -785,9 +833,4 @@ function pnpmCommandEnvironment() {
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
-}
-
-function fail(message) {
-  console.error(`[consumer-fixtures] ${message}`);
-  process.exit(1);
 }
