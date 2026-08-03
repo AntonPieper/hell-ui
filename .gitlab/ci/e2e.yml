@@ -1,0 +1,100 @@
+# Browser tests, tiered by risk. playwright.config.ts owns what each tier
+# runs (HELL_E2E_TIER); here a tier is one job, selected by pipeline source:
+# `e2e:pr` gates MRs, `e2e:main` runs on pushes to main, `e2e:full` runs on
+# v* tags and is the default for scheduled and dispatched pipelines
+# ($E2E_TIER picks a different tier there). Exactly one tier job
+# instantiates per test pipeline.
+#
+# The job runs the derived image from the project's container registry
+# (tools/ci/e2e-image): the pinned Playwright browsers plus nginx, so the
+# same container serves the built docs bundle and tests against it — no pull
+# from Docker Hub or mcr.microsoft.com at job time. There is no aggregate
+# gate job: the merge gate is the pipeline itself, and silent-shrink
+# protection is the pipeline-shape contract's job.
+#
+# One job per tier, deliberately unsharded. Every job lands on the same
+# shared 8-core docker host, so N shard jobs buy no compute over one job
+# whose in-process workers already use every core — they only multiply
+# setup (checkout, install, nginx) and multiply the worker count by N,
+# which starves the tests (measured: five full-tier shards at the config's
+# one-worker-per-core default drove the host to a median load of 17.5 per
+# logical core, and frame-driven waits timed out suite-wide). In-process
+# Playwright retries handle test flake; job retry stays infrastructure-only.
+# The slowest tier (full, ~25 minutes solo) sits inside the 45-minute
+# timeout with headroom, well under the runner's 60-minute cap.
+
+.e2e-tier:
+  extends: .node-job
+  stage: test
+  image: $CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG
+  # One browser job at a time, across pipelines: every job shares the same
+  # 8-core host, and two tier jobs running concurrently (an MR's pr run next
+  # to a dispatched full run) double the worker count the single-job design
+  # sized to the machine — measured at 7.5+ load per core, which is where
+  # the pdf-rasterization and measured-layout suites start timing out.
+  resource_group: browser-host
+  timeout: 45 minutes
+  needs:
+    - build
+    # When the derivation changed in this very pipeline, run behind its
+    # rebuild; in every other pipeline the job does not instantiate and the
+    # tag is pulled as-is.
+    - job: e2e-image
+      optional: true
+  cache:
+    - !reference [.caches, pnpm-readonly]
+  variables:
+    # The browsers baked into the image, at the base image's path — never a
+    # per-job download.
+    PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    # External-target mode for the preflight: it identifies the served build
+    # by the stamp the build job baked into the artifact, not by comparing
+    # against this checkout.
+    HELL_E2E_BASE_URL: http://127.0.0.1
+  script:
+    # Serve the exact artifact the build job produced; nothing is rebuilt
+    # here, and a missing bundle must fail as a missing bundle.
+    - test -f dist/hell-docs/browser/index.html
+    - cp -R dist/hell-docs/browser/. /usr/share/nginx/html/
+    # nginx daemonizes by default; wait until it answers before testing.
+    - nginx
+    - timeout 30 sh -c 'until curl --silent --fail --output /dev/null http://127.0.0.1/; do sleep 1; done'
+    - pnpm run ci:test:e2e
+  # Reports and traces exist to diagnose a red shard; a green run's timings
+  # are already in the job log, so uploading its report would only spend
+  # storage on every healthy pipeline. Only the HTML report is uploaded: it
+  # copies every trace and screenshot into its own data/ directory, so also
+  # archiving the raw test-results doubles the payload — a badly red shard
+  # blew past the instance's artifact size cap with a 413 exactly that way.
+  artifacts:
+    when: on_failure
+    paths:
+      - test-results/playwright-html/
+    expire_in: 7 days
+
+e2e:pr:
+  extends: .e2e-tier
+  variables:
+    HELL_E2E_TIER: pr
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "pr"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "pr"
+
+e2e:main:
+  extends: .e2e-tier
+  variables:
+    HELL_E2E_TIER: main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "main"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "main"
+
+e2e:full:
+  extends: .e2e-tier
+  variables:
+    HELL_E2E_TIER: full
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default" && $E2E_TIER == "full"
+    - if: ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api") && $E2E_TIER == "full"
