@@ -344,6 +344,11 @@ describe('HellAppShell secondary panel', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    // `restoreMocks` does not cover the timer clock.
+    vi.useRealTimers();
+  });
+
   it('merges app shell ui classes through local root parts', () => {
     const fixture = TestBed.createComponent(UiShellHost);
     fixture.detectChanges();
@@ -584,6 +589,7 @@ describe('HellAppShell secondary panel', () => {
   });
 
   it('cancels delayed restoration when a sibling action starts new pointer intent', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(FocusShellHost);
     const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-toggle');
@@ -605,12 +611,13 @@ describe('HellAppShell secondary panel', () => {
     outsideAction.addEventListener('pointerdown', (event) => event.stopPropagation());
     pointerDown(outsideAction);
     outsideAction.focus();
-    await delay(200);
+    await advanceShellRetryClock(fixture, 200);
 
     expect(document.activeElement).toBe(outsideAction);
   });
 
   it('dismisses onto a focusable content action even when click propagation stops', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(FocusShellHost);
     const shell = query<HTMLElement>(fixture.nativeElement, '#focus-shell');
@@ -631,7 +638,7 @@ describe('HellAppShell secondary panel', () => {
     contentAction.focus();
     contentAction.click();
     fixture.detectChanges();
-    await delay(200);
+    await advanceShellRetryClock(fixture, 200);
 
     expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
     expect(document.activeElement).toBe(contentAction);
@@ -760,6 +767,7 @@ describe('HellAppShell secondary panel', () => {
   });
 
   it('retains focus ownership and the original opener when a controlled close is rejected', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(ControlledPublicActionShellHost);
     const host = fixture.componentInstance;
@@ -786,7 +794,7 @@ describe('HellAppShell secondary panel', () => {
     rejectedCloseAction.addEventListener('click', () => rejectedCloseAction.focus());
     rejectedCloseAction.click();
     fixture.detectChanges();
-    await delay(20);
+    await advanceShellRetryClock(fixture, 20);
 
     expect(shell.getAttribute('data-mobile-sidenav-open')).toBe('true');
     expect(document.activeElement).toBe(panelItem);
@@ -799,6 +807,7 @@ describe('HellAppShell secondary panel', () => {
   });
 
   it('cancels delayed restoration when click-only intent moves focus', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(FocusShellHost);
     const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-toggle');
@@ -817,12 +826,13 @@ describe('HellAppShell secondary panel', () => {
 
     outsideAction.addEventListener('click', () => outsideAction.focus());
     outsideAction.click();
-    await delay(200);
+    await advanceShellRetryClock(fixture, 200);
 
     expect(document.activeElement).toBe(outsideAction);
   });
 
   it('does not restore focus to a public action that becomes hidden', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(PublicActionShellHost);
     const host = fixture.componentInstance;
@@ -842,12 +852,13 @@ describe('HellAppShell secondary panel', () => {
     fixture.detectChanges();
     keyDownEscape(panelItem);
     fixture.detectChanges();
-    await delay(200);
+    await advanceShellRetryClock(fixture, 200);
 
     expect(document.activeElement).not.toBe(action);
   });
 
   it('expires a rejected controlled action before the same panel opens later', async () => {
+    useShellRetryClock();
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(RejectedControlledActionHost);
     const host = fixture.componentInstance;
@@ -868,7 +879,7 @@ describe('HellAppShell secondary panel', () => {
     rejectedAction.click();
     fixture.detectChanges();
     expect(host.sidenavEvents).toEqual([false]);
-    await delay(10);
+    await advanceShellRetryClock(fixture, 10);
 
     currentAction.focus();
     host.acceptSidenavChanges = true;
@@ -1209,8 +1220,34 @@ function keyDownEscape(element: HTMLElement): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 }
 
-function delay(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+/**
+ * Puts the shell's retry clock under test control.
+ *
+ * `scheduleMobileFocusRestore` and `scheduleMobilePanelTask` re-assert their
+ * target through `window.setTimeout` at 0ms, 50ms and 150ms. Tests that prove
+ * focus survived those retries -- or that a newer interaction cancelled them --
+ * have to let the retries actually run, which is what the real-time sleeps here
+ * used to buy. Sinon only intercepts timers created after it is installed, so
+ * this must be called before the interaction that schedules them.
+ *
+ * Only `setTimeout` is faked. jsdom pumps `requestAnimationFrame` from a
+ * `setInterval` of its own, and Angular's change-detection scheduler races
+ * `setTimeout` against `requestAnimationFrame`; leaving intervals and frames
+ * real therefore keeps change detection and `whenStable()` working while the
+ * retry clock is frozen. The shell also completes document-level actions on a
+ * `queueMicrotask`, which stays real for the same reason.
+ */
+function useShellRetryClock(): void {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+}
+
+/** Runs every shell retry scheduled within `milliseconds`, then flushes rendering. */
+async function advanceShellRetryClock(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  milliseconds: number,
+): Promise<void> {
+  await vi.advanceTimersByTimeAsync(milliseconds);
+  await settle(fixture);
 }
 
 function mockRenderedBox(element: HTMLElement): void {

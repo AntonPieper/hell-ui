@@ -7,6 +7,7 @@ import {
   HELL_FLOATING_SCOPE,
   type HellFloatingScope,
 } from '../internal/core/floating-scope';
+import { stubCountdownInterval } from '../spec-helpers';
 import { HELL_CONFIRM_LABELS, injectHellPrompt } from './confirm';
 
 const ANCHORED_PROMPT_TEST_TIMEOUT_MS = 15_000;
@@ -169,6 +170,7 @@ describe('HellPrompt anchored presentation', () => {
   it(
     'gates a countdown action without auto-confirming',
     async () => {
+      const tickCountdown = stubCountdownInterval();
       const { fixture, host } = setup();
       let resolved = false;
       const promise = host.prompt.confirm('Reset this device?', {
@@ -182,7 +184,7 @@ describe('HellPrompt anchored presentation', () => {
       expect(confirm.disabled).toBe(true);
       expect(confirm.textContent).toContain('(1)');
 
-      await delay(1150);
+      tickCountdown();
       await settle(fixture);
 
       expect(confirm.disabled).toBe(false);
@@ -437,10 +439,6 @@ async function nextFrame(): Promise<void> {
     return;
   }
   await Promise.resolve();
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {

@@ -1,13 +1,11 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-/**
- * Loaded CI runners (webkit especially) can deactivate the page long enough for
- * the default 5s focus expectations to flake: a dropped page activation both
- * freezes CSS animation clocks (the dialog enter animation's computed opacity
- * sticks just below 1) and makes toBeFocused report "inactive". Focus
- * predicates therefore get extra headroom, mirroring the dialog focus contract.
- */
-const FOCUS_SETTLE_TIMEOUT = 10_000;
+import {
+  SETTLE_TIMEOUT,
+  ensurePageIsActive,
+  expectFocused,
+  settleEnterAnimation,
+} from './utils';
 
 test.describe('confirm browser accessibility contract', () => {
   test.beforeEach(async ({ page }) => {
@@ -26,7 +24,7 @@ test.describe('confirm browser accessibility contract', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
     await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
+    await settleEnterAnimation(dialog);
 
     // Named by its title and described by its description.
     await expect(dialog).toHaveAttribute('aria-describedby', /\S/);
@@ -52,7 +50,7 @@ test.describe('confirm browser accessibility contract', () => {
 
     // Escape resolves false and restores focus to the opener.
     await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expectFocused(page, trigger, 'modal dismissal restores focus to its opener');
     await expect(example.getByText('Publishing cancelled.')).toBeVisible();
   });
@@ -67,7 +65,7 @@ test.describe('confirm browser accessibility contract', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Delete this project?' });
     await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
+    await settleEnterAnimation(dialog);
 
     const confirm = dialog.getByRole('button', { name: 'Delete project' });
     const cancel = dialog.getByRole('button', { name: 'Keep project' });
@@ -79,7 +77,7 @@ test.describe('confirm browser accessibility contract', () => {
     await expectFocused(page, cancel, 'a destructive action focuses the cancel button');
 
     await confirm.click();
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Project deleted.')).toBeVisible();
   });
 
@@ -91,19 +89,19 @@ test.describe('confirm browser accessibility contract', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Reset the production database?' });
     await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
+    await settleEnterAnimation(dialog);
 
     const confirm = dialog.getByRole('button', { name: /Reset now/ });
     await expect(confirm).toBeDisabled();
     await expect(confirm).toContainText('(');
 
     // The countdown only enables the button; it does not confirm on its own.
-    await expect(confirm).toBeEnabled({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(confirm).toBeEnabled({ timeout: SETTLE_TIMEOUT });
     await expect(dialog).toBeVisible();
     await expect(example.getByText('Database untouched.')).toBeVisible();
 
     await confirm.click();
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Database reset.')).toBeVisible();
   });
 });
@@ -125,7 +123,7 @@ test.describe('anchored prompt browser accessibility contract', () => {
 
     const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
     await expect(panel).toBeVisible();
-    await settleDialogAnimations(panel);
+    await settleEnterAnimation(panel);
 
     const confirm = panel.getByRole('button', { name: 'Delete', exact: true });
     const cancel = panel.getByRole('button', { name: 'Cancel' });
@@ -137,7 +135,7 @@ test.describe('anchored prompt browser accessibility contract', () => {
     // Escape dismisses through the shared Floating Dismissal rules, resolves
     // the promise false, and restores focus to the anchor.
     await page.keyboard.press('Escape');
-    await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(panel).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expectFocused(page, anchor, 'anchored dismissal restores focus to its anchor');
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
   });
@@ -152,17 +150,17 @@ test.describe('anchored prompt browser accessibility contract', () => {
     const cancelPanel = page.getByRole('dialog', { name: 'Delete staging-us-east?' });
     await expect(cancelPanel).toBeVisible();
     await page.getByRole('heading', { name: 'Confirm', level: 1 }).click();
-    await expect(cancelPanel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(cancelPanel).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
 
     // Confirm resolves true, runs the delete, and removes the row.
     await example.getByRole('button', { name: 'Delete staging-eu-west' }).click();
     const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
     await expect(panel).toBeVisible();
-    await settleDialogAnimations(panel);
+    await settleEnterAnimation(panel);
     await panel.getByRole('button', { name: 'Delete', exact: true }).click();
 
-    await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(panel).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Deleted staging-eu-west.')).toBeVisible();
     await expect(example.getByRole('button', { name: 'Delete staging-eu-west' })).toHaveCount(0);
   });
@@ -181,7 +179,7 @@ test.describe('anchored prompt browser accessibility contract', () => {
 
     // Arming the second anchored prompt closes the first (its promise resolves
     // false) — armed deletes never accumulate.
-    await expect(first).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(first).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(page.getByRole('dialog')).toHaveCount(1);
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
   });
@@ -205,7 +203,7 @@ test.describe('choice browser accessibility contract', () => {
 
     const dialog = page.getByRole('dialog', { name: 'You have unsaved changes' });
     await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
+    await settleEnterAnimation(dialog);
 
     // One button per action, in order, with the composed variants; with a
     // destructive action present, initial focus sits on the safe
@@ -220,7 +218,7 @@ test.describe('choice browser accessibility contract', () => {
 
     // Escape resolves the dismiss-equivalent key ('stay'), not null.
     await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Still editing.')).toBeVisible();
     await expectFocused(page, trigger, 'choice dismissal restores focus to its opener');
 
@@ -228,10 +226,10 @@ test.describe('choice browser accessibility contract', () => {
     // resets, and focus returns to the trigger.
     await trigger.click();
     await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
+    await settleEnterAnimation(dialog);
     await dialog.getByRole('button', { name: 'Discard changes' }).click();
 
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
     await expect(example.getByText('Changes discarded — editor closed.')).toBeVisible();
     await expect(example.getByRole('textbox', { name: 'Release note' })).toHaveValue(
       'Ship dark mode',
@@ -239,75 +237,6 @@ test.describe('choice browser accessibility contract', () => {
     await expectFocused(page, trigger, 'choice activation restores focus to its opener');
   });
 });
-
-/**
- * Headless WebKit on a loaded runner can drop page activation, which both
- * freezes CSS animation clocks and makes toBeFocused report "inactive". Bring
- * the page to the front and wait until it is genuinely visible and focused
- * before asserting any focus contract.
- */
-async function ensurePageIsActive(page: Page): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return page.evaluate(() => {
-          window.focus();
-          return document.visibilityState === 'visible' && document.hasFocus();
-        });
-      },
-      {
-        message: 'page should be visible and focused before asserting the focus contract',
-        timeout: FOCUS_SETTLE_TIMEOUT,
-      },
-    )
-    .toBe(true);
-}
-
-/**
- * Assert that `locator` is the document's active element, re-asserting page
- * activation on every poll so the check reflects the real focus state instead
- * of a deactivated one.
- */
-async function expectFocused(page: Page, locator: Locator, message: string): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return locator.evaluate((element) => {
-          window.focus();
-          const active = document.activeElement;
-          if (element === active) return 'expected';
-          if (!(active instanceof HTMLElement)) return String(active);
-          return `${active.tagName.toLowerCase()}#${active.id || '(no-id)'}`;
-        });
-      },
-      { message, timeout: FOCUS_SETTLE_TIMEOUT },
-    )
-    .toBe('expected');
-}
-
-/**
- * Finish the dialog's enter animation deterministically. A throttled WebKit
- * page can freeze the animation clock just below full opacity, which wedges
- * focus on <body> instead of letting the trap grab the initial control.
- */
-async function settleDialogAnimations(dialog: Locator): Promise<void> {
-  await dialog.evaluate((element) => {
-    for (const animation of element.getAnimations({ subtree: true })) {
-      try {
-        animation.finish();
-      } catch {
-        // Infinite animations cannot finish and do not gate settling.
-      }
-    }
-  });
-  await expect
-    .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity), {
-      timeout: FOCUS_SETTLE_TIMEOUT,
-    })
-    .toBe('1');
-}
 
 function cssId(ids: string): string {
   return ids.trim().split(/\s+/)[0].replace(/([^\w-])/g, '\\$1');
