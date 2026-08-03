@@ -30,10 +30,9 @@ const LIBRARY_BUILD_STAMP_PATH = 'dist/hell.build.json';
 
 /**
  * There is exactly one library package, and both the stamp path above and the
- * output digest below assume it. `finalize-dist-package.mjs` accepts a
- * `<dist-package-root>` argument, which reads as though a second package could
- * be stamped; it cannot, and this rejects that call rather than silently
- * stamping the wrong tree.
+ * output digest below assume it. `finalizeDistPackage` takes a `distRoot`, which
+ * reads as though a second package could be stamped; it cannot, so it calls this
+ * first and refuses any other root before touching that package.
  */
 export function assertIsTheLibraryDistRoot(root, distRoot) {
   const expected = join(root, LIBRARY_DIST_ROOT);
@@ -126,8 +125,7 @@ export function captureLibrarySourceDigest({ root }) {
   return computeDeclarationInputsDigest(root);
 }
 
-export function writeLibraryBuildStamp({ root, configuration, distRoot, sourceDigestBeforeBuild }) {
-  if (distRoot !== undefined) assertIsTheLibraryDistRoot(root, distRoot);
+export function writeLibraryBuildStamp({ root, configuration, sourceDigestBeforeBuild }) {
   if (!LIBRARY_BUILD_CONFIGURATIONS.includes(configuration)) {
     throw new Error(
       `Unknown library build configuration '${configuration}'. Expected one of: ${LIBRARY_BUILD_CONFIGURATIONS.join(', ')}.`,
@@ -171,13 +169,19 @@ function readLibraryBuildStamp(root) {
 /**
  * Reasons the built library cannot stand in for the working tree, phrased so a
  * reader fixes the build instead of chasing a phantom API change. An empty
- * array means `dist/hell` was produced by the requested configuration from
- * exactly these sources.
+ * array means `dist/hell` was produced by the production build from exactly
+ * these sources.
+ *
+ * Only the production build is described. `packages/angular`'s
+ * `build:development` script stamps a development `dist/hell`, and the gates
+ * that read the prepared declarations measure the published configuration — so
+ * a development build is reported as the configuration mismatch it is, not
+ * accepted by asking for it.
  */
-export function describeStaleLibraryBuild({ root, expectedConfiguration = 'production' }) {
+export function describeStaleLibraryBuild({ root }) {
   return classifyLibraryBuildStamp({
     stamp: readLibraryBuildStamp(root),
-    expectedConfiguration,
+    expectedConfiguration: 'production',
     currentDigest: computeDeclarationInputsDigest(root),
     currentOutputDigest: computeOutputDigest(root),
   });
@@ -189,10 +193,7 @@ function classifyLibraryBuildStamp({
   currentDigest,
   currentOutputDigest,
 }) {
-  const rebuild =
-    expectedConfiguration === 'production'
-      ? 'Run `pnpm run build:lib`.'
-      : `Run \`pnpm --filter hell-ui run build:${expectedConfiguration}\`.`;
+  const rebuild = 'Run `pnpm run build:lib`.';
 
   if (!stamp) {
     return [

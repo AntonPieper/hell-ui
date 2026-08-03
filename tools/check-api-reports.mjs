@@ -96,7 +96,7 @@ if (missingInputs.length) {
 // A report generated from a `dist` that does not match the working tree is not
 // a weaker signal, it is a wrong one: it names API changes nobody made. Refuse
 // the run instead of describing the wrong artifact.
-const staleBuildReasons = describeStaleLibraryBuild({ root, expectedConfiguration: 'production' });
+const staleBuildReasons = describeStaleLibraryBuild({ root });
 if (staleBuildReasons.length) {
   console.error('API report check requires the current production build of the library.');
   for (const reason of staleBuildReasons) console.error(`- ${reason}`);
