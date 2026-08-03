@@ -1,6 +1,6 @@
-import { Component, signal, viewChild } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FormField, disabled as disabledSchema, form } from '@angular/forms/signals';
 
 import { HellNativeSwitch, HellSwitch, type HellSwitchUi } from './switch';
@@ -8,6 +8,8 @@ import { expectUiRouting, sortClasses } from '../spec-helpers';
 
 /**
  * Switch specs assert behavior, forms integration, and state attributes.
+ * The shared forms-integration Value Authority contract is owned centrally by
+ * `internal/core/forms-integration-conformance.spec.ts`.
  * Part-Class Pipeline merge semantics are owned centrally by
  * `internal/core/part-class-pipeline.spec.ts`; ui routing asserts that consumer
  * classes reach each part and that nothing outside the default render and the
@@ -74,29 +76,6 @@ class LabelledSwitchHost {
   onSpaceKeydown(): void {
     this.spaceKeydowns++;
   }
-}
-
-@Component({
-  imports: [ReactiveFormsModule, HellSwitch],
-  template: `
-    <button hellSwitch [formControl]="control" (checkedChange)="checkedEvents.push($event)"></button>
-  `,
-})
-class SwitchFormHost {
-  readonly control = new FormControl(false, { nonNullable: true });
-  readonly checkedEvents: boolean[] = [];
-}
-
-@Component({
-  imports: [FormsModule, HellSwitch],
-  template: `
-    <button hellSwitch [(ngModel)]="checked" (checkedChange)="checkedEvents.push($event)"></button>
-  `,
-})
-class SwitchNgModelHost {
-  readonly checked = signal(false);
-  readonly model = viewChild.required(NgModel);
-  readonly checkedEvents: boolean[] = [];
 }
 
 @Component({
@@ -180,8 +159,6 @@ describe('HellSwitch', () => {
         SwitchHost,
         SwitchTwoWayHost,
         LabelledSwitchHost,
-        SwitchFormHost,
-        SwitchNgModelHost,
         SwitchSignalFormsHost,
         NativeSwitchFormHost,
         SwitchPartStyleHost,
@@ -269,67 +246,6 @@ describe('HellSwitch', () => {
     expect(host.checked()).toBe(false);
     expect(host.checkedEvents).toEqual([false]);
     expect(sw.getAttribute('aria-checked')).toBe('false');
-  });
-
-  it('integrates with reactive forms without echoing programmatic writes', async () => {
-    const fixture = TestBed.createComponent(SwitchFormHost);
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
-
-    host.control.setValue(true);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(sw.getAttribute('aria-checked')).toBe('true');
-    expect(host.checkedEvents).toEqual([]);
-
-    sw.click();
-    sw.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(host.control.value).toBe(false);
-    expect(host.control.touched).toBe(true);
-    expect(host.checkedEvents).toEqual([false]);
-
-    host.control.disable();
-    fixture.detectChanges();
-
-    expect(sw.disabled).toBe(true);
-  });
-
-  it('integrates with template-driven forms through ngModel', async () => {
-    const fixture = TestBed.createComponent(SwitchNgModelHost);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const host = fixture.componentInstance;
-    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
-
-    expect(sw.getAttribute('aria-checked')).toBe('false');
-    expect(host.checkedEvents).toEqual([]);
-
-    sw.click();
-    fixture.detectChanges();
-
-    expect(host.checked()).toBe(true);
-    expect(host.checkedEvents).toEqual([true]);
-    expect(host.model().touched).toBe(false);
-
-    sw.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(host.model().touched).toBe(true);
-
-    host.checked.set(false);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(sw.getAttribute('aria-checked')).toBe('false');
-    expect(host.checkedEvents).toEqual([true]);
   });
 
   it('participates in Signal Forms as a FormCheckboxControl through formField', () => {
