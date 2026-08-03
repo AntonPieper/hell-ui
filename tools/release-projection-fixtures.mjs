@@ -6,13 +6,14 @@
 // Nothing here talks to GitHub or publishes anything; the release workflow's
 // thin jobs consume exactly these functions at publish time.
 //
-// The post-publication half is proven the same way: drift fixtures feed
-// captured live releases back through the same projection the draft is built
-// from — so the metadata comparisons are the ones the draft fixtures already
-// cover, and the drift fixtures assert what only a live release can carry:
-// exact releases stay clean while body drift, a retargeted release, missing
-// tagged notes, and repair-shaped options fail with visible evidence, and the
-// immutability policy gate refuses anything but affirmative evidence.
+// The post-publication half reuses that policy rather than restating it:
+// verifyReleaseDrift re-runs the published-phase verification, so its metadata
+// comparisons are the ones the draft fixtures already cover. The drift
+// fixtures drive what the drift seam itself decides — an exact release stays
+// clean, while body drift against the tagged notes, a release retargeted away
+// from the tagged commit, a missing or unprojectable tagged record, and any
+// repair-shaped option fail with visible evidence — and the immutability
+// policy gate refuses anything but affirmative evidence.
 
 import {
   chooseProjectionAction,
@@ -37,7 +38,7 @@ const fixtures = [
   { name: 'prerelease classification follows the release-stage policy', run: fixturePrereleaseClassification },
   { name: 'successful required registries open the barrier', run: fixtureBarrierOpensOnSuccess },
   {
-    name: 'a skipped, cancelled, or failed required registry blocks, whichever destination it names',
+    name: 'a required registry blocks on anything but success, whichever destination it names',
     run: fixtureBarrierBlocksOnRequiredOutcomes,
   },
   { name: 'a disabled optional registry never blocks', run: fixtureBarrierIgnoresDisabledRegistries },
@@ -159,24 +160,27 @@ function fixtureBarrierOpensOnSuccess(context) {
 
 // Every Required Registry runs through the same `result !== 'success'`
 // comparison, whichever destination it names: GitHub Packages, an enabled
-// npmjs, or a future private registry listed as required.
+// npmjs, or a future private registry listed as required. A `success` row
+// opens the barrier; every other result blocks it.
 function fixtureBarrierBlocksOnRequiredOutcomes(context) {
   const withPrivate = (result) =>
     registries({ extra: [{ name: 'corp-internal', required: true, result }] });
-  const blocked = [
-    ['GitHub Packages', 'skipped', registries({ githubPackages: 'skipped' })],
-    ['npmjs', 'cancelled', registries({ npmjs: 'cancelled' })],
-    ['corp-internal', 'failure', withPrivate('failure')],
+  const rows = [
+    { name: 'GitHub Packages', result: 'skipped', results: registries({ githubPackages: 'skipped' }) },
+    { name: 'npmjs', result: 'cancelled', results: registries({ npmjs: 'cancelled' }) },
+    { name: 'npmjs', result: 'success', results: registries({ npmjs: 'success' }) },
+    { name: 'corp-internal', result: 'failure', results: withPrivate('failure') },
+    { name: 'corp-internal', result: 'success', results: withPrivate('success') },
   ];
-  for (const [name, result, registryResults] of blocked) {
-    expectFailure(
-      context,
-      evaluateRegistryBarrier(registryResults),
-      `Required Registry ${name} was ${result}`,
-      `${name} ${result}`,
-    );
+  for (const row of rows) {
+    const verdict = evaluateRegistryBarrier(row.results);
+    const label = `required ${row.name} ${row.result}`;
+    if (row.result === 'success') {
+      expectPass(context, verdict, label);
+    } else {
+      expectFailure(context, verdict, `Required Registry ${row.name} was ${row.result}`, label);
+    }
   }
-  expectPass(context, evaluateRegistryBarrier(withPrivate('success')), 'a required private registry success');
 }
 
 function fixtureBarrierIgnoresDisabledRegistries(context) {
@@ -339,12 +343,11 @@ function fixtureRejectsMetadataMismatches(context) {
     'must be a stable release',
     'a promoted release published as a prerelease',
   );
-  expectFailure(
-    context,
-    verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) }),
-    'no custom assets',
-    'an unexpected custom asset',
-  );
+  // The failure has to name the asset it found, so a maintainer can see what
+  // was attached without opening the release.
+  const withAsset = verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) });
+  expectFailure(context, withAsset, 'no custom assets', 'an unexpected custom asset');
+  expectFailure(context, withAsset, 'hell-ui-0.3.0.tgz', 'an unexpected custom asset');
 }
 
 function fixtureRequiresImmutabilityPolicy(context) {
@@ -507,8 +510,10 @@ function fixtureTargetDrift(context) {
     'Release target drifted',
     'a release retargeted at another commit in upper case',
   );
-  // One value per tolerated shape: a branch-name target, and no target at all.
-  for (const tolerated of ['main', null]) {
+  // One value per tolerated shape, plus the named accepted risk: the branch
+  // name a hand-made release carries, a branch name written to land in the
+  // tolerated case on purpose, and no target at all.
+  for (const tolerated of ['main', 'attacker-branch', null]) {
     expectPass(
       context,
       drift(publishedRelease('0.3.0', { target_commitish: tolerated })),

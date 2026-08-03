@@ -378,6 +378,7 @@ function fixtureAutomaticSelectionNeverPromotes(context) {
     },
   });
   expectFailure(context, prerelease.prepare(), 'pass an explicit version', 'automatic selection on a prerelease');
+  expectUntouchedBaseline(context, prerelease, 'refused automatic selection on a prerelease');
 }
 
 function fixtureExplicitPrereleaseCandidate(context) {

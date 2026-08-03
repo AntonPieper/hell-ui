@@ -51,6 +51,14 @@ export const prStatePolicyFixtures = [
     expect: { state: 'consumer-change' },
   },
   {
+    // Only an addition claims the Consumer Change state; editing a fragment
+    // already under review declares nothing on its own.
+    name: 'a modified pending fragment alone declares no state',
+    labels: [],
+    files: [file('.changes/unreleased/Fixed-20260701-090000.yaml', 'modified')],
+    expect: { state: null, errors: ['Declares no state'] },
+  },
+  {
     name: 'the no-consumer-change label alone is valid',
     labels: [noConsumerChangeLabel, 'documentation'],
     files: [file('docs/release/change-fragments.md', 'modified'), file('e2e/menu.spec.ts', 'added')],

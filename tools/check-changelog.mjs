@@ -2,12 +2,13 @@
 // Repository release-note contract (ADR 0003).
 //
 // The Release Changelog is generated: CHANGELOG.md must reproduce the
-// committed Released Version Notes byte-for-byte, the 0.2.0 internal-beta
-// baseline and a record for the current package version must exist, the
-// committed pending Change Fragments must satisfy the objective validator,
-// `pnpm change` and `pnpm release:prepare` must remain the only public
-// Changie-backed commands, and the real Changie configuration, validator,
-// merge behavior, and Release Preparation transaction are proven in isolated
+// committed Released Version Notes byte-for-byte — regenerated here with the
+// real Changie binary, which is where merge behavior is proven — the 0.2.0
+// internal-beta baseline and a record for the current package version must
+// exist, the committed pending Change Fragments must satisfy the objective
+// validator, `pnpm change` and `pnpm release:prepare` must remain the only
+// public Changie-backed commands, and the real Changie configuration,
+// validator, and Release Preparation transaction are proven in isolated
 // repository fixtures. Release Projection publication is proven the same
 // way: fixture-driven policy decisions plus a static release-workflow
 // contract, with no live publication.

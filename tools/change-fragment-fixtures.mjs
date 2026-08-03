@@ -4,12 +4,13 @@
 // Every fixture copies the repository's real .changie.yaml and .changes
 // records into a fresh temporary Git repository and drives the real Changie
 // binary. Authoring fixtures run `changie new` exactly as `pnpm change` would
-// and assert the objective validator's verdict. Byte-for-byte regeneration of
-// CHANGELOG.md from the committed records is proven against this repository
-// itself by the changelog contract in the same command
-// (tools/release-changelog.mjs), so it is not replayed here. Nothing here
-// batches a version, commits, tags, pushes, or publishes, and the repository
-// itself is never touched.
+// and assert the objective validator's verdict — including that the
+// configuration's kinds and the validator's allowed kinds cannot drift apart.
+// Byte-for-byte regeneration of CHANGELOG.md from the committed records is
+// proven against this repository itself by the changelog contract in the same
+// command (tools/release-changelog.mjs), so it is not replayed here. Nothing
+// here batches a version, commits, tags, pushes, or publishes, and the
+// repository itself is never touched.
 
 import { spawnSync } from 'node:child_process';
 import {
@@ -38,6 +39,7 @@ const fixtures = [
   { name: 'authoring writes one pending fragment', run: fixtureAuthorsOnePendingFragment },
   { name: 'breaking prompts for migration', run: fixtureBreakingPromptsForMigration },
   { name: 'several fragments in one change', run: fixtureSeveralFragmentsInOneChange },
+  { name: 'changie rejects unknown kinds', run: fixtureChangieRejectsUnknownKinds },
   { name: 'validator rejects malformed fragments', run: fixtureValidatorRejectsMalformedFragments },
   { name: 'validator accepts multiline prose', run: fixtureValidatorAcceptsMultilineProse },
 ];
@@ -237,6 +239,30 @@ function fixtureSeveralFragmentsInOneChange(context) {
     }
   }
   expectNoValidatorErrors(context, 'several valid fragments');
+}
+
+// The one proof that .changie.yaml's kinds and the validator's changeKinds
+// (tools/change-fragments.mjs) agree: a kind the validator would reject must
+// be unauthorable, or authoring could write fragments the gate then refuses.
+function fixtureChangieRejectsUnknownKinds(context) {
+  for (const kind of ['Removed', 'Deprecated']) {
+    const result = context.changie(['new', '-k', kind, '-b', 'Not an allowed kind.']);
+    if (result.signal) {
+      context.fail(`changie new -k ${kind} was killed by ${result.signal} instead of failing fast.`);
+      continue;
+    }
+    if (result.status === 0) {
+      context.fail(`changie new -k ${kind} must be rejected; the schema has exactly five kinds.`);
+    }
+    if (!`${result.stderr}${result.stdout}`.includes('invalid kind')) {
+      context.fail(`changie new -k ${kind} should report an invalid kind; got: ${result.stderr}`);
+    }
+  }
+
+  const fragments = context.pendingFragments();
+  if (fragments.length !== 0) {
+    context.fail(`rejected kinds must not write fragments; found ${fragments.join(', ')}`);
+  }
 }
 
 function fixtureValidatorRejectsMalformedFragments(context) {

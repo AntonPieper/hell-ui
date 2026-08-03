@@ -325,9 +325,9 @@ const verifyFixtures = [
     live: live(),
     expect: { failures: [] },
   },
-  // Every recorded project setting is compared by value and restored by the
-  // same PUT, and the file is the record rather than a floor — so one
-  // string-valued and one boolean-valued setting stand in for the whole list.
+  // Every recorded project setting runs through the same value comparison and
+  // the same PUT restore, whichever setting it is, so these two stand in for
+  // the recorded list.
   {
     name: 'a relaxed merge method is drift, and restoration writes it back',
     live: withProject({ merge_method: 'merge' }),
