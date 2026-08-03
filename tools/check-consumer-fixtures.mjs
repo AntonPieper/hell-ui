@@ -452,10 +452,20 @@ async function runFixtureSmoke(fixture, workspace, label) {
 
   const browserRoot = fixtureBrowserBuildRoot(fixture, workspace);
   const server = await startStaticServer(browserRoot);
+  // Buffered, not streamed: a green smoke stays quiet, and a red one says
+  // what the app actually did instead of only "expected text, found ''".
+  const pageEvidence = [];
   let browser;
   try {
     browser = await chromium.launch();
     const page = await browser.newPage();
+    page.on('console', (message) =>
+      pageEvidence.push(`console.${message.type()}: ${message.text()}`),
+    );
+    page.on('pageerror', (error) => pageEvidence.push(`pageerror: ${error.message}`));
+    page.on('requestfailed', (request) =>
+      pageEvidence.push(`requestfailed: ${request.url()} (${request.failure()?.errorText})`),
+    );
     await page.goto(server.url, { waitUntil: 'networkidle' });
 
     for (const step of steps) {
@@ -463,8 +473,15 @@ async function runFixtureSmoke(fixture, workspace, label) {
       console.log(`[${label}] smoke ok: ${describeSmokeStep(step)}`);
     }
   } catch (error) {
+    const evidence = pageEvidence.length
+      ? `\nPage evidence (last ${Math.min(pageEvidence.length, 40)} events):\n  ${pageEvidence
+          .slice(-40)
+          .join('\n  ')}`
+      : '\nPage evidence: no console output, page errors, or failed requests recorded.';
     fail(
-      `Fixture ${fixture.name} smoke failed: ${error instanceof Error ? error.message : String(error)}`,
+      `Fixture ${fixture.name} smoke failed: ${
+        error instanceof Error ? error.message : String(error)
+      }${evidence}`,
     );
   } finally {
     if (browser) await browser.close();
@@ -567,11 +584,21 @@ function startStaticServer(staticRoot) {
       requestedPath === '/'
         ? join(absoluteRoot, 'index.html')
         : resolve(absoluteRoot, `.${requestedPath}`);
-    const filePath =
-      target.startsWith(absoluteRoot) && existsSync(target) && statSync(target).isFile()
-        ? target
-        : join(absoluteRoot, 'index.html');
+    const targetIsFile =
+      target.startsWith(absoluteRoot) && existsSync(target) && statSync(target).isFile();
 
+    // Only extensionless paths get the SPA fallback. A missing asset must
+    // fail as a missing asset: falling back would serve index.html labeled
+    // with the asset's content type and turn a packaging hole into an opaque
+    // parse error inside the smoke.
+    if (!targetIsFile && extname(requestedPath) !== '') {
+      console.error(`[consumer-fixtures] static server 404: ${requestedPath}`);
+      response.writeHead(404, { 'content-type': 'text/plain' });
+      response.end('not found');
+      return;
+    }
+
+    const filePath = targetIsFile ? target : join(absoluteRoot, 'index.html');
     response.writeHead(200, { 'content-type': staticContentType(filePath) });
     response.end(readFileSync(filePath));
   });
@@ -743,6 +770,14 @@ function pnpmCommandEnvironment() {
   for (const key of Object.keys(env)) {
     const normalized = key.toLowerCase();
     if (normalized.startsWith('npm_') || deniedPnpmKeys.has(normalized)) delete env[key];
+  }
+
+  // The scrub keeps the parent `pnpm run` context out of fixture installs,
+  // but the store location is infrastructure, not context: without it CI's
+  // cached store goes unused and every shard re-downloads the dependency
+  // tree from the registry.
+  if (process.env.npm_config_store_dir) {
+    env.npm_config_store_dir = process.env.npm_config_store_dir;
   }
 
   return env;
