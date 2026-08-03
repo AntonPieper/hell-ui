@@ -14,9 +14,9 @@ const sourcePackageCondition = '@heinrich/source';
  * compiler ran, and only the process that ordered the build has one.
  */
 export function finalizeDistPackage({ root, distRoot, configuration, sourceDigestBeforeBuild }) {
-  // Checked before anything is written. This used to be left to the stamp
-  // writer, which ran after the manifest had already been rewritten — so
-  // passing the wrong root mutated that package and only then threw.
+  // Checked before anything is written: this function rewrites the manifest in
+  // place, so a root it cannot stamp has to be refused while that package is
+  // still untouched.
   assertIsTheLibraryDistRoot(root, distRoot);
 
   const packageJsonPath = join(distRoot, 'package.json');

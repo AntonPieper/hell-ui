@@ -32,25 +32,36 @@ export const entrypointCategories = {
 
 // Manifest ordering, kept separate from the declaration above so regrouping
 // those constants for readability cannot silently reorder every generated
-// manifest. Two lists only stay in step if something says so, and an
-// unranked category would otherwise sort by an invented rank: refuse to load
-// instead, at the moment the category is added rather than whenever the first
-// entrypoint claims it.
-const categorySort = new Map(
-  [
-    entrypointCategories.ROOT,
-    entrypointCategories.CORE,
-    entrypointCategories.INTERNAL,
-    entrypointCategories.TESTING,
-    entrypointCategories.TABLE_PRIMITIVES,
-    entrypointCategories.TANSTACK_TABLE_SHELL,
-    entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
-    entrypointCategories.STYLED_PRIMITIVE,
-    entrypointCategories.MIXED_ENTRYPOINT,
-    entrypointCategories.COMPOSITE,
-    entrypointCategories.FEATURE,
-  ].map((category, index) => [category, index]),
+// manifest. Two lists only stay in step if something says so, so the checks
+// below refuse to load on either way of drifting: a category declared above and
+// missing here would sort by an invented rank, and one listed twice here would
+// shift every rank after it. Both fail at the moment the list is edited rather
+// than whenever the first entrypoint claims the category.
+const categoryRanking = [
+  entrypointCategories.ROOT,
+  entrypointCategories.CORE,
+  entrypointCategories.INTERNAL,
+  entrypointCategories.TESTING,
+  entrypointCategories.TABLE_PRIMITIVES,
+  entrypointCategories.TANSTACK_TABLE_SHELL,
+  entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+  entrypointCategories.STYLED_PRIMITIVE,
+  entrypointCategories.MIXED_ENTRYPOINT,
+  entrypointCategories.COMPOSITE,
+  entrypointCategories.FEATURE,
+];
+
+const categorySort = new Map(categoryRanking.map((category, index) => [category, index]));
+
+const duplicateRankings = categoryRanking.filter(
+  (category, index) => categoryRanking.indexOf(category) !== index,
 );
+if (duplicateRankings.length) {
+  throw new Error(
+    `Entrypoint categories ranked more than once: ${[...new Set(duplicateRankings)].join(', ')}. ` +
+      'Each category takes exactly one manifest sort rank.',
+  );
+}
 
 const unrankedCategories = Object.values(entrypointCategories).filter(
   (category) => !categorySort.has(category),
@@ -58,7 +69,7 @@ const unrankedCategories = Object.values(entrypointCategories).filter(
 if (unrankedCategories.length) {
   throw new Error(
     `Entrypoint categories without a manifest sort rank: ${unrankedCategories.join(', ')}. ` +
-      'Add them to categorySort in tools/entrypoint-manifest.mjs.',
+      'Add them to categoryRanking in tools/entrypoint-manifest.mjs.',
   );
 }
 

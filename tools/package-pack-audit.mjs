@@ -513,6 +513,10 @@ function checkCodeExport(key, exportValue, fileSet, tarball, failures) {
   }
 }
 
+// ng-packagr flattens every entry point into one file stem: the package name
+// followed by the subpath, slashes turned to dashes. hell-ui carries no scope,
+// so the package name doubles as the unscoped stem; a scoped rename would have
+// to strip the scope back off.
 function expectedCodeExportTargets(key) {
   const exportSlug =
     key === '.' ? angularPackageName : `${angularPackageName}-${key.slice(2).replace(/\//g, '-')}`;
@@ -699,7 +703,7 @@ function checkInternalEntrypointPrivacy(packageJson, failures) {
   const internalExportKeys = new Set(
     entrypointPublicApiFiles()
       .filter((entrypoint) => entrypoint.category === entrypointCategories.INTERNAL)
-      .map((entrypoint) => `.${entrypoint.specifier.slice(angularPackageName.length)}`),
+      .map((entrypoint) => packageExportPath(entrypoint.specifier)),
   );
 
   for (const key of internalExportKeys) {

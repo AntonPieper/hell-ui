@@ -31,8 +31,8 @@ const LIBRARY_BUILD_STAMP_PATH = 'dist/hell.build.json';
 /**
  * There is exactly one library package, and both the stamp path above and the
  * output digest below assume it. `finalizeDistPackage` takes a `distRoot`, which
- * reads as though a second package could be stamped; it cannot, and this rejects
- * that call rather than silently stamping the wrong tree.
+ * reads as though a second package could be stamped; it cannot, so it calls this
+ * first and refuses any other root before touching that package.
  */
 export function assertIsTheLibraryDistRoot(root, distRoot) {
   const expected = join(root, LIBRARY_DIST_ROOT);
