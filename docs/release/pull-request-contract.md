@@ -16,7 +16,7 @@ up-to-date-branch policy:
 
 | Check context | Proves |
 | --- | --- |
-| `Static contracts` | Lint, dead-code, architecture, PR-state policy, and protected-`main` policy document contracts ([`protected-main-policy.md`](./protected-main-policy.md)) |
+| `Static contracts` | Lint, dead-code, architecture, PR-state policy, CI pipeline-shape, and protected-`main` policy document contracts ([`protected-main-policy.md`](./protected-main-policy.md)) |
 | `Unit tests` | Unit test suite with coverage |
 | `Build and API` | Library/docs build, API report, package audit |
 | `E2E` | Every planned Playwright shard succeeded |

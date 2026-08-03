@@ -1,5 +1,9 @@
 # Lint and the repository's static contracts (dead code, architecture, PR
-# state policy, main-policy document).
+# state policy, main-policy document, pipeline shape). The pipeline-shape
+# contract proves this very pipeline's job roster, tags, topology, and tier
+# selection from the checked-in CI files — this pipeline has no aggregate
+# gate job, so the contract carries the silent-shrink protection GitHub's
+# e2e-gate provides over there.
 
 static:
   extends: .node-job
