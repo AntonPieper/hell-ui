@@ -10,7 +10,8 @@
 // summary at the end names every failure.
 //
 // Outside CI both shard variables are unset and the single implicit shard
-// runs everything; --plan prints the shard assignment without running.
+// runs everything. Every run prints the full shard assignment first, so a log
+// shows what this shard owns and where the other fixtures went.
 
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
@@ -21,7 +22,6 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
 const runnerPath = join(root, 'tools', 'check-consumer-fixtures.mjs');
 
-const planOnly = process.argv.slice(2).includes('--plan');
 const emitSectionMarkers = process.env.GITLAB_CI === 'true';
 
 const shard = readShard();
@@ -38,8 +38,6 @@ for (let index = 1; index <= shard.total; index += 1) {
     `[consumer-shard]   shard ${index}/${shard.total}: ${names.join(', ') || '(none)'}${marker}`,
   );
 }
-
-if (planOnly) process.exit(0);
 
 // Without a prebuilt tarball every per-fixture runner invocation would
 // rebuild and repack the library; in CI the build job's audited artifact is
@@ -112,7 +110,9 @@ function discoverFixtureNames() {
       fail(`Fixture ${entry.name} is missing its fixture.json manifest`);
     }
     // Section names allow [A-Za-z0-9_.-]; a fixture the shard cannot label
-    // must fail here, not silently corrupt the job log.
+    // must fail here, not silently corrupt the job log. Kept in step by hand
+    // with discoverFixtures in tools/check-consumer-fixtures.mjs until the
+    // shard collapse merges the two discovery paths.
     if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
       fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
     }

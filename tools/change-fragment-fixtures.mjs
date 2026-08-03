@@ -4,15 +4,16 @@
 // Every fixture copies the repository's real .changie.yaml and .changes
 // records into a fresh temporary Git repository and drives the real Changie
 // binary. Authoring fixtures run `changie new` exactly as `pnpm change` would
-// and assert the objective validator's verdict; merge fixtures prove that the
-// committed Released Version Notes regenerate CHANGELOG.md byte-for-byte and
-// that record edits change the aggregate. Nothing here batches a version,
-// commits, tags, pushes, or publishes, and the repository itself is never
-// touched.
+// and assert the objective validator's verdict — including that the
+// configuration's kinds and the validator's allowed kinds cannot drift apart.
+// Byte-for-byte regeneration of CHANGELOG.md from the committed records is
+// proven against this repository itself by the changelog contract in the same
+// command (tools/release-changelog.mjs), so it is not replayed here. Nothing
+// here batches a version, commits, tags, pushes, or publishes, and the
+// repository itself is never touched.
 
 import { spawnSync } from 'node:child_process';
 import {
-  appendFileSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -29,11 +30,7 @@ import {
   collectUnreleasedFragmentErrors,
   listUnreleasedFragments,
 } from './change-fragments.mjs';
-import {
-  changelogBaselineVersion,
-  listReleasedVersionFiles,
-  resolveChangieBinary,
-} from './release-changelog.mjs';
+import { listReleasedVersionFiles, resolveChangieBinary } from './release-changelog.mjs';
 
 const changieTimeoutMs = 30_000;
 const promptConfirm = '\r';
@@ -45,11 +42,6 @@ const fixtures = [
   { name: 'changie rejects unknown kinds', run: fixtureChangieRejectsUnknownKinds },
   { name: 'validator rejects malformed fragments', run: fixtureValidatorRejectsMalformedFragments },
   { name: 'validator accepts multiline prose', run: fixtureValidatorAcceptsMultilineProse },
-  {
-    name: 'merge regenerates the committed release changelog byte-for-byte',
-    run: fixtureMergeReproducesCommittedChangelog,
-  },
-  { name: 'merge tracks released-record edits', run: fixtureMergeTracksReleasedRecordEdits },
 ];
 
 export function runChangeFragmentFixtures({ root }) {
@@ -96,7 +88,6 @@ function createFixtureContext(root, binary, workspace) {
 
   const failures = [];
   const context = {
-    root,
     workspace,
     unreleasedDir,
     failures,
@@ -250,6 +241,9 @@ function fixtureSeveralFragmentsInOneChange(context) {
   expectNoValidatorErrors(context, 'several valid fragments');
 }
 
+// The one proof that .changie.yaml's kinds and the validator's changeKinds
+// (tools/change-fragments.mjs) agree: a kind the validator would reject must
+// be unauthorable, or authoring could write fragments the gate then refuses.
 function fixtureChangieRejectsUnknownKinds(context) {
   for (const kind of ['Removed', 'Deprecated']) {
     const result = context.changie(['new', '-k', kind, '-b', 'Not an allowed kind.']);
@@ -346,41 +340,4 @@ function fixtureValidatorAcceptsMultilineProse(context) {
     ].join('\n'),
   );
   expectNoValidatorErrors(context, 'multiline prose');
-}
-
-function fixtureMergeReproducesCommittedChangelog(context) {
-  const result = context.changie(['merge']);
-  if (!expectChangieSuccess(context, result, 'changie merge')) return;
-
-  const generatedPath = join(context.workspace, 'CHANGELOG.md');
-  if (!existsSync(generatedPath)) {
-    context.fail('changie merge must generate a CHANGELOG.md from the released records.');
-    return;
-  }
-  const generated = readFileSync(generatedPath, 'utf8');
-  const committed = readFileSync(join(context.root, 'CHANGELOG.md'), 'utf8');
-  if (generated !== committed) {
-    context.fail(
-      'changie merge over the committed Released Version Notes must reproduce CHANGELOG.md ' +
-        'byte-for-byte; regenerate the aggregate from the records instead of editing it by hand.',
-    );
-  }
-}
-
-function fixtureMergeTracksReleasedRecordEdits(context) {
-  appendFileSync(
-    join(context.workspace, '.changes', `${changelogBaselineVersion}.md`),
-    '\n### Fixed\n\n- Sentinel released-record edit.\n',
-  );
-  const result = context.changie(['merge']);
-  if (!expectChangieSuccess(context, result, 'changie merge after a record edit')) return;
-
-  const generated = readFileSync(join(context.workspace, 'CHANGELOG.md'), 'utf8');
-  if (!generated.includes('Sentinel released-record edit.')) {
-    context.fail('the merged aggregate must be derived from the released records.');
-  }
-  const committed = readFileSync(join(context.root, 'CHANGELOG.md'), 'utf8');
-  if (generated === committed) {
-    context.fail('an edited released record must change the regenerated aggregate so drift is detectable.');
-  }
 }

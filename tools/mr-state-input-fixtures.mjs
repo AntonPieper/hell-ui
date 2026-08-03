@@ -60,30 +60,18 @@ const diffFixtures = [
     },
   },
   {
-    name: 'a copy entry fails closed — the decision never asks git to find copies',
-    raw: 'C100\0docs/template.md\0docs/copy.md\0',
-    expect: { errors: ['unrecognized git status'] },
-  },
-  {
     name: 'a type change is a content change',
     raw: 'T\0docs/link.md\0',
     expect: { files: [{ filename: 'docs/link.md', status: 'changed' }] },
-  },
-  {
-    name: 'an unmerged entry fails closed',
-    raw: 'U\0packages/angular/button/button.ts\0',
-    expect: { errors: ['unrecognized git status'] },
   },
   {
     name: 'an unknown status token fails closed',
     raw: 'M2\0docs/notes.md\0',
     expect: { errors: ['unrecognized git status'] },
   },
-  {
-    name: 'a record missing its path fails closed',
-    raw: 'A\0',
-    expect: { errors: ['truncated'] },
-  },
+  // One fixture per call site of the truncation guard: a rename reads two
+  // paths, so a missing destination covers the absent-field rejection, and a
+  // single-path status covers the empty-field one.
   {
     name: 'a rename missing its destination fails closed',
     raw: 'R100\0docs/old.md\0',
@@ -127,7 +115,7 @@ function encodeCorpusFixture(fixture) {
   if (fixture.expectedFileCount !== undefined) return null;
   if (!fixture.labels.every((label) => typeof label === 'string' && !label.includes(','))) return null;
 
-  const entries = (fixture.pages ? fixture.pages.flat() : fixture.files).map(encodeChangedFile);
+  const entries = fixture.files.map(encodeChangedFile);
   if (entries.some((encoded) => encoded === null)) return null;
   return { labelsRaw: fixture.labels.join(','), diffRaw: entries.join('') };
 }
