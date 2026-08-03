@@ -133,7 +133,10 @@ app. Two rules keep fixtures honest:
 
 Copy an existing fixture directory, adjust `fixture.json`, `package.json`, and
 `src/`, and run `pnpm run test:consumer-fixtures <fixture-name>`. Discovery is
-directory-based: no runner or CI changes are needed. In GitHub CI the
+directory-based: no runner or CI changes are needed. The directory name must
+match `[A-Za-z0-9_.-]+` because it labels a collapsible GitLab log section;
+both the runner and the sharded CI entry reject anything else, so a name that
+cannot be labeled fails on the run that adds it. In GitHub CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by

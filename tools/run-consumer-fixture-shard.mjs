@@ -110,7 +110,9 @@ function discoverFixtureNames() {
       fail(`Fixture ${entry.name} is missing its fixture.json manifest`);
     }
     // Section names allow [A-Za-z0-9_.-]; a fixture the shard cannot label
-    // must fail here, not silently corrupt the job log.
+    // must fail here, not silently corrupt the job log. Kept in step by hand
+    // with discoverFixtures in tools/check-consumer-fixtures.mjs until the
+    // shard collapse merges the two discovery paths.
     if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
       fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
     }

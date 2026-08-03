@@ -104,6 +104,9 @@ try {
   if (error instanceof ConsumerFixtureFailure) {
     console.error(`[consumer-fixtures] ${error.message}`);
   } else {
+    // A crash in the runner itself still carries the prefix a log scan looks
+    // for, followed by the full stack.
+    console.error('[consumer-fixtures] unexpected error');
     console.error(error);
   }
   process.exit(1);
@@ -154,10 +157,11 @@ function discoverFixtures() {
     if (!existsSync(manifestPath)) {
       fail(`Fixture ${entry.name} is missing its fixture.json manifest: ${manifestPath}`);
     }
-    // The same rule the sharded CI entry enforces
-    // (tools/run-consumer-fixture-shard.mjs): a fixture whose name cannot label
-    // a GitLab log section must fail here too, so it fails locally on the run
-    // that added it rather than in CI.
+    // The same rule the sharded CI entry enforces, so a fixture whose name
+    // cannot label a GitLab log section fails on the run that added it rather
+    // than in CI. Kept in step by hand with discoverFixtureNames in
+    // tools/run-consumer-fixture-shard.mjs until the shard collapse merges the
+    // two discovery paths.
     if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
       fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
     }
@@ -225,7 +229,22 @@ async function runFixture(fixture) {
     console.log(`[${label}] ok`);
   } finally {
     if (keep) console.log(`[${label}] kept ${workspace}`);
-    else rmSync(workspace, { force: true, recursive: true });
+    else discardTempDirectory(workspace);
+  }
+}
+
+// Cleanup runs in a finally, so a throw here would replace the failure that
+// triggered it — losing the verdict to a temp-directory problem. A removal
+// that fails is a warning; the run still reports what actually went wrong.
+function discardTempDirectory(path) {
+  try {
+    rmSync(path, { force: true, recursive: true });
+  } catch (error) {
+    console.warn(
+      `[consumer-fixtures] warning: could not remove ${path}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
 }
 
@@ -520,9 +539,10 @@ async function runFixtureSmoke(fixture, workspace, label) {
       console.log(`[${label}] smoke ok: ${describeSmokeStep(step)}`);
     }
   } catch (error) {
-    // A message this runner composed already names the fixture and the
-    // expectation; only foreign failures (a Playwright timeout, a navigation
-    // error) need the buffered evidence to be readable.
+    // Both step kinds compose their own failure, naming the fixture, the
+    // selector, and what they found, so those pass through untouched. The
+    // evidence is for failures no step could describe: a launch or navigation
+    // error, or an element that never appeared to read.
     if (error instanceof ConsumerFixtureFailure) throw error;
 
     fail(
@@ -600,14 +620,27 @@ async function assertSmokeStep(fixture, page, step, expect) {
 }
 
 async function assertSmokeTextStep(fixture, page, step, expect) {
-  // The web-first assertion retries the read for us and reports the text it
-  // last saw; the message keeps the fixture and the expectation in the failure.
-  await expect(
-    page.locator(step.selector),
-    `Fixture ${fixture.name} smoke expected ${step.selector} to contain ${JSON.stringify(
-      step.textIncludes,
-    )}`,
-  ).toContainText(step.textIncludes, { timeout: 15_000 });
+  const locator = page.locator(step.selector);
+  try {
+    // The web-first assertion owns the retry loop the runner used to hand-roll.
+    await expect(locator).toContainText(step.textIncludes, { timeout: 15_000 });
+  } catch (assertionError) {
+    // Playwright's own message would name the fixture twice and drop the text
+    // it found, so the assertion is reshaped into the message CI has always
+    // seen. An element that never appeared has no text to report: that stays a
+    // foreign failure, carrying the page evidence, exactly as before.
+    let lastText;
+    try {
+      lastText = (await locator.textContent({ timeout: 1_000 })) ?? '';
+    } catch {
+      throw assertionError;
+    }
+    fail(
+      `Fixture ${fixture.name} smoke expected ${step.selector} to contain ${JSON.stringify(
+        step.textIncludes,
+      )} but found ${JSON.stringify(lastText)}`,
+    );
+  }
 }
 
 async function assertSmokeComputedStyleStep(fixture, page, step) {
@@ -641,36 +674,50 @@ function fixtureBrowserBuildRoot(fixture, workspace) {
 
 function startStaticServer(staticRoot) {
   const absoluteRoot = resolve(staticRoot);
+  const errors = [];
   const server = createServer((request, response) => {
-    const url = new URL(request.url ?? '/', 'http://127.0.0.1');
-    const requestedPath = decodeURIComponent(url.pathname);
-    const target =
-      requestedPath === '/'
-        ? join(absoluteRoot, 'index.html')
-        : resolve(absoluteRoot, `.${requestedPath}`);
-    const targetIsFile =
-      target.startsWith(absoluteRoot) && existsSync(target) && statSync(target).isFile();
+    // Node routes a request-handler throw to neither the server's 'error' event
+    // nor any caller: it is an uncaughtException, which would crash the run
+    // past every cleanup. A malformed percent-escape in the path
+    // (decodeURIComponent) and a file deleted between the stat and the read
+    // both reach here, so the whole handler answers 500 and fails the fixture.
+    try {
+      const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+      const requestedPath = decodeURIComponent(url.pathname);
+      const target =
+        requestedPath === '/'
+          ? join(absoluteRoot, 'index.html')
+          : resolve(absoluteRoot, `.${requestedPath}`);
+      const targetIsFile =
+        target.startsWith(absoluteRoot) && existsSync(target) && statSync(target).isFile();
 
-    // Only extensionless paths get the SPA fallback. A missing asset must
-    // fail as a missing asset: falling back would serve index.html labeled
-    // with the asset's content type and turn a packaging hole into an opaque
-    // parse error inside the smoke.
-    if (!targetIsFile && extname(requestedPath) !== '') {
-      console.error(`[consumer-fixtures] static server 404: ${requestedPath}`);
-      response.writeHead(404, { 'content-type': 'text/plain' });
-      response.end('not found');
-      return;
+      // Only extensionless paths get the SPA fallback. A missing asset must
+      // fail as a missing asset: falling back would serve index.html labeled
+      // with the asset's content type and turn a packaging hole into an opaque
+      // parse error inside the smoke.
+      if (!targetIsFile && extname(requestedPath) !== '') {
+        console.error(`[consumer-fixtures] static server 404: ${requestedPath}`);
+        response.writeHead(404, { 'content-type': 'text/plain' });
+        response.end('not found');
+        return;
+      }
+
+      const filePath = targetIsFile ? target : join(absoluteRoot, 'index.html');
+      response.writeHead(200, { 'content-type': staticContentType(filePath) });
+      response.end(readFileSync(filePath));
+    } catch (error) {
+      errors.push(
+        `request ${request.url}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      if (response.writableEnded) return;
+      if (!response.headersSent) response.writeHead(500, { 'content-type': 'text/plain' });
+      response.end('static server failed');
     }
-
-    const filePath = targetIsFile ? target : join(absoluteRoot, 'index.html');
-    response.writeHead(200, { 'content-type': staticContentType(filePath) });
-    response.end(readFileSync(filePath));
   });
 
   // A server 'error' with no listener is an uncaught exception, so the handler
   // stays attached for the server's whole life: an error raised after listen
   // fails the fixture through `errors` instead of crashing the run.
-  const errors = [];
   return new Promise((resolveServer, reject) => {
     let listening = false;
     server.on('error', (error) => {
@@ -768,7 +815,7 @@ function discardPackedPackage(packedPackage) {
     console.log(`[consumer-fixtures] kept packed package ${packedPackage.root}`);
     return;
   }
-  rmSync(packedPackage.root, { force: true, recursive: true });
+  discardTempDirectory(packedPackage.root);
 }
 
 function exactInstalledVersion(name) {
@@ -823,7 +870,10 @@ function pnpmCommandEnvironment() {
   // The scrub keeps the parent `pnpm run` context out of fixture installs,
   // but the store location is infrastructure, not context: without it CI's
   // cached store goes unused and every shard re-downloads the dependency
-  // tree from the registry.
+  // tree from the registry. Probed and rejected as the replacement: pnpm's
+  // `--config.store-dir=` flag only works ahead of the subcommand, and
+  // `pnpm run <script> --config.store-dir=…` forwards it into the script
+  // instead, so the env var stays.
   if (process.env.npm_config_store_dir) {
     env.npm_config_store_dir = process.env.npm_config_store_dir;
   }
