@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict';
 import { cpus, loadavg, platform } from 'node:os';
 import type { FullConfig, Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 
@@ -25,9 +24,11 @@ import { DOCS_BUILD_STAMP_FILE } from '../docs-build-stamp.mjs';
  * Two rules hold the rest together:
  *
  * - Never print a figure that was not measured; absent data says "not sampled".
- * - Never say what a failure means. `checkReportStaysDescriptiveFixture` fails
- *   the run if adjudicating language reappears in the output, so a future
- *   conclusion cannot arrive by a path nobody thought to test.
+ * - Never say what a failure means. `host-health-reporter.spec.ts` owns the list
+ *   of adjudicating language and fails if any of it reappears in the rendered
+ *   output, so a future conclusion cannot arrive by a path nobody thought to
+ *   test. Checking the output rather than the code means a reinstated
+ *   conclusion is caught however it is spelled.
  */
 
 const SAMPLE_INTERVAL_MS = 1_000;
@@ -54,12 +55,12 @@ const CPU_CAVEAT =
   'so it lags the window it is reported for, ignores container CPU limits, and is not the ' +
   "machine's parallelism; loadavg is unavailable on Windows";
 
-interface Sample {
+export interface Sample {
   readonly at: number;
   readonly loadPerCpu: number;
 }
 
-interface FailureRecord {
+export interface FailureRecord {
   readonly title: string;
   readonly status: string;
   readonly startedAt: number;
@@ -93,7 +94,7 @@ type ProbeOutcome =
  *
  * Without a baseline there is nothing to compare, so it says that instead.
  */
-function describeServedBuild(baseline: string | null, served: string): ProbeOutcome {
+export function describeServedBuild(baseline: string | null, served: string): ProbeOutcome {
   if (baseline === null) return 'answered, but this run never recorded which build it started against';
   return served === baseline
     ? 'answered with the build this run started against'
@@ -105,7 +106,7 @@ interface ServerObservation {
   readonly outcome: ProbeOutcome;
 }
 
-interface RunFacts {
+export interface RunFacts {
   readonly platform: string;
   readonly cpuCount: number | null;
   readonly loadAvailable: boolean;
@@ -125,7 +126,7 @@ interface RunFacts {
  * abandoned when a run is cut short by `--max-failures` or SIGINT, so listing
  * them would describe tests that never ran.
  */
-function countsAsFailure(status: TestResult['status']): boolean {
+export function countsAsFailure(status: TestResult['status']): boolean {
   return status !== 'passed' && status !== 'skipped' && status !== 'interrupted';
 }
 
@@ -143,7 +144,7 @@ function countsAsFailure(status: TestResult['status']): boolean {
  * `lastAttempt` is the highest attempt index seen for each title, counting
  * passes: a retry that went green is still a retry that ran.
  */
-function partitionRetryableAttempts(
+export function partitionRetryableAttempts(
   attempts: readonly RetryableAttempt[],
   lastAttempt: ReadonlyMap<string, number>,
 ): { covered: FailureRecord[]; unretried: FailureRecord[] } {
@@ -157,7 +158,7 @@ function partitionRetryableAttempts(
 }
 
 /** Extracted so the window it records is testable without driving Playwright. */
-function toFailureRecord(
+export function toFailureRecord(
   title: string,
   status: string,
   startTime: Date,
@@ -225,7 +226,7 @@ function describeProbeFor(
 }
 
 /** The whole report. Pure, so a fixture drives it with real sample arrays. */
-function formatRunReport(facts: RunFacts): string[] {
+export function formatRunReport(facts: RunFacts): string[] {
   const loads = facts.samples.map((sample) => sample.loadPerCpu);
   const lines = [
     `[host-health] ${facts.platform}, ${facts.cpuCount ?? 'an unknown number of'} logical CPUs, ` +
@@ -290,247 +291,6 @@ function describeFailure(failure: FailureRecord, facts: RunFacts): string[] {
 }
 
 /**
- * Language this report must never use again.
- *
- * Every blocking finding across six rounds lived in a sentence like these, and
- * none of them in the numbers underneath. Checking the rendered output rather
- * than the code means a reinstated conclusion fails here however it is spelled.
- */
-const ADJUDICATING = [
-  /verdict/i,
-  /attributable/i,
-  /oversubscribed/i,
-  /starv/i,
-  /harness failing/i,
-  /unproven/i,
-  /\bre-run\b/i,
-  /regression/i,
-  /\bexplain/i,
-];
-
-function checkReportStaysDescriptiveFixture(): void {
-  const at = 1_700_000_000_000;
-  const sample = (offset: number, loadPerCpu: number): Sample => ({ at: at + offset, loadPerCpu });
-  const failure = (title: string, offset: number, length: number): FailureRecord => ({
-    title,
-    status: 'timedOut',
-    startedAt: at + offset,
-    endedAt: at + offset + length,
-  });
-
-  const busy = [sample(0, 4.2), sample(1_000, 4.6), sample(2_000, 5.1), sample(3_000, 3.9)];
-
-  const scenarios: RunFacts[] = [
-    {
-      platform: 'darwin',
-      cpuCount: 10,
-      loadAvailable: true,
-      durationMs: 4_000,
-      samples: busy,
-      failures: [failure('a › times out', 500, 2_000)],
-      observations: [
-        { at: at + 3_000, outcome: 'answered with the build this run started against' },
-      ],
-      retriedToGreen: ['b › passed on a retry'],
-      retriedFailures: [],
-      baseURL: 'http://127.0.0.1:4200',
-    },
-    // No samples at all: every load figure must say so rather than print NaN.
-    {
-      platform: 'darwin',
-      cpuCount: 10,
-      loadAvailable: true,
-      durationMs: 200,
-      samples: [],
-      failures: [failure('c › fails instantly', 0, 40)],
-      observations: [],
-      retriedToGreen: [],
-      retriedFailures: [],
-      baseURL: 'http://127.0.0.1:4200',
-    },
-    // A platform without load averages.
-    {
-      platform: 'win32',
-      cpuCount: 8,
-      loadAvailable: false,
-      durationMs: 5_000,
-      samples: [],
-      failures: [failure('d › fails', 1_000, 800)],
-      observations: [{ at: at + 1_000, outcome: 'did not answer' }],
-      retriedToGreen: [],
-      retriedFailures: [],
-      baseURL: 'http://127.0.0.1:4200',
-    },
-    {
-      platform: 'linux',
-      cpuCount: 4,
-      loadAvailable: true,
-      durationMs: 9_000,
-      samples: busy,
-      failures: [],
-      observations: [],
-      retriedToGreen: [],
-      retriedFailures: [],
-      baseURL: undefined,
-    },
-    // Several probes, so "nearest" has to mean nearest rather than first.
-    {
-      platform: 'linux',
-      cpuCount: 4,
-      loadAvailable: true,
-      durationMs: 20_000,
-      samples: busy,
-      failures: [failure('e › fails late', 10_000, 1_000)],
-      observations: [
-        { at: at + 1_000, outcome: 'answered with the build this run started against' },
-        { at: at + 11_200, outcome: 'did not answer' },
-      ],
-      retriedToGreen: [],
-      retriedFailures: [],
-      baseURL: 'http://127.0.0.1:4200',
-    },
-  ];
-
-  for (const facts of scenarios) {
-    const report = formatRunReport(facts).join('\n');
-    for (const phrase of ADJUDICATING) {
-      assert.doesNotMatch(
-        report,
-        phrase,
-        `the report drew a conclusion (${phrase}); it may only state measurements`,
-      );
-    }
-    assert.doesNotMatch(report, /NaN|undefined|Infinity/, 'no unmeasured value may be formatted');
-  }
-
-  // Real sample arrays, not an injected accessor: this drives the production
-  // path from samples through the window filter to the median.
-  const busyReport = formatRunReport(scenarios[0]).join('\n');
-  // The failure spans at+500 to at+2500, so only the samples at 1000 and 2000
-  // fall inside it: median of 4.6 and 5.1. The run summary below covers all
-  // four, which is what makes the window filter observable.
-  assert.match(
-    busyReport,
-    /during that window: median 4\.85 \(2 sample\(s\)\)/,
-    'the per-failure figure must be the median of the samples inside that window',
-  );
-  assert.match(
-    busyReport,
-    /median 4\.40, peak 5\.10 \(4 sample\(s\)\)/,
-    'and the run summary must aggregate every sample',
-  );
-
-  const noSamples = formatRunReport(scenarios[1]).join('\n');
-  assert.match(
-    noSamples,
-    /during that window: median not sampled \(0 sample\(s\)\)/,
-    'a window with no samples must say so',
-  );
-  assert.match(noSamples, /server: not probed during this run/, 'and so must a missing probe');
-
-  const windows = formatRunReport(scenarios[2]).join('\n');
-  assert.match(windows, /not sampled on win32/, 'a platform without load averages must say so');
-
-  // The probe is reported with its distance from the failure, never as its
-  // cause: probes are queued after a failure ends, so a fault is first seen
-  // after the failures it produced.
-  assert.match(
-    busyReport,
-    /nearest probe 0\.5s after this failure ended/,
-    'the probe offset must be stated so a reader can weigh it',
-  );
-  assert.match(
-    windows,
-    /nearest probe 0\.8s before this failure ended/,
-    'including when the probe preceded the failure',
-  );
-
-  // With more than one probe, the one reported must be the closest to the
-  // failure, not whichever happened first.
-  const manyProbes = formatRunReport(scenarios[4]).join('\n');
-  assert.match(
-    manyProbes,
-    /nearest probe 0\.2s after this failure ended .* did not answer/,
-    'the probe nearest the failure must be the one reported',
-  );
-
-  // The caveat travels with the number. A per-logical-CPU figure read without
-  // it is misleading on a CPU-capped container, and a comment in this file
-  // does not reach whoever is reading the log.
-  for (const facts of scenarios) {
-    assert.match(
-      formatRunReport(facts).join('\n'),
-      /os\.cpus\(\)\.length/,
-      'every report must carry the caveat about what the figure counts',
-    );
-  }
-
-  assert.deepEqual(
-    (['passed', 'skipped', 'interrupted', 'failed', 'timedOut'] as TestResult['status'][]).filter(
-      countsAsFailure,
-    ),
-    ['failed', 'timedOut'],
-    'only outcomes that ran and went wrong may be listed',
-  );
-
-  // A run that never learned its baseline must not report a match against it.
-  assert.equal(
-    describeServedBuild(null, 'anything'),
-    'answered, but this run never recorded which build it started against',
-    'with no baseline there is nothing to compare, and nothing to acquit',
-  );
-  assert.equal(
-    describeServedBuild('digest-a', 'digest-a'),
-    'answered with the build this run started against',
-    'a match is only a match against a baseline that exists',
-  );
-  assert.equal(
-    describeServedBuild('digest-a', 'digest-b'),
-    'answered with a different build than this run started against',
-    'and a swap must stay reachable',
-  );
-
-  // "Covered up by a retry" may only be said of an attempt a retry followed.
-  // A run cut short by --max-failures or SIGINT leaves a budgeted retry unrun,
-  // and that attempt is where the test ended, so it must reach the failures
-  // instead of a list claiming something hid it.
-  const firstAttempt = { record: failure('f › failed first', 0, 100), retry: 0 };
-  const abandoned = { record: failure('g › never retried', 200, 100), retry: 0 };
-  const partitioned = partitionRetryableAttempts(
-    [firstAttempt, abandoned],
-    new Map([
-      ['f › failed first', 1],
-      ['g › never retried', 0],
-    ]),
-  );
-  assert.deepEqual(
-    partitioned.covered,
-    [firstAttempt.record],
-    'only an attempt a later attempt followed was covered up',
-  );
-  assert.deepEqual(
-    partitioned.unretried,
-    [abandoned.record],
-    'an attempt the run ended on is a failure, not something a retry hid',
-  );
-  assert.deepEqual(
-    partitionRetryableAttempts([abandoned], new Map()).unretried,
-    [abandoned.record],
-    'a title that recorded no attempt at all cannot have been retried',
-  );
-
-  // A failure record must carry the duration the run measured, not a zero that
-  // would make every window empty and every load figure "not sampled".
-  const record = toFailureRecord('t › x', 'failed', new Date(at), 2_500);
-  assert.equal(record.endedAt - record.startedAt, 2_500, 'the recorded window is the real duration');
-  assert.match(
-    formatRunReport({ ...scenarios[0], failures: [record] }).join('\n'),
-    /failed after 2\.5s/,
-    'and it reaches the report',
-  );
-}
-
-/**
  * Node documents that `os.cpus()` may return an empty array when CPU info is
  * unavailable. Substituting 1 would invent a machine and divide load by it, so
  * an unknown count stays `null` and every figure derived from it says
@@ -567,7 +327,6 @@ class HostHealthReporter implements Reporter {
   private probes: Promise<void> = Promise.resolve();
 
   constructor() {
-    checkReportStaysDescriptiveFixture();
     if (!LOAD_AVERAGE_AVAILABLE) return;
     // Sampling starts at config load, so the window covers the docs build and
     // browser launches as well as the tests themselves.

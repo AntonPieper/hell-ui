@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 import ts from 'typescript';
@@ -30,8 +29,12 @@ import { toPosixPath } from './source-digest.mjs';
  * TypeScript 6.0.3 does not affect this printing — with the flag on,
  * `appearance` still emits `"grip" | "line"` — and naming all 33 unions would
  * mint 33 public exports to work around a compiler artifact.
+ *
+ * Exported for `api-report-model.spec.mjs`, which drives the sorting rules —
+ * nesting, literals containing pipes, constrained `infer` — over declaration
+ * text directly rather than through a whole extraction.
  */
-function canonicaliseUnionOrder(declarationText) {
+export function canonicaliseUnionOrder(declarationText) {
   const source = ts.createSourceFile(
     'staged.d.ts',
     declarationText,
@@ -149,7 +152,8 @@ export function createApiReportInputPackage({
 const COMPILER_GENERATED_STATIC =
   /^([ \t]*)(static (?:ɵ(?:fac|dir|cmp|prov|mod|inj|pipe)|ngAcceptInputType_\w+):)/;
 
-function normalizeApiReportDeclarations(declarationText) {
+/** Exported for `api-report-model.spec.mjs`; production callers stage a package. */
+export function normalizeApiReportDeclarations(declarationText) {
   const normalized = [];
   for (const line of declarationText.split('\n')) {
     // A declaration map would redirect every reported location to the absolute
@@ -164,106 +168,6 @@ function normalizeApiReportDeclarations(declarationText) {
     normalized.push(line);
   }
   return canonicaliseUnionOrder(normalized.join('\n'));
-}
-
-function checkUnionOrderFixture() {
-  const sorted = canonicaliseUnionOrder(
-    'export declare const a: "grip" | "line";\nexport declare const b: "line" | "grip";\n',
-  );
-  assert.match(sorted, /const a: "grip" \| "line";/, 'a union is emitted in sorted order');
-  assert.match(
-    sorted,
-    /const b: "grip" \| "line";/,
-    'and the reverse spelling of the same union becomes identical text',
-  );
-
-  // Nested unions sort independently, and the surrounding syntax is untouched.
-  assert.equal(
-    canonicaliseUnionOrder('type T = Map<"z" | "a", ("q" | "b")[]> | null;'),
-    'type T = Map<"a" | "z", ("b" | "q")[]> | null;',
-    'nested unions are sorted without disturbing the syntax around them',
-  );
-
-  // A pipe inside a string literal or a template must not be mistaken for a
-  // union separator, which is why this parses rather than splitting text.
-  const literal = 'export declare const c: "a|b" | "a";';
-  assert.equal(
-    canonicaliseUnionOrder(literal),
-    'export declare const c: "a" | "a|b";',
-    'a pipe inside a literal is not a separator',
-  );
-
-  // Function types carry their own parameter lists; sorting must not reach into
-  // them or reorder anything that is not a union constituent.
-  assert.equal(
-    canonicaliseUnionOrder('type F = ((row: A, b: B) => void) | string | null;'),
-    'type F = ((row: A, b: B) => void) | null | string;',
-    'function-type constituents keep their internals and sort as a whole',
-  );
-
-  // The set still matters: adding a member is still a change.
-  assert.notEqual(
-    canonicaliseUnionOrder('type U = "a" | "b";'),
-    canonicaliseUnionOrder('type U = "a" | "b" | "c";'),
-    'sorting must not hide a member appearing or disappearing',
-  );
-
-  assert.equal(
-    canonicaliseUnionOrder('export declare const d: string;\n'),
-    'export declare const d: string;\n',
-    'a declaration with no union is returned unchanged',
-  );
-
-  // `infer U extends X` takes its constraint to the end of the union, so moving
-  // it changes the parse: `zed | infer U extends string` and
-  // `infer U extends string | zed` are different types. Sorting would render
-  // both identically and hide a change between them.
-  const inferLast = 'export type T<X> = X extends zed | infer U extends string ? U : never;\n';
-  const inferFirst = 'export type T<X> = X extends infer U extends string | zed ? U : never;\n';
-  assert.equal(canonicaliseUnionOrder(inferLast), inferLast, 'a constrained infer is left in place');
-  assert.notEqual(
-    canonicaliseUnionOrder(inferLast),
-    canonicaliseUnionOrder(inferFirst),
-    'and the two spellings stay distinguishable, so a change between them still fails the gate',
-  );
-
-  // The guard is narrow: an unconstrained `infer` has nothing greedy to absorb.
-  assert.equal(
-    canonicaliseUnionOrder('export type Q<X> = X extends zed | infer U ? U : never;\n'),
-    'export type Q<X> = X extends infer U | zed ? U : never;\n',
-    'an unconstrained infer still sorts',
-  );
-}
-
-/** Self-check with a synthetic declaration; runs before the real gate. */
-export function checkApiReportInputPackageFixture() {
-  checkUnionOrderFixture();
-  const declarations = [
-    'export declare class Fixture {',
-    '    static ɵfac: i0.ɵɵFactoryDeclaration<Fixture, never>;',
-    '    /** Documented already. */',
-    '    static ɵcmp: i0.ɵɵComponentDeclaration<Fixture, "fixture", never, {}, {}, never>;',
-    '}',
-    '//# sourceMappingURL=fixture.d.ts.map',
-    '',
-  ].join('\n');
-
-  const normalized = normalizeApiReportDeclarations(declarations);
-  assert.doesNotMatch(
-    normalized,
-    /sourceMappingURL/,
-    'a declaration map reference must never survive into the extractor input',
-  );
-  assert.equal(
-    normalized.split('\n').filter((line) => line.includes('compiler-generated')).length,
-    1,
-    'only the undocumented compiler-generated static gets an annotation',
-  );
-  assert.equal(
-    normalizeApiReportDeclarations(normalized),
-    normalized,
-    'normalization must be idempotent, so a re-staged declaration reports the same surface',
-  );
 }
 
 /**

@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
@@ -23,7 +22,11 @@ import { collectSourceFiles, digestSourceFiles } from './source-digest.mjs';
 /** Served from the docs root, so the harness fetches it over the same origin as the pages. */
 export const DOCS_BUILD_STAMP_FILE = 'hell-e2e-build.json';
 
-const STAMP_VERSION = 1;
+/**
+ * Exported so `docs-build-stamp.spec.mjs` builds synthetic stamps at the
+ * current format rather than hard-coding a number that drifts.
+ */
+export const STAMP_VERSION = 1;
 
 /** The Angular application builder writes into `browser/`; older layouts do not. */
 function servedDocsRoot(distRoot) {
@@ -92,8 +95,11 @@ function currentCommit(root) {
  * ever change, a digest still identifies a checkout without disclosing a home
  * directory or worktree name — and it is only a digest of a path, so treat it
  * as an identifier, not a secret.
+ *
+ * Exported for `docs-build-stamp.spec.mjs`, which needs the identifier of a
+ * synthetic root to build a stamp that belongs to it.
  */
-function workspaceId(root) {
+export function workspaceId(root) {
   return createHash('sha256').update(root).digest('hex').slice(0, 16);
 }
 
@@ -161,57 +167,4 @@ export function describeForeignDocsBuild({
     ];
   }
   return [];
-}
-
-/** Self-check with synthetic stamps; runs before the harness trusts a real one. */
-export function checkDocsBuildStampFixture() {
-  const root = '/repo';
-  const currentDigest = 'digest-a';
-  const served = {
-    version: STAMP_VERSION,
-    workspaceId: workspaceId(root),
-    sourcesDigest: currentDigest,
-  };
-
-  assert.deepEqual(
-    describeForeignDocsBuild({ root, currentDigest, stamp: served }),
-    [],
-    'a stamp from this checkout at these sources must pass',
-  );
-
-  // A stale process holding the port is fixed by killing it, not by
-  // rebuilding, so it must not be reported as an unidentifiable build.
-  assert.match(
-    describeForeignDocsBuild({ root, currentDigest, stamp: null, serverAnswersPages: false })[0],
-    /stale or broken process holding the port/,
-    'a server that does not serve the app at all must be named as a stale process',
-  );
-
-  const cases = [
-    [null, /did not serve/, 'an unidentifiable server must fail'],
-    [{ ...served, version: STAMP_VERSION + 1 }, /stamp format/, 'an old stamp format must fail'],
-    [
-      { ...served, workspaceId: 'ffffffffffffffff' },
-      /different checkout \(ffffffffffffffff/,
-      'another checkout must fail and identify it without naming a path',
-    ],
-    [{ ...served, sourcesDigest: 'digest-b' }, /different sources/, 'an older build must fail'],
-  ];
-  for (const [stamp, expected, message] of cases) {
-    const failures = describeForeignDocsBuild({ root, currentDigest, stamp });
-    assert.equal(failures.length, 1, message);
-    assert.match(failures[0], expected, message);
-  }
-
-  // A foreign checkout is reported as such even when its sources happen to
-  // match, because the served pages still come from somewhere else.
-  assert.match(
-    describeForeignDocsBuild({
-      root,
-      currentDigest,
-      stamp: { ...served, workspaceId: 'ffffffffffffffff' },
-    })[0],
-    /different checkout/,
-    'checkout identity outranks a matching digest',
-  );
 }

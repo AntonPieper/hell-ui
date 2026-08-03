@@ -4,13 +4,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   apiReportSiblingPaths,
-  checkApiReportInputPackageFixture,
   createApiReportDeclarationMirror,
   createApiReportInputPackage,
 } from './api-report-model.mjs';
-import { checkApiReportCrossEntrypoint } from './check-api-report-cross-entrypoint.mjs';
 import {
-  checkApiReportWarningGateFixture,
   scanApiReportWarnings,
   scanInternalContractImports,
   validateWarningGateConfiguration,
@@ -20,10 +17,7 @@ import {
   entrypointPublicApiFiles,
   packageName,
 } from './entrypoint-manifest.mjs';
-import {
-  checkLibraryBuildStampFixture,
-  describeStaleLibraryBuild,
-} from './library-build-stamp.mjs';
+import { describeStaleLibraryBuild } from './library-build-stamp.mjs';
 
 const require = createRequire(import.meta.url);
 const { ConsoleMessageId, Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
@@ -83,9 +77,6 @@ const inputPackageFolder = join(root, 'tmp/api-report-input-package');
 const distPackageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
 
-checkLibraryBuildStampFixture();
-checkApiReportInputPackageFixture();
-
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {
   console.error('API report check requires a built library. Run `pnpm run build:lib` first.');
@@ -122,8 +113,6 @@ const mirroredDeclarations = createApiReportDeclarationMirror({
     declarationFilePath: mainEntryPointPath(entrypoint),
   })),
 });
-checkApiReportCrossEntrypoint();
-checkApiReportWarningGateFixture();
 
 let failed = false;
 const warningGateFailures = validateWarningGateConfiguration(

@@ -25,9 +25,15 @@ pnpm run ci:build:docs:prepared
 pnpm run ci:test:api-report:prepared
 ```
 
-`ci:test:static` runs ESLint, Knip, and the repository's static contracts:
+`ci:test:static` runs ESLint, Knip, the repository's static contracts —
 architecture, PR-state policy, secret-detection policy, pipeline shape, and the
-main-policy document. Local unit tests run through `test:unit` without coverage
+main-policy document — and `test:tools`, the tooling's own specs
+(`vitest.tools.config.ts`, a node-environment runner over `tools/**/*.spec.*`).
+Those specs used to run as fixture functions inside the gates they cover, so
+every `test:api-report` invocation paid for three synthetic API Extractor runs
+and every Playwright config load paid for the host-health reporter's self-test;
+they are tests, so they run with the tests. Local unit tests run through
+`test:unit` without coverage
 output; CI and release checks use `test:coverage`, which enables Angular's
 native coverage switch and enforces the thresholds in `vitest.config.ts`.
 
