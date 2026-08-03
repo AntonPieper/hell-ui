@@ -88,8 +88,8 @@ const audioTranscriptRuntimeTerms = [
 // byte-pinned file here would only restate that gate.
 //
 // The checker keeps the durable concerns no standard tool covers — entrypoint
-// sidecar coverage, local package resolution, optional-peer isolation at the
-// package-metadata level — plus docs and component contracts owned elsewhere.
+// sidecar coverage, local package resolution, and optional-peer metadata —
+// plus docs and component contracts owned elsewhere.
 const architectureCheckManifest = [
   { name: 'docs-examples', kind: 'permanent', owner: '@AntonPieper', run: checkDocsExamples },
   {
@@ -111,10 +111,10 @@ const architectureCheckManifest = [
     run: checkEntrypointManifestIntegrity,
   },
   {
-    name: 'package-output-integrity',
+    name: 'package-resolution',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkPackageOutputIntegrity,
+    run: checkPackageResolution,
   },
   {
     // Browser transcript runtime APIs (not imports) stay inside the optional
@@ -143,11 +143,13 @@ const architectureCheckManifest = [
     run: checkInternalEntrypointPrivacyContract,
   },
   {
-    // The Shared Style Substrate carries tokens and cross-component
-    // primitives only; component skins live in hell-ui/themes/*.css. Style
-    // Package Entry Point existence is not checked here: the entrypoint
-    // manifest loader rejects a styleBundle that disagrees with the
-    // entrypoint's styles.css, and the generated bundle is byte-pinned by
+    // The Shared Style Substrate carries Semantic Theme Tokens, palettes, and
+    // skin-wide primitives only; a component-specific skin selector belongs in
+    // a Theme Adapter Stylesheet under hell-ui/themes/*.css
+    // (docs/adr/theme-adapter-stylesheets.md). Style Package Entry Point
+    // existence is not checked here: the entrypoint manifest loader rejects a
+    // styleBundle that disagrees with the entrypoint's styles.css, and the
+    // generated bundle is byte-pinned by
     // tools/generate-entrypoint-manifests.mjs --check.
     name: 'token-substrate-ownership',
     kind: 'permanent',
@@ -155,15 +157,17 @@ const architectureCheckManifest = [
     run: checkTokenSubstrateDoesNotOwnComponentSkins,
   },
   {
-    // Default Style Bundle contract (docs/adr/0002-public-package-and-
-    // stylesheet-surface.md, #312): hell-ui/styles.css is generated from
-    // explicit entrypoint styleBundle metadata, orders the Shared Style
-    // Substrate before standard component styles, and never includes Heavy
-    // Feature Stylesheets or Theme Adapter Stylesheets.
-    name: 'default-style-bundle',
+    // Heavy surfaces stay out of the Default Style Bundle
+    // (docs/adr/0002-public-package-and-stylesheet-surface.md, #312): a Heavy
+    // Feature or TanStack table entrypoint must declare styleBundle "opt-in"
+    // in its sidecar, so a consumer never pays for that CSS by importing
+    // hell-ui/styles.css. This is the metadata decision the generated bundle
+    // is rendered from; the rendered file itself is byte-pinned by
+    // tools/generate-entrypoint-manifests.mjs --check.
+    name: 'heavy-style-opt-in',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkDefaultStyleBundle,
+    run: checkHeavyStyleOptIn,
   },
   { name: 'component-contract', kind: 'permanent', owner: '@AntonPieper', run: checkComponentContract },
   {
@@ -836,11 +840,11 @@ function checkEntrypointManifestIntegrity() {
   checkEntrypointManifestSourceCoverage();
 }
 
-// Package-output integrity: how the package resolves locally — the
-// @heinrich/source resolution contract instead of tsconfig path aliases, and
-// the import-path-first Angular workspace layout. The generated exports map
-// itself is byte-pinned by tools/generate-entrypoint-manifests.mjs --check.
-function checkPackageOutputIntegrity() {
+// Package resolution: how the package resolves locally — the @heinrich/source
+// resolution contract instead of tsconfig path aliases, and the
+// import-path-first Angular workspace layout. The generated exports map itself
+// is byte-pinned by tools/generate-entrypoint-manifests.mjs --check.
+function checkPackageResolution() {
   const tsconfig = readTsconfigFile('tsconfig.json');
   if (tsconfig.compilerOptions?.paths) {
     failures.push(
@@ -1133,7 +1137,7 @@ function checkInternalEntrypointPrivacyContract() {
   }
 }
 
-function checkDefaultStyleBundle() {
+function checkHeavyStyleOptIn() {
   const heavyCategories = new Set([
     entrypointCategories.FEATURE,
     entrypointCategories.TANSTACK_TABLE_SHELL,

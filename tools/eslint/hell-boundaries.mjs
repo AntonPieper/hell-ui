@@ -2,9 +2,9 @@
  * AST-based ESLint enforcement of hell-ui entrypoint dependency
  * boundaries (#259). Since #270 these rules are the only import-boundary
  * enforcement — including the table adapter direction edge — and
- * tools/check-architecture.mjs keeps only durable concerns no standard tool
- * covers (entrypoint sidecar coverage, local package resolution,
- * optional-peer metadata). The rules:
+ * tools/check-architecture.mjs keeps only the durable concerns no standard
+ * tool covers: entrypoint sidecar coverage, local package resolution, and
+ * optional-peer metadata. The rules:
  *
  * - entrypoint-boundaries: which entrypoint categories may import which, and
  *   that cross-entrypoint imports go through the target's Package Entry Point

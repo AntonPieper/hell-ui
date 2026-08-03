@@ -113,8 +113,9 @@ export default tseslint.config(
     // identities and categories derive from the hell-entrypoint.json manifest
     // sidecars (tools/entrypoint-manifest.mjs); these AST rules are the only
     // import-boundary enforcement, table adapter direction included — the
-    // architecture checker keeps only durable manifest, package-resolution,
-    // and peer-metadata concerns.
+    // architecture checker keeps only the durable concerns no standard tool
+    // covers: entrypoint sidecar coverage, local package resolution, and
+    // optional-peer metadata.
     files: ['packages/angular/**/*.ts'],
     ignores: ['packages/angular/**/*.spec.ts', 'packages/angular/test-setup.ts'],
     plugins: { 'hell-boundaries': hellBoundaries },

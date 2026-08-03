@@ -29,7 +29,7 @@
     "test:main-policy": "node tools/check-main-policy-document.mjs",
     "restore:main-policy": "node tools/restore-main-policy.mjs",
     "api-report:update": "node tools/check-api-reports.mjs --local",
-    "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report && pnpm run benchmark:style-bundle --skip-build",
+    "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run ci:check:entrypoints && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report && pnpm run benchmark:style-bundle --skip-build",
     "benchmark:style-bundle": "node tools/check-consumer-fixtures.mjs styles-aggregate",
     "test:consumer-fixtures": "node tools/check-consumer-fixtures.mjs",
     "test:package-pack": "publint dist/hell --pack=false --strict && node tools/check-package-pack.mjs",
