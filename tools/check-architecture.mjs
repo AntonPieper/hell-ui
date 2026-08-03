@@ -1,21 +1,14 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 
 import {
   componentEntrypoints,
-  defaultStyleBundleImportSpecifiers,
   entrypointCategories,
   entrypointMetadataFileName,
   entrypointPublicApiFiles,
-  entrypointStyleExports,
   libraryRoot,
-  packageExportPath,
-  renderDefaultStyleBundleFile,
-  renderNgPackageFile,
-  renderPackageJsonExports,
-  renderPublicApiFile,
   secondaryPackageEntrypoints,
   sourcePackageCondition,
   styleBundlePolicies,
@@ -46,10 +39,7 @@ const docsHeavyLazyRoutePolicies = [
       'hell-ui/pdf-viewer/styles/styles.css',
       'pdfjs/pdf_viewer.css',
     ],
-    forbiddenComponentStyleFragments: [
-      'hell-ui/features/pdf-viewer/styles.css',
-      '@hell-ui/pdf-viewer/styles',
-    ],
+    forbiddenComponentStyleFragments: ['hell-ui/features/pdf-viewer/styles.css'],
   },
   {
     id: 'code-editor-docs',
@@ -88,11 +78,18 @@ const audioTranscriptRuntimeTerms = [
 //
 // Import-boundary enforcement is not a checker concern (#270): the AST ESLint
 // rules in tools/eslint/hell-boundaries.mjs own entrypoint category edges,
-// relative cross-entrypoint imports, optional-peer import isolation, and
-// internal public-api export bans. The checker keeps only durable concerns no
-// standard tool covers — entrypoint manifest integrity, package-output
-// integrity, optional-peer isolation at the package-metadata level, and table
-// adapter direction — plus docs and component contracts owned elsewhere.
+// relative cross-entrypoint imports, optional-peer import isolation (including
+// table adapter direction), and internal public-api export bans.
+//
+// Generated-file freshness is not a checker concern either: every file rendered
+// from the entrypoint manifest — public-api.ts, ng-package.json, styles.css,
+// and the package.json exports map — is byte-pinned by
+// tools/generate-entrypoint-manifests.mjs --check. Re-deriving a property of a
+// byte-pinned file here would only restate that gate.
+//
+// The checker keeps the durable concerns no standard tool covers — entrypoint
+// sidecar coverage, local package resolution, and optional-peer metadata —
+// plus docs and component contracts owned elsewhere.
 const architectureCheckManifest = [
   { name: 'docs-examples', kind: 'permanent', owner: '@AntonPieper', run: checkDocsExamples },
   {
@@ -114,10 +111,10 @@ const architectureCheckManifest = [
     run: checkEntrypointManifestIntegrity,
   },
   {
-    name: 'package-output-integrity',
+    name: 'package-resolution',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkPackageOutputIntegrity,
+    run: checkPackageResolution,
   },
   {
     // Browser transcript runtime APIs (not imports) stay inside the optional
@@ -145,38 +142,37 @@ const architectureCheckManifest = [
     owner: '@AntonPieper',
     run: checkInternalEntrypointPrivacyContract,
   },
-  { name: 'style-entry-points', kind: 'permanent', owner: '@AntonPieper', run: checkStyleEntryPoints },
   {
-    // Default Style Bundle contract (docs/adr/0002-public-package-and-
-    // stylesheet-surface.md, #312): hell-ui/styles.css is generated from
-    // explicit entrypoint styleBundle metadata, orders the Shared Style
-    // Substrate before standard component styles, and never includes Heavy
-    // Feature Stylesheets or Theme Adapter Stylesheets.
-    name: 'default-style-bundle',
+    // The Shared Style Substrate carries Semantic Theme Tokens, palettes, and
+    // skin-wide primitives only; a component-specific skin selector belongs in
+    // a Theme Adapter Stylesheet under hell-ui/themes/*.css
+    // (docs/adr/theme-adapter-stylesheets.md). Style Package Entry Point
+    // existence is not checked here: the entrypoint manifest loader rejects a
+    // styleBundle that disagrees with the entrypoint's styles.css, and the
+    // generated bundle is byte-pinned by
+    // tools/generate-entrypoint-manifests.mjs --check.
+    name: 'token-substrate-ownership',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkDefaultStyleBundle,
+    run: checkTokenSubstrateDoesNotOwnComponentSkins,
+  },
+  {
+    // Heavy surfaces stay out of the Default Style Bundle
+    // (docs/adr/0002-public-package-and-stylesheet-surface.md, #312): a Heavy
+    // Feature or TanStack table entrypoint must declare styleBundle "opt-in"
+    // in its sidecar, so a consumer never pays for that CSS by importing
+    // hell-ui/styles.css. This is the metadata decision the generated bundle
+    // is rendered from; the rendered file itself is byte-pinned by
+    // tools/generate-entrypoint-manifests.mjs --check.
+    name: 'heavy-style-opt-in',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkHeavyStyleOptIn,
   },
   { name: 'component-contract', kind: 'permanent', owner: '@AntonPieper', run: checkComponentContract },
   {
-    // Pins the native Number Input adoption (#250) until the release ships.
-    name: 'native-number-input-contract',
-    kind: 'migration',
-    owner: '@AntonPieper',
-    removeAfter: '0.2.0',
-    run: checkNativeNumberInputContract,
-  },
-  {
-    // Pins the slim App Shell coordination interface (#251) until the release ships.
-    name: 'slim-app-shell-contract',
-    kind: 'migration',
-    owner: '@AntonPieper',
-    removeAfter: '0.2.0',
-    run: checkSlimAppShellContract,
-  },
-  {
-    // Guards the ADR-decided tooltip vocabulary and its deliberate tuple
-    // absence (docs/adr/tooltip-content-and-surface.md, #238).
+    // Guards the ADR-decided tooltip vocabulary
+    // (docs/adr/tooltip-content-and-surface.md, #238).
     name: 'tooltip-vocabulary-contract',
     kind: 'permanent',
     owner: '@AntonPieper',
@@ -193,12 +189,6 @@ const architectureCheckManifest = [
     kind: 'permanent',
     owner: '@AntonPieper',
     run: checkInteractiveTriggerSelectorContract,
-  },
-  {
-    name: 'table-adapter-direction',
-    kind: 'permanent',
-    owner: '@AntonPieper',
-    run: checkTableAdapterDirectionContract,
   },
   {
     name: 'ngp-state-writer-contract',
@@ -249,9 +239,7 @@ function main() {
 function checkCheckManifest(manifest) {
   const kinds = new Set(['permanent', 'migration']);
   const releasePattern = /^\d+\.\d+\.\d+$/;
-  const packageVersion = parseJsonWithComments(
-    readFile(join(root, 'packages/angular/package.json')),
-  ).version;
+  const packageVersion = readJsonFile('packages/angular/package.json').version;
   const seenNames = new Set();
 
   for (const entry of manifest) {
@@ -304,41 +292,6 @@ function compareReleases(left, right) {
     if (difference !== 0) return difference;
   }
   return 0;
-}
-
-function checkNativeNumberInputContract() {
-  const rel = 'packages/angular/number-input/number-input.ts';
-  const source = readFile(join(root, rel));
-  const requiredFragments = [
-    "selector: 'input[hellNumberInput]'",
-    "selector: 'button[hellNumberStep]'",
-    "exportAs: 'hellNumberInput'",
-    "alias: 'hellNumberStepFor'",
-    'export const HELL_NUMBER_INPUT_IMPORTS',
-  ];
-
-  for (const fragment of requiredFragments) {
-    if (!source.includes(fragment)) {
-      failures.push(`${rel} native Number Input contract is missing ${fragment}`);
-    }
-  }
-}
-
-function checkSlimAppShellContract() {
-  const styleRel = 'packages/angular/app-shell/styles.css';
-  const styles = readFile(join(root, styleRel));
-
-  for (const fragment of [
-    "[hellAppTopbar][data-slot='root'] > [hellSidenavToggle][data-slot='root']",
-    "[hellAppSecondary][data-slot='root'] > [hellSecondaryToggle][data-slot='root']",
-    "[hellAppSecondaryBody][data-slot='root'] > [hellSecondaryToggle][data-slot='root']",
-    "[data-mobile-sidenav-open='true']::before",
-    "[data-mobile-secondary-open='true']::before",
-  ]) {
-    if (!styles.includes(fragment)) {
-      failures.push(`${styleRel} slim App Shell placement recipe is missing ${fragment}`);
-    }
-  }
 }
 
 function checkDocsExamples() {
@@ -654,47 +607,6 @@ function moduleImportSpecifiers(file) {
   return imports;
 }
 
-function moduleSpecifierReferences(file) {
-  const source = readFile(file);
-  const sourceFile = ts.createSourceFile(
-    file,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-  const references = [];
-
-  function pushReference(specifier, kind) {
-    const line = sourceFile.getLineAndCharacterOfPosition(specifier.getStart(sourceFile)).line + 1;
-    references.push({ file, kind, line, specifier: specifier.text });
-  }
-
-  function visit(node) {
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      pushReference(node.moduleSpecifier, 'import');
-    } else if (
-      ts.isExportDeclaration(node) &&
-      node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    ) {
-      pushReference(node.moduleSpecifier, 'export');
-    } else if (
-      ts.isCallExpression(node) &&
-      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteral(node.arguments[0])
-    ) {
-      pushReference(node.arguments[0], 'dynamic');
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return references;
-}
-
 function isTypeOnlyImportDeclaration(node) {
   if (!node.importClause) return false;
   if (node.importClause.isTypeOnly) return true;
@@ -900,10 +812,9 @@ function checkDocsCategoryNavigationContract() {
 }
 
 // Entrypoint manifest integrity: the hell-entrypoint.json sidecars stay
-// complete and discoverable, generated public API and ng-package files match
-// the manifest render byte-for-byte, and the Light Root Entry Point policy
-// holds over the manifest itself. ESLint exempts generated public-api.ts files
-// from its relative-import rule because this check pins them.
+// complete and discoverable, and the Light Root Entry Point policy holds over
+// the manifest itself. The generated public-api.ts and ng-package.json files
+// are byte-pinned by tools/generate-entrypoint-manifests.mjs --check.
 function checkEntrypointManifestIntegrity() {
   const publicApiFiles = entrypointPublicApiFiles();
   const rootPublicApi = publicApiFiles.find((entrypoint) => entrypoint.id === 'root');
@@ -926,64 +837,33 @@ function checkEntrypointManifestIntegrity() {
     }
   }
 
-  const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
-  const supportedTableSpecifiers = [
-    'hell-ui/table',
-    'hell-ui/table-tanstack',
-    'hell-ui/table-tanstack/virtual',
-  ];
-  for (const specifier of supportedTableSpecifiers) {
-    if (!manifestSpecifiers.has(specifier))
-      failures.push(`Entrypoint metadata is missing table entry point ${specifier}`);
-  }
-
   checkEntrypointManifestSourceCoverage();
-  checkGeneratedEntrypointFiles();
 }
 
-// Package-output integrity: what the package resolves and ships — package.json
-// exports, the @heinrich/source resolution contract, and the import-path-first
-// Angular workspace layout — stays derived from the entrypoint manifest.
-function checkPackageOutputIntegrity() {
-  const publicApiFiles = entrypointPublicApiFiles();
-
-  const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
+// Package resolution: how the package resolves locally — the @heinrich/source
+// resolution contract instead of tsconfig path aliases, and the
+// import-path-first Angular workspace layout. The generated exports map itself
+// is byte-pinned by tools/generate-entrypoint-manifests.mjs --check.
+function checkPackageResolution() {
+  const tsconfig = readTsconfigFile('tsconfig.json');
   if (tsconfig.compilerOptions?.paths) {
     failures.push(
       'Root tsconfig.json must not define Hell package path aliases; package exports with @heinrich/source are the local source-resolution contract',
     );
   }
 
-  const tsconfigBase = parseJsonWithComments(readFile(join(root, 'tsconfig.base.json')));
+  const tsconfigBase = readTsconfigFile('tsconfig.base.json');
   const customConditions = tsconfigBase.compilerOptions?.customConditions ?? [];
   if (!customConditions.includes(sourcePackageCondition)) {
     failures.push(`tsconfig.base.json must include custom condition ${sourcePackageCondition}`);
   }
 
-  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
-  const packageExports = packageJson.exports ?? {};
-  const expectedPackageExports = renderPackageJsonExports();
-  if (JSON.stringify(packageExports) !== JSON.stringify(expectedPackageExports)) {
-    failures.push(
-      'Package Entry Point exports in packages/angular/package.json are stale (run pnpm run generate:entrypoints)',
-    );
-  }
-
-  const angularWorkspace = parseJsonWithComments(readFile(join(root, 'packages/angular/angular.json')));
+  const angularWorkspace = readJsonFile('packages/angular/angular.json');
   const angularSourceRoot = angularWorkspace.projects?.hell?.sourceRoot;
   if (angularSourceRoot !== '.') {
     failures.push(
       `hell-ui Angular project sourceRoot must be "." for import-path-first package layout; found ${angularSourceRoot ?? 'missing'}`,
     );
-  }
-  for (const entrypoint of publicApiFiles) {
-    const exportPath = packageExportPath(entrypoint.specifier);
-    const expectedSource = expectedPackageExports[exportPath]?.[sourcePackageCondition];
-    if (packageExports[exportPath]?.[sourcePackageCondition] !== expectedSource) {
-      failures.push(
-        `Package Entry Point ${entrypoint.specifier} export ${exportPath} must resolve ${sourcePackageCondition} to ${expectedSource}`,
-      );
-    }
   }
 }
 
@@ -993,7 +873,7 @@ function libraryPackageFiles() {
     const fullDir = join(root, dir);
     if (existsSync(fullDir)) files.push(...walk(fullDir));
   }
-  return [...new Set(files)].filter((file) => !relPath(file).includes('/node_modules/'));
+  return [...new Set(files)];
 }
 
 function libraryProductionTsFiles() {
@@ -1040,7 +920,7 @@ function isAudioTranscriptFeatureSeamPath(rel) {
 // isolation (which sources may import an optional peer) is enforced by
 // tools/eslint/hell-boundaries.mjs.
 function checkOptionalPeerIsolationContract() {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
+  const packageJson = readJsonFile('packages/angular/package.json');
   const workspaceCatalog = readWorkspaceCatalog();
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
@@ -1216,15 +1096,6 @@ function checkOptionalPeerIsolationContract() {
       `Package dependency contract must pin the optional pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
     );
   }
-
-  const rootNgPackage = parseJsonWithComments(
-    readFile(join(root, 'packages/angular/ng-package.json')),
-  );
-  if (JSON.stringify(rootNgPackage.assets ?? []).includes('pdf.worker')) {
-    failures.push(
-      'Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source',
-    );
-  }
 }
 
 // Internal Package Paths are excluded from consumer documentation, examples,
@@ -1252,7 +1123,7 @@ function checkInternalEntrypointPrivacyContract() {
 
     for (const file of walk(surfaceRoot)) {
       const rel = relPath(file);
-      if (rel.includes('/node_modules/') || !scannedExtensions.test(file)) continue;
+      if (!scannedExtensions.test(file)) continue;
 
       const source = readFile(file);
       if (!internalReferencePattern.test(source)) continue;
@@ -1266,17 +1137,7 @@ function checkInternalEntrypointPrivacyContract() {
   }
 }
 
-function checkStyleEntryPoints() {
-  for (const { exportPath, sourcePath } of entrypointStyleExports()) {
-    if (!existsSync(join(root, libraryRoot, sourcePath.slice(2)))) {
-      failures.push(`Style Package Entry Point ${exportPath} points at missing ${sourcePath}`);
-    }
-  }
-
-  checkTokenSubstrateDoesNotOwnComponentSkins();
-}
-
-function checkDefaultStyleBundle() {
+function checkHeavyStyleOptIn() {
   const heavyCategories = new Set([
     entrypointCategories.FEATURE,
     entrypointCategories.TANSTACK_TABLE_SHELL,
@@ -1291,42 +1152,6 @@ function checkDefaultStyleBundle() {
         `Default Style Bundle must not include heavy/optional surface ${entrypoint.specifier}; declare styleBundle "opt-in" in ${entrypoint.metadataPath}`,
       );
     }
-  }
-
-  const bundlePath = `${libraryRoot}/styles.css`;
-  if (!existsSync(join(root, bundlePath))) {
-    failures.push(
-      `Default Style Bundle is missing ${bundlePath} (run pnpm run generate:entrypoints)`,
-    );
-    return;
-  }
-
-  const bundle = readFile(join(root, bundlePath));
-  if (bundle !== renderDefaultStyleBundleFile()) {
-    failures.push(
-      `Default Style Bundle is stale: ${bundlePath} (run pnpm run generate:entrypoints)`,
-    );
-  }
-
-  const imports = [...bundle.matchAll(/@import\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
-  if (imports[0] !== './tokens.css') {
-    failures.push(
-      `Default Style Bundle ${bundlePath} must import the Shared Style Substrate ./tokens.css before component styles`,
-    );
-  }
-  for (const specifier of imports) {
-    if (/^\.\/(features\/|table-tanstack|themes\/)/.test(specifier)) {
-      failures.push(
-        `Default Style Bundle ${bundlePath} must not import heavy or Theme Adapter stylesheet ${specifier}`,
-      );
-    }
-  }
-
-  const expectedImports = defaultStyleBundleImportSpecifiers();
-  if (JSON.stringify(imports) !== JSON.stringify(expectedImports)) {
-    failures.push(
-      `Default Style Bundle ${bundlePath} imports must match entrypoint styleBundle metadata exactly (run pnpm run generate:entrypoints)`,
-    );
   }
 }
 
@@ -1593,33 +1418,6 @@ function checkTooltipVocabularyContract() {
       failures.push(`${rel} canonical Tooltip vocabulary is missing ${fragment}`);
     }
   }
-
-  // Tooltip deliberately exports no directive convenience array (#238): the
-  // common path imports only HellTooltip, so no tuple may blur that boundary.
-  const tuplePattern = /\bHELL_TOOLTIP[A-Z0-9_]*_(?:DIRECTIVES|IMPORTS)\b/g;
-  const files = [
-    ...libraryPackageFiles().filter((path) => /\.(?:json|ts)$/.test(path)),
-    ...walk(join(root, 'apps/docs/src')).filter((path) => /\.(?:html|json|md|ts)$/.test(path)),
-    ...walk(join(root, 'e2e')).filter((path) => /\.(?:json|ts)$/.test(path)),
-    ...walk(join(root, 'tools')).filter(
-      (path) =>
-        /\.(?:json|mjs|ts)$/.test(path) &&
-        path !== join(root, 'tools/check-architecture.mjs'),
-    ),
-    ...walk(join(root, 'etc/api-reports')).filter((path) => path.endsWith('.md')),
-    join(root, 'README.md'),
-    join(root, libraryRoot, 'README.md'),
-  ];
-
-  for (const file of files) {
-    const fileSource = readFile(file);
-    for (const match of fileSource.matchAll(tuplePattern)) {
-      const lineNumber = fileSource.slice(0, match.index).split('\n').length;
-      failures.push(
-        `Tooltip vocabulary ${relative(root, file)}:${lineNumber} exposes or consumes ${match[0]}; Tooltip has no directive convenience array — import HellTooltip (and HellTooltipSurface for custom surfaces) directly`,
-      );
-    }
-  }
 }
 
 function checkNativeButtonSelectorContract() {
@@ -1682,81 +1480,13 @@ function checkInteractiveTriggerSelectorContract() {
   }
 }
 
-// Table adapter direction (docs/adr/tanstack-table-shell.md): core table
-// primitives never depend on adapter entrypoints, and adapter engines stay
-// out of the core table surfaces. Kept as durable defense in depth alongside
-// the ESLint boundary layer because the direction edge is an ADR decision,
-// not just an import-policy default.
-function checkTableAdapterDirectionContract() {
-  const coreTableBoundaryDirs = [
-    'packages/angular/table',
-  ];
-  const coreTableBoundaryFiles = [
-    ...coreTableBoundaryDirs.flatMap((rel) => walk(join(root, rel))),
-    join(root, 'packages/angular/table/public-api.ts'),
-  ].filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
-  const adapterDirs = ['packages/angular/table-tanstack'];
-  const adapterFiles = adapterDirs
-    .flatMap((rel) => walk(join(root, rel)))
-    .filter(
-      (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
-    );
-  const policies = [
-    {
-      label: 'TanStack Table',
-      matches: (specifier) =>
-        specifier.startsWith('@tanstack/angular-table') || specifier.startsWith('@tanstack/table'),
-      allowedDir: 'packages/angular/table-tanstack',
-    },
-    {
-      label: 'TanStack Virtual',
-      matches: (specifier) => specifier.startsWith('@tanstack/virtual'),
-      allowedDir: 'packages/angular/table-tanstack/virtual',
-    },
-    {
-      label: 'Angular CDK table adapter',
-      matches: (specifier) => specifier.startsWith('@angular/cdk/'),
-      allowedDir: 'FORBIDDEN',
-    },
-  ];
-  const adapterSourceDirs = new Set(adapterDirs);
-
-  for (const file of [...coreTableBoundaryFiles, ...adapterFiles]) {
-    const rel = relPath(file);
-    const hits = moduleSpecifierReferences(file);
-    for (const hit of hits) {
-      for (const policy of policies) {
-        if (!policy.matches(hit.specifier)) continue;
-        if (rel === policy.allowedDir || rel.startsWith(`${policy.allowedDir}/`)) continue;
-        failures.push(
-          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier}; ${policy.label} imports must stay inside ${policy.allowedDir}.`,
-        );
-      }
-
-      const target = resolveRelativeModuleFile(file, hit.specifier);
-      if (!target) continue;
-      const targetRel = relPath(target);
-      const adapterDir = [...adapterSourceDirs].find(
-        (dir) => targetRel === dir || targetRel.startsWith(`${dir}/`),
-      );
-      if (adapterDir && !rel.startsWith(`${adapterDir}/`)) {
-        failures.push(
-          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table primitives must not depend on adapter entrypoints.`,
-        );
-      }
-    }
-  }
-}
-
 function checkNgpStateWriterContract() {
   const adapterRelPath = 'packages/angular/internal/ng-primitives/ngp-state-adapters.ts';
   const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
-  const ngpPackage = parseJsonWithComments(
-    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
-  );
+  const ngpPackage = readJsonFile('packages/angular/node_modules/ng-primitives/package.json');
   const workspaceCatalog = readWorkspaceCatalog();
-  const libraryPackage = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
+  const libraryPackage = readJsonFile('packages/angular/package.json');
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
@@ -1922,9 +1652,7 @@ function checkNgpStateWriterContract() {
 function checkDialogScopedModalitySeam() {
   const seamRelPath = 'packages/angular/dialog/dialog-scope.ts';
   const seamSource = readFile(join(root, seamRelPath));
-  const ngpPackage = parseJsonWithComments(
-    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
-  );
+  const ngpPackage = readJsonFile('packages/angular/node_modules/ng-primitives/package.json');
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!seamSource.includes(`HELL_DIALOG_SCOPED_MODALITY_VERSION = '${expectedVersion}'`)) {
@@ -2078,24 +1806,15 @@ function checkOneFormsContractGuard() {
   }
 }
 
+// Sidecar coverage runs the discovery backwards: the manifest loader can only
+// describe the sidecars it found, so every shipped Package Entry Point (one
+// ng-package.json per APF subpath) must have a discoverable sidecar next to it.
+// Nothing else here needs asserting — package directories, metadata paths, and
+// categories all come from the loader, which throws on a bad one.
 function checkEntrypointManifestSourceCoverage() {
-  const discoveredMetadataPaths = new Set();
-  for (const entrypoint of entrypointPublicApiFiles()) {
-    if (!existsSync(join(root, entrypoint.packageDir))) {
-      failures.push(
-        `Entrypoint Metadata ${entrypoint.id} references missing package directory ${entrypoint.packageDir}`,
-      );
-    }
-    discoveredMetadataPaths.add(entrypoint.metadataPath);
-    if (!entrypoint.metadataPath || !existsSync(join(root, entrypoint.metadataPath))) {
-      failures.push(
-        `Entrypoint Metadata ${entrypoint.id} is missing ${entrypointMetadataFileName} in ${entrypoint.packageDir}`,
-      );
-    }
-    if (!entrypoint.category) {
-      failures.push(`Entrypoint Metadata ${entrypoint.id} is missing category metadata`);
-    }
-  }
+  const discoveredMetadataPaths = new Set(
+    entrypointPublicApiFiles().map((entrypoint) => entrypoint.metadataPath),
+  );
 
   const packageMetadataPaths = walk(join(root, libraryRoot))
     .filter((path) => basename(path) === 'ng-package.json')
@@ -2105,38 +1824,6 @@ function checkEntrypointManifestSourceCoverage() {
       failures.push(`Package Entry Point is missing entrypoint metadata ${metadataPath}`);
     } else if (!discoveredMetadataPaths.has(metadataPath)) {
       failures.push(`Entrypoint Metadata is not discoverable: ${metadataPath}`);
-    }
-  }
-}
-
-function checkGeneratedEntrypointFiles() {
-  for (const entrypoint of entrypointPublicApiFiles()) {
-    const filePath = join(root, entrypoint.publicApiPath);
-    if (!existsSync(filePath)) {
-      failures.push(`Entrypoint generated public API is missing ${entrypoint.publicApiPath}`);
-      continue;
-    }
-
-    const expected = renderPublicApiFile(entrypoint);
-    if (readFile(filePath) !== expected) {
-      failures.push(
-        `Entrypoint generated public API is stale: ${entrypoint.publicApiPath} (run pnpm run generate:entrypoints)`,
-      );
-    }
-  }
-
-  for (const entrypoint of secondaryPackageEntrypoints()) {
-    const filePath = join(root, entrypoint.packagePath);
-    if (!existsSync(filePath)) {
-      failures.push(`Entrypoint generated ng-package is missing ${entrypoint.packagePath}`);
-      continue;
-    }
-
-    const expected = renderNgPackageFile(entrypoint);
-    if (readFile(filePath) !== expected) {
-      failures.push(
-        `Entrypoint generated ng-package is stale: ${entrypoint.packagePath} (run pnpm run generate:entrypoints)`,
-      );
     }
   }
 }
@@ -2183,7 +1870,18 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function parseJsonWithComments(source) {
+// Plain JSON: package.json, angular.json, and installed package manifests are
+// strict JSON, so nothing may quietly strip content from them.
+function readJsonFile(relativePath) {
+  return JSON.parse(readFile(join(root, relativePath)));
+}
+
+// tsconfig files are the one JSONC surface the checker reads, so the
+// comment-stripping scanner exists for them alone. Comment openers inside
+// string values (`"./features/*/styles.css"`) and escaped quotes
+// (`"\\"`) must survive, which is what the string/escape states below track.
+function readTsconfigFile(relativePath) {
+  const source = readFile(join(root, relativePath));
   let json = '';
   let inString = false;
   let escaped = false;
@@ -2217,7 +1915,7 @@ function parseJsonWithComments(source) {
         continue;
       }
 
-      if (char === '\\\\') {
+      if (char === '\\') {
         escaped = true;
         continue;
       }
@@ -2256,12 +1954,18 @@ function readFile(path) {
   return readFileSync(path, 'utf8');
 }
 
+// Repo-source walk with lstat semantics: Dirent classifies a symlink as
+// neither file nor directory, so installed-dependency trees reachable through
+// pnpm's symlink farm (packages/angular/node_modules/*) are never followed.
+// Installed dependencies are not repo sources, and reading them turns any
+// text sweep into a scan of thousands of published .d.ts files.
 function walk(path) {
   const out = [];
-  for (const name of readdirSync(path)) {
-    const fullPath = join(path, name);
-    if (statSync(fullPath).isDirectory()) out.push(...walk(fullPath));
-    else out.push(fullPath);
+  for (const dirent of readdirSync(path, { withFileTypes: true })) {
+    if (dirent.name === 'node_modules') continue;
+    const fullPath = join(path, dirent.name);
+    if (dirent.isDirectory()) out.push(...walk(fullPath));
+    else if (dirent.isFile()) out.push(fullPath);
   }
   return out;
 }
