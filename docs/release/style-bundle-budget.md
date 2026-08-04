@@ -96,3 +96,23 @@ An over-budget benchmark is a decision point, not a formality:
 Shrinking is the easy direction: when the bundle gets smaller, re-measure and
 lower the baseline and budget in the same way so the gate keeps tracking the
 accepted cost.
+
+## Re-baselining accumulated growth
+
+Routine, individually reviewed styling changes each land within budget but
+still consume headroom; left alone, the gate eventually reds a release for
+growth that was accepted piece by piece. When most of the headroom is spent,
+re-baseline in a change of its own: re-measure from a clean build
+(`pnpm run benchmark:style-bundle`, no `--skip-build`) at the revision being
+recorded, confirm the fixture's forbidden sentinels still pass, and audit that
+the accumulated delta traces to reviewed styling changes —
+
+```bash
+git log <baseline-revision>.. -- 'packages/angular/**/styles.css' 'packages/angular/**/*.recipes.ts'
+```
+
+— then refresh `baseline` and re-derive the limits exactly as in step 3 above.
+This is the one case where a budget-only change is expected rather than a red
+flag: the pull request records the measurement and the commit audit in place
+of a styling diff. An accumulated delta that does *not* trace to reviewed
+styling changes is the hunt-it-down case, not a re-baseline.
