@@ -53,6 +53,18 @@
     - docker
   interruptible: true
   retry: !reference [.retries, infra-only]
+  # Default placement: the test set runs in every test pipeline — merge
+  # requests, pushes to main, v* tags, scheduled and dispatched runs — and
+  # never in the scheduled policy sweep, which runs exactly one job of its
+  # own. Jobs with a placement of their own (the MR contract, the E2E tiers,
+  # the release machinery, the sweep) override this list wholesale.
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
   variables:
     COREPACK_HOME: "$CI_PROJECT_DIR/.cache/corepack"
     COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"

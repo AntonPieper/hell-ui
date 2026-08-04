@@ -57,3 +57,4 @@ include:
   - local: .gitlab/ci/e2e.yml
   - local: .gitlab/ci/package-consumer.yml
   - local: .gitlab/ci/release.yml
+  - local: .gitlab/ci/sweep.yml

@@ -29,6 +29,8 @@
     "verify:main-policy": "node tools/policy/check-main-policy.mjs",
     "test:main-policy": "node tools/policy/check-main-policy-document.mjs",
     "restore:main-policy": "node tools/policy/restore-main-policy.mjs",
+    "verify:release-drift": "node tools/release/gitlab-release-drift.mjs audit",
+    "restore:release": "node tools/release/gitlab-release-drift.mjs restore",
     "api-report:update": "node tools/api-report/check-api-reports.mjs --local",
     "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:tools && pnpm run ci:check:entrypoints && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report && pnpm run benchmark:style-bundle --skip-build",
     "benchmark:style-bundle": "node tools/package/check-consumer-fixtures.mjs styles-aggregate",

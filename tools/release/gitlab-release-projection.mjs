@@ -63,6 +63,13 @@ const semVerPattern =
 // other version mismatch.
 const dryRunSuffixPattern = /-dryrun\.(0|[1-9]\d*)$/;
 
+// Whether a version carries the reserved dry-run suffix. The drift sweep
+// asks this about release tags: a dry run never creates a release, so a
+// release sitting on a dry-run tag is drift by construction.
+export function isReservedDryRunVersion(version) {
+  return typeof version === 'string' && dryRunSuffixPattern.test(version);
+}
+
 // The version a release tag projects, or null when the tag is not a
 // v-prefixed SemVer release tag.
 export function releaseTagVersion(tagName) {
@@ -83,7 +90,7 @@ export function decideReleaseMode({ tagName, manifestVersion }) {
       version: null,
     };
   }
-  if (dryRunSuffixPattern.test(manifestVersion)) {
+  if (isReservedDryRunVersion(manifestVersion)) {
     return {
       failures: [
         `${packageManifestPath} version ${manifestVersion} carries the reserved -dryrun.<n> ` +

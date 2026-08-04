@@ -51,12 +51,13 @@ export function describeTransport() {
 }
 
 /**
- * Read one object.
+ * Read one object. Shared by the policy commands and the release drift
+ * sweep, which deliberately rides the same transport and read-only token.
  *
  * @param {string} path API v4 path, without a leading slash.
  * @returns {Promise<object>}
  */
-async function apiGet(path) {
+export async function apiGet(path) {
   return request('GET', path, null);
 }
 
@@ -64,12 +65,14 @@ async function apiGet(path) {
  * Read every page of a collection.
  *
  * @param {string} path API v4 path, without a leading slash or query string.
+ * @param {string} query optional extra query parameters, already encoded.
  * @returns {Promise<object[]>}
  */
-async function apiList(path) {
+export async function apiList(path, query = '') {
+  const prefix = query === '' ? '' : `${query}&`;
   const entries = [];
   for (let page = 1; ; page += 1) {
-    const batch = await request('GET', `${path}?per_page=${perPage}&page=${page}`, null);
+    const batch = await request('GET', `${path}?${prefix}per_page=${perPage}&page=${page}`, null);
     if (!Array.isArray(batch)) {
       throw new Error(`Expected a collection from ${path}; got ${typeof batch}.`);
     }
