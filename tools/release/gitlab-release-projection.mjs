@@ -697,7 +697,7 @@ async function apiRequest(env, method, path, body = null) {
 // means nothing published yet — both prove the endpoint and the job token.
 // A 401/403 is a refused credential and fails closed.
 async function registryMetadata(registryUrl, jobToken) {
-  const url = `${registryUrl}${publishedPackageName.replace('/', '%2F')}`;
+  const url = `${registryUrl}${publishedPackageName.replaceAll('/', '%2F')}`;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${jobToken}` } });
   if (response.status === 404) return { failures: [], versions: [] };
   if (response.status !== 200) {
