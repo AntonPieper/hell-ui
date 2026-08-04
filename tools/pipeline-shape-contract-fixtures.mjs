@@ -1,18 +1,15 @@
 // Negative fixtures for the pipeline-shape contract (GitLab migration).
 //
-// Each fixture copies the repository's real GitLab CI definitions into a
-// temporary directory, applies one adversarial mutation, and asserts that the
-// contract rejects it. This keeps the contract honest: a check that only ever
-// sees the compliant pipeline could silently stop catching the shrink it
-// exists to prevent.
+// Each fixture is one adversarial mutation of a named CI definition that the
+// contract must reject; runMutatedTreeFixture replays it against a copy of the
+// repository's real GitLab CI definitions. This keeps the contract honest: a
+// check that only ever sees the compliant pipeline could silently stop
+// catching the shrink it exists to prevent.
 
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { runMutatedTreeFixture, runNamedFixtures } from './fixture-harness.mjs';
 import { collectPipelineShapeContractErrors } from './pipeline-shape-contracts.mjs';
 
-// `mutate` receives the named file's real text and must return a changed
-// document; `needle` must appear in the resulting contract errors.
 const fixtures = [
   {
     // The include list is the roster's supply line: dropping one line removes
@@ -131,38 +128,18 @@ const fixtures = [
 ];
 
 export function runPipelineShapeContractFixtures({ root }) {
-  const failures = [];
-  for (const fixture of fixtures) {
-    for (const failure of runFixture(root, fixture)) {
-      failures.push(`pipeline-shape fixture "${fixture.name}": ${failure}`);
-    }
-  }
-  return { failures, total: fixtures.length };
-}
-
-function runFixture(root, fixture) {
-  const dir = mkdtempSync(join(tmpdir(), 'hell-pipeline-shape-'));
-  try {
-    mkdirSync(join(dir, '.gitlab'), { recursive: true });
-    cpSync(join(root, '.gitlab-ci.yml'), join(dir, '.gitlab-ci.yml'));
-    cpSync(join(root, '.gitlab', 'ci'), join(dir, '.gitlab', 'ci'), { recursive: true });
-
-    const original = readFileSync(join(root, fixture.file), 'utf8');
-    const mutated = fixture.mutate(original);
-    if (mutated === original) {
-      return ['the mutation did not change the file; the fixture no longer tests anything.'];
-    }
-    writeFileSync(join(dir, fixture.file), mutated);
-
-    const errors = collectPipelineShapeContractErrors({ root: dir });
-    if (!errors.some((error) => error.includes(fixture.needle))) {
-      return [
-        `expected a contract error mentioning "${fixture.needle}"; got: ` +
-          `${errors.join(' | ') || '(no errors)'}`,
-      ];
-    }
-    return [];
-  } finally {
-    rmSync(dir, { force: true, recursive: true });
-  }
+  return runNamedFixtures(
+    fixtures,
+    (fixture) =>
+      runMutatedTreeFixture({
+        root,
+        copy: ['.gitlab-ci.yml', join('.gitlab', 'ci')],
+        tmpPrefix: 'hell-pipeline-shape-',
+        path: fixture.file,
+        mutate: fixture.mutate,
+        collectErrors: collectPipelineShapeContractErrors,
+        needle: fixture.needle,
+      }),
+    'pipeline-shape fixture',
+  );
 }

@@ -15,6 +15,7 @@
 // repair-shaped option fail with visible evidence — and the immutability
 // policy gate refuses anything but affirmative evidence.
 
+import { collectExpectationFailures, runNamedFixtures } from './fixture-harness.mjs';
 import {
   chooseProjectionAction,
   classifyPrereleaseVersion,
@@ -61,16 +62,11 @@ const fixtures = [
 ];
 
 export function runReleaseProjectionFixtures() {
-  const failures = [];
-  for (const fixture of fixtures) {
-    const context = { fail: (message) => failures.push(`release-projection fixture "${fixture.name}": ${message}`) };
-    try {
-      fixture.run(context);
-    } catch (error) {
-      context.fail(error instanceof Error ? error.message : String(error));
-    }
-  }
-  return { failures, total: fixtures.length };
+  return runNamedFixtures(
+    fixtures,
+    (fixture, fail) => fixture.run({ fail }),
+    'release-projection fixture',
+  );
 }
 
 function registries({ githubPackages = 'success', npmjsRequired = true, npmjs = 'success', extra = [] } = {}) {
@@ -117,13 +113,25 @@ function verify(overrides = {}) {
   });
 }
 
+// One decision reports every reason it refused at once, so `needles` is the
+// whole expected verdict: a reason no needle names fails the fixture too.
+const projectionDialect = (label) => ({
+  pass: (failures) => failures.map((failure) => `${label} unexpectedly failed: ${failure}`),
+  missing: (needle, failures) =>
+    `${label} must fail mentioning "${needle}"; got: ${failures.join(' | ') || '(pass)'}`,
+  extra: (failure) => `${label} also failed for an unexpected reason: ${failure}`,
+});
+
 function expectPass(context, { failures }, label) {
-  for (const failure of failures) context.fail(`${label} unexpectedly failed: ${failure}`);
+  for (const failure of collectExpectationFailures(failures, [], projectionDialect(label))) {
+    context.fail(failure);
+  }
 }
 
-function expectFailure(context, { failures }, needle, label) {
-  if (!failures.some((failure) => failure.includes(needle))) {
-    context.fail(`${label} must fail mentioning "${needle}"; got: ${failures.join(' | ') || '(pass)'}`);
+// `needles` is one substring or a list of them.
+function expectFailure(context, { failures }, needles, label) {
+  for (const failure of collectExpectationFailures(failures, needles, projectionDialect(label))) {
+    context.fail(failure);
   }
 }
 
@@ -346,8 +354,7 @@ function fixtureRejectsMetadataMismatches(context) {
   // The failure has to name the asset it found, so a maintainer can see what
   // was attached without opening the release.
   const withAsset = verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) });
-  expectFailure(context, withAsset, 'no custom assets', 'an unexpected custom asset');
-  expectFailure(context, withAsset, 'hell-ui-0.3.0.tgz', 'an unexpected custom asset');
+  expectFailure(context, withAsset, ['no custom assets', 'hell-ui-0.3.0.tgz'], 'an unexpected custom asset');
 }
 
 function fixtureRequiresImmutabilityPolicy(context) {
@@ -383,10 +390,13 @@ function fixtureVerifiesPublishedState(context) {
     verify({ phase: 'published', release: releaseProjection({ draft: false, immutable: true }) }),
     'verifying the published immutable release',
   );
+  // GitHub cannot make a draft immutable, so a projection the publish step
+  // left as a draft fails on both counts at once, and the verification has to
+  // report both rather than stopping at the draft flag.
   expectFailure(
     context,
     verify({ phase: 'published' }),
-    'still a draft',
+    ['still a draft', 'not immutable'],
     'a projection left as a draft',
   );
   expectFailure(
@@ -478,8 +488,7 @@ function fixtureBodyDrift(context) {
       body: '## [0.3.0] - 2026-07-27\n\n### Fixed\n\n- Fixed toast exit ordering, honest!\n',
     }),
   );
-  expectFailure(context, edited, 'byte-for-byte', 'an edited body');
-  expectFailure(context, edited, 'first difference at line 5', 'an edited body');
+  expectFailure(context, edited, ['byte-for-byte', 'first difference at line 5'], 'an edited body');
 
   // A web-UI edit that "restores" the text with CRLF line endings is still
   // drift; exact restoration means exact tagged bytes.
@@ -543,8 +552,8 @@ function fixtureMissingTaggedRecord(context) {
     recordCommit: commit,
     tagCommit: commit,
   });
-  expectFailure(context, missing, 'carries no Released Version Notes record', 'a tag without a record');
-  expectFailure(context, missing, '.changes/0.3.0.md', 'a tag without a record');
+  const needles = ['carries no Released Version Notes record', '.changes/0.3.0.md'];
+  expectFailure(context, missing, needles, 'a tag without a record');
 
   // The tag is validated before it can name a record path, so a tag outside
   // the v<SemVer> shape never reaches the filesystem.
@@ -566,8 +575,12 @@ function fixtureMissingTaggedRecord(context) {
 
 function fixtureRepairRequestsRejected(context) {
   const repair = drift(publishedRelease('0.3.0'), { repair: true });
-  expectFailure(context, repair, 'Unsupported release drift option', 'a repair request');
-  expectFailure(context, repair, 'never repairs, edits, or republishes', 'a repair request');
+  expectFailure(
+    context,
+    repair,
+    ['Unsupported release drift option', 'never repairs, edits, or republishes'],
+    'a repair request',
+  );
 
   const autoFix = drift(publishedRelease('0.3.0', { body: 'drifted' }), { autoRepair: 'restore-from-tag' });
   expectFailure(context, autoFix, 'Unsupported release drift option', 'an auto-repair request');

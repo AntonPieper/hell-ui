@@ -6,6 +6,11 @@
 // report and allowlist shapes the policy does not recognize. Nothing here
 // reads a file or runs the analyzer.
 
+import {
+  collectExpectationFailures,
+  errorDialect,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
 import { evaluateSecretDetectionReport } from './secret-detection-policy.mjs';
 
 // A finding as the analyzer emits it. The raw extract is the secret itself;
@@ -217,48 +222,46 @@ const secretDetectionPolicyFixtures = [
 ];
 
 export function runSecretDetectionPolicyFixtures() {
-  const failures = [];
-
-  for (const fixture of secretDetectionPolicyFixtures) {
-    const verdict = evaluateSecretDetectionReport({
-      report: fixture.report,
-      allowlist: fixture.allowlist,
-    });
-    for (const failure of collectFixtureFailures(fixture.expect, verdict)) {
-      failures.push(`secret-detection fixture "${fixture.name}": ${failure}`);
-    }
-  }
-
-  return { failures, total: secretDetectionPolicyFixtures.length };
+  return runNamedFixtures(
+    secretDetectionPolicyFixtures,
+    runFixture,
+    'secret-detection fixture',
+  );
 }
 
-function collectFixtureFailures(expect, verdict) {
+const reportDialect = errorDialect({
+  clean: 'a pass',
+  rejection: 'a rejection',
+  got: 'got errors: ',
+});
+
+function runFixture(fixture) {
+  const verdict = evaluateSecretDetectionReport({
+    report: fixture.report,
+    allowlist: fixture.allowlist,
+  });
+
+  if (fixture.expect.neverContains !== undefined) {
+    return collectLeakFailures(fixture.expect.neverContains, verdict);
+  }
+  return [
+    ...collectExpectationFailures(verdict.errors, fixture.expect.errors ?? [], reportDialect),
+    ...collectFindingFailures(fixture.expect, verdict),
+  ];
+}
+
+// The one assertion no shared matcher can make: the secret itself must never
+// travel from the report into the verdict, so the whole verdict is searched
+// for the raw extract rather than compared field by field.
+function collectLeakFailures(secret, verdict) {
+  if (!JSON.stringify(verdict).includes(secret)) return [];
+  return ['the verdict leaked the raw source extract.'];
+}
+
+// Findings are asserted field by field against a partial shape, so a fixture
+// can pin the one field it is about without restating the whole finding.
+function collectFindingFailures(expect, verdict) {
   const failures = [];
-
-  if (expect.neverContains !== undefined) {
-    if (JSON.stringify(verdict).includes(expect.neverContains)) {
-      failures.push('the verdict leaked the raw source extract.');
-    }
-    return failures;
-  }
-
-  const expectedErrors = expect.errors ?? [];
-  if (expectedErrors.length > 0) {
-    if (verdict.errors.length === 0) {
-      failures.push(`expected a rejection mentioning ${expectedErrors.join(', ')}; got a pass.`);
-      return failures;
-    }
-    for (const needle of expectedErrors) {
-      if (!verdict.errors.some((error) => error.includes(needle))) {
-        failures.push(
-          `expected an error mentioning "${needle}"; got: ${verdict.errors.join(' | ')}`,
-        );
-      }
-    }
-  } else if (verdict.errors.length > 0) {
-    failures.push(`expected a pass; got errors: ${verdict.errors.join(' | ')}`);
-  }
-
   for (const [key, expected] of Object.entries(expect)) {
     if (key === 'errors') continue;
     const actual = verdict[key];
@@ -279,6 +282,5 @@ function collectFixtureFailures(expect, verdict) {
       }
     });
   }
-
   return failures;
 }
