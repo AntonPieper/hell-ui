@@ -190,6 +190,106 @@ Tailwind `@source` scanning. If an app invents its own Tailwind classes in
 `ui`, those classes still belong to the app's own Tailwind content/source
 pipeline.
 
+## Form controls commit through one value model
+
+Every Hell-owned form control replaced `ControlValueAccessor` with a single
+Angular model input — its Control Value Authority — and implements exactly one
+Signal Forms contract. `ControlValueAccessor`, the `NG_VALUE_ACCESSOR` and
+`NG_VALIDATORS` providers, and the `writeValue` / `registerOnChange` /
+`registerOnTouched` / `setDisabledState` methods are gone from every control;
+the decision record is
+[`0001-control-value-authority.md`](../adr/0001-control-value-authority.md).
+
+| Control            | Selector                | Committed model                                        | Contract                |
+| ------------------ | ----------------------- | ------------------------------------------------------ | ----------------------- |
+| `HellCheckbox`     | `button[hellCheckbox]`  | `checked`: `boolean`                                   | `FormCheckboxControl`   |
+| `HellSwitch`       | `button[hellSwitch]`    | `checked`: `boolean`                                   | `FormCheckboxControl`   |
+| `HellSlider`       | `hell-slider`           | `value`: `number`                                      | `FormValueControl`      |
+| `HellRadioGroup`   | `[hellRadioGroup]`      | `value`: `T \| null`                                   | `FormValueControl`      |
+| `HellToggleGroup`  | `[hellToggleGroup]`     | `value`: `string \| null` / `readonly string[]`        | `FormValueControl`      |
+| `HellSelect`       | `[hellSelect]`          | `value`: `T \| null` / `readonly T[]`                  | `FormValueControl`      |
+| `HellCombobox`     | `[hellCombobox]`        | `value`: `T \| null` / `readonly T[]`                  | `FormValueControl`      |
+| `HellCodeEditor`   | `hell-code-editor`      | `value`: `string`                                      | `FormValueControl`      |
+| `HellDateInput`    | `input[hellDateInput]`  | `value`: `Date \| null`                                | `FormValueControl`      |
+| `HellTimeInput`    | `input[hellTimeInput]`  | `value`: `HellTimeValue \| null`                       | `FormValueControl`      |
+| `HellNumberInput`  | `input[hellNumberInput]`| `value`: `number \| null`                              | `FormValueControl`      |
+
+Toggle Group's model shape follows its `type` input (`'single'` keeps
+`string | null`, `'multiple'` keeps `readonly string[]`). Select and Combobox
+share the Pick Value family from `hell-ui/core`: `HellPickSingleValue<T>` is
+`T | null`, `HellPickMultipleValue<T>` is `readonly T[]`, and `HellPickValue<T>`
+is either. The three typed inputs additionally keep editable draft text as
+interaction state; their sections below cover the parse-error reporting that
+comes with it.
+
+One model serves every binding path. Direct `[value]`, two-way `[(value)]`,
+Signal Forms `[formField]`, Reactive Forms `formControl`, and template-driven
+`ngModel` all read and write the same model through Angular's built-in Signal
+Forms interoperability, so existing `formControl` and `ngModel` templates keep
+working with no replacement code. Use the `checked` equivalents on Checkbox and
+Switch. Do not keep a separate change output: the model supplies
+`(valueChange)` / `(checkedChange)` itself.
+
+### Static value attributes must become bindings
+
+Model inputs do not support input transforms, so the `booleanAttribute` and
+`numberAttribute` coercion that used to sit on `value` / `checked` is gone. A
+static attribute still binds, but it now passes its raw string through
+unconverted — so any control whose model is not a string needs an explicit
+binding:
+
+```html
+<!-- Before -->
+<button hellCheckbox checked aria-label="Accepted"></button>
+<hell-slider value="42" />
+
+<!-- After -->
+<button hellCheckbox [checked]="true" aria-label="Accepted"></button>
+<hell-slider [value]="42" />
+```
+
+Configuration inputs are unaffected and keep their transforms, `disabled`
+included. A static `value="bold"` on Toggle Group in single mode, or on a Radio
+Group over strings, still passes the correct type and needs no change.
+
+### Required and range rules move to the form
+
+No migrated control contributes control errors any more. Declare policy on the
+form instead — `Validators.required` and friends for classic controls, or
+`required()` / `min()` / `max()`-style schema rules.
+
+Where a control exposes a matching reserved input, that rule's metadata drives
+it, and the set is deliberately narrow: `required` on Checkbox, Radio Group and
+the three typed inputs; `min` / `max` on Slider and the three typed inputs.
+Switch, Slider, Toggle Group, Select and Combobox have no `required` input, so a
+required rule on those surfaces only through your own form error rendering.
+
+Invalid presentation is likewise narrower than before. Only the three typed
+inputs expose a reserved `invalid` input and set `aria-invalid` themselves. The
+delegated controls' recipes still style a `data-invalid` attribute, but the
+controls no longer decide it — that state now comes from the surrounding Field
+or Control Group.
+
+### Touched state is an output
+
+Every migrated control exposes `readonly touch = output<void>()` and emits it at
+its documented interaction boundary. The `FormField` directive and the classic
+interop layers subscribe to it, so bound forms track touched with no work on
+your side; there is no `markTouched` bridge any more. Read it directly only if
+your app tracked touched by hand.
+
+### Controls that did not change
+
+Native styled pairs stay platform-owned and gain no Hell value model:
+`HellNativeCheckbox`, `HellNativeSwitch`, `HellNativeRadio`,
+`HellNativeRadioGroup`, and `HellNativeSelect` keep binding through Angular's
+own `DefaultValueAccessor`. So do the styling-only `input[hellInput]` and
+`textarea[hellTextarea]` directives. The standalone `button[hellToggle]`,
+`HellAccordion`, `HellListbox`, `HellMenuItemCheckbox`,
+`HellMenuItemRadioGroup`, `HellTabset`, `HellPagination`, and
+`HellPaginationStrip` remain delegated or consumer-owned interaction surfaces
+with no forms contract.
+
 ## Date Input is native-input behavior
 
 The owned `<hell-date-input>` component and its embedded calendar are removed.
