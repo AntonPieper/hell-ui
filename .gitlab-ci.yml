@@ -56,3 +56,4 @@ include:
   - local: .gitlab/ci/e2e-image.yml
   - local: .gitlab/ci/e2e.yml
   - local: .gitlab/ci/package-consumer.yml
+  - local: .gitlab/ci/release.yml

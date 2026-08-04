@@ -1,11 +1,13 @@
 // Static pipeline-shape contract (GitLab migration).
 //
 // Parses the root .gitlab-ci.yml plus its local includes and proves the
-// pipeline's shape without running it: the merge-request job roster is
-// complete, every job carries the docker runner tag, the workflow rules match
-// the five-source topology, exactly one E2E tier job instantiates per test
-// pipeline and selects exactly its tier, and every `needs` edge points at a
-// job that exists in the same pipeline. This pipeline deliberately has no
+// pipeline's shape without running it: the merge-request, push-to-main, and
+// v* tag job rosters are complete, every job carries the docker runner tag,
+// the workflow rules match the five-source topology, exactly one E2E tier
+// job instantiates per test pipeline and selects exactly its tier, the
+// release machinery is reachable from a real tag push only and publishes
+// last behind a blocking manual gate, and every `needs` edge points at a job
+// that exists in the same pipeline. This pipeline deliberately has no
 // aggregate gate job — the merge gate is the pipeline itself — so this
 // contract carries the silent-shrink protection that the e2e-gate job
 // provides on the GitHub side.
@@ -56,6 +58,42 @@ const canonicalWorkflowRules = [
 
 const tierJobs = { 'e2e:pr': 'pr', 'e2e:main': 'main', 'e2e:full': 'full' };
 
+// The canonical v* tag rule every release job carries: release machinery is
+// reachable from a real tag push only — never from a dispatch or schedule,
+// even one running on a tag ref.
+const tagRuleExpression = '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\\d/';
+
+// The one job in the pipeline allowed — and required — to use when: manual:
+// the release machinery's blocking approval gate, the last abort point
+// before publication. This is the contract decision that admits `manual`
+// into the when: subset, for exactly this job.
+const manualGateJob = 'release:approval';
+
+// The release machinery, in publish-last order. checkReleaseMachinery pins
+// each job's rule, the DAG between them, and the blocking semantics of the
+// approval gate.
+const releaseJobs = [
+  'release:gate',
+  'release:rule-liveness',
+  'release:approval',
+  'release:publish',
+  'release:projection',
+];
+
+// Everything the publish job must sit behind: the release machinery ahead of
+// it plus every gating job of the tag pipeline. An edge missing here means
+// something publishes before the pipeline proved it.
+const releasePublishNeeds = [
+  'release:gate',
+  'release:rule-liveness',
+  'release:approval',
+  'static',
+  'unit',
+  'build',
+  'package-consumer',
+  'e2e:full',
+];
+
 // Required merge-request roster: the jobs that must instantiate
 // unconditionally in every MR pipeline. e2e-image is checked separately —
 // it must exist and stay conditional (a derivation rebuild, not a gate).
@@ -86,6 +124,26 @@ const requiredMainJobs = [
 ];
 const forbiddenMainJobs = ['pr-state', 'release-notes', 'e2e:pr', 'e2e:full'];
 
+// v* tag roster: the tag pipeline is the release gate, so it carries the
+// full test set plus the release machinery. Secret detection stays off on
+// purpose — a tag names a commit that already passed the push-to-main scan.
+const requiredTagJobs = [
+  'static',
+  'unit',
+  'build',
+  'package-consumer',
+  'e2e:full',
+  ...releaseJobs,
+];
+const forbiddenTagJobs = [
+  'pr-state',
+  'release-notes',
+  'secret_detection',
+  'secret-detection-gate',
+  'e2e:pr',
+  'e2e:main',
+];
+
 export function collectPipelineShapeContractErrors({ root }) {
   const errors = [];
   const model = loadPipeline(root, errors);
@@ -97,6 +155,7 @@ export function collectPipelineShapeContractErrors({ root }) {
   checkDockerTags(model, errors);
   const evaluation = evaluateAllJobs(model, errors);
   checkRosters(model, evaluation, errors);
+  checkReleaseMachinery(model, evaluation, errors);
   checkTierDiscipline(model, evaluation, errors);
   checkNeedsConsistency(model, evaluation, errors);
   // A subset violation surfaces once per evaluation that touches it;
@@ -375,13 +434,14 @@ function parseRuleExpression(owner, text, errors) {
 // --- Rules: shape validation and static evaluation ----------------------
 
 const allowedRuleKeys = ['if', 'when', 'changes'];
-// Exactly the when: values the checked-in pipeline uses. `manual` and
-// `always` are outside the subset on purpose: each changes when (or
-// whether) a job gates, so admitting one is a contract decision, not a
-// default.
+// Exactly the when: values the checked-in pipeline uses. `manual` is
+// admitted for one named job only — the release approval gate, where the
+// human block is the point (the checkReleaseMachinery decision); everywhere
+// else it would leave a required gate quietly waiting. `always` stays
+// outside the subset: admitting it is a contract decision, not a default.
 const allowedWhenValues = ['never', 'on_success'];
 
-function validateRules(owner, rules, errors) {
+function validateRules(owner, rules, errors, { manualAllowed = false } = {}) {
   if (rules === undefined) return true;
   if (isReference(rules) || !Array.isArray(rules)) {
     errors.push(`${owner} has a rules: shape the contract does not interpret.`);
@@ -402,8 +462,18 @@ function validateRules(owner, rules, errors) {
       }
     }
     if ('when' in rule && !allowedWhenValues.includes(rule.when)) {
-      errors.push(`${label} uses when: ${JSON.stringify(rule.when)}, outside the minimal subset.`);
-      valid = false;
+      if (rule.when === 'manual' && manualAllowed) {
+        // The one admitted manual rule; checkReleaseMachinery pins its shape.
+      } else if (rule.when === 'manual') {
+        errors.push(
+          `${label} uses when: "manual", which only the release approval gate ` +
+            `("${manualGateJob}") may carry.`,
+        );
+        valid = false;
+      } else {
+        errors.push(`${label} uses when: ${JSON.stringify(rule.when)}, outside the minimal subset.`);
+        valid = false;
+      }
     }
     if ('changes' in rule && !(Array.isArray(rule.changes) && rule.changes.every((c) => typeof c === 'string'))) {
       errors.push(`${label} has a changes: shape the contract does not interpret.`);
@@ -421,7 +491,9 @@ function validateRules(owner, rules, errors) {
 //
 // Rules evaluate in order, first match wins, no match means no job. A rule
 // whose if-part matches but that carries changes: forks the walk: one path
-// applies the rule, the other continues past it.
+// applies the rule, the other continues past it. A when: manual rule
+// instantiates the job ('always') — whether an instantiated manual job also
+// gates is checkReleaseMachinery's question, not this evaluator's.
 function evaluateRules(owner, rules, vars, errors) {
   if (rules === undefined) return 'always';
   const outcomes = new Set();
@@ -527,7 +599,8 @@ function evaluateAllJobs(model, errors) {
   const outcomes = new Map();
   for (const [name, { job }] of model.jobs) {
     const rules = resolveJobKey(model, name, job, 'rules', errors);
-    if (!validateRules(`Job "${name}"`, rules, errors)) continue;
+    if (!validateRules(`Job "${name}"`, rules, errors, { manualAllowed: name === manualGateJob }))
+      continue;
     const perContext = new Map();
     for (const context of contexts) {
       const outcome = evaluateRules(`Job "${name}"`, rules, context.vars, errors);
@@ -597,7 +670,11 @@ function checkExpressionSubset(model, errors) {
   // template) still has every expression held to the subset.
   for (const [name, { job }] of model.jobs) {
     const rules = resolveJobKey(model, name, job, 'rules', errors);
-    if (!validateRules(`Job "${name}"`, rules, errors) || rules === undefined) continue;
+    if (
+      !validateRules(`Job "${name}"`, rules, errors, { manualAllowed: name === manualGateJob }) ||
+      rules === undefined
+    )
+      continue;
     for (const rule of rules) {
       if ('if' in rule) parseRuleExpression(`Job "${name}"`, rule.if, errors);
     }
@@ -634,14 +711,25 @@ function checkRosters(model, { outcomes }, errors) {
       context: 'merge-request pipelines',
       required: requiredMrJobs,
       forbidden: forbiddenMrJobs,
+      image: 'conditional',
     },
     {
       context: 'push-to-main pipelines',
       required: requiredMainJobs,
       forbidden: forbiddenMainJobs,
+      image: 'conditional',
+    },
+    // The derived image never rebuilds on a tag: the pinned tag was built by
+    // the MR or main-push pipeline that changed the derivation, and browser
+    // jobs pull it as-is through their optional needs edge.
+    {
+      context: 'v* tag pipelines',
+      required: requiredTagJobs,
+      forbidden: forbiddenTagJobs,
+      image: 'never',
     },
   ];
-  for (const { context, required, forbidden } of rosters) {
+  for (const { context, required, forbidden, image } of rosters) {
     for (const name of required) {
       const outcome = outcomes.get(name)?.get(context);
       if (outcome === undefined) {
@@ -670,15 +758,131 @@ function checkRosters(model, { outcomes }, errors) {
         errors.push(`Job "${name}" must not instantiate in ${context} (found: ${outcome}).`);
       }
     }
-    // The image rebuild stays conditional: unconditional would rebuild and
-    // re-push on every pipeline, absent would break the needs edges.
+    // The image rebuild stays conditional where the derivation can change:
+    // unconditional would rebuild and re-push on every pipeline, absent
+    // would break the needs edges.
     const imageOutcome = outcomes.get('e2e-image')?.get(context);
-    if (imageOutcome !== 'conditional') {
+    if (imageOutcome !== image) {
       errors.push(
-        `Job "e2e-image" must instantiate conditionally (on derivation changes) in ${context} ` +
-          `(found: ${imageOutcome ?? 'missing'}).`,
+        `Job "e2e-image" must ${
+          image === 'conditional' ? 'instantiate conditionally (on derivation changes)' : 'not instantiate'
+        } in ${context} (found: ${imageOutcome ?? 'missing'}).`,
       );
     }
+  }
+}
+
+// The release machinery's own shape: reachable from a real v* tag push only,
+// ordered publish-last through pinned needs edges, and blocked by a manual
+// approval gate that actually blocks.
+function checkReleaseMachinery(model, { contexts, outcomes }, errors) {
+  // Placement: every release job instantiates on v* tag pipelines and
+  // nowhere else — not in MRs, not on main, and not from a schedule or
+  // dispatch, even one pointed at a tag ref.
+  for (const name of releaseJobs) {
+    const perContext = outcomes.get(name);
+    if (!perContext) {
+      // The tag roster already reports the missing job.
+      continue;
+    }
+    for (const context of contexts) {
+      const expected = context.name === 'v* tag pipelines' ? 'always' : 'never';
+      const outcome = perContext.get(context.name);
+      if (outcome !== expected) {
+        errors.push(
+          `Release job "${name}" must ${expected === 'always' ? 'instantiate' : 'not instantiate'} ` +
+            `in ${context.name} (found: ${outcome}).`,
+        );
+      }
+    }
+  }
+
+  // The approval gate is the last abort point, and it must actually block:
+  // exactly one rule selecting the tag pipeline with when: manual, and
+  // allow_failure pinned to false explicitly — an allow_failure manual job
+  // counts as skipped-success and the publish would run unattended.
+  const approval = model.jobs.get(manualGateJob);
+  if (approval) {
+    const rules = resolveJobKey(model, manualGateJob, approval.job, 'rules', errors);
+    const shapeOk =
+      Array.isArray(rules) &&
+      rules.length === 1 &&
+      !isReference(rules[0]) &&
+      typeof rules[0] === 'object' &&
+      rules[0] !== null &&
+      JSON.stringify(Object.keys(rules[0]).sort()) === JSON.stringify(['if', 'when']) &&
+      rules[0].when === 'manual' &&
+      expressionEquals(rules[0].if, tagRuleExpression);
+    if (!shapeOk) {
+      errors.push(
+        `Job "${manualGateJob}" must carry exactly one rule ` +
+          `\`if: ${tagRuleExpression}\` with \`when: manual\`: the blocking manual gate is the ` +
+          "release's last abort point.",
+      );
+    }
+    const allowFailure = resolveJobKey(model, manualGateJob, approval.job, 'allow_failure', errors);
+    if (allowFailure !== false) {
+      errors.push(
+        `Job "${manualGateJob}" must pin allow_failure: false explicitly: an allow_failure ` +
+          'manual job counts as skipped-success and the publish would run unattended.',
+      );
+    }
+  }
+
+  // Publish-last, by construction: the DAG between the release jobs is the
+  // ADR's stage order, and the publish job sits behind every gating job of
+  // the tag pipeline.
+  const expectedNeeds = new Map([
+    ['release:rule-liveness', ['release:gate']],
+    ['release:approval', ['release:rule-liveness']],
+    ['release:publish', releasePublishNeeds],
+    ['release:projection', ['release:publish']],
+  ]);
+  for (const [name, expected] of expectedNeeds) {
+    const entry = model.jobs.get(name);
+    if (!entry) continue;
+    const needs = resolveJobKey(model, name, entry.job, 'needs', errors);
+    const names = Array.isArray(needs) && needs.every((edge) => typeof edge === 'string') ? needs : null;
+    if (
+      names === null ||
+      JSON.stringify([...names].sort()) !== JSON.stringify([...expected].sort())
+    ) {
+      errors.push(
+        `Job "${name}" must need exactly [${expected.join(', ')}]; the publish-last order is ` +
+          'the release contract.',
+      );
+    }
+  }
+
+  // The two jobs with external effects survive auto-cancel and never
+  // interleave across release pipelines.
+  for (const name of ['release:publish', 'release:projection']) {
+    const entry = model.jobs.get(name);
+    if (!entry) continue;
+    if (resolveJobKey(model, name, entry.job, 'interruptible', errors) !== false) {
+      errors.push(
+        `Job "${name}" must pin interruptible: false: auto-cancel must never kill a registry ` +
+          'write or a release creation in flight.',
+      );
+    }
+    if (resolveJobKey(model, name, entry.job, 'resource_group', errors) !== 'release') {
+      errors.push(
+        `Job "${name}" must carry resource_group: release, so two release pipelines never ` +
+          'interleave their writes.',
+      );
+    }
+  }
+}
+
+// Structural equality over the parsed minimal-subset expression grammar,
+// like the workflow-topology comparison: spelling differences that parse the
+// same compare equal, anything unparsable compares unequal.
+function expressionEquals(actual, canonical) {
+  if (typeof actual !== 'string') return false;
+  try {
+    return JSON.stringify(parseExpression(actual)) === JSON.stringify(parseExpression(canonical));
+  } catch {
+    return false;
   }
 }
 
