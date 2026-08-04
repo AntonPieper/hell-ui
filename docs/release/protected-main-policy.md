@@ -73,6 +73,8 @@ it proves the checked-in document is a coherent posture, which is what makes
 a posture change safe to review. `verify:main-policy` reads all four surfaces
 and reports every difference, including access-level grants to a single user,
 group, or deploy key — the exception grants that defeat the rule they sit on.
+It also runs daily, unattended, as the policy half of the scheduled drift
+sweep ([`drift-sweep.md`](./drift-sweep.md)).
 
 Point the commands at a project through the environment, never a checked-in
 name:

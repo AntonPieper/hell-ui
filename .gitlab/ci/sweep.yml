@@ -1,0 +1,32 @@
+# The daily drift sweep. A schedule with PIPELINE_KIND=policy-sweep runs
+# exactly this job and nothing else (the pipeline-shape contract proves the
+# exclusivity in both directions): the protected-main policy verifier over
+# its four live surfaces, then the release drift audit — every release
+# re-read via the API and compared byte-for-byte against the record at its
+# tag's commit, plus the one package-type asset link. Protection rules and
+# release edits leave no trace on this platform edition, so this sweep is
+# the audit trail.
+#
+# The sweep only reads, with the one long-lived token the project holds:
+# HELL_POLICY_TOKEN, a read-only project access token stored as a protected +
+# masked CI variable (docs/release/drift-sweep.md documents its scope, expiry,
+# and rotation). Drift is reported, never repaired — restoration is an
+# explicit maintainer command run outside CI, so the write-capable credential
+# never enters a pipeline.
+
+policy-sweep:
+  extends: .node-job
+  stage: test
+  timeout: 10 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "policy-sweep"
+  # Dependency-free like the policies it replays: API reads in, verdict out —
+  # no install, no caches.
+  cache: []
+  before_script: []
+  script:
+    # Both halves always run: one drifted surface must never hide what the
+    # other proved, so the verdict is aggregated at the end.
+    - node tools/policy/check-main-policy.mjs || SWEEP_FAILED=1
+    - node tools/release/gitlab-release-drift.mjs audit || SWEEP_FAILED=1
+    - test -z "$SWEEP_FAILED"

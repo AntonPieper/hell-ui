@@ -190,6 +190,52 @@ const fixtures = [
       text.replace('  interruptible: false\n  resource_group: release\n', '  interruptible: false\n'),
     needle: 'resource_group: release',
   },
+  {
+    // Dropping the sweep include removes the daily audit while every
+    // scheduled pipeline still gets created — an empty sweep pipeline that
+    // proves nothing, silently.
+    name: 'a dropped sweep include removes the daily audit job',
+    file: '.gitlab-ci.yml',
+    mutate: (text) => text.replace('  - local: .gitlab/ci/sweep.yml\n', ''),
+    needle: 'required job "policy-sweep"',
+  },
+  {
+    // Dropping the PIPELINE_KIND condition from the default placement makes
+    // the whole test set instantiate next to the sweep — the cheap daily
+    // audit becomes a full test run nobody sized the schedule for.
+    name: 'the test set leaking into the policy sweep',
+    file: '.gitlab/ci/base.yml',
+    mutate: (text) =>
+      text.replace(
+        '    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "default"\n',
+        '    - if: $CI_PIPELINE_SOURCE == "schedule"\n',
+      ),
+    needle: 'must not instantiate in scheduled policy-sweep pipelines',
+  },
+  {
+    // A sweep rule answering another pipeline source would gate merge
+    // requests on a read token that only protected refs carry.
+    name: 'a sweep job leaking into merge-request pipelines',
+    file: '.gitlab/ci/sweep.yml',
+    mutate: (text) =>
+      text.replace(
+        '    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "policy-sweep"\n',
+        '    - if: $CI_PIPELINE_SOURCE == "schedule" && $PIPELINE_KIND == "policy-sweep"\n    - if: $CI_PIPELINE_SOURCE == "merge_request_event"\n',
+      ),
+    needle: 'Job "policy-sweep" must not instantiate in merge-request pipelines',
+  },
+  {
+    // An allow_failure sweep is a daily audit whose red verdict cannot be
+    // seen anywhere — the same silent shrink as not running it.
+    name: 'an allow_failure sweep stops auditing and goes red',
+    file: '.gitlab/ci/sweep.yml',
+    mutate: (text) =>
+      text.replace(
+        'policy-sweep:\n  extends: .node-job\n',
+        'policy-sweep:\n  extends: .node-job\n  allow_failure: true\n',
+      ),
+    needle: 'Job "policy-sweep" must stay gating',
+  },
 ];
 
 export function runPipelineShapeContractFixtures({ root }) {

@@ -6,8 +6,9 @@
 // the workflow rules match the five-source topology, exactly one E2E tier
 // job instantiates per test pipeline and selects exactly its tier, the
 // release machinery is reachable from a real tag push only and publishes
-// last behind a blocking manual gate, and every `needs` edge points at a job
-// that exists in the same pipeline. This pipeline deliberately has no
+// last behind a blocking manual gate, the scheduled policy sweep runs
+// exactly one job with nothing beside it, and every `needs` edge points at
+// a job that exists in the same pipeline. This pipeline deliberately has no
 // aggregate gate job — the merge gate is the pipeline itself — so this
 // contract carries the silent-shrink protection that the e2e-gate job
 // provides on the GitHub side.
@@ -44,6 +45,13 @@ const allowedTemplateIncludes = ['Jobs/Secret-Detection.gitlab-ci.yml'];
 // deliberately absent: nothing uses it, and a new global default deserves a
 // contract decision, not silent acceptance.
 const reservedTopLevelKeys = ['workflow', 'stages', 'variables', 'include'];
+
+// The one job a scheduled policy-sweep pipeline runs: the daily policy and
+// release drift audit. checkSweepExclusivity pins the exclusivity in both
+// directions — nothing else instantiates next to it, and it instantiates
+// nowhere else.
+const sweepJob = 'policy-sweep';
+const sweepContext = 'scheduled policy-sweep pipelines';
 
 // The five-source topology (root .gitlab-ci.yml). Compared structurally:
 // each rule's expression by parsed shape, the terminal rule literally.
@@ -155,6 +163,7 @@ export function collectPipelineShapeContractErrors({ root }) {
   checkDockerTags(model, errors);
   const evaluation = evaluateAllJobs(model, errors);
   checkRosters(model, evaluation, errors);
+  checkSweepExclusivity(model, evaluation, errors);
   checkReleaseMachinery(model, evaluation, errors);
   checkTierDiscipline(model, evaluation, errors);
   checkNeedsConsistency(model, evaluation, errors);
@@ -767,6 +776,47 @@ function checkRosters(model, { outcomes }, errors) {
         `Job "e2e-image" must ${
           image === 'conditional' ? 'instantiate conditionally (on derivation changes)' : 'not instantiate'
         } in ${context} (found: ${imageOutcome ?? 'missing'}).`,
+      );
+    }
+  }
+}
+
+// The scheduled policy sweep runs exactly one job, in exactly one pipeline
+// kind. Both directions are silent-shrink surfaces: a test job leaking into
+// the sweep turns the cheap daily audit into a full test run nobody sized
+// the schedule for, and the sweep leaking into test pipelines would gate
+// merges on a read token only protected refs carry.
+function checkSweepExclusivity(model, { contexts, outcomes }, errors) {
+  const perContext = outcomes.get(sweepJob);
+  if (!perContext) {
+    errors.push(`required job "${sweepJob}" is missing from the pipeline definition.`);
+  } else {
+    for (const context of contexts) {
+      const expected = context.name === sweepContext ? 'always' : 'never';
+      const outcome = perContext.get(context.name);
+      if (outcome !== expected) {
+        errors.push(
+          `Job "${sweepJob}" must ${expected === 'always' ? 'instantiate' : 'not instantiate'} ` +
+            `in ${context.name} (found: ${outcome}).`,
+        );
+      }
+    }
+    const entry = model.jobs.get(sweepJob);
+    const allowFailure = resolveJobKey(model, sweepJob, entry.job, 'allow_failure', errors);
+    if (allowFailure !== undefined && allowFailure !== false) {
+      errors.push(
+        `Job "${sweepJob}" must stay gating: allow_failure must be false or absent, found ` +
+          `${JSON.stringify(allowFailure)}.`,
+      );
+    }
+  }
+  for (const [name] of model.jobs) {
+    if (name === sweepJob) continue;
+    const outcome = outcomes.get(name)?.get(sweepContext);
+    if (outcome !== undefined && outcome !== 'never') {
+      errors.push(
+        `Job "${name}" must not instantiate in ${sweepContext}: the sweep runs exactly one ` +
+          `job (found: ${outcome}).`,
       );
     }
   }
