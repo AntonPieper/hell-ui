@@ -13,10 +13,10 @@ installed with strict peers, the fixture imports `hell-ui/styles.css` through
 the supported Tailwind/PostCSS production path, and every CSS byte of the
 resulting minified build output is counted. It never measures source files or
 an unprocessed concatenation, and it never filters, excludes, or
-outlier-corrects the emitted CSS. The same fixture's forbidden CSS sentinels
-and forbidden dependencies are what prove Heavy Feature Stylesheets (Code
+outlier-corrects the emitted CSS. What proves Heavy Feature Stylesheets (Code
 Editor, PDF Viewer, TanStack integrations) and Theme Adapter Stylesheets stay
-out of the bundle being measured.
+out of the bundle being measured is the same fixture's forbidden CSS sentinels,
+plus the forbidden-dependency set the runner derives from its peer group.
 
 Raw bytes and gzip bytes (fixed compression level 9) are both reported. Both
 counts are deterministic for a given package revision and pinned toolchain.

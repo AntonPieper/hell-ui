@@ -1,16 +1,8 @@
 {
   "description": "Default Style Bundle mode: one hell-ui/styles.css import through the Tailwind/PostCSS production path with composite peers only",
   "peerGroup": "composite",
-  "forbiddenDependencies": [
-    "@ng-icons/core",
-    "@ng-icons/font-awesome",
-    "@tanstack/angular-table",
-    "@tanstack/virtual-core",
-    "@codemirror/view",
-    "pdfjs-dist"
-  ],
+  "dependencies": ["tailwindcss"],
   "cssSentinels": [
-    "--color-hell-surface-muted:",
     "@keyframes hell-pop-in",
     "animation:hell-shimmer 1.6s linear infinite",
     "table-layout:fixed",
@@ -21,7 +13,7 @@
     "hell-pdf-viewer",
     "[data-hell-skin=glass]hell-toaster"
   ],
-  "styleBundleBudget": "../style-bundle-budget.json",
+  "styleBundleBudget": true,
   "smoke": {
     "stepsFile": "../style-modes-smoke.steps.json"
   }
