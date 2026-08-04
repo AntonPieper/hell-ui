@@ -1,0 +1,839 @@
+import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join, posix, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import {
+  defaultStyleBundleImportSpecifiers,
+  entrypointCategories,
+  entrypointPublicApiFiles,
+  entrypointStyleExports,
+  packageExportPath,
+} from '../entrypoints/entrypoint-manifest.mjs';
+import { readWorkspaceCatalog } from '../build/workspace-versions.mjs';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const angularPackageName = 'hell-ui';
+
+// The packed .ts recipe sources ship so consumer Tailwind builds can scan the
+// Part Recipe class strings. Their list is owned by the asset entries in
+// packages/angular/ng-package.json; derive it instead of mirroring it.
+const angularRecipeSourceFiles = JSON.parse(
+  readFileSync(join(root, 'packages/angular/ng-package.json'), 'utf8'),
+).assets
+  .filter((asset) => typeof asset === 'object' && asset.glob.endsWith('.ts'))
+  .map((asset) => posix.join(asset.output, asset.glob));
+
+const packagePeerGroups = Object.freeze({
+  core: Object.freeze([
+    '@angular/cdk',
+    '@angular/common',
+    '@angular/core',
+    '@angular/forms',
+    '@floating-ui/dom',
+    'ng-primitives',
+    'rxjs',
+  ]),
+  style: Object.freeze(['tailwindcss']),
+  router: Object.freeze(['@angular/router']),
+  icons: Object.freeze(['@ng-icons/core']),
+  fontAwesome: Object.freeze(['@ng-icons/font-awesome']),
+  codeEditor: Object.freeze([
+    '@codemirror/commands',
+    '@codemirror/language',
+    '@codemirror/state',
+    '@codemirror/view',
+    '@lezer/highlight',
+  ]),
+  pdfViewer: Object.freeze(['pdfjs-dist']),
+  tanStackTable: Object.freeze(['@tanstack/angular-table']),
+  tanStackVirtual: Object.freeze(['@tanstack/virtual-core']),
+});
+
+// Peer group contracts name the strict-peer install sets the consumer
+// fixtures prove (tools/package/check-consumer-fixtures.mjs); the tier records which
+// consumption tier a group belongs to.
+export const peerGroupContracts = Object.freeze({
+  core: { tier: 'core', peers: packagePeerGroups.core },
+  'primitive-ui': { tier: 'primitive', peers: packagePeerGroups.core },
+  primitive: {
+    tier: 'primitive',
+    peers: [...packagePeerGroups.core, ...packagePeerGroups.style],
+  },
+  'primitive-icons': {
+    tier: 'primitive',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
+  composite: {
+    tier: 'composite',
+    peers: [...packagePeerGroups.core, ...packagePeerGroups.style],
+  },
+  'composite-icons': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
+  'composite-router': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.router,
+    ],
+  },
+  'composite-icons-router': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.router,
+      ...packagePeerGroups.icons,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
+  table: { tier: 'table', peers: [...packagePeerGroups.core, ...packagePeerGroups.style] },
+  'table-tanstack': {
+    tier: 'table-tanstack',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.tanStackTable,
+    ],
+  },
+  'table-tanstack-virtual': {
+    tier: 'table-tanstack',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.tanStackTable,
+      ...packagePeerGroups.tanStackVirtual,
+    ],
+  },
+  'audio-transcript': {
+    tier: 'audio-transcript',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
+  'code-editor': {
+    tier: 'code-editor',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.codeEditor,
+    ],
+  },
+  'pdf-viewer': {
+    tier: 'pdf-viewer',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
+      ...packagePeerGroups.fontAwesome,
+      ...packagePeerGroups.pdfViewer,
+    ],
+  },
+});
+
+// Resolve a packed-tarball selection to one .tgz path. The selection is
+// either the tarball file itself or a directory holding exactly one .tgz
+// (for example a downloaded CI artifact directory).
+export function resolvePackedTarball(selection) {
+  const target = resolve(selection);
+  if (!existsSync(target)) throw new Error(`Packed tarball path missing: ${target}`);
+  if (!statSync(target).isDirectory()) return target;
+
+  const tarballs = readdirSync(target).filter((entry) => entry.endsWith('.tgz'));
+  if (tarballs.length !== 1) {
+    throw new Error(
+      `Packed tarball directory ${target} must hold exactly one .tgz; found ${
+        tarballs.length ? tarballs.join(', ') : 'none'
+      }`,
+    );
+  }
+  return join(target, tarballs[0]);
+}
+
+export function auditPackedPackage({ tarball } = {}) {
+  if (!tarball) throw new Error('Package pack audit requires a tarball path.');
+  if (!existsSync(tarball)) throw new Error(`Package pack audit tarball missing: ${tarball}`);
+
+  const files = packedFiles(tarball);
+  const fileSet = new Set(files);
+  const packageJson = readPackedJson(tarball, 'package.json');
+  const failures = [];
+
+  failures.push(...findForbiddenPackedFileFailures(files));
+  checkApfPackageJson(packageJson, fileSet, tarball, failures);
+  checkPackageMetadata(packageJson, failures);
+  checkPackagePeers(packageJson, failures);
+  checkPackedFileAccounting(packageJson, tarball, files, fileSet, failures);
+  checkPackedDefaultStyleBundle(tarball, fileSet, failures);
+  checkInternalEntrypointPrivacy(packageJson, failures);
+
+  if (failures.length) {
+    throw new Error(['Package pack audit failed:', ...failures.map((failure) => `- ${failure}`)].join('\n'));
+  }
+
+  console.log(
+    `[package-pack-audit] ok: ${files.length} packed files audited for ${packageJson.name}`,
+  );
+  return { files, packageJson };
+}
+
+function packedFiles(tarball) {
+  const result = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' });
+  if (result.error) {
+    throw new Error(`Unable to inspect packed package ${tarball}: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(`Unable to inspect packed package ${tarball}: ${result.stderr || result.stdout}`);
+  }
+
+  return result.stdout
+    .split(/\r?\n/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .filter((entry) => !entry.endsWith('/'))
+    .map((entry) => entry.replace(/^package\//, ''))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function packedTextFile(tarball, file) {
+  const result = spawnSync('tar', ['-xOf', tarball, `package/${file}`], { encoding: 'utf8' });
+  if (result.error) {
+    throw new Error(`Unable to read ${file} from packed package ${tarball}: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(`Unable to read ${file} from packed package ${tarball}: ${result.stderr || result.stdout}`);
+  }
+  return result.stdout;
+}
+
+function readPackedJson(tarball, file) {
+  try {
+    return JSON.parse(packedTextFile(tarball, file));
+  } catch (error) {
+    throw new Error(`Unable to parse ${file} from packed package ${tarball}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+function readPackedJsonOrFail(tarball, file, failures) {
+  try {
+    return readPackedJson(tarball, file);
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+    return null;
+  }
+}
+
+function findForbiddenPackedFileFailures(files) {
+  const failures = [];
+  const forbidden = [
+    {
+      label: 'source map',
+      pattern: /\.map$/i,
+    },
+    {
+      label: 'secret-bearing file',
+      pattern: /(^|\/)(?:\.env(?:\..*)?|\.npmrc|id_rsa|id_dsa|credentials?|secrets?|service-account)(?:$|\/|\.)|\.(?:pem|p12|pfx|key|crt)$/i,
+    },
+    {
+      label: 'test artifact or test source',
+      pattern: /(^|\/)(?:__tests__|coverage|e2e|test-results)(?:\/|$)|\.(?:spec|test)\.[cm]?[jt]sx?$/i,
+    },
+    {
+      label: 'workspace node_modules leak',
+      pattern: /(^|\/)node_modules(?:\/|$)/,
+    },
+    {
+      label: 'unexpected worker asset',
+      pattern: /(^|\/)[^/]*worker[^/]*\.(?:mjs|cjs|js|ts)$/i,
+    },
+  ];
+
+  for (const rule of forbidden) {
+    const matches = files.filter((file) => rule.pattern.test(file));
+    if (matches.length) failures.push(`Packed package includes ${rule.label}: ${matches.join(', ')}`);
+  }
+
+  return failures;
+}
+
+function checkApfPackageJson(packageJson, fileSet, tarball, failures) {
+  if (packageJson.name !== angularPackageName) {
+    failures.push(
+      `APF package.json name must be ${angularPackageName}; found ${packageJson.name ?? 'missing'}`,
+    );
+  }
+
+  if (packageJson.type !== 'module') failures.push('APF package.json must declare "type": "module"');
+
+  const exportsMap = packageJson.exports;
+  if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) {
+    failures.push('APF package.json must declare an object exports map');
+    return;
+  }
+
+  const packageJsonExport = exportsMap['./package.json'];
+  checkExportConditions('./package.json', packageJsonExport, ['default'], failures);
+  if (packageJsonExport?.default !== './package.json') {
+    failures.push('APF exports must expose ./package.json with default ./package.json');
+  }
+
+  if (!Array.isArray(packageJson.sideEffects) || !packageJson.sideEffects.includes('**/*.css')) {
+    failures.push('APF package.json sideEffects must include **/*.css for style entry points');
+  }
+
+  checkPublishMetadata(packageJson, failures);
+
+  const expectedCodeExports = expectedCodeExportKeys();
+  for (const key of expectedCodeExports) {
+    checkCodeExport(key, exportsMap[key], fileSet, tarball, failures);
+  }
+
+  checkExpectedStyleExports(exportsMap, fileSet, failures);
+
+  for (const key of Object.keys(exportsMap)) {
+    if (
+      key === './package.json' ||
+      expectedCodeExports.has(key) ||
+      expectedStyleExportKeys().has(key)
+    ) {
+      continue;
+    }
+
+    if (key === './styles' || key.startsWith('./styles/')) {
+      failures.push(`hell-ui must not include legacy category style export ${key}`);
+      continue;
+    }
+
+    failures.push(`APF exports contains unexpected export ${key}`);
+  }
+}
+
+function checkExpectedStyleExports(exportsMap, fileSet, failures) {
+  for (const [key, expectedTarget] of expectedStyleExportTargets()) {
+    checkStyleExport(key, exportsMap[key], fileSet, failures, { expectedTarget });
+  }
+}
+
+function expectedStyleExportKeys() {
+  return new Set(expectedStyleExportTargets().keys());
+}
+
+function expectedStyleExportTargets() {
+  return new Map(
+    entrypointStyleExports().map((styleEntry) => [styleEntry.exportPath, styleEntry.sourcePath]),
+  );
+}
+
+function checkPublishMetadata(packageJson, failures) {
+  if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
+    failures.push('APF package.json repository.url must match the trusted-publishing GitHub repository');
+  }
+  if (packageJson.repository?.directory !== 'packages/angular') {
+    failures.push('APF package.json repository.directory must be packages/angular');
+  }
+  if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
+    failures.push('APF package.json publishConfig.registry must be https://registry.npmjs.org/');
+  }
+  if (packageJson.publishConfig?.access !== 'public') {
+    failures.push('APF package.json publishConfig.access must be public');
+  }
+  if (packageJson.publishConfig?.provenance !== true) {
+    failures.push('APF package.json publishConfig.provenance must be true');
+  }
+}
+
+function checkPackageMetadata(packageJson, failures) {
+  if (!packageJson.version) failures.push('APF package.json must declare a version');
+  if (!packageJson.description) failures.push('APF package.json must declare a description');
+
+  assertSameSet(
+    `${packageJson.name} package.json files`,
+    expectedPackageFiles(),
+    packageJson.files ?? [],
+    failures,
+  );
+
+  const dependencies = Object.keys(packageJson.dependencies ?? {});
+  const expectedDependencies = ['tailwind-merge', 'tslib'];
+  assertSameSet(`${packageJson.name} package dependencies`, expectedDependencies, dependencies, failures);
+}
+
+function expectedPackageFiles() {
+  return [
+    'README.md',
+    'LICENSE',
+    'package.json',
+    '**/package.json',
+    'fesm2022/*.mjs',
+    'types/*.d.ts',
+    '**/*.css',
+    ...angularRecipeSourceFiles,
+    'assets/**',
+  ];
+}
+
+function checkPackagePeers(packageJson, failures) {
+  const peers = packageJson.peerDependencies ?? {};
+  const peerNames = Object.keys(peers);
+  const optionalPeers = optionalPeerNames(packageJson);
+
+  for (const [metaPeer, meta] of Object.entries(packageJson.peerDependenciesMeta ?? {})) {
+    if (!peers[metaPeer]) {
+      failures.push(`${packageJson.name} package.json has peerDependenciesMeta for undeclared ${metaPeer}`);
+    }
+    if (meta?.optional !== true) {
+      failures.push(`${packageJson.name} peerDependenciesMeta for ${metaPeer} must set optional true`);
+    }
+  }
+
+  const expectedOptionalPeers = [
+    ...packagePeerGroups.style,
+    ...packagePeerGroups.router,
+    ...packagePeerGroups.icons,
+    ...packagePeerGroups.fontAwesome,
+    ...packagePeerGroups.tanStackTable,
+    ...packagePeerGroups.tanStackVirtual,
+    ...packagePeerGroups.codeEditor,
+    ...packagePeerGroups.pdfViewer,
+  ];
+  const expectedPeers = [...packagePeerGroups.core, ...expectedOptionalPeers];
+  assertSameSet('hell-ui peerDependencies', expectedPeers, peerNames, failures);
+  assertSameSet(
+    'hell-ui required peerDependencies',
+    packagePeerGroups.core,
+    requiredPeerNames(packageJson),
+    failures,
+  );
+  assertSameSet(
+    'hell-ui optional peerDependenciesMeta',
+    expectedOptionalPeers,
+    [...optionalPeers],
+    failures,
+  );
+
+  const workspaceCatalog = readWorkspaceCatalog();
+  if (peers['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
+    failures.push(
+      `hell-ui must pin the pdfjs-dist optional peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+    );
+  }
+}
+
+function optionalPeerNames(packageJson) {
+  return new Set(
+    Object.entries(packageJson.peerDependenciesMeta ?? {})
+      .filter(([, meta]) => meta?.optional === true)
+      .map(([peer]) => peer),
+  );
+}
+
+function requiredPeerNames(packageJson) {
+  const optionalPeers = optionalPeerNames(packageJson);
+  return Object.keys(packageJson.peerDependencies ?? {}).filter((peer) => !optionalPeers.has(peer));
+}
+
+function expectedCodeExportKeys() {
+  return new Set(
+    entrypointPublicApiFiles().map((entrypoint) => packageExportPath(entrypoint.specifier)),
+  );
+}
+
+function checkCodeExport(key, exportValue, fileSet, tarball, failures) {
+  if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) {
+    failures.push(`APF code export ${key} must be an object with types/default conditions`);
+    return;
+  }
+
+  checkExportConditions(key, exportValue, ['types', 'default'], failures);
+
+  const expected = expectedCodeExportTargets(key);
+  const types = checkExportTarget(
+    key,
+    'types',
+    exportValue.types,
+    '.d.ts',
+    'types/',
+    fileSet,
+    failures,
+    expected.types,
+  );
+  const fesm = checkExportTarget(
+    key,
+    'default',
+    exportValue.default,
+    '.mjs',
+    'fesm2022/',
+    fileSet,
+    failures,
+    expected.default,
+  );
+
+  if (key === '.') return;
+
+  const packageJsonPath = `${key.slice(2)}/package.json`;
+  if (!fileSet.has(packageJsonPath)) {
+    failures.push(`Secondary entry point ${key} is missing packed ${packageJsonPath}`);
+    return;
+  }
+
+  if (!types || !fesm) return;
+
+  const secondaryPackage = readPackedJsonOrFail(tarball, packageJsonPath, failures);
+  if (!secondaryPackage) return;
+
+  const packageDir = posix.dirname(packageJsonPath);
+  const expectedModule = posix.relative(packageDir, fesm);
+  const expectedTypings = posix.relative(packageDir, types);
+
+  if (secondaryPackage.module !== expectedModule) {
+    failures.push(
+      `Secondary entry point ${key} package.json module is ${secondaryPackage.module ?? 'missing'}, expected ${expectedModule}`,
+    );
+  }
+  if (secondaryPackage.typings !== expectedTypings) {
+    failures.push(
+      `Secondary entry point ${key} package.json typings is ${secondaryPackage.typings ?? 'missing'}, expected ${expectedTypings}`,
+    );
+  }
+}
+
+// ng-packagr flattens every entry point into one file stem: the package name
+// followed by the subpath, slashes turned to dashes. hell-ui carries no scope,
+// so the package name doubles as the unscoped stem; a scoped rename would have
+// to strip the scope back off.
+function expectedCodeExportTargets(key) {
+  const exportSlug =
+    key === '.' ? angularPackageName : `${angularPackageName}-${key.slice(2).replace(/\//g, '-')}`;
+  return {
+    types: `types/${exportSlug}.d.ts`,
+    default: `fesm2022/${exportSlug}.mjs`,
+  };
+}
+
+function checkExportTarget(key, condition, rawTarget, extension, directory, fileSet, failures, expectedTarget = null) {
+  const target = normalizeExportTarget(rawTarget);
+  if (!target) {
+    failures.push(`APF export ${key}.${condition} must point at a ${extension} file`);
+    return null;
+  }
+  if (!target.startsWith(directory) || !target.endsWith(extension)) {
+    failures.push(`APF export ${key}.${condition} must point at ${directory}*${extension}; found ${rawTarget}`);
+    return target;
+  }
+  if (expectedTarget && target !== expectedTarget) {
+    failures.push(`APF export ${key}.${condition} must point at ./${expectedTarget}; found ${rawTarget}`);
+  }
+  if (!fileSet.has(target)) {
+    failures.push(`APF export ${key}.${condition} points at ${rawTarget}, missing from packed files`);
+  }
+  return target;
+}
+
+function checkExportConditions(key, exportValue, expectedConditions, failures) {
+  if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) return;
+
+  const expected = new Set(expectedConditions);
+  for (const condition of Object.keys(exportValue)) {
+    if (!expected.has(condition)) {
+      failures.push(`APF export ${key} must not include unexpected ${condition} condition`);
+    }
+  }
+  for (const condition of expectedConditions) {
+    if (!(condition in exportValue)) {
+      failures.push(`APF export ${key} is missing ${condition} condition`);
+    }
+  }
+}
+
+function isStyleExport(exportValue) {
+  return !!exportValue && typeof exportValue === 'object' && !Array.isArray(exportValue) && 'style' in exportValue;
+}
+
+function checkStyleExport(key, exportValue, fileSet, failures, { expectedTarget = null } = {}) {
+  if (!isStyleExport(exportValue)) {
+    failures.push(`Style export ${key} must be an object with style/default conditions`);
+    return;
+  }
+
+  checkExportConditions(key, exportValue, ['style', 'default'], failures);
+
+  const styleTarget = normalizeExportTarget(exportValue.style);
+  const defaultTarget = normalizeExportTarget(exportValue.default);
+  if (styleTarget && defaultTarget && styleTarget !== defaultTarget) {
+    failures.push(`Style export ${key} style/default targets must match`);
+  }
+
+  for (const condition of ['style', 'default']) {
+    const rawTarget = exportValue[condition];
+    if (expectedTarget && rawTarget !== expectedTarget) {
+      failures.push(
+        `Style export ${key}.${condition} must point at ${expectedTarget}; found ${rawTarget ?? 'missing'}`,
+      );
+      continue;
+    }
+
+    const target = normalizeExportTarget(rawTarget);
+    if (!target) {
+      failures.push(`Style export ${key}.${condition} must point at a CSS file`);
+      continue;
+    }
+    if (!target.endsWith('.css')) {
+      failures.push(`Style export ${key}.${condition} must point at CSS; found ${exportValue[condition]}`);
+      continue;
+    }
+    if (!matchesPackedPattern(target, fileSet)) {
+      failures.push(`Style export ${key}.${condition} points at ${exportValue[condition]}, missing from packed files`);
+    }
+  }
+}
+
+function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failures) {
+  const exportsMap = packageJson.exports;
+  if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) return;
+
+  const allowed = new Set(['README.md', 'LICENSE', 'package.json']);
+
+  const packageJsonExportTarget = normalizeExportTarget(exportsMap['./package.json']?.default);
+  if (packageJsonExportTarget) allowed.add(packageJsonExportTarget);
+
+  for (const key of expectedCodeExportKeys()) {
+    const exportValue = exportsMap[key];
+    if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) continue;
+
+    for (const condition of ['types', 'default']) {
+      const target = normalizeExportTarget(exportValue[condition]);
+      if (target) allowed.add(target);
+    }
+
+    if (key !== '.') allowed.add(`${key.slice(2)}/package.json`);
+  }
+
+  for (const key of expectedStyleExportKeys()) {
+    const exportValue = exportsMap[key];
+    if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) continue;
+
+    for (const condition of ['style', 'default']) {
+      const target = normalizeExportTarget(exportValue[condition]);
+      if (target && !target.includes('*')) allowed.add(target);
+      if (target?.includes('*')) {
+        for (const file of files) {
+          if (matchesPackedPattern(target, new Set([file]))) allowed.add(file);
+        }
+      }
+    }
+  }
+
+  for (const file of expectedExplicitPackedFiles()) {
+    allowed.add(file);
+    if (!fileSet.has(file)) failures.push(`${packageJson.name} package is missing expected packed file ${file}`);
+  }
+
+  addCssImportClosure(tarball, allowed, fileSet, failures);
+
+  const unexpected = files.filter((file) => !allowed.has(file));
+  if (unexpected.length) {
+    failures.push(`Packed package includes unexpected files: ${unexpected.join(', ')}`);
+  }
+}
+
+function expectedExplicitPackedFiles() {
+  return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
+}
+
+// The packed Default Style Bundle must reproduce the entrypoint styleBundle
+// metadata exactly: the Shared Style Substrate first, then every standard
+// component stylesheet, and never a Heavy Feature Stylesheet or Theme Adapter
+// Stylesheet.
+function checkPackedDefaultStyleBundle(tarball, fileSet, failures) {
+  const bundleFile = 'styles.css';
+  if (!fileSet.has(bundleFile)) {
+    failures.push(`Packed package is missing Default Style Bundle ${bundleFile}`);
+    return;
+  }
+
+  let source;
+  try {
+    source = packedTextFile(tarball, bundleFile);
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+    return;
+  }
+
+  const imports = cssImportSpecifiers(source);
+  const expected = defaultStyleBundleImportSpecifiers();
+  if (JSON.stringify(imports) !== JSON.stringify(expected)) {
+    failures.push(
+      `Packed Default Style Bundle ${bundleFile} imports must match entrypoint styleBundle metadata; expected [${expected.join(', ')}], found [${imports.join(', ')}]`,
+    );
+  }
+  for (const specifier of imports) {
+    if (/^\.\/(features\/|table-tanstack|themes\/)/.test(specifier)) {
+      failures.push(
+        `Packed Default Style Bundle ${bundleFile} must not import heavy or Theme Adapter stylesheet ${specifier}`,
+      );
+    }
+  }
+}
+
+// Internal Package Paths stay unmistakably private in the packed artifact
+// (#272, docs/adr/0002-public-package-and-stylesheet-surface.md): every
+// internal-category entrypoint ships under the ./internal/ export prefix,
+// every ./internal/ export resolves to an internal-category entrypoint, and
+// no ./internal/ path is presented as a supported style or shorthand surface.
+function checkInternalEntrypointPrivacy(packageJson, failures) {
+  const exportsMap = packageJson.exports;
+  if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) return;
+
+  const internalExportKeys = new Set(
+    entrypointPublicApiFiles()
+      .filter((entrypoint) => entrypoint.category === entrypointCategories.INTERNAL)
+      .map((entrypoint) => packageExportPath(entrypoint.specifier)),
+  );
+
+  for (const key of internalExportKeys) {
+    if (!key.startsWith('./internal/')) {
+      failures.push(
+        `Internal Package Path export ${key} must stay under the ./internal/ prefix; a supported contract is promoted to a named non-internal Package Entry Point instead`,
+      );
+    }
+    if (!exportsMap[key]) continue;
+    if (isStyleExport(exportsMap[key])) {
+      failures.push(
+        `Internal Package Path export ${key} must not be a style export; internal CSS ships through relative cross-imports only`,
+      );
+    }
+  }
+
+  for (const [key, exportValue] of Object.entries(exportsMap)) {
+    if (!key.startsWith('./internal/')) continue;
+
+    if (isStyleExport(exportValue) || key.endsWith('.css')) {
+      failures.push(
+        `Packed exports present internal stylesheet ${key} as a consumer surface; internal CSS ships through relative cross-imports only`,
+      );
+      continue;
+    }
+    if (!internalExportKeys.has(key)) {
+      failures.push(
+        `Packed exports contain ./internal/ path ${key} that is not a declared internal-category entrypoint; internal subpaths exist only for APF cross-entrypoint linking`,
+      );
+    }
+  }
+}
+
+function addCssImportClosure(tarball, allowed, fileSet, failures) {
+  const queue = [...allowed].filter((file) => file.endsWith('.css'));
+  const visited = new Set();
+
+  while (queue.length) {
+    const cssFile = queue.shift();
+    if (!cssFile || visited.has(cssFile) || !fileSet.has(cssFile)) continue;
+    visited.add(cssFile);
+
+    let source;
+    try {
+      source = packedTextFile(tarball, cssFile);
+    } catch (error) {
+      failures.push(error instanceof Error ? error.message : String(error));
+      continue;
+    }
+
+    for (const specifier of cssImportSpecifiers(source)) {
+      if (!specifier.startsWith('.')) continue;
+
+      const target = posix.normalize(posix.join(posix.dirname(cssFile), specifier));
+      if (target.startsWith('../') || target.startsWith('/')) {
+        failures.push(`Packed CSS file ${cssFile} imports path outside package: ${specifier}`);
+        continue;
+      }
+      if (!target.endsWith('.css')) continue;
+      if (!fileSet.has(target)) {
+        failures.push(`Packed CSS file ${cssFile} imports missing CSS file ${target}`);
+        continue;
+      }
+      if (!allowed.has(target)) {
+        allowed.add(target);
+        queue.push(target);
+      }
+    }
+
+    for (const specifier of cssSourceSpecifiers(source)) {
+      if (!specifier.startsWith('.')) continue;
+
+      const target = posix.normalize(posix.join(posix.dirname(cssFile), specifier));
+      if (target.startsWith('../') || target.startsWith('/')) {
+        failures.push(`Packed CSS file ${cssFile} sources path outside package: ${specifier}`);
+        continue;
+      }
+      if (!fileSet.has(target)) {
+        failures.push(`Packed CSS file ${cssFile} sources missing file ${target}`);
+        continue;
+      }
+      allowed.add(target);
+    }
+  }
+}
+
+function cssImportSpecifiers(source) {
+  return [...source.matchAll(/@import\s+(?:url\()?['"]([^'")]+)['"]\)?/g)].map(
+    (match) => match[1],
+  );
+}
+
+function cssSourceSpecifiers(source) {
+  return [...source.matchAll(/@source\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
+}
+
+function assertSameSet(label, expected, actual, failures) {
+  const expectedList = uniqueSorted(expected);
+  const actualList = uniqueSorted(actual);
+  if (
+    expectedList.length === actualList.length &&
+    expectedList.every((value, index) => value === actualList[index])
+  ) {
+    return;
+  }
+
+  failures.push(
+    `${label} mismatch; expected ${formatList(expectedList)}, found ${formatList(actualList)}`,
+  );
+}
+
+// Exported for the consumer fixture runner, which compares its own declared
+// peer sets and needs the same normalization and rendering as the audit.
+export function uniqueSorted(values) {
+  return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+}
+
+export function formatList(values) {
+  return values.length ? values.join(', ') : '(none)';
+}
+
+function normalizeExportTarget(target) {
+  if (typeof target !== 'string' || !target.startsWith('./')) return null;
+  if (target.includes('..')) return null;
+  return target.slice(2);
+}
+
+function matchesPackedPattern(target, fileSet) {
+  if (!target.includes('*')) return fileSet.has(target);
+
+  const [prefix, suffix] = target.split('*');
+  return [...fileSet].some((file) => file.startsWith(prefix) && file.endsWith(suffix));
+}

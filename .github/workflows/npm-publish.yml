@@ -7,7 +7,7 @@
 # from literally sharing one tarball rather than from build determinism across
 # separate gate runs. The GitHub Release body is an exact byte projection of
 # the tagged Released Version Notes, decided by the fixture-tested policy in
-# tools/release-projection.mjs; manual dispatch stays evidence-only.
+# tools/release/release-projection.mjs; manual dispatch stays evidence-only.
 #
 # This file must keep the npm-publish.yml name: the npm trusted-publisher
 # record pins the workflow filename (docs/release/npm-publishing.md).
@@ -76,7 +76,7 @@ jobs:
             rm -f "$RUNNER_TEMP/immutable-releases.json"
 
       - name: Require the enabled immutable-release policy
-        run: node tools/release-projection.mjs policy "$RUNNER_TEMP/immutable-releases.json"
+        run: node tools/release/release-projection.mjs policy "$RUNNER_TEMP/immutable-releases.json"
 
   publish-npm:
     name: Publish to npm
@@ -269,11 +269,11 @@ jobs:
       - name: Plan the release projection from the current commit
         env:
           HELL_RELEASE_COMMIT: ${{ github.sha }}
-        run: node tools/release-projection.mjs plan --evidence
+        run: node tools/release/release-projection.mjs plan --evidence
 
   # The Required Registry barrier and the Release Projection draft. This job
   # runs even when a registry job failed or was skipped (`!cancelled()`) so
-  # the fixture-tested policy in tools/release-projection.mjs blocks loudly:
+  # the fixture-tested policy in tools/release/release-projection.mjs blocks loudly:
   # a skipped, cancelled, or failed Required Registry fails the barrier step
   # before any GitHub release is touched. The draft body is the exact tagged
   # .changes/<version>.md bytes; a rerun adopts an existing release only when
@@ -312,13 +312,13 @@ jobs:
              {"name": "npmjs",
               "required": ${{ vars.HELL_ENABLE_NPMJS_PUBLISH == 'true' }},
               "result": "${{ needs.publish-npm.result }}"}]
-        run: node tools/release-projection.mjs barrier
+        run: node tools/release/release-projection.mjs barrier
 
       - name: Plan the release projection
         env:
           HELL_RELEASE_TAG: ${{ github.ref_name }}
           HELL_RELEASE_COMMIT: ${{ github.sha }}
-        run: node tools/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
+        run: node tools/release/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
 
       - name: Capture existing releases for the tag
         run: |
@@ -331,7 +331,7 @@ jobs:
         id: decide
         run: |
           set -euo pipefail
-          decision="$(node tools/release-projection.mjs decide "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/existing.json")"
+          decision="$(node tools/release/release-projection.mjs decide "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/existing.json")"
           echo "action=$(jq -r '.action' <<<"$decision")" >> "$GITHUB_OUTPUT"
           echo "release-id=$(jq -r '.releaseId // empty' <<<"$decision")" >> "$GITHUB_OUTPUT"
 
@@ -360,7 +360,7 @@ jobs:
 
       - name: Verify the draft projection
         run: |
-          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
+          node tools/release/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
             --phase projection --policy "$RUNNER_TEMP/immutable-releases.json"
 
   # Publishing the GitHub prerelease is the last release action. No
@@ -392,7 +392,7 @@ jobs:
         env:
           HELL_RELEASE_TAG: ${{ github.ref_name }}
           HELL_RELEASE_COMMIT: ${{ github.sha }}
-        run: node tools/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
+        run: node tools/release/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
 
       - name: Capture the verified draft
         run: |
@@ -404,7 +404,7 @@ jobs:
 
       - name: Verify the draft projection before publication
         run: |
-          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
+          node tools/release/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/release.json" \
             --phase projection --policy "$RUNNER_TEMP/immutable-releases.json"
 
       - name: Publish the GitHub prerelease
@@ -421,5 +421,5 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/published.json"
-          node tools/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/published.json" \
+          node tools/release/release-projection.mjs verify "$RUNNER_TEMP/expected.json" "$RUNNER_TEMP/published.json" \
             --phase published

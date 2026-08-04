@@ -4,7 +4,7 @@ The GitHub Release for a version is a Release Projection: a byte-for-byte
 publication of the tagged Released Version Notes record
 `.changes/<version>.md`, never a separately authored source. The decision
 record is `docs/adr/0003-changie-release-notes.md`, and the projection itself
-is decided by [`tools/release-projection.mjs`](../../tools/release-projection.mjs)
+is decided by [`tools/release/release-projection.mjs`](../../tools/release/release-projection.mjs)
 — the same module the release workflow drafts from
 ([`npm-publishing.md`](./npm-publishing.md)). This page covers the two
 mechanisms that keep a published projection trustworthy — the native
@@ -38,7 +38,7 @@ gh api repos/AntonPieper/hell-ui/immutable-releases
 The release workflow (`.github/workflows/npm-publish.yml`) runs a
 `release-immutability` gate on every real tag push. It captures the
 repository's immutable-releases policy and decides through
-`node tools/release-projection.mjs policy`, the same seam draft verification
+`node tools/release/release-projection.mjs policy`, the same seam draft verification
 uses: only `enabled: true` opens the gate, and disabled, missing, or
 unreadable evidence refuses. Both registry publish jobs require the gate, so
 no package publishes — and no Release Projection follows — while release tags
@@ -81,9 +81,9 @@ permission capable of automatic repair. A rerun of the drift check — or any
 unrelated release edit — can never publish a registry package or create
 another release: registry publication is triggered only by tag pushes, never
 by release events. `pnpm test:changelog` proves these workflow contracts
-statically ([`tools/check-release-workflow.mjs`](../../tools/check-release-workflow.mjs))
+statically ([`tools/release/check-release-workflow.mjs`](../../tools/release/check-release-workflow.mjs))
 and drives the drift policy through captured fixtures
-([`tools/release-projection-fixtures.mjs`](../../tools/release-projection-fixtures.mjs)).
+([`tools/release/release-projection-fixtures.mjs`](../../tools/release/release-projection-fixtures.mjs)).
 
 **Coverage limit.** GitHub runs a workflow file as it exists at the commit the
 release tag points at, so the drift check only covers releases whose tag

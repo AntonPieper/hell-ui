@@ -654,7 +654,7 @@ describe('HellDialogTrigger scoped overlays', () => {
 
   it('names the ng-primitives release its focus-trap escape marker is written against', () => {
     // The marker is a version-bound DOM seam. This records the pairing the
-    // tests above exercise; `tools/check-architecture.mjs` owns the exact match
+    // tests above exercise; `tools/architecture/check-architecture.mjs` owns the exact match
     // against the installed package.
     expect(HELL_DIALOG_SCOPED_MODALITY_VERSION).toMatch(/^ng-primitives@\d+\.\d+\.\d+$/);
   });

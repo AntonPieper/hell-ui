@@ -71,7 +71,7 @@ jobs:
 
       - name: Decide the pull-request state
         run: >-
-          node tools/decide-pr-state.mjs
+          node tools/merge-state/decide-pr-state.mjs
           --labels "${RUNNER_TEMP}/labels.json"
           --files "${RUNNER_TEMP}/files.json"
           --pull "${RUNNER_TEMP}/pull.json"

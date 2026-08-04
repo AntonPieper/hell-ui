@@ -54,7 +54,7 @@ Two rules keep the composed manifest honest:
 ## The composed package.json
 
 The runner owns the whole consumer manifest, so the parts every fixture shares
-live in `tools/check-consumer-fixtures.mjs` exactly once:
+live in `tools/package/check-consumer-fixtures.mjs` exactly once:
 
 - the scaffold: `name` (`hell-consumer-fixture-<directory>`), `private`,
   `type`, and the `build` script;
@@ -98,7 +98,7 @@ the fixture is not keeping.
 
 - `description` (required) — printed while the fixture runs.
 - `peerGroup` (required) — a peer group name from
-  `tools/package-pack-audit.mjs`. The fixture's composed dependencies that are
+  `tools/package/package-pack-audit.mjs`. The fixture's composed dependencies that are
   package peers must match that group exactly, preserving the strict-peer
   install contract per boundary. It also derives the fixture's forbidden
   dependencies: the closed pool of peer-group markers (every package some peer
@@ -162,7 +162,7 @@ the fixture is not keeping.
 
 ## Runner
 
-`tools/check-consumer-fixtures.mjs` (`pnpm run test:consumer-fixtures`):
+`tools/package/check-consumer-fixtures.mjs` (`pnpm run test:consumer-fixtures`):
 
 1. Builds the library once (`build:lib`), unless `--skip-build` reuses
    `dist/hell`.
@@ -189,7 +189,7 @@ did not run — a red local run tells you about one fixture, not the whole set.
 `HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging — each
 is a complete, openable consumer project.
 
-The sharded CI entry (`tools/run-consumer-fixture-shard.mjs`) is shard
+The sharded CI entry (`tools/package/run-consumer-fixture-shard.mjs`) is shard
 arithmetic over the same runner: it reads the fixture set from the runner's own
 discovery, deals it round-robin across `CI_NODE_TOTAL` shards, and runs its
 slice by importing the runner in-process. One shard therefore audits the packed
@@ -214,7 +214,7 @@ job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by
 rulesets). In GitLab CI one sharded `package-consumer` job
 (`.gitlab/ci/package-consumer.yml`) discovers fixtures in-job and deals them
-round-robin across its shards via `tools/run-consumer-fixture-shard.mjs`, with
+round-robin across its shards via `tools/package/run-consumer-fixture-shard.mjs`, with
 one collapsible log section per fixture. The shared release gate in
 `.github/workflows/release-gate.yml` (called by both publish workflows) runs
 the whole set serially against the audited release tarball.

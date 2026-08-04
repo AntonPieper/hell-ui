@@ -161,7 +161,7 @@ reference implementation.
    `ngModel` paths at once (`tools/consumer-fixtures/styled-controls`).
    Update the API report and docs page + example, and record the Breaking
    Change Fragment; the permanent
-   `one-forms-contract` architecture guard (`tools/check-architecture.mjs`)
+   `one-forms-contract` architecture guard (`tools/architecture/check-architecture.mjs`)
    rejects any class that mixes the contract families.
 
 ## Typed Value Input pattern (established by the Date Input tracer, #284)

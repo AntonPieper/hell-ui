@@ -19,7 +19,7 @@ pr-state:
   cache: []
   before_script: []
   script:
-    - node tools/decide-mr-state.mjs
+    - node tools/merge-state/decide-mr-state.mjs
 
 release-notes:
   extends: .node-job

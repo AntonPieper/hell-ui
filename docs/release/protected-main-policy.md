@@ -42,7 +42,7 @@ policy has no opinion about.
 The list of recorded project settings is closed in both directions. Dropping
 a key from the file is an error rather than a silent decision to stop
 enforcing it, and adding one is an error until it is named in
-`tools/main-policy.mjs`. That is the whole point of a policy file: it cannot
+`tools/policy/main-policy.mjs`. That is the whole point of a policy file: it cannot
 quietly shrink.
 
 ## Posture

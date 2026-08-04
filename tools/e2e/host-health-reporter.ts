@@ -2,7 +2,7 @@ import { cpus, loadavg, platform } from 'node:os';
 import type { FullConfig, Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 
 // @ts-expect-error -- repo tooling is authored as plain ESM without declarations.
-import { DOCS_BUILD_STAMP_FILE } from '../docs-build-stamp.mjs';
+import { DOCS_BUILD_STAMP_FILE } from '../docs/docs-build-stamp.mjs';
 
 /**
  * Reports what the machine and the docs server were doing while the tests ran,

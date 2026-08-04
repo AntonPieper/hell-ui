@@ -2,7 +2,7 @@
  * AST-based ESLint enforcement of hell-ui entrypoint dependency
  * boundaries (#259). Since #270 these rules are the only import-boundary
  * enforcement — including the table adapter direction edge — and
- * tools/check-architecture.mjs keeps only the durable concerns no standard
+ * tools/architecture/check-architecture.mjs keeps only the durable concerns no standard
  * tool covers: entrypoint sidecar coverage, local package resolution, and
  * optional-peer metadata. The rules:
  *
@@ -19,7 +19,7 @@
  *
  * Entrypoint identities, source directories, specifiers, and categories all
  * come from the hell-entrypoint.json manifest sidecars via
- * tools/entrypoint-manifest.mjs — there is no second hand-written entrypoint
+ * tools/entrypoints/entrypoint-manifest.mjs — there is no second hand-written entrypoint
  * list. The category matrix below is boundary policy over those manifest
  * categories and is validated against them at load time.
  */
@@ -31,7 +31,7 @@ import {
   entrypointCategories,
   entrypointPublicApiFiles,
   packageName,
-} from '../entrypoint-manifest.mjs';
+} from '../entrypoints/entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
