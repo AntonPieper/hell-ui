@@ -55,6 +55,45 @@ test.describe('omnibar accessibility contract', () => {
     await expect(input).toBeFocused();
   });
 
+  // Regression for #459: typing schedules a re-search (debounced input plus an
+  // async source in the docs example), and arrow-key navigation performed
+  // while that search is in flight must survive the result landing when it
+  // carries the same people. Red when the example unmounts options during
+  // 'loading' — the landing then re-creates every item and the omnibar resets
+  // the active option to the first result.
+  test('keeps in-flight arrow navigation when a same-query result set lands late', async ({
+    page,
+  }) => {
+    await gotoOmnibar(page);
+
+    const input = peopleInput(page);
+    const user3 = peopleOption(page, 3, 'Support');
+    const loading = page.getByRole('status').filter({ hasText: 'Loading people' });
+
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press('/');
+    await expect(input).toBeFocused();
+
+    // Let the initial empty-query search settle so typing races a mounted panel.
+    await expect(peopleOption(page, 1, 'Design')).toBeVisible();
+
+    // Armed before typing so the loading window cannot be missed.
+    const landed = loading
+      .waitFor({ state: 'visible' })
+      .then(() => loading.waitFor({ state: 'hidden' }));
+    landed.catch(() => {}); // keep an early expect failure from becoming an unhandled rejection
+
+    await input.fill('user');
+    await page.keyboard.press('ArrowDown');
+    await expect(user3).toHaveAttribute('aria-selected', 'true');
+
+    await landed;
+
+    await expect(user3).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('Selected User 3 from Support.')).toBeVisible();
+  });
+
   test('bare global hotkey does not steal typing from another editable field', async ({ page }) => {
     await gotoOmnibar(page);
 
