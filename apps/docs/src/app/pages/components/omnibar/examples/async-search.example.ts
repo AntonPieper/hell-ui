@@ -65,7 +65,7 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
         </button>
       </div>
 
-      @if (peopleSearch.status() === 'success' && peopleSearch.items().length > 0) {
+      @if (peopleSearch.items().length > 0) {
         <div hellOmnibarGroup label="People">
           <div hellOmnibarGroupLabel>People</div>
           @for (person of peopleSearch.items(); track person.id) {
