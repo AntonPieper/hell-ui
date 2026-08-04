@@ -9,6 +9,11 @@
 // fail-closed handling of unrecognized metadata. Nothing here talks to GitHub.
 
 import {
+  collectExpectationFailures,
+  errorDialect,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
+import {
   changedFilesApiCap,
   evaluatePullRequestState,
   noConsumerChangeLabel,
@@ -33,10 +38,13 @@ const preparationCandidate = ({ record = '.changes/0.3.0.md', extras = [] } = {}
 ];
 
 // `expect` is either `{ state }` for a passing decision or
-// `{ state, errors: [substring, ...] }` for a failing one; every listed
-// substring must appear in the reported errors. The corpus is exported so the
-// GitLab input adapter (tools/mr-state-input-fixtures.mjs) replays the same
-// scenarios through its own encoding.
+// `{ state, errors: [substring, ...] }` for a failing one. The listed
+// substrings are the whole verdict: every one must appear in the reported
+// errors, and an error no substring names fails the fixture too, so a scenario
+// that starts failing for a second reason cannot pass on the strength of the
+// first. The corpus is exported so the GitLab input adapter
+// (tools/mr-state-input-fixtures.mjs) replays the same scenarios through its
+// own encoding.
 export const prStatePolicyFixtures = [
   {
     name: 'one added fragment is a Consumer Change',
@@ -101,10 +109,17 @@ export const prStatePolicyFixtures = [
     expect: { state: 'no-consumer-change', errors: ['while carrying "no-consumer-change"'] },
   },
   {
+    // A pending fragment added inside a preparation candidate breaks two
+    // rules at once — it declares a Consumer Change under the preparation
+    // label, and it is a change the candidate shape does not admit — and the
+    // verdict has to name both.
     name: 'fragments combined with release-preparation fail',
     labels: [releasePreparationLabel],
     files: preparationCandidate({ extras: [fragmentAddition('Changed-20260724-130000.yaml')] }),
-    expect: { state: 'release-preparation', errors: ['while carrying "release-preparation"'] },
+    expect: {
+      state: 'release-preparation',
+      errors: ['while carrying "release-preparation"', 'no unrelated changes'],
+    },
   },
   {
     name: 'a direct Release Changelog edit fails a Consumer Change',
@@ -235,13 +250,7 @@ export const prStatePolicyFixtures = [
 ];
 
 export function runPrStatePolicyFixtures() {
-  const failures = [];
-  for (const fixture of prStatePolicyFixtures) {
-    for (const failure of runFixture(fixture)) {
-      failures.push(`pr-state policy fixture "${fixture.name}": ${failure}`);
-    }
-  }
-  return { failures, total: prStatePolicyFixtures.length };
+  return runNamedFixtures(prStatePolicyFixtures, runFixture, 'pr-state policy fixture');
 }
 
 function runFixture(fixture) {
@@ -253,6 +262,11 @@ function runFixture(fixture) {
   return collectVerdictFailures(fixture.expect, verdict);
 }
 
+const verdictDialect = errorDialect({
+  clean: 'a passing decision',
+  rejection: 'a failing decision',
+});
+
 // Compares one policy verdict against a fixture's expectation. Exported so
 // the GitLab input-adapter fixtures assert the replayed corpus the same way.
 export function collectVerdictFailures(expect, { state, errors }) {
@@ -260,23 +274,6 @@ export function collectVerdictFailures(expect, { state, errors }) {
   if (state !== expect.state) {
     failures.push(`expected state ${JSON.stringify(expect.state)}, got ${JSON.stringify(state)}.`);
   }
-
-  const expectedErrors = expect.errors ?? [];
-  if (expectedErrors.length === 0) {
-    if (errors.length > 0) {
-      failures.push(`expected a passing decision; got: ${errors.join(' | ')}`);
-    }
-    return failures;
-  }
-
-  if (errors.length === 0) {
-    failures.push(`expected a failing decision mentioning ${expectedErrors.join(', ')}; got a pass.`);
-    return failures;
-  }
-  for (const needle of expectedErrors) {
-    if (!errors.some((error) => error.includes(needle))) {
-      failures.push(`expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`);
-    }
-  }
+  failures.push(...collectExpectationFailures(errors, expect.errors ?? [], verdictDialect));
   return failures;
 }

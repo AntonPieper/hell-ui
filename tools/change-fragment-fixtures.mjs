@@ -30,6 +30,7 @@ import {
   collectUnreleasedFragmentErrors,
   listUnreleasedFragments,
 } from './change-fragments.mjs';
+import { runNamedFixtures } from './fixture-harness.mjs';
 import { listReleasedVersionFiles, resolveChangieBinary } from './release-changelog.mjs';
 
 const changieTimeoutMs = 30_000;
@@ -53,30 +54,23 @@ export function runChangeFragmentFixtures({ root }) {
     };
   }
 
-  const failures = [];
-  for (const fixture of fixtures) {
-    for (const failure of runFixture(root, binary, fixture)) {
-      failures.push(`change-fragment fixture "${fixture.name}": ${failure}`);
-    }
-  }
-
-  return { failures, total: fixtures.length };
+  return runNamedFixtures(
+    fixtures,
+    (fixture, fail) => runFixture(root, binary, fixture, fail),
+    'change-fragment fixture',
+  );
 }
 
-function runFixture(root, binary, fixture) {
+function runFixture(root, binary, fixture, fail) {
   const workspace = mkdtempSync(join(tmpdir(), 'hell-change-fragment-'));
   try {
-    const context = createFixtureContext(root, binary, workspace);
-    fixture.run(context);
-    return context.failures;
-  } catch (error) {
-    return [error instanceof Error ? error.message : String(error)];
+    fixture.run(createFixtureContext(root, binary, workspace, fail));
   } finally {
     rmSync(workspace, { force: true, recursive: true });
   }
 }
 
-function createFixtureContext(root, binary, workspace) {
+function createFixtureContext(root, binary, workspace, fail) {
   const unreleasedDir = join(workspace, '.changes', 'unreleased');
   copyFileSync(join(root, '.changie.yaml'), join(workspace, '.changie.yaml'));
   mkdirSync(unreleasedDir, { recursive: true });
@@ -86,12 +80,10 @@ function createFixtureContext(root, binary, workspace) {
   }
   writeFileSync(join(unreleasedDir, '.gitkeep'), '');
 
-  const failures = [];
   const context = {
     workspace,
     unreleasedDir,
-    failures,
-    fail: (message) => failures.push(message),
+    fail,
     changie: (args, options = {}) =>
       spawnSync(binary, args, {
         cwd: workspace,
