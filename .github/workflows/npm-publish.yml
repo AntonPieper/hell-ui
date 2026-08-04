@@ -57,6 +57,10 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      # Reading the repository's native immutable-releases policy is an
+      # Administration-scoped read. Without it the capture below fails and the
+      # gate refuses an enabled policy it simply could not see.
+      administration: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -288,6 +292,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      # Draft verification proves the policy a second time.
+      administration: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
@@ -376,6 +382,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      # Publish re-proves the policy before flipping the release live.
+      administration: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       HELL_RELEASE_ID: ${{ needs.draft-github-release.outputs.release-id }}
