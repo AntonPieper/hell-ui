@@ -8,7 +8,6 @@ import { OVERSUBSCRIBED_LOAD_PER_CORE } from './host-load.mjs';
 // @ts-expect-error -- repo tooling is authored as plain ESM without declarations.
 import {
   DOCS_BUILD_STAMP_FILE,
-  checkDocsBuildStampFixture,
   computeDocsSourcesDigest,
   describeForeignDocsBuild,
 } from '../docs-build-stamp.mjs';
@@ -53,7 +52,6 @@ const LOAD_MEANINGFUL_DECLINE = 0.05;
 const PREFLIGHT_FETCH_TIMEOUT_MS = 10_000;
 
 export default async function globalSetup(config: FullConfig): Promise<void> {
-  checkDocsBuildStampFixture();
   await assertHostHasHeadroom();
   await assertServedDocsBuildMatchesWorkspace(config);
 }

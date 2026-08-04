@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
@@ -1831,10 +1831,12 @@ function readTsconfigFile(path) {
 // JSONC to JSON, character by character. Comment openers inside string values
 // (`"./features/*/styles.css"`) and escaped quotes (`"\\"`) must survive, which
 // is what the string/escape states below track. Taking the source rather than a
-// path keeps the state machine independent of the filesystem; this module still
-// exports nothing and runs main() on load, so a spec cannot reach it yet — the
-// in-flight tools vitest work owns exporting it and pinning these states.
-function parseJsonc(source) {
+// path keeps the state machine independent of the filesystem, and
+// `check-architecture.spec.mjs` pins these states from there — which is why the
+// checks run behind the entry guard at the foot of this file rather than on
+// import: a spec that reached this parser by loading the module would run every
+// architecture check, and exit the process on the first failure.
+export function parseJsonc(source) {
   let json = '';
   let inString = false;
   let escaped = false;
@@ -1982,4 +1984,18 @@ function libraryProductionTsFiles() {
   return libraryProductionTsFileList;
 }
 
-main();
+// Running the checks is what `node tools/check-architecture.mjs` does, not what
+// importing this module does; `parseJsonc` above is imported by its spec.
+//
+// Both sides are resolved through symlinks before comparing. `import.meta.url`
+// is always the real path, while `process.argv[1]` is whatever spelling invoked
+// the script — so an absolute invocation through a symlinked path compares two
+// different strings and silently skips the checks rather than failing. Nothing
+// invokes it that way today; a gate that can quietly do nothing is worth one
+// line to close.
+if (
+  process.argv[1] &&
+  realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+) {
+  main();
+}

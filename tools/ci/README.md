@@ -25,11 +25,18 @@ pnpm run ci:build:docs:prepared
 pnpm run ci:test:api-report:prepared
 ```
 
-`ci:test:static` runs ESLint, Knip, and the repository's static contracts:
+`ci:test:static` runs ESLint, Knip, the repository's static contracts —
 architecture, PR-state policy, secret-detection policy, pipeline shape, and the
-main-policy document. Local unit tests run through `test:unit` without coverage
-output; CI and release checks use `test:coverage`, which enables Angular's
-native coverage switch and enforces the thresholds in `vitest.config.ts`.
+main-policy document — and `test:tools`, the tooling's own specs, run by
+`vitest.tools.config.ts` in a node environment over the `.spec.mjs` and
+`.spec.ts` files colocated with the tools under `tools/`. That is the gate for
+any change under `tools/`; on the GitLab runner it writes
+`test-results/vitest-tools-junit.xml`, which the `static` job publishes to the
+merge-request test widget.
+
+Local unit tests run through `test:unit` without coverage output; CI and release
+checks use `test:coverage`, which enables Angular's native coverage switch and
+enforces the thresholds in `vitest.config.ts`.
 
 The two pipelines cover the same ground. They diverge only where the execution
 environment forces it: GitHub fans work out across ephemeral hosted runners,

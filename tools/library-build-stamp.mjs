@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
@@ -44,8 +43,12 @@ export function assertIsTheLibraryDistRoot(root, distRoot) {
   }
 }
 
-/** Bump when the digest inputs change so old stamps are rejected, not trusted. */
-const STAMP_VERSION = 2;
+/**
+ * Bump when the digest inputs change so old stamps are rejected, not trusted.
+ * Exported so `library-build-stamp.spec.mjs` builds synthetic stamps at the
+ * current format instead of hard-coding a number that drifts.
+ */
+export const STAMP_VERSION = 2;
 
 const LIBRARY_DIST_ROOT = 'dist/hell';
 
@@ -187,7 +190,12 @@ export function describeStaleLibraryBuild({ root }) {
   });
 }
 
-function classifyLibraryBuildStamp({
+/**
+ * The staleness decision itself, over values rather than the filesystem, so
+ * `library-build-stamp.spec.mjs` reaches every branch with synthetic stamps
+ * instead of arranging a real interrupted build.
+ */
+export function classifyLibraryBuildStamp({
   stamp,
   expectedConfiguration,
   currentDigest,
@@ -219,57 +227,4 @@ function classifyLibraryBuildStamp({
     ];
   }
   return [];
-}
-
-/** Self-check with synthetic stamps; runs before the real gate. */
-export function checkLibraryBuildStampFixture() {
-  const current = {
-    expectedConfiguration: 'production',
-    currentDigest: 'digest-a',
-    currentOutputDigest: 'output-a',
-  };
-  const fresh = {
-    version: STAMP_VERSION,
-    configuration: 'production',
-    declarationInputsDigest: 'digest-a',
-    outputDigest: 'output-a',
-  };
-
-  assert.deepEqual(
-    classifyLibraryBuildStamp({ ...current, stamp: fresh }),
-    [],
-    'a stamp matching the configuration and the working tree must pass',
-  );
-
-  const cases = [
-    [null, /no build stamp/, 'an unstamped dist must fail'],
-    [{ ...fresh, version: STAMP_VERSION + 1 }, /stamp format/, 'an unknown stamp format must fail'],
-    [{ ...fresh, configuration: 'development' }, /'development'/, 'another configuration must fail'],
-    [
-      { ...fresh, declarationInputsDigest: 'digest-b' },
-      /different library sources/,
-      'other sources must fail',
-    ],
-    // Matching sources with different output is the watch-overwrite case: the
-    // build started from this tree, then something else rewrote dist.
-    [
-      { ...fresh, outputDigest: 'output-b' },
-      /has changed since the build that stamped it/,
-      'a rewritten dist must fail even when its sources match',
-    ],
-  ];
-  for (const [stamp, expected, message] of cases) {
-    const failures = classifyLibraryBuildStamp({ ...current, stamp });
-    assert.equal(failures.length, 1, message);
-    assert.match(failures[0], expected, message);
-    assert.match(failures[0], /pnpm run build:lib/, 'every failure must name the fix');
-  }
-
-  // The digest must describe content, not the moment of the build, or two
-  // builds of one tree would disagree.
-  assert.deepEqual(
-    classifyLibraryBuildStamp({ ...current, stamp: { ...fresh, builtAt: 'much later' } }),
-    [],
-    'the build timestamp must not affect staleness',
-  );
 }

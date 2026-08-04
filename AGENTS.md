@@ -48,9 +48,13 @@ pnpm run test:architecture
 pnpm run build:lib
 ```
 
-Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
-`pnpm run test:consumer-fixtures`, `pnpm run test:api-report`, or
+Add focused `pnpm run test:unit`, `pnpm run test:tools`, `pnpm run build:docs`,
+`pnpm run e2e`, `pnpm run test:consumer-fixtures`, `pnpm run test:api-report`, or
 `pnpm run release:dry-run` when the touched surface warrants it.
+
+`pnpm run test:tools` is the gate for anything under `tools/`: the tooling's own
+specs, run by `vitest.tools.config.ts` in a node environment. It is part of
+`ci:test:static`, so both providers run it.
 
 `pnpm run e2e` runs a preflight that refuses to start on a host with no
 headroom, or against a docs server it cannot identify as this checkout's

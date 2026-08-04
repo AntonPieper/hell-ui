@@ -13,3 +13,10 @@ static:
     - !reference [.caches, pnpm-readonly]
   script:
     - pnpm run ci:test:static
+  # The tool specs in this job report through the merge-request test widget the
+  # same way the unit job's do. Its own file, not the unit job's, so the two
+  # never clobber each other in a shared workspace layout.
+  artifacts:
+    when: always
+    reports:
+      junit: test-results/vitest-tools-junit.xml
