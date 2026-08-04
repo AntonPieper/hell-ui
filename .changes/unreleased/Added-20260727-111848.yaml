@@ -1,8 +1,0 @@
-kind: Added
-body: 'Date Input''s format is configurable: `provideHellDateInputFormat` sets one
-  format for an injector scope, and a new `format` input overrides that scope for
-  a single input. Patterns are written with the `YYYY`, `MM`, and `DD` tokens plus
-  literal separators, and parsing, display, the native `min`/`max` attributes, and
-  the placeholder hint all follow the effective format. The committed `Date | null`
-  value contract is unchanged.'
-time: 2026-07-27T11:18:48.5837+02:00

@@ -1,5 +1,0 @@
-kind: Changed
-body: '`--hell-z-dialog-scoped` drops from `1020` to `900` so that popovers, menus,
-  and CDK-portaled panels opened from the surrounding shell layer over a scoped dialog''s
-  region. Page-modal dialogs keep `--hell-z-dialog` at `1200` and stay on top.'
-time: 2026-07-27T14:25:22.650624+02:00

@@ -1,5 +1,0 @@
-kind: Changed
-body: The PDF viewer page overview now allocates a thumbnail canvas only once that
-  thumbnail is rendered, instead of reserving one per page the moment the overview
-  opens.
-time: 2026-07-27T12:09:42.487552+02:00

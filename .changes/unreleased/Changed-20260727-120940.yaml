@@ -1,5 +1,0 @@
-kind: Changed
-body: Pinch and Ctrl+wheel zoom in the PDF viewer now coalesce to one scale update
-  per animation frame, and pdf.js re-scales the already-rendered pages during the
-  gesture and re-rasterizes them once it settles.
-time: 2026-07-27T12:09:40.657398+02:00

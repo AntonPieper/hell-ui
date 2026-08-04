@@ -1,8 +1,0 @@
-kind: Added
-body: '`hellAppSidenav` publishes its resting content widths as `--hell-app-sidenav-content-width`
-  and `--hell-app-sidenav-collapsed-content-width`, with the sidenav''s own inline
-  padding already subtracted. Navigation recipes size rail rows and center rail glyphs
-  against these instead of against the box the shell interpolates while collapsing,
-  so labels no longer re-wrap or re-ellipsise and icons no longer jump between positions
-  mid transition.'
-time: 2026-07-27T14:33:23.581519+02:00

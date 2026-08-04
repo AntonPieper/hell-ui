@@ -1,4 +1,0 @@
-kind: Fixed
-body: Reopening the PDF viewer page overview repaints its thumbnails. They previously
-  stayed blank because the viewer still considered the discarded canvases painted.
-time: 2026-07-27T11:29:44.170658+02:00

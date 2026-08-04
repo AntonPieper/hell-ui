@@ -1,5 +1,0 @@
-kind: Fixed
-body: The PDF viewer's page overview no longer collapses each thumbnail to a control
-  height, which left every preview overlapping the pages below it in the rail. A thumbnail
-  row is now as tall as its preview and label.
-time: 2026-07-29T07:09:18.206866+02:00
