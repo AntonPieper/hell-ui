@@ -11,40 +11,76 @@ unlocks), not on one component: the fixture count tracks packaging boundaries
 ```
 tools/consumer-fixtures/
   README.md
+  _base/                # shared workspace scaffolding, overlaid by the runner
+    project/            # onto every fixture
+      .npmrc            # strict-peer-dependencies=true, auto-install-peers=false
+      angular.json
+      tsconfig.json
+      tsconfig.app.json
+      src/index.html
+    tailwind/           # only onto fixtures that install the tailwindcss peer
+      .postcssrc.json
   <fixture-name>/
     fixture.json        # runner-facing manifest (see below)
-    package.json        # real consumer manifest; dependency names with "*" versions
-    .npmrc              # strict-peer-dependencies=true, auto-install-peers=false
-    .postcssrc.json     # only in fixtures with the tailwindcss peer
-    angular.json
-    tsconfig.json
-    tsconfig.app.json
     src/                # the consumer application
 ```
 
-Every fixture is a real project: open it, read it, edit it like any consumer
-app. Two rules keep fixtures honest:
+A fixture directory holds only what makes it that scenario. Everything a real
+Angular consumer project also needs but no scenario varies is the runner's:
+`_base/project/` is copied into every workspace, `_base/tailwind/` only into
+workspaces that install the style peer, and the consumer `package.json` is
+composed per run. Directories whose name starts with `_` are shared material,
+never fixtures.
 
-- Dependency versions are always `"*"`. The runner pins each dependency to the
-  repo's tested version — the root-installed version, else the exact version
-  the lockfile's `catalogs:` snapshot records for the `pnpm-workspace.yaml`
-  catalog entry, else the root `package.json` — so fixtures cannot drift onto
-  untested versions. A dependency that still resolves to a range fails the run
-  rather than being written through: a range re-resolves at install time,
-  which is exactly the drift this contract exists to prevent.
-- `hell-ui` is declared like any other dependency and is replaced at
-  run time with the packed tarball. Fixtures never install workspace links, and
-  they never commit lockfiles.
+The runner materializes the real project into a temp workspace: base overlay
+first, then the fixture's own files, which win on collision — a scenario that
+needs its own `angular.json` or `index.html` simply checks one in.
+`HELL_KEEP_PACKAGE_CONSUMER=1` keeps that workspace, and it is a complete
+project: open it, read it, build it like any consumer app.
+
+Two rules keep the composed manifest honest:
+
+- No fixture writes a dependency version. The runner pins each dependency to
+  the repo's tested version — the root-installed version, else the exact
+  version the lockfile's `catalogs:` snapshot records for the
+  `pnpm-workspace.yaml` catalog entry, else the root `package.json` — so
+  fixtures cannot drift onto untested versions. A dependency that resolves to
+  a range fails the run rather than being written through: a range re-resolves
+  at install time, which is exactly the drift this contract exists to prevent.
+- `hell-ui` is composed in like any other dependency and resolves to the
+  packed tarball. Fixtures never install workspace links, and they never commit
+  lockfiles.
+
+## The composed package.json
+
+The runner owns the whole consumer manifest, so the parts every fixture shares
+live in `tools/check-consumer-fixtures.mjs` exactly once:
+
+- the scaffold: `name` (`hell-consumer-fixture-<directory>`), `private`,
+  `type`, and the `build` script;
+- the dependencies every fixture installs (Angular CDK/common/compiler/core/
+  forms/platform-browser, `@floating-ui/dom`, `ng-primitives`, `rxjs`,
+  `tslib`) plus the packed library under its own packed name;
+- the dev dependencies every fixture builds with (`@angular/build`,
+  `@angular/cli`, `@angular/compiler-cli`, `typescript`);
+- the Tailwind/PostCSS toolchain (`@tailwindcss/postcss`, `postcss`) and the
+  `.postcssrc.json` overlay, added together for fixtures whose dependencies
+  include `tailwindcss` and for no others — the build toolchain follows the
+  style peer rather than being declared per fixture.
+
+A fixture adds only the dependencies that make it its scenario, via
+`fixture.json`'s `dependencies`.
 
 ## fixture.json
 
 ```json
 {
   "description": "one-line contract statement",
-  "peerGroup": "core",
-  "forbiddenDependencies": ["@tanstack/angular-table"],
+  "peerGroup": "table-tanstack",
+  "dependencies": ["@tanstack/angular-table", "tailwindcss"],
   "cssSentinels": ["table-layout:fixed"],
   "forbiddenCssSentinels": ["hell-code-editor"],
+  "styleBundleBudget": true,
   "smoke": {
     "steps": [
       { "selector": "app-root p", "textIncludes": "expected text" },
@@ -57,16 +93,32 @@ app. Two rules keep fixtures honest:
 }
 ```
 
-- `description` — printed while the fixture runs.
-- `peerGroup` (optional) — a peer group name from
-  `tools/package-pack-audit.mjs`. The fixture's declared dependencies that are
+An unknown key fails discovery: a field the runner does not read is a promise
+the fixture is not keeping.
+
+- `description` (required) — printed while the fixture runs.
+- `peerGroup` (required) — a peer group name from
+  `tools/package-pack-audit.mjs`. The fixture's composed dependencies that are
   package peers must match that group exactly, preserving the strict-peer
-  install contract per boundary.
-- `forbiddenDependencies` (optional) — packages that must not appear anywhere
-  in the installed workspace, including the pnpm store (guards optional peers
-  against transitive leaks).
-- `cssSentinels` (optional) — distinctive fragments that must appear in the
-  built CSS, compared with all whitespace stripped. Keep one or two sentinels
+  install contract per boundary. It also derives the fixture's forbidden
+  dependencies: the closed pool of peer-group markers (every package some peer
+  group installs that another does not) minus this group's own peers. Each of
+  those must be absent from `node_modules` **and** from the pnpm store, so a
+  transitive leak counts too. Nothing is declared per fixture, which is what
+  the old hand-written lists got wrong — the core fixture forbade the table,
+  editor, and pdf.js markers but not the icon or style peers its siblings
+  forbade.
+- `dependencies` (optional) — the extra dependencies this scenario installs on
+  top of the composed set above, as bare package names. `root-core` declares
+  none.
+- `cssSentinels` (optional) — the scenario's distinctive fragments that must
+  appear in the built CSS, compared with all whitespace stripped, on top of the
+  runner's own `--color-hell-surface-muted:` token probe. That probe applies to
+  every fixture that installs the `tailwindcss` peer, because a stylesheet
+  export that resolved from the packed tarball always pulls the token layer with
+  it — and for those fixtures a build that emits no CSS is a failure. A fixture
+  without the style peer and without sentinels of its own (the no-CSS
+  `root-core` boundary) is exempt by contract. Keep one or two sentinels
   per imported stylesheet export: they prove the export resolved from the
   packed tarball and shipped compiled output. Exhaustive fragment lists belong
   to unit tests, not the packaging boundary. Entries whose stylesheets emit no
@@ -83,15 +135,17 @@ app. Two rules keep fixtures honest:
   for heavy/optional stylesheet markers (Code Editor, PDF Viewer, Theme
   Adapter Stylesheets) that a standard-style fixture must never pick up
   implicitly.
-- `styleBundleBudget` (optional) — path to a checked-in size budget file,
-  resolved against the fixture directory but staying inside
-  `tools/consumer-fixtures/`. The runner measures every CSS byte the
+- `styleBundleBudget` (optional) — `true` opts the fixture into the size gate.
+  The runner owns the path (`style-bundle-budget.json` in this directory), so
+  no fixture can point the gate somewhere else. It measures every CSS byte the
   fixture's production build emitted (compiled and minified, nothing
   filtered), prints deterministic per-file and total raw/gzip byte counts,
   and fails when the file's `budget` limits are exceeded. The file also
   records the accepted `baseline` (package revision, measurement command,
-  measured bytes) the budget is derived from. `styles-aggregate` uses
-  `style-bundle-budget.json` as the Default Style Bundle release gate; see
+  measured bytes) the budget is derived from — including the `fixture` it was
+  measured from, which must be the fixture being measured against it: a budget
+  derived from one bundle says nothing about another's. `styles-aggregate` is
+  the Default Style Bundle release gate; see
   `docs/release/style-bundle-budget.md` for the review and update process.
 - `smoke` (optional) — one runtime smoke: the runner serves the production
   build and loads it in headless Chromium. A step either polls `selector`
@@ -118,24 +172,42 @@ app. Two rules keep fixtures honest:
    a `.tgz` file or a directory holding exactly one, such as a downloaded CI
    artifact directory.
 3. For every fixture directory (or the fixture names passed as arguments):
-   copies the project to a temp workspace, pins dependency versions, applies
-   the repo's pnpm overrides, and runs
+   materializes the project into a temp workspace (base overlay, then the
+   fixture's files, then the composed `package.json`), applies the repo's pnpm
+   overrides, and runs
    `pnpm install --strict-peer-dependencies --ignore-scripts`.
 4. Asserts the library resolved to the packed tarball (never the repo
-   checkout) and that forbidden dependencies are absent.
+   checkout) and that the peer-group markers outside the fixture's own group
+   are absent.
 5. Runs the fixture's own `build` script, asserts the CSS sentinels,
-   enforces the fixture's style bundle size budget when one is declared, and,
+   enforces the style bundle size budget when the fixture opts in, and,
    when enabled, runs the smoke.
 
-`HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging.
+This entry stops at the first failing fixture and names the ones it therefore
+did not run — a red local run tells you about one fixture, not the whole set.
+
+`HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging — each
+is a complete, openable consumer project.
+
+The sharded CI entry (`tools/run-consumer-fixture-shard.mjs`) is shard
+arithmetic over the same runner: it reads the fixture set from the runner's own
+discovery, deals it round-robin across `CI_NODE_TOTAL` shards, and runs its
+slice by importing the runner in-process. One shard therefore audits the packed
+tarball once rather than once per fixture, and both entries share one discovery
+and validation path. In that batch mode each fixture runs inside its own
+collapsible log section, a failing fixture never stops the ones after it, and a
+prebuilt tarball is mandatory — in CI the audited artifact the build job
+published is the only thing consumers are meant to test. Per-fixture verdicts
+and the closing summary print outside the collapsed sections, so a red job names
+its failures without anyone expanding anything.
 
 ## Adding a fixture
 
-Copy an existing fixture directory, adjust `fixture.json`, `package.json`, and
-`src/`, and run `pnpm run test:consumer-fixtures <fixture-name>`. Discovery is
+Copy an existing fixture directory, adjust `fixture.json` and `src/`, and run
+`pnpm run test:consumer-fixtures <fixture-name>`. Discovery is
 directory-based: no runner or CI changes are needed. The directory name must
-match `[A-Za-z0-9_.-]+` because it labels a collapsible GitLab log section;
-both the runner and the sharded CI entry reject anything else, so a name that
+match `[A-Za-z0-9_.-]+` because it labels a collapsible GitLab log section, and
+must not start with `_`, which marks shared material; a name that
 cannot be labeled fails on the run that adds it. In GitHub CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates

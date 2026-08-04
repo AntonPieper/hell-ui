@@ -37,10 +37,16 @@ export function measureCompiledCss(cssFiles) {
   };
 }
 
-// Loads and validates a checked-in style bundle budget file. The file records
-// the accepted baseline (package revision, measurement command, measured
-// bytes) and the explicit release budget derived from that baseline.
-export function loadStyleBundleBudget(budgetPath) {
+// Loads and validates a checked-in style bundle budget file against the
+// fixture about to be measured. The file records the accepted baseline
+// (package revision, measurement command, measured bytes) and the explicit
+// release budget derived from that baseline.
+//
+// `consumingFixture` is checked against `baseline.fixture`: a budget derived
+// from one fixture's bundle says nothing about another's, so a fixture that
+// opts into a budget measured elsewhere fails loudly instead of passing a gate
+// on a bundle the baseline was never taken from.
+export function loadStyleBundleBudget(budgetPath, consumingFixture) {
   const budget = JSON.parse(readFileSync(budgetPath, 'utf8'));
 
   const baseline = budget.baseline ?? {};
@@ -48,6 +54,11 @@ export function loadStyleBundleBudget(budgetPath) {
     if (typeof baseline[key] !== 'string' || !baseline[key].trim()) {
       throw new Error(`Style bundle budget ${budgetPath} baseline.${key} must be a non-empty string`);
     }
+  }
+  if (baseline.fixture !== consumingFixture) {
+    throw new Error(
+      `Style bundle budget ${budgetPath} records a baseline measured from fixture ${baseline.fixture}, but fixture ${consumingFixture} is being measured against it`,
+    );
   }
   for (const key of ['rawBytes', 'gzipBytes']) {
     assertPositiveInteger(budgetPath, `baseline.${key}`, baseline[key]);

@@ -1,16 +1,8 @@
 {
   "description": "overlays and router boundary: composite shell, dialog, omnibar, toast, prompts, layout composites, and Filter Builder with the router peer installed",
   "peerGroup": "composite-router",
-  "forbiddenDependencies": [
-    "@ng-icons/core",
-    "@ng-icons/font-awesome",
-    "@tanstack/angular-table",
-    "@tanstack/virtual-core",
-    "@codemirror/view",
-    "pdfjs-dist"
-  ],
+  "dependencies": ["@angular/router", "tailwindcss"],
   "cssSentinels": [
-    "--color-hell-surface-muted:",
     "grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--_hell-app-secondary-track)",
     "[hellAppTopbar][data-slot=root]>[hellSidenavToggle][data-slot=root]",
     "--hell-app-content-max-width:960px",
