@@ -16,7 +16,7 @@ pnpm run ci:test:static
 pnpm run ci:test:unit
 pnpm run ci:test:e2e
 pnpm run ci:test:consumer-fixtures        # one fixture, by name
-pnpm run ci:test:consumer-fixtures:shard  # this shard's slice of the whole set
+pnpm run ci:test:consumer-fixtures:batch  # the whole set, continuing past failures
 pnpm run ci:test:release-notes
 pnpm run ci:check:entrypoints
 pnpm run ci:build:lib
@@ -148,12 +148,13 @@ so adding, renaming, or removing one never requires a CI edit:
   `package-consumer-gate` job publishes the single stable `Package consumer`
   context, runs on every outcome (`if: always()`), and fails unless the plan and
   every planned fixture job succeeded.
-- GitLab: one `package-consumer` job with `parallel: 3` runs
-  `ci:test:consumer-fixtures:shard` (`tools/package/run-consumer-fixture-shard.mjs`),
-  which discovers the fixtures in-job and deals them round-robin over the
-  shards. The shard count is capacity tuning, not coverage. Each fixture gets
-  its own collapsible log section, and a failing fixture never stops the rest
-  of the shard — the shard's summary names every failure.
+- GitLab: one unsharded `package-consumer` job runs
+  `ci:test:consumer-fixtures:batch`, which discovers the fixtures in-job and
+  runs them all. It holds the `browser-host` resource group like the e2e
+  tiers — every job shares one 8-core docker host, so shards multiply setup
+  without buying compute, and concurrent browser jobs overload the host.
+  Each fixture gets its own collapsible log section, and a failing fixture
+  never stops the ones after it — the job's summary names every failure.
 
 ## Built output, artifacts, and caches
 

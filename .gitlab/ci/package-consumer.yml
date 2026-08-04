@@ -1,12 +1,20 @@
 # Consumer fixtures verified against the packed tarball the build job
-# audited and published — nothing is rebuilt here. One sharded job: fixtures
-# are discovered in-job and dealt round-robin across the shards
-# (tools/package/run-consumer-fixture-shard.mjs), so adding a fixture never edits CI;
-# the shard count is capacity tuning, not coverage. Per-fixture collapsible
-# log sections carry each fixture's result inside a shard.
+# audited and published — nothing is rebuilt here. One unsharded job:
+# fixtures are discovered in-job and run as a batch
+# (tools/package/check-consumer-fixtures.mjs --batch), so adding a fixture
+# never edits CI. Per-fixture collapsible log sections carry each fixture's
+# result, and a failing fixture never stops the ones after it.
+#
+# Deliberately one job, for the same measured reason as the e2e tiers
+# (e2e.yml): every job lands on the same shared 8-core docker host, so shard
+# jobs buy no compute over one job — they only multiply setup. At three
+# shards the fixed per-shard cost (checkout, cache restore, artifact
+# download, workspace install, tarball audit) measured ~27s against ~70–95s
+# of fixture work per shard; one job pays it once, and the whole fixture set
+# is ~4 minutes of work, well inside the timeout.
 #
 # The fixture smoke loads each built consumer app in headless chromium, so
-# the shards run the derived e2e image (tools/ci/e2e-image): the browsers and
+# the job runs the derived e2e image (tools/ci/e2e-image): the browsers and
 # their system packages are baked in at the pinned Playwright version — the
 # per-run `playwright install --with-deps` and the browser-binary cache it
 # needed are gone, exactly as Playwright's CI guidance recommends. The smoke
@@ -18,7 +26,11 @@ package-consumer:
   stage: test
   image: $CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG
   timeout: 45 minutes
-  parallel: 3
+  # Browser plus production-build load, so the job takes its turn on the one
+  # browser host exactly like the e2e tiers: two concurrent browser jobs were
+  # measured at 7.5+ load per logical core (e2e.yml), which is where the
+  # pdf-rasterization and measured-layout suites start timing out.
+  resource_group: browser-host
   needs:
     - build
     - job: e2e-image
@@ -28,8 +40,13 @@ package-consumer:
     HELL_CONSUMER_FIXTURE_SMOKE: "1"
     # The browsers baked into the image, at the base image's path.
     PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-  # Deliberately not the read-only pnpm cache: fixture installs can pull
-  # packages the workspace lockfile does not cover, and pushing them back
-  # keeps the next run's fixture installs warm.
+  # The .node-job pull-push default, spelled out next to the installs that
+  # depend on it: deliberately not the read-only pnpm cache, because fixture
+  # installs can pull packages the workspace lockfile does not cover, and
+  # pushing them back keeps the next run's fixture installs warm. One job
+  # means one writer, and it starts only after build — the other pull-push
+  # holder — finished.
+  cache:
+    - !reference [.caches, pnpm]
   script:
-    - pnpm run ci:test:consumer-fixtures:shard
+    - pnpm run ci:test:consumer-fixtures:batch

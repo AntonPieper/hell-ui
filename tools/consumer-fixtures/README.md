@@ -189,17 +189,13 @@ did not run — a red local run tells you about one fixture, not the whole set.
 `HELL_KEEP_PACKAGE_CONSUMER=1` keeps the temp workspaces for debugging — each
 is a complete, openable consumer project.
 
-The sharded CI entry (`tools/package/run-consumer-fixture-shard.mjs`) is shard
-arithmetic over the same runner: it reads the fixture set from the runner's own
-discovery, deals it round-robin across `CI_NODE_TOTAL` shards, and runs its
-slice by importing the runner in-process. One shard therefore audits the packed
-tarball once rather than once per fixture, and both entries share one discovery
-and validation path. In that batch mode each fixture runs inside its own
-collapsible log section, a failing fixture never stops the ones after it, and a
-prebuilt tarball is mandatory — in CI the audited artifact the build job
-published is the only thing consumers are meant to test. Per-fixture verdicts
-and the closing summary print outside the collapsed sections, so a red job names
-its failures without anyone expanding anything.
+The `--batch` flag is the CI shape: the whole set runs in one process, so the
+packed tarball is audited once rather than once per fixture. Each fixture runs
+inside its own collapsible log section, a failing fixture never stops the ones
+after it, and a prebuilt tarball is mandatory — in CI the audited artifact the
+build job published is the only thing consumers are meant to test. Per-fixture
+verdicts and the closing summary print outside the collapsed sections, so a red
+job names its failures without anyone expanding anything.
 
 ## Adding a fixture
 
@@ -212,10 +208,10 @@ cannot be labeled fails on the run that adds it. In GitHub CI the
 `package-consumer-plan` job enumerates fixture directories and fans one matrix
 job out per fixture; the stable `Package consumer` gate context aggregates
 them (see `tools/ci/README.md` — per-fixture job names are never pinned by
-rulesets). In GitLab CI one sharded `package-consumer` job
-(`.gitlab/ci/package-consumer.yml`) discovers fixtures in-job and deals them
-round-robin across its shards via `tools/package/run-consumer-fixture-shard.mjs`, with
-one collapsible log section per fixture. The shared release gate in
+rulesets). In GitLab CI one unsharded `package-consumer` job
+(`.gitlab/ci/package-consumer.yml`) discovers fixtures in-job and runs the
+whole set with `--batch`, one collapsible log section per fixture. The shared
+release gate in
 `.github/workflows/release-gate.yml` (called by both publish workflows) runs
 the whole set serially against the audited release tarball.
 

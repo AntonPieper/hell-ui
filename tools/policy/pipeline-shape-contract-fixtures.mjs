@@ -225,6 +225,24 @@ const fixtures = [
     needle: 'Job "policy-sweep" must not instantiate in merge-request pipelines',
   },
   {
+    // Re-sharding package-consumer re-multiplies per-shard setup and puts
+    // concurrent browser jobs back on the one shared host — the reshape to
+    // a single job was a measured decision, like the tiers'.
+    name: 'a re-sharded package-consumer job breaks the single-job design',
+    file: '.gitlab/ci/package-consumer.yml',
+    mutate: (text) => text.replace('\n  timeout: 45 minutes\n', '\n  timeout: 45 minutes\n  parallel: 3\n'),
+    needle: 'unsharded',
+  },
+  {
+    // Without the resource group the consumer smokes run beside an e2e tier,
+    // which is the measured 7.5+ load per core that tips the
+    // pdf-rasterization and measured-layout suites.
+    name: 'a package-consumer job slipping off the browser-host resource group',
+    file: '.gitlab/ci/package-consumer.yml',
+    mutate: (text) => text.replace('  resource_group: browser-host\n', ''),
+    needle: 'resource_group: browser-host',
+  },
+  {
     // An allow_failure sweep is a daily audit whose red verdict cannot be
     // seen anywhere — the same silent shrink as not running it.
     name: 'an allow_failure sweep stops auditing and goes red',
