@@ -1,80 +1,47 @@
 // Sharded CI entry for the packed-tarball consumer fixture runner.
 //
-// GitLab runs this script once per parallel shard (CI_NODE_INDEX of
-// CI_NODE_TOTAL). Fixtures are discovered in-job from
-// tools/consumer-fixtures/ and dealt round-robin over the shards in sorted
+// This file is shard arithmetic and nothing else. GitLab runs it once per
+// parallel shard (CI_NODE_INDEX of CI_NODE_TOTAL); the fixtures come from the
+// runner's own discovery and are dealt round-robin over the shards in sorted
 // order, so adding a fixture changes no CI configuration — it lands on some
-// shard in the next pipeline. Every fixture runs as its own
-// tools/check-consumer-fixtures.mjs invocation wrapped in a collapsible log
-// section, and a failing fixture never stops the rest of the shard: the
-// summary at the end names every failure.
+// shard in the next pipeline. Every run prints the full shard assignment
+// first, so a log shows what this shard owns and where the other fixtures
+// went.
 //
-// Outside CI both shard variables are unset and the single implicit shard
-// runs everything. Every run prints the full shard assignment first, so a log
-// shows what this shard owns and where the other fixtures went.
+// The runner is imported, not re-spawned: one shard builds nothing, audits the
+// packed tarball once, and runs its fixtures as a batch — each in its own
+// collapsible log section, continuing past failures, with a summary naming
+// every failure. Outside CI both shard variables are unset and the single
+// implicit shard runs everything.
 
-import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {
+  discoverFixtureNames,
+  reportRunnerError,
+  runConsumerFixtures,
+} from './check-consumer-fixtures.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const fixturesRoot = join(root, 'tools', 'consumer-fixtures');
-const runnerPath = join(root, 'tools', 'check-consumer-fixtures.mjs');
+try {
+  const shard = readShard();
+  const fixtures = discoverFixtureNames();
+  const assigned = shardAssignment(fixtures, shard.total, shard.index);
 
-const emitSectionMarkers = process.env.GITLAB_CI === 'true';
-
-const shard = readShard();
-const fixtures = discoverFixtureNames();
-const assigned = shardAssignment(fixtures, shard.total, shard.index);
-
-console.log(
-  `[consumer-shard] ${fixtures.length} fixture(s) discovered, running shard ${shard.index}/${shard.total}`,
-);
-for (let index = 1; index <= shard.total; index += 1) {
-  const names = shardAssignment(fixtures, shard.total, index);
-  const marker = index === shard.index ? '  <- this shard' : '';
   console.log(
-    `[consumer-shard]   shard ${index}/${shard.total}: ${names.join(', ') || '(none)'}${marker}`,
+    `[consumer-shard] ${fixtures.length} fixture(s) discovered, running shard ${shard.index}/${shard.total}`,
   );
-}
-
-// Without a prebuilt tarball every per-fixture runner invocation would
-// rebuild and repack the library; in CI the build job's audited artifact is
-// the one thing consumers are meant to test.
-if (!(process.env.HELL_PACKAGE_CONSUMER_TARBALL ?? '').trim()) {
-  fail(
-    'HELL_PACKAGE_CONSUMER_TARBALL must point at a packed tarball or a directory holding one. ' +
-      'Locally: pnpm run ci:build:lib && pnpm run ci:pack:lib, then set it to artifacts/package.',
-  );
-}
-
-const failures = [];
-for (const name of assigned) {
-  openSection(`fixture_${name}`, `consumer fixture ${name}`);
-  const result = spawnSync(process.execPath, [runnerPath, name], { cwd: root, stdio: 'inherit' });
-  closeSection(`fixture_${name}`);
-
-  if (result.error) {
-    failures.push(name);
-    console.error(`[consumer-shard] FAILED: ${name} (${result.error.message})`);
-  } else if (result.status !== 0) {
-    failures.push(name);
-    console.error(`[consumer-shard] FAILED: ${name} (exit ${result.status})`);
-  } else {
-    console.log(`[consumer-shard] ok: ${name}`);
+  for (let index = 1; index <= shard.total; index += 1) {
+    const names = shardAssignment(fixtures, shard.total, index);
+    const marker = index === shard.index ? '  <- this shard' : '';
+    console.log(
+      `[consumer-shard]   shard ${index}/${shard.total}: ${names.join(', ') || '(none)'}${marker}`,
+    );
   }
-}
 
-if (failures.length) {
-  console.error(
-    `[consumer-shard] ${failures.length}/${assigned.length} fixture(s) failed: ${failures.join(', ')}`,
-  );
+  const failures = await runConsumerFixtures({ names: assigned, batch: true });
+  if (failures.length) process.exit(1);
+} catch (error) {
+  reportRunnerError(error);
   process.exit(1);
 }
-console.log(
-  `[consumer-shard] ok: ${assigned.length ? assigned.join(', ') : '(no fixtures on this shard)'}`,
-);
 
 function shardAssignment(names, total, index) {
   return names.filter((_, position) => position % total === index - 1);
@@ -98,46 +65,6 @@ function parsePositiveInteger(name, raw) {
   if (raw === undefined) fail(`${name} is unset while its counterpart shard variable is set`);
   if (!/^[1-9]\d*$/.test(raw)) fail(`${name} must be a positive integer, got ${JSON.stringify(raw)}`);
   return Number(raw);
-}
-
-function discoverFixtureNames() {
-  if (!existsSync(fixturesRoot)) fail(`Fixture root missing: ${fixturesRoot}`);
-
-  const names = [];
-  for (const entry of readdirSync(fixturesRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    if (!existsSync(join(fixturesRoot, entry.name, 'fixture.json'))) {
-      fail(`Fixture ${entry.name} is missing its fixture.json manifest`);
-    }
-    // Section names allow [A-Za-z0-9_.-]; a fixture the shard cannot label
-    // must fail here, not silently corrupt the job log. Kept in step by hand
-    // with discoverFixtures in tools/check-consumer-fixtures.mjs until the
-    // shard collapse merges the two discovery paths.
-    if (!/^[A-Za-z0-9_.-]+$/.test(entry.name)) {
-      fail(`Fixture directory name ${JSON.stringify(entry.name)} cannot label a log section`);
-    }
-    names.push(entry.name);
-  }
-
-  if (!names.length) fail(`No consumer fixtures found under ${fixturesRoot}`);
-  return names.sort();
-}
-
-function openSection(id, header) {
-  if (!emitSectionMarkers) {
-    console.log(`[consumer-shard] --- ${header} ---`);
-    return;
-  }
-  console.log(`\x1b[0Ksection_start:${unixTime()}:${id}[collapsed=true]\r\x1b[0K${header}`);
-}
-
-function closeSection(id) {
-  if (!emitSectionMarkers) return;
-  console.log(`\x1b[0Ksection_end:${unixTime()}:${id}\r\x1b[0K`);
-}
-
-function unixTime() {
-  return Math.floor(Date.now() / 1000);
 }
 
 function fail(message) {

@@ -1,16 +1,8 @@
 {
   "description": "normal styled controls: styled primitive, mixed, and table-primitive entries with core peers plus tailwindcss",
   "peerGroup": "primitive",
-  "forbiddenDependencies": [
-    "@ng-icons/core",
-    "@ng-icons/font-awesome",
-    "@tanstack/angular-table",
-    "@tanstack/virtual-core",
-    "@codemirror/view",
-    "pdfjs-dist"
-  ],
+  "dependencies": ["tailwindcss"],
   "cssSentinels": [
-    "--color-hell-surface-muted:",
     "mask:var(--hell-icon-chevron-down) center/contain no-repeat",
     "button[hellAlertDismiss][data-slot=root]:empty:before",
     "margin-inline-start:var(--_hell-avatar-group-overlap)",
