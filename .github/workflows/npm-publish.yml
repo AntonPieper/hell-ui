@@ -68,10 +68,21 @@ jobs:
         with:
           node-version-file: .node-version
 
-      # An unreadable policy leaves no evidence file, which the seam treats
-      # exactly like missing evidence: the gate fails closed.
+      # Reading the policy is an Administration-scoped read, which GITHUB_TOKEN
+      # cannot carry at all — the Actions app has no such permission to narrow
+      # from, so it needs a stored PAT (docs/release/release-immutability.md).
+      # A missing secret is called out here rather than left to look like a
+      # disabled policy; an unreadable policy still leaves no evidence file,
+      # which the seam treats exactly like missing evidence: fails closed.
       - name: Capture the immutable-releases policy
+        env:
+          GH_TOKEN: ${{ secrets.HELL_RELEASE_POLICY_TOKEN }}
         run: |
+          test -n "${GH_TOKEN:-}" || {
+            echo 'HELL_RELEASE_POLICY_TOKEN is not configured, so the immutable-releases' >&2
+            echo 'policy cannot be proven. See docs/release/release-immutability.md.' >&2
+            exit 1
+          }
           gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
             rm -f "$RUNNER_TEMP/immutable-releases.json"
 
@@ -351,10 +362,14 @@ jobs:
       - name: Capture the release and repository policy
         env:
           HELL_RELEASE_ID: ${{ steps.create.outputs.release-id || steps.decide.outputs.release-id }}
+          # Only the policy read needs the Administration-scoped PAT; the
+          # release and commit reads stay on GITHUB_TOKEN.
+          HELL_RELEASE_POLICY_TOKEN: ${{ secrets.HELL_RELEASE_POLICY_TOKEN }}
         run: |
           set -euo pipefail
           gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/release.json"
-          gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
+          GH_TOKEN="$HELL_RELEASE_POLICY_TOKEN" \
+            gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
             echo 'null' > "$RUNNER_TEMP/immutable-releases.json"
           echo "HELL_TAG_COMMIT=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_REF_NAME}" --jq '.sha')" >> "$GITHUB_ENV"
 
@@ -395,10 +410,15 @@ jobs:
         run: node tools/release/release-projection.mjs plan > "$RUNNER_TEMP/expected.json"
 
       - name: Capture the verified draft
+        env:
+          # Only the policy read needs the Administration-scoped PAT; the
+          # release and commit reads stay on GITHUB_TOKEN.
+          HELL_RELEASE_POLICY_TOKEN: ${{ secrets.HELL_RELEASE_POLICY_TOKEN }}
         run: |
           set -euo pipefail
           gh api "repos/${GITHUB_REPOSITORY}/releases/${HELL_RELEASE_ID}" > "$RUNNER_TEMP/release.json"
-          gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
+          GH_TOKEN="$HELL_RELEASE_POLICY_TOKEN" \
+            gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" > "$RUNNER_TEMP/immutable-releases.json" ||
             echo 'null' > "$RUNNER_TEMP/immutable-releases.json"
           echo "HELL_TAG_COMMIT=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_REF_NAME}" --jq '.sha')" >> "$GITHUB_ENV"
 

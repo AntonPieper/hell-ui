@@ -45,6 +45,29 @@ no package publishes — and no Release Projection follows — while release tag
 and assets would remain unlocked. Draft verification proves the policy a
 second time before the release is published.
 
+### The policy read needs its own token
+
+`GET /repos/{owner}/{repo}/immutable-releases` is an **Administration**-scoped
+read. `GITHUB_TOKEN` can never carry it: a workflow's `permissions:` block only
+narrows what the GitHub Actions app already has, and that app has no
+Administration permission — `administration` is not even a valid key there.
+
+The three policy reads therefore use a repository secret,
+**`HELL_RELEASE_POLICY_TOKEN`**, scoped to only that one call; every other API
+call in those jobs stays on `GITHUB_TOKEN`.
+
+Token contract:
+
+- fine-grained PAT, this repository only;
+- one permission: **Repository permissions → Administration: Read-only**;
+- no write scope anywhere — it exists to read one boolean;
+- stored as the Actions secret `HELL_RELEASE_POLICY_TOKEN`.
+
+The dedicated gate names a missing secret explicitly rather than letting it
+look like a disabled policy. An expired token reads as unreadable evidence and
+fails closed, so an expiry lands as a refused release rather than a silent
+downgrade — set a calendar reminder when minting it.
+
 ## Read-only drift detection
 
 `.github/workflows/release-drift.yml` runs whenever a published release is
