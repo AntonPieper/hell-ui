@@ -1,8 +1,0 @@
-kind: Changed
-body: The PDF viewer's page overview rail now mounts only the pages around the visible
-  window instead of one button per page, so opening it on a long document no longer
-  blocks on building the whole rail. Thumbnails fit a uniform box, so rows no longer
-  resize as pages paint; the rail scrolls to keep the current page in view; and the
-  mounted buttons carry `aria-posinset`/`aria-setsize` so the real page count survives
-  virtualization.
-time: 2026-07-29T06:44:46.599862+02:00

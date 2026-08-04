@@ -1,4 +1,0 @@
-kind: Added
-body: '`--hell-icon-upload` joins the CSS-only icon masks in `hell-ui/tokens.css`,
-  so your own elements can mask the same upload glyph the File Picker drop zone uses.'
-time: 2026-07-27T12:51:27.091079+02:00

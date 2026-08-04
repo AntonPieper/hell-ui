@@ -1,5 +1,0 @@
-kind: Fixed
-body: Typing an out-of-range page number in the PDF viewer toolbar now snaps the field
-  back to the page the viewer actually navigated to, instead of leaving the rejected
-  number on screen.
-time: 2026-07-27T11:29:45.45028+02:00

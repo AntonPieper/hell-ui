@@ -1,6 +1,0 @@
-kind: Fixed
-body: >-
-  PDF viewer tap gestures measure their timing at input time instead of
-  handler-run time, so quick taps and double-tap zoom register even while the
-  main thread is busy rasterizing pages.
-time: 2026-08-03T10:05:00.000Z

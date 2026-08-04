@@ -1,7 +1,0 @@
-kind: Added
-body: The PDF viewer now works on touch. One finger pans, two fingers pinch-zoom,
-  and a double tap toggles between the fitted zoom preset and a magnified view anchored
-  on the tap. Toolbar and find-bar controls grow to finger-sized targets on coarse
-  pointers, and on phone-sized viewports the page overview floats over the document
-  instead of dividing it.
-time: 2026-07-27T19:27:42.813369+02:00
