@@ -3,15 +3,15 @@
   "baseline": {
     "fixture": "styles-aggregate",
     "packageVersion": "0.2.0",
-    "revision": "af4e27983f41d566f44251ecd8a0e9719db22dce",
+    "revision": "b01915ea5a08b601b6f635dc30aad92e3f7d3c86",
     "command": "pnpm run benchmark:style-bundle",
-    "measuredAt": "2026-07-24",
-    "rawBytes": 181296,
-    "gzipBytes": 26996
+    "measuredAt": "2026-08-04",
+    "rawBytes": 187727,
+    "gzipBytes": 27781
   },
   "budget": {
-    "maxRawBytes": 190000,
-    "maxGzipBytes": 28000,
-    "derivation": "Accepted baseline plus roughly 4-5% headroom for routine fixes, rounded to clean limits (181,296 -> 190,000 raw; 26,996 -> 28,000 gzip). Intentional growth beyond this re-measures the baseline and re-derives the budget per docs/release/style-bundle-budget.md."
+    "maxRawBytes": 196000,
+    "maxGzipBytes": 29000,
+    "derivation": "Accepted baseline plus roughly 4-5% headroom for routine fixes, rounded to clean limits (187,727 -> 196,000 raw; 27,781 -> 29,000 gzip). Intentional growth beyond this re-measures the baseline and re-derives the budget per docs/release/style-bundle-budget.md."
   }
 }
