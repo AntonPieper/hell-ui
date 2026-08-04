@@ -26,7 +26,7 @@ export const HELL_DIALOG_SCOPE_ROOT = new InjectionToken<HTMLElement | null>(
  * `inert` and cannot take focus at all, so nothing escapes into it.
  *
  * The attribute name belongs to ng-primitives, which makes this a version-bound
- * seam. `tools/check-architecture.mjs` keeps the marker in this file and keeps
+ * seam. `tools/architecture/check-architecture.mjs` keeps the marker in this file and keeps
  * the constant below matching the installed package.
  */
 const HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE = 'data-focus-trap';

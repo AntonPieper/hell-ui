@@ -271,7 +271,7 @@ jobs:
       # This does not reach the published site: Vercel runs its own
       # `pnpm run build` and never executes this step.
       - name: Stamp docs build
-        run: node tools/stamp-docs-build.mjs dist/hell-docs
+        run: node tools/docs/stamp-docs-build.mjs dist/hell-docs
 
       - name: Upload package tarball
         uses: actions/upload-artifact@v7

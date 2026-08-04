@@ -2,7 +2,7 @@
  * hell-ui/styles.css — Default Style Bundle.
  *
  * Generated from entrypoint styleBundle metadata by
- * tools/generate-entrypoint-manifests.mjs; do not edit by hand.
+ * tools/entrypoints/generate-entrypoint-manifests.mjs; do not edit by hand.
  * Run `pnpm run generate:entrypoints` after changing entrypoint metadata.
  *
  * The Shared Style Substrate (tokens.css) comes first, followed by every

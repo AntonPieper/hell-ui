@@ -1,0 +1,443 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { basename, dirname, join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+export const packageName = 'hell-ui';
+export const libraryRoot = 'packages/angular';
+export const sourcePackageCondition = '@heinrich/source';
+export const entrypointMetadataFileName = 'hell-entrypoint.json';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const libraryRootPath = join(root, libraryRoot);
+
+export const styleBundlePolicies = {
+  DEFAULT: 'default',
+  OPT_IN: 'opt-in',
+  NONE: 'none',
+};
+
+export const entrypointCategories = {
+  ROOT: 'root',
+  CORE: 'core',
+  INTERNAL: 'internal',
+  TESTING: 'testing',
+  STYLED_PRIMITIVE: 'styled-primitive',
+  MIXED_ENTRYPOINT: 'mixed-entrypoint',
+  COMPOSITE: 'composite',
+  FEATURE: 'feature',
+  TABLE_PRIMITIVES: 'table-primitives',
+  TANSTACK_TABLE_SHELL: 'tanstack-table-shell',
+  TANSTACK_TABLE_BODY_STRATEGY: 'tanstack-table-body-strategy',
+};
+
+// Manifest ordering, kept separate from the declaration above so regrouping
+// those constants for readability cannot silently reorder every generated
+// manifest. Two lists only stay in step if something says so, so the checks
+// below refuse to load on either way of drifting: a category declared above and
+// missing here would sort by an invented rank, and one listed twice here would
+// shift every rank after it. Both fail at the moment the list is edited rather
+// than whenever the first entrypoint claims the category.
+const categoryRanking = [
+  entrypointCategories.ROOT,
+  entrypointCategories.CORE,
+  entrypointCategories.INTERNAL,
+  entrypointCategories.TESTING,
+  entrypointCategories.TABLE_PRIMITIVES,
+  entrypointCategories.TANSTACK_TABLE_SHELL,
+  entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+  entrypointCategories.STYLED_PRIMITIVE,
+  entrypointCategories.MIXED_ENTRYPOINT,
+  entrypointCategories.COMPOSITE,
+  entrypointCategories.FEATURE,
+];
+
+const categorySort = new Map(categoryRanking.map((category, index) => [category, index]));
+
+const duplicateRankings = categoryRanking.filter(
+  (category, index) => categoryRanking.indexOf(category) !== index,
+);
+if (duplicateRankings.length) {
+  throw new Error(
+    `Entrypoint categories ranked more than once: ${[...new Set(duplicateRankings)].join(', ')}. ` +
+      'Each category takes exactly one manifest sort rank.',
+  );
+}
+
+const unrankedCategories = Object.values(entrypointCategories).filter(
+  (category) => !categorySort.has(category),
+);
+if (unrankedCategories.length) {
+  throw new Error(
+    `Entrypoint categories without a manifest sort rank: ${unrankedCategories.join(', ')}. ` +
+      'Add them to categoryRanking in tools/entrypoints/entrypoint-manifest.mjs.',
+  );
+}
+
+const entrypointManifest = readEntrypointManifest();
+
+export function entrypointPublicApiFiles() {
+  return [entrypointManifest.root, ...entrypointManifest.entries];
+}
+
+export function secondaryPackageEntrypoints() {
+  return entrypointManifest.entries.map((entrypoint) => ({
+    ...entrypoint,
+    packagePath: `${entrypoint.packageDir}/ng-package.json`,
+  }));
+}
+
+function entrypointPackageExports() {
+  return Object.fromEntries(
+    entrypointPublicApiFiles().map((entrypoint) => [
+      packageExportPath(entrypoint.specifier),
+      {
+        [sourcePackageCondition]: `./${relativeToLibrary(entrypoint.publicApiPath)}`,
+      },
+    ]),
+  );
+}
+
+export function entrypointStyleExports() {
+  return [
+    { exportPath: './tokens.css', sourcePath: './tokens.css' },
+    { exportPath: './styles.css', sourcePath: './styles.css' },
+    ...styleProducingEntrypoints().map((entrypoint) => ({
+      entrypoint,
+      exportPath: `${packageExportPath(entrypoint.specifier)}/styles.css`,
+      sourcePath: `./${relativeToLibrary(`${entrypoint.packageDir}/styles.css`)}`,
+    })),
+    ...themeAdapterStyleExports(),
+  ];
+}
+
+function styleProducingEntrypoints() {
+  return entrypointManifest.entries.filter(
+    (entrypoint) => entrypoint.styleBundle !== styleBundlePolicies.NONE,
+  );
+}
+
+function defaultStyleBundleEntrypoints() {
+  return styleProducingEntrypoints()
+    .filter((entrypoint) => entrypoint.styleBundle === styleBundlePolicies.DEFAULT)
+    .sort((a, b) => a.packageDir.localeCompare(b.packageDir));
+}
+
+export function defaultStyleBundleImportSpecifiers() {
+  return [
+    './tokens.css',
+    ...defaultStyleBundleEntrypoints().map(
+      (entrypoint) => `./${relativeToLibrary(`${entrypoint.packageDir}/styles.css`)}`,
+    ),
+  ];
+}
+
+export function renderDefaultStyleBundleFile() {
+  return `${[
+    '/*',
+    ' * hell-ui/styles.css — Default Style Bundle.',
+    ' *',
+    ' * Generated from entrypoint styleBundle metadata by',
+    ' * tools/entrypoints/generate-entrypoint-manifests.mjs; do not edit by hand.',
+    ' * Run `pnpm run generate:entrypoints` after changing entrypoint metadata.',
+    ' *',
+    ' * The Shared Style Substrate (tokens.css) comes first, followed by every',
+    ' * standard component stylesheet in deterministic order. Heavy Feature',
+    ' * Stylesheets and Theme Adapter Stylesheets stay explicit opt-ins and are',
+    ' * never included here.',
+    ' */',
+    '',
+    ...defaultStyleBundleImportSpecifiers().map((specifier) => `@import '${specifier}';`),
+  ].join('\n')}\n`;
+}
+
+function themeAdapterStyleExports() {
+  const themesDir = join(libraryRootPath, 'themes');
+  if (!existsSync(themesDir)) return [];
+
+  return readdirSync(themesDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.css'))
+    .map((entry) => ({
+      exportPath: `./themes/${entry.name}`,
+      sourcePath: `./themes/${entry.name}`,
+    }))
+    .sort((a, b) => a.exportPath.localeCompare(b.exportPath));
+}
+
+function entrypointPackageStyleExports() {
+  return Object.fromEntries(
+    entrypointStyleExports().map((styleEntry) => [
+      styleEntry.exportPath,
+      {
+        [sourcePackageCondition]: styleEntry.sourcePath,
+        style: styleEntry.sourcePath,
+        default: styleEntry.sourcePath,
+      },
+    ]),
+  );
+}
+
+function renderPackageJsonExports() {
+  return {
+    ...entrypointPackageExports(),
+    ...entrypointPackageStyleExports(),
+  };
+}
+
+export function renderPackageJsonFile(packageJson) {
+  return `${JSON.stringify({ ...packageJson, exports: renderPackageJsonExports() }, null, 2)}\n`;
+}
+
+// Exported for tools/package/package-pack-audit.mjs, which derives the packed export
+// keys with it rather than re-slicing the specifier itself.
+export function packageExportPath(specifier) {
+  return specifier === packageName ? '.' : `.${specifier.slice(packageName.length)}`;
+}
+
+export function componentEntrypoints() {
+  return entrypointManifest.entries.filter((entrypoint) =>
+    [
+      entrypointCategories.STYLED_PRIMITIVE,
+      entrypointCategories.MIXED_ENTRYPOINT,
+      entrypointCategories.COMPOSITE,
+      entrypointCategories.FEATURE,
+      entrypointCategories.TABLE_PRIMITIVES,
+      entrypointCategories.TANSTACK_TABLE_SHELL,
+      entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+    ].includes(entrypoint.category),
+  );
+}
+
+export function renderPublicApiFile(entrypoint) {
+  const lines = [];
+  if (entrypoint.header?.length) {
+    lines.push(...entrypoint.header);
+  }
+  lines.push(...entrypoint.exports.map((exportPath) => `export * from '${exportPath}';`));
+  if (entrypoint.extraExports?.length) {
+    lines.push(...entrypoint.extraExports);
+  }
+  if (entrypoint.footer?.length) {
+    lines.push('', ...entrypoint.footer);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+export function renderNgPackageFile(entrypoint) {
+  return `${JSON.stringify({ lib: { entryFile: entrypoint.entryFile } }, null, 2)}\n`;
+}
+
+function readEntrypointManifest() {
+  const entries = discoverEntrypointMetadataFiles().map(readEntrypointMetadataFile);
+  const rootEntries = entries.filter(
+    (entrypoint) => entrypoint.category === entrypointCategories.ROOT,
+  );
+  if (rootEntries.length !== 1) {
+    throw new Error(
+      `Expected exactly one ${entrypointMetadataFileName} with category "${entrypointCategories.ROOT}" in ${libraryRoot}; found ${rootEntries.length}`,
+    );
+  }
+  const [rootEntry] = rootEntries;
+
+  const secondaryEntries = entries
+    .filter((entrypoint) => entrypoint !== rootEntry)
+    .sort(compareEntrypoints);
+
+  return { root: rootEntry, entries: secondaryEntries };
+}
+
+function discoverEntrypointMetadataFiles() {
+  const files = [];
+  visit(libraryRootPath);
+  return files.sort();
+
+  function visit(directory) {
+    for (const dirent of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, dirent.name);
+      if (dirent.isDirectory()) {
+        visit(path);
+        continue;
+      }
+      if (dirent.isFile() && dirent.name === entrypointMetadataFileName) {
+        files.push(path);
+      }
+    }
+  }
+}
+
+function readEntrypointMetadataFile(path) {
+  const metadata = JSON.parse(readFileSync(path, 'utf8'));
+  assertKnownMetadataKeys(path, metadata);
+  const packageDir = toRepoPath(dirname(path));
+  const relPackageDir = packageDir.slice(libraryRoot.length).replace(/^\//, '');
+  const category = metadata.category;
+  const validCategories = new Set(Object.values(entrypointCategories));
+  if (!validCategories.has(category)) {
+    throw new Error(
+      `${relative(root, path)} must declare category as one of ${[...validCategories].join(', ')}`,
+    );
+  }
+
+  assertInternalPathAndCategoryAgree(path, relPackageDir, category, metadata);
+
+  const styleBundle = readStyleBundlePolicy(path, metadata, category);
+
+  return {
+    id: relPackageDir || 'root',
+    category,
+    styleBundle,
+    specifier: relPackageDir ? `${packageName}/${relPackageDir}` : packageName,
+    packageDir,
+    metadataPath: toRepoPath(path),
+    publicApiPath: `${packageDir}/public-api.ts`,
+    entryFile: stringValue(path, metadata, 'entryFile') ?? 'public-api.ts',
+    exports: stringArray(path, metadata, 'exports') ?? defaultExports(packageDir, category),
+    header: stringArray(path, metadata, 'header'),
+    footer: stringArray(path, metadata, 'footer'),
+    extraExports: stringArray(path, metadata, 'extraExports'),
+  };
+}
+
+// Internal Package Paths are unmistakably private (#272,
+// docs/adr/0002-public-package-and-stylesheet-surface.md): a shipped
+// non-consumer APF subpath lives under internal/ and declares the internal
+// Module Category, the internal/ prefix never carries a consumer category,
+// and every internal entrypoint's generated public API opens with an
+// @internal marker so the packed surface documents its own non-support.
+function assertInternalPathAndCategoryAgree(path, relPackageDir, category, metadata) {
+  const hasInternalPrefix =
+    relPackageDir === 'internal' || relPackageDir.startsWith('internal/');
+
+  if (category === entrypointCategories.INTERNAL && !hasInternalPrefix) {
+    throw new Error(
+      `${relative(root, path)} declares the internal Module Category outside the internal/ prefix; ` +
+        'non-consumer entrypoints must live under packages/angular/internal/ (Internal Package Path)',
+    );
+  }
+  if (hasInternalPrefix && category !== entrypointCategories.INTERNAL) {
+    throw new Error(
+      `${relative(root, path)} sits under the internal/ prefix but declares category "${category}"; ` +
+        'shipped internal/ subpaths must declare the internal Module Category, or move to a named ' +
+        'non-internal Package Entry Point when the contract is consumer-supported',
+    );
+  }
+
+  if (category === entrypointCategories.INTERNAL) {
+    const header = metadata.header;
+    if (!Array.isArray(header) || !header.some((line) => typeof line === 'string' && line.includes('@internal'))) {
+      throw new Error(
+        `${relative(root, path)} must declare a header containing an @internal marker; ` +
+          'internal entrypoints document their non-support in the generated public API',
+      );
+    }
+  }
+}
+
+// Every entrypoint makes an explicit Default Style Bundle decision: "default"
+// (included in the generated hell-ui/styles.css), "opt-in" (exports an
+// Entrypoint-Scoped Stylesheet that consumers add explicitly), or "none" (no
+// stylesheet). The policy must agree with the entrypoint's styles.css file so
+// the generated bundle can never silently drop or invent a stylesheet. The
+// root entrypoint is exempt from the file check because the package-root
+// styles.css is the generated Default Style Bundle itself, not an
+// Entrypoint-Scoped Stylesheet.
+function readStyleBundlePolicy(path, metadata, category) {
+  const styleBundle = stringValue(path, metadata, 'styleBundle');
+  const validPolicies = new Set(Object.values(styleBundlePolicies));
+  if (styleBundle === undefined || !validPolicies.has(styleBundle)) {
+    throw new Error(
+      `${relative(root, path)} must declare styleBundle as one of ${[...validPolicies].join(', ')}`,
+    );
+  }
+
+  if (category === entrypointCategories.ROOT) {
+    if (styleBundle !== styleBundlePolicies.NONE) {
+      throw new Error(
+        `${relative(root, path)} must declare styleBundle "none"; the package-root styles.css is the generated Default Style Bundle, not an Entrypoint-Scoped Stylesheet`,
+      );
+    }
+    return styleBundle;
+  }
+
+  // Internal, core, and testing entrypoints never export public stylesheets:
+  // internal CSS ships through relative cross-imports (for example
+  // internal/overlay/styles.css), not through Internal Package Path exports.
+  const styleFreeCategories = new Set([
+    entrypointCategories.INTERNAL,
+    entrypointCategories.CORE,
+    entrypointCategories.TESTING,
+  ]);
+  if (styleFreeCategories.has(category) && styleBundle !== styleBundlePolicies.NONE) {
+    throw new Error(
+      `${relative(root, path)} (category "${category}") must declare styleBundle "none"; internal, core, and testing entrypoints do not export public stylesheets`,
+    );
+  }
+
+  const hasStylesheet = existsSync(join(dirname(path), 'styles.css'));
+  if (styleBundle === styleBundlePolicies.NONE && hasStylesheet) {
+    throw new Error(
+      `${relative(root, path)} declares styleBundle "none" but the entrypoint has a styles.css; declare "default" or "opt-in"`,
+    );
+  }
+  if (styleBundle !== styleBundlePolicies.NONE && !hasStylesheet) {
+    throw new Error(
+      `${relative(root, path)} declares styleBundle "${styleBundle}" but the entrypoint has no styles.css`,
+    );
+  }
+  return styleBundle;
+}
+
+function assertKnownMetadataKeys(path, metadata) {
+  const allowed = new Set([
+    'category',
+    'styleBundle',
+    'entryFile',
+    'exports',
+    'header',
+    'footer',
+    'extraExports',
+  ]);
+  for (const key of Object.keys(metadata)) {
+    if (!allowed.has(key)) {
+      throw new Error(`${relative(root, path)} declares unknown entrypoint metadata key "${key}"`);
+    }
+  }
+}
+
+function stringValue(path, metadata, key) {
+  const value = metadata[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') {
+    throw new Error(`${relative(root, path)} metadata key "${key}" must be a string`);
+  }
+  return value;
+}
+
+function stringArray(path, metadata, key) {
+  const value = metadata[key];
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw new Error(`${relative(root, path)} metadata key "${key}" must be an array of strings`);
+  }
+  return value;
+}
+
+function defaultExports(packageDir, category) {
+  if (category === entrypointCategories.ROOT) return [];
+  return [`./${basename(packageDir)}`];
+}
+
+// Every category is ranked (checked above) and the loader rejects unknown
+// categories before anything reaches this sort, so both lookups resolve.
+function compareEntrypoints(a, b) {
+  const categoryDelta = categorySort.get(a.category) - categorySort.get(b.category);
+  if (categoryDelta) return categoryDelta;
+  return a.packageDir.localeCompare(b.packageDir);
+}
+
+function relativeToLibrary(path) {
+  return relative(libraryRoot, path).split(sep).join('/');
+}
+
+function toRepoPath(path) {
+  return relative(root, path).split(sep).join('/');
+}

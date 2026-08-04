@@ -64,7 +64,7 @@ Every exported API belongs to one documented category:
 - `Internal`: implementation detail, not a consumer import path. `hell-ui/internal/*` subpaths exist only because Angular Package Format cross-entrypoint linking requires resolvable seams; they keep the `internal` prefix and internal Module Category, carry no support promise, and never appear in consumer docs, examples, fixtures, or public API stability reports. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
 The API report gate is manifest-driven: every entry point is guarded unless it
-appears in `apiReportExclusions` in `tools/check-api-reports.mjs`. Public API
+appears in `apiReportExclusions` in `tools/api-report/check-api-reports.mjs`. Public API
 stability reports in `etc/api-reports/` cover root, `/core`, `/testing`,
 narrow primitive, composite, and table entry points. Guarded Internal Package
 Path seams whose declarations cross guarded boundaries keep drift-guard

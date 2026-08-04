@@ -175,7 +175,7 @@ corrective patch release.
   template rendering.
 - `packages/angular/package.json` is no longer edited manually for ordinary
   releases; Changie's merge replacement owns its version.
-- The old `tools/check-changelog.mjs` contract changes from finding a
+- The old `tools/release/check-changelog.mjs` contract changes from finding a
   hand-written current-version heading to validating fragments, version
   agreement, and deterministic generated projections.
 - Two repository labels, two required PR checks, native release immutability,

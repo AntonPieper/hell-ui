@@ -1,7 +1,7 @@
 # Docs example import boundaries
 
 - ID: docs-example-import-boundaries
-- Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
+- Enforced by: `pnpm run test:architecture` (`tools/architecture/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
 - Source of truth: `apps/docs/src/app/docs-catalog.ts`
 
 ## Rule
@@ -12,7 +12,7 @@ Docs pages are lazy routes. Keep each page's live examples and raw source import
 2. Import the live example component and its `?raw` source only from that route's page component.
 3. Register search metadata in `apps/docs/src/app/docs-search-index.ts`; do not import example implementations there.
 4. Put reusable docs shell widgets in `apps/docs/src/app/shared/`, not in another page directory.
-5. Do not import page/example code from another lazy route unless the exact edge is listed below and mirrored in `tools/check-architecture.mjs`.
+5. Do not import page/example code from another lazy route unless the exact edge is listed below and mirrored in `tools/architecture/check-architecture.mjs`.
 
 When the architecture check fails, it lists the page/example import edge that crosses a lazy-route boundary so the next agent can move the code to `shared/`, move the example under the owning route, or add a narrow documented allowance.
 

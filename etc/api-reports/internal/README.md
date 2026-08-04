@@ -2,8 +2,8 @@
 
 These files are **not** public API stability reports. They are drift guards
 for guarded `hell-ui/internal/*` seams whose declarations cross into public
-reports (see `tools/check-api-reports.mjs` and
-`tools/check-api-report-warnings.mjs`).
+reports (see `tools/api-report/check-api-reports.mjs` and
+`tools/api-report/check-api-report-warnings.mjs`).
 
 Internal Package Paths ship only for Angular Package Format cross-entrypoint
 linking. They keep the `internal` prefix and internal Module Category, stay

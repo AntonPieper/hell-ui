@@ -3,14 +3,11 @@ import { join } from 'node:path';
 import type { FullConfig } from '@playwright/test';
 
 // @ts-expect-error -- repo tooling is authored as plain ESM without declarations.
-import { OVERSUBSCRIBED_LOAD_PER_CORE } from './host-load.mjs';
-
-// @ts-expect-error -- repo tooling is authored as plain ESM without declarations.
 import {
   DOCS_BUILD_STAMP_FILE,
   computeDocsSourcesDigest,
   describeForeignDocsBuild,
-} from '../docs-build-stamp.mjs';
+} from '../docs/docs-build-stamp.mjs';
 
 /**
  * Two preconditions the suite cannot check for itself, both of which have
@@ -29,6 +26,30 @@ import {
 // Playwright transpiles config files to CommonJS, so `__dirname` is the
 // portable choice here — `playwright.config.ts` resolves the same way.
 const root = join(__dirname, '../..');
+
+/**
+ * The load above which the preflight refuses to start a browser run.
+ *
+ * Used only by the preflight. The health reporter measures load and prints it;
+ * it does not compare it to anything, so there is no second consumer and no
+ * second verdict to keep consistent with this one.
+ *
+ * This is a *starting* condition and is only sound as one. Runs that began
+ * between 1.1 and 1.5 queued per core all finished green — 33/33 across three
+ * engines, and 298/298 twice on the full chromium tier. An earlier value of 1.5
+ * was reasoned rather than measured, sat below the ambient level of a working
+ * machine, and refused three consecutive runs that then passed completely. A
+ * gate that blocks good runs gets switched off, and a switched-off gate
+ * protects nothing.
+ *
+ * It is deliberately not a threshold for load *during* a run. Those ranges
+ * overlap: healthy full-tier runs peaked at 2.05 and 3.15 while passing every
+ * test, and this machine's genuinely starved runs began around 3.3. A parallel
+ * suite is supposed to fill the machine, so mid-run load cannot separate "busy
+ * doing the work" from "unable to do the work", and no threshold on it would be
+ * honest. That is why the reporter reports the number instead of judging it.
+ */
+const OVERSUBSCRIBED_LOAD_PER_CORE = 2.5;
 
 const ALLOW_LOADED_HOST = 'HELL_E2E_ALLOW_LOADED_HOST';
 const ALLOW_UNVERIFIED_BUILD = 'HELL_E2E_ALLOW_UNVERIFIED_BUILD';

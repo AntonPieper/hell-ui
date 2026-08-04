@@ -19,7 +19,7 @@ work.
   `packages/angular/package.json` are not runtime-leak evidence; peer isolation
   claims need package-consumer proof.
 - API reports are a stability policy, not every entrypoint by default. Check
-  `tools/check-api-reports.mjs` before adding or updating baselines.
+  `tools/api-report/check-api-reports.mjs` before adding or updating baselines.
 
 ## Component Patterns
 

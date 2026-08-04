@@ -58,7 +58,7 @@ tested, and architecture-guarded.
 ## Guardrails
 
 - `ngp-state-adapters.ts` owns the only production writes to the version-bound `State<T>.value` and `State<T>.disabled` channels.
-- `tools/check-architecture.mjs` fails if the adapter version constant drifts from the installed `ng-primitives` package, or if workspace/package peer pins stop matching that installed version.
+- `tools/architecture/check-architecture.mjs` fails if the adapter version constant drifts from the installed `ng-primitives` package, or if workspace/package peer pins stop matching that installed version.
 - The architecture guard rejects direct `State<T>.value.set(...)`, `State<T>.disabled.set(...)`, indexed state-channel writes, retired private bridge tokens, and direct primitive-instance `.state` access outside the adapter seam.
 - The architecture guard rejects select and toggle-group state-writer tokens in the adapter: primitives with public setters must use them.
 - The adapter is internal-only and must not be re-exported from the adapters barrel.

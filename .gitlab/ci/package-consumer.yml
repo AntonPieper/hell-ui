@@ -1,7 +1,7 @@
 # Consumer fixtures verified against the packed tarball the build job
 # audited and published — nothing is rebuilt here. One sharded job: fixtures
 # are discovered in-job and dealt round-robin across the shards
-# (tools/run-consumer-fixture-shard.mjs), so adding a fixture never edits CI;
+# (tools/package/run-consumer-fixture-shard.mjs), so adding a fixture never edits CI;
 # the shard count is capacity tuning, not coverage. Per-fixture collapsible
 # log sections carry each fixture's result inside a shard.
 #

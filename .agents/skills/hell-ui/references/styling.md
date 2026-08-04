@@ -36,7 +36,7 @@ tokens, themes, or design polish.
 - For styling migrations, search composed consumers and stale docs/comments, then
   prove type exports, API reports, shipped recipe CSS, semantic token runtime
   styles, and package-consumer behavior when the public surface changes.
-- `tools/check-architecture.mjs` derives migrated Part Style Map modules from
+- `tools/architecture/check-architecture.mjs` derives migrated Part Style Map modules from
   decorated source classes that declare the typed `ui` signal and
   `hellPartStyler` pipeline. It enforces that emitted `data-slot` values match
   each component's exported Part union. Button is the single-root reference;

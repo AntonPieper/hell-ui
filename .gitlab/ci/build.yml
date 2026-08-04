@@ -23,7 +23,7 @@ build:
     # preflight refuses a server it cannot identify — the stamp has to be
     # baked into the artifact because the Playwright webServer command that
     # writes it locally never runs in CI.
-    - node tools/stamp-docs-build.mjs dist/hell-docs
+    - node tools/docs/stamp-docs-build.mjs dist/hell-docs
   # Two days, not thirty: downstream jobs consume these artifacts within
   # minutes, so the expiry only has to cover a short debugging-and-retry
   # window — a ~52 MiB docs bundle per pipeline adds up on shared storage.

@@ -39,7 +39,7 @@ Current local evidence:
 
 - `hell-ui` root is core-only (`packages/angular/public-api.ts`).
 - Package peer metadata is package-wide (`packages/angular/package.json`), so optional feature peers still appear in the main package metadata.
-- Package-consumer peer groups are asserted with strict installs by the checked-in fixtures in `tools/consumer-fixtures/` (`tools/check-consumer-fixtures.mjs`).
+- Package-consumer peer groups are asserted with strict installs by the checked-in fixtures in `tools/consumer-fixtures/` (`tools/package/check-consumer-fixtures.mjs`).
 - `audio-player` is exported by the composites aggregate and narrow `hell-ui/audio-player` entrypoint; the speech transcript path has no npm peer but does carry Web Speech / media-capture runtime risk. That runtime is isolated behind `hell-ui/features/audio-transcript` and `provideHellAudioTranscript()`.
 
 ## Decision

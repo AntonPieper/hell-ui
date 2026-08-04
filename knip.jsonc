@@ -4,9 +4,12 @@
     ".": {
       // The pr-state and secret-detection-gate merge-request jobs run these
       // entry points from .gitlab/ci/*.yml, which knip does not read.
-      "entry": ["tools/decide-mr-state.mjs", "tools/gate-secret-detection.mjs"],
+      "entry": [
+        "tools/merge-state/decide-mr-state.mjs",
+        "tools/policy/gate-secret-detection.mjs"
+      ],
       // Consumer fixtures are standalone projects compiled against the packed
-      // tarball by tools/check-consumer-fixtures.mjs, not repo source.
+      // tarball by tools/package/check-consumer-fixtures.mjs, not repo source.
       "ignore": ["tools/consumer-fixtures/**"],
       // check-main-ruleset.mjs shells out to the system GitHub CLI,
       // gitlab-api.mjs to the GitLab CLI, and build-library.mjs to the Angular

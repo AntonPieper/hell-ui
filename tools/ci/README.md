@@ -46,9 +46,9 @@ definitions and the pipeline-shape contract below are the spec.
 
 ## Where the GitLab shape is specified
 
-`pnpm run test:pipeline-shape` (`tools/check-pipeline-shape.mjs`) is the source
+`pnpm run test:pipeline-shape` (`tools/policy/check-pipeline-shape.mjs`) is the source
 of truth for the GitLab pipeline's shape, and it enforces rather than describes
-it: `tools/pipeline-shape-contracts.mjs` parses the real root file plus its
+it: `tools/policy/pipeline-shape-contracts.mjs` parses the real root file plus its
 includes and proves the job roster per pipeline source, the `docker` runner tag
 on every job, the five-source workflow topology, that exactly one E2E tier job
 instantiates per test pipeline and selects exactly its own tier, and that every
@@ -149,7 +149,7 @@ so adding, renaming, or removing one never requires a CI edit:
   context, runs on every outcome (`if: always()`), and fails unless the plan and
   every planned fixture job succeeded.
 - GitLab: one `package-consumer` job with `parallel: 3` runs
-  `ci:test:consumer-fixtures:shard` (`tools/run-consumer-fixture-shard.mjs`),
+  `ci:test:consumer-fixtures:shard` (`tools/package/run-consumer-fixture-shard.mjs`),
   which discovers the fixtures in-job and deals them round-robin over the
   shards. The shard count is capacity tuning, not coverage. Each fixture gets
   its own collapsible log section, and a failing fixture never stops the rest

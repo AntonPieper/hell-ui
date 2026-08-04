@@ -246,7 +246,7 @@ just do?".
 Constraints:
 
 - The marker is a version-bound DOM seam like the `State<T>` channel in
-  `ng-primitives-state-adapter.md`. `tools/check-architecture.mjs`
+  `ng-primitives-state-adapter.md`. `tools/architecture/check-architecture.mjs`
   (`dialog-scoped-modality-seam`) keeps it in that one file and keeps
   `HELL_DIALOG_SCOPED_MODALITY_VERSION` matching the installed package.
 - When ng-primitives decomposes the dialog into primitive functions, or exposes

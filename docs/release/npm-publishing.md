@@ -131,7 +131,7 @@ The GitHub Release for a tag is a Release Projection of the tagged Released
 Version Notes (`.changes/<version>.md`), never a separately authored copy.
 The `draft-github-release` and `publish-github-release` jobs of the release
 workflow drive it through the fixture-tested policy in
-[`tools/release-projection.mjs`](../../tools/release-projection.mjs), which
+[`tools/release/release-projection.mjs`](../../tools/release/release-projection.mjs), which
 `pnpm test:changelog` proves from captured-metadata fixtures plus a static
 workflow contract — no test publishes anything.
 
@@ -179,7 +179,7 @@ check watches the published projection against them — see
    Notes record, and regenerates `CHANGELOG.md` (see
    [`release-preparation.md`](./release-preparation.md)). Land the candidate
    through a release-preparation pull request.
-2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all consumer fixtures run in the gate.
+2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/api-report/check-api-reports.mjs`](../../tools/api-report/check-api-reports.mjs); all consumer fixtures run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
    Use a lightweight tag exactly as written (no `-a`/`-s`): an annotated
    tag's own SHA differs from the commit it dereferences to, so projection

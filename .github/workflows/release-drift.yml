@@ -42,7 +42,7 @@ jobs:
       - name: Checkout release tag
         uses: actions/checkout@v6
 
-      # No install step: tools/release-projection.mjs and its drift entry are
+      # No install step: tools/release/release-projection.mjs and its drift entry are
       # deliberately dependency-free, so the check runs on a bare checkout.
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -68,4 +68,4 @@ jobs:
       - name: Compare the release against the tagged Released Version Notes
         env:
           HELL_RELEASE_JSON: ${{ runner.temp }}/release.json
-        run: node tools/check-release-drift.mjs
+        run: node tools/release/check-release-drift.mjs

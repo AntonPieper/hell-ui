@@ -108,7 +108,7 @@ earlier. Around 33 exported members have unions whose order the compiler
 chooses this way, and adding a *private, unexported* alias can reorder one.
 
 So union member order is a fact about compilation, not about the API. The report
-input sorts every union before extraction (`tools/api-report-model.mjs`), which
+input sorts every union before extraction (`tools/api-report/api-report-model.mjs`), which
 makes the gate immune to reordering while still catching a member being added,
 removed or changed — the set is what matters, and TypeScript re-normalises order
 when it reads a declaration, so printed order never reaches consumers.

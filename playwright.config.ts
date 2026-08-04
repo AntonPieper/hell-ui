@@ -80,7 +80,7 @@ const baseURL = externalBaseUrl ?? `http://127.0.0.1:${port}`;
  */
 const webServerCommand =
   process.env.HELL_E2E_WEB_SERVER_COMMAND ??
-  `pnpm run build:docs && node tools/stamp-docs-build.mjs dist/hell-docs && ` +
+  `pnpm run build:docs && node tools/docs/stamp-docs-build.mjs dist/hell-docs && ` +
     `pnpm exec vite preview --host 127.0.0.1 --port ${port} --strictPort --outDir dist/hell-docs/browser`;
 
 export default defineConfig({
