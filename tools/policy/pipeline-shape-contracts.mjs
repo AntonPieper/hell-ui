@@ -166,6 +166,7 @@ export function collectPipelineShapeContractErrors({ root }) {
   checkSweepExclusivity(model, evaluation, errors);
   checkReleaseMachinery(model, evaluation, errors);
   checkTierDiscipline(model, evaluation, errors);
+  checkBrowserHostDiscipline(model, errors);
   checkNeedsConsistency(model, evaluation, errors);
   // A subset violation surfaces once per evaluation that touches it;
   // reporting it once is enough to go red.
@@ -970,14 +971,6 @@ function checkTierDiscipline(model, { contexts, outcomes }, errors) {
           `${JSON.stringify(variables.HELL_E2E_TIER)}.`,
       );
     }
-    if (resolveJobKey(model, name, entry.job, 'parallel', errors) !== undefined) {
-      errors.push(
-        `Job "${name}" must stay unsharded: every tier job is one job on the one browser host.`,
-      );
-    }
-    if (resolveJobKey(model, name, entry.job, 'resource_group', errors) !== 'browser-host') {
-      errors.push(`Job "${name}" must carry resource_group: browser-host.`);
-    }
   }
 
   // Exactly one tier job per test pipeline; none in the policy sweep.
@@ -998,6 +991,29 @@ function checkTierDiscipline(model, { contexts, outcomes }, errors) {
           `${context.tier === null ? ' — none for the policy sweep' : ` (${context.tier})`}; ` +
           `found: ${instantiated.join(', ') || '(none)'}.`,
       );
+    }
+  }
+}
+
+// The derived browser image marks a job as browser load — the Playwright
+// tiers, the consumer-fixture smokes — and every job lands on the same
+// shared 8-core docker host. Two disciplines follow from the measurements
+// that sized those jobs to the machine (7.5+ load per logical core when two
+// browser jobs overlap): a browser job takes its turn via the browser-host
+// resource group, and it never shards — shard jobs on one host multiply
+// setup, never compute.
+const browserImage = '$CI_REGISTRY_IMAGE/e2e:$E2E_IMAGE_TAG';
+
+function checkBrowserHostDiscipline(model, errors) {
+  for (const [name, { job }] of model.jobs) {
+    if (resolveJobKey(model, name, job, 'image', errors) !== browserImage) continue;
+    if (resolveJobKey(model, name, job, 'parallel', errors) !== undefined) {
+      errors.push(
+        `Job "${name}" must stay unsharded: shard jobs on the one browser host multiply setup, never compute.`,
+      );
+    }
+    if (resolveJobKey(model, name, job, 'resource_group', errors) !== 'browser-host') {
+      errors.push(`Job "${name}" must carry resource_group: browser-host.`);
     }
   }
 }

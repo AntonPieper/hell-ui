@@ -17,10 +17,11 @@
 // fixture.json manifest next to its src/. See
 // tools/consumer-fixtures/README.md for the full contract.
 //
-// Two entry shapes share this module. `tools/package/run-consumer-fixture-shard.mjs`
-// imports it and runs one shard's fixtures as a batch; a direct
-// `node tools/package/check-consumer-fixtures.mjs [fixture...]` runs the named
-// fixtures (or all of them) fail-fast.
+// One entry: `node tools/package/check-consumer-fixtures.mjs [fixture...]`
+// runs the named fixtures (or all of them) fail-fast. `--batch` is the CI
+// shape — every fixture runs even after a failure, each inside its own
+// collapsible log section, against the prebuilt tarball the build job
+// published.
 
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -195,23 +196,25 @@ function fail(message) {
 
 if (invokedDirectly()) await runCommandLine();
 
-// The `node tools/package/check-consumer-fixtures.mjs [fixture...] [--skip-build]`
+// The `node tools/package/check-consumer-fixtures.mjs [fixture...] [--skip-build] [--batch]`
 // entry: the named fixtures, or every fixture when none is named, stopping at
-// the first failure.
+// the first failure unless `--batch` asks for the run-everything CI shape.
 async function runCommandLine() {
   const args = process.argv.slice(2);
   const named = args.filter((arg) => !arg.startsWith('--'));
+  const knownFlags = ['--skip-build', '--batch'];
   try {
     // A misspelled flag used to be dropped silently, so a run that was asked to
     // skip the build did it anyway and only the wall time said so.
-    const unknownFlags = args.filter((arg) => arg.startsWith('--') && arg !== '--skip-build');
+    const unknownFlags = args.filter((arg) => arg.startsWith('--') && !knownFlags.includes(arg));
     if (unknownFlags.length) {
-      fail(`Unknown option(s): ${formatList(unknownFlags)}; only --skip-build is supported`);
+      fail(`Unknown option(s): ${formatList(unknownFlags)}; supported: ${formatList(knownFlags)}`);
     }
 
     const failures = await runConsumerFixtures({
       names: named.length ? named : discoverFixtureNames(),
       skipPackageBuild: args.includes('--skip-build'),
+      batch: args.includes('--batch'),
     });
     if (failures.length) process.exit(1);
   } catch (error) {
@@ -230,7 +233,7 @@ function invokedDirectly() {
   return resolve(invokedPath) === fileURLToPath(import.meta.url);
 }
 
-export function reportRunnerError(error) {
+function reportRunnerError(error) {
   if (error instanceof ConsumerFixtureFailure) {
     console.error(`[consumer-fixtures] ${error.message}`);
     return;
@@ -241,10 +244,8 @@ export function reportRunnerError(error) {
   console.error(error);
 }
 
-// Every fixture name, validated and sorted. Callers that need the set before
-// running it — the CI shard deals them across parallel jobs — read it from
-// here rather than re-implementing discovery.
-export function discoverFixtureNames() {
+// Every fixture name, validated and sorted.
+function discoverFixtureNames() {
   return discoverFixtures().map((fixture) => fixture.name);
 }
 
@@ -252,13 +253,13 @@ export function discoverFixtureNames() {
 // failed. A problem with the run itself — an unusable manifest, a tarball that
 // does not audit — throws instead; that is not a fixture's verdict.
 //
-// `batch` is the CI shard mode: each fixture runs inside its own collapsible
-// log section, a failing fixture never stops the ones after it, and a prebuilt
+// `batch` is the CI mode: each fixture runs inside its own collapsible log
+// section, a failing fixture never stops the ones after it, and a prebuilt
 // tarball is mandatory — in CI the audited artifact the build job published is
 // the only thing consumers are meant to test. Without it the run stops at the
 // first broken fixture, which is what a local run or a single-fixture CI job
 // wants.
-export async function runConsumerFixtures({ names, skipPackageBuild = false, batch = false } = {}) {
+async function runConsumerFixtures({ names, skipPackageBuild = false, batch = false } = {}) {
   const selectedFixtures = selectFixtures(discoverFixtures(), names ?? []);
   for (const fixture of selectedFixtures) assertFixturePeerContract(fixture);
 
