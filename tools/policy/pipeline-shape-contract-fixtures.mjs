@@ -125,6 +125,71 @@ const fixtures = [
       ),
     needle: 'must stay gating',
   },
+  {
+    // Dropping the release include removes the entire publish machinery
+    // while every other tag-pipeline job still looks right.
+    name: 'a dropped release include removes the publish machinery',
+    file: '.gitlab-ci.yml',
+    mutate: (text) => text.replace('  - local: .gitlab/ci/release.yml\n', ''),
+    needle: 'required job "release:publish"',
+  },
+  {
+    // Removing when: manual turns the last abort point into an ordinary
+    // auto-running job — the publish would need no human decision at all.
+    name: 'an auto-running approval gate fails instead of publishing unattended',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) => text.replace('      when: manual\n', ''),
+    needle: 'last abort point',
+  },
+  {
+    // With allow_failure: true an unplayed manual job counts as
+    // skipped-success, so the publish behind it would run unattended.
+    name: 'an allow_failure approval gate stops blocking and goes red',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) => text.replace('  allow_failure: false\n', '  allow_failure: true\n'),
+    needle: 'run unattended',
+  },
+  {
+    // A publish job missing one gating needs edge publishes before the
+    // pipeline proved that job — the publish-last order is the contract.
+    name: 'a publish job missing the browser-tier needs edge',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) => text.replace('    - e2e:full\n', ''),
+    needle: 'Job "release:publish" must need exactly',
+  },
+  {
+    // A release job whose rule answers another pipeline source is reachable
+    // outside a real tag push.
+    name: 'a release job leaking outside tag pipelines',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) =>
+      text.replace(
+        'release:gate:\n  extends: .node-job\n  stage: test\n  timeout: 15 minutes\n  rules:\n    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\\d/\n',
+        'release:gate:\n  extends: .node-job\n  stage: test\n  timeout: 15 minutes\n  rules:\n    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"\n',
+      ),
+    needle: 'Release job "release:gate"',
+  },
+  {
+    // An interruptible publish can be auto-cancelled mid-upload by a
+    // pipeline racing on the same ref.
+    name: 'an interruptible publish job can be killed mid-write',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) =>
+      text.replace(
+        '  interruptible: false\n  resource_group: release\n',
+        '  resource_group: release\n',
+      ),
+    needle: 'interruptible: false',
+  },
+  {
+    // Without the shared resource group, two release pipelines interleave
+    // their registry writes and release creations.
+    name: 'a publish job losing its cross-pipeline serialization',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) =>
+      text.replace('  interruptible: false\n  resource_group: release\n', '  interruptible: false\n'),
+    needle: 'resource_group: release',
+  },
 ];
 
 export function runPipelineShapeContractFixtures({ root }) {

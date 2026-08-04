@@ -1,0 +1,122 @@
+# The v* tag pipeline's release machinery: publish-last, in this order —
+#
+#   release:gate            the content gate: release-note contract plus the
+#                           tag/manifest/record agreement
+#   release:rule-liveness   publication refuses when the standing v*
+#                           protected-tag rule is gone (read in-band from
+#                           CI_COMMIT_REF_PROTECTED — no token involved)
+#   release:approval        when: manual, blocking — the last abort point
+#   release:publish         the audited tarball, repacked under the published
+#                           name, into this project's npm registry with
+#                           CI_JOB_TOKEN; needs every gating job in the tag
+#                           pipeline, so nothing publishes before everything
+#                           is green
+#   release:projection      the GitLab Release last: title v<version>, body =
+#                           exact tagged .changes/<version>.md bytes, exactly
+#                           one package-type asset link
+#
+# Every decision lives in the fixture-tested policy seam
+# (tools/release/gitlab-release-projection.mjs); these jobs are thin shells
+# over its subcommands. A tag `v<version>-dryrun.<n>` runs the same jobs in
+# the same order as a dry run: publish stops before the upload and the
+# projection verifies its plan synthetically without creating a release —
+# that dry run is also a cutover gate, re-run on the final synced tip.
+#
+# There is no long-lived publish secret anywhere here: the only credential is
+# CI_JOB_TOKEN, and the registry and API are addressed through CI-provided
+# variables, never a hostname in the tree.
+
+release:gate:
+  extends: .node-job
+  stage: test
+  timeout: 15 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+  cache:
+    - !reference [.caches, pnpm-readonly]
+  script:
+    # The release-note contract (byte-exact changelog, record presence,
+    # fragment validation) normally gates merge requests; a tag must prove it
+    # again on the exact tagged tree.
+    - pnpm run ci:test:release-notes
+    - node tools/release/gitlab-release-projection.mjs gate
+
+release:rule-liveness:
+  extends: .node-job
+  stage: test
+  timeout: 5 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+  # Dependency-free like the policy it runs: CI-provided facts in, verdict
+  # out — no install, no caches.
+  cache: []
+  before_script: []
+  needs:
+    - release:gate
+  script:
+    - node tools/release/gitlab-release-projection.mjs rule-liveness
+
+# The last abort point (ADR 0003 / the migration ADR): nothing irreversible
+# has happened yet, and playing this job is the human decision that lets the
+# publish jobs run. `when: manual` inside rules defaults to allow_failure:
+# false, but the blocking semantics are load-bearing — an allow_failure:
+# true manual job counts as skipped-success and the publish would run
+# unattended — so it is pinned explicitly and the pipeline-shape contract
+# enforces it.
+release:approval:
+  extends: .node-job
+  stage: test
+  timeout: 5 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+      when: manual
+  allow_failure: false
+  cache: []
+  before_script: []
+  needs:
+    - release:rule-liveness
+  script:
+    # The same gate decision, printed for the person who played the button:
+    # which mode this tag selected and what approving it authorizes.
+    - node tools/release/gitlab-release-projection.mjs gate
+
+release:publish:
+  extends: .node-job
+  stage: test
+  timeout: 10 minutes
+  # Auto-cancel must never kill a publish in flight, and two release
+  # pipelines must never interleave their registry writes.
+  interruptible: false
+  resource_group: release
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+  cache: []
+  # pnpm publishes the tarball; nothing is built or installed here.
+  before_script:
+    - corepack enable
+  needs:
+    - release:gate
+    - release:rule-liveness
+    - release:approval
+    - static
+    - unit
+    - build
+    - package-consumer
+    - e2e:full
+  script:
+    - node tools/release/gitlab-release-projection.mjs publish artifacts/package
+
+release:projection:
+  extends: .node-job
+  stage: test
+  timeout: 10 minutes
+  interruptible: false
+  resource_group: release
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+  cache: []
+  before_script: []
+  needs:
+    - release:publish
+  script:
+    - node tools/release/gitlab-release-projection.mjs project
