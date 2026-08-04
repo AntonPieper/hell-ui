@@ -1,17 +1,15 @@
 // Negative fixtures for the pipeline-shape contract (GitLab migration).
 //
-// Each fixture copies the repository's real GitLab CI definitions into a
-// temporary directory, applies one adversarial mutation, and asserts that the
-// contract rejects it. This keeps the contract honest: a check that only ever
-// sees the compliant pipeline could silently stop catching the shrink it
-// exists to prevent.
+// Each fixture is one adversarial mutation of a named CI definition that the
+// contract must reject; runMutatedTreeFixture replays it against a copy of the
+// repository's real GitLab CI definitions. This keeps the contract honest: a
+// check that only ever sees the compliant pipeline could silently stop
+// catching the shrink it exists to prevent.
 
 import { join } from 'node:path';
 import { runMutatedTreeFixture, runNamedFixtures } from './fixture-harness.mjs';
 import { collectPipelineShapeContractErrors } from './pipeline-shape-contracts.mjs';
 
-// `mutate` receives the named file's real text and must return a changed
-// document; `needle` must appear in the resulting contract errors.
 const fixtures = [
   {
     // The include list is the roster's supply line: dropping one line removes

@@ -128,6 +128,7 @@ function expectPass(context, { failures }, label) {
   }
 }
 
+// `needles` is one substring or a list of them.
 function expectFailure(context, { failures }, needles, label) {
   for (const failure of collectExpectationFailures(failures, needles, projectionDialect(label))) {
     context.fail(failure);
@@ -352,12 +353,8 @@ function fixtureRejectsMetadataMismatches(context) {
   );
   // The failure has to name the asset it found, so a maintainer can see what
   // was attached without opening the release.
-  expectFailure(
-    context,
-    verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) }),
-    ['no custom assets', 'hell-ui-0.3.0.tgz'],
-    'an unexpected custom asset',
-  );
+  const withAsset = verify({ release: releaseProjection({ assetNames: ['hell-ui-0.3.0.tgz'] }) });
+  expectFailure(context, withAsset, ['no custom assets', 'hell-ui-0.3.0.tgz'], 'an unexpected custom asset');
 }
 
 function fixtureRequiresImmutabilityPolicy(context) {
@@ -555,12 +552,8 @@ function fixtureMissingTaggedRecord(context) {
     recordCommit: commit,
     tagCommit: commit,
   });
-  expectFailure(
-    context,
-    missing,
-    ['carries no Released Version Notes record', '.changes/0.3.0.md'],
-    'a tag without a record',
-  );
+  const needles = ['carries no Released Version Notes record', '.changes/0.3.0.md'];
+  expectFailure(context, missing, needles, 'a tag without a record');
 
   // The tag is validated before it can name a record path, so a tag outside
   // the v<SemVer> shape never reaches the filesystem.
@@ -581,9 +574,10 @@ function fixtureMissingTaggedRecord(context) {
 }
 
 function fixtureRepairRequestsRejected(context) {
+  const repair = drift(publishedRelease('0.3.0'), { repair: true });
   expectFailure(
     context,
-    drift(publishedRelease('0.3.0'), { repair: true }),
+    repair,
     ['Unsupported release drift option', 'never repairs, edits, or republishes'],
     'a repair request',
   );

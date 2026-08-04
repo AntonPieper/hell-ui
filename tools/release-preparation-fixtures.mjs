@@ -201,6 +201,7 @@ function expectSuccess(context, result, label) {
   return failures.length === 0;
 }
 
+// `needles` is one substring or a list of them.
 function expectFailure(context, result, needles, label) {
   const failures = collectExpectationFailures(result.failures, needles, preparationDialect(label));
   for (const failure of failures) context.fail(failure);

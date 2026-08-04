@@ -10,6 +10,7 @@
 import {
   collectExpectationFailures,
   jsonEquals,
+  mergeFixtureResults,
   runNamedFixtures,
 } from './fixture-harness.mjs';
 import {
@@ -545,22 +546,22 @@ const verifyFixtures = [
 ];
 
 export function runMainPolicyFixtures() {
-  const documents = runNamedFixtures(readFixtures, runReadFixture, 'main-policy document fixture');
-  const parity = runNamedFixtures(verifyFixtures, runVerifyFixture, 'main-policy parity fixture');
-  return {
-    failures: [...documents.failures, ...parity.failures],
-    total: documents.total + parity.total,
-  };
+  return mergeFixtureResults(
+    runNamedFixtures(readFixtures, runReadFixture, 'main-policy document fixture'),
+    runNamedFixtures(verifyFixtures, runVerifyFixture, 'main-policy parity fixture'),
+  );
 }
 
-// The seam reports rejections as "errors" when it reads the document and as
-// "failures" when it compares against a live project; the fixtures name the
-// surface they are about, so the noun follows.
+// This suite writes its own dialect rather than taking the harness default:
+// the seam reports rejections as "errors" when it reads the document and as
+// "failures" when it compares against a live project, and each fixture names
+// the surface it is about, so the noun follows.
 const policyDialect = (what) => ({
   pass: (reported) => `expected no ${what}s; got: ${reported.join(' | ')}`,
   none: (expected) => `expected ${what}s mentioning ${expected.join(', ')}; got none.`,
   missing: (needle, reported) =>
     `expected a ${what} mentioning "${needle}"; got: ${reported.join(' | ')}`,
+  extra: (reported) => `reported an unexpected ${what}: ${reported}`,
 });
 
 const documentDialect = policyDialect('error');

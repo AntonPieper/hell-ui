@@ -1,10 +1,10 @@
 // Negative fixtures for the static workflow trust contracts (ADR 0003).
 //
-// Each fixture copies the repository's real workflow definitions into a
-// temporary directory, applies one adversarial mutation to the privileged
-// metadata workflow, and asserts that the trust contracts reject it. This
-// keeps the contracts honest: a check that only ever sees compliant workflows
-// could silently stop catching violations.
+// Each fixture is one adversarial mutation of the privileged metadata workflow
+// that the trust contracts must reject; runMutatedTreeFixture replays it
+// against a copy of the repository's real workflow definitions. This keeps the
+// contracts honest: a check that only ever sees compliant workflows could
+// silently stop catching violations.
 
 import { join } from 'node:path';
 import { runMutatedTreeFixture, runNamedFixtures } from './fixture-harness.mjs';
@@ -12,8 +12,6 @@ import { collectWorkflowTrustContractErrors } from './workflow-trust-contracts.m
 
 const trustedWorkflowPath = join('.github', 'workflows', 'pr-state.yml');
 
-// `mutate` receives the real pr-state.yml text and must return a changed
-// document; `needle` must appear in the resulting contract errors.
 const fixtures = [
   {
     // The extraction pattern cannot represent literal braces inside an

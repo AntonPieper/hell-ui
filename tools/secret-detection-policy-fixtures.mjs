@@ -6,7 +6,11 @@
 // report and allowlist shapes the policy does not recognize. Nothing here
 // reads a file or runs the analyzer.
 
-import { collectExpectationFailures, runNamedFixtures } from './fixture-harness.mjs';
+import {
+  collectExpectationFailures,
+  errorDialect,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
 import { evaluateSecretDetectionReport } from './secret-detection-policy.mjs';
 
 // A finding as the analyzer emits it. The raw extract is the secret itself;
@@ -225,11 +229,11 @@ export function runSecretDetectionPolicyFixtures() {
   );
 }
 
-const reportDialect = {
-  pass: (errors) => `expected a pass; got errors: ${errors.join(' | ')}`,
-  none: (expected) => `expected a rejection mentioning ${expected.join(', ')}; got a pass.`,
-  missing: (needle, errors) => `expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`,
-};
+const reportDialect = errorDialect({
+  clean: 'a pass',
+  rejection: 'a rejection',
+  got: 'got errors: ',
+});
 
 function runFixture(fixture) {
   const verdict = evaluateSecretDetectionReport({

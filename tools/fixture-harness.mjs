@@ -1,12 +1,16 @@
-// The runner every fixture suite under tools/ shares.
+// The scaffolding the fixture suites under tools/ share.
 //
-// The suites themselves stay what they are — a corpus plus the assertions only
-// that corpus needs — but the scaffolding around them is the same four things
-// every time, and when each suite hand-rolled its own the four drifted apart.
-// The one that mattered was strictness: every matcher checked that the needles
-// a fixture named were reported, and none checked the other direction, so a
-// fixture kept passing after the seam under it started failing for a second,
-// unrelated reason it never mentioned.
+// Not every suite needs every piece — the loop is universal, the matcher
+// serves the six suites that assert over reported problem strings (three of
+// them on its default dialect), the merge serves the two that run more than
+// one corpus, and the mutated-tree runner serves the two that prove a static
+// contract still rejects a violation. What matters is that each piece has one
+// implementation:
+// when the suites hand-rolled their own, they drifted, and the drift that
+// mattered was strictness. Every matcher checked that the needles a fixture
+// named were reported, and none checked the other direction, so a fixture kept
+// passing after the seam under it started failing for a second, unrelated
+// reason it never mentioned.
 //
 // Node stdlib only: the seams these fixtures cover run in CI jobs that install
 // nothing, and a suite must never be the reason a dependency appears.
@@ -58,13 +62,14 @@ export function runNamedFixtures(fixtures, runOne, prefix) {
 // - `none(expected)` — the fixture expected problems and got none at all.
 //   Optional: supply it to summarise that case in one line, or leave it out
 //   to get one `missing` line per expectation instead.
-// - `extra(entry)` — a reported problem outside the expectations. Optional;
-//   defaults to a bare line naming it.
+// - `extra(entry)` — a reported problem outside the expectations. Required.
 //
 // Renderers return one line or an array of lines. There is deliberately no way
 // to opt out of the extras check: every suite here came out clean under it
 // once its fixtures named what the seam actually reports, so a suite that
 // needs an escape hatch should have to argue for one.
+//
+// Most suites want `errorDialect` below rather than a hand-written dialect.
 export function collectExpectationFailures(reported, expected, dialect) {
   const needles = toArray(expected);
   if (needles.length === 0) {
@@ -82,10 +87,35 @@ export function collectExpectationFailures(reported, expected, dialect) {
   }
   for (const entry of reported) {
     if (!needles.some((needle) => entry.includes(needle))) {
-      failures.push(...toArray((dialect.extra ?? describeExtra)(entry)));
+      failures.push(...toArray(dialect.extra(entry)));
     }
   }
   return failures;
+}
+
+// The dialect for a suite that asserts over a list of reported error strings.
+// Three of them do, and the only prose that varied between their hand-written
+// dialects was how each names a clean result and what it calls the rejection it
+// expected: `clean` fills "expected <clean>; got: …", `rejection` fills
+// "expected <rejection> mentioning …; got a pass.". `got` exists because one
+// suite reports "got errors:" where the others report "got:".
+export function errorDialect({ clean, rejection, got = 'got: ' }) {
+  return {
+    pass: (errors) => `expected ${clean}; ${got}${errors.join(' | ')}`,
+    none: (expected) => `expected ${rejection} mentioning ${expected.join(', ')}; got a pass.`,
+    missing: (needle, errors) =>
+      `expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`,
+    extra: (error) => `reported an unexpected error: ${error}`,
+  };
+}
+
+// Combines the results of the corpora a suite runs separately, for the two
+// suites that run more than one.
+export function mergeFixtureResults(...results) {
+  return {
+    failures: results.flatMap((result) => result.failures),
+    total: results.reduce((count, result) => count + result.total, 0),
+  };
 }
 
 // Structural equality for the JSON-shaped records fixtures compare — parsed
@@ -105,8 +135,8 @@ export function jsonEquals(actual, expected) {
 // `copy` lists repository-relative files and directories to reproduce;
 // `path` names the file inside them to mutate; `mutate` receives its real text
 // and must return a changed document; `collectErrors` runs the contract over
-// the copy; and `needle` must appear in what it reports. `subject` names the
-// mutated thing in the no-op guard, and `tmpPrefix` the temporary directory.
+// the copy; `needle` must appear in what it reports; and `tmpPrefix` names the
+// temporary directory.
 export function runMutatedTreeFixture({
   root,
   copy,
@@ -115,7 +145,6 @@ export function runMutatedTreeFixture({
   mutate,
   collectErrors,
   needle,
-  subject = 'file',
 }) {
   const dir = mkdtempSync(join(tmpdir(), tmpPrefix));
   try {
@@ -128,7 +157,7 @@ export function runMutatedTreeFixture({
     const original = readFileSync(join(root, path), 'utf8');
     const mutated = mutate(original);
     if (mutated === original) {
-      return [`the mutation did not change the ${subject}; the fixture no longer tests anything.`];
+      return ['the mutation did not change the file; the fixture no longer tests anything.'];
     }
     writeFileSync(join(dir, path), mutated);
 
@@ -143,10 +172,6 @@ export function runMutatedTreeFixture({
   } finally {
     rmSync(dir, { force: true, recursive: true });
   }
-}
-
-function describeExtra(entry) {
-  return `reported a problem no expectation names: ${entry}`;
 }
 
 function toArray(value) {

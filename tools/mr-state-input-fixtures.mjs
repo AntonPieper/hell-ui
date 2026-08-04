@@ -11,7 +11,9 @@
 
 import {
   collectExpectationFailures,
+  errorDialect,
   jsonEquals,
+  mergeFixtureResults,
   runNamedFixtures,
 } from './fixture-harness.mjs';
 import { evaluatePullRequestState } from './pr-state-policy.mjs';
@@ -126,13 +128,17 @@ function encodeCorpusFixture(fixture) {
 }
 
 export function runMrStateInputFixtures() {
-  const labels = runNamedFixtures(labelFixtures, runLabelFixture, 'mr-state label fixture');
-  const diffs = runNamedFixtures(diffFixtures, runDiffFixture, 'mr-state diff fixture');
+  const adapter = mergeFixtureResults(
+    runNamedFixtures(labelFixtures, runLabelFixture, 'mr-state label fixture'),
+    runNamedFixtures(diffFixtures, runDiffFixture, 'mr-state diff fixture'),
+  );
+  // The replay drives the pull-request corpus, not a corpus of its own, so it
+  // reports its own count rather than adding to the adapter fixture total.
   const replay = runCorpusReplay();
 
   return {
-    failures: [...labels.failures, ...diffs.failures, ...replay.failures],
-    total: labels.total + diffs.total,
+    failures: [...adapter.failures, ...replay.failures],
+    total: adapter.total,
     replayed: replay.replayed,
   };
 }
@@ -143,11 +149,7 @@ function runLabelFixture(fixture) {
   return [`expected ${JSON.stringify(fixture.expect)}, got ${JSON.stringify(labels)}.`];
 }
 
-const diffDialect = {
-  pass: (errors) => `expected a pass; got: ${errors.join(' | ')}`,
-  none: (expected) => `expected a rejection mentioning ${expected.join(', ')}; got a pass.`,
-  missing: (needle, errors) => `expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`,
-};
+const diffDialect = errorDialect({ clean: 'a pass', rejection: 'a rejection' });
 
 function runDiffFixture(fixture) {
   const { files, errors } = parseNameStatusDiff(fixture.raw);

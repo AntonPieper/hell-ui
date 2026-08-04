@@ -8,7 +8,11 @@
 // edits, the Release Preparation candidate shape, rename metadata, and
 // fail-closed handling of unrecognized metadata. Nothing here talks to GitHub.
 
-import { collectExpectationFailures, runNamedFixtures } from './fixture-harness.mjs';
+import {
+  collectExpectationFailures,
+  errorDialect,
+  runNamedFixtures,
+} from './fixture-harness.mjs';
 import {
   changedFilesApiCap,
   evaluatePullRequestState,
@@ -258,12 +262,10 @@ function runFixture(fixture) {
   return collectVerdictFailures(fixture.expect, verdict);
 }
 
-const verdictDialect = {
-  pass: (errors) => `expected a passing decision; got: ${errors.join(' | ')}`,
-  none: (expected) => `expected a failing decision mentioning ${expected.join(', ')}; got a pass.`,
-  missing: (needle, errors) =>
-    `expected an error mentioning "${needle}"; got: ${errors.join(' | ')}`,
-};
+const verdictDialect = errorDialect({
+  clean: 'a passing decision',
+  rejection: 'a failing decision',
+});
 
 // Compares one policy verdict against a fixture's expectation. Exported so
 // the GitLab input-adapter fixtures assert the replayed corpus the same way.
