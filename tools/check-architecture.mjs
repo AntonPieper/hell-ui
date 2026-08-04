@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
@@ -1986,6 +1986,16 @@ function libraryProductionTsFiles() {
 
 // Running the checks is what `node tools/check-architecture.mjs` does, not what
 // importing this module does; `parseJsonc` above is imported by its spec.
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+//
+// Both sides are resolved through symlinks before comparing. `import.meta.url`
+// is always the real path, while `process.argv[1]` is whatever spelling invoked
+// the script — so an absolute invocation through a symlinked path compares two
+// different strings and silently skips the checks rather than failing. Nothing
+// invokes it that way today; a gate that can quietly do nothing is worth one
+// line to close.
+if (
+  process.argv[1] &&
+  realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+) {
   main();
 }

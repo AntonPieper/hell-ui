@@ -225,7 +225,7 @@ function describeProbeFor(
   return `server: nearest probe ${when} (${formatClock(nearest.at)}) ${nearest.outcome}`;
 }
 
-/** The whole report. Pure, so a fixture drives it with real sample arrays. */
+/** The whole report. Pure, so its spec drives it with real sample arrays. */
 export function formatRunReport(facts: RunFacts): string[] {
   const loads = facts.samples.map((sample) => sample.loadPerCpu);
   const lines = [

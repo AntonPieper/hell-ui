@@ -33,8 +33,11 @@ describe('describeForeignDocsBuild', () => {
     ['an unidentifiable server', null, /did not serve/],
     ['an old stamp format', { ...served, version: STAMP_VERSION + 1 }, /stamp format/],
     [
-      // Identified by digest, never named: this stamp is published with the
-      // docs site, so the other checkout's path must not be.
+      // `served` carries the *matching* digest, so this row is also the case
+      // where a foreign checkout's sources happen to agree: identity outranks
+      // the digest, because the served pages still come from somewhere else.
+      // And the other checkout is identified by digest, never named — this
+      // stamp is published with the docs site, so its path must not be.
       'another checkout, identified without naming a path',
       { ...served, workspaceId: 'ffffffffffffffff' },
       /different checkout \(ffffffffffffffff/,
@@ -45,17 +48,5 @@ describe('describeForeignDocsBuild', () => {
 
     expect(failures).toHaveLength(1);
     expect(failures[0]).toMatch(expected);
-  });
-
-  it('reports a foreign checkout even when its sources happen to match', () => {
-    // The served pages still come from somewhere else, so checkout identity
-    // outranks a matching digest.
-    expect(
-      describeForeignDocsBuild({
-        root,
-        currentDigest,
-        stamp: { ...served, workspaceId: 'ffffffffffffffff' },
-      })[0],
-    ).toMatch(/different checkout/);
   });
 });

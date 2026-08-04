@@ -28,7 +28,7 @@
 // The small SemVer helpers are therefore local copies of the
 // release-changelog.mjs contract.
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -563,6 +563,13 @@ function report(label, failures) {
   return true;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// Resolved through symlinks on both sides: `import.meta.url` is always the real
+// path, while `process.argv[1]` is whatever spelling invoked the script, so an
+// absolute invocation through a symlinked path would compare two different
+// strings and silently skip `main()` instead of failing.
+if (
+  process.argv[1] &&
+  realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+) {
   process.exit(main(process.argv.slice(2)));
 }
