@@ -346,7 +346,7 @@ jobs:
     # together with the `@playwright/test` catalog entry (and
     # tools/ci/e2e-image, which derives from the same base).
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
     env:
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     strategy:
