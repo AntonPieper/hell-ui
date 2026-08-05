@@ -19,3 +19,9 @@ custom:
         `@tanstack/angular-table`, so no new dependency is required. TanStack's own
         reference for the rest is bundled at
         `@tanstack/angular-table/skills/migrate-v8-to-v9/SKILL.md`.
+        One timing difference is easy to miss: the row model now follows the `data`
+        option through Angular reactivity, so it has not rebuilt yet in a
+        `queueMicrotask` scheduled right after you write new data. Code that writes
+        rows and then reads them back with `table.getRowModel()` in a microtask —
+        for example to select a row after a server page loads — will see the previous
+        data. Use the rows you just fetched instead of re-deriving them from the table.
