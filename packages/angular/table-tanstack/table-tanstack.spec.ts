@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import {
   columnFilteringFeature,
   columnPinningFeature,
@@ -7,20 +8,27 @@ import {
   columnSizingFeature,
   columnVisibilityFeature,
   createExpandedRowModel,
+  createFilteredRowModel,
   createPaginatedRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
   globalFilteringFeature,
   injectTable,
   rowExpandingFeature,
   rowPaginationFeature,
   rowSelectionFeature,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
   tableFeatures,
   type ColumnDef,
+  type ColumnFiltersState,
   type ColumnSizingState,
   type ExpandedState,
   type PaginationState,
   type Row,
   type RowSelectionState,
+  type SortingState,
 } from '@tanstack/angular-table';
 
 import {
@@ -57,6 +65,26 @@ const features = tableFeatures({
   rowSortingFeature,
   expandedRowModel: createExpandedRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
+});
+
+/**
+ * A client-side feature set: sorted and filtered row models plus the function
+ * registries `auto` resolves through. v9 stopped bundling the built-ins, so a
+ * table that installs the row models without the registries silently sorts
+ * lexically and drops column filters instead of failing.
+ */
+const clientFeatures = tableFeatures({
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
 });
 
 interface Person {
@@ -349,6 +377,54 @@ class NonLeadingPinnedShellHost {
   }));
 }
 
+interface StatusPerson {
+  readonly id: string;
+  readonly name: string;
+  readonly status: 'active' | 'away';
+}
+
+/** Numbered names and a status column, the two shapes `auto` resolution decides. */
+const statusPeople: StatusPerson[] = Array.from({ length: 12 }, (_, index) => ({
+  id: `person-${index + 1}`,
+  name: `Person ${index + 1}`,
+  status: index % 4 === 0 ? 'away' : 'active',
+}));
+
+@Component({
+  selector: 'hell-test-client-sorted-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class ClientSortedShellHost {
+  readonly sorting = signal<SortingState>([{ id: 'name', desc: false }]);
+  readonly columnFilters = signal<ColumnFiltersState>([]);
+  readonly columns: ColumnDef<typeof clientFeatures, StatusPerson>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'status', header: 'Status' },
+  ];
+
+  readonly table = injectTable(() => ({
+    features: clientFeatures,
+    data: statusPeople,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+    state: { sorting: this.sorting(), columnFilters: this.columnFilters() },
+    onSortingChange: (updater) =>
+      this.sorting.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+    onColumnFiltersChange: (updater) =>
+      this.columnFilters.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+  }));
+}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -363,6 +439,7 @@ describe('Hell TanStack table shell', () => {
         ResizableShellHost,
         UncontrolledResizableShellHost,
         NonLeadingPinnedShellHost,
+        ClientSortedShellHost,
       ],
     }).compileComponents();
   });
@@ -749,6 +826,49 @@ describe('Hell TanStack table shell', () => {
     // 'a' renders last, so it has no trailing neighbour to transact against.
     // Against the declared order it would be 'd' that lost its separator.
     expect(handled).toEqual(['c', 'b', 'd']);
+  });
+
+  it('sorts a numbered column naturally and applies a column filter through the registries', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const fixture = TestBed.createComponent(ClientSortedShellHost);
+      fixture.detectChanges();
+      const host = fixture.componentInstance;
+
+      // `auto` resolves to `alphanumeric` here. Unregistered it falls back to
+      // `sortFn_basic`, which orders lexically as Person 1, Person 10, Person 11.
+      expect(host.table.getRowModel().rows.map((row) => row.original.name)).toEqual([
+        'Person 1',
+        'Person 2',
+        'Person 3',
+        'Person 4',
+        'Person 5',
+        'Person 6',
+        'Person 7',
+        'Person 8',
+        'Person 9',
+        'Person 10',
+        'Person 11',
+        'Person 12',
+      ]);
+
+      // `auto` resolves to `includesString`. Unregistered it returns undefined
+      // and the filter is skipped, leaving all 12 rows visible.
+      host.columnFilters.set([{ id: 'status', value: 'away' }]);
+      fixture.detectChanges();
+      const filtered = host.table.getFilteredRowModel().rows;
+      expect(filtered.map((row) => row.original.name)).toEqual([
+        'Person 1',
+        'Person 5',
+        'Person 9',
+      ]);
+
+      // The registration warnings are the loud half of the same defect.
+      const messages = warn.mock.calls.map((call) => String(call[0]));
+      expect(messages.filter((message) => message.includes('is not registered'))).toEqual([]);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   describe('recipes', () => {

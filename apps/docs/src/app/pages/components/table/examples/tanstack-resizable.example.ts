@@ -22,6 +22,8 @@ import {
   injectTable,
   rowExpandingFeature,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
   tableFeatures,
   type ColumnDef,
   type ColumnSizingState,
@@ -40,6 +42,10 @@ const features = tableFeatures({
   rowExpandingFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort functions by name out of this registry rather than
+  // bundling the built-ins: the numbered service and uptime columns resolve to
+  // `alphanumeric`, the plain-word owner and region columns to `text`.
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
 });
 
 interface Service {

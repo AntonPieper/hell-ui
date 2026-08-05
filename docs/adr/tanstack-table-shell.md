@@ -162,6 +162,24 @@ rather than gated conditionals and so resolve generically:
 static-function entry point replaces it. `table._getDefaultColumnDef()` became
 the public `table.getDefaultColumnDef()`.
 
+### Function registries are not optional
+
+v9 stopped bundling the sort and filter built-ins. `sortFn`/`filterFn` resolve by
+name out of the `sortFns`/`filterFns` registries, and so does the `auto` default
+that a column uses when it names neither. An unregistered name degrades silently
+rather than throwing: `alphanumeric` falls back to a plain comparison, so a
+numbered column sorts `Person 1, Person 10, Person 2`, and `includesString`
+resolves to nothing, so the filter is skipped and every row stays visible.
+Development builds warn, and nothing else does — types cannot catch it, because
+`auto` is a default rather than a named key.
+
+Every construction site that installs a client row model therefore registers the
+built-ins its columns resolve to. Sites that leave sorting and filtering to a
+server register neither, because no client row model runs. A spec host covers the
+two shapes that decide resolution — a numbered name column and a string status
+filter — and asserts no registration warnings, since the warning and the wrong
+answer are halves of the same defect.
+
 ### Logical pinning
 
 Pinning is logical in v9: `'left'`/`'right'` became `'start'`/`'end'` throughout.

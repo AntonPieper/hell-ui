@@ -39,11 +39,14 @@ import {
   createExpandedRowModel,
   createFilteredRowModel,
   createSortedRowModel,
+  filterFn_includesString,
   globalFilteringFeature,
   injectTable,
   rowExpandingFeature,
   rowSelectionFeature,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
   tableFeatures,
   type ColumnDef,
   type ColumnFiltersState,
@@ -70,6 +73,14 @@ const features = tableFeatures({
   expandedRowModel: createExpandedRowModel(),
   filteredRowModel: createFilteredRowModel(),
   sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort and filter functions by name out of these
+  // registries and no longer bundles the built-ins. Without them a name column
+  // sorts lexically (Person 1, Person 10) and a column filter silently matches
+  // every row. Register the built-ins these columns actually resolve to:
+  // `alphanumeric` for the numbered name, `text` for the plain-word columns, and
+  // `includesString` for the string column and global filters.
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
 });
 
 interface Person {

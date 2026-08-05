@@ -19,12 +19,14 @@ import {
   createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
+  filterFn_includesString,
   globalFilteringFeature,
   injectTable,
   rowExpandingFeature,
   rowPaginationFeature,
   rowSelectionFeature,
   rowSortingFeature,
+  sortFn_text,
   tableFeatures,
   type ColumnDef,
   type PaginationState,
@@ -51,6 +53,11 @@ const features = tableFeatures({
   filteredRowModel: createFilteredRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort and filter functions by name out of these
+  // registries and no longer bundles the built-ins. The name column resolves to
+  // `text`, and the global filter to `includesString`.
+  sortFns: { text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
 });
 
 interface Person {

@@ -16,7 +16,27 @@ custom:
         `paginatedRowModel: createPaginatedRowModel()`, and `getExpandedRowModel()`
         becomes `expandedRowModel: createExpandedRowModel()`. Every feature you use must
         be imported and registered; all of them are re-exported from
-        `@tanstack/angular-table`, so no new dependency is required. TanStack's own
+        `@tanstack/angular-table`, so no new dependency is required.
+        Register the sort and filter functions too, not just the features and row
+        models. v9 no longer bundles the built-ins: `sortFn` and `filterFn` resolve by
+        name out of the `sortFns` and `filterFns` registries, and so does the `auto`
+        default that every column uses unless it names one. An unregistered name fails
+        quietly rather than loudly — a column that resolves to `alphanumeric` falls back
+        to a plain comparison and sorts `Person 1, Person 10, Person 2`, and one that
+        resolves to `includesString` gets no filter function at all, so the filter is
+        skipped and every row stays visible. Development builds warn
+        (`sortFn 'alphanumeric' (auto) for column 'name' is not registered`), so check the
+        console after upgrading. `auto` picks `alphanumeric` for strings containing digits,
+        `text` for other strings, `datetime` for dates, `includesString` for string
+        filters, `inNumberRange` for numbers, `equals` for booleans and objects,
+        `arrIncludes` for arrays and `inDateRange` for date ranges. Import the ones your
+        columns resolve to and register them under those names, for example
+        `sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text }` and
+        `filterFns: { includesString: filterFn_includesString }`. Spreading the exported
+        `sortFns`/`filterFns` registries also works but bundles every built-in. Tables
+        that leave sorting and filtering to a server need neither, because no client row
+        model runs.
+        TanStack's own
         reference for the rest is bundled at
         `@tanstack/angular-table/skills/migrate-v8-to-v9/SKILL.md`.
         One timing difference is easy to miss: the row model now follows the `data`
