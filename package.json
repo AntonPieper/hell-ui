@@ -51,20 +51,21 @@
     "ci:test:api-report:prepared": "pnpm run test:api-report"
   },
   "devDependencies": {
+    "@angular/cli": "catalog:",
     "@axe-core/playwright": "catalog:",
     "@eslint/js": "catalog:",
     "@microsoft/api-extractor": "catalog:",
     "@playwright/test": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "angular-eslint": "catalog:",
-    "changie": "^1.25.1",
+    "changie": "^1.25.2",
     "eslint": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
-    "publint": "^0.3.21",
+    "publint": "^0.3.23",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "^7.3.5",
+    "vite": "^8.2.0",
     "vitest": "catalog:",
     "yaml": "^2.9.0"
   }

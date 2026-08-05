@@ -1,0 +1,5 @@
+kind: Breaking
+body: The optional `@ng-icons/core` and `@ng-icons/font-awesome` peer dependencies moved from `^33.0.0` to `^34.0.0`. Only consumers of icon-backed entry points are affected.
+time: 2026-08-05T12:34:12.820539+02:00
+custom:
+    migration: Upgrade `@ng-icons/core` and `@ng-icons/font-awesome` to `^34.0.0`; both must move together.
