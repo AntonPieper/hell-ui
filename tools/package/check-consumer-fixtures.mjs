@@ -194,27 +194,53 @@ function fail(message) {
   throw new ConsumerFixtureFailure(message);
 }
 
+// The parser and its flag list sit above the entry point below rather than
+// beside `runCommandLine`, where the rest of the command line lives: this
+// module reaches its entry point partway down, and a `const` declared after it
+// would still be in its temporal dead zone when the run reads it.
+const knownFlags = ['--skip-build', '--batch'];
+
+// Splits this runner's argv into the fixtures it was asked for, the flags that
+// shape the run, and anything it cannot make sense of.
+//
+// `pnpm test:consumer-fixtures -- --skip-build` is a spelling a maintainer
+// arrives at anyway — it is what the sibling `pnpm restore:release -- <tag>`
+// needs, and it is the habit pnpm's own documentation teaches for forwarding
+// flags. pnpm forwards that `--` into argv rather than consuming it, so the
+// separator has to be dropped here or it survives as a flag this runner does
+// not know and refuses a correct invocation.
+//
+// Dropping the separator is not the same as dropping unknown flags. A
+// misspelled flag used to be ignored silently, so a run that was asked to skip
+// the build did it anyway and only the wall time said so; that is why anything
+// else starting with a dash still refuses. The same split, for the same reason,
+// is `parseRestoreArgs` in tools/policy/restore-main-policy.mjs.
+export function parseFixtureArgs(args) {
+  const meaningful = args.filter((arg) => arg !== '--');
+  return {
+    named: meaningful.filter((arg) => !arg.startsWith('--')),
+    skipPackageBuild: meaningful.includes('--skip-build'),
+    batch: meaningful.includes('--batch'),
+    unknownFlags: meaningful.filter((arg) => arg.startsWith('--') && !knownFlags.includes(arg)),
+  };
+}
+
 if (invokedDirectly()) await runCommandLine();
 
 // The `node tools/package/check-consumer-fixtures.mjs [fixture...] [--skip-build] [--batch]`
 // entry: the named fixtures, or every fixture when none is named, stopping at
 // the first failure unless `--batch` asks for the run-everything CI shape.
 async function runCommandLine() {
-  const args = process.argv.slice(2);
-  const named = args.filter((arg) => !arg.startsWith('--'));
-  const knownFlags = ['--skip-build', '--batch'];
+  const { named, skipPackageBuild, batch, unknownFlags } = parseFixtureArgs(process.argv.slice(2));
   try {
-    // A misspelled flag used to be dropped silently, so a run that was asked to
-    // skip the build did it anyway and only the wall time said so.
-    const unknownFlags = args.filter((arg) => arg.startsWith('--') && !knownFlags.includes(arg));
     if (unknownFlags.length) {
       fail(`Unknown option(s): ${formatList(unknownFlags)}; supported: ${formatList(knownFlags)}`);
     }
 
     const failures = await runConsumerFixtures({
       names: named.length ? named : discoverFixtureNames(),
-      skipPackageBuild: args.includes('--skip-build'),
-      batch: args.includes('--batch'),
+      skipPackageBuild,
+      batch,
     });
     if (failures.length) process.exit(1);
   } catch (error) {
