@@ -1,0 +1,19 @@
+kind: Breaking
+body: The `hell-ui/table-tanstack` shell classes now take TanStack's `TFeatures` type parameter ahead of `TData`, and each one requires the TanStack features it reads to be registered on the table you pass it.
+time: 2026-08-05T15:01:34.015107+02:00
+custom:
+    migration: |-
+        Both type parameters are inferred from the `[table]` binding, so templates need
+        no change. Update explicit annotations to put features first — `Table<T>` becomes
+        `Table<typeof features, T>`, and likewise for `ColumnDef`, `Row`, `Column`,
+        `Cell` and `Header` — matching TanStack's own v9 order. Then register the
+        features each shell class reads. `hell-tanstack-table` needs
+        `columnPinningFeature`, `columnResizingFeature`, `columnSizingFeature`,
+        `columnVisibilityFeature`, `rowExpandingFeature` and `rowSortingFeature`;
+        `hell-tanstack-pagination` needs `rowPaginationFeature`;
+        `hell-tanstack-global-filter` needs `columnFilteringFeature` and
+        `globalFilteringFeature`; `hell-tanstack-column-filter` needs
+        `columnFilteringFeature`. Import them from `@tanstack/angular-table` and pass
+        them to `tableFeatures({ ... })`. Registering more than a shell needs is fine —
+        the shells are generic over your feature set — but omitting one is a compile
+        error naming the missing feature rather than a runtime failure.

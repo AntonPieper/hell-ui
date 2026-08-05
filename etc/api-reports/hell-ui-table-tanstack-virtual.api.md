@@ -7,6 +7,7 @@
 import * as _angular_core from '@angular/core';
 import { OnDestroy } from '@angular/core';
 import { RowData } from '@tanstack/angular-table';
+import { TableFeatures } from '@tanstack/angular-table';
 import { ɵHellDomWriter } from 'hell-ui/table-tanstack';
 import { ɵHellTanStackBodyItem } from 'hell-ui/table-tanstack';
 import { ɵHellTanStackBodyStrategy } from 'hell-ui/table-tanstack';
@@ -15,12 +16,12 @@ import { ɵHellTanStackBodyStrategy } from 'hell-ui/table-tanstack';
 export const HELL_TANSTACK_TABLE_VIRTUAL_IMPORTS: readonly [typeof HellTanStackVirtualRows];
 
 // @public
-export class HellTanStackVirtualRows<TData extends RowData = RowData> implements ɵHellTanStackBodyStrategy<TData>, OnDestroy {
+export class HellTanStackVirtualRows<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> implements ɵHellTanStackBodyStrategy<TFeatures, TData>, OnDestroy {
     constructor();
     // (undocumented)
     connectBody(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction;
     // (undocumented)
-    connectRow(el: HTMLElement, item: ɵHellTanStackBodyItem<TData>, writer: ɵHellDomWriter): VoidFunction;
+    connectRow(el: HTMLElement, item: ɵHellTanStackBodyItem<TFeatures, TData>, writer: ɵHellDomWriter): VoidFunction;
     // (undocumented)
     connectScrollport(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction;
     // (undocumented)
@@ -32,13 +33,13 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData> implements
     // (undocumented)
     readonly overscan: _angular_core.InputSignalWithTransform<number, unknown>;
     // (undocumented)
-    rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[];
+    rows(items: readonly ɵHellTanStackBodyItem<TFeatures, TData>[]): readonly ɵHellTanStackBodyItem<TFeatures, TData>[];
     // (undocumented)
     protected readonly rowWidth: _angular_core.WritableSignal<null | number>;
     // (undocumented)
     protected readonly totalSize: _angular_core.WritableSignal<number>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTanStackVirtualRows<any>, "hell-tanstack-table[hellTanStackVirtualRows]", ["hellTanStackVirtualRows"], { "enabled": { "alias": "hellTanStackVirtualRows"; "required": false; "isSignal": true; }; "estimateRowSize": { "alias": "virtualEstimateRowSize"; "required": false; "isSignal": true; }; "overscan": { "alias": "virtualOverscan"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTanStackVirtualRows<any>, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTanStackVirtualRows<any, any>, "hell-tanstack-table[hellTanStackVirtualRows]", ["hellTanStackVirtualRows"], { "enabled": { "alias": "hellTanStackVirtualRows"; "required": false; "isSignal": true; }; "estimateRowSize": { "alias": "virtualEstimateRowSize"; "required": false; "isSignal": true; }; "overscan": { "alias": "virtualOverscan"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTanStackVirtualRows<any, any>, never>;
 }
 
 // Warnings were encountered during analysis:

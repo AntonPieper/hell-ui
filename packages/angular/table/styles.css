@@ -195,25 +195,30 @@
     position: static;
   }
 
-  hell-tanstack-table [data-pinned='left'],
-  hell-tanstack-table [data-pinned='right'] {
+  /*
+   * Column pinning is logical, not physical: TanStack pins to `start`/`end`, so
+   * these resolve against the writing direction through logical inset
+   * properties rather than hard-coding `left`/`right`.
+   */
+  hell-tanstack-table [data-pinned='start'],
+  hell-tanstack-table [data-pinned='end'] {
     position: sticky;
     z-index: 2;
     background-color: var(--color-hell-surface-elevated);
   }
 
-  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='left'],
-  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='right'] {
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='start'],
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='end'] {
     z-index: 3;
     background-color: var(--color-hell-surface-subtle);
   }
 
-  hell-tanstack-table [data-pinned='left'] {
-    left: var(--hell-table-pinned-start, 0);
+  hell-tanstack-table [data-pinned='start'] {
+    inset-inline-start: var(--hell-table-pinned-start, 0);
   }
 
-  hell-tanstack-table [data-pinned='right'] {
-    right: var(--hell-table-pinned-after, 0);
+  hell-tanstack-table [data-pinned='end'] {
+    inset-inline-end: var(--hell-table-pinned-after, 0);
   }
 
   hell-tanstack-table [data-pinned-last='true'] {

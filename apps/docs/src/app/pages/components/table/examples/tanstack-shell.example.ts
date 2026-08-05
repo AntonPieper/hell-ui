@@ -36,8 +36,18 @@ import {
 } from 'hell-ui/table-tanstack';
 import { HellToolbar, HellToolbarItem } from 'hell-ui/toolbar';
 import {
-  createAngularTable,
-  getCoreRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ColumnFiltersState,
   type PaginationState,
@@ -46,6 +56,24 @@ import {
   type SortingState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+// Sorting, filtering and pagination are all manual here, so the features are
+// registered for their APIs and state while the server owns the row models.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+});
 
 interface Person {
   readonly id: string;
@@ -400,7 +428,7 @@ export class TableTanStackShellExample implements OnDestroy {
   protected readonly globalFilter = signal('');
   protected readonly detailOpen = signal(false);
   protected readonly openedId = signal<string | null>(null);
-  protected readonly selectedRowClass = (row: Row<Person>) =>
+  protected readonly selectedRowClass = (row: Row<typeof features, Person>) =>
     row.getIsSelected() ? 'bg-hell-primary-soft' : null;
   private queryVersion = 0;
   private queryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -464,7 +492,7 @@ export class TableTanStackShellExample implements OnDestroy {
     Math.max(1, Math.ceil(this.totalRows() / this.pagination().pageSize)),
   );
 
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       id: 'select',
       header: '',
@@ -504,11 +532,11 @@ export class TableTanStackShellExample implements OnDestroy {
     },
   ];
 
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
     enableRowSelection: true,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     manualFiltering: true,
     manualPagination: true,

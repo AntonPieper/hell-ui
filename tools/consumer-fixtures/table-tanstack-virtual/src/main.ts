@@ -7,13 +7,34 @@ import {
 } from 'hell-ui/table-tanstack';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getExpandedRowModel,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  injectTable,
+  rowExpandingFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ExpandedState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires every feature a table uses to be registered explicitly, and the
+// Hell shell reads pinning, sizing, resizing, visibility, expanding and sorting.
+// Kept at module scope: injectTable re-runs its options initializer whenever a
+// signal it reads changes, so rebuilding features there would discard
+// TanStack's memoized work.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  expandedRowModel: createExpandedRowModel(),
+});
 
 interface Person {
   readonly id: string;
@@ -46,7 +67,7 @@ class App {
     { id: 'grace', name: 'Grace Hopper', active: false },
   ]);
   protected readonly expanded = signal<ExpandedState>({ ada: true });
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     { accessorKey: 'name', header: 'Name' },
     {
       accessorKey: 'active',
@@ -54,11 +75,10 @@ class App {
       cell: (context) => String(context.getValue<boolean>()),
     },
   ];
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: { expanded: this.expanded() },

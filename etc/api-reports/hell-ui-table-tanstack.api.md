@@ -5,6 +5,7 @@
 ```ts
 
 import { AfterViewInit } from '@angular/core';
+import { Atoms_All } from '@tanstack/angular-table';
 import { Cell } from '@tanstack/angular-table';
 import { Column } from '@tanstack/angular-table';
 import { FlexRenderDirective } from '@tanstack/angular-table';
@@ -21,6 +22,9 @@ import { Provider } from '@angular/core';
 import { Row } from '@tanstack/angular-table';
 import { RowData } from '@tanstack/angular-table';
 import { Table } from '@tanstack/angular-table';
+import { TableFeature } from '@tanstack/angular-table';
+import { TableFeatures } from '@tanstack/angular-table';
+import * as _tanstack_angular_table from '@tanstack/angular-table';
 import { TemplateRef } from '@angular/core';
 import { Type } from '@angular/core';
 
@@ -55,27 +59,27 @@ export class HellDefaultTableLoadingState {
 }
 
 // @public (undocumented)
-export class HellTableShellCell<TData extends RowData = RowData, TValue = unknown> {
+export class HellTableShellCell<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData, TValue = unknown> {
     // (undocumented)
     readonly columnId: i0.InputSignal<string>;
     // (undocumented)
-    readonly template: TemplateRef<HellTableShellCellContext<TData, TValue>>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellCell<any, any>, "ng-template[hellTableShellCell]", never, { "columnId": { "alias": "hellTableShellCell"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellCell<any, any>, never>;
+    readonly template: TemplateRef<HellTableShellCellContext<TFeatures, TData, TValue>>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellCell<any, any, any>, "ng-template[hellTableShellCell]", never, { "columnId": { "alias": "hellTableShellCell"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellCell<any, any, any>, never>;
 }
 
 // @public (undocumented)
-export interface HellTableShellCellContext<TData extends RowData = RowData, TValue = unknown> {
+export interface HellTableShellCellContext<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData, TValue = unknown> {
     // (undocumented)
-    readonly $implicit: Cell<TData, TValue>;
+    readonly $implicit: Cell<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly cell: Cell<TData, TValue>;
+    readonly cell: Cell<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly column: Column<TData, TValue>;
+    readonly column: Column<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly row: Row<TData>;
+    readonly row: Row<TFeatures, TData>;
     // (undocumented)
-    readonly table: Table<TData>;
+    readonly table: Table<TFeatures, TData>;
 }
 
 // @public (undocumented)
@@ -98,21 +102,21 @@ export class HellTableShellError {
 }
 
 // @public (undocumented)
-export class HellTableShellExpandedRow<TData extends RowData = RowData> {
+export class HellTableShellExpandedRow<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> {
     // (undocumented)
-    readonly template: TemplateRef<HellTableShellExpandedRowContext<TData>>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellExpandedRow<any>, "ng-template[hellTableShellExpandedRow]", never, {}, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellExpandedRow<any>, never>;
+    readonly template: TemplateRef<HellTableShellExpandedRowContext<TFeatures, TData>>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellExpandedRow<any, any>, "ng-template[hellTableShellExpandedRow]", never, {}, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellExpandedRow<any, any>, never>;
 }
 
 // @public (undocumented)
-export interface HellTableShellExpandedRowContext<TData extends RowData = RowData> {
+export interface HellTableShellExpandedRowContext<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> {
     // (undocumented)
-    readonly $implicit: Row<TData>;
+    readonly $implicit: Row<TFeatures, TData>;
     // (undocumented)
-    readonly row: Row<TData>;
+    readonly row: Row<TFeatures, TData>;
     // (undocumented)
-    readonly table: Table<TData>;
+    readonly table: Table<TFeatures, TData>;
 }
 
 // @public (undocumented)
@@ -122,35 +126,35 @@ export class HellTableShellFooter {
 }
 
 // @public (undocumented)
-export class HellTableShellFooterCell<TData extends RowData = RowData, TValue = unknown> {
+export class HellTableShellFooterCell<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData, TValue = unknown> {
     // (undocumented)
     readonly columnId: i0.InputSignal<string>;
     // (undocumented)
-    readonly template: TemplateRef<HellTableShellHeaderContext<TData, TValue>>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellFooterCell<any, any>, "ng-template[hellTableShellFooterCell]", never, { "columnId": { "alias": "hellTableShellFooterCell"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellFooterCell<any, any>, never>;
+    readonly template: TemplateRef<HellTableShellHeaderContext<TFeatures, TData, TValue>>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellFooterCell<any, any, any>, "ng-template[hellTableShellFooterCell]", never, { "columnId": { "alias": "hellTableShellFooterCell"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellFooterCell<any, any, any>, never>;
 }
 
 // @public (undocumented)
-export class HellTableShellHeader<TData extends RowData = RowData, TValue = unknown> {
+export class HellTableShellHeader<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData, TValue = unknown> {
     // (undocumented)
     readonly columnId: i0.InputSignal<string>;
     // (undocumented)
-    readonly template: TemplateRef<HellTableShellHeaderContext<TData, TValue>>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellHeader<any, any>, "ng-template[hellTableShellHeader]", never, { "columnId": { "alias": "hellTableShellHeader"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellHeader<any, any>, never>;
+    readonly template: TemplateRef<HellTableShellHeaderContext<TFeatures, TData, TValue>>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTableShellHeader<any, any, any>, "ng-template[hellTableShellHeader]", never, { "columnId": { "alias": "hellTableShellHeader"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTableShellHeader<any, any, any>, never>;
 }
 
 // @public (undocumented)
-export interface HellTableShellHeaderContext<TData extends RowData = RowData, TValue = unknown> {
+export interface HellTableShellHeaderContext<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData, TValue = unknown> {
     // (undocumented)
-    readonly $implicit: Header<TData, TValue>;
+    readonly $implicit: Header<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly column: Column<TData, TValue>;
+    readonly column: Column<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly header: Header<TData, TValue>;
+    readonly header: Header<TFeatures, TData, TValue>;
     // (undocumented)
-    readonly table: Table<TData>;
+    readonly table: Table<TFeatures, TData>;
 }
 
 // @public (undocumented)
@@ -195,11 +199,11 @@ export interface HellTableStatusViews {
 }
 
 // @public (undocumented)
-export class HellTanStackColumnFilter<TData extends RowData = RowData> {
+export class HellTanStackColumnFilter<TFeatures extends HellTanStackColumnFilterFeatures, TData extends RowData = RowData> {
     // (undocumented)
     protected clearFilter(): void;
     // (undocumented)
-    protected readonly column: i0.Signal<Column<TData, unknown> | undefined>;
+    protected readonly column: i0.Signal<Column<TFeatures, TData, unknown> | undefined>;
     // (undocumented)
     readonly columnId: i0.InputSignal<string>;
     // (undocumented)
@@ -211,15 +215,21 @@ export class HellTanStackColumnFilter<TData extends RowData = RowData> {
     // (undocumented)
     protected setFilter(event: Event): void;
     // (undocumented)
-    readonly table: i0.InputSignal<Table<TData>>;
+    readonly table: i0.InputSignal<Table<TFeatures, TData>>;
     // (undocumented)
     protected readonly value: i0.Signal<string>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackColumnFilter<any>, "hell-tanstack-column-filter", never, { "table": { "alias": "table"; "required": true; "isSignal": true; }; "columnId": { "alias": "columnId"; "required": true; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackColumnFilter<any>, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackColumnFilter<any, any>, "hell-tanstack-column-filter", never, { "table": { "alias": "table"; "required": true; "isSignal": true; }; "columnId": { "alias": "columnId"; "required": true; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackColumnFilter<any, any>, never>;
+}
+
+// @public
+export interface HellTanStackColumnFilterFeatures extends TableFeatures {
+    // (undocumented)
+    columnFilteringFeature: TableFeature;
 }
 
 // @public (undocumented)
-export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
+export class HellTanStackGlobalFilter<TFeatures extends HellTanStackGlobalFilterFeatures, TData extends RowData = RowData> {
     // (undocumented)
     protected clearFilter(): void;
     // (undocumented)
@@ -231,13 +241,22 @@ export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
     // (undocumented)
     protected setFilter(event: Event): void;
     // (undocumented)
-    readonly table: i0.InputSignal<Table<TData>>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackGlobalFilter<any>, "hell-tanstack-global-filter", never, { "table": { "alias": "table"; "required": true; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackGlobalFilter<any>, never>;
+    readonly table: i0.InputSignal<_tanstack_angular_table.Table_Core<TFeatures, TData> & _tanstack_angular_table.ExtractFeatureMapTypes<TFeatures, _tanstack_angular_table.Table_FeatureMap<TFeatures, TData>> & ɵHellTableAtoms<"globalFilter">>;
+    protected value(): string;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackGlobalFilter<any, any>, "hell-tanstack-global-filter", never, { "table": { "alias": "table"; "required": true; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackGlobalFilter<any, any>, never>;
+}
+
+// @public
+export interface HellTanStackGlobalFilterFeatures extends TableFeatures {
+    // (undocumented)
+    columnFilteringFeature: TableFeature;
+    // (undocumented)
+    globalFilteringFeature: TableFeature;
 }
 
 // @public (undocumented)
-export class HellTanStackPagination<TData extends RowData = RowData> {
+export class HellTanStackPagination<TFeatures extends HellTanStackPaginationFeatures, TData extends RowData = RowData> {
     // (undocumented)
     protected currentPage(): number;
     // (undocumented)
@@ -255,10 +274,16 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
     // (undocumented)
     protected setPageSize(event: Event): void;
     // (undocumented)
-    readonly table: i0.InputSignal<Table<TData>>;
+    readonly table: i0.InputSignal<_tanstack_angular_table.Table_Core<TFeatures, TData> & _tanstack_angular_table.ExtractFeatureMapTypes<TFeatures, _tanstack_angular_table.Table_FeatureMap<TFeatures, TData>> & ɵHellTableAtoms<"pagination">>;
     readonly ui: i0.InputSignal<HellUiInput<HellTanStackPaginationPart>>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackPagination<any>, "hell-tanstack-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "table": { "alias": "table"; "required": true; "isSignal": true; }; "pageSizeOptions": { "alias": "pageSizeOptions"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackPagination<any>, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackPagination<any, any>, "hell-tanstack-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "table": { "alias": "table"; "required": true; "isSignal": true; }; "pageSizeOptions": { "alias": "pageSizeOptions"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackPagination<any, any>, never>;
+}
+
+// @public
+export interface HellTanStackPaginationFeatures extends TableFeatures {
+    // (undocumented)
+    rowPaginationFeature: TableFeature;
 }
 
 // @public
@@ -268,29 +293,29 @@ export type HellTanStackPaginationPart = 'pageSize' | 'root';
 export type HellTanStackPaginationUi = HellUi<HellTanStackPaginationPart>;
 
 // @public (undocumented)
-export type HellTanStackRowClass<TData extends RowData = RowData> = {
-    bivarianceHack(row: Row<TData>): HellClassValue;
+export type HellTanStackRowClass<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> = {
+    bivarianceHack(row: Row<TFeatures, TData>): HellClassValue;
 }['bivarianceHack'];
 
 // @public (undocumented)
-export class HellTanStackTable<TData extends RowData = RowData> {
+export class HellTanStackTable<TFeatures extends HellTanStackTableFeatures, TData extends RowData = RowData> {
     // (undocumented)
-    protected bodyItemBridge(item: ɵHellTanStackBodyItem<TData>): ɵHellTanStackBodyItem;
+    protected bodyItemBridge(item: ɵHellTanStackBodyItem<TFeatures, TData>): ɵHellTanStackBodyItem;
     // (undocumented)
-    protected bodyItems(): readonly ɵHellTanStackBodyItem<TData>[];
+    protected bodyItems(): readonly ɵHellTanStackBodyItem<TFeatures, TData>[];
     // (undocumented)
-    protected readonly bodyStrategy: null | ɵHellTanStackBodyStrategy<TData>;
+    protected readonly bodyStrategy: null | ɵHellTanStackBodyStrategy<TFeatures, TData>;
     // (undocumented)
     protected bodyStrategyBridge(): null | ɵHellTanStackBodyStrategy;
     // (undocumented)
-    protected cellClass(cell: Cell<TData, unknown>): string;
+    protected cellClass(cell: Cell<TFeatures, TData, unknown>): string;
     // (undocumented)
-    protected cellContext(cell: Cell<TData, unknown>): HellTableShellCellContext<TData, unknown>;
+    protected cellContext(cell: Cell<TFeatures, TData, unknown>): HellTableShellCellContext<TFeatures, TData, unknown>;
     // (undocumented)
-    protected cellTemplateFor(cell: Cell<TData, unknown>): HellTableShellCell<TData, unknown> | null;
+    protected cellTemplateFor(cell: Cell<TFeatures, TData, unknown>): HellTableShellCell<TFeatures, TData, unknown> | null;
     protected columnResizingEnabled(): boolean;
     // (undocumented)
-    protected columnSize(column: Column<TData, unknown>): null | number;
+    protected columnSize(column: Column<TFeatures, TData, unknown>): null | number;
     // (undocumented)
     protected readonly displayState: i0.Signal<"empty" | "error" | "loading" | "ready">;
     // (undocumented)
@@ -305,15 +330,17 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     protected errorValue(): unknown;
     // (undocumented)
-    protected expandedRowContext(row: Row<TData>): HellTableShellExpandedRowContext<TData>;
+    protected expandedRowContext(row: Row<TFeatures, TData>): HellTableShellExpandedRowContext<TFeatures, TData>;
     // (undocumented)
-    protected readonly expandedRows: i0.Signal<readonly HellTableShellExpandedRow<TData>[]>;
+    protected readonly expandedRows: i0.Signal<readonly HellTableShellExpandedRow<TFeatures, TData>[]>;
     // (undocumented)
-    protected expandedRowTemplate(): HellTableShellExpandedRow<TData>;
+    protected expandedRowTemplate(): HellTableShellExpandedRow<TFeatures, TData>;
     // (undocumented)
-    protected footerClass(header: Header<TData, unknown>): string;
+    protected footerClass(header: Header<TFeatures, TData, unknown>): string;
     // (undocumented)
-    protected footerTemplateFor(header: Header<TData, unknown>): HellTableShellFooterCell<TData, unknown> | null;
+    protected footerGroups(): _tanstack_angular_table.HeaderGroup<TFeatures, TData>[];
+    // (undocumented)
+    protected footerTemplateFor(header: Header<TFeatures, TData, unknown>): HellTableShellFooterCell<TFeatures, TData, unknown> | null;
     // (undocumented)
     protected hasFooter(): boolean;
     // (undocumented)
@@ -321,36 +348,40 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     protected hasToolbar(): boolean;
     // (undocumented)
-    protected headerClass(header: Header<TData, unknown>): string;
+    protected headerClass(header: Header<TFeatures, TData, unknown>): string;
     // (undocumented)
-    protected headerContext(header: Header<TData, unknown>): HellTableShellHeaderContext<TData, unknown>;
+    protected headerContext(header: Header<TFeatures, TData, unknown>): HellTableShellHeaderContext<TFeatures, TData, unknown>;
     // (undocumented)
-    protected headerTemplateFor(header: Header<TData, unknown>): HellTableShellHeader<TData, unknown> | null;
+    protected headerGroups(): _tanstack_angular_table.HeaderGroup<TFeatures, TData>[];
+    // (undocumented)
+    protected headerTemplateFor(header: Header<TFeatures, TData, unknown>): HellTableShellHeader<TFeatures, TData, unknown> | null;
     // (undocumented)
     protected loadingTemplate(): HellTableShellLoading | null;
     protected readonly part: (part: HellTanStackTablePart) => string;
     // (undocumented)
-    protected pinnedAfter(column: Column<TData, unknown>): null | number;
+    protected pinnedAfter(column: Column<TFeatures, TData, unknown>): null | number;
     // (undocumented)
-    protected pinnedFirst(column: Column<TData, unknown>): 'true' | null;
+    protected pinnedFirst(column: Column<TFeatures, TData, unknown>): 'true' | null;
+    protected pinnedLast(column: Column<TFeatures, TData, unknown>): 'true' | null;
+    protected pinnedSide(column: Column<TFeatures, TData, unknown>): 'end' | 'start' | null;
     // (undocumented)
-    protected pinnedLast(column: Column<TData, unknown>): 'true' | null;
-    // (undocumented)
-    protected pinnedSide(column: Column<TData, unknown>): 'left' | 'right' | null;
-    // (undocumented)
-    protected pinnedStart(column: Column<TData, unknown>): null | number;
+    protected pinnedStart(column: Column<TFeatures, TData, unknown>): null | number;
     // (undocumented)
     protected readonly providerViews: HellTableStatusViews;
-    protected resizeAdapterFor(header: Header<TData, unknown>): HellTableResizeAdapter | null;
-    protected resizeHandleLabel(header: Header<TData, unknown>): string;
+    protected resizeAdapterFor(header: Header<TFeatures, TData, unknown>): HellTableResizeAdapter | null;
+    protected resizeHandleLabel(header: Header<TFeatures, TData, unknown>): string;
     // (undocumented)
-    readonly rowClass: i0.InputSignal<((row: Row<TData>) => HellClassValue) | HellClassValue>;
+    protected rowCells(row: Row<TFeatures, TData>): readonly Cell<TFeatures, TData, unknown>[];
     // (undocumented)
-    protected rowClassValue(row: Row<TData>): string;
+    readonly rowClass: i0.InputSignal<((row: Row<TFeatures, TData>) => HellClassValue) | HellClassValue>;
     // (undocumented)
-    protected sortButtonLabel(header: Header<TData, unknown>): string;
+    protected rowClassValue(row: Row<TFeatures, TData>): string;
     // (undocumented)
-    protected sortState(header: Header<TData, unknown>): 'asc' | 'desc' | null;
+    protected sortable(header: Header<TFeatures, TData, unknown>): boolean;
+    // (undocumented)
+    protected sortButtonLabel(header: Header<TFeatures, TData, unknown>): string;
+    // (undocumented)
+    protected sortState(header: Header<TFeatures, TData, unknown>): 'asc' | 'desc' | null;
     // (undocumented)
     readonly status: i0.InputSignal<HellTableStatusValue>;
     // (undocumented)
@@ -358,16 +389,33 @@ export class HellTanStackTable<TData extends RowData = RowData> {
     // (undocumented)
     readonly stickyHeader: i0.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
-    readonly table: i0.InputSignal<Table<TData>>;
+    readonly table: i0.InputSignal<_tanstack_angular_table.Table_Core<TFeatures, TData> & _tanstack_angular_table.ExtractFeatureMapTypes<TFeatures, _tanstack_angular_table.Table_FeatureMap<TFeatures, TData>> & ɵHellTableAtoms<"columnSizing">>;
     // (undocumented)
     protected tableTotalSize(): null | number;
     // (undocumented)
-    protected toggleSorting(header: Header<TData, unknown>, event: MouseEvent): void;
+    protected toggleSorting(header: Header<TFeatures, TData, unknown>, event: MouseEvent): void;
     readonly ui: i0.InputSignal<HellUiInput<HellTanStackTablePart>>;
     // (undocumented)
     protected visibleColumnCount(): number;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackTable<any>, "hell-tanstack-table", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "table": { "alias": "table"; "required": true; "isSignal": true; }; "status": { "alias": "status"; "required": false; "isSignal": true; }; "stickyHeader": { "alias": "stickyHeader"; "required": false; "isSignal": true; }; "rowClass": { "alias": "rowClass"; "required": false; "isSignal": true; }; }, {}, ["headers", "cells", "footers", "loadingTemplates", "emptyTemplates", "errorTemplates", "toolbars", "footersShell", "expandedRows"], ["[hellTableShellToolbar]", "[hellTableShellFooter]"], true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackTable<any>, never>;
+    protected visibleLeafColumns(): readonly Column<TFeatures, TData, unknown>[];
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellTanStackTable<any, any>, "hell-tanstack-table", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "table": { "alias": "table"; "required": true; "isSignal": true; }; "status": { "alias": "status"; "required": false; "isSignal": true; }; "stickyHeader": { "alias": "stickyHeader"; "required": false; "isSignal": true; }; "rowClass": { "alias": "rowClass"; "required": false; "isSignal": true; }; }, {}, ["headers", "cells", "footers", "loadingTemplates", "emptyTemplates", "errorTemplates", "toolbars", "footersShell", "expandedRows"], ["[hellTableShellToolbar]", "[hellTableShellFooter]"], true, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<HellTanStackTable<any, any>, never>;
+}
+
+// @public
+export interface HellTanStackTableFeatures extends TableFeatures {
+    // (undocumented)
+    columnPinningFeature: TableFeature;
+    // (undocumented)
+    columnResizingFeature: TableFeature;
+    // (undocumented)
+    columnSizingFeature: TableFeature;
+    // (undocumented)
+    columnVisibilityFeature: TableFeature;
+    // (undocumented)
+    rowExpandingFeature: TableFeature;
+    // (undocumented)
+    rowSortingFeature: TableFeature;
 }
 
 // @public
@@ -380,7 +428,7 @@ export type HellTanStackTableUi = HellUi<HellTanStackTablePart>;
 export function provideHellTableStatusViews(views: HellTableStatusViews): Provider;
 
 // @public (undocumented)
-export const ɵHELL_TANSTACK_BODY_STRATEGY: InjectionToken<ɵHellTanStackBodyStrategy<unknown>>;
+export const ɵHELL_TANSTACK_BODY_STRATEGY: InjectionToken<ɵHellTanStackBodyStrategy<TableFeatures, RowData>>;
 
 // @public (undocumented)
 export class ɵHellDomWriter {
@@ -395,6 +443,11 @@ export class ɵHellDomWriter {
 // @public
 export type ɵHellStrategyCleanup = VoidFunction | void;
 
+// @public
+export type ɵHellTableAtoms<TSlice extends keyof Atoms_All> = {
+    readonly atoms: Required<Pick<Atoms_All, TSlice>>;
+};
+
 // @public (undocumented)
 export class ɵHellTanStackBodyConnector implements AfterViewInit, OnChanges, OnDestroy {
     // (undocumented)
@@ -404,25 +457,25 @@ export class ɵHellTanStackBodyConnector implements AfterViewInit, OnChanges, On
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<TableFeatures, RowData>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyConnector, "[hellTanStackInternalBody]", never, { "strategy": { "alias": "hellTanStackInternalBody"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyConnector, never>;
 }
 
 // @public (undocumented)
-export interface ɵHellTanStackBodyItem<TData extends RowData = RowData> {
+export interface ɵHellTanStackBodyItem<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> {
     // (undocumented)
     readonly key: string;
     // (undocumented)
     readonly kind: ɵHellTanStackBodyItemKind;
     // (undocumented)
-    readonly row: Row<TData>;
+    readonly row: Row<TFeatures, TData>;
 }
 
 // @public (undocumented)
 export class ɵHellTanStackBodyItemConnector implements AfterViewInit, OnChanges, OnDestroy {
     // (undocumented)
-    readonly item: i0.InputSignal<ɵHellTanStackBodyItem<unknown>>;
+    readonly item: i0.InputSignal<ɵHellTanStackBodyItem<TableFeatures, RowData>>;
     // (undocumented)
     ngAfterViewInit(): void;
     // (undocumented)
@@ -430,7 +483,7 @@ export class ɵHellTanStackBodyItemConnector implements AfterViewInit, OnChanges
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<TableFeatures, RowData>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyItemConnector, "[hellTanStackInternalBodyItemConnector]", never, { "strategy": { "alias": "hellTanStackInternalBodyItemConnector"; "required": false; "isSignal": true; }; "item": { "alias": "hellTanStackInternalBodyItem"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyItemConnector, never>;
 }
@@ -447,169 +500,181 @@ export class ɵHellTanStackBodyScrollportConnector implements AfterViewInit, OnC
     // (undocumented)
     ngOnDestroy(): void;
     // (undocumented)
-    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<unknown>>;
+    readonly strategy: i0.InputSignal<null | ɵHellTanStackBodyStrategy<TableFeatures, RowData>>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<ɵHellTanStackBodyScrollportConnector, "[hellTanStackInternalBodyScrollport]", never, { "strategy": { "alias": "hellTanStackInternalBodyScrollport"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<ɵHellTanStackBodyScrollportConnector, never>;
 }
 
 // @public (undocumented)
-export interface ɵHellTanStackBodyStrategy<TData extends RowData = RowData> {
+export interface ɵHellTanStackBodyStrategy<TFeatures extends TableFeatures = TableFeatures, TData extends RowData = RowData> {
     // (undocumented)
     connectBody?(el: HTMLElement, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
     // (undocumented)
-    connectRow?(el: HTMLElement, item: ɵHellTanStackBodyItem<TData>, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
+    connectRow?(el: HTMLElement, item: ɵHellTanStackBodyItem<TFeatures, TData>, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
     // (undocumented)
     connectScrollport?(el: HTMLElement, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
     // (undocumented)
-    rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[];
+    rows(items: readonly ɵHellTanStackBodyItem<TFeatures, TData>[]): readonly ɵHellTanStackBodyItem<TFeatures, TData>[];
 }
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-table-tanstack.d.ts:30:1 - (ae-undocumented) Missing documentation for "HellTanStackRowClass".
-// types/hell-ui-table-tanstack.d.ts:33:1 - (ae-undocumented) Missing documentation for "HellTableStatusValue".
-// types/hell-ui-table-tanstack.d.ts:41:15 - (ae-undocumented) Missing documentation for "HellTableStatus".
-// types/hell-ui-table-tanstack.d.ts:46:1 - (ae-undocumented) Missing documentation for "HellTableStatusViews".
-// types/hell-ui-table-tanstack.d.ts:47:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-table-tanstack.d.ts:48:5 - (ae-undocumented) Missing documentation for "empty".
-// types/hell-ui-table-tanstack.d.ts:49:5 - (ae-undocumented) Missing documentation for "error".
-// types/hell-ui-table-tanstack.d.ts:51:15 - (ae-undocumented) Missing documentation for "HELL_TABLE_STATUS_VIEWS".
-// types/hell-ui-table-tanstack.d.ts:52:1 - (ae-undocumented) Missing documentation for "provideHellTableStatusViews".
-// types/hell-ui-table-tanstack.d.ts:53:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItemKind".
-// types/hell-ui-table-tanstack.d.ts:54:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItem".
-// types/hell-ui-table-tanstack.d.ts:55:5 - (ae-undocumented) Missing documentation for "row".
-// types/hell-ui-table-tanstack.d.ts:56:5 - (ae-undocumented) Missing documentation for "key".
-// types/hell-ui-table-tanstack.d.ts:57:5 - (ae-undocumented) Missing documentation for "kind".
-// types/hell-ui-table-tanstack.d.ts:59:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyStrategy".
-// types/hell-ui-table-tanstack.d.ts:60:5 - (ae-undocumented) Missing documentation for "rows".
-// types/hell-ui-table-tanstack.d.ts:61:5 - (ae-undocumented) Missing documentation for "connectScrollport".
-// types/hell-ui-table-tanstack.d.ts:62:5 - (ae-undocumented) Missing documentation for "connectBody".
-// types/hell-ui-table-tanstack.d.ts:63:5 - (ae-undocumented) Missing documentation for "connectRow".
-// types/hell-ui-table-tanstack.d.ts:65:15 - (ae-undocumented) Missing documentation for "ɵHELL_TANSTACK_BODY_STRATEGY".
-// types/hell-ui-table-tanstack.d.ts:66:1 - (ae-undocumented) Missing documentation for "ɵHellDomWriter".
-// types/hell-ui-table-tanstack.d.ts:68:5 - (ae-undocumented) Missing documentation for "data".
-// types/hell-ui-table-tanstack.d.ts:69:5 - (ae-undocumented) Missing documentation for "cssVar".
-// types/hell-ui-table-tanstack.d.ts:70:5 - (ae-undocumented) Missing documentation for "cleanup".
-// types/hell-ui-table-tanstack.d.ts:72:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyScrollportConnector".
-// types/hell-ui-table-tanstack.d.ts:73:5 - (ae-undocumented) Missing documentation for "strategy".
-// types/hell-ui-table-tanstack.d.ts:77:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-table-tanstack.d.ts:78:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
-// types/hell-ui-table-tanstack.d.ts:79:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-table-tanstack.d.ts:86:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyConnector".
-// types/hell-ui-table-tanstack.d.ts:87:5 - (ae-undocumented) Missing documentation for "strategy".
-// types/hell-ui-table-tanstack.d.ts:91:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-table-tanstack.d.ts:92:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
-// types/hell-ui-table-tanstack.d.ts:93:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-table-tanstack.d.ts:100:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItemConnector".
-// types/hell-ui-table-tanstack.d.ts:101:5 - (ae-undocumented) Missing documentation for "strategy".
-// types/hell-ui-table-tanstack.d.ts:102:5 - (ae-undocumented) Missing documentation for "item".
-// types/hell-ui-table-tanstack.d.ts:106:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-table-tanstack.d.ts:107:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
-// types/hell-ui-table-tanstack.d.ts:108:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-table-tanstack.d.ts:115:1 - (ae-undocumented) Missing documentation for "HellTableShellHeader".
-// types/hell-ui-table-tanstack.d.ts:116:5 - (ae-undocumented) Missing documentation for "columnId".
-// types/hell-ui-table-tanstack.d.ts:117:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:123:1 - (ae-undocumented) Missing documentation for "HellTableShellCell".
-// types/hell-ui-table-tanstack.d.ts:124:5 - (ae-undocumented) Missing documentation for "columnId".
-// types/hell-ui-table-tanstack.d.ts:125:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:131:1 - (ae-undocumented) Missing documentation for "HellTableShellFooterCell".
-// types/hell-ui-table-tanstack.d.ts:132:5 - (ae-undocumented) Missing documentation for "columnId".
-// types/hell-ui-table-tanstack.d.ts:133:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:139:1 - (ae-undocumented) Missing documentation for "HellTableShellExpandedRow".
-// types/hell-ui-table-tanstack.d.ts:140:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:146:1 - (ae-undocumented) Missing documentation for "HellTableShellLoading".
-// types/hell-ui-table-tanstack.d.ts:147:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:153:1 - (ae-undocumented) Missing documentation for "HellTableShellEmpty".
-// types/hell-ui-table-tanstack.d.ts:154:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:160:1 - (ae-undocumented) Missing documentation for "HellTableShellError".
-// types/hell-ui-table-tanstack.d.ts:161:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-table-tanstack.d.ts:170:1 - (ae-undocumented) Missing documentation for "HellTableShellToolbar".
-// types/hell-ui-table-tanstack.d.ts:176:1 - (ae-undocumented) Missing documentation for "HellTableShellFooter".
-// types/hell-ui-table-tanstack.d.ts:182:1 - (ae-undocumented) Missing documentation for "HellTableShellCellContext".
-// types/hell-ui-table-tanstack.d.ts:183:5 - (ae-undocumented) Missing documentation for "$implicit".
-// types/hell-ui-table-tanstack.d.ts:184:5 - (ae-undocumented) Missing documentation for "cell".
-// types/hell-ui-table-tanstack.d.ts:185:5 - (ae-undocumented) Missing documentation for "row".
-// types/hell-ui-table-tanstack.d.ts:186:5 - (ae-undocumented) Missing documentation for "column".
-// types/hell-ui-table-tanstack.d.ts:187:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:189:1 - (ae-undocumented) Missing documentation for "HellTableShellHeaderContext".
-// types/hell-ui-table-tanstack.d.ts:190:5 - (ae-undocumented) Missing documentation for "$implicit".
-// types/hell-ui-table-tanstack.d.ts:191:5 - (ae-undocumented) Missing documentation for "header".
-// types/hell-ui-table-tanstack.d.ts:192:5 - (ae-undocumented) Missing documentation for "column".
-// types/hell-ui-table-tanstack.d.ts:193:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:195:1 - (ae-undocumented) Missing documentation for "HellTableShellExpandedRowContext".
-// types/hell-ui-table-tanstack.d.ts:196:5 - (ae-undocumented) Missing documentation for "$implicit".
-// types/hell-ui-table-tanstack.d.ts:197:5 - (ae-undocumented) Missing documentation for "row".
-// types/hell-ui-table-tanstack.d.ts:198:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:200:1 - (ae-undocumented) Missing documentation for "HellTanStackTable".
-// types/hell-ui-table-tanstack.d.ts:205:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:206:5 - (ae-undocumented) Missing documentation for "status".
-// types/hell-ui-table-tanstack.d.ts:207:5 - (ae-undocumented) Missing documentation for "stickyHeader".
-// types/hell-ui-table-tanstack.d.ts:208:5 - (ae-undocumented) Missing documentation for "rowClass".
-// types/hell-ui-table-tanstack.d.ts:209:5 - (ae-undocumented) Missing documentation for "providerViews".
-// types/hell-ui-table-tanstack.d.ts:213:5 - (ae-undocumented) Missing documentation for "bodyStrategy".
-// types/hell-ui-table-tanstack.d.ts:222:5 - (ae-undocumented) Missing documentation for "expandedRows".
-// types/hell-ui-table-tanstack.d.ts:223:5 - (ae-undocumented) Missing documentation for "displayState".
-// types/hell-ui-table-tanstack.d.ts:224:5 - (ae-undocumented) Missing documentation for "bodyItems".
-// types/hell-ui-table-tanstack.d.ts:225:5 - (ae-undocumented) Missing documentation for "columnSize".
-// types/hell-ui-table-tanstack.d.ts:236:5 - (ae-undocumented) Missing documentation for "tableTotalSize".
-// types/hell-ui-table-tanstack.d.ts:319:5 - (ae-undocumented) Missing documentation for "visibleColumnCount".
-// types/hell-ui-table-tanstack.d.ts:320:5 - (ae-undocumented) Missing documentation for "loadingTemplate".
-// types/hell-ui-table-tanstack.d.ts:321:5 - (ae-undocumented) Missing documentation for "emptyTemplate".
-// types/hell-ui-table-tanstack.d.ts:322:5 - (ae-undocumented) Missing documentation for "errorTemplate".
-// types/hell-ui-table-tanstack.d.ts:323:5 - (ae-undocumented) Missing documentation for "hasToolbar".
-// types/hell-ui-table-tanstack.d.ts:324:5 - (ae-undocumented) Missing documentation for "hasFooter".
-// types/hell-ui-table-tanstack.d.ts:325:5 - (ae-undocumented) Missing documentation for "hasFooters".
-// types/hell-ui-table-tanstack.d.ts:326:5 - (ae-undocumented) Missing documentation for "headerTemplateFor".
-// types/hell-ui-table-tanstack.d.ts:327:5 - (ae-undocumented) Missing documentation for "cellTemplateFor".
-// types/hell-ui-table-tanstack.d.ts:328:5 - (ae-undocumented) Missing documentation for "footerTemplateFor".
-// types/hell-ui-table-tanstack.d.ts:329:5 - (ae-undocumented) Missing documentation for "expandedRowTemplate".
-// types/hell-ui-table-tanstack.d.ts:330:5 - (ae-undocumented) Missing documentation for "bodyStrategyBridge".
-// types/hell-ui-table-tanstack.d.ts:331:5 - (ae-undocumented) Missing documentation for "bodyItemBridge".
-// types/hell-ui-table-tanstack.d.ts:332:5 - (ae-undocumented) Missing documentation for "cellContext".
-// types/hell-ui-table-tanstack.d.ts:333:5 - (ae-undocumented) Missing documentation for "headerContext".
-// types/hell-ui-table-tanstack.d.ts:334:5 - (ae-undocumented) Missing documentation for "expandedRowContext".
-// types/hell-ui-table-tanstack.d.ts:335:5 - (ae-undocumented) Missing documentation for "errorValue".
-// types/hell-ui-table-tanstack.d.ts:336:5 - (ae-undocumented) Missing documentation for "errorContext".
-// types/hell-ui-table-tanstack.d.ts:340:5 - (ae-undocumented) Missing documentation for "statusComponentInputs".
-// types/hell-ui-table-tanstack.d.ts:341:5 - (ae-undocumented) Missing documentation for "headerClass".
-// types/hell-ui-table-tanstack.d.ts:342:5 - (ae-undocumented) Missing documentation for "cellClass".
-// types/hell-ui-table-tanstack.d.ts:343:5 - (ae-undocumented) Missing documentation for "footerClass".
-// types/hell-ui-table-tanstack.d.ts:344:5 - (ae-undocumented) Missing documentation for "rowClassValue".
-// types/hell-ui-table-tanstack.d.ts:345:5 - (ae-undocumented) Missing documentation for "sortState".
-// types/hell-ui-table-tanstack.d.ts:346:5 - (ae-undocumented) Missing documentation for "sortButtonLabel".
-// types/hell-ui-table-tanstack.d.ts:347:5 - (ae-undocumented) Missing documentation for "toggleSorting".
-// types/hell-ui-table-tanstack.d.ts:348:5 - (ae-undocumented) Missing documentation for "pinnedSide".
-// types/hell-ui-table-tanstack.d.ts:349:5 - (ae-undocumented) Missing documentation for "pinnedStart".
-// types/hell-ui-table-tanstack.d.ts:350:5 - (ae-undocumented) Missing documentation for "pinnedAfter".
-// types/hell-ui-table-tanstack.d.ts:351:5 - (ae-undocumented) Missing documentation for "pinnedLast".
-// types/hell-ui-table-tanstack.d.ts:352:5 - (ae-undocumented) Missing documentation for "pinnedFirst".
-// types/hell-ui-table-tanstack.d.ts:362:1 - (ae-undocumented) Missing documentation for "HellDefaultTableLoadingState".
-// types/hell-ui-table-tanstack.d.ts:368:1 - (ae-undocumented) Missing documentation for "HellDefaultTableEmptyState".
-// types/hell-ui-table-tanstack.d.ts:376:1 - (ae-undocumented) Missing documentation for "HellDefaultTableErrorState".
-// types/hell-ui-table-tanstack.d.ts:377:5 - (ae-undocumented) Missing documentation for "error".
-// types/hell-ui-table-tanstack.d.ts:383:1 - (ae-undocumented) Missing documentation for "HellTanStackPagination".
-// types/hell-ui-table-tanstack.d.ts:392:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:393:5 - (ae-undocumented) Missing documentation for "pageSizeOptions".
-// types/hell-ui-table-tanstack.d.ts:394:5 - (ae-undocumented) Missing documentation for "currentPage".
-// types/hell-ui-table-tanstack.d.ts:395:5 - (ae-undocumented) Missing documentation for "pageCount".
-// types/hell-ui-table-tanstack.d.ts:396:5 - (ae-undocumented) Missing documentation for "pageSize".
-// types/hell-ui-table-tanstack.d.ts:397:5 - (ae-undocumented) Missing documentation for "setPage".
-// types/hell-ui-table-tanstack.d.ts:398:5 - (ae-undocumented) Missing documentation for "setPageSize".
-// types/hell-ui-table-tanstack.d.ts:404:1 - (ae-undocumented) Missing documentation for "HellTanStackGlobalFilter".
-// types/hell-ui-table-tanstack.d.ts:405:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:406:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-table-tanstack.d.ts:407:5 - (ae-undocumented) Missing documentation for "filterInputUi".
-// types/hell-ui-table-tanstack.d.ts:410:5 - (ae-undocumented) Missing documentation for "setFilter".
-// types/hell-ui-table-tanstack.d.ts:411:5 - (ae-undocumented) Missing documentation for "clearFilter".
-// types/hell-ui-table-tanstack.d.ts:417:1 - (ae-undocumented) Missing documentation for "HellTanStackColumnFilter".
-// types/hell-ui-table-tanstack.d.ts:418:5 - (ae-undocumented) Missing documentation for "table".
-// types/hell-ui-table-tanstack.d.ts:419:5 - (ae-undocumented) Missing documentation for "columnId".
-// types/hell-ui-table-tanstack.d.ts:420:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-table-tanstack.d.ts:421:5 - (ae-undocumented) Missing documentation for "filterInputUi".
-// types/hell-ui-table-tanstack.d.ts:424:5 - (ae-undocumented) Missing documentation for "column".
-// types/hell-ui-table-tanstack.d.ts:425:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-table-tanstack.d.ts:426:5 - (ae-undocumented) Missing documentation for "setFilter".
-// types/hell-ui-table-tanstack.d.ts:427:5 - (ae-undocumented) Missing documentation for "clearFilter".
+// types/hell-ui-table-tanstack.d.ts:40:5 - (ae-undocumented) Missing documentation for "columnPinningFeature".
+// types/hell-ui-table-tanstack.d.ts:41:5 - (ae-undocumented) Missing documentation for "columnResizingFeature".
+// types/hell-ui-table-tanstack.d.ts:42:5 - (ae-undocumented) Missing documentation for "columnSizingFeature".
+// types/hell-ui-table-tanstack.d.ts:43:5 - (ae-undocumented) Missing documentation for "columnVisibilityFeature".
+// types/hell-ui-table-tanstack.d.ts:44:5 - (ae-undocumented) Missing documentation for "rowExpandingFeature".
+// types/hell-ui-table-tanstack.d.ts:45:5 - (ae-undocumented) Missing documentation for "rowSortingFeature".
+// types/hell-ui-table-tanstack.d.ts:49:5 - (ae-undocumented) Missing documentation for "rowPaginationFeature".
+// types/hell-ui-table-tanstack.d.ts:58:5 - (ae-undocumented) Missing documentation for "columnFilteringFeature".
+// types/hell-ui-table-tanstack.d.ts:59:5 - (ae-undocumented) Missing documentation for "globalFilteringFeature".
+// types/hell-ui-table-tanstack.d.ts:63:5 - (ae-undocumented) Missing documentation for "columnFilteringFeature".
+// types/hell-ui-table-tanstack.d.ts:101:1 - (ae-undocumented) Missing documentation for "HellTanStackRowClass".
+// types/hell-ui-table-tanstack.d.ts:104:1 - (ae-undocumented) Missing documentation for "HellTableStatusValue".
+// types/hell-ui-table-tanstack.d.ts:112:15 - (ae-undocumented) Missing documentation for "HellTableStatus".
+// types/hell-ui-table-tanstack.d.ts:117:1 - (ae-undocumented) Missing documentation for "HellTableStatusViews".
+// types/hell-ui-table-tanstack.d.ts:118:5 - (ae-undocumented) Missing documentation for "loading".
+// types/hell-ui-table-tanstack.d.ts:119:5 - (ae-undocumented) Missing documentation for "empty".
+// types/hell-ui-table-tanstack.d.ts:120:5 - (ae-undocumented) Missing documentation for "error".
+// types/hell-ui-table-tanstack.d.ts:122:15 - (ae-undocumented) Missing documentation for "HELL_TABLE_STATUS_VIEWS".
+// types/hell-ui-table-tanstack.d.ts:123:1 - (ae-undocumented) Missing documentation for "provideHellTableStatusViews".
+// types/hell-ui-table-tanstack.d.ts:124:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItemKind".
+// types/hell-ui-table-tanstack.d.ts:125:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItem".
+// types/hell-ui-table-tanstack.d.ts:126:5 - (ae-undocumented) Missing documentation for "row".
+// types/hell-ui-table-tanstack.d.ts:127:5 - (ae-undocumented) Missing documentation for "key".
+// types/hell-ui-table-tanstack.d.ts:128:5 - (ae-undocumented) Missing documentation for "kind".
+// types/hell-ui-table-tanstack.d.ts:130:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyStrategy".
+// types/hell-ui-table-tanstack.d.ts:131:5 - (ae-undocumented) Missing documentation for "rows".
+// types/hell-ui-table-tanstack.d.ts:132:5 - (ae-undocumented) Missing documentation for "connectScrollport".
+// types/hell-ui-table-tanstack.d.ts:133:5 - (ae-undocumented) Missing documentation for "connectBody".
+// types/hell-ui-table-tanstack.d.ts:134:5 - (ae-undocumented) Missing documentation for "connectRow".
+// types/hell-ui-table-tanstack.d.ts:136:15 - (ae-undocumented) Missing documentation for "ɵHELL_TANSTACK_BODY_STRATEGY".
+// types/hell-ui-table-tanstack.d.ts:137:1 - (ae-undocumented) Missing documentation for "ɵHellDomWriter".
+// types/hell-ui-table-tanstack.d.ts:139:5 - (ae-undocumented) Missing documentation for "data".
+// types/hell-ui-table-tanstack.d.ts:140:5 - (ae-undocumented) Missing documentation for "cssVar".
+// types/hell-ui-table-tanstack.d.ts:141:5 - (ae-undocumented) Missing documentation for "cleanup".
+// types/hell-ui-table-tanstack.d.ts:143:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyScrollportConnector".
+// types/hell-ui-table-tanstack.d.ts:144:5 - (ae-undocumented) Missing documentation for "strategy".
+// types/hell-ui-table-tanstack.d.ts:148:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-table-tanstack.d.ts:149:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
+// types/hell-ui-table-tanstack.d.ts:150:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
+// types/hell-ui-table-tanstack.d.ts:157:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyConnector".
+// types/hell-ui-table-tanstack.d.ts:158:5 - (ae-undocumented) Missing documentation for "strategy".
+// types/hell-ui-table-tanstack.d.ts:162:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-table-tanstack.d.ts:163:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
+// types/hell-ui-table-tanstack.d.ts:164:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
+// types/hell-ui-table-tanstack.d.ts:171:1 - (ae-undocumented) Missing documentation for "ɵHellTanStackBodyItemConnector".
+// types/hell-ui-table-tanstack.d.ts:172:5 - (ae-undocumented) Missing documentation for "strategy".
+// types/hell-ui-table-tanstack.d.ts:173:5 - (ae-undocumented) Missing documentation for "item".
+// types/hell-ui-table-tanstack.d.ts:177:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-table-tanstack.d.ts:178:5 - (ae-undocumented) Missing documentation for "ngOnChanges".
+// types/hell-ui-table-tanstack.d.ts:179:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
+// types/hell-ui-table-tanstack.d.ts:186:1 - (ae-undocumented) Missing documentation for "HellTableShellHeader".
+// types/hell-ui-table-tanstack.d.ts:187:5 - (ae-undocumented) Missing documentation for "columnId".
+// types/hell-ui-table-tanstack.d.ts:188:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:194:1 - (ae-undocumented) Missing documentation for "HellTableShellCell".
+// types/hell-ui-table-tanstack.d.ts:195:5 - (ae-undocumented) Missing documentation for "columnId".
+// types/hell-ui-table-tanstack.d.ts:196:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:202:1 - (ae-undocumented) Missing documentation for "HellTableShellFooterCell".
+// types/hell-ui-table-tanstack.d.ts:203:5 - (ae-undocumented) Missing documentation for "columnId".
+// types/hell-ui-table-tanstack.d.ts:204:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:210:1 - (ae-undocumented) Missing documentation for "HellTableShellExpandedRow".
+// types/hell-ui-table-tanstack.d.ts:211:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:217:1 - (ae-undocumented) Missing documentation for "HellTableShellLoading".
+// types/hell-ui-table-tanstack.d.ts:218:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:224:1 - (ae-undocumented) Missing documentation for "HellTableShellEmpty".
+// types/hell-ui-table-tanstack.d.ts:225:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:231:1 - (ae-undocumented) Missing documentation for "HellTableShellError".
+// types/hell-ui-table-tanstack.d.ts:232:5 - (ae-undocumented) Missing documentation for "template".
+// types/hell-ui-table-tanstack.d.ts:241:1 - (ae-undocumented) Missing documentation for "HellTableShellToolbar".
+// types/hell-ui-table-tanstack.d.ts:247:1 - (ae-undocumented) Missing documentation for "HellTableShellFooter".
+// types/hell-ui-table-tanstack.d.ts:253:1 - (ae-undocumented) Missing documentation for "HellTableShellCellContext".
+// types/hell-ui-table-tanstack.d.ts:254:5 - (ae-undocumented) Missing documentation for "$implicit".
+// types/hell-ui-table-tanstack.d.ts:255:5 - (ae-undocumented) Missing documentation for "cell".
+// types/hell-ui-table-tanstack.d.ts:256:5 - (ae-undocumented) Missing documentation for "row".
+// types/hell-ui-table-tanstack.d.ts:257:5 - (ae-undocumented) Missing documentation for "column".
+// types/hell-ui-table-tanstack.d.ts:258:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:260:1 - (ae-undocumented) Missing documentation for "HellTableShellHeaderContext".
+// types/hell-ui-table-tanstack.d.ts:261:5 - (ae-undocumented) Missing documentation for "$implicit".
+// types/hell-ui-table-tanstack.d.ts:262:5 - (ae-undocumented) Missing documentation for "header".
+// types/hell-ui-table-tanstack.d.ts:263:5 - (ae-undocumented) Missing documentation for "column".
+// types/hell-ui-table-tanstack.d.ts:264:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:266:1 - (ae-undocumented) Missing documentation for "HellTableShellExpandedRowContext".
+// types/hell-ui-table-tanstack.d.ts:267:5 - (ae-undocumented) Missing documentation for "$implicit".
+// types/hell-ui-table-tanstack.d.ts:268:5 - (ae-undocumented) Missing documentation for "row".
+// types/hell-ui-table-tanstack.d.ts:269:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:271:1 - (ae-undocumented) Missing documentation for "HellTanStackTable".
+// types/hell-ui-table-tanstack.d.ts:276:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:277:5 - (ae-undocumented) Missing documentation for "status".
+// types/hell-ui-table-tanstack.d.ts:278:5 - (ae-undocumented) Missing documentation for "stickyHeader".
+// types/hell-ui-table-tanstack.d.ts:279:5 - (ae-undocumented) Missing documentation for "rowClass".
+// types/hell-ui-table-tanstack.d.ts:280:5 - (ae-undocumented) Missing documentation for "providerViews".
+// types/hell-ui-table-tanstack.d.ts:284:5 - (ae-undocumented) Missing documentation for "bodyStrategy".
+// types/hell-ui-table-tanstack.d.ts:293:5 - (ae-undocumented) Missing documentation for "expandedRows".
+// types/hell-ui-table-tanstack.d.ts:294:5 - (ae-undocumented) Missing documentation for "displayState".
+// types/hell-ui-table-tanstack.d.ts:295:5 - (ae-undocumented) Missing documentation for "bodyItems".
+// types/hell-ui-table-tanstack.d.ts:298:5 - (ae-undocumented) Missing documentation for "headerGroups".
+// types/hell-ui-table-tanstack.d.ts:299:5 - (ae-undocumented) Missing documentation for "footerGroups".
+// types/hell-ui-table-tanstack.d.ts:300:5 - (ae-undocumented) Missing documentation for "rowCells".
+// types/hell-ui-table-tanstack.d.ts:301:5 - (ae-undocumented) Missing documentation for "columnSize".
+// types/hell-ui-table-tanstack.d.ts:315:5 - (ae-undocumented) Missing documentation for "tableTotalSize".
+// types/hell-ui-table-tanstack.d.ts:402:5 - (ae-undocumented) Missing documentation for "visibleColumnCount".
+// types/hell-ui-table-tanstack.d.ts:403:5 - (ae-undocumented) Missing documentation for "loadingTemplate".
+// types/hell-ui-table-tanstack.d.ts:404:5 - (ae-undocumented) Missing documentation for "emptyTemplate".
+// types/hell-ui-table-tanstack.d.ts:405:5 - (ae-undocumented) Missing documentation for "errorTemplate".
+// types/hell-ui-table-tanstack.d.ts:406:5 - (ae-undocumented) Missing documentation for "hasToolbar".
+// types/hell-ui-table-tanstack.d.ts:407:5 - (ae-undocumented) Missing documentation for "hasFooter".
+// types/hell-ui-table-tanstack.d.ts:408:5 - (ae-undocumented) Missing documentation for "hasFooters".
+// types/hell-ui-table-tanstack.d.ts:409:5 - (ae-undocumented) Missing documentation for "headerTemplateFor".
+// types/hell-ui-table-tanstack.d.ts:410:5 - (ae-undocumented) Missing documentation for "cellTemplateFor".
+// types/hell-ui-table-tanstack.d.ts:411:5 - (ae-undocumented) Missing documentation for "footerTemplateFor".
+// types/hell-ui-table-tanstack.d.ts:412:5 - (ae-undocumented) Missing documentation for "expandedRowTemplate".
+// types/hell-ui-table-tanstack.d.ts:413:5 - (ae-undocumented) Missing documentation for "bodyStrategyBridge".
+// types/hell-ui-table-tanstack.d.ts:414:5 - (ae-undocumented) Missing documentation for "bodyItemBridge".
+// types/hell-ui-table-tanstack.d.ts:415:5 - (ae-undocumented) Missing documentation for "cellContext".
+// types/hell-ui-table-tanstack.d.ts:416:5 - (ae-undocumented) Missing documentation for "headerContext".
+// types/hell-ui-table-tanstack.d.ts:417:5 - (ae-undocumented) Missing documentation for "expandedRowContext".
+// types/hell-ui-table-tanstack.d.ts:418:5 - (ae-undocumented) Missing documentation for "errorValue".
+// types/hell-ui-table-tanstack.d.ts:419:5 - (ae-undocumented) Missing documentation for "errorContext".
+// types/hell-ui-table-tanstack.d.ts:423:5 - (ae-undocumented) Missing documentation for "statusComponentInputs".
+// types/hell-ui-table-tanstack.d.ts:424:5 - (ae-undocumented) Missing documentation for "headerClass".
+// types/hell-ui-table-tanstack.d.ts:425:5 - (ae-undocumented) Missing documentation for "cellClass".
+// types/hell-ui-table-tanstack.d.ts:426:5 - (ae-undocumented) Missing documentation for "footerClass".
+// types/hell-ui-table-tanstack.d.ts:427:5 - (ae-undocumented) Missing documentation for "rowClassValue".
+// types/hell-ui-table-tanstack.d.ts:428:5 - (ae-undocumented) Missing documentation for "sortable".
+// types/hell-ui-table-tanstack.d.ts:429:5 - (ae-undocumented) Missing documentation for "sortState".
+// types/hell-ui-table-tanstack.d.ts:430:5 - (ae-undocumented) Missing documentation for "sortButtonLabel".
+// types/hell-ui-table-tanstack.d.ts:431:5 - (ae-undocumented) Missing documentation for "toggleSorting".
+// types/hell-ui-table-tanstack.d.ts:438:5 - (ae-undocumented) Missing documentation for "pinnedStart".
+// types/hell-ui-table-tanstack.d.ts:439:5 - (ae-undocumented) Missing documentation for "pinnedAfter".
+// types/hell-ui-table-tanstack.d.ts:450:5 - (ae-undocumented) Missing documentation for "pinnedFirst".
+// types/hell-ui-table-tanstack.d.ts:460:1 - (ae-undocumented) Missing documentation for "HellDefaultTableLoadingState".
+// types/hell-ui-table-tanstack.d.ts:466:1 - (ae-undocumented) Missing documentation for "HellDefaultTableEmptyState".
+// types/hell-ui-table-tanstack.d.ts:474:1 - (ae-undocumented) Missing documentation for "HellDefaultTableErrorState".
+// types/hell-ui-table-tanstack.d.ts:475:5 - (ae-undocumented) Missing documentation for "error".
+// types/hell-ui-table-tanstack.d.ts:481:1 - (ae-undocumented) Missing documentation for "HellTanStackPagination".
+// types/hell-ui-table-tanstack.d.ts:490:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:491:5 - (ae-undocumented) Missing documentation for "pageSizeOptions".
+// types/hell-ui-table-tanstack.d.ts:494:5 - (ae-undocumented) Missing documentation for "currentPage".
+// types/hell-ui-table-tanstack.d.ts:495:5 - (ae-undocumented) Missing documentation for "pageCount".
+// types/hell-ui-table-tanstack.d.ts:496:5 - (ae-undocumented) Missing documentation for "pageSize".
+// types/hell-ui-table-tanstack.d.ts:497:5 - (ae-undocumented) Missing documentation for "setPage".
+// types/hell-ui-table-tanstack.d.ts:498:5 - (ae-undocumented) Missing documentation for "setPageSize".
+// types/hell-ui-table-tanstack.d.ts:504:1 - (ae-undocumented) Missing documentation for "HellTanStackGlobalFilter".
+// types/hell-ui-table-tanstack.d.ts:505:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:506:5 - (ae-undocumented) Missing documentation for "placeholder".
+// types/hell-ui-table-tanstack.d.ts:507:5 - (ae-undocumented) Missing documentation for "filterInputUi".
+// types/hell-ui-table-tanstack.d.ts:512:5 - (ae-undocumented) Missing documentation for "setFilter".
+// types/hell-ui-table-tanstack.d.ts:513:5 - (ae-undocumented) Missing documentation for "clearFilter".
+// types/hell-ui-table-tanstack.d.ts:519:1 - (ae-undocumented) Missing documentation for "HellTanStackColumnFilter".
+// types/hell-ui-table-tanstack.d.ts:520:5 - (ae-undocumented) Missing documentation for "table".
+// types/hell-ui-table-tanstack.d.ts:521:5 - (ae-undocumented) Missing documentation for "columnId".
+// types/hell-ui-table-tanstack.d.ts:522:5 - (ae-undocumented) Missing documentation for "placeholder".
+// types/hell-ui-table-tanstack.d.ts:523:5 - (ae-undocumented) Missing documentation for "filterInputUi".
+// types/hell-ui-table-tanstack.d.ts:526:5 - (ae-undocumented) Missing documentation for "column".
+// types/hell-ui-table-tanstack.d.ts:527:5 - (ae-undocumented) Missing documentation for "value".
+// types/hell-ui-table-tanstack.d.ts:528:5 - (ae-undocumented) Missing documentation for "setFilter".
+// types/hell-ui-table-tanstack.d.ts:529:5 - (ae-undocumented) Missing documentation for "clearFilter".
 
 // (No @packageDocumentation comment for this package)
 

@@ -13,13 +13,32 @@ import {
   HellTanStackTable,
 } from 'hell-ui/table-tanstack';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getExpandedRowModel,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  injectTable,
+  rowExpandingFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ExpandedState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  expandedRowModel: createExpandedRowModel(),
+});
 
 interface Person {
   readonly id: string;
@@ -253,23 +272,22 @@ export class TableA11yHarnessPage {
   };
   protected readonly rows = signal<Person[]>([...people]);
   protected readonly expanded = signal<ExpandedState>({ ada: true });
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     { accessorKey: 'name', header: 'Name' },
     { accessorKey: 'role', header: 'Role' },
     { id: 'actions', header: 'Actions' },
   ];
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: { expanded: this.expanded() },
     onExpandedChange: (updater) => applyUpdater(this.expanded, updater),
   }));
 
-  protected readonly pinnedColumns: ColumnDef<Person>[] = [
+  protected readonly pinnedColumns: ColumnDef<typeof features, Person>[] = [
     { accessorKey: 'name', header: 'Name', size: 160 },
     { accessorKey: 'role', header: 'Role', size: 160 },
     { id: 'team', header: 'Team', accessorFn: (row) => row.id, size: 160 },
@@ -277,13 +295,14 @@ export class TableA11yHarnessPage {
     { id: 'status', header: 'Status', accessorFn: () => 'Active', size: 160 },
     { id: 'updated', header: 'Updated', accessorFn: () => '2 days ago', size: 160 },
   ];
-  protected readonly pinnedTable = createAngularTable<Person>(() => ({
+  protected readonly pinnedTable = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.pinnedColumns,
     enableColumnResizing: true,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
-    initialState: { columnPinning: { left: ['name', 'role'] } },
+    // Pinning is logical in v9: 'left'/'right' became 'start'/'end'.
+    initialState: { columnPinning: { start: ['name', 'role'], end: [] } },
   }));
 
   protected sortedPeople(): readonly Person[] {

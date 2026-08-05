@@ -1,10 +1,20 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getPaginationRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createPaginatedRowModel,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ColumnSizingState,
   type ExpandedState,
@@ -30,6 +40,24 @@ import {
 import { HellButton } from 'hell-ui/button';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
+
+// Every feature the shell classes under test require, registered once for all
+// hosts. v9 gates feature APIs on registration, so a host that skipped one would
+// fail to type-check against the shell rather than fail at runtime.
+const features = tableFeatures({
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  expandedRowModel: createExpandedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+});
 
 interface Person {
   readonly id: string;
@@ -79,10 +107,10 @@ class ShellHost {
   readonly status = signal(HellTableStatus.READY);
   readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
   readonly rowSelection = signal<RowSelectionState>({ ada: true });
-  protected readonly selectedRowClass = (row: Row<Person>) =>
+  protected readonly selectedRowClass = (row: Row<typeof features, Person>) =>
     row.getIsSelected() ? 'bg-hell-primary-soft' : null;
 
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -93,11 +121,10 @@ class ShellHost {
     { id: 'actions', header: 'Actions' },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
     state: { pagination: this.pagination(), rowSelection: this.rowSelection() },
@@ -154,13 +181,12 @@ class MissingStatusHost extends ShellHost {}
 class VirtualRowsHost {
   readonly rows = signal<Person[]>(people);
   readonly expanded = signal<ExpandedState>({ ada: true });
-  readonly columns: ColumnDef<Person>[] = [{ accessorKey: 'name', header: 'Name' }];
+  readonly columns: ColumnDef<typeof features, Person>[] = [{ accessorKey: 'name', header: 'Name' }];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: { expanded: this.expanded() },
@@ -186,10 +212,10 @@ class FilterHost extends ShellHost {}
   template: `<hell-tanstack-column-filter [table]="table" columnId="name" />`,
 })
 class ColumnFilterHost {
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: [{ accessorKey: 'name', header: 'Name' }],
-    getCoreRowModel: getCoreRowModel(),
     initialState: {
       columnFilters: [{ id: 'name', value: { term: 'Ada' } }],
     },
@@ -237,7 +263,7 @@ class StyledShellHost extends ShellHost {}
 class ResizableShellHost {
   readonly resizingEnabled = signal(true);
   readonly columnSizing = signal<ColumnSizingState>({});
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     { id: 'a', header: 'A', size: 200, minSize: 120 },
     { id: 'b', header: 'B', size: 160 },
     { id: 'c', header: 'C', size: 140 },
@@ -245,11 +271,11 @@ class ResizableShellHost {
     { id: 'd', header: 'D', size: 120, enableResizing: false },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: this.columns,
     enableColumnResizing: this.resizingEnabled(),
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     state: { columnSizing: this.columnSizing() },
     onColumnSizingChange: (updater) =>
@@ -275,16 +301,16 @@ class ResizableShellHost {
   `,
 })
 class UncontrolledResizableShellHost {
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     { id: 'a', header: 'A', size: 200, minSize: 120 },
     { id: 'b', header: 'B', size: 160 },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: this.columns,
     enableColumnResizing: true,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
   }));
 }
@@ -530,7 +556,7 @@ describe('Hell TanStack table shell', () => {
     // uncontrolled sizing state does not refresh across them. Writing one
     // column per updater would compute the second from the same state as the
     // first, dropping "a" and growing the table by the whole key step.
-    expect(table.getState().columnSizing).toEqual({ a: 216, b: 144 });
+    expect(table.atoms.columnSizing.get()).toEqual({ a: 216, b: 144 });
     expect(table.getTotalSize()).toBe(totalBefore);
 
     const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;

@@ -18,7 +18,7 @@ import {
   observeElementRect,
   type VirtualItem,
 } from '@tanstack/virtual-core';
-import type { RowData } from '@tanstack/angular-table';
+import type { RowData, TableFeatures } from '@tanstack/angular-table';
 
 import {
   ɵHELL_TANSTACK_BODY_STRATEGY,
@@ -27,7 +27,8 @@ import {
   type ɵHellTanStackBodyStrategy,
 } from 'hell-ui/table-tanstack';
 
-interface HellVirtualBodyItem<TData extends RowData> extends ɵHellTanStackBodyItem<TData> {
+interface HellVirtualBodyItem<TFeatures extends TableFeatures, TData extends RowData>
+  extends ɵHellTanStackBodyItem<TFeatures, TData> {
   readonly virtualIndex: number;
 }
 
@@ -50,8 +51,10 @@ type HellVirtualResizeObserverConstructor = new (
     '[style.--hell-table-virtual-row-width.px]': 'rowWidth()',
   },
 })
-export class HellTanStackVirtualRows<TData extends RowData = RowData>
-  implements ɵHellTanStackBodyStrategy<TData>, OnDestroy
+export class HellTanStackVirtualRows<
+  TFeatures extends TableFeatures = TableFeatures,
+  TData extends RowData = RowData,
+> implements ɵHellTanStackBodyStrategy<TFeatures, TData>, OnDestroy
 {
   readonly enabled = input(true, {
     alias: 'hellTanStackVirtualRows',
@@ -71,7 +74,7 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   private readonly version = signal(0);
   private scrollport: HTMLElement | null = null;
   private body: HTMLElement | null = null;
-  private sourceItems: readonly ɵHellTanStackBodyItem<TData>[] = [];
+  private sourceItems: readonly ɵHellTanStackBodyItem<TFeatures, TData>[] = [];
   private virtualItems: readonly VirtualItem[] = [];
   private virtualItemsByKey = new Map<string, VirtualItem>();
   private mountedCleanup: VoidFunction | null = null;
@@ -111,7 +114,9 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     });
   }
 
-  rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[] {
+  rows(
+    items: readonly ɵHellTanStackBodyItem<TFeatures, TData>[],
+  ): readonly ɵHellTanStackBodyItem<TFeatures, TData>[] {
     this.version();
     this.sourceItems = items;
     this.setCount(items.length);
@@ -125,7 +130,7 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
 
     return virtualItems
       .map((virtualItem) => this.itemForVirtualItem(virtualItem))
-      .filter((item): item is HellVirtualBodyItem<TData> => !!item);
+      .filter((item): item is HellVirtualBodyItem<TFeatures, TData> => !!item);
   }
 
   connectScrollport(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction {
@@ -157,7 +162,7 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
 
   connectRow(
     el: HTMLElement,
-    item: ɵHellTanStackBodyItem<TData>,
+    item: ɵHellTanStackBodyItem<TFeatures, TData>,
     writer: ɵHellDomWriter,
   ): VoidFunction {
     const virtualItem = this.virtualItemFor(item);
@@ -195,14 +200,16 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     this.mountedCleanup ??= this.virtualizer._didMount();
   }
 
-  private itemForVirtualItem(virtualItem: VirtualItem): HellVirtualBodyItem<TData> | null {
+  private itemForVirtualItem(
+    virtualItem: VirtualItem,
+  ): HellVirtualBodyItem<TFeatures, TData> | null {
     const item = this.sourceItems[virtualItem.index];
     if (!item) return null;
     this.virtualItemsByKey.set(item.key, virtualItem);
     return { ...item, virtualIndex: virtualItem.index };
   }
 
-  private virtualItemFor(item: ɵHellTanStackBodyItem<TData>): VirtualItem | null {
+  private virtualItemFor(item: ɵHellTanStackBodyItem<TFeatures, TData>): VirtualItem | null {
     return this.virtualItemsByKey.get(item.key) ?? null;
   }
 

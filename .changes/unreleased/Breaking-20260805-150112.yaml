@@ -1,0 +1,21 @@
+kind: Breaking
+body: The optional `@tanstack/angular-table` peer dependency moved from `^8.21.4` to `^9.0.0`. Only consumers of the `hell-ui/table-tanstack` and `hell-ui/table-tanstack/virtual` entry points are affected.
+time: 2026-08-05T15:01:12.028682+02:00
+custom:
+    migration: |-
+        Upgrade `@tanstack/angular-table` to `^9.0.0` and migrate your own table
+        construction with it: v9 is a redesign rather than a compatible release.
+        Replace `createAngularTable(() => options)` with `injectTable(() => options)`
+        called in an Angular injection context (a component field initializer is one);
+        drop the `getCoreRowModel()` option, which is now automatic; and move features
+        and row models into a `features: tableFeatures({ ... })` object built once at
+        module scope rather than inside the initializer. Row-model options become
+        sibling slots — `getSortedRowModel()` becomes
+        `sortedRowModel: createSortedRowModel()`, `getFilteredRowModel()` becomes
+        `filteredRowModel: createFilteredRowModel()`, `getPaginationRowModel()` becomes
+        `paginatedRowModel: createPaginatedRowModel()`, and `getExpandedRowModel()`
+        becomes `expandedRowModel: createExpandedRowModel()`. Every feature you use must
+        be imported and registered; all of them are re-exported from
+        `@tanstack/angular-table`, so no new dependency is required. TanStack's own
+        reference for the rest is bundled at
+        `@tanstack/angular-table/skills/migrate-v8-to-v9/SKILL.md`.

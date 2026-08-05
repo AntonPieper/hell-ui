@@ -1,0 +1,15 @@
+kind: Breaking
+body: 'Column pinning in the `hell-ui/table-tanstack` shell is now logical rather than physical: the shell publishes `data-pinned="start"` and `data-pinned="end"` instead of `"left"`/`"right"`, and `hell-ui/table/styles.css` positions pinned columns with `inset-inline-start`/`inset-inline-end`.'
+time: 2026-08-05T15:01:19.962397+02:00
+custom:
+    migration: |-
+        Update anything that selects or asserts on the pinned attributes: replace
+        `[data-pinned='left']` with `[data-pinned='start']` and `[data-pinned='right']`
+        with `[data-pinned='end']`. The `--hell-table-pinned-start` and
+        `--hell-table-pinned-after` CSS variables keep their names. If you set TanStack
+        pinning state yourself, its shape changed too: `columnPinning.left`/`.right`
+        became `.start`/`.end`, and `column.pin('left' | 'right')` became
+        `column.pin('start' | 'end')`. Because the shell now positions with logical
+        inset properties, pinned columns follow the writing direction — under `dir="rtl"`
+        a start-pinned column sticks to the right edge, where it previously stuck to the
+        left.

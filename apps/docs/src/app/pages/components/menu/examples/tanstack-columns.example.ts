@@ -9,13 +9,31 @@ import { HellButton } from 'hell-ui/button';
 import { HELL_MENU_IMPORTS } from 'hell-ui/menu';
 import { HellTableShellToolbar, HellTanStackTable } from 'hell-ui/table-tanstack';
 import {
-  createAngularTable,
-  getCoreRowModel,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowSortingFeature,
+  tableFeatures,
   type Column,
   type ColumnDef,
   type Updater,
-  type VisibilityState,
+  type ColumnVisibilityState,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+});
 
 interface Person {
   readonly id: string;
@@ -37,16 +55,16 @@ const PEOPLE: readonly Person[] = [
 const STORAGE_KEY = 'hell-docs.people-table.column-visibility.v1';
 const MIN_VISIBLE = 1;
 
-function loadColumnVisibility(): VisibilityState {
+function loadColumnVisibility(): ColumnVisibilityState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as VisibilityState) : {};
+    return raw ? (JSON.parse(raw) as ColumnVisibilityState) : {};
   } catch {
     return {};
   }
 }
 
-function saveColumnVisibility(state: VisibilityState): void {
+function saveColumnVisibility(state: ColumnVisibilityState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
@@ -100,9 +118,9 @@ export class MenuTanStackColumnsExample {
   protected readonly rows = signal<Person[]>([...PEOPLE]);
 
   // TanStack owns the column-visibility state; the app persists it to localStorage.
-  protected readonly columnVisibility = signal<VisibilityState>(loadColumnVisibility());
+  protected readonly columnVisibility = signal<ColumnVisibilityState>(loadColumnVisibility());
 
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     // The anchor column opts out of hiding, so it never appears in the menu and
     // the table can never lose its identity column.
     { accessorKey: 'name', header: 'Name', enableHiding: false, size: 200 },
@@ -112,10 +130,10 @@ export class MenuTanStackColumnsExample {
     { accessorKey: 'email', header: 'Email', size: 220 },
   ];
 
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     state: { columnVisibility: this.columnVisibility() },
     onColumnVisibilityChange: (updater) => {
@@ -134,16 +152,16 @@ export class MenuTanStackColumnsExample {
     return this.hideableColumns().filter((column) => column.getIsVisible());
   });
 
-  protected columnLabel(column: Column<Person>): string {
+  protected columnLabel(column: Column<typeof features, Person>): string {
     const header = column.columnDef.header;
     return typeof header === 'string' ? header : column.id;
   }
 
-  protected isLastVisible(column: Column<Person>): boolean {
+  protected isLastVisible(column: Column<typeof features, Person>): boolean {
     return column.getIsVisible() && this.visibleColumns().length <= MIN_VISIBLE;
   }
 
-  protected setColumnVisible(column: Column<Person>, visible: boolean): void {
+  protected setColumnVisible(column: Column<typeof features, Person>, visible: boolean): void {
     column.toggleVisibility(visible);
   }
 

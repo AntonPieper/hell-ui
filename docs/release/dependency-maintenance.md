@@ -124,7 +124,6 @@ Re-probe every entry here on each sweep; delete the ones that have retired.
 | Package | Held at | Why |
 |---|---|---|
 | `typescript` | `~6.0.3` (7.0.2 available) | TypeScript 7 is the native-port major and its own migration, not a sweep item. |
-| `@tanstack/angular-table` | `^8.21.4` (9.0.0 available) | v9 is a breaking architectural rewrite — `Table` takes two type parameters and column pinning moved into feature modules. Needs its own migration. |
 
 These are **range caps, not overrides** — they express "this is the newest
 version that works" at the point where the dependency is declared, which is the
