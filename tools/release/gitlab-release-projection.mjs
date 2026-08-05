@@ -316,6 +316,54 @@ export function decidePublishCommand({ mode, tarballPath }) {
   };
 }
 
+// How long the post-publish verification waits for the registry to catch up.
+// The registry accepts an npm upload and indexes it asynchronously, so the
+// metadata read immediately after `pnpm publish` can still answer without the
+// version that was just taken — observed on the 0.3.0 seed, where the upload
+// succeeded, the immediate read missed it, and the package reached its
+// processed state seconds later. Publication is the one irreversible step in
+// this machinery, so it verifies rather than assumes; it just has to give the
+// registry a bounded moment to agree.
+export const publishVerificationAttempts = 10;
+export const publishVerificationDelayMs = 3000;
+
+// Reads the registry until it lists `version`, or until the budget is spent.
+// The reader and the sleeper are injected so the loop itself is fixture-tested
+// rather than only its per-attempt decision. Two refusals are deliberately not
+// the same thing: a failing read (a refused credential, a wrong endpoint) stops
+// at once, because retrying it would only turn a clear error into a slow vague
+// one, while a merely-absent version is what the waiting is for. Either way an
+// unconfirmed publication fails closed.
+export async function awaitPublishedVersion({
+  read,
+  version,
+  attempts = publishVerificationAttempts,
+  delayMs = publishVerificationDelayMs,
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+}) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const metadata = await read();
+    if (metadata.failures.length > 0) {
+      return { verified: false, failures: metadata.failures, attempts: attempt };
+    }
+    if (metadata.versions.includes(version)) {
+      return { verified: true, failures: [], attempts: attempt };
+    }
+    if (attempt < attempts) await sleep(delayMs);
+  }
+  return {
+    verified: false,
+    failures: [
+      `The registry still does not list ${publishedPackageName}@${version} after ${attempts} ` +
+        `attempt(s) over about ${Math.round((attempts - 1) * (delayMs / 1000))}s. The upload may ` +
+        'have been accepted and left unindexed, so treat the version as possibly present: check ' +
+        'the project registry before re-running, and note that a rerun of this job publishes ' +
+        'nothing when the version is already there.',
+    ],
+    attempts,
+  };
+}
+
 // Picks the one published registry package the release's asset link names.
 // The packages API filters by fuzzy name, so the exact match happens here.
 export function choosePublishedPackage({ packages, name, version }) {
@@ -556,16 +604,15 @@ async function runPublish(args) {
     return 0;
   }
 
-  const after = await registryMetadata(registryUrl, env.CI_JOB_TOKEN);
-  if (after.failures.length > 0) return reportAndFail('Registry verification', after.failures);
-  if (!after.versions.includes(gate.version)) {
-    console.error(
-      `The registry does not list ${publishedPackageName}@${gate.version} after publishing; ` +
-        'the publication cannot be verified.',
-    );
-    return 1;
-  }
-  console.log(`Published ${publishedPackageName}@${gate.version} to the project npm registry.`);
+  const confirmation = await awaitPublishedVersion({
+    read: () => registryMetadata(registryUrl, env.CI_JOB_TOKEN),
+    version: gate.version,
+  });
+  if (!confirmation.verified) return reportAndFail('Registry verification', confirmation.failures);
+  console.log(
+    `Published ${publishedPackageName}@${gate.version} to the project npm registry; the registry ` +
+      `confirmed it on read ${confirmation.attempts}.`,
+  );
   return 0;
 }
 
