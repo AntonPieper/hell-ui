@@ -35,7 +35,12 @@ catalog:
   "@microsoft/api-extractor": "^7.58.12"
   "@ng-icons/core": "^34.0.0"
   "@ng-icons/font-awesome": "^34.0.0"
-  "@playwright/test": "^1.59.1"
+  # Pinned to the minor the CI browser images are built for: the GitHub E2E job
+  # runs mcr.microsoft.com/playwright:v1.59.1-noble and GitLab builds
+  # e2e:v1.59.1-node22-r2. A resolution past 1.59.x installs a browser
+  # revision neither image carries and every E2E test fails to launch, so
+  # bumping Playwright means moving both images in the same change.
+  "@playwright/test": "~1.59.1"
   "@tailwindcss/postcss": "^4.3.3"
   "@tanstack/angular-table": "^8.21.4"
   "@tanstack/virtual-core": "^3.17.7"

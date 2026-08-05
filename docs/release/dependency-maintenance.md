@@ -125,7 +125,12 @@ Re-probe every entry here on each sweep; delete the ones that have retired.
 |---|---|---|
 | `typescript` | `~6.0.3` (7.0.2 available) | TypeScript 7 is the native-port major and its own migration, not a sweep item. |
 | `@tanstack/angular-table` | `^8.21.4` (9.0.0 available) | v9 is a breaking architectural rewrite — `Table` takes two type parameters and column pinning moved into feature modules. Needs its own migration. |
-| `@playwright/test` | `^1.59.1` (1.62.1 available) | Bumping it requires rebuilding the browser job image and moving `E2E_IMAGE_TAG` in the same commit — see `tools/ci/e2e-image/README.md`. |
+| `@playwright/test` | `~1.59.1` (1.62.1 available) | The version is coupled to two prebuilt browser images: the GitHub E2E job runs `mcr.microsoft.com/playwright:v1.59.1-noble` and GitLab builds `e2e:v1.59.1-node22-r2`. Resolving past 1.59.x installs a browser revision neither image carries and every test fails at `browserType.launch`. Bumping means moving both images in the same change — see `tools/ci/e2e-image/README.md`. Note the range must be `~`, not `^`: a caret lets a lock refresh drift across the coupling silently. |
+| `changie` | `1.25.1` exactly (1.25.2 available) | 1.25.2 refuses to prompt when stdin is not a TTY (`custom missing and prompt is disabled`). `tools/release/change-fragment-fixtures.mjs` drives the Breaking-kind migration prompt by piping the answer in, so two fixtures fail under 1.25.2. It reproduces only in CI — a local run can still hold the older downloaded binary — so trust the CI result over a green local `pnpm test:changelog`. Retires when changie restores piped-stdin prompting or the fixtures move to `--custom`. |
+
+Both of these are **range caps, not overrides** — they express "this is the newest
+version that works" at the point where the dependency is declared, which is the
+cheaper and more visible mechanism. Reach for a cap before an override.
 
 ## Validation
 
