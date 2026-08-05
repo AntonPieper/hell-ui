@@ -286,8 +286,6 @@ export class HellTooltip {
       if (this.presentContent() !== null) return;
       untracked(() => this.state.overlay()?.hideImmediate());
     });
-
-    inject(DestroyRef).onDestroy(() => this.state.destroy());
   }
 
   /** Shows the tooltip unless content is absent or the host is natively disabled. */

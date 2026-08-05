@@ -34,6 +34,7 @@ import {
   injectDateRangePickerState,
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
+import type { FocusOrigin } from '@angular/cdk/a11y';
 import { HellIcon } from 'hell-ui/icon';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
 import type { HellUi, HellUiInput } from 'hell-ui/core';
@@ -200,15 +201,11 @@ interface HellDatePickerNavigationState {
 }
 
 interface HellDatePickerCalendarState extends HellDatePickerNavigationState {
-  setFocusedDate(
-    date: Date,
-    origin: 'keyboard' | undefined,
-    direction: 'forward' | 'backward',
-  ): void;
+  setFocusedDate(date: Date, origin: FocusOrigin, direction: 'forward' | 'backward'): void;
 }
 
 function hellDatePickerYearShiftDisabled(
-  state: HellDatePickerNavigationState | undefined,
+  state: HellDatePickerNavigationState | null | undefined,
   months: number,
 ): boolean {
   if (!state || state.disabled()) return true;
@@ -259,7 +256,7 @@ export class HellDatePickerPreviousYear {
     if (!s) return;
     const focused = s.focusedDate();
     const next = hellShiftDateByMonths(focused, months);
-    s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
+    s.setFocusedDate(next, null, months > 0 ? 'forward' : 'backward');
   }
 }
 
@@ -296,7 +293,7 @@ export class HellDatePickerNextYear {
     if (!s) return;
     const focused = s.focusedDate();
     const next = hellShiftDateByMonths(focused, months);
-    s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
+    s.setFocusedDate(next, null, months > 0 ? 'forward' : 'backward');
   }
 }
 
@@ -880,7 +877,7 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
       )
     ) {
       const min = current.min();
-      current.setFocusedDate(unclamped, undefined, min && unclamped < min ? 'forward' : 'backward');
+      current.setFocusedDate(unclamped, null, min && unclamped < min ? 'forward' : 'backward');
     }
 
     const focused = current.focusedDate();
@@ -907,7 +904,7 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
     const current = state();
     current.setFocusedDate(
       hellShiftDateByMonths(current.focusedDate(), delta * HELL_DATE_PICKER_MONTH_COUNT),
-      undefined,
+      null,
       delta > 0 ? 'forward' : 'backward',
     );
     return true;
@@ -927,7 +924,7 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
 
     view.set('day');
     if (target.getTime() !== focused.getTime()) {
-      current.setFocusedDate(target, undefined, target < focused ? 'backward' : 'forward');
+      current.setFocusedDate(target, null, target < focused ? 'backward' : 'forward');
     }
     focusDayGrid();
   };

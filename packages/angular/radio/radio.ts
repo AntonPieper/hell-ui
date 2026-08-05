@@ -18,6 +18,7 @@ import {
   NgpRadioItem,
   NgpRadioIndicator,
   injectRadioGroupState,
+  injectRadioItemState,
 } from 'ng-primitives/radio';
 import {
   injectRovingFocusGroupState,
@@ -305,7 +306,7 @@ export class HellRadio {
 
   private readonly groupState = injectRadioGroupState<unknown>();
   private readonly rovingRegistry = inject(HellRadioRovingRegistry);
-  private readonly radioItem = inject(NgpRadioItem<unknown>);
+  private readonly radioItemState = injectRadioItemState<unknown>();
   private readonly rovingFocusGroupState = injectRovingFocusGroupState();
   private readonly rovingFocusItemState = injectRovingFocusItemState();
   private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
@@ -314,14 +315,14 @@ export class HellRadio {
   /** Whether the enclosing `HellRadioGroup` is disabled. */
   protected readonly groupDisabled = computed(() => this.groupState().disabled());
   /** Whether this item is individually disabled. */
-  protected readonly itemDisabled = computed(() => this.radioItem.disabled());
+  protected readonly itemDisabled = computed(() => this.radioItemState().disabled());
   /** Whether the item is disabled, either individually or via its group. */
   protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
 
   constructor() {
     const item: HellRadioRovingRegistration = {
       element: this.host.nativeElement,
-      checked: this.radioItem.checked,
+      checked: () => this.radioItemState().checked(),
       disabled: this.isDisabled,
       rovingFocusItemId: () => this.rovingFocusItemState().id(),
     };

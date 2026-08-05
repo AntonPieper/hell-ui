@@ -1,12 +1,12 @@
 import type { State } from 'ng-primitives/state';
 import type { NgpCombobox } from 'ng-primitives/combobox';
-import type { NgpRadioGroup } from 'ng-primitives/radio';
+import type { NgpRadioGroupState } from 'ng-primitives/radio';
 import type { NgpRovingFocusGroupState } from 'ng-primitives/roving-focus';
 
 /**
  * Internal compatibility seam for ng-primitives form-control state sync.
  *
- * Deliberate version-bound State-channel seam for `ng-primitives@0.123.0`, not
+ * Deliberate version-bound State-channel seam for `ng-primitives@0.128.7`, not
  * an ad hoc primitive-instance state escape hatch.
  * Select gained public CVA-safe `setValue(value, { emit: false })` /
  * `setDisabled(disabled)` in the 0.123 line and no longer goes through this
@@ -28,7 +28,7 @@ import type { NgpRovingFocusGroupState } from 'ng-primitives/roving-focus';
  * @internal
  */
 
-export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.123.0';
+export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.128.7';
 export const HELL_NGP_STATE_WRITER_UPGRADE_PATH =
   'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once public value+disabled setters support silent CVA writes and roving-focus exposes a non-focusing active-item setter.';
 
@@ -40,7 +40,7 @@ type StateWithActiveItemChannel = { activeItem: WritableStateChannel<string | nu
 type ComboboxStateWriter = State<NgpCombobox> &
   StateWithValueChannel<unknown> &
   StateWithDisabledChannel;
-type RadioGroupStateWriter<T> = State<NgpRadioGroup<T>> &
+type RadioGroupStateWriter<T> = NgpRadioGroupState<T> &
   StateWithValueChannel<T | null> &
   StateWithDisabledChannel;
 
