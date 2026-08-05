@@ -3,6 +3,8 @@
 - Status: Accepted
 - Date: 2026-05-29
 - Rechecked: 2026-07-03 for `ng-primitives@0.123.0`
+- Rechecked: 2026-08-05 for `ng-primitives@0.128.7` — see
+  [2026-08-05 recheck](#2026-08-05-recheck-ng-primitives01287)
 
 ## Context
 
@@ -62,6 +64,57 @@ tested, and architecture-guarded.
 - The architecture guard rejects direct `State<T>.value.set(...)`, `State<T>.disabled.set(...)`, indexed state-channel writes, retired private bridge tokens, and direct primitive-instance `.state` access outside the adapter seam.
 - The architecture guard rejects select and toggle-group state-writer tokens in the adapter: primitives with public setters must use them.
 - The adapter is internal-only and must not be re-exported from the adapters barrel.
+
+## 2026-08-05 recheck (`ng-primitives@0.128.7`)
+
+Measured against the published `ng-primitives@0.128.7` tarball typings and
+fesm2022 sources. **Two of the adapter's three channels now retire; combobox is
+the only thing keeping the seam alive.**
+
+### Radio group — retires
+
+`NgpRadioGroupState` is now a real public state surface with real setters:
+
+```ts
+setValue(value: T | null, options?: SetterOptions): void;
+setDisabled(value: boolean): void;
+```
+
+`SetterOptions.emit` is documented verbatim for the case this adapter exists to
+serve — "Set to `false` for cases like form `writeValue` where the internal
+state should sync without notifying listeners". That is the silent-update
+option this ADR named as the exit condition, so `writeRadioGroupStateValue` and
+`writeRadioGroupStateDisabled` should be replaced by
+`state().setValue(value, { emit: false })` and `state().setDisabled(disabled)`.
+
+This is no longer optional. The state object now exposes `value` as
+`deprecatedSetter(value, 'setValue', …)`, a Proxy whose `set` trap logs
+`"Deprecation warning: Use setValue() instead of setting the value directly."`
+on every call. The adapter's `state.value.set(...)` therefore goes through a
+deprecated path and warns on every CVA write.
+
+### Roving focus — retires
+
+`NgpRovingFocusGroupState` gained `setTabStop(id: string | null): void`,
+documented as setting the tab stop "without stealing focus" — the
+non-focusing active-item setter this ADR asked for. `setActiveItem` still calls
+`item.focus(origin)` and still cannot be used for form writes, but
+`writeRovingFocusActiveItem` can now be replaced by `setTabStop`.
+
+### Combobox — does not retire
+
+Unchanged from 0.123.0. There is still no `NgpComboboxState` interface;
+`injectComboboxState<U = NgpCombobox>()` still returns the raw
+`State<U>` directive-derived channel, and there is no `setValue` or
+`setDisabled` anywhere in the combobox surface.
+
+### Verdict
+
+The seam survives, scoped to combobox alone. `writeComboboxStateValue` and
+`writeComboboxStateDisabled` stay; the radio and roving-focus writers, their
+runtime assertions, and the corresponding architecture-guard allowances should
+go. Full deletion still waits on public combobox value/disabled setters with a
+silent-update option.
 
 ## Consequences
 
