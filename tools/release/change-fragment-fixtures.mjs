@@ -61,6 +61,22 @@ export function runChangeFragmentFixtures({ root }) {
   );
 }
 
+// Changie 1.25.2 refuses to prompt when it detects a CI environment, and two
+// fixtures exist precisely to drive the Breaking-kind migration prompt with
+// scripted input. That detection is right for `pnpm change` — a pipeline has
+// nobody to answer — and wrong for these fixtures, which model a contributor at
+// a workstation and always supply the answer. So the CI markers are cleared for
+// the child only, alongside the TERM that already stands in for a terminal.
+// Without this the fixtures fail in CI and pass locally, which is the worst of
+// both: the interactive path stops being covered exactly where it is enforced.
+const ciEnvironmentMarkers = ['CI', 'GITHUB_ACTIONS', 'GITLAB_CI', 'BUILD_NUMBER', 'RUN_ID'];
+
+function interactiveChangieEnv() {
+  const env = { ...process.env, TERM: process.env.TERM ?? 'xterm-256color' };
+  for (const marker of ciEnvironmentMarkers) delete env[marker];
+  return env;
+}
+
 function runFixture(root, binary, fixture, fail) {
   const workspace = mkdtempSync(join(tmpdir(), 'hell-change-fragment-'));
   try {
@@ -88,7 +104,7 @@ function createFixtureContext(root, binary, workspace, fail) {
       spawnSync(binary, args, {
         cwd: workspace,
         encoding: 'utf8',
-        env: { ...process.env, TERM: process.env.TERM ?? 'xterm-256color' },
+        env: interactiveChangieEnv(),
         input: options.input ?? '',
         killSignal: 'SIGKILL',
         timeout: changieTimeoutMs,
