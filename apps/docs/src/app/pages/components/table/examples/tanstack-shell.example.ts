@@ -650,7 +650,7 @@ export class TableTanStackShellExample implements OnDestroy {
       this.rows.set(result.rows);
       this.totalRows.set(result.totalRows);
       this.status.set(HellTableStatus.READY);
-      this.openPendingAdjacentPageRow();
+      this.openPendingAdjacentPageRow(result.rows);
     }, 120);
   }
 
@@ -698,16 +698,20 @@ export class TableTanStackShellExample implements OnDestroy {
     }
   }
 
-  private openPendingAdjacentPageRow(): void {
+  /**
+   * Opens the edge row of the page a boundary navigation just loaded.
+   *
+   * Takes the rows the query returned rather than reading them back off the
+   * table: the table's row model follows the `data` option through Angular
+   * reactivity, so it has not necessarily rebuilt at the moment this runs. The
+   * page that was just fetched is the page to open into, so use it directly.
+   */
+  private openPendingAdjacentPageRow(rows: readonly Person[]): void {
     const pending = this.pendingAdjacentPageOpen;
     if (!pending) return;
 
     this.pendingAdjacentPageOpen = null;
-    queueMicrotask(() => {
-      const rows = this.table.getRowModel().rows;
-      const row = pending > 0 ? rows[0] : rows.at(-1);
-      this.openPerson(row?.original ?? null);
-    });
+    this.openPerson((pending > 0 ? rows[0] : rows.at(-1)) ?? null);
   }
 
   private openedRowIndex(rows: readonly { readonly original: Person }[]): number {
