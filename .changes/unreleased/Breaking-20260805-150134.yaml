@@ -17,3 +17,25 @@ custom:
         them to `tableFeatures({ ... })`. Registering more than a shell needs is fine —
         the shells are generic over your feature set — but omitting one is a compile
         error naming the missing feature rather than a runtime failure.
+        Hell's own exported generics moved with them, so update explicit annotations of
+        these too: `HellTanStackTable`, `HellTanStackPagination`, `HellTanStackGlobalFilter`
+        and `HellTanStackColumnFilter`; the projection directives
+        `HellTableShellHeader`, `HellTableShellCell` and `HellTableShellFooterCell`
+        (`<TFeatures, TData, TValue>`) and `HellTableShellExpandedRow`
+        (`<TFeatures, TData>`); their template context interfaces
+        `HellTableShellHeaderContext`, `HellTableShellCellContext` and
+        `HellTableShellExpandedRowContext`; `HellTanStackRowClass`, whose callback now
+        receives `Row<TFeatures, TData>`; and `HellTanStackVirtualRows` from
+        `hell-ui/table-tanstack/virtual`, which becomes
+        `HellTanStackVirtualRows<TFeatures, TData>`. All of them take `TFeatures` ahead of
+        `TData`. The four component classes leave it without a default, because no one
+        feature set is right for every table, so an explicit annotation has to name yours.
+        The projection directives, the context interfaces, `HellTanStackRowClass` and
+        `HellTanStackVirtualRows` all default both parameters, so annotations that passed
+        no type arguments keep working; only ones that passed a single `TData` argument
+        need the feature set inserted ahead of it.
+        The shells also emit more `protected` template helpers than before
+        (`visibleLeafColumns`, `headerGroups`, `footerGroups`, `rowCells`, `sortable`).
+        They are not part of the supported surface, but they do appear in the generated
+        declarations, so a subclass of one of these components that already declares a
+        member of the same name has to rename it.
