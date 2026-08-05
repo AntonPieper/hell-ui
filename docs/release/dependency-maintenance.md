@@ -124,7 +124,7 @@ Re-probe every entry here on each sweep; delete the ones that have retired.
 | Package | Held at | Why |
 |---|---|---|
 | `typescript` | `~6.0.3` (7.0.2 available) | TypeScript 7 is the native-port major and its own migration, not a sweep item. |
-| `@tanstack/angular-table` | `^8.21.4` (9.0.0 available) | v9 is a breaking architectural rewrite — `Table` takes two type parameters and column pinning moved into feature modules. Needs its own migration. |
+| `@tanstack/angular-table` | `^8.21.4` (9.0.0 available) | v9 is a feature-registration rewrite, and migrating it is a public-API design project rather than a bump. See below. |
 | `@playwright/test` | `~1.59.1` (1.62.1 available) | The version is coupled to two prebuilt browser images: the GitHub E2E job runs `mcr.microsoft.com/playwright:v1.59.1-noble` and GitLab builds `e2e:v1.59.1-node22-r2`. Resolving past 1.59.x installs a browser revision neither image carries and every test fails at `browserType.launch`. Bumping means moving both images in the same change — see `tools/ci/e2e-image/README.md`. Note the range must be `~`, not `^`: a caret lets a lock refresh drift across the coupling silently. |
 
 These are **range caps, not overrides** — they express "this is the newest
@@ -148,6 +148,39 @@ A dependency can be constrained by something that is not in any manifest:
 When a bump is green locally but red in CI, suspect an environment check before
 suspecting the platform. Re-run the failing command with `CI=true` locally; it
 reproduced both of these immediately.
+
+### TanStack Table v9 — what blocks it
+
+Measured against 9.0.0 on 2026-08-05. The package ships its own migration
+reference at `@tanstack/angular-table/skills/migrate-v8-to-v9/SKILL.md`; read it
+first, and inspect `dist/types/` rather than reconstructing v9 from v8 memory.
+
+The mechanical part is small — 59 type errors, all in
+`packages/angular/table-tanstack/table-tanstack.ts`, plus physical-to-logical
+pinning renames (`'left'`/`'right'` become `'start'`/`'end'`). What makes it a
+project is three adopter-facing decisions it forces:
+
+1. **Hell's public generics change shape.** v9 puts `TFeatures` first on every
+   type: `Table<TFeatures, TData>`, `Row<TFeatures, TData>`,
+   `Cell<TFeatures, TData, TValue>`. Hell's shell classes are generic in `TData`
+   alone today, so every one of them either grows a parameter or pins one.
+2. **The permissive escape hatch is closed here.** TanStack special-cases
+   `TFeatures = any` to expose every feature API — exactly v8's bundled-feature
+   behaviour — but `@typescript-eslint/no-explicit-any` is an error in this repo
+   and `packages/angular` has no explicit `any` anywhere. So Hell has to name the
+   feature set its shell actually requires (it reads pinning, sizing, sorting,
+   filtering and pagination APIs), which in turn dictates what adopters must
+   register.
+3. **It likely adds a published peer dependency.** `@tanstack/angular-table` v9
+   re-exports only `rowPaginationFeature`. Registering pinning, sizing or sorting
+   means importing from `@tanstack/table-core`, which is not currently a Hell
+   dependency or peer at all.
+
+Scope beyond the library: 9 files construct tables (`createAngularTable` →
+`injectTable`, `getCoreRowModel()` dropped, features registered) across the docs
+app and both consumer fixtures, plus api-report regeneration, the table specs,
+e2e pinning assertions, and Breaking fragments for the peer range and the
+generic change.
 
 ## Validation
 
