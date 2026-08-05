@@ -125,7 +125,6 @@ Re-probe every entry here on each sweep; delete the ones that have retired.
 |---|---|---|
 | `typescript` | `~6.0.3` (7.0.2 available) | TypeScript 7 is the native-port major and its own migration, not a sweep item. |
 | `@tanstack/angular-table` | `^8.21.4` (9.0.0 available) | v9 is a breaking architectural rewrite — `Table` takes two type parameters and column pinning moved into feature modules. Needs its own migration. |
-| `@playwright/test` | `~1.59.1` (1.62.1 available) | The version is coupled to two prebuilt browser images: the GitHub E2E job runs `mcr.microsoft.com/playwright:v1.59.1-noble` and GitLab builds `e2e:v1.59.1-node22-r2`. Resolving past 1.59.x installs a browser revision neither image carries and every test fails at `browserType.launch`. Bumping means moving both images in the same change — see `tools/ci/e2e-image/README.md`. Note the range must be `~`, not `^`: a caret lets a lock refresh drift across the coupling silently. |
 
 These are **range caps, not overrides** — they express "this is the newest
 version that works" at the point where the dependency is declared, which is the
@@ -135,8 +134,11 @@ cheaper and more visible mechanism. Reach for a cap before an override.
 
 A dependency can be constrained by something that is not in any manifest:
 
-- **Playwright** is pinned by two prebuilt container images. A `^` range let a
-  lock refresh cross that coupling silently, and every E2E test died at
+- **Playwright** is pinned by two prebuilt container images — the GitHub E2E job
+  image and GitLab's `E2E_IMAGE_TAG`/`E2E_PLAYWRIGHT_VERSION`. All three move in
+  one change or none; see `tools/ci/e2e-image/README.md`. Keep the range a `~`:
+  a `^` let a lock refresh cross the coupling silently, installing a browser
+  revision neither image carried, and every E2E test died at
   `browserType.launch`.
 - **Changie** changes behavior based on the *environment*, not the platform:
   1.25.2 stops prompting when it detects CI. That made two fragment fixtures
