@@ -164,8 +164,8 @@ importers:
         specifier: 'catalog:'
         version: 22.1.0(@angular/cli@22.0.9(chokidar@5.0.0))(chokidar@5.0.0)(eslint@10.8.0(jiti@2.7.0))(typescript-eslint@8.66.0(eslint@10.8.0(jiti@2.7.0))(typescript@6.0.3))(typescript@6.0.3)
       changie:
-        specifier: 1.25.1
-        version: 1.25.1
+        specifier: 1.25.2
+        version: 1.25.2
       eslint:
         specifier: 'catalog:'
         version: 10.8.0(jiti@2.7.0)
@@ -2784,8 +2784,8 @@ packages:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
-  changie@1.25.1:
-    resolution: {integrity: sha512-0ZMNZUmKo0kD8ONywL3AB8yuihVm1jXsnKL+inCV/ZgmyZTb2Eoot18I4MiRNH0k1Vcm5M+2qm6M+iPABTZi4A==}
+  changie@1.25.2:
+    resolution: {integrity: sha512-dmhlZ5Dd0e5VXewYlnVR3LKobFG44w5FXO57J6CLPHQIufxVbBrxiMlq7zQ2O7GaB+YmvnJa4kSfAlhyfaB0KQ==}
     hasBin: true
 
   chardet@2.2.0:
@@ -6920,7 +6920,7 @@ snapshots:
 
   chalk@5.6.2: {}
 
-  changie@1.25.1: {}
+  changie@1.25.2: {}
 
   chardet@2.2.0: {}
 

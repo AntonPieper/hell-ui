@@ -58,7 +58,7 @@
     "@playwright/test": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "angular-eslint": "catalog:",
-    "changie": "1.25.1",
+    "changie": "1.25.2",
     "eslint": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
