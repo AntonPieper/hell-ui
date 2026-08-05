@@ -221,12 +221,30 @@
     inset-inline-end: var(--hell-table-pinned-after, 0);
   }
 
+  /*
+   * Boundary shadows for the pinned regions, cast toward the scrolling centre.
+   *
+   * `box-shadow` has no logical form, so the inline axis is carried in a
+   * variable that flips with the resolved direction. `:dir()` rather than
+   * `[dir='rtl']` so an inherited or `auto` direction resolves correctly too.
+   * `data-pinned-last` is the trailing start-pinned column, so its shadow runs
+   * toward the inline end; `data-pinned-first` is the leading end-pinned column
+   * and runs the opposite way.
+   */
+  hell-tanstack-table {
+    --hell-table-pinned-shadow-inline: 8px;
+  }
+
+  hell-tanstack-table:dir(rtl) {
+    --hell-table-pinned-shadow-inline: -8px;
+  }
+
   hell-tanstack-table [data-pinned-last='true'] {
-    box-shadow: 8px 0 8px -8px rgb(0 0 0 / 0.16);
+    box-shadow: var(--hell-table-pinned-shadow-inline) 0 8px -8px rgb(0 0 0 / 0.16);
   }
 
   hell-tanstack-table [data-pinned-first='true'] {
-    box-shadow: -8px 0 8px -8px rgb(0 0 0 / 0.16);
+    box-shadow: calc(-1 * var(--hell-table-pinned-shadow-inline)) 0 8px -8px rgb(0 0 0 / 0.16);
   }
 
   .hell-table-shell-status {

@@ -12,4 +12,7 @@ custom:
         `column.pin('start' | 'end')`. Because the shell now positions with logical
         inset properties, pinned columns follow the writing direction — under `dir="rtl"`
         a start-pinned column sticks to the right edge, where it previously stuck to the
-        left.
+        left, and the pinned-region boundary shadows flip with it so they keep casting
+        toward the scrolling centre. If you restyled those shadows, they now read the
+        `--hell-table-pinned-shadow-inline` custom property rather than hard-coded
+        physical offsets.

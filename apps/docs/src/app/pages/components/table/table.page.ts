@@ -446,15 +446,25 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               status components.
             </li>
             <li>
-              <code>hell-tanstack-pagination</code> (<code>HellTanStackPagination&lt;T&gt;</code>):
+              <code>hell-tanstack-pagination</code>
+              (<code>HellTanStackPagination&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackPaginationFeatures</code>):
               <code>table</code> (required), <code>pageSizeOptions</code>
               (<code>readonly number[]</code>), <code>ui</code>
               (<code>HellTanStackPaginationUi</code> over <code>root</code>/<code>pageSize</code>).
             </li>
             <li>
-              <code>hell-tanstack-global-filter</code> / <code>hell-tanstack-column-filter</code>:
-              <code>table</code> (required), <code>placeholder</code>, and (column)
-              <code>columnId</code> (required).
+              <code>hell-tanstack-global-filter</code>
+              (<code>HellTanStackGlobalFilter&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackGlobalFilterFeatures</code>):
+              <code>table</code> (required), <code>placeholder</code>.
+            </li>
+            <li>
+              <code>hell-tanstack-column-filter</code>
+              (<code>HellTanStackColumnFilter&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackColumnFilterFeatures</code>):
+              <code>table</code> (required), <code>columnId</code> (required),
+              <code>placeholder</code>.
             </li>
             <li>
               Column passthrough: set <code>columnDef.meta.hell.headerClass</code> /

@@ -315,6 +315,40 @@ class UncontrolledResizableShellHost {
   }));
 }
 
+/**
+ * Pins columns that are not already leading, so the rendered order differs from
+ * the declared leaf order. Every column carries a distinct size, which is what
+ * makes a `<colgroup>` built in the wrong order detectable.
+ */
+@Component({
+  selector: 'hell-test-nonleading-pinned-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class NonLeadingPinnedShellHost {
+  readonly columns: ColumnDef<typeof features, Person>[] = [
+    { id: 'a', header: 'A', size: 200 },
+    { id: 'b', header: 'B', size: 160 },
+    { id: 'c', header: 'C', size: 140 },
+    { id: 'd', header: 'D', size: 120 },
+  ];
+
+  readonly table = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    enableColumnResizing: true,
+    getRowId: (row) => row.id,
+    // 'c' pinned to start and 'a' to end, so the table renders c, b, d, a.
+    initialState: { columnPinning: { start: ['c'], end: ['a'] } },
+  }));
+}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -328,6 +362,7 @@ describe('Hell TanStack table shell', () => {
         StyledShellHost,
         ResizableShellHost,
         UncontrolledResizableShellHost,
+        NonLeadingPinnedShellHost,
       ],
     }).compileComponents();
   });
@@ -677,6 +712,43 @@ describe('Hell TanStack table shell', () => {
     // The rows-per-page select delegates to the nested hellNativeSelect root part.
     const select = query(root, '#styled-pagination select[hellNativeSelect]');
     expect(select.getAttribute('data-slot')).toBe('root');
+  });
+
+  it('lays the colgroup out in pinned render order, not declared column order', () => {
+    const fixture = TestBed.createComponent(NonLeadingPinnedShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    // TanStack renders start-pinned, then centre, then end-pinned. Reading the
+    // flat leaf list instead would emit the declared a, b, c, d order and hand
+    // every column the wrong width.
+    const headerIds = [...root.querySelectorAll('thead th')].map((cell) =>
+      cell.getAttribute('data-column-id'),
+    );
+    const bodyIds = [...root.querySelectorAll('tbody tr:first-child td')].map((cell) =>
+      cell.getAttribute('data-column-id'),
+    );
+    const colWidths = [...root.querySelectorAll('colgroup col')].map(
+      (col) => (col as HTMLTableColElement).style.width,
+    );
+
+    expect(headerIds).toEqual(['c', 'b', 'd', 'a']);
+    expect(bodyIds).toEqual(['c', 'b', 'd', 'a']);
+    expect(colWidths).toEqual(['140px', '160px', '120px', '200px']);
+  });
+
+  it('pairs each resize separator with its rendered neighbour when pinning reorders columns', () => {
+    const fixture = TestBed.createComponent(NonLeadingPinnedShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const handled = [...root.querySelectorAll('thead th')]
+      .filter((cell) => cell.querySelector('[data-hell-table-shell-resize-handle]'))
+      .map((cell) => cell.getAttribute('data-column-id'));
+
+    // 'a' renders last, so it has no trailing neighbour to transact against.
+    // Against the declared order it would be 'd' that lost its separator.
+    expect(handled).toEqual(['c', 'b', 'd']);
   });
 
   describe('recipes', () => {

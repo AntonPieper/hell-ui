@@ -55,11 +55,11 @@ import {
   getDefaultPaginationState,
   row_getIsExpanded,
   row_getVisibleCells,
+  table_getCenterVisibleLeafColumns,
   table_getEndVisibleLeafColumns,
   table_getPageCount,
   table_getStartVisibleLeafColumns,
   table_getTotalSize,
-  table_getVisibleLeafColumns,
   table_setColumnSizing,
   table_setGlobalFilter,
   table_setPageIndex,
@@ -919,9 +919,25 @@ export class HellTanStackTable<
     return this.bodyStrategy?.rows(items) ?? items;
   }
 
-  /** Visible leaf columns, the single source for the `<colgroup>` and colspans. */
+  /**
+   * Visible leaf columns in the order the table actually renders them.
+   *
+   * TanStack builds both header groups and row cells as start-pinned, then
+   * centre, then end-pinned, while `table_getVisibleLeafColumns()` keeps the
+   * original leaf order and ignores pinning. The `<colgroup>` and the resize
+   * pair both index positionally against the rendered cells, so both have to
+   * walk the pinned regions in that same order. Reading the flat list instead
+   * only agrees while every pinned column is already leading: pinning a column
+   * from further right would map `<col>` widths onto the wrong columns and pair
+   * each resize separator with the wrong neighbour.
+   */
   protected visibleLeafColumns(): readonly Column<TFeatures, TData, unknown>[] {
-    return table_getVisibleLeafColumns(this.table());
+    const table = this.table();
+    return [
+      ...table_getStartVisibleLeafColumns(table),
+      ...table_getCenterVisibleLeafColumns(table),
+      ...table_getEndVisibleLeafColumns(table),
+    ];
   }
 
   protected headerGroups() {
