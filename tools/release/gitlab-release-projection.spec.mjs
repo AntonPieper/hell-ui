@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  awaitPublishedVersion,
   choosePublishedPackage,
   collectRuleLivenessErrors,
   decidePublishCommand,
@@ -293,5 +294,79 @@ describe('choosePublishedPackage', () => {
     expect(packageWebUrl('https://example.invalid/group/project/', 7)).toBe(
       'https://example.invalid/group/project/-/packages/7',
     );
+  });
+});
+
+describe('awaitPublishedVersion', () => {
+  // The registry indexes an accepted upload asynchronously, so a single
+  // immediate read after `pnpm publish` can miss the version it just took.
+  // This happened on the 0.3.0 seed: the upload succeeded and the verification
+  // read did not list it, failing a publication that had in fact worked.
+  const reads = (...results) => {
+    const queue = [...results];
+    const calls = { count: 0 };
+    return [
+      () => {
+        calls.count += 1;
+        return Promise.resolve(queue.shift());
+      },
+      calls,
+    ];
+  };
+  const collectSleeps = () => {
+    const slept = [];
+    return [(ms) => (slept.push(ms), Promise.resolve()), slept];
+  };
+
+  it('verifies on the first read when the registry already lists the version', async () => {
+    const [read, calls] = reads({ failures: [], versions: [version] });
+    const [sleep, slept] = collectSleeps();
+    const result = await awaitPublishedVersion({ read, version, attempts: 5, delayMs: 10, sleep });
+    expect(result).toEqual({ verified: true, failures: [], attempts: 1 });
+    expect(calls.count).toBe(1);
+    expect(slept).toEqual([]);
+  });
+
+  it('keeps reading while the version has not been indexed yet', async () => {
+    const [read, calls] = reads(
+      { failures: [], versions: [] },
+      { failures: [], versions: ['0.2.0'] },
+      { failures: [], versions: ['0.2.0', version] },
+    );
+    const [sleep, slept] = collectSleeps();
+    const result = await awaitPublishedVersion({ read, version, attempts: 5, delayMs: 10, sleep });
+    expect(result).toEqual({ verified: true, failures: [], attempts: 3 });
+    expect(calls.count).toBe(3);
+    expect(slept).toEqual([10, 10]);
+  });
+
+  // Fail-closed: an unconfirmable publication is still a failed job, and the
+  // message has to say the budget was spent rather than implying nothing was
+  // uploaded.
+  it('fails closed when the budget is spent, naming the window it waited', async () => {
+    const [read, calls] = reads(
+      { failures: [], versions: [] },
+      { failures: [], versions: [] },
+      { failures: [], versions: [] },
+    );
+    const [sleep, slept] = collectSleeps();
+    const result = await awaitPublishedVersion({ read, version, attempts: 3, delayMs: 10, sleep });
+    expect(result.verified).toBe(false);
+    expect(result.attempts).toBe(3);
+    expect(calls.count).toBe(3);
+    // No sleep after the final attempt — the budget ends on a read, not a wait.
+    expect(slept).toEqual([10, 10]);
+    expect(result.failures.some((failure) => /3 attempt/.test(failure))).toBe(true);
+  });
+
+  // A refused credential is not eventual consistency: retrying it would only
+  // turn a clear 401/403 into a slow, vague failure.
+  it('stops immediately when the read itself fails', async () => {
+    const [read, calls] = reads({ failures: ['HTTP 403'], versions: [] });
+    const [sleep, slept] = collectSleeps();
+    const result = await awaitPublishedVersion({ read, version, attempts: 5, delayMs: 10, sleep });
+    expect(result).toEqual({ verified: false, failures: ['HTTP 403'], attempts: 1 });
+    expect(calls.count).toBe(1);
+    expect(slept).toEqual([]);
   });
 });
