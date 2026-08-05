@@ -1,0 +1,5 @@
+kind: Breaking
+body: The optional `pdfjs-dist` peer dependency moved from `5.6.205` to `6.2.108`. Only consumers of the `hell-ui/pdf-viewer` entry point are affected.
+time: 2026-08-05T12:34:24.539679+02:00
+custom:
+    migration: Upgrade `pdfjs-dist` to `6.2.108` alongside this release. The peer is pinned exactly, so a 5.x install no longer satisfies it.
