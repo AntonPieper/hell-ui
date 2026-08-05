@@ -385,7 +385,12 @@ jobs:
   # without editing.
   publish-github-release:
     name: Publish GitHub release
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    # A skip propagates down the whole dependency chain, and publish-npm skips
+    # whenever the npmjs switch is off — its standing state. Without a status
+    # function this job therefore never ran, exactly as draft-github-release
+    # would not have. Depend on the draft's result explicitly rather than on
+    # the implicit success() the propagated skip defeats.
+    if: ${{ !cancelled() && needs.draft-github-release.result == 'success' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     needs: draft-github-release
     runs-on: ubuntu-latest
     timeout-minutes: 10
