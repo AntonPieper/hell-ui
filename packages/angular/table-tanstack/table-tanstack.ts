@@ -1132,15 +1132,17 @@ export class HellTanStackTable<
    * `columnSizing` updater.
    *
    * The resize runtime writes both sides back to back with no render in
-   * between, and TanStack's own `columnSizing` state does not refresh between
-   * two synchronous updaters: the Angular adapter's `onStateChange` closes over
-   * the state captured when its options last recomputed, and the table proxy
-   * caches `setColumnSizing` after the first access. A per-side updater would
+   * between, and the `columnSizing` an updater reads does not refresh across two
+   * synchronous writes: the slice follows Angular reactivity, which has not run
+   * again by the time the second updater executes. A per-side updater would
    * therefore compute the second write from the same state as the first and
-   * drop the leading column's size, leaving the pair total — and with it
-   * `getTotalSize()` — drifting by the whole delta on every move. Carrying the
+   * drop the leading column's size, leaving the pair total — and with it the
+   * table total — drifting by the whole delta on every move. Carrying the
    * accumulated writes makes each call land both sides at once, which is also
    * correct when the caller controls `columnSizing` through a signal.
+   *
+   * `UncontrolledResizableShellHost` in the spec is the regression guard: it
+   * leaves sizing to TanStack, where the staleness is observable.
    */
   private writeColumnSize(
     transaction: HellColumnResizeTransaction,
