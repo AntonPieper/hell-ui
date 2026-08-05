@@ -12,7 +12,7 @@ docs bundle and runs the tests against it.
   `$CI_REGISTRY_IMAGE/e2e`. The registry path itself is shown on the
   project's Container Registry page and is deliberately never written in this
   repository.
-- **Tag**: `v<playwright>-node<major>[-rN]`, e.g. `v1.59.1-node22-r2` —
+- **Tag**: `v<playwright>-node<major>[-rN]`, e.g. `v1.62.1-node22` —
   the workspace's locked `@playwright/test` version (`pnpm-lock.yaml`) plus
   the Node major from `.node-version`, with an optional revision suffix for
   derivation changes that move neither pin. The tag says exactly which
