@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   auditRelease,
+  parseRestoreArgs,
   planRestoration,
   unreleasedReleaseTags,
 } from './gitlab-release-drift.mjs';
@@ -231,5 +232,45 @@ describe('unreleasedReleaseTags', () => {
 
   it('is empty when every release tag has its release', () => {
     expect(unreleasedReleaseTags({ tags: [tag()], releases: [release()] })).toEqual([]);
+  });
+});
+
+describe('parseRestoreArgs', () => {
+  // The documented invocation is `pnpm restore:release -- <tag>`, and pnpm
+  // forwards that separator into argv instead of consuming it. Every spelling
+  // the docs and this tool's own error messages tell a maintainer to type has
+  // to reach the same decision.
+  it('accepts the documented invocation, whose -- separator pnpm forwards', () => {
+    expect(parseRestoreArgs(['--', `v${version}`])).toEqual({
+      apply: false,
+      positional: [`v${version}`],
+    });
+  });
+
+  it('accepts --apply after the forwarded separator', () => {
+    expect(parseRestoreArgs(['--', `v${version}`, '--apply'])).toEqual({
+      apply: true,
+      positional: [`v${version}`],
+    });
+  });
+
+  it('accepts the bare invocation without a separator', () => {
+    expect(parseRestoreArgs([`v${version}`, '--apply'])).toEqual({
+      apply: true,
+      positional: [`v${version}`],
+    });
+  });
+
+  // Dropping the separator must not also swallow a real mistake: two tags is
+  // still ambiguous, and no tag is still a usage error.
+  it('keeps a second positional so an ambiguous invocation still refuses', () => {
+    expect(parseRestoreArgs(['--', `v${version}`, 'v0.4.0']).positional).toEqual([
+      `v${version}`,
+      'v0.4.0',
+    ]);
+  });
+
+  it('leaves no positional when only the separator is given', () => {
+    expect(parseRestoreArgs(['--']).positional).toEqual([]);
   });
 });

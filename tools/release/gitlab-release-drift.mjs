@@ -271,9 +271,23 @@ async function runAudit(args) {
   return 0;
 }
 
+// Splits the restoration command's argv. `pnpm restore:release -- <tag>` is
+// the documented invocation everywhere — this file's own error messages, the
+// sweep's red output, and docs/release/drift-sweep.md — but pnpm forwards that
+// `--` into argv rather than consuming it, so the separator has to be dropped
+// here or the documented spelling reads the separator as the tag and refuses.
+// Dropping it is not the same as ignoring extra arguments: a second positional
+// still survives, so an ambiguous invocation still fails the usage check.
+export function parseRestoreArgs(args) {
+  const meaningful = args.filter((arg) => arg !== '--');
+  return {
+    apply: meaningful.includes('--apply'),
+    positional: meaningful.filter((arg) => arg !== '--apply'),
+  };
+}
+
 async function runRestore(args) {
-  const apply = args.includes('--apply');
-  const positional = args.filter((arg) => arg !== '--apply');
+  const { apply, positional } = parseRestoreArgs(args);
   if (positional.length !== 1) {
     console.error('Usage: pnpm restore:release -- <tag> [--apply]');
     return 2;
