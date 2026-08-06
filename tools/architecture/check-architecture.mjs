@@ -208,6 +208,19 @@ const architectureCheckManifest = [
     run: checkDialogScopedModalitySeam,
   },
   {
+    // Attribute ownership over ng-primitives attrBinding writers
+    // (docs/adr/floating-dismissal.md 2026-08-06 amendment,
+    // docs/architecture/manual-runtime-ownership.md). The seam depends on
+    // upstream's render-effect scheduling and host-directive construction
+    // order, so — like the other two ng-primitives seams — the recorded
+    // version must match the installed package and the helpers may appear
+    // only at the reviewed call sites.
+    name: 'ngp-attr-ownership-seam',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkNgpAttrOwnershipSeam,
+  },
+  {
     // One Control Value Authority (docs/adr/0001-control-value-authority.md,
     // #277): a control class implements exactly one Angular forms contract
     // family. Angular's migration guidance forbids implementing both a
@@ -1558,6 +1571,71 @@ function checkNgpStateWriterContract() {
 // scoped dialog owns those two decisions by writing ng-primitives' own
 // focus-trap escape marker. That reliance is version-bound: keep it in one
 // file, and keep the recorded version matching the installed package.
+// Attribute-ownership seam over ng-primitives' imperative attrBinding writers.
+// The helpers only work while three version-bound assumptions hold — upstream
+// binds the contested attributes from render effects, effects run in
+// registration order, and each call site reads the upstream writer's own
+// trigger signals — so the seam carries a version constant that must match the
+// installed package (forcing a re-probe on every bump), the form-control
+// helper must keep sharing upstream's `controlStatus()` trigger, and the
+// helpers may appear only at the reviewed call sites below. A new call site is
+// a new claim about upstream scheduling: review it against the installed
+// bundle before adding it here.
+function checkNgpAttrOwnershipSeam() {
+  const seamRelPath = 'packages/angular/internal/ng-primitives/ngp-attr-ownership.ts';
+  const seamSource = readFile(join(root, seamRelPath));
+  const ngpPackage = readJsonFile(
+    join(root, 'packages/angular/node_modules/ng-primitives/package.json'),
+  );
+  const expectedVersion = `ng-primitives@${ngpPackage.version}`;
+
+  if (!seamSource.includes(`HELL_NGP_ATTR_OWNERSHIP_VERSION = '${expectedVersion}'`)) {
+    failures.push(
+      `ngp attr-ownership seam version must match installed ${expectedVersion}; re-probe the attrBinding scheduling assumptions in ${seamRelPath} before moving the pin`,
+    );
+  }
+
+  // The form-control helper is only correct while it re-runs whenever
+  // upstream's aria-invalid writer does, and controlStatus() is that shared
+  // trigger. Dropping the import silently breaks the lockstep guarantee.
+  if (!/import\s*\{[^}]*\bcontrolStatus\b[^}]*\}\s*from\s*'ng-primitives\/utils'/.test(seamSource)) {
+    failures.push(
+      `${seamRelPath} must keep reading controlStatus from ng-primitives/utils — it is the shared trigger that keeps hellOwnsControlAriaInvalid in lockstep with upstream's aria-invalid writer`,
+    );
+  }
+
+  const allowedOwnershipFiles = new Set([
+    seamRelPath,
+    'packages/angular/internal/ng-primitives/public-api.ts',
+    // aria-invalid without a touched gate (NgpInput-family hosts).
+    'packages/angular/input/input.ts',
+    'packages/angular/select/select.ts',
+    'packages/angular/date-input/date-input.ts',
+    'packages/angular/time-input/time-input.ts',
+    'packages/angular/number-input/number-input.ts',
+    // aria-disabled absent on enabled radio items.
+    'packages/angular/radio/radio.ts',
+    // aria-modal="false" on scoped dialogs.
+    'packages/angular/dialog/dialog.ts',
+  ]);
+  const ownershipTokens = [
+    'HELL_NGP_ATTR_OWNERSHIP_VERSION',
+    'hellOwnsNgpAttribute',
+    'hellOwnsControlAriaInvalid',
+  ];
+
+  for (const file of libraryPackageFiles().filter((f) => f.endsWith('.ts'))) {
+    const rel = relPath(file);
+    if (allowedOwnershipFiles.has(rel)) continue;
+    const source = readFile(file);
+    if (ownershipTokens.some((token) => source.includes(token))) {
+      failures.push(
+        `ngp attr-ownership usage is not approved in ${rel}; the seam's call sites are reviewed per upstream version — see ${seamRelPath}`,
+      );
+    }
+  }
+}
+
 function checkDialogScopedModalitySeam() {
   const seamRelPath = 'packages/angular/dialog/dialog-scope.ts';
   const seamSource = readFile(join(root, seamRelPath));

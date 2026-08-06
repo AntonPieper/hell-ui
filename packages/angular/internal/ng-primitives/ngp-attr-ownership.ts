@@ -12,7 +12,27 @@ import { controlStatus } from 'ng-primitives/utils';
  * effect runs later in every shared flush. The write callback must read the
  * same signals the upstream writer reads, so both re-run together and the
  * later registration decides every time.
+ *
+ * This is a deliberate version-bound runtime seam (see the scoped-modality
+ * amendments in `docs/adr/floating-dismissal.md` and the attribute-ownership
+ * row in `docs/architecture/manual-runtime-ownership.md`), not a defect
+ * bridge: the contracts it holds — `aria-invalid` without a touched gate,
+ * `aria-disabled` absent on enabled radio items, `aria-modal="false"` on
+ * scoped dialogs — survive upgrades. It rests on three assumptions that the
+ * `ngp-attr-ownership-seam` architecture check re-binds to the installed
+ * version on every bump: upstream binds these attributes via `attrBinding`
+ * render effects (not Angular host bindings), effects run in registration
+ * order within a flush, and the signals each call site reads are the ones the
+ * upstream writer is keyed on. A call site retires when upstream either
+ * returns the attribute to an Angular host binding or exposes an input/config
+ * that expresses Hell's contract (then feed the source instead, as
+ * `HellCheckbox` does for `aria-required` and `hellTabset` does for `wrap`).
+ *
+ * @internal
  */
+
+/** ng-primitives release whose attrBinding scheduling this seam is written against. */
+export const HELL_NGP_ATTR_OWNERSHIP_VERSION = 'ng-primitives@0.128.8';
 export function hellOwnsNgpAttribute(write: () => void): void {
   // Mirror ng-primitives' isomorphic scheduling so the write order also holds
   // during server rendering, where upstream binds via plain effects.

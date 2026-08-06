@@ -158,7 +158,7 @@ reachable.
 | --- | --- |
 | Portal lifecycle, dismiss guards, Escape routing through `NgpOverlayRegistry`, exit animations, focus restore to the opener, `closeOnNavigation` | Yes. `NgpDialogManager` / `NgpDialogRef` keep owning all of it; scoped modality changes none of it. |
 | Backdrop geometry | Yes — Hell-owned already, through the shared `HellFloatingScopedInsetsRuntime`. |
-| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` writes the attribute through its own host binding (declared after the `NgpDialog` host directive, so it is the one that lands) rather than binding the exposed input. |
+| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` cannot bind the exposed input; how it writes the attribute instead is version-bound — see the 2026-08-06 amendment below. |
 | Focus trap scope | **No.** `NgpDialog` applies `NgpFocusTrap` as a host directive and exposes none of its inputs, and `ng-primitives/dialog` exports no `ngpDialog` primitive function — only `provideDialogState` / `injectDialogState`. The popover path (`ngpPopover({}) + ngpFocusTrap({ disabled })`, which is how `trapFocus` works) has no dialog equivalent. Angular's host-directive input exposure is template-bound, so the library cannot drive it either. |
 | Page-wide `aria-hidden` | **No.** `NgpDialogManager.hideNonDialogContentFromAssistiveTechnology` runs unconditionally for the first open, its previous-value map is private, and `NgpDialogConfig` has no switch. Left alone it makes the still-focusable shell a descendant of `aria-hidden="true"`, which is the violation scoped modality exists to avoid. |
 | Background scroll | Partly. `NgpDialogConfig.scrollStrategy` is public, but `BlockScrollStrategy` targets the document, and inside an app shell the document does not scroll — the Dialog Scope root is the real scroll container. |
@@ -284,6 +284,42 @@ Constraints:
   asserted as the three-case rule above rather than as per-step expectations,
   and each mutation-verified. Both defects this ADR records shipped because
   coverage pinned one order.
+
+## Amendment: attribute ownership over imperative primitive writers (2026-08-06)
+
+The scoped-modality amendment above recorded that `HellDialog` holds
+`aria-modal` through an Angular host binding declared after the `NgpDialog`
+host directive. `ng-primitives@0.128` invalidated that mechanism — not the
+decision: the dialog primitive (like the input family and radio items) now
+writes its host attributes imperatively via `attrBinding` render effects,
+which run after every Angular host binding, so a competing binding can never
+hold the attribute again.
+
+The replacement is the attribute-ownership seam in
+`packages/angular/internal/ng-primitives/ngp-attr-ownership.ts`: the owning
+component re-asserts the attribute from an effect registered after the
+primitive's (host directives construct before their host) whose callback reads
+the same signals the upstream writer reads, so both re-run together and the
+later registration decides every flush. The seam holds three deliberate
+contract differences, none of which is a defect bridge:
+
+- `aria-modal="false"` on scoped dialogs (this ADR's scoped-modality
+  amendment — the decision is unchanged, only the write mechanism moved);
+- `aria-invalid` without upstream's `invalid && touched` gate on the
+  `NgpInput` family (explicit `invalid` inputs, visual-only drafts, and
+  enclosing Field validation advertise immediately);
+- `aria-disabled` absent on enabled radio items (the native `disabled`
+  attribute carries the state; upstream writes a literal `"false"`).
+
+The reliance on upstream's effect scheduling and on host-directive
+construction order is version-bound, so it gets the same treatment as the
+`[data-focus-trap]` marker: a version constant that the
+`ngp-attr-ownership-seam` architecture check binds to the installed package,
+plus a reviewed allowlist of call sites. A call site retires when upstream
+either returns the attribute to an Angular host binding or exposes an
+input/config expressing Hell's contract — then feed the source instead, as
+`HellCheckbox` does for `aria-required` and `hellTabset` does for tab
+wrapping.
 
 ## Consequences
 

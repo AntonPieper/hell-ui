@@ -41,6 +41,14 @@ value/disabled setters, or does it still need a guarded state-provider seam?
 
 ## Decision
 
+> **Current decision (2026-08-06, `ng-primitives@0.128.8`): the seam is
+> combobox-only.** The text below is the accepted 2026-07-03 decision against
+> `0.123.0`, kept for the record; its radio-group and roving-focus scope was
+> retired by the [2026-08-05 recheck](#2026-08-05-recheck-ng-primitives01287),
+> executed with the 0.128.8 pin move — radio uses the public
+> `setValue(value, { emit: false })` / `setDisabled(disabled)` pair and roving
+> focus uses the non-focusing `setTabStop(id)`.
+
 Keep the adapter with guard for **combobox and radio group only**; select now
 uses the public `NgpSelectState.setValue` / `setDisabled` API and is banned
 from the adapter by the architecture guard.
@@ -131,8 +139,9 @@ radio bridge allowance in the architecture guard are deleted.
 - `ng-primitives` stays intentionally exact-pinned while Hell depends on the `State<T>` channel shape for combobox.
 - Any ng-primitives upgrade must rerun this ADR check against the upgraded typings/docs before changing the pin.
 - The architecture guard must continue to reject ad hoc ng-primitives state writes outside the adapter, including typed direct channel writes.
-- When a future ng-primitives release adds public combobox and radio-group
-  value + disabled setters with a silent-update option, remove those writes
-  from the adapter (as done for select in 0.123.0); when roving focus gains a
-  non-focusing active-item setter (or radio maps checked state into roving
-  focus), remove `writeRovingFocusActiveItem` and delete the adapter entirely.
+- The select (0.123.0), radio-group, and roving-focus (0.128.8) retirements
+  are done: those primitives call public setters directly and are banned from
+  the adapter by the architecture guard. One step remains — when a future
+  ng-primitives release adds public combobox value + disabled setters with a
+  silent-update option, move `HellCombobox` onto them and delete the adapter
+  entirely.
