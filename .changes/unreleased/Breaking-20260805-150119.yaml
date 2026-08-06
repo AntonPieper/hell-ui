@@ -1,5 +1,5 @@
 kind: Breaking
-body: 'Column pinning in the `hell-ui/table-tanstack` shell is now logical rather than physical: the shell publishes `data-pinned="start"` and `data-pinned="end"` instead of `"left"`/`"right"`, and `hell-ui/table/styles.css` positions pinned columns with `inset-inline-start`/`inset-inline-end`.'
+body: 'Column pinning in the `hell-ui/table-tanstack` shell is now logical rather than physical: the shell publishes `data-pinned="start"` and `data-pinned="end"` instead of `"left"`/`"right"`, and the pinning rules moved into the opt-in `hell-ui/table-tanstack/styles.css`, which positions pinned columns with `inset-inline-start`/`inset-inline-end`.'
 time: 2026-08-05T15:01:19.962397+02:00
 custom:
     migration: |-

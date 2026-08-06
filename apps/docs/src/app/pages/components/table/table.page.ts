@@ -78,6 +78,14 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             small static or app-driven tables; use the shell when TanStack already owns the data.
           </p>
           <p>
+            The shell has its own stylesheet: load
+            <code>hell-ui/table-tanstack/styles.css</code> instead of
+            <code>hell-ui/table/styles.css</code> when you render it. It imports the primitive
+            table styles itself, so it stays a single import, and it is what carries the pinned
+            column rules — sticky positioning, the logical start/end insets, and the boundary
+            shadows. The primitives stylesheet alone renders the shell without any of them.
+          </p>
+          <p>
             TanStack v9 gates every feature API on the features a table registers, so each shell
             class states what it reads. <code>hell-tanstack-table</code> requires
             <code>columnPinningFeature</code>, <code>columnResizingFeature</code>,
