@@ -285,41 +285,18 @@ Constraints:
   and each mutation-verified. Both defects this ADR records shipped because
   coverage pinned one order.
 
-## Amendment: attribute ownership over imperative primitive writers (2026-08-06)
+## Amendment: `aria-modal` write mechanism (2026-08-06)
 
 The scoped-modality amendment above recorded that `HellDialog` holds
 `aria-modal` through an Angular host binding declared after the `NgpDialog`
 host directive. `ng-primitives@0.128` invalidated that mechanism — not the
-decision: the dialog primitive (like the input family and radio items) now
-writes its host attributes imperatively via `attrBinding` render effects,
-which run after every Angular host binding, so a competing binding can never
-hold the attribute again.
-
-The replacement is the attribute-ownership seam in
-`packages/angular/internal/ng-primitives/ngp-attr-ownership.ts`: the owning
-component re-asserts the attribute from an effect registered after the
-primitive's (host directives construct before their host) whose callback reads
-the same signals the upstream writer reads, so both re-run together and the
-later registration decides every flush. The seam holds three deliberate
-contract differences, none of which is a defect bridge:
-
-- `aria-modal="false"` on scoped dialogs (this ADR's scoped-modality
-  amendment — the decision is unchanged, only the write mechanism moved);
-- `aria-invalid` without upstream's `invalid && touched` gate on the
-  `NgpInput` family (explicit `invalid` inputs, visual-only drafts, and
-  enclosing Field validation advertise immediately);
-- `aria-disabled` absent on enabled radio items (the native `disabled`
-  attribute carries the state; upstream writes a literal `"false"`).
-
-The reliance on upstream's effect scheduling and on host-directive
-construction order is version-bound, so it gets the same treatment as the
-`[data-focus-trap]` marker: a version constant that the
-`ngp-attr-ownership-seam` architecture check binds to the installed package,
-plus a reviewed allowlist of call sites. A call site retires when upstream
-either returns the attribute to an Angular host binding or exposes an
-input/config expressing Hell's contract — then feed the source instead, as
-`HellCheckbox` does for `aria-required` and `hellTabset` does for tab
-wrapping.
+decision: `ngpDialog` now writes the attribute imperatively via an
+`attrBinding` render effect, which runs after every Angular host binding, so
+a competing binding can never hold it again. `HellDialog` now re-asserts the
+scoped `aria-modal="false"` through the cross-cutting attribute-ownership
+seam; the decision, ordering argument, guard, and removal conditions live in
+`docs/adr/ngp-attribute-ownership.md`. The scoped-modality decision itself —
+what value a scoped dialog advertises and why — is unchanged and stays here.
 
 ## Consequences
 

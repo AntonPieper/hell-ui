@@ -209,7 +209,7 @@ const architectureCheckManifest = [
   },
   {
     // Attribute ownership over ng-primitives attrBinding writers
-    // (docs/adr/floating-dismissal.md 2026-08-06 amendment,
+    // (docs/adr/ngp-attribute-ownership.md,
     // docs/architecture/manual-runtime-ownership.md). The seam depends on
     // upstream's render-effect scheduling and host-directive construction
     // order, so — like the other two ng-primitives seams — the recorded

@@ -72,7 +72,8 @@ class HellRadioRovingRegistry {
  * Angular forms — Signal Forms `[formField]` via the `FormValueControl`
  * contract, and `formControl`/`ngModel` via Angular's built-in Signal Forms
  * interoperability. External writes synchronize into `ng-primitives` through
- * the guarded state adapter without re-emitting a selection commit.
+ * its public silent setters (`setValue(value, { emit: false })` /
+ * `setDisabled`) without re-emitting a selection commit.
  */
 @Directive({
   selector: '[hellRadioGroup]',

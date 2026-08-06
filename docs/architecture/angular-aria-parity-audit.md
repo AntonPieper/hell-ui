@@ -11,8 +11,9 @@
   `docs/adr/projection-first-interactions.md`.
 - Version context: `packages/angular/package.json` already peers on
   `@angular/core`/`@angular/cdk` `^22.0.0`, so stable Angular Aria has no
-  framework-version gate. `ng-primitives` remains intentionally pinned at
-  `0.123.0` per the ng-primitives state-adapter ADR.
+  framework-version gate. `ng-primitives` remains intentionally exact-pinned
+  (at `0.128.8` as of 2026-08-06) per the ng-primitives state-adapter ADR;
+  the seam that motivates the pin is combobox-only since that release.
 
 ## Angular Aria stable surface (as checked)
 
@@ -82,8 +83,9 @@ stable framework primitive could replace — also implicates surfaces outside
 this audit's four areas. Recorded here for triage, not decided here:
 
 - **ng-primitives state adapter** (`docs/adr/ng-primitives-state-adapter.md`):
-  the combobox/radio `State<T>` channel writes are the repo's canonical
-  version-bound seam and the reason for the `0.123.0` pin. Angular Aria's
+  the combobox `State<T>` channel writes are the repo's canonical
+  version-bound seam and the reason for the exact pin (radio and roving-focus
+  retired onto public setters with ng-primitives 0.128.8). Angular Aria's
   Combobox/Listbox/Select now cover the same patterns with signal-forms
   integration, making an Aria-backed rich Select/Combobox a credible pin-free
   path — but that is a delegated-engine swap for public form controls, a far

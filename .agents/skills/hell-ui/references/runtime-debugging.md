@@ -31,9 +31,10 @@ hard UI bugs.
   an ng-primitives `attrBinding` render-effect writer beating an Angular host
   binding (0.128+). Hell's deliberate contract differences are re-asserted
   through `packages/angular/internal/ng-primitives/ngp-attr-ownership.ts`
-  (version-bound; call sites allowlisted by the `ngp-attr-ownership-seam`
-  architecture check). Never add a competing host binding — either feed the
-  upstream input/config or extend the seam.
+  (decision record: `docs/adr/ngp-attribute-ownership.md`; version-bound, call
+  sites allowlisted by the `ngp-attr-ownership-seam` architecture check).
+  Never add a competing host binding — either feed the upstream input/config
+  or extend the seam.
 - Current Angular, CDK, ng-primitives, CodeMirror, pdf.js, TanStack,
   Playwright, pnpm, or Vercel facts require the configured docs/MCP path before
   relying on memory.

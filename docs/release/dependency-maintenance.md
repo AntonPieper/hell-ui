@@ -67,11 +67,11 @@ maintainer approval **and** these probes before merge:
    upstream defect. Re-probe by deleting it and running its guard tests, not by
    reading upstream's changelog — delete it once upstream has fixed it.
 3. **Attribute-ownership effects** — every `hellOwnsNgpAttribute` /
-   `hellOwnsControlAriaInvalid` call site (see
-   `packages/angular/internal/ng-primitives/ngp-attr-ownership.ts`). These are
-   deliberate contract differences, not defect bridges: they survive upgrades,
-   but each one reads the same signals its upstream writer reads, so verify
-   those triggers still hold on the new version.
+   `hellOwnsControlAriaInvalid` call site
+   (`docs/adr/ngp-attribute-ownership.md`). These are deliberate contract
+   differences, not defect bridges: they survive upgrades, but each one must
+   wake with its upstream writer, so verify those triggers still hold on the
+   new version.
 
 Retired probes, for the record: the toggle-group mode-ARIA override
 (`toggleGroupItemModeAria()`) was deleted when 0.128 fixed upstream issue #813,
@@ -79,10 +79,15 @@ and pagination keyboard activation turned out not to be upstream-retirable at
 all — `hellPageLink` composes no upstream pagination primitives, so
 `paginationKeyboardActivation` is Hell's own implementation and stays.
 
-Three pins move together and are enforced by
+Five pins move together and are enforced by
 `tools/architecture/check-architecture.mjs`: the catalog entry, the
-`ng-primitives` peer in `packages/angular/package.json`, and the adapter version
-constant.
+`ng-primitives` peer in `packages/angular/package.json`, and one version
+constant per version-bound seam — `HELL_NGP_STATE_WRITER_VERSION`
+(state adapter), `HELL_DIALOG_SCOPED_MODALITY_VERSION` (focus-trap escape
+marker), and `HELL_NGP_ATTR_OWNERSHIP_VERSION` (attribute ownership). Each
+constant exists to force a re-probe of its seam's assumptions before the pin
+moves; a new version-bound seam must add its constant to its architecture
+check and to this list.
 
 ## Overrides
 

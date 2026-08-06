@@ -39,15 +39,36 @@ value/disabled setters, or does it still need a guarded state-provider seam?
 | `NgpRadioGroup` | `readonly value: InputSignal<T \| null>`, `ngpRadioGroupValueChange`, and `select(value)` which emits `valueChange`. | `readonly disabled: InputSignalWithTransform<boolean, BooleanInput>`; no public disabled setter. | Not enough — `select(value)` emits, so it is not a `writeValue` hook. | Keep the adapter for radio value and disabled sync. |
 | Roving focus group | `setActiveItem(id, origin)` exists but DOM-focuses the item via `focusMonitor.focusVia`. | n/a | No non-focusing setter. | Keep the non-focusing `activeItem` channel write for radio checked-item tab stops. |
 
-## Decision
+## Decision (current — 2026-08-06, `ng-primitives@0.128.8`)
 
-> **Current decision (2026-08-06, `ng-primitives@0.128.8`): the seam is
-> combobox-only.** The text below is the accepted 2026-07-03 decision against
-> `0.123.0`, kept for the record; its radio-group and roving-focus scope was
-> retired by the [2026-08-05 recheck](#2026-08-05-recheck-ng-primitives01287),
-> executed with the 0.128.8 pin move — radio uses the public
-> `setValue(value, { emit: false })` / `setDisabled(disabled)` pair and roving
-> focus uses the non-focusing `setTabStop(id)`.
+The seam is **combobox-only**. `writeComboboxStateValue` and
+`writeComboboxStateDisabled` are the only guarded `State<T>` channel writes;
+select (since 0.123.0), radio group, and roving focus (since 0.128.8) call
+public ng-primitives setters directly — `setValue(value, { emit: false })` /
+`setDisabled(disabled)` and the non-focusing `setTabStop(id)` — and are banned
+from the adapter by the architecture guard.
+
+This is not a claim that combobox has complete public CVA setters; it is a
+deliberate internal compatibility seam over the documented state-provider API
+until those setters exist. The package stays exact-pinned (workspace catalog
+and published peer) while Hell depends on the combobox channel shape. The
+adapter is deleted entirely once combobox gains public value + disabled
+setters with a silent-update option.
+
+## Guardrails
+
+- `ngp-state-adapters.ts` owns the only production writes to the version-bound `State<T>.value` and `State<T>.disabled` channels, and combobox is its only client.
+- `tools/architecture/check-architecture.mjs` fails if the adapter version constant drifts from the installed `ng-primitives` package, or if workspace/package peer pins stop matching that installed version.
+- The architecture guard rejects direct `State<T>.value.set(...)`, `State<T>.disabled.set(...)`, indexed state-channel writes, retired private bridge tokens, and direct primitive-instance `.state` access outside the adapter seam.
+- The guarded writer tokens are combobox-only; the retired select, radio-group, and roving-focus writers no longer exist, and reintroducing writer usage outside the reviewed bridge files fails the guard. Primitives with public setters must use them.
+- The adapter is internal-only and must not be re-exported from the adapters barrel.
+
+## Superseded decision (2026-07-03, `ng-primitives@0.123.0`)
+
+> Superseded by the current decision above: the radio-group and roving-focus
+> scope was retired by the
+> [2026-08-05 recheck](#2026-08-05-recheck-ng-primitives01287), executed with
+> the 0.128.8 pin move.
 
 Keep the adapter with guard for **combobox and radio group only**; select now
 uses the public `NgpSelectState.setValue` / `setDisabled` API and is banned
@@ -69,14 +90,6 @@ peer dependency stay pinned to `ng-primitives@0.123.0` while Hell depends on
 the remaining channel shape. The documented state-provider seam is public
 enough for guarded internal use, and the version-bound reliance is explicit,
 tested, and architecture-guarded.
-
-## Guardrails
-
-- `ngp-state-adapters.ts` owns the only production writes to the version-bound `State<T>.value` and `State<T>.disabled` channels.
-- `tools/architecture/check-architecture.mjs` fails if the adapter version constant drifts from the installed `ng-primitives` package, or if workspace/package peer pins stop matching that installed version.
-- The architecture guard rejects direct `State<T>.value.set(...)`, `State<T>.disabled.set(...)`, indexed state-channel writes, retired private bridge tokens, and direct primitive-instance `.state` access outside the adapter seam.
-- The architecture guard rejects select and toggle-group state-writer tokens in the adapter: primitives with public setters must use them.
-- The adapter is internal-only and must not be re-exported from the adapters barrel.
 
 ## 2026-08-05 recheck (`ng-primitives@0.128.7`)
 
