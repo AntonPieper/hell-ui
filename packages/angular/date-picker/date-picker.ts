@@ -837,13 +837,15 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
       ),
     );
 
-  const focusDayGrid = (): void =>
-    focusAfterRender(
-      () =>
-        host.nativeElement.querySelector<HTMLButtonElement>(
-          '[data-slot="dateButton"][tabindex="0"]',
-        ) ?? host.nativeElement.querySelector<HTMLButtonElement>('[data-slot="dateButton"]'),
-    );
+  // ng-primitives 0.128 writes the day buttons' roving tabindex from a render
+  // effect, so right after a view switch no button matches [tabindex="0"] yet
+  // and a DOM query cannot find the tab stop. The primitive owns the restore
+  // instead: a 'keyboard' origin makes setFocusedDate re-focus the focused
+  // date's button after the next render.
+  const focusDayGrid = (): void => {
+    const current = state();
+    current.setFocusedDate(current.focusedDate(), 'keyboard', 'forward');
+  };
 
   const closeToDayView = (restore: 'trigger' | 'grid'): void => {
     const opened = view();
@@ -923,10 +925,8 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
         : hellDatePickerWithYearMonth(focused, value, focused.getMonth());
 
     view.set('day');
-    if (target.getTime() !== focused.getTime()) {
-      current.setFocusedDate(target, null, target < focused ? 'backward' : 'forward');
-    }
-    focusDayGrid();
+    // 'keyboard' origin: the primitive restores grid focus after render.
+    current.setFocusedDate(target, 'keyboard', target < focused ? 'backward' : 'forward');
   };
 
   const onPanelKeydown = (event: KeyboardEvent): void => {
