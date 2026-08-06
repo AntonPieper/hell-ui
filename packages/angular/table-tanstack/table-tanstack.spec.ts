@@ -45,13 +45,15 @@ import {
   HellTableShellLoading,
   HellTableShellToolbar,
 } from './table-tanstack';
+import { HellTanStackResizableColumns } from './resizable-columns';
 import { HellButton } from 'hell-ui/button';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
-// Every feature the shell classes under test require, registered once for all
-// hosts. v9 gates feature APIs on registration, so a host that skipped one would
-// fail to type-check against the shell rather than fail at runtime.
+// Every feature the shell classes and the resizable-columns directive under
+// test require, registered once for all hosts. v9 gates feature APIs on
+// registration, so a host that skipped one would fail to type-check against
+// the shell rather than fail at runtime.
 const features = tableFeatures({
   columnFilteringFeature,
   columnPinningFeature,
@@ -72,11 +74,14 @@ const features = tableFeatures({
  * registries `auto` resolves through. v9 stopped bundling the built-ins, so a
  * table that installs the row models without the registries silently sorts
  * lexically and drops column filters instead of failing.
+ *
+ * `columnResizingFeature` is deliberately absent: resizing is opt-in through
+ * `hellTanStackResizableColumns`, so this host binding the shell is the
+ * compile-level proof that a non-resizing table no longer registers it.
  */
 const clientFeatures = tableFeatures({
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   rowExpandingFeature,
@@ -281,14 +286,18 @@ class StyledShellHost extends ShellHost {}
 @Component({
   selector: 'hell-test-resizable-host',
   standalone: true,
-  imports: [HellTanStackTable, HellTableShellEmpty],
+  imports: [HellTanStackTable, HellTanStackResizableColumns, HellTableShellEmpty],
   template: `
-    <hell-tanstack-table [table]="table">
+    <hell-tanstack-table
+      [table]="table"
+      [hellTanStackResizableColumns]="directiveEnabled()"
+    >
       <ng-template hellTableShellEmpty>No rows</ng-template>
     </hell-tanstack-table>
   `,
 })
 class ResizableShellHost {
+  readonly directiveEnabled = signal(true);
   readonly resizingEnabled = signal(true);
   readonly columnSizing = signal<ColumnSizingState>({});
   readonly columns: ColumnDef<typeof features, Person>[] = [
@@ -321,9 +330,9 @@ class ResizableShellHost {
 @Component({
   selector: 'hell-test-uncontrolled-resizable-host',
   standalone: true,
-  imports: [HellTanStackTable, HellTableShellEmpty],
+  imports: [HellTanStackTable, HellTanStackResizableColumns, HellTableShellEmpty],
   template: `
-    <hell-tanstack-table [table]="table">
+    <hell-tanstack-table [table]="table" hellTanStackResizableColumns>
       <ng-template hellTableShellEmpty>No rows</ng-template>
     </hell-tanstack-table>
   `,
@@ -334,11 +343,12 @@ class UncontrolledResizableShellHost {
     { id: 'b', header: 'B', size: 160 },
   ];
 
+  // No `enableColumnResizing` either: the directive is the opt-in, and
+  // TanStack treats the unset option as enabled.
   readonly table = injectTable(() => ({
     features,
     data: people,
     columns: this.columns,
-    enableColumnResizing: true,
     getRowId: (row) => row.id,
   }));
 }
@@ -351,9 +361,9 @@ class UncontrolledResizableShellHost {
 @Component({
   selector: 'hell-test-nonleading-pinned-host',
   standalone: true,
-  imports: [HellTanStackTable, HellTableShellEmpty],
+  imports: [HellTanStackTable, HellTanStackResizableColumns, HellTableShellEmpty],
   template: `
-    <hell-tanstack-table [table]="table">
+    <hell-tanstack-table [table]="table" hellTanStackResizableColumns>
       <ng-template hellTableShellEmpty>No rows</ng-template>
     </hell-tanstack-table>
   `,
@@ -370,7 +380,6 @@ class NonLeadingPinnedShellHost {
     features,
     data: people,
     columns: this.columns,
-    enableColumnResizing: true,
     getRowId: (row) => row.id,
     // 'c' pinned to start and 'a' to end, so the table renders c, b, d, a.
     initialState: { columnPinning: { start: ['c'], end: ['a'] } },
@@ -579,19 +588,43 @@ describe('Hell TanStack table shell', () => {
     expect(cell.style.getPropertyValue('--hell-table-column-grow')).toBe(`${size}`);
   });
 
-  it('renders no resize separators until TanStack column resizing is turned on', () => {
+  it('renders no resize separators without the resizable-columns directive', () => {
     const fixture = TestBed.createComponent(ShellHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    // TanStack treats an unset `enableColumnResizing` as enabled, so the shell
-    // requires an explicit opt-in rather than growing handles on every table.
+    // TanStack treats an unset `enableColumnResizing` as enabled, and this
+    // host even registers the resizing feature — the shell itself still adds
+    // no resize affordance. Only `hellTanStackResizableColumns` does.
     expect(
       root
         .querySelector('hell-tanstack-table')
         ?.getAttribute('data-hell-tanstack-resizable-columns'),
     ).toBeNull();
     expect(root.querySelectorAll('[hellTableResizeHandle]')).toHaveLength(0);
+  });
+
+  it('follows the live directive opt-in on and off', () => {
+    const fixture = TestBed.createComponent(ResizableShellHost);
+    // Rendered once with the directive disabled, so a strategy registration
+    // snapshot taken on the first read would keep the separators hidden.
+    fixture.componentInstance.directiveEnabled.set(false);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const shell = () => root.querySelector('hell-tanstack-table');
+    const handles = () => root.querySelectorAll('[hellTableResizeHandle]').length;
+
+    expect(shell()?.getAttribute('data-hell-tanstack-resizable-columns')).toBeNull();
+    expect(handles()).toBe(0);
+
+    fixture.componentInstance.directiveEnabled.set(true);
+    fixture.detectChanges();
+    expect(shell()?.getAttribute('data-hell-tanstack-resizable-columns')).toBe('true');
+    expect(handles()).toBe(2);
+
+    fixture.componentInstance.directiveEnabled.set(false);
+    fixture.detectChanges();
+    expect(handles()).toBe(0);
   });
 
   it('renders a separator per header cell that has a resizable trailing neighbour', () => {
@@ -619,6 +652,8 @@ describe('Hell TanStack table shell', () => {
 
   it('follows the live TanStack resizing option instead of a cached copy of it', () => {
     const fixture = TestBed.createComponent(ResizableShellHost);
+    // The directive stays applied while `enableColumnResizing: false` opts the
+    // whole table out: TanStack's own option remains the fine-grained control.
     // Rendered once with resizing off, so a snapshot of the option taken on the
     // first read would keep the separators hidden after the caller turns it on.
     fixture.componentInstance.resizingEnabled.set(false);

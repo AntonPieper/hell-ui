@@ -90,14 +90,16 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <p>
             TanStack v9 gates every feature API on the features a table registers, so each shell
             class states what it reads. <code>hell-tanstack-table</code> requires
-            <code>columnPinningFeature</code>, <code>columnResizingFeature</code>,
+            <code>columnPinningFeature</code>,
             <code>columnSizingFeature</code>, <code>columnVisibilityFeature</code>,
             <code>rowExpandingFeature</code> and <code>rowSortingFeature</code> in your
             <code>tableFeatures({{ '{' }}…{{ '}' }})</code> call;
             <code>hell-tanstack-pagination</code> adds <code>rowPaginationFeature</code>,
             <code>hell-tanstack-global-filter</code> adds
-            <code>columnFilteringFeature</code> and <code>globalFilteringFeature</code>, and
-            <code>hell-tanstack-column-filter</code> adds <code>columnFilteringFeature</code>.
+            <code>columnFilteringFeature</code> and <code>globalFilteringFeature</code>,
+            <code>hell-tanstack-column-filter</code> adds <code>columnFilteringFeature</code>, and
+            the <code>hellTanStackResizableColumns</code> opt-in adds
+            <code>columnResizingFeature</code> alongside <code>columnSizingFeature</code>.
             Registering more than a shell needs is always fine — the shells are generic over your
             feature set, so row selection or grouping alongside these still satisfies them.
           </p>
@@ -182,10 +184,15 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         <div class="hd-prose">
           <h2>Resizable columns</h2>
           <p>
-            Set TanStack's own <code>enableColumnResizing: true</code> and the shell renders a
-            <code>hellTableResizeHandle</code> separator on every header cell that has a resizable
-            neighbour to its trailing side. There is no Hell resize prop: opt a single column out
-            with <code>columnDef.enableResizing: false</code>, and bound it with
+            Add the <code>hellTanStackResizableColumns</code> directive to the shell element and it
+            renders a <code>hellTableResizeHandle</code> separator on every header cell that has a
+            resizable neighbour to its trailing side. The directive shares the shell's
+            <code>[table]</code> binding and requires <code>columnResizingFeature</code> (alongside
+            <code>columnSizingFeature</code>) on that table — the base shell no longer does, so a
+            table without the directive registers no resizing feature at all. TanStack's own
+            options stay the fine-grained control: opt a single column out with
+            <code>columnDef.enableResizing: false</code>, a whole table with
+            <code>enableColumnResizing: false</code>, and bound each column with
             <code>minSize</code>/<code>maxSize</code>.
           </p>
           <p>
@@ -483,11 +490,12 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               building renderers outside the shell.
             </li>
             <li>
-              Column resizing: the shell renders a resize separator per header cell when the
-              caller-owned table sets TanStack's <code>enableColumnResizing: true</code> and the
-              column has a resizable neighbour. Sizes are committed to TanStack
-              <code>columnSizing</code>; <code>minSize</code>/<code>maxSize</code> bound each pair.
-              The shell reflects <code>data-hell-tanstack-resizable-columns</code> on its host.
+              Column resizing: opt-in via the <code>hellTanStackResizableColumns</code> directive
+              on the shell element; the shell then renders a resize separator per header cell with
+              a resizable neighbour. Sizes are committed to TanStack
+              <code>columnSizing</code>; <code>minSize</code>/<code>maxSize</code> bound each pair,
+              and <code>enableColumnResizing</code>/<code>enableResizing</code> opt out. The
+              directive reflects <code>data-hell-tanstack-resizable-columns</code> on the host.
             </li>
             <li>
               <b>Virtual</b> (<code>hell-ui/table-tanstack/virtual</code>):

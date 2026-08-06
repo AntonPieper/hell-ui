@@ -1,0 +1,30 @@
+kind: Breaking
+body: >-
+    Column resizing on `hell-tanstack-table` is now opt-in through the new
+    `hellTanStackResizableColumns` directive (`hell-ui/table-tanstack`). The
+    shell alone no longer renders resize separators, no longer honours
+    `enableColumnResizing: true` as the opt-in, and `HellTanStackTableFeatures`
+    no longer requires `columnResizingFeature` — tables that never resize stop
+    registering the resizing feature and carrying its state.
+time: 2026-08-06T15:45:00.000000+02:00
+custom:
+    migration: |-
+        For each resizable table, add the `hellTanStackResizableColumns` directive to
+        the shell element and import `HellTanStackResizableColumns` alongside
+        `HellTanStackTable`: `<hell-tanstack-table [table]="table"
+        hellTanStackResizableColumns>`. The directive shares the shell's `[table]`
+        binding and requires `columnResizingFeature` and `columnSizingFeature` on that
+        table (`HellTanStackResizableColumnsFeatures`), so keep both registered in
+        `tableFeatures({ ... })` where you resize. An explicit
+        `enableColumnResizing: true` is no longer needed and can be deleted — the
+        directive is the per-table opt-in, and TanStack's defaults take over from
+        there. The opt-outs are unchanged and still TanStack's own:
+        `enableColumnResizing: false` parks a whole table and
+        `columnDef.enableResizing: false` parks one column, with
+        `minSize`/`maxSize` bounding each pair. Binding the attribute
+        (`[hellTanStackResizableColumns]="flag"`) toggles the opt-in live.
+        For each table that never resizes, delete `columnResizingFeature` from its
+        `tableFeatures({ ... })` call and any leftover `enableColumnResizing`
+        option. The `data-hell-tanstack-resizable-columns` host attribute is now
+        reflected by the directive instead of the shell, so it only ever appears on
+        opted-in tables — selectors keyed on it keep working.

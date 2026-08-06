@@ -33,7 +33,6 @@ import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createExpandedRowModel,
@@ -58,11 +57,10 @@ import {
 } from '@tanstack/angular-table';
 
 // v9 requires explicit feature registration; the Hell shell reads pinning,
-// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// sizing, visibility, expanding and sorting. Hoisted out of the
 // injectTable initializer so it is not rebuilt on every signal change.
 const features = tableFeatures({
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   rowExpandingFeature,

@@ -1827,7 +1827,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
  path:'/components/table',
  detail:'components/table/examples/tanstack-resizable.example.ts',
  terms:
-'resize resizable columns components/table/examples/tanstack-resizable.example components/table hell-tanstack-table hellTableResizeHandle enableColumnResizing enableResizing columnSizing setColumnSizing resetColumnSizing minSize maxSize colgroup separator drag keyboard ArrowLeft ArrowRight Home End hellTanStackVirtualRows column width',
+'resize resizable columns components/table/examples/tanstack-resizable.example components/table hell-tanstack-table hellTanStackResizableColumns columnResizingFeature hellTableResizeHandle enableColumnResizing enableResizing columnSizing setColumnSizing resetColumnSizing minSize maxSize colgroup separator drag keyboard ArrowLeft ArrowRight Home End hellTanStackVirtualRows column width',
  },
  {
  title:'Tabs: Basic',

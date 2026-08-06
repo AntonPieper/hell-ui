@@ -13,7 +13,6 @@ import {
 import {
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createFilteredRowModel,
@@ -42,7 +41,6 @@ import {
 const features = tableFeatures({
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   globalFilteringFeature,
