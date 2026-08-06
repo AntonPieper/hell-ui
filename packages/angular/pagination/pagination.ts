@@ -88,11 +88,13 @@ function injectPaginationNativeControl(): HellPaginationNativeControl {
 }
 
 /**
- * ng-primitives >= 0.123 registers its pagination `keydown.enter`/`keydown.space`
- * handlers as literal DOM event names, so keyboard activation never reaches
- * them. Hell keeps Enter/Space activation (with the anchor guard and without
- * double-firing native click synthesis) through Angular host listeners until
- * upstream restores it.
+ * Hell's own Enter/Space activation for `hellPageLink`, not a bridge over an
+ * upstream defect. `HellPageLink` composes no ng-primitives pagination
+ * directives — one polymorphic selector cannot pick among five upstream
+ * primitives, because Angular host directives are static (#153) — so upstream's
+ * keyboard handling (fixed in 0.128.7) never runs on these hosts. This stays
+ * for as long as `hellPageLink` remains a single polymorphic directive; it
+ * keeps the anchor guard and avoids double-firing native click synthesis.
  */
 function paginationKeyboardActivation(
   native: HellPaginationNativeControl,

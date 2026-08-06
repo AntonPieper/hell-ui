@@ -28,6 +28,7 @@ import {
   hellPartStyler,
   type HellRecipe,
 } from 'hell-ui/internal/core';
+import { hellOwnsControlAriaInvalid } from 'hell-ui/internal/ng-primitives';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -324,7 +325,6 @@ const HELL_NATIVE_SELECT_RECIPE = {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-size]': 'size()',
-    '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellNativeSelect {
@@ -341,6 +341,10 @@ export class HellNativeSelect {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
+
+  constructor() {
+    hellOwnsControlAriaInvalid(this.invalid);
+  }
 }
 
 /** All directives that make up the Select entry point, for bulk `imports`. */

@@ -1437,16 +1437,15 @@ function checkNgpStateWriterContract() {
     'packages/angular/internal/ng-primitives/public-api.ts',
     'packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts',
     'packages/angular/combobox/combobox.ts',
-    'packages/angular/radio/radio.ts',
   ]);
+  // Radio-group and roving-focus writers retired with ng-primitives 0.128:
+  // radio uses the public `setValue(value, { emit: false })`/`setDisabled`
+  // pair and roving focus the non-focusing `setTabStop(id)` directly.
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
     'HELL_NGP_STATE_WRITER_UPGRADE_PATH',
     'writeComboboxStateValue',
     'writeComboboxStateDisabled',
-    'writeRadioGroupStateValue',
-    'writeRadioGroupStateDisabled',
-    'writeRovingFocusActiveItem',
   ];
   // Both write tables below are the same three State<T> channels crossed with
   // the receiver shapes a write can take, so they are built from one channel

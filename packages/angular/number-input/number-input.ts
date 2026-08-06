@@ -45,6 +45,7 @@ import {
   hellPartStyler,
   type HellRecipe,
 } from 'hell-ui/internal/core';
+import { hellOwnsControlAriaInvalid } from 'hell-ui/internal/ng-primitives';
 
 /** Built-in accessibility labels owned by the Number Input entry point. */
 export interface HellNumberInputLabels {
@@ -208,7 +209,6 @@ let nextNumberInputId = 0;
     '[attr.aria-valuenow]': 'current()',
     '[attr.aria-valuemin]': 'min()',
     '[attr.aria-valuemax]': 'max()',
-    '[attr.aria-invalid]': 'isInvalid() ? "true" : null',
     '[attr.aria-describedby]': 'fieldAriaDescribedby()',
     '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
@@ -351,6 +351,7 @@ export class HellNumberInput implements FormValueControl<number | null> {
   );
 
   constructor() {
+    hellOwnsControlAriaInvalid(this.isInvalid);
     NUMBER_INPUT_STEP_CONTROLLERS.set(this, {
       isDisabled: (direction) => this.isStepDisabled(direction),
       apply: (direction, multiplied) => this.applyStep(direction, multiplied),

@@ -103,8 +103,8 @@ catalogs:
       specifier: ~22.0.2
       version: 22.0.2
     ng-primitives:
-      specifier: 0.128.7
-      version: 0.128.7
+      specifier: 0.128.8
+      version: 0.128.8
     pdfjs-dist:
       specifier: 6.2.108
       version: 6.2.108
@@ -132,9 +132,6 @@ catalogs:
     vitest:
       specifier: 4.1.10
       version: 4.1.10
-
-overrides:
-  '@phenomnomnominal/tsquery': 6.2.0
 
 packageExtensionsChecksum: sha256-scTvqmgJjRyrhfd9HjytQc3ymzvOzLBIEQeVubBcjxU=
 
@@ -255,7 +252,7 @@ importers:
         version: link:../../packages/angular
       ng-primitives:
         specifier: 'catalog:'
-        version: 0.128.7(22db8bcf49146666c2b40a02989b3941)
+        version: 0.128.8(22db8bcf49146666c2b40a02989b3941)
       pdfjs-dist:
         specifier: 'catalog:'
         version: 6.2.108
@@ -368,7 +365,7 @@ importers:
         version: 22.0.2(@angular/compiler-cli@22.0.8(@angular/compiler@22.0.8)(typescript@6.0.3))(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)
       ng-primitives:
         specifier: 'catalog:'
-        version: 0.128.7(22db8bcf49146666c2b40a02989b3941)
+        version: 0.128.8(22db8bcf49146666c2b40a02989b3941)
       pdfjs-dist:
         specifier: 'catalog:'
         version: 6.2.108
@@ -383,7 +380,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0))
+        version: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0))
 
 packages:
 
@@ -3838,8 +3835,8 @@ packages:
       tailwindcss:
         optional: true
 
-  ng-primitives@0.128.7:
-    resolution: {integrity: sha512-kuffPkhKkfU9VMnCuy8lJ/cmzUsXKKZIm0O8dQmPg+dRrVWK3sZGgxe5cUkWVCZfShXFwNLIFzGtb5UArJOjsA==}
+  ng-primitives@0.128.8:
+    resolution: {integrity: sha512-Xy8f4ojSMBCFAbHDRRX83RGkeS4jc7Ro0KKugJylWvMyWp/2hcclJIPThXPR7mgTo0sYMlQk58O9Z8gg/TguuQ==}
     peerDependencies:
       '@angular/cdk': ^21.0.0 || ^22.0.0
       '@angular/common': ^21.0.0 || ^22.0.0
@@ -4991,7 +4988,7 @@ snapshots:
       ng-packagr: 22.0.2(@angular/compiler-cli@22.0.8(@angular/compiler@22.0.8)(typescript@6.0.3))(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)
       postcss: 8.5.25
       tailwindcss: 4.3.3
-      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0))
+      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - '@types/node'
       - chokidar
@@ -5045,7 +5042,7 @@ snapshots:
       ng-packagr: 22.1.1(@angular/compiler-cli@22.0.8(@angular/compiler@22.0.8)(typescript@6.0.3))(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)
       postcss: 8.5.25
       tailwindcss: 4.3.3
-      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0))
+      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - '@types/node'
       - chokidar
@@ -6698,7 +6695,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0))
+      vitest: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0))
 
   '@vitest/expect@4.1.10':
     dependencies:
@@ -6709,6 +6706,14 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
+  '@vitest/mocker@4.1.10(vite@7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.10
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0)
+
   '@vitest/mocker@4.1.10(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.10
@@ -6716,14 +6721,6 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0)
-
-  '@vitest/mocker@4.1.10(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0))':
-    dependencies:
-      '@vitest/spy': 4.1.10
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.10':
     dependencies:
@@ -8030,7 +8027,7 @@ snapshots:
       - supports-color
     optional: true
 
-  ng-primitives@0.128.7(22db8bcf49146666c2b40a02989b3941):
+  ng-primitives@0.128.8(22db8bcf49146666c2b40a02989b3941):
     dependencies:
       '@angular/cdk': 22.0.7(@angular/common@22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(@angular/platform-browser@22.0.8(@angular/common@22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/common': 22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -8860,20 +8857,33 @@ snapshots:
       sass: 1.102.0
       yaml: 2.9.0
 
-  vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0):
+  vitest@4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0)):
     dependencies:
-      lightningcss: 1.33.0
+      '@vitest/expect': 4.1.10
+      '@vitest/mocker': 4.1.10(vite@7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.10
+      '@vitest/runner': 4.1.10
+      '@vitest/snapshot': 4.1.10
+      '@vitest/spy': 4.1.10
+      '@vitest/utils': 4.1.10
+      es-module-lexer: 2.3.1
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      obug: 2.1.4
+      pathe: 2.0.3
       picomatch: 4.0.5
-      postcss: 8.5.25
-      rolldown: 1.2.2
+      std-env: 4.2.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
+      tinyrainbow: 3.1.1
+      vite: 7.3.6(jiti@2.7.0)(less@4.8.1)(lightningcss@1.33.0)(sass@1.99.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
     optionalDependencies:
-      esbuild: 0.28.1
-      fsevents: 2.3.3
-      jiti: 2.7.0
-      less: 4.8.1
-      sass: 1.99.0
-      yaml: 2.9.0
+      '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
+      jsdom: 30.0.1
+    transitivePeerDependencies:
+      - msw
 
   vitest@4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0)):
     dependencies:
@@ -8896,34 +8906,6 @@ snapshots:
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
       vite: 8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.102.0)(yaml@2.9.0)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
-      jsdom: 30.0.1
-    transitivePeerDependencies:
-      - msw
-
-  vitest@4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@30.0.1)(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0)):
-    dependencies:
-      '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(vite@8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0))
-      '@vitest/pretty-format': 4.1.10
-      '@vitest/runner': 4.1.10
-      '@vitest/snapshot': 4.1.10
-      '@vitest/spy': 4.1.10
-      '@vitest/utils': 4.1.10
-      es-module-lexer: 2.3.1
-      expect-type: 1.4.0
-      magic-string: 0.30.21
-      obug: 2.1.4
-      pathe: 2.0.3
-      picomatch: 4.0.5
-      std-env: 4.2.0
-      tinybench: 2.9.0
-      tinyexec: 1.3.0
-      tinyglobby: 0.2.17
-      tinyrainbow: 3.1.1
-      vite: 8.2.0(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.1)(sass@1.99.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)

@@ -1,9 +1,7 @@
 import {
-  afterRenderEffect,
   Directive,
   effect,
   ElementRef,
-  PLATFORM_ID,
   booleanAttribute,
   computed,
   inject,
@@ -12,16 +10,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { type FormValueControl } from '@angular/forms/signals';
 import { NgpToggle } from 'ng-primitives/toggle';
 import {
   NgpToggleGroupItem,
-  injectToggleGroupItemState,
   ngpToggleGroup,
   provideToggleGroupState,
 } from 'ng-primitives/toggle-group';
-import { ngpRovingFocusGroup, provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
+import { provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
 import { type NgpOrientation } from 'ng-primitives/common';
 import { containsNode, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellSize, type HellUiInput } from 'hell-ui/core';

@@ -2,6 +2,7 @@
   "category": "internal",
   "styleBundle": "none",
   "exports": [
+    "./ngp-attr-ownership",
     "./ngp-state-adapters"
   ],
   "header": [

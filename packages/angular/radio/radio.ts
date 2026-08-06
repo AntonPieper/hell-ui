@@ -24,11 +24,7 @@ import {
   injectRovingFocusGroupState,
   injectRovingFocusItemState,
 } from 'ng-primitives/roving-focus';
-import {
-  writeRadioGroupStateDisabled,
-  writeRadioGroupStateValue,
-  writeRovingFocusActiveItem,
-} from 'hell-ui/internal/ng-primitives';
+import { hellOwnsNgpAttribute } from 'hell-ui/internal/ng-primitives';
 import { containsNode, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellOrientation, type HellUiInput } from 'hell-ui/core';
 
@@ -144,27 +140,29 @@ export class HellRadioGroup<T = unknown> implements FormValueControl<T | null> {
 
   constructor() {
     // External value writes (property, two-way, form) synchronize into the
-    // primitive through the guarded adapter; the equality guard keeps user
-    // selections (which already updated the primitive) from writing back.
+    // primitive through its public silent setter; the equality guard keeps
+    // user selections (which already updated the primitive) from writing back.
     effect(() => {
       const state = this.groupState();
       const value = this.value();
       if (Object.is(state.value(), value)) return;
-      untracked(() => writeRadioGroupStateValue(state, value));
+      untracked(() => state.setValue(value, { emit: false }));
     });
 
     effect(() => {
       const state = this.groupState();
       const disabled = this.disabled();
       if (state.disabled() === disabled) return;
-      untracked(() => writeRadioGroupStateDisabled(state, disabled));
+      untracked(() => state.setDisabled(disabled));
     });
 
+    // `setTabStop` moves the roving tab stop without stealing focus, which is
+    // exactly what a form write needs (`setActiveItem` would focus the item).
     effect(() => {
       const itemId = this.rovingTabStopItemId();
       const groupState = this.rovingFocusGroupState();
       if (groupState.activeItem() === itemId) return;
-      untracked(() => writeRovingFocusActiveItem(groupState, itemId));
+      untracked(() => groupState.setTabStop(itemId));
     });
 
     const valueSub = this.group.valueChange.subscribe((value) => {
@@ -290,7 +288,6 @@ export class HellRadioGroup<T = unknown> implements FormValueControl<T | null> {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.disabled]': 'isDisabled() ? "" : null',
-    '[attr.aria-disabled]': 'isDisabled() ? "true" : null',
     type: 'button',
   },
 })
@@ -320,6 +317,17 @@ export class HellRadio {
   protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
 
   constructor() {
+    // `NgpRadioItem` (0.128) writes `aria-disabled` imperatively as a literal
+    // "true"/"false"; Hell's contract keeps enabled items free of the
+    // attribute (the native `disabled` attribute already carries the state).
+    // `isDisabled` reads the same item/group signals upstream's writer does,
+    // so both re-run together and this later-registered write decides.
+    hellOwnsNgpAttribute(() => {
+      const element = this.host.nativeElement;
+      if (this.isDisabled()) element.setAttribute('aria-disabled', 'true');
+      else element.removeAttribute('aria-disabled');
+    });
+
     const item: HellRadioRovingRegistration = {
       element: this.host.nativeElement,
       checked: () => this.radioItemState().checked(),
@@ -341,7 +349,7 @@ export class HellRadio {
 
   private syncRovingFocusActiveItem(): void {
     if (this.isDisabled()) return;
-    writeRovingFocusActiveItem(this.rovingFocusGroupState(), this.rovingFocusItemState().id());
+    this.rovingFocusGroupState().setTabStop(this.rovingFocusItemState().id());
   }
 }
 

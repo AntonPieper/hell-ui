@@ -26,7 +26,7 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected onFocusOut(event: FocusEvent): void;
     protected readonly part: (part: "root") => string;
-    protected readonly state: ng_primitives_toggle_group.NgpToggleGroupState;
+    protected readonly state: ng_primitives_toggle_group.NgpToggleGroupState<string>;
     readonly touch: _angular_core.OutputEmitterRef<void>;
     readonly type: _angular_core.InputSignal<"multiple" | "single">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
@@ -37,7 +37,6 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
 
 // @public
 export class HellToggleGroupItem {
-    constructor();
     protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;

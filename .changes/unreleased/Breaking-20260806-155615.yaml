@@ -1,0 +1,5 @@
+kind: Breaking
+body: The `ng-primitives` peer dependency moved from `0.123.0` to `0.128.8`. The pinned version now declares `@phenomnomnominal/tsquery` `6.2.0`, so installs against TypeScript 6 under strict peer resolution work without a workaround. The `placement` inputs of `HellPopoverTrigger` and `HellTooltip` are now typed as the unified `NgpPlacement` (upstream renamed its per-primitive placement aliases); the accepted values are unchanged.
+time: 2026-08-06T15:56:15.000000+02:00
+custom:
+  migration: Install `ng-primitives@0.128.8`. If your workspace carried an override or resolution forcing `@phenomnomnominal/tsquery` to `6.2.0` to install against TypeScript 6, delete it. If you imported the `NgpPopoverPlacement` or `NgpTooltipPlacement` types from ng-primitives to type values passed to `placement`, import `NgpPlacement` from `ng-primitives/portal` instead.

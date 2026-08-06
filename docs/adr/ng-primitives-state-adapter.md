@@ -5,6 +5,11 @@
 - Rechecked: 2026-07-03 for `ng-primitives@0.123.0`
 - Rechecked: 2026-08-05 for `ng-primitives@0.128.7` — see
   [2026-08-05 recheck](#2026-08-05-recheck-ng-primitives01287)
+- Rechecked: 2026-08-06 for `ng-primitives@0.128.8` — identical for every
+  surface this ADR covers (the 0.128.7→0.128.8 tarball diff touches only the
+  date-picker bundle, adding range `setStart`/`setEnd`). The 0.128.7 verdict
+  was executed with the 0.128.8 pin move: the radio and roving-focus writers
+  are deleted and the seam is combobox-only.
 
 ## Context
 
@@ -116,9 +121,14 @@ runtime assertions, and the corresponding architecture-guard allowances should
 go. Full deletion still waits on public combobox value/disabled setters with a
 silent-update option.
 
+**Executed with the 0.128.8 pin move:** radio uses
+`setValue(value, { emit: false })` / `setDisabled(disabled)` and roving focus
+uses `setTabStop(id)` directly; the retired writers, their assertions, and the
+radio bridge allowance in the architecture guard are deleted.
+
 ## Consequences
 
-- `ng-primitives@0.123.0` stays intentionally pinned while Hell depends on the `State<T>` channel shape for combobox and radio.
+- `ng-primitives` stays intentionally exact-pinned while Hell depends on the `State<T>` channel shape for combobox.
 - Any ng-primitives upgrade must rerun this ADR check against the upgraded typings/docs before changing the pin.
 - The architecture guard must continue to reject ad hoc ng-primitives state writes outside the adapter, including typed direct channel writes.
 - When a future ng-primitives release adds public combobox and radio-group

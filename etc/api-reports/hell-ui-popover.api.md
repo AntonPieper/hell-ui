@@ -13,7 +13,6 @@ import * as ng_primitives_portal from 'ng-primitives/portal';
 import { NgpDismissGuard } from 'ng-primitives/portal';
 import { NgpDismissGuardInput } from 'ng-primitives/portal';
 import { NgpOverlayContent } from 'ng-primitives/portal';
-import { NgpPopoverPlacement } from 'ng-primitives/popover';
 
 // @public
 export class HellPopover {
@@ -39,7 +38,7 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
     readonly offset: _angular_core.InputSignalWithTransform<ng_primitives_portal.NgpOffset, ng_primitives_portal.NgpOffsetInput | null | undefined>;
     readonly open: _angular_core.Signal<boolean>;
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
-    readonly placement: _angular_core.InputSignal<NgpPopoverPlacement>;
+    readonly placement: _angular_core.InputSignal<ng_primitives_portal.NgpPlacement>;
     readonly popover: _angular_core.InputSignal<NgpOverlayContent<unknown> | undefined>;
     readonly shift: _angular_core.InputSignalWithTransform<boolean | ng_primitives_portal.NgpShiftOptions | undefined, ng_primitives_portal.NgpShiftInput | null>;
     show(): Promise<void>;

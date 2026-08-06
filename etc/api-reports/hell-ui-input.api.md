@@ -15,6 +15,7 @@ export const HELL_SEARCH_IMPORTS: readonly [typeof HellSearch, typeof HellSearch
 
 // @public
 export class HellInput {
+    constructor();
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;
     readonly size: _angular_core.InputSignal<"lg" | "md" | "sm">;
@@ -41,6 +42,7 @@ export class HellSearchClear {
 
 // @public
 export class HellTextarea {
+    constructor();
     readonly autoGrow: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;

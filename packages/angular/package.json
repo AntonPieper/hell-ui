@@ -577,7 +577,7 @@
     "@floating-ui/dom": "^1.7.6",
     "@tanstack/angular-table": "^9.0.0",
     "@tanstack/virtual-core": "^3.17.0",
-    "ng-primitives": "0.128.7",
+    "ng-primitives": "0.128.8",
     "@ng-icons/core": "^34.0.0",
     "@ng-icons/font-awesome": "^34.0.0",
     "rxjs": "^7.8.0",
