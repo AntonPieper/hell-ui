@@ -9,13 +9,41 @@ import {
 import { HellInput } from 'hell-ui/input';
 import { HellTableShellToolbar, HellTanStackTable } from 'hell-ui/table-tanstack';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getFilteredRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createFilteredRowModel,
+  filterFn_includesString,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ColumnFiltersState,
   type FilterFn,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+// `globalFilterFn: 'includesString'` is a registry key in v9, so the built-in
+// it names is imported and registered under `filterFns` rather than resolved
+// from a bundled registry.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  filteredRowModel: createFilteredRowModel(),
+  filterFns: { includesString: filterFn_includesString },
+});
 
 interface Person {
   readonly id: string;
@@ -74,12 +102,12 @@ const TEAM_OPTIONS: readonly FilterOption<TeamFilter['value']>[] = [
   { value: 'Operations', label: 'Operations' },
 ];
 
-const includesAnyString: FilterFn<Person> = (row, columnId, filterValues: readonly string[]) => {
+const includesAnyString: FilterFn<typeof features, Person> = (row, columnId, filterValues: readonly string[]) => {
   const cellValue = String(row.getValue(columnId) ?? '').toLowerCase();
   return filterValues.some((value) => cellValue.includes(value.toLowerCase()));
 };
 
-const equalsAnyString: FilterFn<Person> = (row, columnId, filterValues: readonly string[]) => {
+const equalsAnyString: FilterFn<typeof features, Person> = (row, columnId, filterValues: readonly string[]) => {
   const cellValue = String(row.getValue(columnId) ?? '').toLowerCase();
   return filterValues.some((value) => cellValue === value.toLowerCase());
 };
@@ -255,7 +283,7 @@ export class FilterBuilderTanStackExample {
   ] as const;
   protected readonly identifyFilter = (filter: PersonFilter) => filter.id;
 
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     { accessorKey: 'name', header: 'Name', filterFn: includesAnyString, size: 200 },
     { accessorKey: 'role', header: 'Role', filterFn: equalsAnyString, size: 128 },
     { accessorKey: 'status', header: 'Status', filterFn: equalsAnyString, size: 128 },
@@ -278,11 +306,10 @@ export class FilterBuilderTanStackExample {
     return Array.from(valuesByField, ([id, values]) => ({ id, value: [...values] }));
   });
 
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getRowId: (row) => row.id,
     globalFilterFn: 'includesString',
     state: {

@@ -68,14 +68,38 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             filtering, pagination, or virtualization: those belong to your app or to TanStack.
           </p>
           <p>
-            When you already have a TanStack <code>Table&lt;T&gt;</code> and want standard chrome
-            around it — toolbar, sticky header, pinned columns, status views, pagination — reach for
-            the companion shell in <code>hell-ui/table-tanstack</code>. It renders your
-            caller-owned table instance with these primitives, keeping TanStack as the engine.
-            TanStack owns columns, rows, sorting, filtering, pagination, selection, pinning, sizing,
-            expansion, virtualization math, and state; Hell owns the reusable chrome around it. Use
-            the raw primitives when you have small static or app-driven tables; use the shell when
-            TanStack already owns the data.
+            When you already have a TanStack <code>Table&lt;TFeatures, TData&gt;</code> and want
+            standard chrome around it — toolbar, sticky header, pinned columns, status views,
+            pagination — reach for the companion shell in
+            <code>hell-ui/table-tanstack</code>. It renders your caller-owned table instance with
+            these primitives, keeping TanStack as the engine. TanStack owns columns, rows, sorting,
+            filtering, pagination, selection, pinning, sizing, expansion, virtualization math, and
+            state; Hell owns the reusable chrome around it. Use the raw primitives when you have
+            small static or app-driven tables; use the shell when TanStack already owns the data.
+          </p>
+          <p>
+            The shell has its own stylesheet: load
+            <code>hell-ui/table-tanstack/styles.css</code> instead of
+            <code>hell-ui/table/styles.css</code> when you render it. It imports the primitive
+            table styles itself, so it stays a single import, and it carries every shell rule
+            Tailwind cannot express: the toolbar and footer bars, the scrollport and its
+            scrollbars, pinned-column sticky positioning with its logical start/end insets and
+            boundary shadows, the status and expanded-row scaffolding, and the virtual-row
+            geometry. The primitives stylesheet alone renders the shell without any of them.
+          </p>
+          <p>
+            TanStack v9 gates every feature API on the features a table registers, so each shell
+            class states what it reads. <code>hell-tanstack-table</code> requires
+            <code>columnPinningFeature</code>, <code>columnResizingFeature</code>,
+            <code>columnSizingFeature</code>, <code>columnVisibilityFeature</code>,
+            <code>rowExpandingFeature</code> and <code>rowSortingFeature</code> in your
+            <code>tableFeatures({{ '{' }}…{{ '}' }})</code> call;
+            <code>hell-tanstack-pagination</code> adds <code>rowPaginationFeature</code>,
+            <code>hell-tanstack-global-filter</code> adds
+            <code>columnFilteringFeature</code> and <code>globalFilteringFeature</code>, and
+            <code>hell-tanstack-column-filter</code> adds <code>columnFilteringFeature</code>.
+            Registering more than a shell needs is always fine — the shells are generic over your
+            feature set, so row selection or grouping alongside these still satisfies them.
           </p>
 
           <h2>Basic</h2>
@@ -117,7 +141,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <h2>With TanStack, search, filters, and pagination</h2>
           <p>
             A full data table built on the shell in <code>hell-ui/table-tanstack</code>.
-            The component owns a TanStack <code>Table&lt;T&gt;</code> in manual mode — sorting,
+            The component owns a TanStack <code>Table&lt;TFeatures, TData&gt;</code> in manual mode — sorting,
             filtering, pagination, and selection are driven by simulated server queries — and
             <code>hell-tanstack-table</code> renders it with Hell chrome. Column definitions are the
             source of truth for cells; one-off controls are projected through
@@ -408,12 +432,16 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <h3>TanStack shell — <code>hell-ui/table-tanstack</code></h3>
           <ul>
             <li>
-              <code>hell-tanstack-table</code> (<code>HellTanStackTable&lt;T&gt;</code>):
-              <code>table</code> (required <code>Table&lt;T&gt;</code>), <code>status</code>
+              <code>hell-tanstack-table</code>
+              (<code>HellTanStackTable&lt;TFeatures, TData&gt;</code>):
+              <code>table</code> (required <code>Table&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackTableFeatures</code>),
+              <code>status</code>
               (<code>HellTableStatusValue</code>, default <code>HellTableStatus.READY</code>),
               <code>stickyHeader</code> (<code>boolean</code>, default <code>false</code>),
-              <code>rowClass</code> (<code>HellTanStackRowClass&lt;T&gt;</code> or a class value),
-              <code>ui</code> (<code>HellTanStackTableUi</code>).
+              <code>rowClass</code> (<code>HellTanStackRowClass&lt;TFeatures, TData&gt;</code> or a
+              class value), <code>ui</code> (<code>HellTanStackTableUi</code>). Both type parameters
+              are inferred from the <code>[table]</code> binding, so templates need no annotation.
             </li>
             <li>
               Projected regions: <code>[hellTableShellToolbar]</code> and
@@ -428,15 +456,25 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
               status components.
             </li>
             <li>
-              <code>hell-tanstack-pagination</code> (<code>HellTanStackPagination&lt;T&gt;</code>):
+              <code>hell-tanstack-pagination</code>
+              (<code>HellTanStackPagination&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackPaginationFeatures</code>):
               <code>table</code> (required), <code>pageSizeOptions</code>
               (<code>readonly number[]</code>), <code>ui</code>
               (<code>HellTanStackPaginationUi</code> over <code>root</code>/<code>pageSize</code>).
             </li>
             <li>
-              <code>hell-tanstack-global-filter</code> / <code>hell-tanstack-column-filter</code>:
-              <code>table</code> (required), <code>placeholder</code>, and (column)
-              <code>columnId</code> (required).
+              <code>hell-tanstack-global-filter</code>
+              (<code>HellTanStackGlobalFilter&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackGlobalFilterFeatures</code>):
+              <code>table</code> (required), <code>placeholder</code>.
+            </li>
+            <li>
+              <code>hell-tanstack-column-filter</code>
+              (<code>HellTanStackColumnFilter&lt;TFeatures, TData&gt;</code>, where
+              <code>TFeatures</code> satisfies <code>HellTanStackColumnFilterFeatures</code>):
+              <code>table</code> (required), <code>columnId</code> (required),
+              <code>placeholder</code>.
             </li>
             <li>
               Column passthrough: set <code>columnDef.meta.hell.headerClass</code> /

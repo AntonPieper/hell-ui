@@ -43,7 +43,7 @@ catalog:
   # caret: a caret lets a lock refresh cross the coupling silently.
   "@playwright/test": "~1.62.1"
   "@tailwindcss/postcss": "^4.3.3"
-  "@tanstack/angular-table": "^8.21.4"
+  "@tanstack/angular-table": "^9.0.0"
   "@tanstack/virtual-core": "^3.17.7"
   "@vitest/coverage-v8": "4.1.10"
   "angular-eslint": "^22.1.0"

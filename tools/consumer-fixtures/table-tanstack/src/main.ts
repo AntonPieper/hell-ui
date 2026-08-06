@@ -11,17 +11,54 @@ import {
   HellTanStackTable,
 } from 'hell-ui/table-tanstack';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortFn_text,
+  tableFeatures,
   type ColumnDef,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires every feature a table uses to be registered explicitly. Kept at
+// module scope because injectTable re-runs its options initializer whenever a
+// signal it reads changes, and rebuilding features there would throw away
+// TanStack's memoized work.
+const features = tableFeatures({
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort and filter functions by name out of these
+  // registries and no longer bundles the built-ins. The name column resolves to
+  // `text`, and the global filter to `includesString`.
+  sortFns: { text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
+});
 
 interface Person {
   readonly id: string;
@@ -67,7 +104,7 @@ class App {
   protected readonly rowSelection = signal<RowSelectionState>({});
   protected readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
   protected readonly globalFilter = signal('');
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -86,13 +123,10 @@ class App {
       header: 'Actions',
     },
   ];
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
     state: {

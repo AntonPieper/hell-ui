@@ -1,0 +1,20 @@
+kind: Breaking
+body: Every TanStack shell CSS rule moved out of `hell-ui/table/styles.css` into the opt-in `hell-ui/table-tanstack/styles.css`, so the Default Style Bundle no longer ships shell selectors to consumers with no TanStack table. Rendering the shell now requires that stylesheet.
+time: 2026-08-06T14:11:16.257216+02:00
+custom:
+    migration: |-
+        Add `@import 'hell-ui/table-tanstack/styles.css';` wherever you render the shell. It
+        works in either style mode: alongside `hell-ui/styles.css` if you use the Default Style
+        Bundle, or in place of `hell-ui/table/styles.css` if you import entrypoint stylesheets
+        granularly. It imports the base table styles itself, so it stays one import either way and
+        the shared base still resolves once. Order is not significant beyond Hell's usual rule that
+        theme adapter stylesheets come after the component CSS they adapt.
+        What moved is every shell-only rule Tailwind cannot express — the toolbar and footer bars,
+        the scrollport and its scrollbars, the shell table sizing, the sticky-header rule, pinned
+        column positioning and its boundary shadows, the status and expanded-row scaffolding, the
+        filter search rows, the pagination controls and the virtual-row geometry.
+        Without the import the shell still renders and stays operable, but pinned columns lose
+        sticky positioning and their boundary shadows, the scrollport loses its thin scrollbars,
+        and the virtual row strategy loses the geometry that keeps its rows on the header grid.
+        Consumers with no TanStack table need no change and get a smaller bundle: the measured
+        Default Style Bundle drops by roughly 4.5 kB raw.

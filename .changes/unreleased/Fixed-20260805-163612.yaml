@@ -1,0 +1,3 @@
+kind: Fixed
+body: Pinning a column that was not already leading applied the `hell-ui/table-tanstack` shell's `<colgroup>` widths to the wrong columns and paired each resize separator with the wrong neighbour. The shell now walks the pinned start/centre/end regions in the order TanStack renders them.
+time: 2026-08-05T16:36:12.716658+02:00

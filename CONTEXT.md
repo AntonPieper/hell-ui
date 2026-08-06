@@ -249,7 +249,7 @@ Names should describe table-shell chrome, such as `hellTableShellToolbar` and `h
 _Avoid_: Pagination input, toolbar mode, singleton footer slot, hellTableFooter, hellTanStackTableFooter.
 
 **Expanded Row**
-A TanStack-owned row expansion state rendered by the TanStack Table Shell as additional row chrome. Hell may project native TanStack `Row<T>` context into the expanded-row template, but it does not own active-row state or a master/detail feature.
+A TanStack-owned row expansion state rendered by the TanStack Table Shell as additional row chrome. Hell may project native TanStack `Row<TFeatures, TData>` context into the expanded-row template, but it does not own active-row state or a master/detail feature.
 _Avoid_: Detail panel, active row editor, master/detail API.
 
 **TanStack Pagination Control**

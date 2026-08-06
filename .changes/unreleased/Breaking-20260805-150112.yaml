@@ -1,0 +1,47 @@
+kind: Breaking
+body: The optional `@tanstack/angular-table` peer dependency moved from `^8.21.4` to `^9.0.0`. The peer is declared package-wide, so the install constraint applies to every consumer that has `@tanstack/angular-table` in its tree — under strict peers, staying on v8 for your own tables now conflicts with Hell regardless of which entry points you import. The source migration below is what is specific to the `hell-ui/table-tanstack` and `hell-ui/table-tanstack/virtual` entry points.
+time: 2026-08-05T15:01:12.028682+02:00
+custom:
+    migration: |-
+        Upgrade `@tanstack/angular-table` to `^9.0.0` and migrate your own table
+        construction with it: v9 is a redesign rather than a compatible release.
+        Replace `createAngularTable(() => options)` with `injectTable(() => options)`
+        called in an Angular injection context (a component field initializer is one);
+        drop the `getCoreRowModel()` option, which is now automatic; and move features
+        and row models into a `features: tableFeatures({ ... })` object built once at
+        module scope rather than inside the initializer. Row-model options become
+        sibling slots — `getSortedRowModel()` becomes
+        `sortedRowModel: createSortedRowModel()`, `getFilteredRowModel()` becomes
+        `filteredRowModel: createFilteredRowModel()`, `getPaginationRowModel()` becomes
+        `paginatedRowModel: createPaginatedRowModel()`, and `getExpandedRowModel()`
+        becomes `expandedRowModel: createExpandedRowModel()`. Every feature you use must
+        be imported and registered; all of them are re-exported from
+        `@tanstack/angular-table`, so no new dependency is required.
+        Register the sort and filter functions too, not just the features and row
+        models. v9 no longer bundles the built-ins: `sortFn` and `filterFn` resolve by
+        name out of the `sortFns` and `filterFns` registries, and so does the `auto`
+        default that every column uses unless it names one. An unregistered name fails
+        quietly rather than loudly — a column that resolves to `alphanumeric` falls back
+        to a plain comparison and sorts `Person 1, Person 10, Person 2`, and one that
+        resolves to `includesString` gets no filter function at all, so the filter is
+        skipped and every row stays visible. Development builds warn
+        (`sortFn 'alphanumeric' (auto) for column 'name' is not registered`), so check the
+        console after upgrading. `auto` picks `alphanumeric` for strings containing digits,
+        `text` for other strings, `datetime` for dates, `includesString` for string
+        filters, `inNumberRange` for numbers, `equals` for booleans and objects,
+        `arrIncludes` for arrays and `inDateRange` for date ranges. Import the ones your
+        columns resolve to and register them under those names, for example
+        `sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text }` and
+        `filterFns: { includesString: filterFn_includesString }`. Spreading the exported
+        `sortFns`/`filterFns` registries also works but bundles every built-in. Tables
+        that leave sorting and filtering to a server need neither, because no client row
+        model runs.
+        TanStack's own
+        reference for the rest is bundled at
+        `@tanstack/angular-table/skills/migrate-v8-to-v9/SKILL.md`.
+        One timing difference is easy to miss: the row model now follows the `data`
+        option through Angular reactivity, so it has not rebuilt yet in a
+        `queueMicrotask` scheduled right after you write new data. Code that writes
+        rows and then reads them back with `table.getRowModel()` in a microtask —
+        for example to select a row after a server page loads — will see the previous
+        data. Use the rows you just fetched instead of re-deriving them from the table.

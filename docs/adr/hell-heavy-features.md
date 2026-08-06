@@ -49,7 +49,7 @@ Use a hybrid boundary:
 1. Keep `hell-ui` root/core/primitives/composites light.
 2. Split the PDF viewer out of `hell-ui` into a separate Angular package before public beta.
 3. Keep CodeMirror as an in-package optional feature entrypoint: `hell-ui/features/code-editor`.
-4. Use exactly two table paths: `hell-ui/table` for primitives and `hell-ui/table-tanstack` for a Hell-styled shell around a caller-owned TanStack `Table<T>`. Remove `hell-ui/data-table`, separate virtual table entrypoints, and CDK table skins before beta because there are no consumers yet.
+4. Use exactly two table paths: `hell-ui/table` for primitives and `hell-ui/table-tanstack` for a Hell-styled shell around a caller-owned TanStack `Table<TFeatures, TData>`. Remove `hell-ui/data-table`, separate virtual table entrypoints, and CDK table skins before beta because there are no consumers yet.
 5. Keep the base audio player in package, but isolate speech transcript behind an explicit optional feature/adapter entrypoint so normal audio-player/composite consumers do not load or own the Web Speech runtime.
 
 ## Options compared

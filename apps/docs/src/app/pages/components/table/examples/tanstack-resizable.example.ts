@@ -14,14 +14,39 @@ import {
 } from 'hell-ui/table-tanstack';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getSortedRowModel,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createSortedRowModel,
+  injectTable,
+  rowExpandingFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
   type ColumnDef,
   type ColumnSizingState,
   type SortingState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort functions by name out of this registry rather than
+  // bundling the built-ins: the numbered service and uptime columns resolve to
+  // `alphanumeric`, the plain-word owner and region columns to `text`.
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+});
 
 interface Service {
   readonly id: string;
@@ -92,7 +117,7 @@ export class TableTanStackResizableExample {
   protected readonly columnSizing = signal<ColumnSizingState>({});
   protected readonly sorting = signal<SortingState>([]);
 
-  protected readonly columns: ColumnDef<Service>[] = [
+  protected readonly columns: ColumnDef<typeof features, Service>[] = [
     { accessorKey: 'service', header: 'Service', size: 200, minSize: 120 },
     { accessorKey: 'owner', header: 'Owner', size: 160, minSize: 96 },
     { accessorKey: 'region', header: 'Region', size: 176, minSize: 96 },
@@ -100,14 +125,13 @@ export class TableTanStackResizableExample {
     { accessorKey: 'uptime', header: 'Uptime', size: 120, meta: { hell: { cellClass: 'text-end' } } },
   ];
 
-  protected readonly table = createAngularTable<Service>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
     // Opting in to TanStack column resizing is what makes the shell render
     // separators; `enableResizing: false` on a column opts that column out.
     enableColumnResizing: true,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
     state: { columnSizing: this.columnSizing(), sorting: this.sorting() },
     onColumnSizingChange: (updater: Updater<ColumnSizingState>) =>

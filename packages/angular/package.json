@@ -575,7 +575,7 @@
     "@angular/forms": "^22.0.0",
     "@angular/router": "^22.0.0",
     "@floating-ui/dom": "^1.7.6",
-    "@tanstack/angular-table": "^8.21.4",
+    "@tanstack/angular-table": "^9.0.0",
     "@tanstack/virtual-core": "^3.17.0",
     "ng-primitives": "0.123.0",
     "@ng-icons/core": "^34.0.0",

@@ -1,16 +1,34 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getPaginationRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
   type ColumnDef,
+  type ColumnFiltersState,
   type ColumnSizingState,
   type ExpandedState,
   type PaginationState,
   type Row,
   type RowSelectionState,
+  type SortingState,
 } from '@tanstack/angular-table';
 
 import {
@@ -30,6 +48,44 @@ import {
 import { HellButton } from 'hell-ui/button';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
+
+// Every feature the shell classes under test require, registered once for all
+// hosts. v9 gates feature APIs on registration, so a host that skipped one would
+// fail to type-check against the shell rather than fail at runtime.
+const features = tableFeatures({
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  expandedRowModel: createExpandedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+});
+
+/**
+ * A client-side feature set: sorted and filtered row models plus the function
+ * registries `auto` resolves through. v9 stopped bundling the built-ins, so a
+ * table that installs the row models without the registries silently sorts
+ * lexically and drops column filters instead of failing.
+ */
+const clientFeatures = tableFeatures({
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
+});
 
 interface Person {
   readonly id: string;
@@ -79,10 +135,10 @@ class ShellHost {
   readonly status = signal(HellTableStatus.READY);
   readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
   readonly rowSelection = signal<RowSelectionState>({ ada: true });
-  protected readonly selectedRowClass = (row: Row<Person>) =>
+  protected readonly selectedRowClass = (row: Row<typeof features, Person>) =>
     row.getIsSelected() ? 'bg-hell-primary-soft' : null;
 
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -93,11 +149,10 @@ class ShellHost {
     { id: 'actions', header: 'Actions' },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
     state: { pagination: this.pagination(), rowSelection: this.rowSelection() },
@@ -154,13 +209,12 @@ class MissingStatusHost extends ShellHost {}
 class VirtualRowsHost {
   readonly rows = signal<Person[]>(people);
   readonly expanded = signal<ExpandedState>({ ada: true });
-  readonly columns: ColumnDef<Person>[] = [{ accessorKey: 'name', header: 'Name' }];
+  readonly columns: ColumnDef<typeof features, Person>[] = [{ accessorKey: 'name', header: 'Name' }];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: { expanded: this.expanded() },
@@ -186,10 +240,10 @@ class FilterHost extends ShellHost {}
   template: `<hell-tanstack-column-filter [table]="table" columnId="name" />`,
 })
 class ColumnFilterHost {
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: [{ accessorKey: 'name', header: 'Name' }],
-    getCoreRowModel: getCoreRowModel(),
     initialState: {
       columnFilters: [{ id: 'name', value: { term: 'Ada' } }],
     },
@@ -237,7 +291,7 @@ class StyledShellHost extends ShellHost {}
 class ResizableShellHost {
   readonly resizingEnabled = signal(true);
   readonly columnSizing = signal<ColumnSizingState>({});
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     { id: 'a', header: 'A', size: 200, minSize: 120 },
     { id: 'b', header: 'B', size: 160 },
     { id: 'c', header: 'C', size: 140 },
@@ -245,11 +299,11 @@ class ResizableShellHost {
     { id: 'd', header: 'D', size: 120, enableResizing: false },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: this.columns,
     enableColumnResizing: this.resizingEnabled(),
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     state: { columnSizing: this.columnSizing() },
     onColumnSizingChange: (updater) =>
@@ -275,17 +329,99 @@ class ResizableShellHost {
   `,
 })
 class UncontrolledResizableShellHost {
-  readonly columns: ColumnDef<Person>[] = [
+  readonly columns: ColumnDef<typeof features, Person>[] = [
     { id: 'a', header: 'A', size: 200, minSize: 120 },
     { id: 'b', header: 'B', size: 160 },
   ];
 
-  readonly table = createAngularTable<Person>(() => ({
+  readonly table = injectTable(() => ({
+    features,
     data: people,
     columns: this.columns,
     enableColumnResizing: true,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
+  }));
+}
+
+/**
+ * Pins columns that are not already leading, so the rendered order differs from
+ * the declared leaf order. Every column carries a distinct size, which is what
+ * makes a `<colgroup>` built in the wrong order detectable.
+ */
+@Component({
+  selector: 'hell-test-nonleading-pinned-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class NonLeadingPinnedShellHost {
+  readonly columns: ColumnDef<typeof features, Person>[] = [
+    { id: 'a', header: 'A', size: 200 },
+    { id: 'b', header: 'B', size: 160 },
+    { id: 'c', header: 'C', size: 140 },
+    { id: 'd', header: 'D', size: 120 },
+  ];
+
+  readonly table = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    enableColumnResizing: true,
+    getRowId: (row) => row.id,
+    // 'c' pinned to start and 'a' to end, so the table renders c, b, d, a.
+    initialState: { columnPinning: { start: ['c'], end: ['a'] } },
+  }));
+}
+
+interface StatusPerson {
+  readonly id: string;
+  readonly name: string;
+  readonly status: 'active' | 'away';
+}
+
+/** Numbered names and a status column, the two shapes `auto` resolution decides. */
+const statusPeople: StatusPerson[] = Array.from({ length: 12 }, (_, index) => ({
+  id: `person-${index + 1}`,
+  name: `Person ${index + 1}`,
+  status: index % 4 === 0 ? 'away' : 'active',
+}));
+
+@Component({
+  selector: 'hell-test-client-sorted-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table">
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class ClientSortedShellHost {
+  readonly sorting = signal<SortingState>([{ id: 'name', desc: false }]);
+  readonly columnFilters = signal<ColumnFiltersState>([]);
+  readonly columns: ColumnDef<typeof clientFeatures, StatusPerson>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'status', header: 'Status' },
+  ];
+
+  readonly table = injectTable(() => ({
+    features: clientFeatures,
+    data: statusPeople,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+    state: { sorting: this.sorting(), columnFilters: this.columnFilters() },
+    onSortingChange: (updater) =>
+      this.sorting.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+    onColumnFiltersChange: (updater) =>
+      this.columnFilters.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
   }));
 }
 
@@ -302,6 +438,8 @@ describe('Hell TanStack table shell', () => {
         StyledShellHost,
         ResizableShellHost,
         UncontrolledResizableShellHost,
+        NonLeadingPinnedShellHost,
+        ClientSortedShellHost,
       ],
     }).compileComponents();
   });
@@ -530,7 +668,7 @@ describe('Hell TanStack table shell', () => {
     // uncontrolled sizing state does not refresh across them. Writing one
     // column per updater would compute the second from the same state as the
     // first, dropping "a" and growing the table by the whole key step.
-    expect(table.getState().columnSizing).toEqual({ a: 216, b: 144 });
+    expect(table.atoms.columnSizing.get()).toEqual({ a: 216, b: 144 });
     expect(table.getTotalSize()).toBe(totalBefore);
 
     const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;
@@ -651,6 +789,86 @@ describe('Hell TanStack table shell', () => {
     // The rows-per-page select delegates to the nested hellNativeSelect root part.
     const select = query(root, '#styled-pagination select[hellNativeSelect]');
     expect(select.getAttribute('data-slot')).toBe('root');
+  });
+
+  it('lays the colgroup out in pinned render order, not declared column order', () => {
+    const fixture = TestBed.createComponent(NonLeadingPinnedShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    // TanStack renders start-pinned, then centre, then end-pinned. Reading the
+    // flat leaf list instead would emit the declared a, b, c, d order and hand
+    // every column the wrong width.
+    const headerIds = [...root.querySelectorAll('thead th')].map((cell) =>
+      cell.getAttribute('data-column-id'),
+    );
+    const bodyIds = [...root.querySelectorAll('tbody tr:first-child td')].map((cell) =>
+      cell.getAttribute('data-column-id'),
+    );
+    const colWidths = [...root.querySelectorAll('colgroup col')].map(
+      (col) => (col as HTMLTableColElement).style.width,
+    );
+
+    expect(headerIds).toEqual(['c', 'b', 'd', 'a']);
+    expect(bodyIds).toEqual(['c', 'b', 'd', 'a']);
+    expect(colWidths).toEqual(['140px', '160px', '120px', '200px']);
+  });
+
+  it('pairs each resize separator with its rendered neighbour when pinning reorders columns', () => {
+    const fixture = TestBed.createComponent(NonLeadingPinnedShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const handled = [...root.querySelectorAll('thead th')]
+      .filter((cell) => cell.querySelector('[data-hell-table-shell-resize-handle]'))
+      .map((cell) => cell.getAttribute('data-column-id'));
+
+    // 'a' renders last, so it has no trailing neighbour to transact against.
+    // Against the declared order it would be 'd' that lost its separator.
+    expect(handled).toEqual(['c', 'b', 'd']);
+  });
+
+  it('sorts a numbered column naturally and applies a column filter through the registries', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const fixture = TestBed.createComponent(ClientSortedShellHost);
+      fixture.detectChanges();
+      const host = fixture.componentInstance;
+
+      // `auto` resolves to `alphanumeric` here. Unregistered it falls back to
+      // `sortFn_basic`, which orders lexically as Person 1, Person 10, Person 11.
+      expect(host.table.getRowModel().rows.map((row) => row.original.name)).toEqual([
+        'Person 1',
+        'Person 2',
+        'Person 3',
+        'Person 4',
+        'Person 5',
+        'Person 6',
+        'Person 7',
+        'Person 8',
+        'Person 9',
+        'Person 10',
+        'Person 11',
+        'Person 12',
+      ]);
+
+      // `auto` resolves to `includesString`. Unregistered it returns undefined
+      // and the filter is skipped, leaving all 12 rows visible.
+      host.columnFilters.set([{ id: 'status', value: 'away' }]);
+      fixture.detectChanges();
+      const filtered = host.table.getFilteredRowModel().rows;
+      expect(filtered.map((row) => row.original.name)).toEqual([
+        'Person 1',
+        'Person 5',
+        'Person 9',
+      ]);
+
+      // The registration warnings are the loud half of the same defect.
+      const messages = warn.mock.calls.map((call) => String(call[0]));
+      expect(messages.filter((message) => message.includes('is not registered'))).toEqual([]);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   describe('recipes', () => {

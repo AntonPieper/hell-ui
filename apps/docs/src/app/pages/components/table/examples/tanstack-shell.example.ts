@@ -36,8 +36,18 @@ import {
 } from 'hell-ui/table-tanstack';
 import { HellToolbar, HellToolbarItem } from 'hell-ui/toolbar';
 import {
-  createAngularTable,
-  getCoreRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  tableFeatures,
   type ColumnDef,
   type ColumnFiltersState,
   type PaginationState,
@@ -46,6 +56,24 @@ import {
   type SortingState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+// Sorting, filtering and pagination are all manual here, so the features are
+// registered for their APIs and state while the server owns the row models.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+});
 
 interface Person {
   readonly id: string;
@@ -400,7 +428,7 @@ export class TableTanStackShellExample implements OnDestroy {
   protected readonly globalFilter = signal('');
   protected readonly detailOpen = signal(false);
   protected readonly openedId = signal<string | null>(null);
-  protected readonly selectedRowClass = (row: Row<Person>) =>
+  protected readonly selectedRowClass = (row: Row<typeof features, Person>) =>
     row.getIsSelected() ? 'bg-hell-primary-soft' : null;
   private queryVersion = 0;
   private queryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -464,7 +492,7 @@ export class TableTanStackShellExample implements OnDestroy {
     Math.max(1, Math.ceil(this.totalRows() / this.pagination().pageSize)),
   );
 
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       id: 'select',
       header: '',
@@ -504,11 +532,11 @@ export class TableTanStackShellExample implements OnDestroy {
     },
   ];
 
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
     enableRowSelection: true,
-    getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     manualFiltering: true,
     manualPagination: true,
@@ -622,7 +650,7 @@ export class TableTanStackShellExample implements OnDestroy {
       this.rows.set(result.rows);
       this.totalRows.set(result.totalRows);
       this.status.set(HellTableStatus.READY);
-      this.openPendingAdjacentPageRow();
+      this.openPendingAdjacentPageRow(result.rows);
     }, 120);
   }
 
@@ -670,16 +698,20 @@ export class TableTanStackShellExample implements OnDestroy {
     }
   }
 
-  private openPendingAdjacentPageRow(): void {
+  /**
+   * Opens the edge row of the page a boundary navigation just loaded.
+   *
+   * Takes the rows the query returned rather than reading them back off the
+   * table: the table's row model follows the `data` option through Angular
+   * reactivity, so it has not necessarily rebuilt at the moment this runs. The
+   * page that was just fetched is the page to open into, so use it directly.
+   */
+  private openPendingAdjacentPageRow(rows: readonly Person[]): void {
     const pending = this.pendingAdjacentPageOpen;
     if (!pending) return;
 
     this.pendingAdjacentPageOpen = null;
-    queueMicrotask(() => {
-      const rows = this.table.getRowModel().rows;
-      const row = pending > 0 ? rows[0] : rows.at(-1);
-      this.openPerson(row?.original ?? null);
-    });
+    this.openPerson((pending > 0 ? rows[0] : rows.at(-1)) ?? null);
   }
 
   private openedRowIndex(rows: readonly { readonly original: Person }[]): number {

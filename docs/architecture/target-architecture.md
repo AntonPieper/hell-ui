@@ -70,7 +70,7 @@ The ideal shape is:
 - Hell supports exactly two table paths: `/table` for native-table primitives and `/table-tanstack` for the Hell-styled TanStack Table Shell.
 - TanStack is the table engine for rows, columns, sorting, filtering, pagination, selection, pinning, sizing, expansion, virtualization, and state.
 - Hell table primitives remain native-table semantic/styling affordances. They do not expose a normalized table model, table state channels, grid mode, row draft controller, column definition DSL, column visibility panel, or first-party data-table renderer.
-- `/table-tanstack` may provide reusable shell chrome, projected shell regions, TanStack-aware controls, and an optional TanStack Virtual body strategy, but it must require a caller-owned TanStack `Table<T>` instance.
+- `/table-tanstack` may provide reusable shell chrome, projected shell regions, TanStack-aware controls, and an optional TanStack Virtual body strategy, but it must require a caller-owned TanStack `Table<TFeatures, TData>` instance whose registered features cover what each shell class reads.
 - Legacy feature aliases, clickable-row APIs, `/data-table`, `/table-virtual`, and `/table-cdk` should be removed before beta because there are no consumers yet.
 
 ### Testing boundary

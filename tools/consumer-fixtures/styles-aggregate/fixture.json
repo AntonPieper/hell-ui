@@ -11,6 +11,7 @@
   "forbiddenCssSentinels": [
     "hell-code-editor",
     "hell-pdf-viewer",
+    "hell-tanstack-table",
     "[data-hell-skin=glass]hell-toaster"
   ],
   "styleBundleBudget": true,

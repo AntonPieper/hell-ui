@@ -31,11 +31,23 @@ import {
 } from 'hell-ui/table-tanstack';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
 import {
-  createAngularTable,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
+  columnFilteringFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFilteredRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
+  globalFilteringFeature,
+  injectTable,
+  rowExpandingFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
   type ColumnDef,
   type ColumnFiltersState,
   type ExpandedState,
@@ -44,6 +56,32 @@ import {
   type SortingState,
   type Updater,
 } from '@tanstack/angular-table';
+
+// v9 requires explicit feature registration; the Hell shell reads pinning,
+// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// injectTable initializer so it is not rebuilt on every signal change.
+const features = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  rowSelectionFeature,
+  expandedRowModel: createExpandedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  // v9 resolves `auto` sort and filter functions by name out of these
+  // registries and no longer bundles the built-ins. Without them a name column
+  // sorts lexically (Person 1, Person 10) and a column filter silently matches
+  // every row. Register the built-ins these columns actually resolve to:
+  // `alphanumeric` for the numbered name, `text` for the plain-word columns, and
+  // `includesString` for the string column and global filters.
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  filterFns: { includesString: filterFn_includesString },
+});
 
 interface Person {
   readonly id: string;
@@ -293,7 +331,7 @@ export class TableTanStackVirtualExample {
   protected readonly rowSelection = signal<RowSelectionState>({ 'person-1': true });
   protected readonly expanded = signal<ExpandedState>({});
   protected readonly globalFilter = signal('');
-  protected readonly selectedRowClass = (row: Row<Person>) =>
+  protected readonly selectedRowClass = (row: Row<typeof features, Person>) =>
     row.getIsSelected() ? 'bg-hell-primary-soft' : null;
 
   protected readonly statusFilters: readonly {
@@ -346,7 +384,7 @@ export class TableTanStackVirtualExample {
     () => this.statusFilter() !== 'all' || this.roleFilter() !== 'all',
   );
 
-  protected readonly columns: ColumnDef<Person>[] = [
+  protected readonly columns: ColumnDef<typeof features, Person>[] = [
     {
       id: 'select',
       header: '',
@@ -386,14 +424,11 @@ export class TableTanStackVirtualExample {
     },
   ];
 
-  protected readonly table = createAngularTable<Person>(() => ({
+  protected readonly table = injectTable(() => ({
+    features,
     data: this.rows(),
     columns: this.columns,
     enableRowSelection: true,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
     state: {

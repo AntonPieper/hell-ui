@@ -321,7 +321,8 @@ test.describe('modern resize handle browser contracts', () => {
     // columns pinned, and no sticky header row to position the cells already.
     await expect(shell).toHaveAttribute('data-hell-tanstack-resizable-columns', 'true');
     await expect(shell).not.toHaveAttribute('data-sticky-header', 'true');
-    await expect(shell.locator('thead th[data-pinned="left"]')).toHaveCount(2);
+    // Pinning is logical: TanStack v9 pins to 'start'/'end', not 'left'/'right'.
+    await expect(shell.locator('thead th[data-pinned="start"]')).toHaveCount(2);
 
     // `position: relative` here would turn `--hell-table-pinned-start` into a
     // plain displacement, sliding the header off the column it heads.
