@@ -81,9 +81,11 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             The shell has its own stylesheet: load
             <code>hell-ui/table-tanstack/styles.css</code> instead of
             <code>hell-ui/table/styles.css</code> when you render it. It imports the primitive
-            table styles itself, so it stays a single import, and it is what carries the pinned
-            column rules — sticky positioning, the logical start/end insets, and the boundary
-            shadows. The primitives stylesheet alone renders the shell without any of them.
+            table styles itself, so it stays a single import, and it carries every shell rule
+            Tailwind cannot express: the toolbar and footer bars, the scrollport and its
+            scrollbars, pinned-column sticky positioning with its logical start/end insets and
+            boundary shadows, the status and expanded-row scaffolding, and the virtual-row
+            geometry. The primitives stylesheet alone renders the shell without any of them.
           </p>
           <p>
             TanStack v9 gates every feature API on the features a table registers, so each shell

@@ -34,9 +34,11 @@ custom:
         `HellTanStackVirtualRows` all default both parameters, so annotations that passed
         no type arguments keep working; only ones that passed a single `TData` argument
         need the feature set inserted ahead of it.
-        The shells also emit three more `protected` template helpers than before
-        (`visibleLeafColumns`, `rowCells`, `sortable`), which read feature-gated APIs the
-        template cannot reach directly.
+        The shells also emit four more `protected` template helpers than before:
+        `visibleLeafColumns`, `rowCells` and `sortable` on `HellTanStackTable`, and
+        `value` on `HellTanStackGlobalFilter`. Each reads something the template cannot
+        reach directly — the first three are feature-gated APIs, and `value` normalises the
+        `globalFilter` state atom that replaced `getState().globalFilter`.
         They are not part of the supported surface, but they do appear in the generated
         declarations, so a subclass of one of these components that already declares a
         member of the same name has to rename it.

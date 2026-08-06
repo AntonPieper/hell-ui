@@ -1,5 +1,5 @@
 kind: Breaking
-body: The optional `@tanstack/angular-table` peer dependency moved from `^8.21.4` to `^9.0.0`. Only consumers of the `hell-ui/table-tanstack` and `hell-ui/table-tanstack/virtual` entry points are affected.
+body: The optional `@tanstack/angular-table` peer dependency moved from `^8.21.4` to `^9.0.0`. The peer is declared package-wide, so the install constraint applies to every consumer that has `@tanstack/angular-table` in its tree — under strict peers, staying on v8 for your own tables now conflicts with Hell regardless of which entry points you import. The source migration below is what is specific to the `hell-ui/table-tanstack` and `hell-ui/table-tanstack/virtual` entry points.
 time: 2026-08-05T15:01:12.028682+02:00
 custom:
     migration: |-
