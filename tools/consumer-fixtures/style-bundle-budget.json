@@ -2,16 +2,16 @@
   "description": "Accepted size baseline and release budget for the compiled Default Style Bundle, measured from the styles-aggregate packed-consumer fixture's production CSS output. See docs/release/style-bundle-budget.md for the review and update process.",
   "baseline": {
     "fixture": "styles-aggregate",
-    "packageVersion": "0.2.0",
-    "revision": "b01915ea5a08b601b6f635dc30aad92e3f7d3c86",
+    "packageVersion": "0.3.0",
+    "revision": "d8bf92c5e497a01cac8221886b5a6de0ad85e2b6",
     "command": "pnpm run benchmark:style-bundle",
-    "measuredAt": "2026-08-04",
-    "rawBytes": 187727,
-    "gzipBytes": 27781
+    "measuredAt": "2026-08-05",
+    "rawBytes": 181493,
+    "gzipBytes": 27067
   },
   "budget": {
-    "maxRawBytes": 196000,
-    "maxGzipBytes": 29000,
-    "derivation": "Accepted baseline plus roughly 4-5% headroom for routine fixes, rounded to clean limits (187,727 -> 196,000 raw; 27,781 -> 29,000 gzip). Intentional growth beyond this re-measures the baseline and re-derives the budget per docs/release/style-bundle-budget.md."
+    "maxRawBytes": 190000,
+    "maxGzipBytes": 28500,
+    "derivation": "Accepted baseline plus roughly 4-5% headroom for routine fixes, rounded to clean limits (181,493 -> 190,000 raw; 27,067 -> 28,500 gzip). Lowered from 196,000/29,000 after the bundle shrank by 6,234 raw bytes against the previous baseline: 4,500 of that is the TanStack shell stylesheet moving out of the Default Style Bundle into the opt-in hell-ui/table-tanstack/styles.css entry point, and the remaining 1,734 predates this change. Intentional growth beyond this re-measures the baseline and re-derives the budget per docs/release/style-bundle-budget.md."
   }
 }

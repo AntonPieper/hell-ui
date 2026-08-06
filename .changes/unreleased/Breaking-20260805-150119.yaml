@@ -1,5 +1,5 @@
 kind: Breaking
-body: 'Column pinning in the `hell-ui/table-tanstack` shell is now logical rather than physical: the shell publishes `data-pinned="start"` and `data-pinned="end"` instead of `"left"`/`"right"`, and every TanStack shell rule moved out of `hell-ui/table/styles.css` into the opt-in `hell-ui/table-tanstack/styles.css`, which positions pinned columns with `inset-inline-start`/`inset-inline-end`.'
+body: 'Column pinning in the `hell-ui/table-tanstack` shell is now logical rather than physical: the shell publishes `data-pinned="start"` and `data-pinned="end"` instead of `"left"`/`"right"`, and pinned columns are positioned with `inset-inline-start`/`inset-inline-end` so they follow the writing direction.'
 time: 2026-08-05T15:01:19.962397+02:00
 custom:
     migration: |-
@@ -16,19 +16,3 @@ custom:
         toward the scrolling centre. If you restyled those shadows, they now read the
         `--hell-table-pinned-shadow-inline` custom property rather than hard-coded
         physical offsets.
-        Every TanStack shell rule also moved out of `hell-ui/table/styles.css` into the
-        opt-in `hell-ui/table-tanstack/styles.css` — not just pinning, but the toolbar and
-        footer bars, the scrollport and its scrollbars, the shell table sizing, the status
-        and expanded-row scaffolding, the filter search rows, the pagination controls and
-        the virtual-row geometry. The default bundle no longer ships shell selectors to
-        consumers with no TanStack table.
-        If you render the shell you now need that stylesheet, in either style mode. Add
-        `@import 'hell-ui/table-tanstack/styles.css';` — alongside `hell-ui/styles.css` if
-        you use the Default Style Bundle, or in place of `hell-ui/table/styles.css` if you
-        import entrypoint stylesheets granularly. It imports the base table styles itself,
-        so it stays one import either way and the shared base still resolves once. Order is
-        not significant beyond Hell's usual rule that theme adapter stylesheets come after
-        the component CSS they adapt.
-        Without it the shell still renders, but pinned columns lose sticky positioning and
-        their boundary shadows, the scrollport loses its thin scrollbars, and the virtual
-        row strategy loses the geometry that keeps its rows on the header grid.
