@@ -34,8 +34,9 @@ custom:
         `HellTanStackVirtualRows` all default both parameters, so annotations that passed
         no type arguments keep working; only ones that passed a single `TData` argument
         need the feature set inserted ahead of it.
-        The shells also emit more `protected` template helpers than before
-        (`visibleLeafColumns`, `headerGroups`, `footerGroups`, `rowCells`, `sortable`).
+        The shells also emit three more `protected` template helpers than before
+        (`visibleLeafColumns`, `rowCells`, `sortable`), which read feature-gated APIs the
+        template cannot reach directly.
         They are not part of the supported surface, but they do appear in the generated
         declarations, so a subclass of one of these components that already declares a
         member of the same name has to rename it.

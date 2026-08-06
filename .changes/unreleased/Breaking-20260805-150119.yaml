@@ -16,3 +16,9 @@ custom:
         toward the scrolling centre. If you restyled those shadows, they now read the
         `--hell-table-pinned-shadow-inline` custom property rather than hard-coded
         physical offsets.
+        Those pinning rules also moved out of `hell-ui/table/styles.css` into the opt-in
+        `hell-ui/table-tanstack/styles.css`, so the default bundle no longer ships shell
+        selectors to consumers with no TanStack table. `hell-ui/table-tanstack/styles.css`
+        imports the base table styles itself so it stays a single import. If you use the
+        shell and imported only `hell-ui/table/styles.css`, switch that import over or
+        pinned columns lose their sticky positioning and boundary shadows.

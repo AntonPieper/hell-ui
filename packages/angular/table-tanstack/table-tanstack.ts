@@ -597,7 +597,7 @@ interface HellColumnMeta {
           }
         </colgroup>
         <thead hellTableHeader data-hell-table-shell-head>
-          @for (headerGroup of headerGroups(); track headerGroup.id) {
+          @for (headerGroup of table().getHeaderGroups(); track headerGroup.id) {
             <tr hellTableRow data-hell-table-shell-header-row>
               @for (header of headerGroup.headers; track header.id) {
                 <th
@@ -799,7 +799,7 @@ interface HellColumnMeta {
 
         @if (hasFooters()) {
           <tfoot data-hell-table-shell-foot>
-            @for (footerGroup of footerGroups(); track footerGroup.id) {
+            @for (footerGroup of table().getFooterGroups(); track footerGroup.id) {
               <tr hellTableRow data-hell-table-shell-footer-row>
                 @for (footer of footerGroup.headers; track footer.id) {
                   <td
@@ -940,14 +940,6 @@ export class HellTanStackTable<
     ];
   }
 
-  protected headerGroups() {
-    return this.table().getHeaderGroups();
-  }
-
-  protected footerGroups() {
-    return this.table().getFooterGroups();
-  }
-
   protected rowCells(row: Row<TFeatures, TData>): readonly Cell<TFeatures, TData, unknown>[] {
     return row_getVisibleCells(row);
   }
@@ -992,7 +984,7 @@ export class HellTanStackTable<
    * as soon as the caller's options recompute.
    */
   protected columnResizingEnabled(): boolean {
-    const header = this.headerGroups()[0]?.headers[0];
+    const header = this.table().getHeaderGroups()[0]?.headers[0];
     if (!header) return false;
     // `enableColumnResizing` belongs to the resizing feature, so a shell generic
     // over `TFeatures` reads it through TanStack's broadened options view.
@@ -1191,7 +1183,9 @@ export class HellTanStackTable<
   }
 
   protected hasFooters(): boolean {
-    return this.footerGroups().some((group) =>
+    return this.table()
+      .getFooterGroups()
+      .some((group) =>
       group.headers.some(
         (header) =>
           !header.isPlaceholder &&

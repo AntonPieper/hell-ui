@@ -2,3 +2,65 @@
 
 /* TanStack shell/pagination default visuals are Tailwind utility recipes in the component. */
 @source "./table-tanstack.ts";
+
+/*
+ * Column pinning presentation for the TanStack shell.
+ *
+ * These selectors are shell-only, so they belong to this opt-in entry point
+ * rather than to `table/styles.css`, which the default `hell-ui/styles.css`
+ * bundle pulls in for every consumer including those with no TanStack table.
+ * The base table styles are imported above, so the cascade order is unchanged.
+ */
+@layer components {
+  /*
+   * Column pinning is logical, not physical: TanStack pins to `start`/`end`, so
+   * these resolve against the writing direction through logical inset
+   * properties rather than hard-coding `left`/`right`.
+   */
+  hell-tanstack-table [data-pinned='start'],
+  hell-tanstack-table [data-pinned='end'] {
+    position: sticky;
+    z-index: 2;
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='start'],
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='end'] {
+    z-index: 3;
+    background-color: var(--color-hell-surface-subtle);
+  }
+
+  hell-tanstack-table [data-pinned='start'] {
+    inset-inline-start: var(--hell-table-pinned-start, 0);
+  }
+
+  hell-tanstack-table [data-pinned='end'] {
+    inset-inline-end: var(--hell-table-pinned-after, 0);
+  }
+
+  /*
+   * Boundary shadows for the pinned regions, cast toward the scrolling centre.
+   *
+   * `box-shadow` has no logical form, so the inline axis is carried in a
+   * variable that flips with the resolved direction. `:dir()` rather than
+   * `[dir='rtl']` so an inherited or `auto` direction resolves correctly too.
+   * `data-pinned-last` is the trailing start-pinned column, so its shadow runs
+   * toward the inline end; `data-pinned-first` is the leading end-pinned column
+   * and runs the opposite way.
+   */
+  hell-tanstack-table {
+    --hell-table-pinned-shadow-inline: 8px;
+  }
+
+  hell-tanstack-table:dir(rtl) {
+    --hell-table-pinned-shadow-inline: -8px;
+  }
+
+  hell-tanstack-table [data-pinned-last='true'] {
+    box-shadow: var(--hell-table-pinned-shadow-inline) 0 8px -8px rgb(0 0 0 / 0.16);
+  }
+
+  hell-tanstack-table [data-pinned-first='true'] {
+    box-shadow: calc(-1 * var(--hell-table-pinned-shadow-inline)) 0 8px -8px rgb(0 0 0 / 0.16);
+  }
+}
