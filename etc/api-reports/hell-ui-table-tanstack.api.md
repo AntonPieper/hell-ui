@@ -691,8 +691,8 @@ export interface ɵHellTanStackResizeStrategy {
 // types/hell-ui-table-tanstack.d.ts:485:5 - (ae-undocumented) Missing documentation for "value".
 // types/hell-ui-table-tanstack.d.ts:486:5 - (ae-undocumented) Missing documentation for "setFilter".
 // types/hell-ui-table-tanstack.d.ts:487:5 - (ae-undocumented) Missing documentation for "clearFilter".
-// types/hell-ui-table-tanstack.d.ts:512:5 - (ae-undocumented) Missing documentation for "columnResizingFeature".
-// types/hell-ui-table-tanstack.d.ts:513:5 - (ae-undocumented) Missing documentation for "columnSizingFeature".
+// types/hell-ui-table-tanstack.d.ts:519:5 - (ae-undocumented) Missing documentation for "columnResizingFeature".
+// types/hell-ui-table-tanstack.d.ts:520:5 - (ae-undocumented) Missing documentation for "columnSizingFeature".
 
 // (No @packageDocumentation comment for this package)
 

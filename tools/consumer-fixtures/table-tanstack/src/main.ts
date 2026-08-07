@@ -8,11 +8,13 @@ import {
   HellTableStatus,
   HellTanStackGlobalFilter,
   HellTanStackPagination,
+  HellTanStackResizableColumns,
   HellTanStackTable,
 } from 'hell-ui/table-tanstack';
 import {
   columnFilteringFeature,
   columnPinningFeature,
+  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createFilteredRowModel,
@@ -28,6 +30,7 @@ import {
   sortFn_text,
   tableFeatures,
   type ColumnDef,
+  type ColumnSizingState,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
@@ -64,6 +67,57 @@ interface Person {
   readonly active: boolean;
 }
 
+/**
+ * Column resizing is opt-in: only this table registers TanStack's resizing
+ * feature and applies `hellTanStackResizableColumns`, while the main shell
+ * below compiles from the packed artifact without either — the two halves of
+ * the split contract.
+ */
+const resizableFeatures = tableFeatures({
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowExpandingFeature,
+  rowSortingFeature,
+});
+
+interface Service {
+  readonly id: string;
+  readonly name: string;
+  readonly region: string;
+}
+
+const services: readonly Service[] = [
+  { id: 'gateway', name: 'gateway', region: 'eu-central-1' },
+  { id: 'metrics', name: 'metrics', region: 'us-east-1' },
+];
+
+@Component({
+  selector: 'app-resizable-table',
+  imports: [HellTanStackTable, HellTanStackResizableColumns, HellTableShellEmpty],
+  template: `
+    <hell-tanstack-table [table]="table" hellTanStackResizableColumns>
+      <ng-template hellTableShellEmpty>No services.</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class ResizableTable {
+  protected readonly columnSizing = signal<ColumnSizingState>({});
+  protected readonly columns: ColumnDef<typeof resizableFeatures, Service>[] = [
+    { accessorKey: 'name', header: 'Service', size: 200, minSize: 120 },
+    { accessorKey: 'region', header: 'Region', size: 160 },
+  ];
+  protected readonly table = injectTable(() => ({
+    features: resizableFeatures,
+    data: services,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+    state: { columnSizing: this.columnSizing() },
+    onColumnSizingChange: (updater) => applyUpdater(this.columnSizing, updater),
+  }));
+}
+
 // TanStack table boundary: the Hell-styled shell composes a caller-owned
 // TanStack Table engine behind the strict optional table peer.
 @Component({
@@ -76,6 +130,7 @@ interface Person {
     HellTableShellToolbar,
     HellTanStackGlobalFilter,
     HellTanStackPagination,
+    ResizableTable,
   ],
   template: `
     <hell-tanstack-table [table]="table" [status]="HellTableStatus.READY" stickyHeader>
@@ -90,6 +145,8 @@ interface Person {
       <span hellTableShellFooter>{{ table.getRowModel().rows.length }} visible</span>
       <hell-tanstack-pagination hellTableShellFooter [table]="table" [pageSizeOptions]="[1, 2]" />
     </hell-tanstack-table>
+
+    <app-resizable-table />
   `,
 })
 class App {

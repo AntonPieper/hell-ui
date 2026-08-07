@@ -1515,7 +1515,14 @@ function normalizeDomName(name: string): string {
     .toLowerCase();
 }
 
-/** All directives that make up the TanStack Table entry point, for bulk `imports`. */
+/**
+ * The base TanStack Table shell directives, for bulk `imports`.
+ *
+ * Opt-in extensions are deliberately not part of this aggregate, so tables
+ * that skip them never carry their code: import `HellTanStackResizableColumns`
+ * directly for column resizing, and `HellTanStackVirtualRows` from
+ * `hell-ui/table-tanstack/virtual` for virtual rows.
+ */
 export const HELL_TANSTACK_TABLE_IMPORTS = [
   HellTanStackTable,
   HellTableShellHeader,
