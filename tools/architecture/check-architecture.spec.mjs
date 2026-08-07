@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
-import { parseJsonc } from './check-architecture.mjs';
+import { ngpAttrOwnershipSeamFailures, parseJsonc } from './check-architecture.mjs';
 
 /**
  * The checker's one JSONC surface is the repository's tsconfig files, and its
@@ -82,5 +84,89 @@ describe('parseJsonc', () => {
     // The parser strips comments and hands the rest to JSON.parse, so a
     // malformed config fails loudly instead of being half-read.
     expect(() => parseJsonc('{"a": 1,}')).toThrow(SyntaxError);
+  });
+});
+
+/**
+ * The attr-ownership seam's correctness rests on invariants no behavior test
+ * exercises on the happy path: the version pin, the mirrored controlStatus
+ * trigger, and — above all — the status() read INSIDE the ownership callback,
+ * which is what keeps Hell's writer waking on upstream-only status flushes.
+ * Each test below mutates exactly one of those away from the real seam source
+ * and expects the checker half to name it, so the guard is proven against the
+ * file it actually protects rather than a synthetic fixture.
+ */
+describe('ngpAttrOwnershipSeamFailures', () => {
+  const seamRelPath = 'packages/angular/internal/ng-primitives/ngp-attr-ownership.ts';
+  const seamPath = new URL(
+    '../../packages/angular/internal/ng-primitives/ngp-attr-ownership.ts',
+    import.meta.url,
+  );
+  const seamSource = readFileSync(seamPath, 'utf8');
+  const installedVersion = `ng-primitives@${
+    JSON.parse(
+      readFileSync(
+        new URL('../../packages/angular/node_modules/ng-primitives/package.json', import.meta.url),
+        'utf8',
+      ),
+    ).version
+  }`;
+
+  const check = (source) => ngpAttrOwnershipSeamFailures(source, installedVersion, seamRelPath);
+
+  const mutate = (pattern, replacement = '') => {
+    expect(seamSource).toMatch(pattern);
+    return seamSource.replace(pattern, replacement);
+  };
+
+  it('accepts the real seam source', () => {
+    expect(check(seamSource)).toEqual([]);
+  });
+
+  it('fails when the version constant drifts from the installed package', () => {
+    const failures = check(
+      seamSource.replace(/HELL_NGP_ATTR_OWNERSHIP_VERSION = '[^']+'/, (m) =>
+        m.replace(/@.*'$/, "@0.0.0'"),
+      ),
+    );
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toContain('seam version must match installed');
+  });
+
+  it('fails when the controlStatus import is dropped', () => {
+    const failures = check(
+      mutate(/import \{ controlStatus \} from 'ng-primitives\/utils';\n/),
+    );
+    expect(failures.some((f) => f.includes('controlStatus from ng-primitives/utils'))).toBe(true);
+  });
+
+  it('fails when the mirrored trigger binding is removed', () => {
+    const failures = check(mutate(/const status = controlStatus\(\);\n/));
+    expect(failures.some((f) => f.includes('const status = controlStatus()'))).toBe(true);
+  });
+
+  it('fails when the status() read is mutated out of the ownership callback', () => {
+    // The exact mutation the guard exists for: the import and binding survive,
+    // the callback compiles and passes every happy-path behavior test, but the
+    // effect is no longer dirtied by upstream-only status flushes.
+    const failures = check(mutate(/^\s*status\(\);\n/m));
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toContain('must read status()');
+  });
+
+  it('fails when the write is no longer registered through hellOwnsNgpAttribute', () => {
+    const failures = check(
+      seamSource.replace(/hellOwnsNgpAttribute\(\(\) => \{/, 'queueMicrotask(() => {'),
+    );
+    expect(
+      failures.some((f) => f.includes('hellOwnsNgpAttribute(() => { ... }) callback')),
+    ).toBe(true);
+  });
+
+  it('fails when the helper itself is deleted without retiring the check', () => {
+    const failures = check(
+      seamSource.slice(0, seamSource.indexOf('export function hellOwnsControlAriaInvalid')),
+    );
+    expect(failures.some((f) => f.includes('must define hellOwnsControlAriaInvalid'))).toBe(true);
   });
 });
