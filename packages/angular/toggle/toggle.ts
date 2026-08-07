@@ -1,9 +1,7 @@
 import {
-  afterRenderEffect,
   Directive,
   effect,
   ElementRef,
-  PLATFORM_ID,
   booleanAttribute,
   computed,
   inject,
@@ -12,16 +10,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { type FormValueControl } from '@angular/forms/signals';
 import { NgpToggle } from 'ng-primitives/toggle';
 import {
   NgpToggleGroupItem,
-  injectToggleGroupItemState,
   ngpToggleGroup,
   provideToggleGroupState,
 } from 'ng-primitives/toggle-group';
-import { ngpRovingFocusGroup, provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
+import { provideRovingFocusGroupState } from 'ng-primitives/roving-focus';
 import { type NgpOrientation } from 'ng-primitives/common';
 import { containsNode, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import { HellSize, type HellUiInput } from 'hell-ui/core';
@@ -170,11 +166,8 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
    * exactly once, which writes the model.
    */
   protected readonly state = ngpToggleGroup({
-    rovingFocusGroup: ngpRovingFocusGroup({
-      orientation: signal<NgpOrientation>('horizontal'),
-      wrap: signal(true),
-      disabled: this.disabled,
-    }),
+    orientation: signal<NgpOrientation>('horizontal'),
+    wrap: signal(true),
     type: this.type,
     value: this.selectedItems,
     disabled: this.disabled,
@@ -207,46 +200,6 @@ export class HellToggleGroup implements FormValueControl<HellToggleGroupValue> {
     if (!containsNode(this.host.nativeElement, event.relatedTarget)) {
       this.touch.emit();
     }
-  }
-}
-
-/**
- * ng-primitives <= 0.124 hardcodes `role="radio"` and `aria-checked` on
- * toggle-group items regardless of the group's `type`, but items in a
- * `multiple` group are toggle buttons, not radios: they need native button
- * semantics with `aria-pressed`. Upstream re-writes `aria-checked` from a
- * render effect on every selection change, so a host binding cannot remove
- * it; Hell corrects the attributes from a later-registered render effect
- * (host directives construct first, so this one runs after upstream's each
- * flush) until upstream derives the semantics from the group type. Tracked
- * upstream as https://github.com/ng-primitives/ng-primitives/issues/813.
- */
-function toggleGroupItemModeAria(): void {
-  const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  const group = inject(HellToggleGroup, { optional: true });
-  const item = injectToggleGroupItemState();
-
-  const syncModeAria = () => {
-    // Read `selected` in both modes so this effect re-runs (after upstream's)
-    // whenever upstream re-writes `aria-checked`.
-    const selected = `${item().selected()}`;
-    if (group?.type() === 'multiple') {
-      element.removeAttribute('role');
-      element.removeAttribute('aria-checked');
-      element.setAttribute('aria-pressed', selected);
-    } else {
-      element.setAttribute('role', 'radio');
-      element.setAttribute('aria-checked', selected);
-      element.removeAttribute('aria-pressed');
-    }
-  };
-
-  // Mirror ng-primitives' isomorphic scheduling so the write order also holds
-  // during server rendering, where upstream binds via plain effects.
-  if (isPlatformBrowser(inject(PLATFORM_ID))) {
-    afterRenderEffect(syncModeAria);
-  } else {
-    effect(syncModeAria);
   }
 }
 
@@ -286,7 +239,4 @@ export class HellToggleGroupItem {
     }),
   });
 
-  constructor() {
-    toggleGroupItemModeAria();
-  }
 }

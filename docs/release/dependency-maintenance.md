@@ -62,21 +62,32 @@ maintainer approval **and** these probes before merge:
 
 1. `docs/adr/ng-primitives-state-adapter.md` — rerun the ADR recheck against the
    upgraded typings before changing the pin.
-2. **Pagination keyboard activation** — `paginationKeyboardActivation` in
-   `packages/angular/pagination/pagination.ts`.
-3. **Toggle-group mode ARIA** — `toggleGroupItemModeAria()` in
-   `packages/angular/toggle/toggle.ts`.
-4. **Breadcrumb ellipsis role/aria-hidden** — `HellBreadcrumbEllipsis` in
-   `packages/angular/breadcrumbs/breadcrumbs.ts`.
+2. **Breadcrumb ellipsis role/aria-hidden** — `HellBreadcrumbEllipsis` in
+   `packages/angular/breadcrumbs/breadcrumbs.ts`, a local override of an
+   upstream defect. Re-probe by deleting it and running its guard tests, not by
+   reading upstream's changelog — delete it once upstream has fixed it.
+3. **Attribute-ownership effects** — every `hellOwnsNgpAttribute` /
+   `hellOwnsControlAriaInvalid` call site
+   (`docs/adr/ngp-attribute-ownership.md`). These are deliberate contract
+   differences, not defect bridges: they survive upgrades, but each one must
+   wake with its upstream writer, so verify those triggers still hold on the
+   new version.
 
-Each of 2–4 is a local override of an upstream defect, carried with a doc
-comment naming the upstream issue. Re-probe all three on **every** upgrade and
-delete the ones upstream has fixed — that deletion is the point of the bump.
+Retired probes, for the record: the toggle-group mode-ARIA override
+(`toggleGroupItemModeAria()`) was deleted when 0.128 fixed upstream issue #813,
+and pagination keyboard activation turned out not to be upstream-retirable at
+all — `hellPageLink` composes no upstream pagination primitives, so
+`paginationKeyboardActivation` is Hell's own implementation and stays.
 
-Three pins move together and are enforced by
+Five pins move together and are enforced by
 `tools/architecture/check-architecture.mjs`: the catalog entry, the
-`ng-primitives` peer in `packages/angular/package.json`, and the adapter version
-constant.
+`ng-primitives` peer in `packages/angular/package.json`, and one version
+constant per version-bound seam — `HELL_NGP_STATE_WRITER_VERSION`
+(state adapter), `HELL_DIALOG_SCOPED_MODALITY_VERSION` (focus-trap escape
+marker), and `HELL_NGP_ATTR_OWNERSHIP_VERSION` (attribute ownership). Each
+constant exists to force a re-probe of its seam's assumptions before the pin
+moves; a new version-bound seam must add its constant to its architecture
+check and to this list.
 
 ## Overrides
 
@@ -114,8 +125,7 @@ Re-probe every entry here on each sweep; delete the ones that have retired.
 
 | Exception | Why it exists | Retires when |
 |---|---|---|
-| `overrides: @phenomnomnominal/tsquery` | `ng-primitives` (through 0.128.7) pins tsquery `6.1.3`, whose peer range `^3 \|\| ^4 \|\| ^5` excludes this repo's TypeScript 6. Without it `pnpm test:consumer-fixtures` fails, because fixtures install with `--strict-peer-dependencies`. | `ng-primitives` moves its tsquery dependency to `6.2.0`, whose peer is `>3.0.0`. |
-| `packageExtensions: ng-primitives` | `ng-primitives/dialog` imports `@angular/router` without declaring the peer — still true at 0.128.7. | `ng-primitives` declares the peer. |
+| `packageExtensions: ng-primitives` | `ng-primitives/dialog` imports `@angular/router` without declaring the peer — still true at 0.128.8. | `ng-primitives` declares the peer. |
 | Angular toolchain held at `~22.0.x` | Every stable `@angular/cli` 22.1.x depends on `listr2` 10.2.2 while its bundled `@listr2/prompt-adapter-inquirer` 4.2.4 peer-requires `listr2` 10.2.1. No adapter release pairs with 10.2.2, so the tree is unsatisfiable under strict peers. | `@angular/cli` ships a self-consistent `listr2` pair (22.1.4+ or 22.2). |
 | Accepted: `@hono/node-server` <2.0.5 (moderate) | Reached only via `@angular/cli` → `@modelcontextprotocol/sdk`, which the CLI pins to `1.29.0` exactly; that SDK caps the adapter at `^1.19.9`. SDK 1.30.0 allows the patched 2.0.5, but the CLI's exact pin blocks it. The defect is a Windows-only path traversal in `serve-static` inside `ng mcp`, a local dev tool — not in the published package or any CI path. | `@angular/cli` bumps its `@modelcontextprotocol/sdk` pin to 1.30.0+. |
 
@@ -183,8 +193,9 @@ So a green fixture run does not prove adopters are fine. It cannot see:
 - **published-metadata defects** — anything the registry serves differently from
   the tarball, such as dropped `peerDependenciesMeta` optional flags;
 - **missing-override defects** — anything our own `overrides:` repairs locally,
-  because adopters do not inherit them. The tsquery entry above is exactly this
-  case: fixtures pass, adopters on TypeScript 6 with strict peers do not.
+  because adopters do not inherit them. The retired tsquery override was exactly
+  this case: fixtures passed while adopters on TypeScript 6 with strict peers
+  could not install, until ng-primitives 0.128.8 moved its own tsquery pin.
 
 When a fixture only passes because of a local workaround, say so in the ticket.
 Do not treat the green run as evidence about adopters.

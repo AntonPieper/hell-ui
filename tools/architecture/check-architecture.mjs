@@ -208,6 +208,19 @@ const architectureCheckManifest = [
     run: checkDialogScopedModalitySeam,
   },
   {
+    // Attribute ownership over ng-primitives attrBinding writers
+    // (docs/adr/ngp-attribute-ownership.md,
+    // docs/architecture/manual-runtime-ownership.md). The seam depends on
+    // upstream's render-effect scheduling and host-directive construction
+    // order, so — like the other two ng-primitives seams — the recorded
+    // version must match the installed package and the helpers may appear
+    // only at the reviewed call sites.
+    name: 'ngp-attr-ownership-seam',
+    kind: 'permanent',
+    owner: '@AntonPieper',
+    run: checkNgpAttrOwnershipSeam,
+  },
+  {
     // One Control Value Authority (docs/adr/0001-control-value-authority.md,
     // #277): a control class implements exactly one Angular forms contract
     // family. Angular's migration guidance forbids implementing both a
@@ -1437,16 +1450,15 @@ function checkNgpStateWriterContract() {
     'packages/angular/internal/ng-primitives/public-api.ts',
     'packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts',
     'packages/angular/combobox/combobox.ts',
-    'packages/angular/radio/radio.ts',
   ]);
+  // Radio-group and roving-focus writers retired with ng-primitives 0.128:
+  // radio uses the public `setValue(value, { emit: false })`/`setDisabled`
+  // pair and roving focus the non-focusing `setTabStop(id)` directly.
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
     'HELL_NGP_STATE_WRITER_UPGRADE_PATH',
     'writeComboboxStateValue',
     'writeComboboxStateDisabled',
-    'writeRadioGroupStateValue',
-    'writeRadioGroupStateDisabled',
-    'writeRovingFocusActiveItem',
   ];
   // Both write tables below are the same three State<T> channels crossed with
   // the receiver shapes a write can take, so they are built from one channel
@@ -1559,6 +1571,115 @@ function checkNgpStateWriterContract() {
 // scoped dialog owns those two decisions by writing ng-primitives' own
 // focus-trap escape marker. That reliance is version-bound: keep it in one
 // file, and keep the recorded version matching the installed package.
+// Attribute-ownership seam over ng-primitives' imperative attrBinding writers.
+// The helpers only work while three version-bound assumptions hold — upstream
+// binds the contested attributes from render effects, effects run in
+// registration order, and each call site reads the upstream writer's own
+// trigger signals — so the seam carries a version constant that must match the
+// installed package (forcing a re-probe on every bump), the form-control
+// helper must keep sharing upstream's `controlStatus()` trigger, and the
+// helpers may appear only at the reviewed call sites below. A new call site is
+// a new claim about upstream scheduling: review it against the installed
+// bundle before adding it here.
+/**
+ * The seam-source half of the ngp-attr-ownership check, over the seam's text
+ * and the installed ng-primitives version. Exported so the tools spec can
+ * mutation-test it: every assertion here is a wake-together or version
+ * invariant whose silent loss would let the wrong writer win in production
+ * while all behavior tests still pass on the happy path.
+ */
+export function ngpAttrOwnershipSeamFailures(seamSource, expectedVersion, seamRelPath) {
+  const seamFailures = [];
+
+  if (!seamSource.includes(`HELL_NGP_ATTR_OWNERSHIP_VERSION = '${expectedVersion}'`)) {
+    seamFailures.push(
+      `ngp attr-ownership seam version must match installed ${expectedVersion}; re-probe the attrBinding scheduling assumptions in ${seamRelPath} before moving the pin`,
+    );
+  }
+
+  // The form-control helper is only correct while it re-runs whenever
+  // upstream's aria-invalid writer does, and controlStatus() is the mirror of
+  // that shared trigger. Dropping the import silently breaks the lockstep
+  // guarantee.
+  if (!/import\s*\{[^}]*\bcontrolStatus\b[^}]*\}\s*from\s*'ng-primitives\/utils'/.test(seamSource)) {
+    seamFailures.push(
+      `${seamRelPath} must keep reading controlStatus from ng-primitives/utils — it is the mirrored trigger that keeps hellOwnsControlAriaInvalid in lockstep with upstream's aria-invalid writer`,
+    );
+  }
+
+  // The import alone proves nothing: the wake-together guarantee lives in the
+  // ownership callback actually READING the status signal, so a flush that
+  // re-runs upstream's writer also re-runs this one. Assert the binding and
+  // the read inside the hellOwnsNgpAttribute callback, not just the import.
+  const helperStart = seamSource.indexOf('function hellOwnsControlAriaInvalid');
+  const helperSource = helperStart === -1 ? '' : seamSource.slice(helperStart);
+  if (helperStart === -1) {
+    seamFailures.push(
+      `${seamRelPath} must define hellOwnsControlAriaInvalid; the aria-invalid ownership contract moved or was deleted without retiring this check`,
+    );
+  } else {
+    if (!/const\s+status\s*=\s*controlStatus\(\)/.test(helperSource)) {
+      seamFailures.push(
+        `hellOwnsControlAriaInvalid in ${seamRelPath} must bind the mirrored trigger with \`const status = controlStatus()\``,
+      );
+    }
+    const callback = /hellOwnsNgpAttribute\(\s*\(\)\s*=>\s*\{([\s\S]*?)\}\s*\)/.exec(helperSource);
+    if (!callback) {
+      seamFailures.push(
+        `hellOwnsControlAriaInvalid in ${seamRelPath} must register its write through a hellOwnsNgpAttribute(() => { ... }) callback`,
+      );
+    } else if (!/\bstatus\s*\(\s*\)/.test(callback[1])) {
+      seamFailures.push(
+        `hellOwnsControlAriaInvalid's ownership callback in ${seamRelPath} must read status() — without that read the effect is not dirtied by upstream-only status flushes and the wake-together guarantee is silently gone`,
+      );
+    }
+  }
+
+  return seamFailures;
+}
+
+function checkNgpAttrOwnershipSeam() {
+  const seamRelPath = 'packages/angular/internal/ng-primitives/ngp-attr-ownership.ts';
+  const seamSource = readFile(join(root, seamRelPath));
+  const ngpPackage = readJsonFile(
+    join(root, 'packages/angular/node_modules/ng-primitives/package.json'),
+  );
+  const expectedVersion = `ng-primitives@${ngpPackage.version}`;
+
+  failures.push(...ngpAttrOwnershipSeamFailures(seamSource, expectedVersion, seamRelPath));
+
+  const allowedOwnershipFiles = new Set([
+    seamRelPath,
+    'packages/angular/internal/ng-primitives/public-api.ts',
+    // aria-invalid without a touched gate (NgpInput-family hosts).
+    'packages/angular/input/input.ts',
+    'packages/angular/select/select.ts',
+    'packages/angular/date-input/date-input.ts',
+    'packages/angular/time-input/time-input.ts',
+    'packages/angular/number-input/number-input.ts',
+    // aria-disabled absent on enabled radio items.
+    'packages/angular/radio/radio.ts',
+    // aria-modal="false" on scoped dialogs.
+    'packages/angular/dialog/dialog.ts',
+  ]);
+  const ownershipTokens = [
+    'HELL_NGP_ATTR_OWNERSHIP_VERSION',
+    'hellOwnsNgpAttribute',
+    'hellOwnsControlAriaInvalid',
+  ];
+
+  for (const file of libraryPackageFiles().filter((f) => f.endsWith('.ts'))) {
+    const rel = relPath(file);
+    if (allowedOwnershipFiles.has(rel)) continue;
+    const source = readFile(file);
+    if (ownershipTokens.some((token) => source.includes(token))) {
+      failures.push(
+        `ngp attr-ownership usage is not approved in ${rel}; the seam's call sites are reviewed per upstream version — see ${seamRelPath}`,
+      );
+    }
+  }
+}
+
 function checkDialogScopedModalitySeam() {
   const seamRelPath = 'packages/angular/dialog/dialog-scope.ts';
   const seamSource = readFile(join(root, seamRelPath));

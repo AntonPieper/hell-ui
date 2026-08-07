@@ -4,6 +4,7 @@ import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
 import { NgpTextarea } from 'ng-primitives/textarea';
 import type { HellUiInput } from 'hell-ui/core';
 import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
+import { hellOwnsControlAriaInvalid } from 'hell-ui/internal/ng-primitives';
 import { HellSize } from 'hell-ui/core';
 
 const HELL_FORM_CONTROL_STATE_CLASSES =
@@ -28,7 +29,6 @@ const HELL_TEXTAREA_RECIPE = {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-size]': 'size()',
-    '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellInput {
@@ -45,6 +45,10 @@ export class HellInput {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
+
+  constructor() {
+    hellOwnsControlAriaInvalid(this.invalid);
+  }
 }
 
 /**
@@ -61,7 +65,6 @@ export class HellInput {
     'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.data-auto-grow]': "autoGrow() ? '' : null",
-    '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellTextarea {
@@ -87,6 +90,10 @@ export class HellTextarea {
    * `field-sizing` is unsupported (no JavaScript polyfill).
    */
   readonly autoGrow = input(false, { alias: 'autoGrow', transform: booleanAttribute });
+
+  constructor() {
+    hellOwnsControlAriaInvalid(this.invalid);
+  }
 }
 
 const HELL_SEARCH_RECIPE = {

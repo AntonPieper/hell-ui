@@ -34,6 +34,7 @@ import {
   injectDateRangePickerState,
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
+import type { FocusOrigin } from '@angular/cdk/a11y';
 import { HellIcon } from 'hell-ui/icon';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
 import type { HellUi, HellUiInput } from 'hell-ui/core';
@@ -200,15 +201,11 @@ interface HellDatePickerNavigationState {
 }
 
 interface HellDatePickerCalendarState extends HellDatePickerNavigationState {
-  setFocusedDate(
-    date: Date,
-    origin: 'keyboard' | undefined,
-    direction: 'forward' | 'backward',
-  ): void;
+  setFocusedDate(date: Date, origin: FocusOrigin, direction: 'forward' | 'backward'): void;
 }
 
 function hellDatePickerYearShiftDisabled(
-  state: HellDatePickerNavigationState | undefined,
+  state: HellDatePickerNavigationState | null | undefined,
   months: number,
 ): boolean {
   if (!state || state.disabled()) return true;
@@ -259,7 +256,7 @@ export class HellDatePickerPreviousYear {
     if (!s) return;
     const focused = s.focusedDate();
     const next = hellShiftDateByMonths(focused, months);
-    s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
+    s.setFocusedDate(next, null, months > 0 ? 'forward' : 'backward');
   }
 }
 
@@ -296,7 +293,7 @@ export class HellDatePickerNextYear {
     if (!s) return;
     const focused = s.focusedDate();
     const next = hellShiftDateByMonths(focused, months);
-    s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
+    s.setFocusedDate(next, null, months > 0 ? 'forward' : 'backward');
   }
 }
 
@@ -840,13 +837,15 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
       ),
     );
 
-  const focusDayGrid = (): void =>
-    focusAfterRender(
-      () =>
-        host.nativeElement.querySelector<HTMLButtonElement>(
-          '[data-slot="dateButton"][tabindex="0"]',
-        ) ?? host.nativeElement.querySelector<HTMLButtonElement>('[data-slot="dateButton"]'),
-    );
+  // ng-primitives 0.128 writes the day buttons' roving tabindex from a render
+  // effect, so right after a view switch no button matches [tabindex="0"] yet
+  // and a DOM query cannot find the tab stop. The primitive owns the restore
+  // instead: a 'keyboard' origin makes setFocusedDate re-focus the focused
+  // date's button after the next render.
+  const focusDayGrid = (): void => {
+    const current = state();
+    current.setFocusedDate(current.focusedDate(), 'keyboard', 'forward');
+  };
 
   const closeToDayView = (restore: 'trigger' | 'grid'): void => {
     const opened = view();
@@ -880,7 +879,7 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
       )
     ) {
       const min = current.min();
-      current.setFocusedDate(unclamped, undefined, min && unclamped < min ? 'forward' : 'backward');
+      current.setFocusedDate(unclamped, null, min && unclamped < min ? 'forward' : 'backward');
     }
 
     const focused = current.focusedDate();
@@ -907,7 +906,7 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
     const current = state();
     current.setFocusedDate(
       hellShiftDateByMonths(current.focusedDate(), delta * HELL_DATE_PICKER_MONTH_COUNT),
-      undefined,
+      null,
       delta > 0 ? 'forward' : 'backward',
     );
     return true;
@@ -926,10 +925,8 @@ function hellDatePickerViews(state: () => HellDatePickerCalendarState, locale: S
         : hellDatePickerWithYearMonth(focused, value, focused.getMonth());
 
     view.set('day');
-    if (target.getTime() !== focused.getTime()) {
-      current.setFocusedDate(target, undefined, target < focused ? 'backward' : 'forward');
-    }
-    focusDayGrid();
+    // 'keyboard' origin: the primitive restores grid focus after render.
+    current.setFocusedDate(target, 'keyboard', target < focused ? 'backward' : 'forward');
   };
 
   const onPanelKeydown = (event: KeyboardEvent): void => {

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { HELL_FIELD_IMPORTS } from 'hell-ui/field';
 import { HellNativeSelect } from 'hell-ui/select';
@@ -105,10 +106,27 @@ class PartStyleHost {
   };
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellInput],
+  template: `
+    <input
+      id="raced-input"
+      hellInput
+      [invalid]="invalid()"
+      [formControl]="control"
+      aria-label="Raced input"
+    />
+  `,
+})
+class AriaInvalidOwnershipHost {
+  readonly invalid = signal(false);
+  readonly control = new FormControl<string>('', Validators.required);
+}
+
 describe('Hell input primitives', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FieldControlHost, PartStyleHost],
+      imports: [FieldControlHost, PartStyleHost, AriaInvalidOwnershipHost],
     }).compileComponents();
   });
 
@@ -206,6 +224,46 @@ describe('Hell input primitives', () => {
     // never sets the reflected attribute, so the gated utilities stay inert.
     const fixedTextarea = control(fixture, 'styled-textarea');
     expect(fixedTextarea.getAttribute('data-auto-grow')).toBeNull();
+  });
+
+  it('holds aria-invalid across upstream status rewrites in both directions', async () => {
+    // Race-focused ownership contract: ngpFormControl rewrites aria-invalid
+    // whenever the control's status or touched state changes (0.128), keyed
+    // on the same status signal this test perturbs. Hell's write must land
+    // last on every such flush — including flushes where Hell's own invalid
+    // source did not change at all.
+    const fixture = TestBed.createComponent(AriaInvalidOwnershipHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const input = fixture.nativeElement.querySelector('#raced-input') as HTMLInputElement;
+
+    // Control invalid + touched is exactly when upstream writes "true"; with
+    // Hell's invalid source false, the attribute must stay absent.
+    host.control.markAsTouched();
+    host.control.updateValueAndValidity();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.control.invalid && host.control.touched).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
+
+    // The inverse race: Hell says invalid while the control turns valid and
+    // untouched — upstream would remove the attribute, Hell must keep it.
+    host.invalid.set(true);
+    host.control.setValue('filled');
+    host.control.markAsUntouched();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(host.control.valid).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    // Further upstream-only perturbations while Hell's source is unchanged.
+    host.control.markAsTouched();
+    host.control.setValue('');
+    host.control.updateValueAndValidity();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('preserves disabled and invalid host behavior through ng-primitives directives', () => {

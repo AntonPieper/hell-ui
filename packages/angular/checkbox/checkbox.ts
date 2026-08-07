@@ -52,7 +52,9 @@ const HELL_NATIVE_CHECKBOX_RECIPE = {
     'data-slot': 'root',
     '(blur)': 'markControlTouched()',
     '[attr.required]': 'required() ? "" : null',
-    '[attr.aria-required]': 'required() ? "true" : null',
+    // `aria-required` belongs to `ngpCheckbox` (0.128 writes it imperatively
+    // from its own `required` prop, after host bindings); Hell passes the
+    // source below instead of competing for the attribute.
     '[attr.data-required]': 'required() ? "true" : null',
   },
   template: `
@@ -127,6 +129,7 @@ export class HellCheckbox implements FormCheckboxControl {
     checked: this.checked,
     indeterminate: this.indeterminate,
     disabled: this.disabled,
+    required: this.required,
     onCheckedChange: (checked) => this.checked.set(checked),
     onIndeterminateChange: (indeterminate) => this.indeterminateChange.emit(indeterminate),
   });

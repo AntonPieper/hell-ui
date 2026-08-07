@@ -16,6 +16,7 @@ export const HELL_SELECT_IMPORTS: readonly [typeof HellSelect, typeof HellSelect
 
 // @public
 export class HellNativeSelect {
+    constructor();
     readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: (part: "root") => string;
     readonly size: i0.InputSignal<"lg" | "md" | "sm">;

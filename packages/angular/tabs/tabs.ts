@@ -1,5 +1,11 @@
 import { Directive, input } from '@angular/core';
-import { NgpTabset, NgpTabList, NgpTabButton, NgpTabPanel } from 'ng-primitives/tabs';
+import {
+  NgpTabset,
+  NgpTabList,
+  NgpTabButton,
+  NgpTabPanel,
+  provideTabsConfig,
+} from 'ng-primitives/tabs';
 import { HellOrientation, type HellUiInput } from 'hell-ui/core';
 import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 
@@ -43,6 +49,10 @@ const HELL_TAB_PANEL_RECIPE = {
       outputs: ['ngpTabsetValueChange:valueChange'],
     },
   ],
+  // ng-primitives 0.128 exposes the previously hardcoded non-wrapping tab
+  // navigation as a config/input defaulting to wrap. Hell's tabs contract is
+  // non-wrapping (arrow keys stop at the ends); pin the config to keep it.
+  providers: [provideTabsConfig({ wrap: false })],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',

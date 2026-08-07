@@ -39,6 +39,7 @@ import {
   hellUniqueIdRefs,
   type HellTypedValueCommitResult,
 } from 'hell-ui/internal/core';
+import { hellOwnsControlAriaInvalid } from 'hell-ui/internal/ng-primitives';
 export type { HellTimeValue } from 'hell-ui/core';
 
 /** Contextual precision passed to time adapter hooks. */
@@ -241,7 +242,6 @@ let nextTimeInputId = 0;
     '[attr.step]': 'nativeStep()',
     '[attr.min]': 'nativeMin()',
     '[attr.max]': 'nativeMax()',
-    '[attr.aria-invalid]': 'isInvalid() ? "true" : null',
     '[attr.aria-describedby]': 'fieldAriaDescribedby()',
     '[attr.aria-labelledby]': 'fieldAriaLabelledby()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
@@ -378,6 +378,7 @@ export class HellTimeInput implements FormValueControl<HellTimeValue | null> {
   );
 
   constructor() {
+    hellOwnsControlAriaInvalid(this.isInvalid);
     hellSyncFormFieldDescriptions(this.formField, this.fieldAriaDescribedby);
     hellSyncFormFieldLabels(this.formField, this.fieldAriaLabelledby);
 
