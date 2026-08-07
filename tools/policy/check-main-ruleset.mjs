@@ -22,8 +22,8 @@
 // updated from the checked-in file (docs/release/pull-request-contract.md).
 
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 
@@ -35,40 +35,65 @@ const workflowsDirectory = join(root, '.github', 'workflows');
 // "Release Preparation"); #370 owns their creation and descriptions.
 const requiredLabels = ['no-consumer-change', 'release-preparation'];
 
-const args = process.argv.slice(2);
-const localOnly = args.includes('--local');
-const unknownArgs = args.filter((argument) => argument !== '--local');
-if (unknownArgs.length > 0) {
-  console.error('Usage: pnpm verify:main-ruleset [--local]');
-  console.error('--local skips the GitHub API evidence and only proves that every');
-  console.error('required check context matches a committed workflow job name.');
-  process.exit(2);
+// Splits this command's argv. `--local` is the only argument it takes, but
+// `pnpm verify:main-ruleset -- --local` is a spelling a maintainer arrives at
+// anyway — it is what the sibling `pnpm restore:release -- <tag>` needs, and it
+// is the habit pnpm's own documentation teaches for forwarding flags. pnpm
+// forwards that `--` into argv rather than consuming it, so the separator has
+// to be dropped here or it survives as an argument this command does not know
+// and the usage check refuses a correct invocation.
+//
+// Dropping the separator is not the same as ignoring extra arguments: anything
+// else still survives, so a typo is still reported rather than silently read as
+// a full run that goes to the API. The same split, for the same reason, is
+// `parseRestoreArgs` in tools/policy/restore-main-policy.mjs.
+export function parseRulesetArgs(args) {
+  const meaningful = args.filter((argument) => argument !== '--');
+  return {
+    localOnly: meaningful.includes('--local'),
+    unknownArgs: meaningful.filter((argument) => argument !== '--local'),
+  };
 }
 
+// This run's verdict, at module scope because every check below reports into
+// it. `main` is the only thing that fills either list, which is what keeps
+// importing this module for `parseRulesetArgs` inert: no workflow is read and
+// `gh` is never invoked.
 const failures = [];
 const evidence = [];
 
-const contract = readContract();
-if (contract) {
-  checkLocalWorkflowContexts(contract);
-  if (!localOnly) checkLiveRepository(contract);
-}
+function main(argv) {
+  const { localOnly, unknownArgs } = parseRulesetArgs(argv);
+  if (unknownArgs.length > 0) {
+    console.error('Usage: pnpm verify:main-ruleset [--local]');
+    console.error('--local skips the GitHub API evidence and only proves that every');
+    console.error('required check context matches a committed workflow job name.');
+    return 2;
+  }
 
-if (failures.length > 0) {
-  // Evidence gathered before the failure still prints, so one failing
-  // surface never hides the API evidence another surface produced.
+  const contract = readContract();
+  if (contract) {
+    checkLocalWorkflowContexts(contract);
+    if (!localOnly) checkLiveRepository(contract);
+  }
+
+  if (failures.length > 0) {
+    // Evidence gathered before the failure still prints, so one failing
+    // surface never hides the API evidence another surface produced.
+    for (const line of evidence) console.log(line);
+    console.error('Main ruleset check failed:');
+    for (const failure of failures) console.error(`- ${failure}`);
+    return 1;
+  }
+
   for (const line of evidence) console.log(line);
-  console.error('Main ruleset check failed:');
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exit(1);
+  console.log(
+    localOnly
+      ? 'Main ruleset ok (local): every required check context matches a committed workflow job name.'
+      : 'Main ruleset ok: the live ruleset matches .github/rulesets/protect-main.json and both pull-request state labels exist.',
+  );
+  return 0;
 }
-
-for (const line of evidence) console.log(line);
-console.log(
-  localOnly
-    ? 'Main ruleset ok (local): every required check context matches a committed workflow job name.'
-    : 'Main ruleset ok: the live ruleset matches .github/rulesets/protect-main.json and both pull-request state labels exist.',
-);
 
 function readContract() {
   let contract;
@@ -361,4 +386,15 @@ function canonicalJson(value) {
 
 function gh(ghArgs) {
   return execFileSync('gh', ghArgs, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+}
+
+// Resolved through symlinks on both sides: `import.meta.url` is always the real
+// path, while `process.argv[1]` is whatever spelling invoked the script, so an
+// absolute invocation through a symlinked path would compare two different
+// strings and silently skip `main()` instead of failing.
+if (
+  process.argv[1] &&
+  realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+) {
+  process.exit(main(process.argv.slice(2)));
 }
