@@ -95,6 +95,10 @@ const HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS = [
  * environment that produces mouse events without pointer events — a consumer's
  * jsdom test driving `fireEvent.mouseEnter`, say — would otherwise have its
  * boundary events swallowed by a guard that nothing it can send ever lifts.
+ * One move event is not always proof: WebKit synthesizes a trusted move at
+ * the resting position when a relayout paints content under a stationary
+ * cursor, so a move at exactly the position the pointer was resting at when
+ * the dropdown attached does not count — see `ignorePointerAtRest`.
  */
 const HELL_COMBOBOX_POINTER_USE_EVENTS = [
   'pointermove',
@@ -102,6 +106,95 @@ const HELL_COMBOBOX_POINTER_USE_EVENTS = [
   'mousemove',
   'mousedown',
 ] as const;
+
+/** Move events whose `pointerType` marks a pointer that cannot rest under a panel. */
+function isTouchOrPenEvent(event: Event): boolean {
+  const pointerType = (event as PointerEvent).pointerType;
+  return pointerType === 'touch' || pointerType === 'pen';
+}
+
+interface HellComboboxMouseRest {
+  /** The mouse's last reported document position, or null if it never reported one. */
+  read(): { x: number; y: number } | null;
+  release(): void;
+}
+
+interface HellComboboxMouseRestState {
+  refs: number;
+  position: { x: number; y: number } | null;
+  /**
+   * Whether this document has ever produced a `pointermove`. Once it has,
+   * every real mouse move arrives as a mouse-typed `pointermove`, so a bare
+   * `mousemove` can only be the compatibility shadow of a touch or pen move
+   * (Pointer Events §13) and must not update the mouse baseline. Documents
+   * that never dispatch pointer events — a legacy-mouse-only environment —
+   * keep updating from `mousemove`.
+   */
+  sawPointerMove: boolean;
+  track: (event: Event) => void;
+}
+
+const HELL_COMBOBOX_MOUSE_REST_EVENTS = ['pointermove', 'mousemove'] as const;
+const HELL_COMBOBOX_MOUSE_REST_TRACKERS = new WeakMap<Document, HellComboboxMouseRestState>();
+
+/**
+ * Where the mouse last reported itself, tracked once per document and shared
+ * by every combobox in it (ref-counted; the last release removes the
+ * listeners). Snapshotted when a dropdown attaches, it is what lets the
+ * resting-pointer guard tell WebKit's synthetic "content painted under the
+ * cursor" move — always at exactly this position — from a real move, which
+ * lands anywhere else.
+ *
+ * Only mouse-identity moves update the position: a touch or pen move on a
+ * hybrid device says nothing about where the mouse cursor rests, and letting
+ * it overwrite the baseline would make the next synthetic mouse move look
+ * like real movement again.
+ */
+function hellRetainComboboxMouseRest(doc: Document): HellComboboxMouseRest {
+  let state = HELL_COMBOBOX_MOUSE_REST_TRACKERS.get(doc);
+  if (!state) {
+    const created: HellComboboxMouseRestState = {
+      refs: 0,
+      position: null,
+      sawPointerMove: false,
+      track: (event: Event): void => {
+        if (event.type === 'pointermove') {
+          created.sawPointerMove = true;
+        } else if (created.sawPointerMove) {
+          // A bare mousemove in a pointer-events document is the
+          // compatibility shadow of the pointer move that preceded it — for a
+          // touch or pen, at the touch position, which would poison the
+          // mouse's resting baseline.
+          return;
+        }
+        if (isTouchOrPenEvent(event)) return;
+        const { clientX, clientY } = event as MouseEvent;
+        created.position = { x: clientX, y: clientY };
+      },
+    };
+    for (const type of HELL_COMBOBOX_MOUSE_REST_EVENTS) {
+      doc.addEventListener(type, created.track, { capture: true, passive: true });
+    }
+    HELL_COMBOBOX_MOUSE_REST_TRACKERS.set(doc, created);
+    state = created;
+  }
+  const retained = state;
+  retained.refs += 1;
+  let released = false;
+  return {
+    read: () => retained.position,
+    release: (): void => {
+      if (released) return;
+      released = true;
+      retained.refs -= 1;
+      if (retained.refs > 0) return;
+      for (const type of HELL_COMBOBOX_MOUSE_REST_EVENTS) {
+        doc.removeEventListener(type, retained.track, { capture: true });
+      }
+      HELL_COMBOBOX_MOUSE_REST_TRACKERS.delete(doc);
+    },
+  };
+}
 
 /**
  * Combobox-local coordination for the touched focus boundary, boundary
@@ -120,6 +213,10 @@ class HellComboboxController {
   });
   private onTouch: () => void = () => {};
   private readWrapNavigation: () => boolean = () => true;
+  /** Shared per-document mouse resting position — see `hellRetainComboboxMouseRest`. */
+  private readonly mouseRest = hellRetainComboboxMouseRest(
+    this.host.nativeElement.ownerDocument,
+  );
   private readonly onFocusOut = (event: FocusEvent): void => {
     this.markControlTouched(event);
   };
@@ -135,6 +232,7 @@ class HellComboboxController {
       this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, {
         capture: true,
       });
+      this.mouseRest.release();
     });
   }
 
@@ -183,12 +281,34 @@ class HellComboboxController {
    */
   private ignorePointerAtRest(dropdown: HTMLElement): () => void {
     let pointerUsed = false;
+    // Where the mouse was resting when this dropdown attached. WebKit's
+    // synthetic moves can only ever report this position.
+    const restingPoint = this.mouseRest.read();
     const swallowWhileAtRest = (event: Event): void => {
       if (pointerUsed) return;
       event.stopImmediatePropagation();
     };
     const markPointerUsed = (event: Event): void => {
       if (pointerUsed) return;
+      // "Used" means moved or pressed. WebKit dispatches a trusted move
+      // event — no user input — whenever a relayout paints new content under
+      // a stationary cursor, which is exactly the moment this guard exists
+      // for. That synthetic move always carries mouse identity and reports
+      // the position the mouse was already resting at when this dropdown
+      // attached, so a mouse move at exactly that position does not count; a
+      // move anywhere else, a touch or pen move (those pointers cannot rest
+      // under a repainting panel), or any press, does. A mouse that never
+      // reported a position cannot be told apart — its first move counts,
+      // keeping single-jump moves (a hover in a consumer's Playwright test,
+      // say) working on a fresh page.
+      if (
+        restingPoint !== null &&
+        (event.type === 'pointermove' || event.type === 'mousemove') &&
+        !isTouchOrPenEvent(event)
+      ) {
+        const { clientX, clientY } = event as MouseEvent;
+        if (restingPoint.x === clientX && restingPoint.y === clientY) return;
+      }
       pointerUsed = true;
       const target = event.target instanceof HTMLElement ? event.target : null;
       const option = target?.closest<HTMLElement>('[role="option"]');

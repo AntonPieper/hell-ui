@@ -1,0 +1,3 @@
+kind: Fixed
+body: On WebKit, reopening a combobox dropdown under a stationary pointer could hand the active option to whatever was painted beneath the cursor, overriding the keyboard's choice. WebKit reports a relayout under a resting cursor as a trusted `pointermove` at the resting position; the resting-pointer guard now recognizes that move as no use of the pointer, while moves anywhere else and presses keep behaving exactly as before.
+time: 2026-08-07T11:05:41.000000+02:00
