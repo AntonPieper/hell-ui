@@ -598,6 +598,108 @@ describe('HellCombobox', () => {
     expect(second.hasAttribute('data-hover')).toBe(true);
   });
 
+  it('keeps the mouse resting position through touch and pen moves on a hybrid device', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    // The mouse rests at one position; a touch drag and a pen move elsewhere
+    // must not overwrite that baseline — they say nothing about where the
+    // mouse cursor sits, and a poisoned baseline would make WebKit's next
+    // synthetic mouse move look like real movement.
+    input.ownerDocument.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'mouse',
+        clientX: 40,
+        clientY: 40,
+      }),
+    );
+    input.ownerDocument.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'touch',
+        clientX: 80,
+        clientY: 80,
+      }),
+    );
+    input.ownerDocument.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'pen',
+        clientX: 90,
+        clientY: 90,
+      }),
+    );
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    // WebKit's synthetic mouse move at the mouse's true resting position must
+    // still be recognized as rest.
+    second.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'mouse',
+        clientX: 40,
+        clientY: 40,
+      }),
+    );
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+    expect(second.hasAttribute('data-hover')).toBe(false);
+
+    // A touch move over the panel is real use even at the mouse's resting
+    // position — a touch cannot rest under a repainting panel.
+    second.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'touch',
+        clientX: 40,
+        clientY: 40,
+      }),
+    );
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    // The replay carries the touch identity, so no mouse hover is painted.
+    expect(second.hasAttribute('data-hover')).toBe(false);
+  });
+
+  it('tracks the document mouse position once, shared across instances, and releases it on teardown', async () => {
+    const doc = document;
+    const addSpy = vi.spyOn(doc, 'addEventListener');
+    const removeSpy = vi.spyOn(doc, 'removeEventListener');
+    const trackerRegistrations = (spy: typeof addSpy): number =>
+      spy.mock.calls.filter(
+        ([type, , options]) =>
+          (type === 'pointermove' || type === 'mousemove') &&
+          typeof options === 'object' &&
+          options !== null &&
+          (options as AddEventListenerOptions).capture === true,
+      ).length;
+
+    const first = TestBed.createComponent(ComboboxFormHost);
+    first.detectChanges();
+    const second = TestBed.createComponent(ComboboxFormHost);
+    second.detectChanges();
+
+    // One tracker per document: the second instance retains the first's
+    // listeners instead of adding its own pair.
+    expect(trackerRegistrations(addSpy)).toBe(2);
+
+    first.destroy();
+    expect(trackerRegistrations(removeSpy)).toBe(0);
+
+    second.destroy();
+    expect(trackerRegistrations(removeSpy)).toBe(2);
+
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
+  });
+
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
     const fixture = TestBed.createComponent(ComboboxProjectedHost);
     fixture.detectChanges();
