@@ -122,6 +122,15 @@ interface HellComboboxMouseRest {
 interface HellComboboxMouseRestState {
   refs: number;
   position: { x: number; y: number } | null;
+  /**
+   * Whether this document has ever produced a `pointermove`. Once it has,
+   * every real mouse move arrives as a mouse-typed `pointermove`, so a bare
+   * `mousemove` can only be the compatibility shadow of a touch or pen move
+   * (Pointer Events §13) and must not update the mouse baseline. Documents
+   * that never dispatch pointer events — a legacy-mouse-only environment —
+   * keep updating from `mousemove`.
+   */
+  sawPointerMove: boolean;
   track: (event: Event) => void;
 }
 
@@ -147,7 +156,17 @@ function hellRetainComboboxMouseRest(doc: Document): HellComboboxMouseRest {
     const created: HellComboboxMouseRestState = {
       refs: 0,
       position: null,
+      sawPointerMove: false,
       track: (event: Event): void => {
+        if (event.type === 'pointermove') {
+          created.sawPointerMove = true;
+        } else if (created.sawPointerMove) {
+          // A bare mousemove in a pointer-events document is the
+          // compatibility shadow of the pointer move that preceded it — for a
+          // touch or pen, at the touch position, which would poison the
+          // mouse's resting baseline.
+          return;
+        }
         if (isTouchOrPenEvent(event)) return;
         const { clientX, clientY } = event as MouseEvent;
         created.position = { x: clientX, y: clientY };

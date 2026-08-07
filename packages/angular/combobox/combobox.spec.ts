@@ -631,6 +631,14 @@ describe('HellCombobox', () => {
         clientY: 90,
       }),
     );
+    // Pointer Events §13: a touch or pen move may be followed by a
+    // compatibility mousemove at the same coordinates. It carries no
+    // pointerType, but in a document that dispatches pointer events a bare
+    // mousemove can only be that shadow — it must not poison the mouse
+    // baseline either.
+    input.ownerDocument.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 90, clientY: 90 }),
+    );
 
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     const dropdown = await waitForDropdown(fixture);
