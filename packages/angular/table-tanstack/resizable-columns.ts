@@ -34,9 +34,10 @@ import {
  *   the per-column `columnDef.enableResizing` remain the fine-grained control,
  *   and both belong to this feature.
  *
- * The base shell deliberately does not require either behaviour: a table that
- * never resizes registers neither this directive nor `columnResizingFeature`.
- * See {@link HellTanStackTableFeatures}.
+ * The base shell deliberately does not require column resizing: a table that
+ * never resizes skips this directive and `columnResizingFeature` entirely.
+ * `columnSizingFeature` is different — the shell requires it for every table
+ * it renders, resizable or not. See {@link HellTanStackTableFeatures}.
  */
 export interface HellTanStackResizableColumnsFeatures extends TableFeatures {
   columnResizingFeature: TableFeature;
