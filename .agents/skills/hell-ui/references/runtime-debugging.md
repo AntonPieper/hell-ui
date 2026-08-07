@@ -24,8 +24,17 @@ hard UI bugs.
   plus focus-only dismissal.
 - Global hotkeys go through `HellGlobalKeydownService`; ng-primitives
   state-channel writes go through
-  `packages/angular/internal/ng-primitives/ngp-state-adapters.ts` (combobox,
-  radio, and roving-focus only — select uses public ng-primitives setters).
+  `packages/angular/internal/ng-primitives/ngp-state-adapters.ts` (combobox
+  only — select, radio, and roving-focus use public ng-primitives setters:
+  `setValue(value, { emit: false })`/`setDisabled` and `setTabStop(id)`).
+- A host ARIA attribute that flaps or refuses to hold a bound value is usually
+  an ng-primitives `attrBinding` render-effect writer beating an Angular host
+  binding (0.128+). Hell's deliberate contract differences are re-asserted
+  through `packages/angular/internal/ng-primitives/ngp-attr-ownership.ts`
+  (decision record: `docs/adr/ngp-attribute-ownership.md`; version-bound, call
+  sites allowlisted by the `ngp-attr-ownership-seam` architecture check).
+  Never add a competing host binding — either feed the upstream input/config
+  or extend the seam.
 - Current Angular, CDK, ng-primitives, CodeMirror, pdf.js, TanStack,
   Playwright, pnpm, or Vercel facts require the configured docs/MCP path before
   relying on memory.

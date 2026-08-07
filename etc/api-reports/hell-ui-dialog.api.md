@@ -18,6 +18,7 @@ export const HELL_DIALOG_IMPORTS: readonly [typeof HellDialogTrigger, typeof Hel
 
 // @public
 export class HellDialog {
+    constructor();
     protected readonly ariaModal: _angular_core.Signal<string>;
     protected onTabKeydown(event: Event): void;
     protected readonly part: (part: "root") => string;

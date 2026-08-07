@@ -32,7 +32,7 @@ export const HELL_DIALOG_SCOPE_ROOT = new InjectionToken<HTMLElement | null>(
 const HELL_NGP_FOCUS_TRAP_ESCAPE_ATTRIBUTE = 'data-focus-trap';
 
 /** ng-primitives release whose focus-trap escape marker this seam is written against. */
-export const HELL_DIALOG_SCOPED_MODALITY_VERSION = 'ng-primitives@0.123.0';
+export const HELL_DIALOG_SCOPED_MODALITY_VERSION = 'ng-primitives@0.128.8';
 
 /**
  * Adapter that copies one Dialog Scope root's insets onto the portaled overlay.

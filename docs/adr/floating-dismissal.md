@@ -158,7 +158,7 @@ reachable.
 | --- | --- |
 | Portal lifecycle, dismiss guards, Escape routing through `NgpOverlayRegistry`, exit animations, focus restore to the opener, `closeOnNavigation` | Yes. `NgpDialogManager` / `NgpDialogRef` keep owning all of it; scoped modality changes none of it. |
 | Backdrop geometry | Yes — Hell-owned already, through the shared `HellFloatingScopedInsetsRuntime`. |
-| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` writes the attribute through its own host binding (declared after the `NgpDialog` host directive, so it is the one that lands) rather than binding the exposed input. |
+| `aria-modal` | **Yes.** `NgpDialogConfig.modal` is public and `NgpDialog` exposes a public `modal` input, so the delegated value is readable. A scoped dialog renders `aria-modal="false"` — the blocked region is `inert` and therefore already absent from the accessibility tree, so `false` describes what is actually unavailable. Everything else mirrors `NgpDialog.modal()`. Because host-directive inputs are template-bound, `HellDialog` cannot bind the exposed input; how it writes the attribute instead is version-bound — see the 2026-08-06 amendment below. |
 | Focus trap scope | **No.** `NgpDialog` applies `NgpFocusTrap` as a host directive and exposes none of its inputs, and `ng-primitives/dialog` exports no `ngpDialog` primitive function — only `provideDialogState` / `injectDialogState`. The popover path (`ngpPopover({}) + ngpFocusTrap({ disabled })`, which is how `trapFocus` works) has no dialog equivalent. Angular's host-directive input exposure is template-bound, so the library cannot drive it either. |
 | Page-wide `aria-hidden` | **No.** `NgpDialogManager.hideNonDialogContentFromAssistiveTechnology` runs unconditionally for the first open, its previous-value map is private, and `NgpDialogConfig` has no switch. Left alone it makes the still-focusable shell a descendant of `aria-hidden="true"`, which is the violation scoped modality exists to avoid. |
 | Background scroll | Partly. `NgpDialogConfig.scrollStrategy` is public, but `BlockScrollStrategy` targets the document, and inside an app shell the document does not scroll — the Dialog Scope root is the real scroll container. |
@@ -284,6 +284,19 @@ Constraints:
   asserted as the three-case rule above rather than as per-step expectations,
   and each mutation-verified. Both defects this ADR records shipped because
   coverage pinned one order.
+
+## Amendment: `aria-modal` write mechanism (2026-08-06)
+
+The scoped-modality amendment above recorded that `HellDialog` holds
+`aria-modal` through an Angular host binding declared after the `NgpDialog`
+host directive. `ng-primitives@0.128` invalidated that mechanism — not the
+decision: `ngpDialog` now writes the attribute imperatively via an
+`attrBinding` render effect, which runs after every Angular host binding, so
+a competing binding can never hold it again. `HellDialog` now re-asserts the
+scoped `aria-modal="false"` through the cross-cutting attribute-ownership
+seam; the decision, ordering argument, guard, and removal conditions live in
+`docs/adr/ngp-attribute-ownership.md`. The scoped-modality decision itself —
+what value a scoped dialog advertises and why — is unchanged and stays here.
 
 ## Consequences
 

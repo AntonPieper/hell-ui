@@ -39,6 +39,26 @@ class RadioRequiredFormHost {
 }
 
 @Component({
+  selector: 'hell-radio-form-sync-host',
+  imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
+  template: `
+    <div
+      hellRadioGroup
+      [formControl]="control"
+      orientation="horizontal"
+      (valueChange)="values.push($any($event))"
+    >
+      <button hellRadio type="button" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioFormSyncHost {
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
+@Component({
   selector: 'hell-radio-keyboard-host',
   imports: [HellRadioGroup, HellRadio],
   template: `
@@ -237,6 +257,38 @@ describe('HellRadio', () => {
 
     expect(host.control.invalid).toBe(false);
     expect(host.control.disabled).toBe(true);
+  });
+
+  it('keeps external form writes silent and reflects them on the items', async () => {
+    const fixture = TestBed.createComponent(RadioFormSyncHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const radios = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      'button[hellRadio]',
+    );
+
+    // A form write flows into the primitive through its public silent setter
+    // (`setValue(value, { emit: false })`): the items reflect it, but
+    // `valueChange` must not re-emit a value the form already knows about.
+    host.control.setValue('b');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(radios[0].getAttribute('aria-checked')).toBe('false');
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    expect(host.values).toEqual([]);
+
+    host.control.disable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(radios[0].disabled).toBe(true);
+    expect(radios[1].disabled).toBe(true);
   });
 
   it('moves custom radio keyboard focus by orientation and skips disabled items', () => {

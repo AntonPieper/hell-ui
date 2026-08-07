@@ -35,6 +35,7 @@ import {
   hellPartStyler,
   type HellRecipe,
 } from 'hell-ui/internal/core';
+import { hellOwnsNgpAttribute } from 'hell-ui/internal/ng-primitives';
 import {
   HELL_DIALOG_SCOPE_ROOT,
   HellDialogScopedModality,
@@ -295,10 +296,6 @@ export class HellDialogScope {}
     'data-slot': 'root',
     '[attr.data-elevation]': '"3"',
     '[attr.data-size]': 'size()',
-    // Declared after the NgpDialog host directive, so this binding is the one
-    // that lands on the element; it mirrors the engine's value except when
-    // scoped modality makes the page-wide claim untrue.
-    '[attr.aria-modal]': 'ariaModal()',
     '(keydown.tab)': 'onTabKeydown($event)',
   },
 })
@@ -332,6 +329,17 @@ export class HellDialog {
   protected readonly ariaModal = computed(() =>
     hellBlocksScopeOnly(this.overlay, this.scopeRoot) ? 'false' : String(this.primitive.modal()),
   );
+
+  constructor() {
+    // `ngpDialog` (0.128) writes `aria-modal` imperatively after host
+    // bindings, so a competing binding can never hold the attribute. This
+    // effect registers after the NgpDialog host directive's and reads the
+    // same `modal` signal, so it lands last on every shared flush and keeps
+    // the scoped-modality exception in place.
+    hellOwnsNgpAttribute(() => {
+      this.element.nativeElement.setAttribute('aria-modal', this.ariaModal());
+    });
+  }
 
   /** Traps focus by cycling Tab/Shift+Tab between the dialog's focusable candidates. */
   protected onTabKeydown(event: Event): void {

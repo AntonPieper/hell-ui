@@ -103,8 +103,8 @@ catalogs:
       specifier: ~22.0.2
       version: 22.0.2
     ng-primitives:
-      specifier: 0.123.0
-      version: 0.123.0
+      specifier: 0.128.8
+      version: 0.128.8
     pdfjs-dist:
       specifier: 6.2.108
       version: 6.2.108
@@ -132,9 +132,6 @@ catalogs:
     vitest:
       specifier: 4.1.10
       version: 4.1.10
-
-overrides:
-  '@phenomnomnominal/tsquery': 6.2.0
 
 packageExtensionsChecksum: sha256-scTvqmgJjRyrhfd9HjytQc3ymzvOzLBIEQeVubBcjxU=
 
@@ -255,7 +252,7 @@ importers:
         version: link:../../packages/angular
       ng-primitives:
         specifier: 'catalog:'
-        version: 0.123.0(22db8bcf49146666c2b40a02989b3941)
+        version: 0.128.8(22db8bcf49146666c2b40a02989b3941)
       pdfjs-dist:
         specifier: 'catalog:'
         version: 6.2.108
@@ -368,7 +365,7 @@ importers:
         version: 22.0.2(@angular/compiler-cli@22.0.8(@angular/compiler@22.0.8)(typescript@6.0.3))(tailwindcss@4.3.3)(tslib@2.8.1)(typescript@6.0.3)
       ng-primitives:
         specifier: 'catalog:'
-        version: 0.123.0(22db8bcf49146666c2b40a02989b3941)
+        version: 0.128.8(22db8bcf49146666c2b40a02989b3941)
       pdfjs-dist:
         specifier: 'catalog:'
         version: 6.2.108
@@ -3838,8 +3835,8 @@ packages:
       tailwindcss:
         optional: true
 
-  ng-primitives@0.123.0:
-    resolution: {integrity: sha512-7LVo3g6zIUvsr7uHCYsRtSaxbpATzWDOTwYXaZpyhgChDfsyhf8afrcKUYPWEDjprpzjPnI0AeGJRhfaMz5LFQ==}
+  ng-primitives@0.128.8:
+    resolution: {integrity: sha512-Xy8f4ojSMBCFAbHDRRX83RGkeS4jc7Ro0KKugJylWvMyWp/2hcclJIPThXPR7mgTo0sYMlQk58O9Z8gg/TguuQ==}
     peerDependencies:
       '@angular/cdk': ^21.0.0 || ^22.0.0
       '@angular/common': ^21.0.0 || ^22.0.0
@@ -3847,9 +3844,12 @@ packages:
       '@angular/forms': ^21.0.0 || ^22.0.0
       '@angular/router': '>=19.0.0'
       '@floating-ui/dom': '>=1.6.0'
+      date-fns: '*'
       luxon: '*'
       rxjs: '>=6.6.0'
     peerDependenciesMeta:
+      date-fns:
+        optional: true
       luxon:
         optional: true
 
@@ -8027,7 +8027,7 @@ snapshots:
       - supports-color
     optional: true
 
-  ng-primitives@0.123.0(22db8bcf49146666c2b40a02989b3941):
+  ng-primitives@0.128.8(22db8bcf49146666c2b40a02989b3941):
     dependencies:
       '@angular/cdk': 22.0.7(@angular/common@22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(@angular/platform-browser@22.0.8(@angular/common@22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/common': 22.0.8(@angular/core@22.0.8(@angular/compiler@22.0.8)(rxjs@7.8.2))(rxjs@7.8.2)

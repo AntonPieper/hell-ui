@@ -260,10 +260,9 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           Items in a <code>type="single"</code> group get <code>role="radio"</code> and
           <code>aria-checked</code>. Items in a <code>type="multiple"</code> group instead keep
           native toggle-button semantics with <code>aria-pressed</code> and no <code>role</code>
-          override — they are independent toggles, not mutually exclusive radios. Hell corrects
-          this itself because upstream <code>ng-primitives</code> (&le; 0.124) hardcodes
-          <code>role="radio"</code>/<code>aria-checked</code> regardless of group type; see
-          <a href="https://github.com/ng-primitives/ng-primitives/issues/813" target="_blank" rel="noopener">ng-primitives#813</a>.
+          override — they are independent toggles, not mutually exclusive radios.
+          <code>ng-primitives</code> derives these per-mode semantics itself since 0.128 (
+          <a href="https://github.com/ng-primitives/ng-primitives/issues/813" target="_blank" rel="noopener">ng-primitives#813</a>).
         </li>
         <li>Disabled toggles and group items get <code>data-disabled</code> and stop responding to press/keyboard activation.</li>
         <li>Icon-only toggles carry no accessible name from content, so they must set <code>aria-label</code> (or pair with a tooltip that also names the action).</li>

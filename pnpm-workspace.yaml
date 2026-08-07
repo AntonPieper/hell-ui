@@ -51,7 +51,7 @@ catalog:
   "jsdom": "^30.0.1"
   "knip": "^6.31.0"
   "ng-packagr": "~22.0.2"
-  "ng-primitives": "0.123.0"
+  "ng-primitives": "0.128.8"
   "pdfjs-dist": "6.2.108"
   "postcss": "^8.5.25"
   "rxjs": "~7.8.2"
@@ -61,18 +61,9 @@ catalog:
   "typescript": "~6.0.3"
   "typescript-eslint": "^8.66.0"
   "vitest": "4.1.10"
-overrides:
-  # ng-primitives (still true at 0.128.7) pins @phenomnomnominal/tsquery to
-  # 6.1.3, whose peer range "^3 || ^4 || ^5" excludes the TypeScript 6 this
-  # repo develops against; tsquery 6.2.0 relaxed it to ">3.0.0". Load-bearing:
-  # without it `pnpm test:consumer-fixtures` fails outright, because fixtures
-  # install with --strict-peer-dependencies. Retires when ng-primitives moves
-  # that pin. Note this repairs only our own installs: adopters resolve the
-  # peer from published metadata and do not inherit overrides, so the upstream
-  # fix is the only thing that reaches them.
-  "@phenomnomnominal/tsquery": "6.2.0"
 packageExtensions:
-  # ng-primitives/dialog imports @angular/router without declaring the peer.
+  # ng-primitives/dialog imports @angular/router without declaring the peer —
+  # re-probed still true at 0.128.8.
   ng-primitives:
     peerDependencies:
       "@angular/router": ">=19.0.0"

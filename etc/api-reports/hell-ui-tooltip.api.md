@@ -7,6 +7,7 @@
 import * as _angular_core from '@angular/core';
 import { HellUiInput } from 'hell-ui/core';
 import * as i1 from 'ng-primitives/tooltip';
+import * as ng_primitives_portal from 'ng-primitives/portal';
 import { NgpFlip } from 'ng-primitives/portal';
 import { NgpFlipInput } from 'ng-primitives/portal';
 import { NgpOffset } from 'ng-primitives/portal';
@@ -32,7 +33,7 @@ export class HellTooltip {
     readonly offset: _angular_core.InputSignalWithTransform<NgpOffset | undefined, NgpOffsetInput | null | undefined>;
     readonly open: Signal<boolean>;
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
-    readonly placement: _angular_core.InputSignal<NgpTooltipPlacement | undefined>;
+    readonly placement: _angular_core.InputSignal<ng_primitives_portal.NgpPlacement | undefined>;
     readonly position: _angular_core.InputSignal<NgpPosition | null>;
     readonly scrollBehavior: _angular_core.InputSignal<"close" | "reposition" | undefined>;
     readonly shift: _angular_core.InputSignalWithTransform<NgpShift, NgpShiftInput | null>;

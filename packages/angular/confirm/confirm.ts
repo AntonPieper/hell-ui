@@ -632,7 +632,7 @@ function openAnchoredPrompt(
     };
 
     const overlay = createOverlay<unknown>({
-      content: HellAnchoredPrompt,
+      content: signal(HellAnchoredPrompt),
       triggerElement: anchor,
       injector,
       viewContainerRef,

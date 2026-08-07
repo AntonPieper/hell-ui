@@ -346,8 +346,9 @@ describe('HellToggleGroup', () => {
     expect(bold.getAttribute('aria-pressed')).toBe('true');
     expect(italic.getAttribute('aria-pressed')).toBe('false');
 
-    // ng-primitives re-writes aria-checked whenever the selection changes;
-    // the Hell override must win again after each toggle.
+    // ng-primitives owns the per-mode semantics since 0.128 (#813) and
+    // re-derives them on every selection change; this pins the multiple-mode
+    // contract across a toggle so an upstream regression cannot land silently.
     italic.click();
     fixture.detectChanges();
 
