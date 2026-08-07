@@ -103,16 +103,13 @@ describe('ngpAttrOwnershipSeamFailures', () => {
     import.meta.url,
   );
   const seamSource = readFileSync(seamPath, 'utf8');
-  const installedVersion = `ng-primitives@${
-    JSON.parse(
-      readFileSync(
-        new URL('../../packages/angular/node_modules/ng-primitives/package.json', import.meta.url),
-        'utf8',
-      ),
-    ).version
-  }`;
+  // The version the seam itself pins. Whether that pin matches the installed
+  // package is the running checker's concern (it reads the real install);
+  // this spec covers the pure source assertions, so it tests drift by handing
+  // the function a different expected version instead of reading the install.
+  const pinnedVersion = /HELL_NGP_ATTR_OWNERSHIP_VERSION = '([^']+)'/.exec(seamSource)?.[1];
 
-  const check = (source) => ngpAttrOwnershipSeamFailures(source, installedVersion, seamRelPath);
+  const check = (source) => ngpAttrOwnershipSeamFailures(source, pinnedVersion, seamRelPath);
 
   const mutate = (pattern, replacement = '') => {
     expect(seamSource).toMatch(pattern);
@@ -123,12 +120,8 @@ describe('ngpAttrOwnershipSeamFailures', () => {
     expect(check(seamSource)).toEqual([]);
   });
 
-  it('fails when the version constant drifts from the installed package', () => {
-    const failures = check(
-      seamSource.replace(/HELL_NGP_ATTR_OWNERSHIP_VERSION = '[^']+'/, (m) =>
-        m.replace(/@.*'$/, "@0.0.0'"),
-      ),
-    );
+  it('fails when the version constant drifts from the expected package version', () => {
+    const failures = ngpAttrOwnershipSeamFailures(seamSource, 'ng-primitives@0.0.0', seamRelPath);
     expect(failures).toHaveLength(1);
     expect(failures[0]).toContain('seam version must match installed');
   });
