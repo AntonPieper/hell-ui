@@ -10,6 +10,7 @@ import {
   HellTableShellEmpty,
   HellTableShellFooter,
   HellTableShellToolbar,
+  HellTanStackResizableColumns,
   HellTanStackTable,
 } from 'hell-ui/table-tanstack';
 import { HellTanStackVirtualRows } from 'hell-ui/table-tanstack/virtual';
@@ -32,8 +33,9 @@ import {
 } from '@tanstack/angular-table';
 
 // v9 requires explicit feature registration; the Hell shell reads pinning,
-// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
-// injectTable initializer so it is not rebuilt on every signal change.
+// sizing, visibility, expanding and sorting, and the resizable-columns opt-in
+// adds resizing. Hoisted out of the injectTable initializer so it is not
+// rebuilt on every signal change.
 const features = tableFeatures({
   columnPinningFeature,
   columnResizingFeature,
@@ -65,6 +67,7 @@ const REGIONS = ['eu-central-1', 'us-east-1', 'ap-south-1'] as const;
   imports: [
     HellButton,
     HellTanStackTable,
+    HellTanStackResizableColumns,
     HellTanStackVirtualRows,
     HellTableShellEmpty,
     HellTableShellFooter,
@@ -74,6 +77,7 @@ const REGIONS = ['eu-central-1', 'us-east-1', 'ap-south-1'] as const;
     <hell-tanstack-table
       [table]="table"
       stickyHeader
+      hellTanStackResizableColumns
       hellTanStackVirtualRows
       [virtualEstimateRowSize]="44"
     >
@@ -129,9 +133,8 @@ export class TableTanStackResizableExample {
     features,
     data: this.rows(),
     columns: this.columns,
-    // Opting in to TanStack column resizing is what makes the shell render
-    // separators; `enableResizing: false` on a column opts that column out.
-    enableColumnResizing: true,
+    // The `hellTanStackResizableColumns` directive is what makes the shell
+    // render separators; `enableResizing: false` on a column opts that one out.
     getRowId: (row) => row.id,
     state: { columnSizing: this.columnSizing(), sorting: this.sorting() },
     onColumnSizingChange: (updater: Updater<ColumnSizingState>) =>

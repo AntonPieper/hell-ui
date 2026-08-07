@@ -96,10 +96,11 @@ table never has to register pagination or filtering:
 
 | Class | Requires |
 |---|---|
-| `hell-tanstack-table` | `columnPinningFeature`, `columnResizingFeature`, `columnSizingFeature`, `columnVisibilityFeature`, `rowExpandingFeature`, `rowSortingFeature` |
+| `hell-tanstack-table` | `columnPinningFeature`, `columnSizingFeature`, `columnVisibilityFeature`, `rowExpandingFeature`, `rowSortingFeature` |
 | `hell-tanstack-pagination` | `rowPaginationFeature` |
 | `hell-tanstack-global-filter` | `columnFilteringFeature`, `globalFilteringFeature` |
 | `hell-tanstack-column-filter` | `columnFilteringFeature` |
+| `hellTanStackResizableColumns` | `columnResizingFeature`, `columnSizingFeature` |
 
 Each is a named interface extending `TableFeatures`, so a missing feature fails
 with a diagnostic naming the interface and the absent feature keys rather than a
@@ -110,12 +111,20 @@ missing method.
 pinned-edge flags ask pinning for its own edges instead —
 `getStartVisibleLeafColumns()` / `getEndVisibleLeafColumns()`.
 
-`columnResizingFeature` is required even though it only decides whether a resize
-separator renders, which costs non-resizing adopters the resizing state. Making
-resizing a separate opt-in directive would remove that cost and is the better
-long-term shape, but it moves the separator out of the shell template — a public
-API redesign that does not belong inside a dependency migration. Recorded as
-follow-up work, not settled against.
+`columnResizingFeature` moved off the shell after the migration landed: resizing
+is opt-in through the `hellTanStackResizableColumns` directive, which declares
+the shell's `table` input under the same name so one `[table]` binding feeds
+both directives and each checks the table against its own requirements. The
+separator stays in the shell template — the shell owns the rendered column order
+and the placeholder rules — and the shell asks the directive for each pair
+through `ɵHELL_TANSTACK_RESIZE_STRATEGY`, injected `self: true` like the body
+strategy. That boundary deliberately speaks in column ids and the non-generic
+`HellTableResizeAdapter`, so the directive can require resizing features the
+shell no longer names without any variance bridge between the two `Table` types.
+An explicit `enableColumnResizing: true` is no longer required either: the
+directive is the per-table opt-in, and TanStack's `enableColumnResizing` /
+per-column `enableResizing` options (both default enabled) remain the
+fine-grained opt-outs via `column_getCanResize()`.
 
 ### 3. `@tanstack/table-core` does not become a peer
 
@@ -148,7 +157,7 @@ generic over `TFeatures` and take the instance as their first argument, which is
 exactly this case. Core APIs (`getRowModel`, `getHeaderGroups`, `getColumn`,
 `getContext`, `renderValue`) are not gated and stay instance methods.
 
-Three further reads use TanStack's own broadened views, which are intersections
+Two further reads use TanStack's own broadened views, which are intersections
 rather than gated conditionals and so resolve generically:
 
 - state: `table.atoms.<slice>` typed from `Atoms_All`, replacing `getState()`.
@@ -156,7 +165,6 @@ rather than gated conditionals and so resolve generically:
   `getDefault*State()` rather than a value Hell invents.
 - column size bounds: `ColumnDefBase_All`, since `minSize`/`maxSize` live on the
   sizing slice of the column definition.
-- `enableColumnResizing`: `TableOptions_All`.
 
 `defaultColumnSizing` is gone; `getDefaultColumnSizingColumnDef()` from the
 static-function entry point replaces it. `table._getDefaultColumnDef()` became

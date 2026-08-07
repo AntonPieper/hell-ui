@@ -14,8 +14,12 @@
   "smoke": {
     "steps": [
       {
-        "selector": "hell-tanstack-table",
+        "selector": "hell-tanstack-table:not([data-hell-tanstack-resizable-columns])",
         "textIncludes": "Person Ada Lovelace"
+      },
+      {
+        "selector": "hell-tanstack-table[data-hell-tanstack-resizable-columns='true']",
+        "textIncludes": "gateway"
       }
     ]
   }

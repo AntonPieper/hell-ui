@@ -10,6 +10,7 @@ import {
   HellTableShellCell,
   HellTableShellEmpty,
   HellTableShellExpandedRow,
+  HellTanStackResizableColumns,
   HellTanStackTable,
 } from 'hell-ui/table-tanstack';
 import {
@@ -28,8 +29,9 @@ import {
 } from '@tanstack/angular-table';
 
 // v9 requires explicit feature registration; the Hell shell reads pinning,
-// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
-// injectTable initializer so it is not rebuilt on every signal change.
+// sizing, visibility, expanding and sorting, and the pinned table's
+// resizable-columns opt-in adds resizing. Hoisted out of the injectTable
+// initializer so it is not rebuilt on every signal change.
 const features = tableFeatures({
   columnPinningFeature,
   columnResizingFeature,
@@ -58,6 +60,7 @@ const people: readonly Person[] = [
     HellButton,
     ...HELL_TABLE_UTILITIES_IMPORTS,
     HellTanStackTable,
+    HellTanStackResizableColumns,
     HellTableShellCell,
     HellTableShellEmpty,
     HellTableShellExpandedRow,
@@ -222,7 +225,7 @@ const people: readonly Person[] = [
       <section aria-labelledby="pinned-resize-heading" data-testid="pinned-resize-section">
         <h2 id="pinned-resize-heading">Pinned columns with resizing</h2>
         <div style="max-width: 420px">
-          <hell-tanstack-table [table]="pinnedTable">
+          <hell-tanstack-table [table]="pinnedTable" hellTanStackResizableColumns>
             <ng-template hellTableShellEmpty>No people found.</ng-template>
           </hell-tanstack-table>
         </div>
@@ -299,7 +302,6 @@ export class TableA11yHarnessPage {
     features,
     data: this.rows(),
     columns: this.pinnedColumns,
-    enableColumnResizing: true,
     getRowId: (row) => row.id,
     // Pinning is logical in v9: 'left'/'right' became 'start'/'end'.
     initialState: { columnPinning: { start: ['name', 'role'], end: [] } },

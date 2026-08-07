@@ -11,7 +11,6 @@ import { HellTableShellToolbar, HellTanStackTable } from 'hell-ui/table-tanstack
 import {
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createFilteredRowModel,
@@ -27,14 +26,13 @@ import {
 } from '@tanstack/angular-table';
 
 // v9 requires explicit feature registration; the Hell shell reads pinning,
-// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// sizing, visibility, expanding and sorting. Hoisted out of the
 // injectTable initializer so it is not rebuilt on every signal change.
 // `globalFilterFn: 'includesString'` is a registry key in v9, so the built-in
 // it names is imported and registered under `filterFns` rather than resolved
 // from a bundled registry.
 const features = tableFeatures({
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   rowExpandingFeature,
