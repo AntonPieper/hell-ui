@@ -38,7 +38,6 @@ import { HellToolbar, HellToolbarItem } from 'hell-ui/toolbar';
 import {
   columnFilteringFeature,
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   globalFilteringFeature,
@@ -58,13 +57,12 @@ import {
 } from '@tanstack/angular-table';
 
 // v9 requires explicit feature registration; the Hell shell reads pinning,
-// sizing, resizing, visibility, expanding and sorting. Hoisted out of the
+// sizing, visibility, expanding and sorting. Hoisted out of the
 // injectTable initializer so it is not rebuilt on every signal change.
 // Sorting, filtering and pagination are all manual here, so the features are
 // registered for their APIs and state while the server owns the row models.
 const features = tableFeatures({
   columnPinningFeature,
-  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   rowExpandingFeature,

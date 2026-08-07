@@ -8,12 +8,16 @@ custom:
         `Table<typeof features, T>`, and likewise for `ColumnDef`, `Row`, `Column`,
         `Cell` and `Header` — matching TanStack's own v9 order. Then register the
         features each shell class reads. `hell-tanstack-table` needs
-        `columnPinningFeature`, `columnResizingFeature`, `columnSizingFeature`,
+        `columnPinningFeature`, `columnSizingFeature`,
         `columnVisibilityFeature`, `rowExpandingFeature` and `rowSortingFeature`;
         `hell-tanstack-pagination` needs `rowPaginationFeature`;
         `hell-tanstack-global-filter` needs `columnFilteringFeature` and
         `globalFilteringFeature`; `hell-tanstack-column-filter` needs
-        `columnFilteringFeature`. Import them from `@tanstack/angular-table` and pass
+        `columnFilteringFeature`. Column resizing is not a shell requirement:
+        it is opt-in through the `hellTanStackResizableColumns` directive, which
+        needs `columnResizingFeature` alongside `columnSizingFeature` on the
+        tables that use it — see this release's column-resizing change entry.
+        Import the features from `@tanstack/angular-table` and pass
         them to `tableFeatures({ ... })`. Registering more than a shell needs is fine —
         the shells are generic over your feature set — but omitting one is a compile
         error naming the missing feature rather than a runtime failure.

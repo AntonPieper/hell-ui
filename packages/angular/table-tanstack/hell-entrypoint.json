@@ -1,6 +1,10 @@
 {
   "category": "tanstack-table-shell",
   "styleBundle": "opt-in",
+  "exports": [
+    "./table-tanstack",
+    "./resizable-columns"
+  ],
   "header": [
     "/**",
     " * @experimental Hell-styled TanStack Table shell entry point.",
