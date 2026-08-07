@@ -95,6 +95,10 @@ const HELL_COMBOBOX_POINTER_BOUNDARY_EVENTS = [
  * environment that produces mouse events without pointer events — a consumer's
  * jsdom test driving `fireEvent.mouseEnter`, say — would otherwise have its
  * boundary events swallowed by a guard that nothing it can send ever lifts.
+ * One move event is not always proof: WebKit synthesizes a trusted move at
+ * the resting position when a relayout paints content under a stationary
+ * cursor, so a move at exactly the position the pointer was resting at when
+ * the dropdown attached does not count — see `ignorePointerAtRest`.
  */
 const HELL_COMBOBOX_POINTER_USE_EVENTS = [
   'pointermove',
@@ -120,21 +124,39 @@ class HellComboboxController {
   });
   private onTouch: () => void = () => {};
   private readWrapNavigation: () => boolean = () => true;
+  /**
+   * Where the pointer last reported itself, document-wide. Snapshotted when a
+   * dropdown attaches, it is what lets the resting-pointer guard tell WebKit's
+   * synthetic "content painted under the cursor" move — always at exactly this
+   * position — from a real move, which lands anywhere else.
+   */
+  private lastPointerPosition: { x: number; y: number } | null = null;
+  private readonly trackPointerPosition = (event: Event): void => {
+    const { clientX, clientY } = event as MouseEvent;
+    this.lastPointerPosition = { x: clientX, y: clientY };
+  };
   private readonly onFocusOut = (event: FocusEvent): void => {
     this.markControlTouched(event);
   };
 
   constructor() {
     this.scope.connect(this.destroyRef);
+    const doc = this.host.nativeElement.ownerDocument;
     this.host.nativeElement.addEventListener('focusout', this.onFocusOut);
     this.host.nativeElement.addEventListener('keydown', this.clampNavigation, {
       capture: true,
     });
+    for (const type of ['pointermove', 'mousemove'] as const) {
+      doc.addEventListener(type, this.trackPointerPosition, { capture: true, passive: true });
+    }
     this.destroyRef.onDestroy(() => {
       this.host.nativeElement.removeEventListener('focusout', this.onFocusOut);
       this.host.nativeElement.removeEventListener('keydown', this.clampNavigation, {
         capture: true,
       });
+      for (const type of ['pointermove', 'mousemove'] as const) {
+        doc.removeEventListener(type, this.trackPointerPosition, { capture: true });
+      }
     });
   }
 
@@ -183,12 +205,31 @@ class HellComboboxController {
    */
   private ignorePointerAtRest(dropdown: HTMLElement): () => void {
     let pointerUsed = false;
+    // Where the pointer was resting when this dropdown attached. WebKit's
+    // synthetic moves can only ever report this position.
+    const restingPoint = this.lastPointerPosition;
     const swallowWhileAtRest = (event: Event): void => {
       if (pointerUsed) return;
       event.stopImmediatePropagation();
     };
     const markPointerUsed = (event: Event): void => {
       if (pointerUsed) return;
+      // "Used" means moved or pressed. WebKit dispatches a trusted move
+      // event — no user input — whenever a relayout paints new content under
+      // a stationary cursor, which is exactly the moment this guard exists
+      // for. That synthetic move always reports the position the pointer was
+      // already resting at when this dropdown attached, so a move at exactly
+      // that position does not count; a move anywhere else, or any press,
+      // does. A pointer that never reported a position cannot be told apart —
+      // its first move counts, keeping single-jump moves (a hover in a
+      // consumer's Playwright test, say) working on a fresh page.
+      if (
+        restingPoint !== null &&
+        (event.type === 'pointermove' || event.type === 'mousemove')
+      ) {
+        const { clientX, clientY } = event as MouseEvent;
+        if (restingPoint.x === clientX && restingPoint.y === clientY) return;
+      }
       pointerUsed = true;
       const target = event.target instanceof HTMLElement ? event.target : null;
       const option = target?.closest<HTMLElement>('[role="option"]');

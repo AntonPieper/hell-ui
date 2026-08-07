@@ -554,6 +554,50 @@ describe('HellCombobox', () => {
     expect(second.hasAttribute('data-hover')).toBe(true);
   });
 
+  it('holds the guard through a move at the position the pointer was resting at on attach', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+
+    // The pointer reports a position, then rests. Reopening paints options
+    // under it, and WebKit answers a relayout under a stationary cursor with
+    // a trusted move at exactly the resting position — no user input. The
+    // guard must hold through that move, and lift for one anywhere else.
+    input.ownerDocument.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, clientX: 40, clientY: 40 }),
+    );
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+    const [first, second] = options as [HTMLElement, HTMLElement];
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+
+    second.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'mouse',
+        clientX: 40,
+        clientY: 40,
+      }),
+    );
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(first.id);
+    expect(second.hasAttribute('data-hover')).toBe(false);
+
+    second.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerType: 'mouse',
+        clientX: 42,
+        clientY: 40,
+      }),
+    );
+    fixture.detectChanges();
+    expect(input.getAttribute('aria-activedescendant')).toBe(second.id);
+    expect(second.hasAttribute('data-hover')).toBe(true);
+  });
+
   it('projects domain objects with comparison, disabled state, and one user commit', async () => {
     const fixture = TestBed.createComponent(ComboboxProjectedHost);
     fixture.detectChanges();
