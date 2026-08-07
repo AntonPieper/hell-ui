@@ -35,9 +35,6 @@ export const HELL_TABLE_STATUS_VIEWS: InjectionToken<HellTableStatusViews>;
 export const HELL_TANSTACK_TABLE_IMPORTS: readonly [typeof HellTanStackTable, typeof HellTableShellHeader, typeof HellTableShellCell, typeof HellTableShellFooterCell, typeof HellTableShellExpandedRow, typeof HellTableShellLoading, typeof HellTableShellEmpty, typeof HellTableShellError, typeof HellTableShellToolbar, typeof HellTableShellFooter, typeof HellTanStackPagination, typeof HellTanStackGlobalFilter, typeof HellTanStackColumnFilter, typeof FlexRenderDirective];
 
 // @public
-export const HELL_TANSTACK_TABLE_RESIZABLE_IMPORTS: readonly [typeof HellTanStackResizableColumns];
-
-// @public
 export type HellClassValue = Readonly<Record<string, boolean | null | undefined>> | null | readonly string[] | string | undefined;
 
 // @public (undocumented)

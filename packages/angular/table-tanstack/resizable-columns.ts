@@ -227,11 +227,17 @@ export class HellTanStackResizableColumns<
    * `getTotalSize()`, so a pointer delta measured on screen is that much larger
    * than the size delta TanStack should record.
    *
-   * The directive sits on the shell host, so the shell `<table>` is measured
-   * through the same behaviour marker the virtual-rows strategy uses.
+   * The directive sits on the shell host and measures the shell `<table>`
+   * through the direct host > scrollport > table path the shell template
+   * guarantees. A descendant query would not do: projected content — a toolbar
+   * is rendered before the scrollport — may nest another shell, whose table
+   * would then win document order and put a foreign width over this table's
+   * TanStack total.
    */
   private columnRenderScale(): number {
-    const element = this.host.querySelector('[data-hell-table-shell-table]');
+    const element = this.host.querySelector(
+      ':scope > [data-hell-table-shell-scrollport] > [data-hell-table-shell-table]',
+    );
     const total = table_getTotalSize(this.table());
     if (!element || !Number.isFinite(total) || total <= 0) return 1;
     const rendered = element.getBoundingClientRect().width;
@@ -265,6 +271,3 @@ export class HellTanStackResizableColumns<
     table_setColumnSizing(this.table(), (current) => ({ ...current, ...writes }));
   }
 }
-
-/** All directives that make up the resizable-columns opt-in, for bulk `imports`. */
-export const HELL_TANSTACK_TABLE_RESIZABLE_IMPORTS = [HellTanStackResizableColumns] as const;

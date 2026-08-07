@@ -354,6 +354,60 @@ class UncontrolledResizableShellHost {
 }
 
 /**
+ * Nests a second shell inside the resizable shell's projected toolbar. The
+ * toolbar renders before the scrollport, so in document order the nested
+ * shell's table is the first `[data-hell-table-shell-table]` under the outer
+ * host — the element an unscoped descendant query would measure the resize
+ * render scale from.
+ */
+@Component({
+  selector: 'hell-test-nested-toolbar-resizable-host',
+  standalone: true,
+  imports: [
+    HellTanStackTable,
+    HellTanStackResizableColumns,
+    HellTableShellEmpty,
+    HellTableShellToolbar,
+  ],
+  template: `
+    <hell-tanstack-table [table]="table" hellTanStackResizableColumns>
+      <div hellTableShellToolbar>
+        <hell-tanstack-table [table]="innerTable">
+          <ng-template hellTableShellEmpty>No rows</ng-template>
+        </hell-tanstack-table>
+      </div>
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class NestedToolbarResizableShellHost {
+  readonly columnSizing = signal<ColumnSizingState>({});
+  readonly columns: ColumnDef<typeof features, Person>[] = [
+    { id: 'a', header: 'A', size: 200, minSize: 120 },
+    { id: 'b', header: 'B', size: 160 },
+  ];
+
+  readonly table = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+    state: { columnSizing: this.columnSizing() },
+    onColumnSizingChange: (updater) =>
+      this.columnSizing.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+  }));
+
+  readonly innerTable = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+  }));
+}
+
+/**
  * Pins columns that are not already leading, so the rendered order differs from
  * the declared leaf order. Every column carries a distinct size, which is what
  * makes a `<colgroup>` built in the wrong order detectable.
@@ -447,6 +501,7 @@ describe('Hell TanStack table shell', () => {
         StyledShellHost,
         ResizableShellHost,
         UncontrolledResizableShellHost,
+        NestedToolbarResizableShellHost,
         NonLeadingPinnedShellHost,
         ClientSortedShellHost,
       ],
@@ -708,6 +763,36 @@ describe('Hell TanStack table shell', () => {
 
     const col = query(root, 'colgroup col:first-child') as HTMLTableColElement;
     expect(col.style.width).toBe('216px');
+  });
+
+  it('measures the resize render scale from the owning shell table, not a nested one', () => {
+    const fixture = TestBed.createComponent(NestedToolbarResizableShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const outerHost = query(root, 'hell-tanstack-table');
+
+    const tables = [...outerHost.querySelectorAll('[data-hell-table-shell-table]')];
+    expect(tables).toHaveLength(2);
+    const [ownTable] = tables.filter((table) => table.closest('hell-tanstack-table') === outerHost);
+    const [nestedTable] = tables.filter((table) => table !== ownTable);
+    // The nested shell's table must come first in document order — that is the
+    // element an unscoped descendant query would pick up.
+    expect(tables[0]).toBe(nestedTable);
+
+    // Outer table rendered at twice its TanStack total (200 + 160 = 360), the
+    // nested one at a poisoned width that yields a very different scale.
+    vi.spyOn(ownTable, 'getBoundingClientRect').mockReturnValue({ width: 720 } as DOMRect);
+    vi.spyOn(nestedTable, 'getBoundingClientRect').mockReturnValue({ width: 3600 } as DOMRect);
+
+    // Only the outer shell opts in, so it owns every handle in the fixture.
+    const handle = query(root, 'th[data-column-id="a"] [hellTableResizeHandle]');
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    // The 16px key step converts through the owning table's scale of 2 into 8
+    // TanStack units. Measured against the nested table (scale 10) the pair
+    // would land on fractional sizes {a: 201.6, b: 158.4} instead.
+    expect(fixture.componentInstance.columnSizing()).toEqual({ a: 208, b: 152 });
   });
 
   it('flows a committed width into the colgroup and both body cell size variables', () => {
