@@ -68,7 +68,8 @@
   variables:
     COREPACK_HOME: "$CI_PROJECT_DIR/.cache/corepack"
     COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
-    npm_config_store_dir: "$CI_PROJECT_DIR/.cache/pnpm-store"
+    # pnpm 11 reads pnpm_config_*; npm_config_* is npm-run context only.
+    pnpm_config_store_dir: "$CI_PROJECT_DIR/.cache/pnpm-store"
   cache:
     - !reference [.caches, pnpm]
   before_script:

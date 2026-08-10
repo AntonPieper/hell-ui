@@ -1193,9 +1193,12 @@ function pnpmCommandEnvironment() {
   // tree from the registry. Probed and rejected as the replacement: pnpm's
   // `--config.store-dir=` flag only works ahead of the subcommand, and
   // `pnpm run <script> --config.store-dir=…` forwards it into the script
-  // instead, so the env var stays.
-  if (process.env.npm_config_store_dir) {
-    env.npm_config_store_dir = process.env.npm_config_store_dir;
+  // instead, so the env var stays. pnpm 11 reads pnpm_config_*; the npm_*
+  // spelling is still accepted from local invocations and forwarded under
+  // the name pnpm reads.
+  const storeDir = process.env.pnpm_config_store_dir ?? process.env.npm_config_store_dir;
+  if (storeDir) {
+    env.pnpm_config_store_dir = storeDir;
   }
 
   return env;

@@ -1,6 +1,9 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+# pnpm 11 reads settings from here, not .npmrc (which is auth/registry only).
+linkWorkspacePackages: false
+saveWorkspaceProtocol: true
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
