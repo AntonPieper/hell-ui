@@ -1,5 +1,0 @@
-kind: Breaking
-body: The tested `pdfjs-dist` version for `hell-ui/features/pdf-viewer` moved from exactly `5.6.205` to exactly `6.2.108`; the viewer is built against the v6 API and worker contract. Only consumers of the PDF viewer entry point are affected.
-time: 2026-08-05T12:34:24.539679+02:00
-custom:
-    migration: Upgrade `pdfjs-dist` to `6.2.108` alongside this release. The package is no longer declared as a peer (see the integration-contract entry under Changed), so no installer will flag a stale 5.x install — the viewer fails at runtime against it instead. Check your lockfile.
