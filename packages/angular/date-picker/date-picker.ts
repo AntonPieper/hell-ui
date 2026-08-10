@@ -1,17 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   Injector,
   afterNextRender,
+  booleanAttribute,
   computed,
   effect,
   inject,
   input,
+  model,
+  output,
   signal,
+  untracked,
   type Signal,
 } from '@angular/core';
+import { type FormValueControl } from '@angular/forms/signals';
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidAnglesLeft,
@@ -38,7 +44,7 @@ import type { FocusOrigin } from '@angular/cdk/a11y';
 import { HellIcon } from 'hell-ui/icon';
 import { hellCreateLabels, type HellLabels } from 'hell-ui/core';
 import type { HellUi, HellUiInput } from 'hell-ui/core';
-import { hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
+import { containsNode, hellPartStyler, type HellRecipe } from 'hell-ui/internal/core';
 import type { InjectionToken } from '@angular/core';
 import {
   HELL_DATE_PICKER_MONTH_COLUMNS,
@@ -124,6 +130,18 @@ export type HellDateRangePickerPart = HellDatePickerPart;
 
 /** Part Style Map accepted by the HellDateRangePicker `ui` input. */
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
+
+/**
+ * Committed value of the HellDateRangePicker `value` model. A user selection
+ * always commits both ends together; either end may be `null` in values
+ * written from outside (a prefilled start with the end still open).
+ */
+export interface HellDateRangeValue {
+  /** Selected range start, or `null` while no start is committed. */
+  readonly start: Date | null;
+  /** Selected range end, or `null` while no end is committed. */
+  readonly end: Date | null;
+}
 
 const HELL_DATE_PICKER_TRIGGER_RECIPE =
   'inline-flex cursor-pointer items-center rounded-hell-sm border-0 bg-transparent px-hell-1 py-0 align-middle font-[family-name:inherit] text-[13px] font-semibold leading-[var(--spacing-hell-control-sm)] text-hell-foreground transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted aria-expanded:bg-hell-surface-muted aria-expanded:text-hell-primary focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50';
@@ -1106,9 +1124,33 @@ export class HellDatePicker {
 }
 
 /**
+ * Whether two optional range dates mark the same instant. The committed model
+ * and the primitive exchange the same `Date` objects on user selections, but
+ * external writes arrive as fresh instances, so identity alone cannot decide
+ * whether a write needs to reach the primitive.
+ */
+function hellSameRangeDate(left: Date | undefined, right: Date | undefined): boolean {
+  return left && right ? left.getTime() === right.getTime() : left === right;
+}
+
+/**
  * Date range picker — same calendar surface as `hell-date-picker` but with
- * range selection. Bind two-way via `[startDate]`/`[endDate]` and listen to
- * `(startDateChange)` / `(endDateChange)`.
+ * range selection.
+ *
+ * The `value` model is the picker's one Control Value Authority for the
+ * committed range: bind it one-way (`[value]` plus `(valueChange)`), two-way
+ * (`[(value)]`), or through Angular forms — Signal Forms `[formField]` via the
+ * `FormValueControl` contract, and `formControl`/`ngModel` via Angular's
+ * built-in Signal Forms interoperability. External writes synchronize into
+ * `ng-primitives` through its public silent setters (`setStart`/`setEnd` with
+ * `{ emit: false }`) without re-emitting `(startDateChange)`/`(endDateChange)`.
+ * An in-progress selection (start picked, end pending) is interaction state,
+ * like a typed-input draft: it never reaches the model, and the model commits
+ * exactly once per completed range.
+ *
+ * The template-driven `[startDate]`/`[endDate]` bindings remain as an
+ * alternative surface for calendar-only use; do not mix them with the `value`
+ * model or a bound form on the same picker.
  */
 @Component({
   selector: 'hell-date-range-picker',
@@ -1123,7 +1165,6 @@ export class HellDatePicker {
         'ngpDateRangePickerFocusedDate:focusedDate',
         'ngpDateRangePickerMin:min',
         'ngpDateRangePickerMax:max',
-        'ngpDateRangePickerDisabled:disabled',
         'ngpDateRangePickerFirstDayOfWeek:firstDayOfWeek',
       ],
       outputs: [
@@ -1140,10 +1181,12 @@ export class HellDatePicker {
     '[attr.data-range]': '"true"',
     '[attr.data-range-complete]': 'rangeComplete() ? "" : null',
     '[attr.data-view]': 'view()',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '(focusout)': 'onFocusOut($event)',
   },
   template: PICKER_TEMPLATE,
 })
-export class HellDateRangePicker {
+export class HellDateRangePicker implements FormValueControl<HellDateRangeValue | null> {
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellDateRangePickerPart>>(undefined, { alias: 'ui' });
 
@@ -1156,14 +1199,84 @@ export class HellDateRangePicker {
   /** BCP 47 locale used to format the month label and weekday headers. Defaults to the runtime locale. */
   readonly locale = input<string | null>(null);
 
+  /**
+   * Committed date range — the one Control Value Authority. A completed user
+   * selection writes it exactly once and emits `(valueChange)`; external
+   * property, two-way, and form writes flow in without re-emitting. An
+   * in-progress selection never reaches it. Defaults to `null` (no range).
+   */
+  readonly value = model<HellDateRangeValue | null>(null);
+  /** Whether the whole picker is disabled. Also driven by bound forms. Defaults to `false`. */
+  readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Whether the picker is marked required for styling hooks. Reflected as
+   * `data-required`; also driven by a bound Signal Forms field's `required()`
+   * metadata. Required policy itself belongs to the form (`required()` schema
+   * rule or `Validators.required`). Defaults to `false`.
+   */
+  readonly required = input(false, { transform: booleanAttribute });
+
+  /**
+   * Emits when focus leaves the picker entirely. Angular forms listen to this
+   * output to mark the bound field or control as touched.
+   */
+  readonly touch = output<void>();
+
   /** Resolved accessibility labels for the date picker. */
   protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
+  private readonly rangePicker = inject(NgpDateRangePicker<Date>);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly views = hellDatePickerViews(() => this.state(), this.locale);
   /** Whether both a start and end date have been selected. */
   protected readonly rangeComplete = computed(() =>
     Boolean(this.state().startDate() && this.state().endDate()),
   );
+
+  constructor() {
+    // External value writes (property, two-way, form) synchronize into the
+    // primitive through its public silent setters; the equality guard keeps
+    // user selections (which already updated the primitive) from writing
+    // back over an in-progress follow-up selection.
+    effect(() => {
+      const state = this.state();
+      const value = this.value();
+      untracked(() => {
+        const start = value?.start ?? undefined;
+        const end = value?.end ?? undefined;
+        if (!hellSameRangeDate(state.startDate(), start)) state.setStart(start, { emit: false });
+        if (!hellSameRangeDate(state.endDate(), end)) state.setEnd(end, { emit: false });
+      });
+    });
+
+    effect(() => {
+      const state = this.state();
+      const disabled = this.disabled();
+      if (state.disabled() === disabled) return;
+      untracked(() => state.setDisabled(disabled));
+    });
+
+    // The primitive commits a range on its end-date change: the first click
+    // opens a range and a follow-up click on a completed range restarts one,
+    // both leaving the end unset — in-progress interaction state that stays
+    // out of the model. Subscribing to the end-date change alone therefore
+    // routes every completed range through the model exactly once.
+    const endDateSub = this.rangePicker.endDateChange.subscribe(() => {
+      const state = this.state();
+      const start = state.startDate();
+      const end = state.endDate();
+      if (start && end) this.value.set({ start, end });
+    });
+    this.destroyRef.onDestroy(() => endDateSub.unsubscribe());
+  }
+
+  /** Emits the `touch` output once focus leaves the picker entirely. */
+  protected onFocusOut(event: FocusEvent): void {
+    if (!containsNode(this.host.nativeElement, event.relatedTarget)) {
+      this.touch.emit();
+    }
+  }
 
   /** Formatted month and year heading for the currently focused date. */
   protected readonly label = computed(() =>

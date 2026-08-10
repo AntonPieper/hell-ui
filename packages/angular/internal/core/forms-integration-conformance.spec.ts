@@ -16,6 +16,7 @@ import { By } from '@angular/platform-browser';
 import { HellCheckbox } from '../../checkbox/checkbox';
 import { HELL_COMBOBOX_IMPORTS } from '../../combobox/combobox';
 import { HellDateInput } from '../../date-input/date-input';
+import { HellDateRangePicker, type HellDateRangeValue } from '../../date-picker/date-picker';
 import {
   HELL_CODE_EDITOR_RUNTIME_FACTORY,
   HellCodeEditor,
@@ -559,6 +560,38 @@ function time(hour: number, minute = 0, second = 0): HellTimeValue {
   return { hour, minute, second };
 }
 
+// ---------------------------------------------------------------------------
+// Date range picker calendar helpers
+// ---------------------------------------------------------------------------
+
+// The calendar opens on the current month (its focused date defaults to
+// "now" and the value sync deliberately never moves it), so the sample
+// ranges are anchored there. Day numbers stay below 28 so every month has
+// them; the buttons come from the grid itself, which serves local-midnight
+// dates.
+const rangeCalendarMonth = new Date();
+
+function rangeDay(day: number): Date {
+  return new Date(rangeCalendarMonth.getFullYear(), rangeCalendarMonth.getMonth(), day);
+}
+
+function rangeDayButton(ctx: ConformanceContext, day: number): HTMLButtonElement {
+  const match = [
+    ...ctx.root.querySelectorAll<HTMLButtonElement>('button[ngpDatePickerDateButton]'),
+  ].find(
+    (candidate) =>
+      candidate.textContent?.trim() === String(day) &&
+      !candidate.hasAttribute('data-outside-month'),
+  );
+  if (!match) throw new Error(`Expected in-month day button ${day}.`);
+  return match;
+}
+
+function clickRangeDay(ctx: ConformanceContext, day: number): void {
+  rangeDayButton(ctx, day).click();
+  ctx.fixture.detectChanges();
+}
+
 function formatTime(value: HellTimeValue | null): string {
   if (!value) return '';
   const pad = (part: number): string => part.toString().padStart(2, '0');
@@ -918,6 +951,45 @@ const REGISTRY: readonly RegisteredConformanceEntry[] = [
       // own bounds, including the stable native attributes.
       expect(query(ctx.root, 'input[hellDateInput]').getAttribute('min')).toBe('2026-04-01');
       expect(query(ctx.root, 'input[hellDateInput]').getAttribute('max')).toBe('2026-04-30');
+    },
+  }),
+
+  conformanceEntry<HellDateRangeValue>({
+    name: 'date range picker',
+    signalFormsRole: 'FormValueControl',
+    imports: [HellDateRangePicker],
+    template: (control) => `<hell-date-range-picker ${control} />`,
+    valueProp: 'value',
+    changeOutput: 'valueChange',
+    initial: { start: rangeDay(3), end: rangeDay(5) },
+    programmatic: { start: rangeDay(8), end: rangeDay(9) },
+    commitResult: () => ({ start: rangeDay(10), end: rangeDay(12) }),
+    // With a committed range in place, the first click restarts the range
+    // (interaction state, no commit); the second click completes it and
+    // commits the model exactly once.
+    commit: (ctx) => {
+      clickRangeDay(ctx, 10);
+      clickRangeDay(ctx, 12);
+    },
+    touch: (ctx) => focusoutToNull(ctx, 'hell-date-range-picker'),
+    expectValue: (ctx, value) => {
+      expect(rangeDayButton(ctx, value.start!.getDate()).hasAttribute('data-range-start')).toBe(
+        true,
+      );
+      expect(rangeDayButton(ctx, value.end!.getDate()).hasAttribute('data-range-end')).toBe(true);
+    },
+    expectDisabled: (ctx) => {
+      expect(rangeDayButton(ctx, 10).disabled).toBe(true);
+      expect(rangeDayButton(ctx, 10).hasAttribute('data-disabled')).toBe(true);
+    },
+    commitWhileDisabledIsIgnored: true,
+    signalSchema: (path) => {
+      requiredSchema(path.value);
+    },
+    expectSignalMetadata: ({ ctx, field }) => {
+      // The field's required() metadata drives the reserved required input.
+      expect(query(ctx.root, 'hell-date-range-picker').getAttribute('data-required')).toBe('true');
+      expect(field().invalid()).toBe(false);
     },
   }),
 
