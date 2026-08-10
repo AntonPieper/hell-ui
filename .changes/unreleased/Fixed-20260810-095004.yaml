@@ -1,0 +1,3 @@
+kind: Fixed
+body: 'A hell-tanstack-table nested inside a virtual-rows shell''s projected toolbar could hijack the outer shell''s measurements: the nested table came first in document order, so its width drove the virtual row width and the virtualizer could fall back to the nested scrollport. Virtual rows now reaches its scrollport and table through the direct host > scrollport > table path the shell template guarantees, so only the owning shell''s elements are measured.'
+time: 2026-08-10T09:50:04.290544+02:00

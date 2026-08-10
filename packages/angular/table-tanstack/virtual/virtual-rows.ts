@@ -70,7 +70,7 @@ export class HellTanStackVirtualRows<
   });
 
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly version = signal(0);
   private scrollport: HTMLElement | null = null;
   private body: HTMLElement | null = null;
@@ -88,7 +88,7 @@ export class HellTanStackVirtualRows<
     count: 0,
     getScrollElement: () =>
       this.scrollport ??
-      (this.host.querySelector('[data-hell-table-shell-scrollport]') as HTMLElement | null),
+      this.host.querySelector<HTMLElement>(':scope > [data-hell-table-shell-scrollport]'),
     estimateSize: () => this.estimateRowSize(),
     overscan: this.overscan(),
     scrollToFn: elementScroll,
@@ -225,8 +225,21 @@ export class HellTanStackVirtualRows<
     this.bump();
   }
 
+  /**
+   * The shell `<table>` this directive owns, reached through the direct
+   * host > scrollport > table path the shell template guarantees. A descendant
+   * query would not do: projected content — a toolbar renders before the
+   * scrollport — may nest another shell, whose table would then win document
+   * order and drive this table's row width from a foreign layout.
+   */
+  private shellTable(): HTMLElement | null {
+    return this.host.querySelector<HTMLElement>(
+      ':scope > [data-hell-table-shell-scrollport] > [data-hell-table-shell-table]',
+    );
+  }
+
   private observeTableWidth(): void {
-    const table = this.host.querySelector('[data-hell-table-shell-table]') as HTMLElement | null;
+    const table = this.shellTable();
     if (table) this.observeWidthElement(table);
   }
 
@@ -242,7 +255,7 @@ export class HellTanStackVirtualRows<
   }
 
   private syncRowWidth(): void {
-    const table = this.host.querySelector('[data-hell-table-shell-table]') as HTMLElement | null;
+    const table = this.shellTable();
     const tableWidth = table?.getBoundingClientRect().width ?? 0;
     const scrollportWidth = this.scrollport?.clientWidth ?? 0;
     const width = Math.max(tableWidth, scrollportWidth);
