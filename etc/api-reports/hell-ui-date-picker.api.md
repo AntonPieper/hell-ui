@@ -4,10 +4,11 @@
 
 ```ts
 
+import * as _angular_core from '@angular/core';
+import { FormValueControl } from '@angular/forms/signals';
 import { HellLabels } from 'hell-ui/core';
 import { HellUi } from 'hell-ui/core';
 import { HellUiInput } from 'hell-ui/core';
-import * as i0 from '@angular/core';
 import * as i1 from 'ng-primitives/date-picker';
 import { InjectionToken } from '@angular/core';
 import { Signal } from '@angular/core';
@@ -24,7 +25,7 @@ export class HellDatePicker {
         readonly type: "literal" | "month" | "year";
         readonly value: string;
     }[]>;
-    readonly locale: i0.InputSignal<null | string>;
+    readonly locale: _angular_core.InputSignal<null | string>;
     protected readonly nextPageDisabled: Signal<boolean>;
     protected readonly nextPageLabel: Signal<string>;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
@@ -48,14 +49,14 @@ export class HellDatePicker {
     protected readonly previousPageLabel: Signal<string>;
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;
-    readonly ui: i0.InputSignal<HellUiInput<HellDatePickerPart>>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     protected readonly view: Signal<"day" | "month" | "year">;
     protected readonly weekdayLabels: Signal<{
         readonly abbr: string;
         readonly narrow: string;
     }[]>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellDatePicker, "hell-date-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDatePicker; inputs: { "ngpDatePickerDate": "date"; "ngpDatePickerFocusedDate": "focusedDate"; "ngpDatePickerMin": "min"; "ngpDatePickerMax": "max"; "ngpDatePickerDisabled": "disabled"; "ngpDatePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDatePickerDateChange": "dateChange"; "ngpDatePickerFocusedDateChange": "focusedDateChange"; }; }]>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellDatePicker, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDatePicker, "hell-date-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDatePicker; inputs: { "ngpDatePickerDate": "date"; "ngpDatePickerFocusedDate": "focusedDate"; "ngpDatePickerMin": "min"; "ngpDatePickerMax": "max"; "ngpDatePickerDisabled": "disabled"; "ngpDatePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDatePickerDateChange": "dateChange"; "ngpDatePickerFocusedDateChange": "focusedDateChange"; }; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePicker, never>;
 }
 
 // @public
@@ -76,8 +77,8 @@ export class HellDatePickerNextYear {
     protected readonly disabled: Signal<boolean>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected shift(months: number): void;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellDatePickerNextYear, "button[hellDatePickerNextYear]", never, {}, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellDatePickerNextYear, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerNextYear, "button[hellDatePickerNextYear]", never, {}, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerNextYear, never>;
 }
 
 // @public
@@ -89,25 +90,28 @@ export class HellDatePickerPreviousYear {
     protected readonly disabled: Signal<boolean>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected shift(months: number): void;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellDatePickerPreviousYear, "button[hellDatePickerPreviousYear]", never, {}, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellDatePickerPreviousYear, never>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerPreviousYear, "button[hellDatePickerPreviousYear]", never, {}, {}, never, never, true, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerPreviousYear, never>;
 }
 
 // @public
 export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
 // @public
-export class HellDateRangePicker {
+export class HellDateRangePicker implements FormValueControl<HellDateRangeValue | null> {
+    constructor();
     protected readonly activeOptionIndex: Signal<null | number>;
+    readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly label: Signal<string>;
     protected readonly labels: HellLabels<HellDatePickerLabels>;
     protected readonly labelSegments: Signal<{
         readonly type: "literal" | "month" | "year";
         readonly value: string;
     }[]>;
-    readonly locale: i0.InputSignal<null | string>;
+    readonly locale: _angular_core.InputSignal<null | string>;
     protected readonly nextPageDisabled: Signal<boolean>;
     protected readonly nextPageLabel: Signal<string>;
+    protected onFocusOut(event: FocusEvent): void;
     protected readonly onPanelKeydown: (event: KeyboardEvent) => void;
     protected readonly onTriggerKeydown: (event: KeyboardEvent) => void;
     protected readonly pagePanel: (delta: number) => void;
@@ -128,16 +132,19 @@ export class HellDateRangePicker {
     protected readonly previousPageDisabled: Signal<boolean>;
     protected readonly previousPageLabel: Signal<string>;
     protected readonly rangeComplete: Signal<boolean>;
+    readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly selectOption: (value: number) => void;
     protected readonly toggleView: (next: "month" | "year") => void;
-    readonly ui: i0.InputSignal<HellUiInput<HellDatePickerPart>>;
+    readonly touch: _angular_core.OutputEmitterRef<void>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
+    readonly value: _angular_core.ModelSignal<HellDateRangeValue | null>;
     protected readonly view: Signal<"day" | "month" | "year">;
     protected readonly weekdayLabels: Signal<{
         readonly abbr: string;
         readonly narrow: string;
     }[]>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellDateRangePicker, "hell-date-range-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDateRangePicker; inputs: { "ngpDateRangePickerStartDate": "startDate"; "ngpDateRangePickerEndDate": "endDate"; "ngpDateRangePickerFocusedDate": "focusedDate"; "ngpDateRangePickerMin": "min"; "ngpDateRangePickerMax": "max"; "ngpDateRangePickerDisabled": "disabled"; "ngpDateRangePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDateRangePickerStartDateChange": "startDateChange"; "ngpDateRangePickerEndDateChange": "endDateChange"; "ngpDateRangePickerFocusedDateChange": "focusedDateChange"; }; }]>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellDateRangePicker, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDateRangePicker, "hell-date-range-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "touch": "touch"; }, never, never, true, [{ directive: typeof i1.NgpDateRangePicker; inputs: { "ngpDateRangePickerStartDate": "startDate"; "ngpDateRangePickerEndDate": "endDate"; "ngpDateRangePickerFocusedDate": "focusedDate"; "ngpDateRangePickerMin": "min"; "ngpDateRangePickerMax": "max"; "ngpDateRangePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDateRangePickerStartDateChange": "startDateChange"; "ngpDateRangePickerEndDateChange": "endDateChange"; "ngpDateRangePickerFocusedDateChange": "focusedDateChange"; }; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateRangePicker, never>;
 }
 
 // @public
@@ -145,6 +152,12 @@ export type HellDateRangePickerPart = HellDatePickerPart;
 
 // @public
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
+
+// @public
+export interface HellDateRangeValue {
+    readonly end: Date | null;
+    readonly start: Date | null;
+}
 
 // (No @packageDocumentation comment for this package)
 

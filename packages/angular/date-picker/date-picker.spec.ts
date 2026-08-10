@@ -1,11 +1,14 @@
 import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormField, form, required as requiredSchema } from '@angular/forms/signals';
 
 import {
   HellDatePicker,
   HellDateRangePicker,
   type HellDatePickerUi,
   type HellDateRangePickerUi,
+  type HellDateRangeValue,
 } from './date-picker';
 import { expectUiRouting, sortClasses } from '../spec-helpers';
 
@@ -49,6 +52,57 @@ class DateRangePickerHost {
   readonly startDate = signal<Date | undefined>(new Date(2026, 10, 24));
   readonly endDate = signal<Date | undefined>(new Date(2027, 0, 2));
   readonly ui = signal<string | HellDateRangePickerUi | undefined>(undefined);
+}
+
+@Component({
+  imports: [HellDateRangePicker],
+  template: `
+    <hell-date-range-picker
+      [(value)]="value"
+      [disabled]="disabled()"
+      (valueChange)="values.push($event)"
+      (startDateChange)="startDates.push($event)"
+      (endDateChange)="endDates.push($event)"
+      (touch)="touches.push(true)"
+    />
+  `,
+})
+class DateRangePickerValueHost {
+  readonly value = signal<HellDateRangeValue | null>(null);
+  readonly disabled = signal(false);
+  readonly values: Array<HellDateRangeValue | null> = [];
+  readonly startDates: Array<Date | undefined> = [];
+  readonly endDates: Array<Date | undefined> = [];
+  readonly touches: boolean[] = [];
+}
+
+@Component({
+  imports: [ReactiveFormsModule, HellDateRangePicker],
+  template: `
+    <hell-date-range-picker
+      [formControl]="control"
+      (valueChange)="values.push($event)"
+      (startDateChange)="startDates.push($event)"
+      (endDateChange)="endDates.push($event)"
+    />
+  `,
+})
+class DateRangePickerFormSyncHost {
+  readonly control = new FormControl<HellDateRangeValue | null>(null);
+  readonly values: Array<HellDateRangeValue | null> = [];
+  readonly startDates: Array<Date | undefined> = [];
+  readonly endDates: Array<Date | undefined> = [];
+}
+
+@Component({
+  imports: [FormField, HellDateRangePicker],
+  template: `<hell-date-range-picker [formField]="bookingForm.range" />`,
+})
+class DateRangePickerFieldHost {
+  readonly model = signal<{ range: HellDateRangeValue | null }>({ range: null });
+  readonly bookingForm = form(this.model, (path) => {
+    requiredSchema(path.range);
+  });
 }
 
 describe('HellDatePicker', () => {
@@ -668,6 +722,161 @@ describe('HellDatePicker', () => {
   });
 });
 
+describe('HellDateRangePicker forms contract', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  it('commits a completed range once and keeps in-progress selections out of the model', async () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerValueHost);
+    const host = fixture.componentInstance;
+    await settle(fixture);
+
+    // The first click opens the range: interaction state only, no commit.
+    dayButton(fixture.nativeElement, 10).click();
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 10).hasAttribute('data-range-start')).toBe(true);
+    expect(host.value()).toBeNull();
+    expect(host.values).toEqual([]);
+    expect(host.startDates).toEqual([new Date(2026, 3, 10)]);
+
+    // The second click completes the range and commits the model exactly once.
+    dayButton(fixture.nativeElement, 15).click();
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 15).hasAttribute('data-range-end')).toBe(true);
+    const committed = { start: new Date(2026, 3, 10), end: new Date(2026, 3, 15) };
+    expect(host.value()).toEqual(committed);
+    expect(host.values).toEqual([committed]);
+
+    // A follow-up click restarts the range: the calendar tracks it, the
+    // committed model keeps the last completed range.
+    dayButton(fixture.nativeElement, 20).click();
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 20).hasAttribute('data-range-start')).toBe(true);
+    expect(dayButton(fixture.nativeElement, 10).hasAttribute('data-range-start')).toBe(false);
+    expect(host.value()).toEqual(committed);
+    expect(host.values).toEqual([committed]);
+  });
+
+  it('keeps external form writes silent and reflects them on the calendar', async () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerFormSyncHost);
+    const host = fixture.componentInstance;
+    await settle(fixture);
+
+    // A form write flows into the primitive through its public silent setters
+    // (`setStart`/`setEnd` with `{ emit: false }`): the calendar reflects it,
+    // but neither `valueChange` nor the range change outputs re-emit a value
+    // the form already knows about.
+    host.control.setValue({ start: new Date(2026, 3, 5), end: new Date(2026, 3, 8) });
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 5).hasAttribute('data-range-start')).toBe(true);
+    expect(dayButton(fixture.nativeElement, 8).hasAttribute('data-range-end')).toBe(true);
+    expect(dayButton(fixture.nativeElement, 6).hasAttribute('data-range-between')).toBe(true);
+    expect(host.values).toEqual([]);
+    expect(host.startDates).toEqual([]);
+    expect(host.endDates).toEqual([]);
+
+    host.control.disable();
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 5).disabled).toBe(true);
+    expect(dayButton(fixture.nativeElement, 5).hasAttribute('data-disabled')).toBe(true);
+    expect(button(fixture.nativeElement, 'Previous year').disabled).toBe(true);
+  });
+
+  it('synchronizes the disabled input into the calendar and gates selection', async () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerValueHost);
+    const host = fixture.componentInstance;
+    host.disabled.set(true);
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 10).disabled).toBe(true);
+    expect(dayButton(fixture.nativeElement, 10).hasAttribute('data-disabled')).toBe(true);
+
+    dayButton(fixture.nativeElement, 10).click();
+    await settle(fixture);
+
+    expect(host.value()).toBeNull();
+    expect(host.startDates).toEqual([]);
+
+    host.disabled.set(false);
+    await settle(fixture);
+
+    expect(dayButton(fixture.nativeElement, 10).disabled).toBe(false);
+    expect(dayButton(fixture.nativeElement, 10).hasAttribute('data-disabled')).toBe(false);
+  });
+
+  it('emits touch only when focus leaves the picker entirely', async () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerValueHost);
+    const host = fixture.componentInstance;
+    await settle(fixture);
+    const picker = rangePicker(fixture.nativeElement);
+
+    // Focus moving between the picker's own controls is not a touch boundary.
+    picker.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: dayButton(fixture.nativeElement, 10),
+      }),
+    );
+    await settle(fixture);
+    expect(host.touches).toEqual([]);
+
+    picker.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    await settle(fixture);
+    expect(host.touches).toEqual([true]);
+  });
+
+  it('integrates with a Signal Forms field: metadata, drafts, and completed commits', async () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerFieldHost);
+    const host = fixture.componentInstance;
+    await settle(fixture);
+
+    // The field's required() metadata drives the reserved required input.
+    expect(rangePicker(fixture.nativeElement).getAttribute('data-required')).toBe('true');
+    expect(host.bookingForm.range().invalid()).toBe(true);
+
+    // An in-progress selection is a draft: the field stays pristine.
+    dayButton(fixture.nativeElement, 10).click();
+    await settle(fixture);
+
+    expect(host.bookingForm.range().value()).toBeNull();
+    expect(host.bookingForm.range().dirty()).toBe(false);
+
+    dayButton(fixture.nativeElement, 15).click();
+    await settle(fixture);
+
+    expect(host.bookingForm.range().value()).toEqual({
+      start: new Date(2026, 3, 10),
+      end: new Date(2026, 3, 15),
+    });
+    expect(host.bookingForm.range().dirty()).toBe(true);
+    expect(host.bookingForm.range().invalid()).toBe(false);
+    expect(host.bookingForm.range().touched()).toBe(false);
+
+    rangePicker(fixture.nativeElement).dispatchEvent(
+      new FocusEvent('focusout', { bubbles: true, relatedTarget: null }),
+    );
+    await settle(fixture);
+    expect(host.bookingForm.range().touched()).toBe(true);
+  });
+});
+
 function label(root: HTMLElement): string {
   const element = labelElement(root);
   return element.textContent?.trim() ?? '';
@@ -745,6 +954,16 @@ function activeIndex(root: HTMLElement): number {
 
 function pressPanelKey(root: HTMLElement, key: string): void {
   panel(root).dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+}
+
+function dayButton(root: HTMLElement, day: number): HTMLButtonElement {
+  const match = dateButtons(root).find(
+    (candidate) =>
+      candidate.textContent?.trim() === String(day) &&
+      !candidate.hasAttribute('data-outside-month'),
+  );
+  if (!match) throw new Error(`Expected in-month day button ${day}.`);
+  return match;
 }
 
 function dateButtons(root: HTMLElement): HTMLButtonElement[] {
