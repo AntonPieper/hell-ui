@@ -131,6 +131,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, package-consumer-plan]
     timeout-minutes: 10
+    # The fixture smoke loads the built consumer app in headless chromium.
+    # Like the E2E shards, the job runs directly in the pinned Playwright
+    # image: chromium and its system libraries are simply present, so there is
+    # no `playwright install --with-deps` step whose apt downloads can stall
+    # the job (they repeatedly ate the whole timeout before this). Bump the
+    # tag together with the E2E job below and the `@playwright/test` catalog
+    # entry.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     strategy:
       fail-fast: false
       matrix:
@@ -161,18 +172,6 @@ jobs:
         with:
           name: package-tarball
           path: artifacts/package
-
-      # The fixture smoke loads the built consumer app in headless chromium.
-      # The browser download is cached; `playwright install` skips anything
-      # already present and still apt-installs system deps each run.
-      - name: Restore Playwright browser cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright chromium
-        run: pnpm run ci:playwright:chromium
 
       - name: Consumer fixture
         env:
@@ -343,8 +342,9 @@ jobs:
     # The tests run directly in the pinned Playwright image instead of
     # docker-running it from inside a VM job: the browsers are simply present,
     # so there is no image tar to cache, load, or save per shard. Bump the tag
-    # together with the `@playwright/test` catalog entry (and
-    # tools/ci/e2e-image, which derives from the same base).
+    # together with the package-consumer job above and the `@playwright/test`
+    # catalog entry (and tools/ci/e2e-image, which derives from the same
+    # base).
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
     env:
