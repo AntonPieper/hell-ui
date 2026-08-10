@@ -43,7 +43,53 @@ export function collectReleaseWorkflowErrors({ root }) {
   checkEvidenceOnlyDispatch(workflow, gate, errors);
   checkImmutabilityGate(workflow, errors);
   checkDriftDetectionOnly(drift, root, errors);
+  checkToolchainPins(workflow, root, errors);
   return errors;
+}
+
+// The publish jobs run on the downloaded tarball artifact without a checkout,
+// so pnpm/action-setup cannot read the packageManager pin from package.json —
+// they need an explicit version, and an explicit version anywhere in this
+// workflow must equal the root pin. Both halves learned from the v0.4.0 tag
+// run: removing the "redundant" pins left the checkout-free jobs with no pnpm
+// version at all, and keeping them without this check had already let them
+// drift silently.
+function checkToolchainPins(workflow, root, errors) {
+  const rootManifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  const pinMatch = /^pnpm@([^+]+)/.exec(String(rootManifest.packageManager ?? ''));
+  if (!pinMatch) {
+    errors.push(
+      'package.json must pin packageManager to pnpm@<version> for the publish jobs to mirror.',
+    );
+    return;
+  }
+  const pinnedVersion = pinMatch[1];
+  for (const [id, definition] of Object.entries(workflow.jobs ?? {})) {
+    const steps = Array.isArray(definition?.steps) ? definition.steps : [];
+    let sawCheckout = false;
+    for (const step of steps) {
+      const uses = typeof step?.uses === 'string' ? step.uses : '';
+      if (uses.startsWith('actions/checkout@')) sawCheckout = true;
+      if (!uses.startsWith('pnpm/action-setup@')) continue;
+      const version = step?.with?.version;
+      if (version === undefined) {
+        if (!sawCheckout) {
+          errors.push(
+            `${releaseWorkflowPath} job \`${id}\` sets up pnpm without a checkout, so ` +
+              'action-setup cannot read the packageManager pin; the step must carry an ' +
+              'explicit version.',
+          );
+        }
+        continue;
+      }
+      if (String(version) !== pinnedVersion) {
+        errors.push(
+          `${releaseWorkflowPath} job \`${id}\` pins pnpm ${version}, but package.json pins ` +
+            `pnpm@${pinnedVersion}; the copies must move together.`,
+        );
+      }
+    }
+  }
 }
 
 function readWorkflow(root, path, errors) {
