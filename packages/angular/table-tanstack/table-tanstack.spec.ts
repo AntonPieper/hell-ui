@@ -230,6 +230,51 @@ class VirtualRowsHost {
   }));
 }
 
+/**
+ * Nests a second shell inside the virtual shell's projected toolbar. The
+ * toolbar renders before the scrollport, so in document order the nested
+ * shell's table is the first `[data-hell-table-shell-table]` under the outer
+ * host — the element an unscoped descendant query would measure the virtual
+ * row width from.
+ */
+@Component({
+  selector: 'hell-test-nested-toolbar-virtual-host',
+  standalone: true,
+  imports: [
+    HellTanStackTable,
+    HellTanStackVirtualRows,
+    HellTableShellEmpty,
+    HellTableShellToolbar,
+  ],
+  template: `
+    <hell-tanstack-table [table]="table" hellTanStackVirtualRows>
+      <div hellTableShellToolbar>
+        <hell-tanstack-table [table]="innerTable">
+          <ng-template hellTableShellEmpty>No rows</ng-template>
+        </hell-tanstack-table>
+      </div>
+      <ng-template hellTableShellEmpty>No rows</ng-template>
+    </hell-tanstack-table>
+  `,
+})
+class NestedToolbarVirtualRowsHost {
+  readonly columns: ColumnDef<typeof features, Person>[] = [{ accessorKey: 'name', header: 'Name' }];
+
+  readonly table = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+  }));
+
+  readonly innerTable = injectTable(() => ({
+    features,
+    data: people,
+    columns: this.columns,
+    getRowId: (row) => row.id,
+  }));
+}
+
 @Component({
   selector: 'hell-test-filter-host',
   standalone: true,
@@ -496,6 +541,7 @@ describe('Hell TanStack table shell', () => {
         ConflictHost,
         MissingStatusHost,
         VirtualRowsHost,
+        NestedToolbarVirtualRowsHost,
         FilterHost,
         ColumnFilterHost,
         StyledShellHost,
@@ -627,6 +673,33 @@ describe('Hell TanStack table shell', () => {
         root.querySelector('[data-hell-table-virtual-body]') as HTMLElement | null
       )?.style.getPropertyValue('--hell-table-virtual-total-size'),
     ).toBe('');
+  });
+
+  it('measures the virtual row width from the owning shell table, not a nested one', async () => {
+    const fixture = TestBed.createComponent(NestedToolbarVirtualRowsHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const outerHost = query(root, 'hell-tanstack-table');
+
+    const tables = [...outerHost.querySelectorAll('[data-hell-table-shell-table]')];
+    expect(tables).toHaveLength(2);
+    const [ownTable] = tables.filter((table) => table.closest('hell-tanstack-table') === outerHost);
+    const [nestedTable] = tables.filter((table) => table !== ownTable);
+    // The nested shell's table must come first in document order — that is the
+    // element an unscoped descendant query would pick up.
+    expect(tables[0]).toBe(nestedTable);
+
+    // Own table rendered at a plausible width, the nested one at a poisoned
+    // width that would be unmistakable in the row-width variable.
+    vi.spyOn(ownTable, 'getBoundingClientRect').mockReturnValue({ width: 720 } as DOMRect);
+    vi.spyOn(nestedTable, 'getBoundingClientRect').mockReturnValue({ width: 3600 } as DOMRect);
+
+    // The scrollport connect hook re-measures in a microtask; flushing it here
+    // lands that measurement on the mocked rects.
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(outerHost.style.getPropertyValue('--hell-table-virtual-row-width')).toBe('720px');
   });
 
   it('publishes the TanStack column size and matching grow factor on body cells', () => {
