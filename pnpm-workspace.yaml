@@ -35,10 +35,11 @@ catalog:
   "@microsoft/api-extractor": "^7.58.12"
   "@ng-icons/core": "^34.0.0"
   "@ng-icons/font-awesome": "^34.0.0"
-  # Pinned to the minor the CI browser images are built for: the GitHub E2E job
-  # runs mcr.microsoft.com/playwright:v1.62.1-noble and GitLab builds
-  # e2e:v1.62.1-node22. A resolution past 1.62.x installs a browser revision
-  # neither image carries and every E2E test fails to launch, so bumping
+  # Pinned to the minor the CI browser images are built for: the GitHub E2E and
+  # package-consumer jobs run mcr.microsoft.com/playwright:v1.62.1-noble and
+  # GitLab builds e2e:v1.62.1-node22. A resolution past 1.62.x installs a
+  # browser revision neither image carries and every E2E test fails to launch,
+  # so bumping
   # Playwright means moving both images in the same change. Tilde, not
   # caret: a caret lets a lock refresh cross the coupling silently.
   "@playwright/test": "~1.62.1"

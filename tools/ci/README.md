@@ -176,11 +176,12 @@ Jobs publish these shared artifacts from the repository root:
 - `test-results/playwright-html/`
 - `test-results/playwright/` (GitHub only, see below)
 
-Caches hold only the pnpm store and the Angular compiler cache — plus, on
-GitHub, the consumer jobs' Playwright chromium download. The GitLab browser
-jobs (the E2E tiers and `package-consumer`) run the derived image with the
-browsers baked in at `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright`, so there is no
-chromium download and no browser cache at all. The pnpm cache is read-only for
+Caches hold only the pnpm store and the Angular compiler cache. The browser
+jobs (the E2E tiers and `package-consumer`) run a Playwright image with the
+browsers baked in at `PLAYWRIGHT_BROWSERS_PATH=/ms-playwright` — GitHub uses
+the upstream `mcr.microsoft.com/playwright` image, GitLab the derived
+`e2e` image — so there is no chromium download, no `--with-deps` apt install,
+and no browser cache at all. The pnpm cache is read-only for
 jobs that only install the workspace; `build` holds the one pull-push copy per
 pipeline, and `package-consumer` keeps pull-push because fixture installs pull
 packages the workspace lockfile does not cover.
