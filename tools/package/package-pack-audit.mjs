@@ -10,7 +10,6 @@ import {
   entrypointStyleExports,
   packageExportPath,
 } from '../entrypoints/entrypoint-manifest.mjs';
-import { readWorkspaceCatalog } from '../build/workspace-versions.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const angularPackageName = 'hell-ui';
@@ -389,63 +388,20 @@ function expectedPackageFiles() {
 }
 
 function checkPackagePeers(packageJson, failures) {
-  const peers = packageJson.peerDependencies ?? {};
-  const peerNames = Object.keys(peers);
-  const optionalPeers = optionalPeerNames(packageJson);
+  const peerNames = Object.keys(packageJson.peerDependencies ?? {});
 
-  for (const [metaPeer, meta] of Object.entries(packageJson.peerDependenciesMeta ?? {})) {
-    if (!peers[metaPeer]) {
-      failures.push(`${packageJson.name} package.json has peerDependenciesMeta for undeclared ${metaPeer}`);
-    }
-    if (meta?.optional !== true) {
-      failures.push(`${packageJson.name} peerDependenciesMeta for ${metaPeer} must set optional true`);
-    }
-  }
-
-  const expectedOptionalPeers = [
-    ...packagePeerGroups.style,
-    ...packagePeerGroups.router,
-    ...packagePeerGroups.icons,
-    ...packagePeerGroups.fontAwesome,
-    ...packagePeerGroups.tanStackTable,
-    ...packagePeerGroups.tanStackVirtual,
-    ...packagePeerGroups.codeEditor,
-    ...packagePeerGroups.pdfViewer,
-  ];
-  const expectedPeers = [...packagePeerGroups.core, ...expectedOptionalPeers];
-  assertSameSet('hell-ui peerDependencies', expectedPeers, peerNames, failures);
-  assertSameSet(
-    'hell-ui required peerDependencies',
-    packagePeerGroups.core,
-    requiredPeerNames(packageJson),
-    failures,
-  );
-  assertSameSet(
-    'hell-ui optional peerDependenciesMeta',
-    expectedOptionalPeers,
-    [...optionalPeers],
-    failures,
-  );
-
-  const workspaceCatalog = readWorkspaceCatalog();
-  if (peers['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
+  // The packed manifest declares exactly the required core peers. The
+  // integration groups above are install sets the fixtures prove, not peers:
+  // the distribution registry serves npm abbreviated metadata without
+  // peerDependenciesMeta, so a declared-but-optional peer reads as required
+  // to every installer. Optional means undeclared.
+  assertSameSet('hell-ui peerDependencies', packagePeerGroups.core, peerNames, failures);
+  if (Object.keys(packageJson.peerDependenciesMeta ?? {}).length) {
     failures.push(
-      `hell-ui must pin the pdfjs-dist optional peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+      `${packageJson.name} package.json declares peerDependenciesMeta, which the distribution ` +
+        'registry never serves; optional integrations stay undeclared instead',
     );
   }
-}
-
-function optionalPeerNames(packageJson) {
-  return new Set(
-    Object.entries(packageJson.peerDependenciesMeta ?? {})
-      .filter(([, meta]) => meta?.optional === true)
-      .map(([peer]) => peer),
-  );
-}
-
-function requiredPeerNames(packageJson) {
-  const optionalPeers = optionalPeerNames(packageJson);
-  return Object.keys(packageJson.peerDependencies ?? {}).filter((peer) => !optionalPeers.has(peer));
 }
 
 function expectedCodeExportKeys() {

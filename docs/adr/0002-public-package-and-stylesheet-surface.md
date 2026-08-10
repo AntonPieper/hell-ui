@@ -57,8 +57,8 @@ Logical Package Entry Points remain the canonical TypeScript API:
 - Do not add root or Module Category component barrels.
 - Do not treat a barrel import as the primary tree-shaking mechanism. ESM and
   accurate `sideEffects` metadata provide code tree-shaking; narrow entrypoints
-  additionally preserve lazy chunks, development builds, optional peers, and
-  API ownership.
+  additionally preserve lazy chunks, development builds, optional integrations
+  (ADR 0006), and API ownership.
 - Treat `hell-ui/internal/*` as private implementation paths, not Package Entry
   Points. They may ship as resolvable Angular Package Format subpaths when
   cross-entrypoint linking requires it, but the `internal` prefix, internal

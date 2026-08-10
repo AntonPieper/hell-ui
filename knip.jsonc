@@ -7,7 +7,8 @@
       "entry": [
         "tools/merge-state/decide-mr-state.mjs",
         "tools/policy/gate-secret-detection.mjs",
-        "tools/release/gitlab-release-projection.mjs"
+        "tools/release/gitlab-release-projection.mjs",
+        "tools/release/registry-consumer-probe.mjs"
       ],
       // Consumer fixtures are standalone projects compiled against the packed
       // tarball by tools/package/check-consumer-fixtures.mjs, not repo source.
@@ -25,8 +26,18 @@
     },
     "apps/docs": {
       "ignore": ["src/styles.css", "src/types/raw.d.ts"],
-      // The private source condition resolves Hell sources from this workspace.
-      "ignoreDependencies": ["tailwind-merge"]
+      "ignoreDependencies": [
+        // The private source condition resolves Hell sources from this workspace.
+        "tailwind-merge",
+        // Undeclared integrations (ADR 0006): the docs app is a consumer, so
+        // it installs what its imported hell-ui entry points use even when it
+        // never imports these directly itself.
+        "@codemirror/commands",
+        "@codemirror/language",
+        "@lezer/highlight",
+        "@tanstack/virtual-core",
+        "pdfjs-dist"
+      ]
     },
     "packages/angular": {
       // Required to compile ng-primitives' undeclared router import.
