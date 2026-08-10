@@ -191,6 +191,38 @@ const fixtures = [
     needle: 'resource_group: release',
   },
   {
+    // A renamed consumer probe removes the publication's adopter-side
+    // evidence while the release machinery still looks complete.
+    name: 'a renamed consumer probe leaves publications unverified',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) => text.replace('\nrelease:verify-consumer:\n', '\nrelease:verify-consumer-quarantine:\n'),
+    needle: 'required job "release:verify-consumer"',
+  },
+  {
+    // A probe that needs only the approval gate runs before the upload it
+    // exists to verify.
+    name: 'a consumer probe slipping ahead of the publish',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) =>
+      text.replace(
+        '  needs:\n    - release:publish\n  script:\n    - node tools/release/registry-consumer-probe.mjs\n',
+        '  needs:\n    - release:approval\n  script:\n    - node tools/release/registry-consumer-probe.mjs\n',
+      ),
+    needle: 'Job "release:verify-consumer" must need exactly',
+  },
+  {
+    // A probe holding the release resource group serializes a read against
+    // the projection's write and delays the release for no protection.
+    name: 'a consumer probe holding the release write lock',
+    file: '.gitlab/ci/release.yml',
+    mutate: (text) =>
+      text.replace(
+        'release:verify-consumer:\n  extends: .node-job\n  stage: test\n  timeout: 10 minutes\n  interruptible: false\n',
+        'release:verify-consumer:\n  extends: .node-job\n  stage: test\n  timeout: 10 minutes\n  interruptible: false\n  resource_group: release\n',
+      ),
+    needle: 'must not carry a resource_group',
+  },
+  {
     // Dropping the sweep include removes the daily audit while every
     // scheduled pipeline still gets created — an empty sweep pipeline that
     // proves nothing, silently.

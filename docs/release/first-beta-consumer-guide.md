@@ -18,7 +18,22 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Install peer tiers
 
-Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point; pdf.js is an optional peer needed only by `hell-ui/features/pdf-viewer`. The consumer fixture runner proves the actual strict-peer install groups with the checked-in fixtures in [`tools/consumer-fixtures/`](../../tools/consumer-fixtures/README.md).
+The package manifest declares only the required core peers (`@angular/cdk`, `@angular/common`, `@angular/core`, `@angular/forms`, `@floating-ui/dom`, `ng-primitives`, `rxjs`). Everything a feature entry point needs beyond that — Tailwind, icons, the TanStack table engine, CodeMirror, pdf.js, the Router — is an **integration**: deliberately not declared in package metadata, installed by the consumer alongside the entry point that uses it. (Registries that serve npm abbreviated metadata drop `peerDependenciesMeta`, so a declared-but-optional peer reads as required to every installer: strict-peer installs fail on peers you never use, and default installs silently pull in all of them. Undeclared, the metadata every installer sees is correct.)
+
+These are the integration ranges this release is tested against — installs outside them are unproven, and the package manager will not warn you:
+
+| Integration | Tested range |
+| --- | --- |
+| `tailwindcss` | `^4.0.0` |
+| `@angular/router` | `^22.0.0` |
+| `@ng-icons/core`, `@ng-icons/font-awesome` | `^34.0.0` |
+| `@tanstack/angular-table` | `^9.0.0` |
+| `@tanstack/virtual-core` | `^3.17.0` |
+| `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view` | `^6.0.0` |
+| `@lezer/highlight` | `^1.0.0` |
+| `pdfjs-dist` | `pdfjs-dist@6.2.108` exactly (worker contract) |
+
+The consumer fixture runner proves the actual strict-peer install groups with the checked-in fixtures in [`tools/consumer-fixtures/`](../../tools/consumer-fixtures/README.md).
 
 The release workflow runs every fixture before publishing.
 
@@ -50,7 +65,7 @@ Angular 22 / TypeScript 6 strict-pnpm consumers also need the current transitive
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `hell-ui/table-tanstack`; caller-owned TanStack Table remains the engine; CSS from `hell-ui/table-tanstack/styles.css`, which imports the primitive table styles and carries every shell-only rule (chrome, scrollport, pinning, status, virtual-row geometry)                                                                                                                                                 | [`table-tanstack`](../../tools/consumer-fixtures/README.md)                              |
 | TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core`                                                                                | `hell-ui/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component                                                                                            | [`table-tanstack-virtual`](../../tools/consumer-fixtures/README.md)                      |
 | Code editor                   | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `hell-ui/features/code-editor`; keep lazy/client-only when runtime risk matters                                                                                                                | [`code-editor`](../../tools/consumer-fixtures/README.md)                                 |
-| PDF viewer                    | Core peer group plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`, and the exact pdf.js peer                                       | `hell-ui/features/pdf-viewer`; app must provide the pdf.js worker source                                                                                                                                                 | [`pdf-viewer`](../../tools/consumer-fixtures/README.md)                                  |
+| PDF viewer                    | Core peer group plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`, and exactly the tested `pdfjs-dist` version                     | `hell-ui/features/pdf-viewer`; app must provide the pdf.js worker source                                                                                                                                                 | [`pdf-viewer`](../../tools/consumer-fixtures/README.md)                                  |
 
 Styled examples also need the Tailwind v4 build plugin from
 `@tailwindcss/postcss` plus `postcss` in dev dependencies, with the same

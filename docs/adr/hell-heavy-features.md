@@ -1,8 +1,20 @@
 # ADR: Heavy feature package boundary
 
-- Status: Accepted; amended 2026-07-08 (PDF viewer split reversed) and
-  2026-07-20 (package and stylesheet surface)
+- Status: Accepted; amended 2026-07-08 (PDF viewer split reversed),
+  2026-07-20 (package and stylesheet surface), and 2026-08-10 (optional
+  peers become undeclared integrations)
 - Date: 2026-05-28
+
+## Amendment (2026-08-10)
+
+The isolation decisions below stand, but their declaration mechanism is
+superseded by `0006-undeclared-optional-integrations.md`: feature packages
+(CodeMirror, pdf.js, TanStack, ng-icons, Tailwind, Router) are no longer
+declared as optional peers in package metadata — they are undeclared
+integrations the consumer installs alongside the entry point that uses them.
+References below to "optional peer" describe the mechanism at the time of the
+original decision; the boundaries, fixtures, and forbidden-marker checks are
+unchanged.
 
 ## Amendment (2026-07-20)
 

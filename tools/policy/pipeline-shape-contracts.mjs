@@ -85,6 +85,7 @@ const releaseJobs = [
   'release:rule-liveness',
   'release:approval',
   'release:publish',
+  'release:verify-consumer',
   'release:projection',
 ];
 
@@ -887,6 +888,7 @@ function checkReleaseMachinery(model, { contexts, outcomes }, errors) {
     ['release:rule-liveness', ['release:gate']],
     ['release:approval', ['release:rule-liveness']],
     ['release:publish', releasePublishNeeds],
+    ['release:verify-consumer', ['release:publish']],
     ['release:projection', ['release:publish']],
   ]);
   for (const [name, expected] of expectedNeeds) {
@@ -920,6 +922,26 @@ function checkReleaseMachinery(model, { contexts, outcomes }, errors) {
       errors.push(
         `Job "${name}" must carry resource_group: release, so two release pipelines never ` +
           'interleave their writes.',
+      );
+    }
+  }
+
+  // The consumer probe is a publication's evidence: it must survive
+  // auto-cancel like the writes it verifies, but it only reads, so it must
+  // not hold the release resource group and delay a concurrent projection.
+  const verifyConsumer = model.jobs.get('release:verify-consumer');
+  if (verifyConsumer) {
+    const name = 'release:verify-consumer';
+    if (resolveJobKey(model, name, verifyConsumer.job, 'interruptible', errors) !== false) {
+      errors.push(
+        `Job "${name}" must pin interruptible: false: auto-cancel must never kill the ` +
+          'publication evidence in flight.',
+      );
+    }
+    if (resolveJobKey(model, name, verifyConsumer.job, 'resource_group', errors) !== undefined) {
+      errors.push(
+        `Job "${name}" must not carry a resource_group: it only reads the registry and must ` +
+          'not serialize against release writes.',
       );
     }
   }

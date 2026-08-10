@@ -11,6 +11,10 @@
 #                           CI_JOB_TOKEN; needs every gating job in the tag
 #                           pipeline, so nothing publishes before everything
 #                           is green
+#   release:verify-consumer the publication proven the way an adopter meets
+#                           it: a scratch consumer installs the published
+#                           version from the registry with strict peers and
+#                           no compensation (GitLab #50's regression guard)
 #   release:projection      the GitLab Release last: title v<version>, body =
 #                           exact tagged .changes/<version>.md bytes, exactly
 #                           one package-type asset link
@@ -105,6 +109,26 @@ release:publish:
     - e2e:full
   script:
     - node tools/release/gitlab-release-projection.mjs publish artifacts/package
+
+# The published package proven the way an adopter meets it (GitLab #50's
+# regression guard): a scratch consumer installs the just-published version
+# from this project's registry — scope routing, npm: alias, strict peers,
+# no compensation — and the served peer contract is compared against the
+# manifest's declared one. On a dry-run tag nothing was published, so the
+# probe verifies the mode and hands over.
+release:verify-consumer:
+  extends: .node-job
+  stage: test
+  timeout: 10 minutes
+  interruptible: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v\d/
+  cache:
+    - !reference [.caches, pnpm-readonly]
+  needs:
+    - release:publish
+  script:
+    - node tools/release/registry-consumer-probe.mjs
 
 release:projection:
   extends: .node-job

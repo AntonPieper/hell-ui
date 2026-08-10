@@ -191,7 +191,9 @@ from published metadata.
 So a green fixture run does not prove adopters are fine. It cannot see:
 
 - **published-metadata defects** — anything the registry serves differently from
-  the tarball, such as dropped `peerDependenciesMeta` optional flags;
+  the tarball. Dropped `peerDependenciesMeta` optional flags were exactly this
+  case, and are why the manifest no longer declares optional peers at all
+  (integrations are undeclared; see the consumer guide's integration table);
 - **missing-override defects** — anything our own `overrides:` repairs locally,
   because adopters do not inherit them. The retired tsquery override was exactly
   this case: fixtures passed while adopters on TypeScript 6 with strict peers

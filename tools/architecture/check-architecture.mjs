@@ -125,10 +125,10 @@ const architectureCheckManifest = [
     run: checkAudioTranscriptRuntimeIsolationContract,
   },
   {
-    name: 'optional-peer-isolation',
+    name: 'consumer-integration-contract',
     kind: 'permanent',
     owner: '@AntonPieper',
-    run: checkOptionalPeerIsolationContract,
+    run: checkConsumerIntegrationContract,
   },
   {
     // Internal Package Paths stay unmistakably private (#272): the manifest
@@ -917,19 +917,18 @@ function isAudioTranscriptFeatureSeamPath(rel) {
 // which are optional and why, and version pinning. The import side of the
 // isolation (which sources may import an optional peer) is enforced by
 // tools/eslint/hell-boundaries.mjs.
-function checkOptionalPeerIsolationContract() {
+function checkConsumerIntegrationContract() {
   const packageJson = readJsonFile(join(root, 'packages/angular/package.json'));
   const catalog = workspaceCatalog();
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
     failures.push(
-      `Package dependency contract uses optionalDependencies instead of optional peer dependencies: ${optionalDependencies.join(', ')}`,
+      `Package dependency contract uses optionalDependencies, which install by default: ${optionalDependencies.join(', ')}`,
     );
   }
 
   const sourceFiles = libraryProductionTsFiles();
   const peerDependencies = packageJson.peerDependencies ?? {};
-  const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
   const dependencies = packageJson.dependencies ?? {};
   const importedPackages = new Set(
     sourceFiles
@@ -946,17 +945,19 @@ function checkOptionalPeerIsolationContract() {
     'ng-primitives',
     'rxjs',
   ]);
-  // Every peer that must be declared optional, by the consumer class that pays
-  // for it. The label spells the class in both messages it appears in
-  // ("optional for <label>-only consumers", "missing optional <label> peer
-  // dependency"). Order carries different weight in the two loops below: in the
-  // per-peer loop it is find() precedence, so a peer listed in two classes is
-  // reported under the first one that matches; in the declaration-coverage loop
-  // it is the order the failures report in.
-  const optionalPeerClasses = [
+  // Integrations are the packages a feature entry point needs at the
+  // consumer's side, deliberately NOT declared in the manifest: the
+  // distribution registry serves npm abbreviated metadata without
+  // peerDependenciesMeta (GitLab #50), so a declared-but-optional peer is
+  // indistinguishable from a required one to every installer reading the
+  // registry — strict-peer consumers fail and default-posture consumers
+  // auto-install a code editor to get a button. Undeclared, the manifest the
+  // registry serves is correct by construction. The consumer guide owns the
+  // install-what-you-use table; the classes below keep it honest.
+  const integrationClasses = [
     {
       label: 'feature',
-      peers: new Set([
+      packages: new Set([
         '@codemirror/commands',
         '@codemirror/language',
         '@codemirror/state',
@@ -965,85 +966,79 @@ function checkOptionalPeerIsolationContract() {
         'pdfjs-dist',
       ]),
     },
-    { label: 'adapter', peers: new Set(['@tanstack/angular-table', '@tanstack/virtual-core']) },
-    { label: 'style', peers: new Set(['tailwindcss']) },
+    { label: 'adapter', packages: new Set(['@tanstack/angular-table', '@tanstack/virtual-core']) },
+    { label: 'style', packages: new Set(['tailwindcss']) },
     // Icon-backed entry points only; non-icon consumers install without them.
-    { label: 'icon', peers: new Set(['@ng-icons/core', '@ng-icons/font-awesome']) },
-    { label: 'transitive', peers: new Set(['@angular/router']) },
+    { label: 'icon', packages: new Set(['@ng-icons/core', '@ng-icons/font-awesome']) },
+    // ng-primitives/dialog imports Router; only dialog-surface consumers pay.
+    { label: 'transitive', packages: new Set(['@angular/router']) },
   ];
-  // Declaration coverage, light stack first: every peer of every class must be
-  // declared, required or optional as its class says.
-  const declaredPeerClasses = [
-    { requirement: 'required', label: 'light', peers: lightStackPeers },
-    ...optionalPeerClasses.map((peerClass) => ({ requirement: 'optional', ...peerClass })),
-  ];
+  const integrationPackages = new Set(integrationClasses.flatMap((c) => [...c.packages]));
 
+  // The registry drops peerDependenciesMeta at serve time, so a manifest that
+  // relies on it ships a contract no installer can see. Nothing may bring it
+  // back — an optional integration is expressed by not declaring it at all.
+  if (Object.keys(packageJson.peerDependenciesMeta ?? {}).length) {
+    failures.push(
+      'Package dependency contract declares peerDependenciesMeta, which the distribution ' +
+        'registry never serves; optional integrations stay undeclared instead',
+    );
+  }
+
+  // Every import must be accounted for: declared (light stack, runtime
+  // dependencies) or a member of a known integration class.
   for (const dependency of importedPackages) {
-    if (!peerDependencies[dependency] && !dependencies[dependency]) {
+    if (!peerDependencies[dependency] && !dependencies[dependency] && !integrationPackages.has(dependency)) {
       failures.push(`Package dependency contract is missing dependency for imported ${dependency}`);
     }
   }
 
-  const nonTsPeerDependencies = new Set([
-    // CSS entry points depend on Tailwind theme variables.
-    'tailwindcss',
-    // ng-primitives exposes these as strict peers consumed by primitive wrappers.
-    '@angular/cdk',
-    '@floating-ui/dom',
-    // ng-primitives/dialog imports Router even though Hell only exposes it via dialog surfaces.
-    '@angular/router',
-  ]);
+  // The declared peer set is exactly the light root/primitives stack —
+  // integrations must not creep back in as peers or runtime dependencies,
+  // and nothing outside either set may be declared a peer.
   for (const dependency of Object.keys(peerDependencies)) {
-    if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
-      failures.push(`Package dependency contract declares unused peer dependency ${dependency}`);
-    }
-
-    if (!peerDependencies[dependency]) continue;
-    if (lightStackPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional === true) {
+    if (integrationPackages.has(dependency)) {
+      const { label } = integrationClasses.find((c) => c.packages.has(dependency));
       failures.push(
-        `Package dependency contract must keep ${dependency} required because it is part of the light root/primitives stack`,
+        `Package dependency contract declares ${label} integration ${dependency} as a peer; ` +
+          `${label}-only consumers install it themselves and the registry would demand it from everyone`,
       );
-    }
-
-    const missedOptionalClass = optionalPeerClasses.find(
-      (peerClass) =>
-        peerClass.peers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true,
-    );
-    if (missedOptionalClass) {
+    } else if (!lightStackPeers.has(dependency)) {
       failures.push(
-        `Package dependency contract must keep ${dependency} optional for ${missedOptionalClass.label}-only consumers`,
+        `Package dependency contract declares ${dependency} as a peer but it is not part of the light root/primitives stack`,
       );
     }
   }
-
-  for (const dependency of Object.keys(peerDependenciesMeta)) {
+  for (const dependency of Object.keys(dependencies)) {
+    if (integrationPackages.has(dependency)) {
+      failures.push(
+        `Package dependency contract declares integration ${dependency} as a runtime dependency, which installs for every consumer`,
+      );
+    }
+  }
+  for (const dependency of lightStackPeers) {
     if (!peerDependencies[dependency]) {
       failures.push(
-        `Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`,
+        `Package dependency contract is missing required light peer dependency ${dependency}`,
       );
-    } else if (
-      !optionalPeerClasses.some((peerClass) => peerClass.peers.has(dependency)) &&
-      peerDependenciesMeta[dependency]?.optional
-    ) {
+    }
+  }
+
+  // The consumer guide is where adopters learn what an entry point needs now
+  // that the manifest deliberately says nothing; every integration must be
+  // named there, and pdf.js — the one exact-version integration — with the
+  // catalog version the fixtures prove.
+  const consumerGuide = readFile(join(root, 'docs/release/first-beta-consumer-guide.md'));
+  for (const dependency of integrationPackages) {
+    if (!consumerGuide.includes(`\`${dependency}\``)) {
       failures.push(
-        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, adapter-only, icon-only, style-only, or transitive-only peer`,
+        `Consumer guide docs/release/first-beta-consumer-guide.md does not name integration ${dependency}`,
       );
     }
   }
-
-  for (const { requirement, label, peers } of declaredPeerClasses) {
-    for (const dependency of peers) {
-      if (!peerDependencies[dependency]) {
-        failures.push(
-          `Package dependency contract is missing ${requirement} ${label} peer dependency ${dependency}`,
-        );
-      }
-    }
-  }
-
-  if (peerDependencies['pdfjs-dist'] !== catalog['pdfjs-dist']) {
+  if (!consumerGuide.includes(`\`pdfjs-dist@${catalog['pdfjs-dist']}\``)) {
     failures.push(
-      `Package dependency contract must pin the optional pdfjs-dist peer to workspace catalog version ${catalog['pdfjs-dist']}`,
+      `Consumer guide must pin the pdfjs-dist integration to workspace catalog version ${catalog['pdfjs-dist']}`,
     );
   }
 }
