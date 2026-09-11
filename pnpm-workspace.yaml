@@ -20,9 +20,9 @@ catalog:
   "@angular/cdk": "~22.0.7"
   "@angular/cli": "~22.0.9"
   "@angular/common": "~22.0.8"
-  "@angular/compiler": "~22.0.8"
+  "@angular/compiler": "~22.1.6"
   "@angular/compiler-cli": "~22.0.8"
-  "@angular/core": "~22.0.8"
+  "@angular/core": "~22.1.0"
   "@angular/forms": "~22.0.8"
   "@angular/platform-browser": "~22.0.8"
   "@angular/router": "~22.0.8"
@@ -64,7 +64,7 @@ catalog:
   "tslib": "^2.8.1"
   "typescript": "~6.0.3"
   "typescript-eslint": "^8.66.0"
-  "vitest": "4.1.10"
+  "vitest": "5.0.0"
 packageExtensions:
   # ng-primitives/dialog imports @angular/router without declaring the peer —
   # re-probed still true at 0.128.8.
